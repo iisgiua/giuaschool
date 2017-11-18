@@ -48,15 +48,25 @@ Il progetto **giua@school** è basato sull'uso di:
 I requisiti minimi per l'installazione sono quelli richiesti da *Symfony 3.3*:
   - web server **Apache 2.x** o superiore;
   - database server **MySQL 5.5** o superiore, o versioni equivalenti di
-    **MariaDB** (sono supportate anche altre piattaforme, ma non sono state testate con giua@school)
-  - **PHP 5.5.9** o superiore (**ATTENZIONE: giua@school non è stato testato con PHP 7.x**);
+    **MariaDB** (sono supportate anche altre piattaforme, ma non sono state
+    testate con *giua@school*)
+  - **PHP 5.5.9** o superiore (**ATTENZIONE: *giua@school* non è stato testato con PHP 7.x**);
   - ulteriori requisiti minori.
 
-Per semplificare le cose, Symfony mette a disposizione uno strumento di
+Per semplificare le cose, *Symfony* mette a disposizione uno strumento di
 verifica dei requisiti, come meglio specificato nella sezione
 dell'installazione.
 
 
 ## INSTALLAZIONE
+
+Per provare *giua@school* si consiglia l'installazione in locale, sul proprio
+computer, seguendo i passi descritti di seguito.
+
+
+### 1. Installare il web server e il database server
+
+
+
 
 ## CREDITS
