@@ -27,7 +27,7 @@ esigenze dell'Istituto, tra cui le principali sono:
 
   - gestione dell'importazione e dell'esportazione dei dati da e verso il sistema proprietario in uso nella Segreteria Alunni.
 
-Successivamente, poiché le modifiche stavano diventanto sempre più numerose, si
+Successivamente, poiché le modifiche stavano diventando sempre più numerose, si
 è deciso di creare un nuovo progetto basato su strumenti più idonei per la
 gestione di un codice ormai troppo complesso.
 
