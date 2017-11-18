@@ -1,2 +1,2 @@
 # giua-school
-giua@school - Registro Elettronico
+giua@school - il Registro Elettronico dell'Istituto di Istruzione Superiore "Michele Giua"
