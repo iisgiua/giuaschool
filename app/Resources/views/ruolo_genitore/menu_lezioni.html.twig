@@ -1,0 +1,6 @@
+<nav>
+  <ul class="nav nav-tabs">
+    <li role="presentation"{{ attivo is defined and attivo == 'lezioni' ? ' class="active"' }}><a href="{{ path('genitori_lezioni') }}" title="Mostra le lezioni svolte in classe giorno per giorno">Lezioni svolte</a></li>
+    <li role="presentation"{{ attivo is defined and attivo == 'argomenti' ? ' class="active"' }}><a href="{{ path('genitori_argomenti') }}" title="Mostra gli argomenti e le attività di ogni materia">Argomenti e attività</a></li>
+  </ul>
+</nav>

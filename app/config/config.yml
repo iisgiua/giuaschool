@@ -1,0 +1,89 @@
+# app/config/config.yml
+
+### importa configurazioni
+imports:
+  - { resource: parameters.yml }
+  - { resource: security.yml }
+  - { resource: services.yml }
+
+### parametri generali
+parameters:
+  locale: it
+  locale_date: 'd/m/Y'
+  locale_time: 'H:i'
+  locale_datetime: 'd/m/Y H:i'
+
+### configurazione framework
+framework:
+  secret: '%secret%'
+  http_method_override: true
+  ide: ~
+  default_locale: '%locale%'
+  trusted_hosts: ~
+  form:
+    enabled: true
+  csrf_protection:
+    enabled: true
+  esi: ~
+  fragments: ~
+  session:
+    handler_id: session.handler.native_file
+    save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
+  assets: ~
+  templating:
+    engines: 'twig'
+  translator:
+    fallbacks: '%locale%'
+  property_access: ~
+  validation:
+    enabled: true
+    enable_annotations: true
+  annotations: ~
+  serializer: ~
+  php_errors:
+    log: true
+  cache: ~
+
+# configurazione doctrine
+doctrine:
+  dbal:
+    driver: pdo_mysql
+    host: '%database_host%'
+    port: '%database_port%'
+    dbname: '%database_name%'
+    user: '%database_user%'
+    password: '%database_password%'
+    charset: utf8
+    default_table_options:
+      charset: utf8
+      collate: utf8_unicode_ci
+  orm:
+    auto_mapping: true
+    naming_strategy: doctrine.orm.naming_strategy.underscore
+    metadata_cache_driver: array
+    query_cache_driver: array
+    result_cache_driver: array
+    auto_generate_proxy_classes: '%kernel.debug%'
+    dql:
+      numeric_functions:
+        day: AppBundle\DQL\DayFunction
+        month: AppBundle\DQL\MonthFunction
+        year: AppBundle\DQL\YearFunction
+        weekday: AppBundle\DQL\WeekdayFunction
+      string_functions:
+        replace: AppBundle\DQL\ReplaceFunction
+
+# configurazione swiftmailer
+swiftmailer:
+  transport: '%mailer_transport%'
+  host: '%mailer_host%'
+  username: '%mailer_user%'
+  password: '%mailer_password%'
+  spool:
+    type: memory
+
+### configurazione twig
+twig:
+  debug: '%kernel.debug%'
+  strict_variables: '%kernel.debug%'
+  form_themes: ['form.html.twig']

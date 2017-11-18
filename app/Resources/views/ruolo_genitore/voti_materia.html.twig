@@ -1,0 +1,60 @@
+{% extends 'ruolo_genitore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_genitore/menu_situazione.html.twig' with {'attivo': 'voti'} %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_voti'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  {% if errore %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+  {% else %}
+  <div class="row gs-mb-1">
+    <div class="col-xs-12">
+      <strong class="gs-big">Materia:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare la materia da visualizzare">{{ info.materia }}<span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for k,v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_voti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+    {% for periodo,v in dati %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th>Data</th>
+        <th>Tipo</th>
+        <th>Argomenti o descrizione della prova</th>
+        <th>Voto</th>
+        <th>Giudizio</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for materia,v1 in v %}
+        {% for data,v2 in v1 %}
+          {% for e in v2 %}
+      <tr>
+        <td><strong>{{ e.data }}</strong></td>
+        <td>{{ e.tipo == 'S' ? 'Scritto' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</td>
+        <td><small>{{ e.argomento }}</small></td>
+        <td>{% if e.voto > 0 %}<span class="label label-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }} gs-big">{{ e.voto_str }}</span>{% endif %}</td>
+        <td><small>{{ e.giudizio }}</small></td>
+      </tr>
+          {% endfor %}
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+    {% else %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">Non sono presenti valutazioni per la materia indicata</strong>
+  </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
+  {% if not cattedra and not classe %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_registro'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_registro'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+    {% if errore %}
+  <div class="row gs-mb-5">
+    <div class="col-sm-12">
+      <strong class="gs-big">Data:</strong>
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+    </div>
+  </div>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+    {% else %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-9">
+      <strong class="gs-big">Data:</strong>
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      <strong class="text-primary gs-ml-3 gs-big">Mese di {{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong>
+    </div>
+    <div class="col-sm-3 text-right">
+      <strong class="gs-big">Vista:</strong>
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza i dati del giorno"><span class="glyphicon glyphicon-stop"></span></a>
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'S'}) }}" role="button" title="Visualizza i dati della settimana"><span class="glyphicon glyphicon-th-large"></span></a>
+      <a class="btn btn-default btn-sm active" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza i dati del mese"><span class="glyphicon glyphicon-th"></span></a>
+    </div>
+  </div>
+  <table class="table table-bordered table-hover table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-1">Data</th>
+        <th class="col-sm-2">Eventi</th>
+        <th class="col-sm-1">1ª</th>
+        <th class="col-sm-1">2ª</th>
+        <th class="col-sm-1">3ª</th>
+        <th class="col-sm-1">4ª</th>
+        <th class="col-sm-1">5ª</th>
+        <th class="col-sm-1">6ª</th>
+        <th class="col-sm-1">7ª</th>
+        <th class="col-sm-1">8ª</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for k,v in dati %}
+        {% if v.errore is defined %}
+      <tr class="bg-warning">
+        <td>{{ settimana[v.data|date('w')]|slice(0,2) }} {{ v.data|date('j') }}</td>
+        <td colspan="9" class="text-center"><em>{{ v.errore }}</em></td>
+      </tr>
+        {% else %}
+      <tr>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': v.data|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Visualizza i dati del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ settimana[v.data|date('w')]|slice(0,2) }} {{ v.data|date('j') }}</strong></a>
+        </td>
+        <td>
+          {% if v.note.lista is not empty %}
+          <button type="button" class="btn btn-xs btn-warning" title="Note disciplinari" data-toggle="modal" data-target="#gs-modal-info" data-title="Note disciplinari" data-body="note-{{ k }}"><span class="glyphicon glyphicon-exclamation-sign"></span></button>
+          <div id="note-{{ k }}" style="display:none">
+            {% for k1,v1 in v.note.lista %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+              {% if v1.alunni is defined %}
+                <small><em>Alunni: {{ v1.alunni }}</em></small><br>
+              {% endif %}
+                {{ v1.testo }}
+                <small><em>({{ v1.docente }})</em></small>
+              {% if v1.provvedimento %}
+                <br><strong>{{ v1.provvedimento }}
+                <small><em>({{ v1.docente_provvedimento }})</em></small></strong>
+              {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% if v.annotazioni.lista is not empty %}
+          <button type="button" class="btn btn-xs btn-default" title="Annotazioni sul registro" data-toggle="modal" data-target="#gs-modal-info" data-title="Annotazioni sul registro" data-body="annotazioni-{{ k }}"><span class="glyphicon glyphicon-pencil"></span></button>
+          <div id="annotazioni-{{ k }}" style="display:none">
+            {% for k1,v1 in v.annotazioni.lista %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+              {% if not v1.visibile %}
+                <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
+              {% endif %}
+                {{ v1.testo }}
+                <small><em>({{ v1.docente }})</em></small>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </td>
+          {% for k1,v1 in v.lezioni %}
+        <td>
+            {% if v1.materia %}
+          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività" data-body="lezioni-{{ k }}-{{ k1 }}">{{ v1.materia }}</button>
+          <div id="lezioni-{{ k }}-{{ k1 }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <strong>{{ v1.inizio }} - {{ v1.fine }} {{ v1.materia }}</strong>
+                <small><em>({% for v2 in v1.docenti %}{{ v2 }}{{ not loop.last ? ', ' }}{% endfor %})</em></small><br>
+                {{ v1.argomenti }}
+              </div>
+            </div>
+              {% if v1.sostegno is defined %}
+                {% for sk,sv in v1.sostegno.argomento %}
+                  {% if sv is not empty %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <strong>Argomenti e attività del sostegno - {{ v1.sostegno.alunno[sk] }}</strong>
+                <small><em>({{ v1.sostegno.docente[sk] }})</em></small><br>
+                {{ sv }}
+              </div>
+            </div>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+          </div>
+            {% endif %}
+        </td>
+          {% endfor %}
+          {% for k1 in ((v.lezioni|length)+1) .. 8 %}
+        <td></td>
+          {% endfor %}
+      </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+      {% include 'include/modal-info.html.twig' %}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#gs-button-date').datepicker({
+    format: "yyyy-mm-dd",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    defaultViewDate: "{{ data }}",
+    startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
+    endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
+    datesDisabled: {{ lista_festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+    });
+  $('#gs-button-date').datepicker()
+    .on('show', function(ev){
+      $('#gs-button-date').datepicker('update', '{{ data }}');
+  });
+  $('#gs-button-date').datepicker()
+    .on('changeDate', function(ev){
+      $('#gs-button-date').datepicker('hide');
+      url = "{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': '9999-99-99', 'vista': 'M'}) }}";
+      url = url.replace("9999-99-99", ev.format());
+      window.location.href = url;
+  });
+  $('[data-toggle="popover"]').popover();
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').text(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
+});
+</script>
+{% endblock %}

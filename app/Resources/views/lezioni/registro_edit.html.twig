@@ -1,0 +1,38 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
+  <div class="panel panel-primary gs-mt-4" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body gs-pt-0">
+      <div class="row bg-success">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Data:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.data }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.classe }}</span></div>
+      </div>
+      <div class="row bg-success gs-mb-3">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Docente:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.docente }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Materia:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.materia }}</span></div>
+      </div>
+      {{ form_start(form) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="registro_add_fine">Ora</label>
+        <div class="col-sm-5">
+          <p class="form-control-static"><strong>Inizio alle {{label.inizio }}</strong></p>
+        </div>
+        <div class="col-sm-5">
+          <strong>Fine alle</strong> {{ form_widget(form.fine, {'attr': {'class': 'gs-inline', 'style': 'width: auto;'}}) }}
+        </div>
+      </div>
+      {{ form_widget(form) }}
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+{% endblock %}

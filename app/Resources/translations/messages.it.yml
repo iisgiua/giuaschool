@@ -1,0 +1,301 @@
+# app/Resources/translation/messages.it.yml
+
+label.abilitato: Abilitato
+label.action: Azione
+label.add: Aggiungi
+label.alias: Alias
+label.altro: Altro
+label.alunno: Alunno
+label.alunno_H: Alunno disabile
+label.bes: BES
+label.bes_B: Alunno con bisogni educativi speciali
+label.bes_D: Alunno con certificazione DSA
+label.bes_H: Alunno con sostegno
+label.bes_N: ''
+label.cancel: Annulla
+label.choose_option: Scegli un'opzione
+label.citta: Città
+label.classe: Classe
+label.classi: Classi
+label.codice_fiscale: Codice fiscale
+label.cognome: Cognome
+label.comune_nascita: Comune di nascita
+label.coordinatore: Coordinatore
+label.csv_file: File CSV
+label.data_nascita: Data di nascita
+label.delete: Cancella
+label.disabilitato: Disabilitato
+label.disable: Disabilita
+label.docente: Docente
+label.edit: Modifica
+label.email: Email
+label.enable: Abilita
+label.enroll: Registra
+label.femminile: Donna
+label.indirizzo: Indirizzo
+label.login: Accedi
+label.logout: Esci
+label.maschile: Uomo
+label.materia: Materia
+label.nessuna_classe: Nessuna classe
+label.nome: Nome
+label.no: No
+label.numeri_telefono: Numeri di telefono
+label.password2: Ripeti la password
+label.password: Password
+label.precedente: Precedente
+label.search: Cerca
+label.sede: Sede
+label.segretario: Segretario
+label.sesso: Sesso
+label.show: Dettagli
+label.si: Si
+label.solo_nuovi: Solo nuovi
+label.submit: Conferma
+label.successiva: Successiva
+label.successivo: Successivo
+label.supplenza: Supplenza
+label.tipo_I: ITP
+label.tipo_N: Normale
+label.tipo_P: Potenziamento
+label.tipo_S: Sostegno
+label.tipo: Tipo
+label.username: Nome utente
+label.mai: Mai
+label.ultimo_accesso: Ultimo accesso
+label.rappresentante_classe: Rappresentante di classe
+label.rappresentante_istituto: Rappresentante di Istituto
+label.rappresentante_consulta: Consulta Provinciale
+label.autorizza_entrata: Autorizzazione ritardo
+label.autorizza_uscita: Autorizzazione uscita
+label.note: Note
+label.frequenza_estero: Anno all'estero
+label.religione: Religione
+label.religione_S: Si avvale
+label.religione_U: No, uscita
+label.religione_I: No, studio individuale
+label.religione_D: No, studio con docente
+label.religione_M: No, materia alternativa
+label.credito3: Credito terza
+label.credito4: Credito quarta
+label.data_inizio: Data inizio
+label.data_fine: Data fine
+label.nuova_password: Genera password
+label.nuova_password_classe: Genera password per la classe
+label.close: Chiude
+label.warning: Attenzione!
+label.continua: Continua
+label.current_password: Password attuale
+label.new_password: Nuova password
+label.new_password2: Ripeti la nuova password
+label.sezione: Sezione
+label.argomenti: Argomenti
+label.attivita: Attività
+label.attivita_sostegno: Attività del sostegno
+label.argomenti_sostegno: Argomenti del sostegno
+label.testo: Testo
+label.visibile_genitori: Visibile ai genitori?
+label.provvedimenti_disciplinari: Provvedimenti disciplinari
+label.tipo_nota: Tipo di nota
+label.nota_classe: Nota di classe
+label.nota_individuale: Nota individuale
+label.alunni: Alunni
+label.provvedimento: Provvedimento disciplinare
+label.ora_entrata: Ora ingresso
+label.ora_uscita: Ora uscita
+label.assenze: Assenze
+label.ritardi: Ritardi
+label.appello_P: Presente
+label.appello_A: Assente
+label.appello_R: Ritardo
+label.voti_S: Scritto/Grafico
+label.voti_O: Orale
+label.voti_P: Pratico
+label.voto_argomento: Argomenti o descrizione della prova
+label.voto_giudizio: Giudizio
+label.scelta_materia: Scegli la materia
+label.ogni_materia: Tutte le materie
+label.qualsiasi_classe: Tutte le classi
+label.uscite: Uscite
+label.conteggio_entrate: Valido per il conteggio dei ritardi?
+label.conteggio_uscite: Valido per il conteggio delle uscite?
+label.annotazione: Annotazione sul registro
+label.scegli_alunno: Scegli l'alunno
+label.scegli_materia: Scegli la materia
+
+
+page.login: Accesso al Registro Elettronico
+page.enroll: Registrazione Docenti
+page.home: Pagina Principale
+page.notelegali: Note Legali
+page.privacy: Informativa sulla Privacy
+page.sistema: Configurazione globale
+page.scuola: Dati della Scuola
+page.ruolo: Assegnamento dei Ruoli
+page.staff: Ruolo di Staff
+page.coordinatore: Ruolo di Coordinatore
+page.segretario: Ruolo di Segretario
+page.procedure: Procedure di Utilità
+page.password: Cambio Password
+page.alias: Alias Utente
+page.docenti: Gestione Docenti
+page.importa_docenti: Importa Docenti
+page.modifica_docenti: Modifica Docenti
+page.cattedre: Gestione Cattedre
+page.alunni: Gestione Alunni
+page.modifica_alunni: Modifica Alunni
+page.mostra_alunni: Dettagli Alunni
+page.importa_alunni: Importa Alunni
+page.cambio_classe: Cambio Classe
+page.modifica_profilo: Modifica Profilo
+page.lezioni: Gestione Lezioni
+page.lezioni_classe: Classe/Materia
+page.lezioni_registro: Registro Lezioni
+page.lezioni_assenze: Registro Assenze
+page.lezioni_voti: Quadro Valutazioni
+page.genitori_lezioni: Lezioni Svolte
+page.genitori_argomenti: Argomenti delle Lezioni
+page.genitori_voti: Valutazioni
+page.genitori_assenze: Assenze
+page.genitori_note: Note Disciplinari
+page.genitori_osservazioni: Osservazioni
+page.ricalcola: Ricalcola Assenze
+page.staff_password: Genera Password
+page.staff_autorizza: Ritardi e Uscite
+page.staff_deroghe: Deroghe Ingressi e Uscite
+page.staff_annotazioni: Annotazioni sul Registro
+page.lezioni_argomenti: Argomenti delle Lezioni
+page.lezioni_riepilogo: Riepilogo delle Lezioni
+page.lezioni_osservazioni: Osservazioni sugli Alunni
+page.lezioni_osservazioni_personali: Diario Personale
+page.lezioni_voti_dettagli: Dettagli Valutazioni
+page.recovery: Recupero Password
+
+
+title.alias: Impersona un altro utente
+title.password: Cambia la password di un utente
+title.staff: Aggiungi un docente allo staff
+title.coordinatore: Aggiungi o modifica un coordinatore del Consiglio di Classe
+title.segretario: Aggiungi o modifica un segretario del Consiglio di Classe
+title.importa_docenti: Importa i docenti da file
+title.importa_cattedre: Importa le cattedre dei docenti da file
+title.modifica_docenti: Modifica i dati di un docente
+title.nuova_cattedra: Inserisci una nuova cattedra
+title.mostra_alunni: Mostra i dettagli dell'alunno
+title.importa_alunni: Importa gli alunni da file
+title.cambio_classe: Inserisci un nuovo cambio di classe
+title.cambio_classe_modifica: Modifica un cambio di classe esistente
+title.modifica_email: Cambia l'indirizzo email
+title.modifica_password: Cambia la password
+title.modifica_profilo: Modifica il profilo dell'utente
+title.lezioni_classe: Scegli la classe o la materia
+title.lezioni_registro: Registro della classe
+title.nuova_lezione: Inserisci una lezione
+title.modifica_lezione: Modifica una lezione esistente
+title.nuova_annotazione: Inserisci una annotazione
+title.modifica_annotazione: Modifica una annotazione esistente
+title.nuova_nota: Inserisci una nota disciplinare
+title.modifica_nota: Modifica una nota disciplinare
+title.lezioni_assenze: Assenze della classe
+title.nuova_entrata: Inserisci il ritardo dell'alunno
+title.modifica_entrata: Modifica il ritardo dell'alunno
+title.nuova_uscita: Inserisci l'uscita anticipata dell'alunno
+title.modifica_uscita: Modifica l'uscita anticipata dell'alunno
+title.giustifica: Giustifica le assenze e i ritardi
+title.appello: Appello degli studenti
+title.lezioni_voti: Valutazioni della classe
+title.voti_classe: Aggiungi o modifica una valutazione per la classe
+title.voti_alunno: Aggiungi o modifica una valutazione per l'alunno
+title.genitori_lezioni: Lezioni della classe
+title.genitori_argomenti: Argomenti e attività della classe
+title.genitori_voti: Valutazioni dell'alunn%sex%
+title.genitori_assenze: Assenze dell'alunn%sex%
+title.genitori_note: Note dell'alunn%sex%
+title.genitori_osservazioni: Osservazioni sull'alunn%sex%
+title.ricalcola: Ricalcola le ore di assenza per un dato periodo
+title.genera_password: Genera credenziali per i genitori
+title.autorizza: Gestione dei ritardi e delle uscite anticipate
+title.deroghe: Inserimento deroghe e annotazioni sugli alunni
+title.annotazioni: Inserimento annotazioni sul registro
+title.lezioni_argomenti: Argomenti e attività della classe
+title.lezioni_riepilogo: Riepilogo delle lezioni della classe
+title.lezioni_osservazioni: Osservazioni sugli alunni della classe
+title.nuova_osservazione: Inserisci l'osservazione sull'alunno
+title.modifica_osservazione: Modifica l'osservazione sull'alunno
+title.lezioni_osservazioni_personali: Diario personale della classe
+title.nuova_osservazione_personale: Inserisci l'osservazione personale
+title.modifica_osservazione_personale: Modifica l'osservazione personale
+title.lezioni_voti_dettagli: Dettagli delle valutazioni della classe
+
+
+message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbligatori.
+message.update_ok: La modifica è stata memorizzata correttamente.
+message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
+  \"Cognome, Nome, Sesso, Username, Password, Email, CodiceFiscale\".
+  Se si attiva il controllo SOLO NUOVI verranno inseriti solo i docenti che non risultano già presenti;
+  in caso contrario, verranno modificati anche i dati dei docenti esistenti."
+message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
+  \"Docente, UsernameDocente, Classe, Materia, Alunno, UsernameAlunno, Tipo, Supplenza\".
+  Verranno inserite solo le cattedre che non risultano già presenti."
+message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
+  \"Cognome, Nome, Sesso, DataNascita, ComuneNascita, CodiceFiscale, Citta, Indirizzo, NumeriTelefono, Bes, FrequenzaEstero,
+  Religione, Credito3, Credito4, Classe, Email\".
+  Se si attiva il controllo SOLO NUOVI verranno inseriti solo gli alunni che non risultano già presenti;
+  in caso contrario, verranno modificati anche i dati degli alunni esistenti (i cambi classi sono ignorati)."
+message.nuova_password_classe: Verranno cambiate le password di tutti gli alunni della classe. Vuoi continuare?
+message.cattedra_mancante: Devi prima scegliere la classe o la materia per poter visualizzare questa pagina.
+message.cancella_lezione: Verrà cancellata la firma e, se sei l'unico docente, anche l'intera lezione. Vuoi continuare?
+message.cancella_annotazione: Verrà cancellata l'annotazione sul registro. Vuoi continuare?
+message.cancella_nota: Verrà cancellata la nota disciplinare. Vuoi continuare?
+message.voti_supplenza: Non è possibile inserire valutazioni per una supplenza.
+message.argomenti_supplenza: Non è possibile visualizzare gli argomenti per una supplenza.
+message.nessun_dato: Non sono presenti dati da visualizzare
+message.osservazioni_supplenza: Non è possibile inserire osservazioni per una supplenza.
+message.cancella_osservazione: Verrà cancellata l'osservazione inserita. Vuoi continuare?
+message.recovery_ok: Procedura eseguita senza errori. Tra qualche minuto riceverai, all'indirizzo indicato, un'email con le nuove credenziali di accesso al Registro Elettronico.
+
+
+exception.auth_required: Devi autenticarti per accedere alla pagina richiesta.
+exception.invalid_csrf: Pagina scaduta. Reinserisci le credenziali di accesso.
+exception.invalid_user: Utente sconosciuto.
+exception.invalid_recovery_email: L'indirizzo email indicato non è presente nel sistema.
+exception.invalid_credentials: Le credenziali di accesso non sono valide.
+exception.invalid_recovery_type: Solo i genitori possono eseguire la procedura.
+exception.blocked_time: Accesso in orario non autorizzato (dalle 8 alle 14).
+exception.invalid_card: Certificato non valido.
+exception.expired_card: Certificato scaduto.
+exception.user_card: Utente non abilitato all'uso di questa modalità di accesso.
+exception.blocked_ip: Accesso da una postazione non autorizzata.
+exception.id_notfound: Oggetto non trovato.
+exception.file_upload: Errore di caricamento del file.
+exception.file_format: Formato del file non valido.
+exception.file_read: Impossibile aprire il file.
+exception.file_field: I campi di intestazione del file non corrispondono a quanto previsto.
+exception.file_data: I campi del file non corrispondono a quanto previsto nel record %num%.
+exception.file_required: Valore obbligatorio mancante nel record %num%.
+exception.file_duplicated: Username generata automaticamente già esistente nel record %num%.
+exception.classe_errata: La classe non è corretta.
+exception.tipo_sostegno: La cattedra non può essere di sostegno.
+exception.cattedra_esiste: La cattedra è già presente.
+exception.file_docente_mancante: Il docente indicato nel record %num% non è presente nel sistema.
+exception.file_docente_duplicato: Il docente indicato nel record %num% è presente più volte nel sistema.
+exception.file_classe: La classe non è corretta nel record %num%.
+exception.file_materia: La materia non è corretta nel record %num%.
+exception.file_alunno_mancante: L'alunno indicato nel record %num% non è presente nel sistema.
+exception.file_alunno_duplicato: L'alunno indicato nel record %num% è presente più volte nel sistema.
+exception.file_tipo: Il tipo indicato nel record %num% è incongruente con gli altri dati.
+exception.file_cattedra: La cattedra indicata nel record %num% è già presente nel sistema.
+exception.file_date: La data '%date%' non è valida nel record %num%.
+exception.date_start_end: La data iniziale è successiva a quella finale.
+exception.prima_inizio_anno: La data è precedente all'inizio dell'anno scolastico.
+exception.dopo_fine_anno: La data è successiva alla fine dell'anno scolastico.
+exception.giorno_riposo_settimanale: Giorno di riposo settimanale.
+exception.invalid_params: Dati errati.
+exception.not_allowed: Azione richiesta non permessa.
+exception.voto_vuoto: Hai lasciato in bianco sia il voto che il giudizio.
+exception.genitori_classe_nulla_data: Nella data indicata l'alunn%sex% non risulta iscritt%sex%
+exception.genitori_classe_nulla: L'alunn%sex% non risulta iscritt%sex%
+exception.festivo_per_classi: La data risulta festiva per la sede di alcune classi
+exception.nota_con_nome: Il testo della nota non può contenere i nomi degli alunni (%nome%)
+exception.error_recovery: "Impossibile spedire l'email all'indirizzo indicato. Potrebbe essere un problema temporaneo del sistema di posta elettronica: riprova più tardi."
+

@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container_fluid gs-mt-5">
+  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+    <div class="panel panel-success" >
+      <div class="panel-heading">
+        <div class="panel-title">Registrazione Docenti</div>
+      </div>
+      <div class="panel-body" >
+        <div class="help-block">
+          <span class="gs-text-normal">Inserisci le credenziali di accesso al Registro Elettronico, quindi clicca sul pulsante <strong>Registra</strong>.<br>
+          <em>Fai attenzione che nessuno possa vedere la password che inserisci.</em></span>
+          </div>
+        {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
+        <form name="login_form" method="post" class="form-horizontal">
+          <div class="form-group">
+            <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
+            <div class="input-group gs-ml-4 gs-mr-4">
+              <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+              <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
+            <div class="input-group gs-ml-4 gs-mr-4 gs-mb-4">
+              <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+              <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
+            </div>
+          </div>
+          <div class="form-group text-center">
+            <button type="submit" class="btn btn-success" id="enroll" name="enroll">{{ 'label.enroll'|trans }}</button>
+          </div>
+          <input type="hidden" id="login__csrf_token" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

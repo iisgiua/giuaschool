@@ -1,0 +1,33 @@
+{% extends 'procedure/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  {% include('include/form.html.twig') %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#{{ form.vars.id }} .input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    todayBtn: "linked",
+    language: "it",
+    autoclose: true,
+    todayHighlight: true,
+    zIndexOffset: 1200
+    });
+});
+</script>
+{% endblock %}
+

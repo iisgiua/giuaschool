@@ -1,0 +1,22 @@
+{% if is_granted('IS_AUTHENTICATED_FULLY') %} {# top bar mostrata quando un utente è connesso #}
+<div class="row">
+  <div class="col-sm-5 hidden-xs"><strong>I.I.S. "NOME"</strong> - {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</div>
+  <div class="col-sm-5 col-xs-8 text-right">
+    <a href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}"><span class="glyphicon glyphicon-user gs-mr-2"></span>{{ app.user.nome }} {{ app.user.cognome }}</a>
+  </div>
+  <div class="col-sm-2 col-xs-4 text-right">
+  {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
+    <a href="{{ path('procedure_alias_exit') }}" title="Esci dall'alias"><span class="glyphicon glyphicon-log-out gs-mr-2"></span><strong>{{ 'label.alias'|trans|upper }}</strong></a>
+  {% else %}
+    <a href="{{ path('logout') }}" title="Esci dal Registro Elettronico"><span class="glyphicon glyphicon-log-out gs-mr-2"></span><strong>{{ 'label.logout'|trans|upper }}</strong></a>
+  {% endif %}
+  </div>
+</div>
+{% else %} {# top bar mostrata quando nessun utente è connesso #}
+<div class="row hidden-xs">
+  <div class="col-sm-6"><strong>I.I.S. "NOME"</strong></div>
+  <div class="col-sm-6 text-right">
+    <em>giua@school</em> - Registro Elettronico
+  </div>
+</div>
+{% endif %}

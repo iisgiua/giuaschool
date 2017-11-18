@@ -1,0 +1,350 @@
+html {
+  height: 100%;
+}
+
+body {
+  padding-top: 80px;
+  padding-bottom: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.gs-page-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.gs-main-container {
+  margin-bottom: 3rem;
+  flex: 1 0 auto;
+}
+
+.gs-header-top {
+  background-color: #00264c;
+  color: #ffffff;
+}
+.gs-header-top a  {
+  color: #5bc0de;
+}
+
+.gs-navbar {
+  background-image: none;
+  background-color: #0066cc;
+  border-radius: 0;
+  border: none;
+}
+.gs-navbar .gs-navbar-nav>li>a {
+  color: #ffffff;
+}
+.gs-navbar .gs-navbar-nav>li>a:hover,
+.gs-navbar .gs-navbar-nav>li>a:focus {
+  color: #000000;
+  background-color: #eeeeee;
+  text-decoration: underline;
+}
+.gs-navbar .gs-navbar-nav>.active>a {
+  color: #0066cc;
+  background-color: #ffffff;
+  background-image: none;
+}
+.gs-navbar .gs-navbar-nav>.active>a:hover,
+.gs-navbar .gs-navbar-nav>.active>a:focus {
+  color: #000000;
+  background-color: #ffffff;
+  background-image: none;
+  text-decoration: underline;
+}
+
+.gs-navbar-header {
+  color: #ffffff;
+}
+
+.gs-navbar-toggle {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.gs-navbar-tab {
+  padding: 2px 0;
+}
+
+.gs-footer-container {
+  background-color: #cccccc;
+  padding-top: 1rem;
+}
+
+.gs-footer-container address {
+  margin-bottom: 1rem;
+}
+
+.gs-navbar-bottom {
+  margin: 0;
+  border-radius: 0;
+  border: none;
+}
+
+.gs-navbar-toggle-bottom {
+  background-color: #ffffff;
+  color: #000000;
+}
+.navbar-inverse .gs-navbar-toggle-bottom:hover,
+.navbar-inverse .gs-navbar-toggle-bottom:focus,
+.navbar-inverse .gs-navbar-toggle-bottom:active  {
+  background-color: #cccccc;
+  color: #000000;
+}
+
+.form-group>label.required:after {
+  content: "*";
+  margin-left: 0.25rem;
+  color: #0066cc;
+}
+
+.gs-checkbox-inline {
+  padding-top: 7px;
+  margin-top: 0;
+  margin-bottom: 0;
+  position: relative;
+  display: inline-block;
+  padding-left: 20px;
+  font-weight: 400;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.gs-checkbox-inline:hover {
+  background-color: #cccccc;
+}
+.gs-checkbox-inline input[type=checkbox] {
+  position: absolute;
+  margin-top: 4px\9;
+  margin-left: -20px;
+}
+.gs-checkbox-inline.active {
+  font-weight: bold;
+}
+
+.gs-checkbox-split {
+  width: 100%;
+}
+
+.gs-checkbox:hover {
+  background-color: #cccccc;
+}
+.gs-checkbox.active {
+  font-weight: bold;
+}
+
+.gs-ml-0 {
+  margin-left: 0rem !important;
+}
+.gs-ml-1 {
+  margin-left: 0.25rem !important;
+}
+.gs-ml-2 {
+  margin-left: 0.5rem !important;
+}
+.gs-ml-3 {
+  margin-left: 1rem !important;
+}
+.gs-ml-4 {
+  margin-left: 1.5rem !important;
+}
+.gs-ml-5 {
+  margin-left: 3rem !important;
+}
+.gs-mr-0 {
+  margin-right: 0rem !important;
+}
+.gs-mr-1 {
+  margin-right: 0.25rem !important;
+}
+.gs-mr-2 {
+  margin-right: 0.5rem !important;
+}
+.gs-mr-3 {
+  margin-right: 1rem !important;
+}
+.gs-mr-4 {
+  margin-right: 1.5rem !important;
+}
+.gs-mr-5 {
+  margin-right: 3rem !important;
+}
+.gs-mt-0 {
+  margin-top: 0rem !important;
+}
+.gs-mt-1 {
+  margin-top: 0.25rem !important;
+}
+.gs-mt-2 {
+  margin-top: 0.5rem !important;
+}
+.gs-mt-3 {
+  margin-top: 1rem !important;
+}
+.gs-mt-4 {
+  margin-top: 1.5rem !important;
+}
+.gs-mt-5 {
+  margin-top: 3rem !important;
+}
+.gs-mb-0 {
+  margin-bottom: 0rem !important;
+}
+.gs-mb-1 {
+  margin-bottom: 0.25rem !important;
+}
+.gs-mb-2 {
+  margin-bottom: 0.5rem !important;
+}
+.gs-mb-3 {
+  margin-bottom: 1rem !important;
+}
+.gs-mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+.gs-mb-5 {
+  margin-bottom: 3rem !important;
+}
+
+.gs-big {
+  font-size: 120%;
+}
+
+.gs-h1 {
+  font-size: 2em;
+  font-weight: bold;
+}
+.gs-h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.gs-h3 {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.gs-h4 {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.gs-inline {
+  display: inline;
+}
+
+.gs-row-eq {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.gs-pt-0 {
+  padding-top: 0rem !important;
+}
+.gs-pb-0 {
+  padding-bottom: 0rem !important;
+}
+.gs-pr-0 {
+  padding-right: 0rem !important;
+}
+.gs-pl-0 {
+  padding-left: 0rem !important;
+}
+.gs-pt-1 {
+  padding-top: 0.25rem !important;
+}
+.gs-pb-1 {
+  padding-bottom: 0.25rem !important;
+}
+.gs-pr-1 {
+  padding-right: 0.25rem !important;
+}
+.gs-pl-1 {
+  padding-left: 0.25rem !important;
+}
+.gs-pt-2 {
+  padding-top: 0.5rem !important;
+}
+.gs-pb-2 {
+  padding-bottom: 0.5rem !important;
+}
+.gs-pr-2 {
+  padding-right: 0.5rem !important;
+}
+.gs-pl-2 {
+  padding-left: 0.5rem !important;
+}
+
+.gs-bg-muted {
+  background-color: #777;
+}
+
+.gs-text-normal {
+  color: #000;
+}
+
+.gs-vertical-top {
+  display: flex;
+  align-items: flex-start;
+}
+.gs-vertical-bottom {
+  display: flex;
+  align-items: flex-end;
+}
+.gs-vertical-center {
+  display: flex;
+  align-items: center;
+}
+
+.bootstrap-datetimepicker-widget table {
+  width: 100%;
+  margin: 0;
+  text-align: center;
+}
+.bootstrap-datetimepicker-widget table td>span {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  padding: 5px;
+}
+.bootstrap-datetimepicker-widget table td>span:hover {
+  background-color: #eeeeee;
+}
+.bootstrap-datetimepicker-widget .timepicker-hour,
+.bootstrap-datetimepicker-widget .timepicker-minute {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: 0;
+  cursor: pointer;
+}
+.bootstrap-datetimepicker-widget table td.hour:hover,
+.bootstrap-datetimepicker-widget table td.minute:hover {
+  background: #eeeeee;
+  cursor: pointer;
+  font-weight: bold;
+}
+.bootstrap-datetimepicker-widget table td.disabled,
+.bootstrap-datetimepicker-widget table td.disabled:hover {
+  background: none;
+  color: #888888;
+  cursor: not-allowed;
+}
+
+.table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: #f0f0f0;
+}
+.table-hover>tbody>tr:hover {
+  background-color: #cccccc;
+}
+.table-striped>tbody>tr:nth-of-type(even)>td.gs-striped-hilited {
+  background-color: #c8fdf7;
+}
+.table-striped>tbody>tr:nth-of-type(odd)>td.gs-striped-hilited {
+  background-color: #9fcac5;
+}
+.table-hover>tbody>tr:hover>td.gs-striped-hilited {
+  background-color: #cccccc;
+}

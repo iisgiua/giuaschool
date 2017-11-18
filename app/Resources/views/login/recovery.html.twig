@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container_fluid gs-mt-0">
+  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4">
+    <div class="panel panel-primary" >
+      <div class="panel-heading">
+        <div class="panel-title">Recupero della password per i genitori</div>
+      </div>
+      <div class="panel-body">
+
+  {% if successo %}
+        <div class="alert alert-success">
+          <span class="gs-text-normal gs-big"><strong>{{ successo|trans }}</strong></span>
+        </div>
+  {% endif %}
+        <div class="help-block">
+          <span class="gs-text-normal">Inserisci l'indirizzo <strong>email</strong> che hai configurato nel Registro Elettronico, quindi clicca sul pulsante <strong>Conferma</strong>.</span><br>
+          <span class="text-danger"><strong><em>Se non hai configurato il tuo indirizzo email o non sei un genitore, non potrai usare questo servizio.</em></strong></span>
+        </div>
+        {{ form_start(form) }}
+  {% if errore %}
+        <div class="alert alert-danger">{{ errore|trans }}</div>
+  {% endif %}
+          <div class="form-group gs-mt-4">
+            <label class="sr-only" for="login_recovery_email">{{ 'label.email'|trans }}</label>
+            <div class="input-group gs-ml-4 gs-mr-4">
+              <div class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></div>
+              {{ form_widget(form.email) }}
+            </div>
+          </div>
+          <div class="form-group text-center">
+            {{ form_widget(form.submit) }}
+          </div>
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

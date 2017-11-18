@@ -1,0 +1,166 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
+  {% if not cattedra and not classe %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_voti'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% elseif not cattedra %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_voti'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.voti_supplenza'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_voti'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+    {% if errore %}
+  <div class="row gs-mb-5">
+    <div class="col-sm-12">
+      <strong class="gs-big">Data:</strong>
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+    </div>
+  </div>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+    {% else %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-8">
+      <strong class="gs-big">Data:</strong>
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      <strong class="gs-big">{{ info.periodo.nome }}</strong>
+    </div>
+    <div class="col-sm-4 text-right">
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_dettagli', {'cattedra': cattedra.id, 'classe': classe.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Dettagli</strong></a>
+      <a class="btn btn-success btn-sm disabled" href="" role="button" title="Inserisce le proposte di voto per lo scrutinio"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
+    </div>
+  </div>
+  <table class="table table-bordered table-hover table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th>Alunno</th>
+      {% if lezione %}
+        <th colspan="3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'data': data, 'tipo': 'S'}) }}" role="button" title="Aggiungi o modifica una valutazione scritta per la classe"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Scritto</a></th>
+        <th colspan="3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'data': data, 'tipo': 'O'}) }}" role="button" title="Aggiungi o modifica una valutazione orale per la classe"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Orale</a></th>
+        <th colspan="3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {'cattedra': cattedra.id, 'data': data, 'tipo': 'P'}) }}" role="button" title="Aggiungi o modifica una valutazione pratica per la classe"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Pratico</a></th>
+      {% else %}
+        <th colspan="3">Scritto</th>
+        <th colspan="3">Orale</th>
+        <th colspan="3">Pratico</th>
+      {% endif %}
+        <th>Azioni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for k,v in dati %}
+      <tr>
+        <td>
+          <strong>{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})</strong>
+        {% if v.bes != 'N' %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~v.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+        {% endif %}
+        {% if v.note is not empty %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+        {% endif %}
+        </td>
+        {% for tipo in ['S','O','P'] %}
+          {% for tempo in ['precedente','attuale','successivo'] %}
+        <td{{ tempo == 'attuale' ? ' class="gs-striped-hilited"'}}>
+            {% for ks,vs in v[tipo][tempo] %}
+              {% if vs.voto > 0 and not vs.visibile %}
+          <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ vs.id }}">{{ vs.voto_str }}</button>
+              {% elseif vs.voto > 0 %}
+          <button type="button" class="btn btn-xs btn-{{ vs.voto < 5 ? 'danger' : (vs.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ vs.id }}">{{ vs.voto_str }}</button>
+              {% else %}
+          <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ vs.id }}"><span class="glyphicon glyphicon-asterisk"></span></button>
+              {% endif %}
+          <div id="voti-{{ vs.id }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <p>
+              {% if not vs.visibile %}
+                  <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
+              {% endif %}
+                  <strong>Data: {{ vs.data|date('d/m/Y') }}</strong>
+                </p>
+              {% if vs.argomento is not empty %}
+                <p><strong>Argomenti o descrizione della prova:</strong><br>{{ vs.argomento }}</p>
+              {% endif %}
+              {% if vs.giudizio is not empty %}
+                <p><strong>Giudizio:</strong><br>{{ vs.giudizio }}</p>
+              {% endif %}
+              </div>
+            </div>
+          </div>
+            {% endfor %}
+        </td>
+          {% endfor %}
+        {% endfor %}
+        <td>
+        {% if lezione %}
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': v.id, 'data': data, 'tipo': 'S'}) }}" role="button" title="Aggiungi o modifica una valutazione scritta per l'alunno">S</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': v.id, 'data': data, 'tipo': 'O'}) }}" role="button" title="Aggiungi o modifica una valutazione orale per l'alunno">O</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': v.id, 'data': data, 'tipo': 'P'}) }}" role="button" title="Aggiungi o modifica una valutazione pratica per l'alunno">P</a>
+        {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+      {% include 'include/modal-info.html.twig' %}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#gs-button-date').datepicker({
+    format: "yyyy-mm-dd",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    defaultViewDate: "{{ data }}",
+    startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
+    endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
+    datesDisabled: {{ lista_festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+    });
+  $('#gs-button-date').datepicker()
+    .on('show', function(ev){
+      $('#gs-button-date').datepicker('update', '{{ data }}');
+  });
+  $('#gs-button-date').datepicker()
+    .on('changeDate', function(ev){
+      $('#gs-button-date').datepicker('hide');
+      url = "{{ path('lezioni_voti_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': '9999-99-99'}) }}";
+      url = url.replace("9999-99-99", ev.format());
+      window.location.href = url;
+  });
+  $('[data-toggle="popover"]').popover();
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').text(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+# app/config/security.yml
+
+security:
+
+  access_denied_url: ~
+
+  encoders:
+    AppBundle\Entity\Utente:
+      algorithm: bcrypt
+      cost: 12
+
+  providers:
+    db_provider:
+      entity:
+        class: AppBundle:Utente
+        property: username
+
+  firewalls:
+    main:
+      provider: db_provider
+      anonymous: ~
+      switch_user: { role: ROLE_AMMINISTRATORE, parameter: _alias }
+      logout:
+        path: /logout/
+        target: /login/form/
+        invalidate_session: true
+        handlers: [AppBundle\Security\LogoutHandler]
+      guard:
+        authenticators:
+          - AppBundle\Security\FormAuthenticator
+          - AppBundle\Security\TokenAuthenticator
+          - AppBundle\Security\CardAuthenticator
+          - AppBundle\Security\EnrollAuthenticator
+        entry_point: AppBundle\Security\FormAuthenticator
+

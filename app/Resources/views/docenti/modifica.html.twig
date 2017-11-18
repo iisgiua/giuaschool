@@ -1,0 +1,67 @@
+{% extends 'docenti/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include('include/form-inline.html.twig') %}
+  <table class="table table-striped table-bordered gs-mb-0">
+    <thead>
+      <tr>
+        <th>{{ 'label.disabilitato'|trans }}</th>
+        <th>{{ 'label.cognome'|trans }}</th>
+        <th>{{ 'label.nome'|trans }}</th>
+        <th>{{ 'label.username'|trans }}</th>
+        <th>{{ 'label.email'|trans }}</th>
+        <th>{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for u in lista %}
+      <tr>
+        <td>{% if not u.abilitato %}<span title="{{ 'label.disabilitato'|trans }}"><span class="glyphicon glyphicon-ban-circle gs-mr-2" aria-hidden="true"></span></span>{% endif %}</td>
+        <td>{{ u.cognome }}</td>
+        <td>{{ u.nome }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('docenti_modifica_edit', {'id': u.id}) }}" role="button"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span>{{ 'label.edit'|trans }}</a>
+          {% if u.abilitato %}
+          <a class="btn btn-danger btn-xs" href="{{ path('docenti_modifica_enable', {'id': u.id, 'enable': 'false'}) }}" role="button"><span class="glyphicon glyphicon-ban-circle gs-mr-2" aria-hidden="true"></span>{{ 'label.disable'|trans }}</a>
+          {% else %}
+          <a class="btn btn-success btn-xs" href="{{ path('docenti_modifica_enable', {'id': u.id, 'enable': 'true'}) }}" role="button"><span class="glyphicon glyphicon-ok gs-mr-2" aria-hidden="true"></span>{{ 'label.enable'|trans }}</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if maxPages > 1 %}
+  <nav aria-label="Navigazione tra le pagine" class="text-center">
+    <ul class="pagination pagination-sm gs-mt-2">
+      {% if page > 1 %}
+      <li>
+        <a href="{{ path('docenti_modifica-param', {page: page-1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a>
+      </li>
+      {% else %}
+      <li class="disabled">
+        <span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span>
+      </li>
+      {% endif %}
+      {% for i in 1..maxPages %}
+      <li {{ page == i ? 'class="active"' }}>
+        <a href="{{ path('docenti_modifica-param', {page: i}) }}">{{ i }}</a>
+      </li>
+      {% endfor %}
+      {% if page < maxPages %}
+      <li>
+        <a href="{{ path('docenti_modifica-param', {page: page+1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a>
+      </li>
+      {% else %}
+      <li class="disabled">
+        <span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

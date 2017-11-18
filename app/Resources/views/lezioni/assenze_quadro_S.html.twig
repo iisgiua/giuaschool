@@ -1,0 +1,132 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
+  {% if not cattedra and not classe %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_assenze'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_assenze'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+    {% if errore %}
+  <div class="row gs-mb-5">
+    <div class="col-sm-12">
+      <strong class="gs-big">Data:</strong>
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+    </div>
+  </div>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+    {% else %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-9">
+      <strong class="gs-big">Data:</strong>
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      <strong class="text-primary gs-ml-3 gs-big">Dal {{ data_inizio }} al {{ data_fine }}</strong>
+    </div>
+    <div class="col-sm-3 text-right">
+      <strong class="gs-big">Vista:</strong>
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza le assenze del giorno"><span class="glyphicon glyphicon-stop"></span></a>
+      <a class="btn btn-default btn-sm active" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'S'}) }}" role="button" title="Visualizza le assenze della settimana"><span class="glyphicon glyphicon-th-large"></span></a>
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza le assenze del mese"><span class="glyphicon glyphicon-th"></span></a>
+    </div>
+  </div>
+  <table class="table table-hover table-bordered table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th>Alunno</th>
+      {% for k,v in dati.lista %}
+        <th>
+        {% if v.errore is defined %}
+          {{ settimana[v.data|date('w')]|slice(0,2) }} {{ v.data|date('j') }}
+        {% else %}
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': v.data|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Visualizza i dati del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ settimana[v.data|date('w')]|slice(0,2) }} {{ v.data|date('j') }}</strong></a>
+        {% endif %}
+        </th>
+      {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for ka,va in dati.alunni %}
+      <tr>
+        <td>
+          <strong>{{ va.cognome }} {{ va.nome }} ({{ va.dataNascita|date('d/m/Y') }})</strong>
+        </td>
+        {% for k,v in dati.lista %}
+          {% if v.errore is defined %}
+        <td class="bg-warning">
+          {% elseif v[va.id_alunno] is defined %}
+        <td>
+            {% if v[va.id_alunno].id_assenza and v[va.id_alunno].assenza_giust %}
+          <span class="label label-default">A</span>
+            {% elseif v[va.id_alunno].id_assenza %}
+          <span class="label label-danger" title="Assenza da giustificare">A</span>
+            {% endif %}
+            {% if v[va.id_alunno].id_entrata and v[va.id_alunno].entrata_giust %}
+          <span class="label label-default" title="Note sul ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}">R</span>
+            {% elseif v[va.id_alunno].id_entrata %}
+          <span class="label label-danger" title="Note sul ritardo (da giustificare)" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}">R</span>
+            {% endif %}
+            {% if v[va.id_alunno].id_uscita %}
+          <span class="label label-default" title="Note sull'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_uscita|date('H:i') }} {{ v[va.id_alunno].note_uscita }}">U</span>
+            {% endif %}
+          {% else %}
+        <td class="gs-bg-muted">
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#gs-button-date').datepicker({
+    format: "yyyy-mm-dd",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    defaultViewDate: "{{ data }}",
+    startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
+    endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
+    datesDisabled: {{ lista_festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+    });
+  $('#gs-button-date').datepicker()
+    .on('show', function(ev){
+      $('#gs-button-date').datepicker('update', '{{ data }}');
+  });
+  $('#gs-button-date').datepicker()
+    .on('changeDate', function(ev){
+      $('#gs-button-date').datepicker('hide');
+      url = "{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': '9999-99-99', 'vista': 'S'}) }}";
+      url = url.replace("9999-99-99", ev.format());
+      window.location.href = url;
+  });
+  $('[data-toggle="popover"]').popover();
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,108 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% form_theme form _self %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
+  <div class="panel panel-primary gs-mt-4" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body gs-pt-0">
+      <div class="row bg-success">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Data:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.data }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.classe }}</span></div>
+      </div>
+      <div class="row bg-success gs-mb-3">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Docente:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.docente }}</span></div>
+      </div>
+      {{ form_start(form) }}
+      <ul id="gs-form-collection" class="list-group">
+      {% for app in form.lista %}
+        <li class="list-group-item{{ (not app.vars.valid) ? ' has-error' }}">
+          <div class="col-sm-3"><strong>{{ app.alunno.vars.value }}</strong></div>
+          {{ form_widget(app) }}
+        </li>
+      {% endfor %}
+      </ul>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#gs-form-collection .input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12 ,13],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+    });
+  $('#gs-form-collection .input-group.time').datetimepicker()
+    .on('dp.show', function(){
+      $(this).find('a.btn').addClass('btn-primary');
+  });
+  $('label.gs-radio-inline input[type="radio"]').change(function() {
+    switch (this.value) {
+      case 'P':
+        if (this.checked) {
+          $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
+          $(this).parent().removeClass('text-muted').addClass('text-success');
+          $(this).parent().parent().find('div.time').css('visibility', 'hidden');
+        } else {
+          $(this).parent().removeClass('text-success').addClass('text-muted');
+        }
+        break;
+      case 'A':
+        if (this.checked) {
+          $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
+          $(this).parent().removeClass('text-muted').addClass('text-danger');
+          $(this).parent().parent().find('div.time').css('visibility', 'hidden');
+        } else {
+          $(this).parent().removeClass('text-danger ').addClass('text-muted');
+        }
+        break;
+      case 'R':
+        if (this.checked) {
+          $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
+          $(this).parent().removeClass('text-muted').addClass('text-warning');
+          $(this).parent().parent().find('div.time').css('visibility', 'visible');
+        } else {
+          $(this).parent().removeClass('text-warning').addClass('text-muted');
+          $(this).parent().parent().find('div.time').css('visibility', 'hidden');
+        }
+        break;
+    }
+  }).change();
+});
+</script>
+{% endblock %}
+
+{% block _assenze_appello_lista_entry_widget %}
+  {{ form_widget(form.presenza) }}
+  <div class="input-group time col-sm-3" style="">
+    {{ form_widget(form.ora, {'attr': {'widget': false}}) }}
+    <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-time"></span></span>
+  </div>
+  {{ form_errors(form.ora) }}
+  {{ form_widget(form.id) }}
+{% endblock %}

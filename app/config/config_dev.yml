@@ -1,0 +1,46 @@
+# app/config/config_dev.yml
+
+### importa configurazioni
+imports:
+  - { resource: config.yml }
+
+### configurazione framework
+framework:
+  test: ~
+  profiler:
+    enabled: true
+    collect: true
+    only_exceptions: false
+  router:
+    resource: '%kernel.project_dir%/app/config/routing_dev.yml'
+    strict_requirements: true
+
+### configurazione swiftmailer
+#swiftmailer:
+#  delivery_address: test-email
+
+### configurazione webprofiler
+web_profiler:
+  toolbar: true
+  intercept_redirects: false
+
+### configurazione monolog
+monolog:
+  use_microseconds: false
+  channels: ["command"]
+  handlers:
+    main:
+      type: rotating_file
+      max_files: 10
+      path: "%kernel.logs_dir%/app_%kernel.environment%.log"
+      level: debug
+      channels: ["!command"]
+    command:
+      type: rotating_file
+      max_files: 10
+      path: "%kernel.logs_dir%/command_%kernel.environment%.log"
+      level: debug
+      channels: ["command"]
+    console:
+      type: console
+

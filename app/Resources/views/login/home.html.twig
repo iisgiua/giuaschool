@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container gs-mt-4">
+  <div class="panel panel-info" >
+    <div class="panel-heading">
+      <div class="panel-title">Ultimo accesso: {{ app.session.get('APP/UTENTE/ultimo_accesso') }}</div>
+    </div>
+    <div class="panel-body" >
+  {% if is_granted('ROLE_DOCENTE') %}
+
+      <p><strong>Ciao {{ app.user.nome }}, benvenut{{ app.user.sesso == 'M' ? 'o' : 'a' }} nel nuovo registro elettronico dell'Istituto!</strong></p>
+      <p>Dal menu <strong>LEZIONI</strong> puoi utilizzare le funzioni per gestire le lezioni, le assenze e le valutazioni.</p>
+      <p><strong class="gs-big">Si prega di prendere visione del manuale d'uso:</strong><br>
+        <ul>
+          <li><a href="{{ asset('doc/giuaschool_manuale_docenti_10-10-2017.pdf') }}"><span class="gs-big">Manuale per i docenti (aggiornato al 10/10/2017)</span></a></li>
+        </ul>
+      </p>
+
+  {% elseif is_granted('ROLE_GENITORE') %}
+
+      <p>Dal menu <strong>LEZIONI</strong> puoi visualizzare le lezioni svolte, mentre dal menu <strong>SITUAZIONE</strong> puoi vedere i voti, le assenze, le note disciplinari e le osservazioni dei docenti.</p>
+      <p>
+        Sei non l'hai già fatto, <strong>configura la tua email</strong>: in questo modo, se dimentichi la password, potrai usare l'apposita procedura per recuperarla.<br>
+        Per configurare la tua email, clicca sul nome dell'alunno presente in alto, nella prima riga.
+      </p>
+
+    {% if dati %}
+      <p><strong>Ultime annotazioni sul Registro di Classe:</strong></p>
+      <ul class="list-group">
+      {% for e in dati %}
+        <li class="list-group-item"><strong>{{ e.data|date('d/m/Y') }}</strong><br>{{ e.testo }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+  {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

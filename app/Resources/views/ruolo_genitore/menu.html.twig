@@ -1,0 +1,9 @@
+<ul class="nav navbar-nav gs-navbar-nav">
+  <li{{ app.request.attributes.get('_route') in ['genitori_lezioni','genitori_argomenti'] ? ' class="active"' }}><a href="{{ path('genitori_lezioni') }}" title="Lezioni svolte in classe: argomenti e attività"><span class="glyphicon glyphicon-blackboard gs-mr-2" aria-hidden="true"></span>Lezioni</a></li>
+  <li{{ app.request.attributes.get('_route') in ['genitori_voti','genitori_assenze','genitori_note'] ? ' class="active"' }}><a href="{{ path('genitori_voti') }}" title="Situazione dell'alunno: voti, assenze, note e osservazioni"><span class="glyphicon glyphicon-search gs-mr-2" aria-hidden="true"></span>Situazione</a></li>
+
+  <li class="disabled"><a href="#"><span class="glyphicon glyphicon-file gs-mr-2" aria-hidden="true"></span>Pagelle</a></li>
+  <li class="disabled"><a href="#"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a></li>
+  <li class="disabled"><a href="#"><span class="glyphicon glyphicon-comment gs-mr-2" aria-hidden="true"></span>Colloqui</a></li>
+  <li class="disabled"><a href="#"><span class="glyphicon glyphicon-calendar gs-mr-2" aria-hidden="true"></span>Agenda</a></li>
+</ul>

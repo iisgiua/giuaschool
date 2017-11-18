@@ -1,0 +1,28 @@
+{% if is_granted('IS_AUTHENTICATED_FULLY') %} {#----- menubar mostrata quando un utente è connesso -----#}
+
+  {% if is_granted('ROLE_DOCENTE') %} {#----- DOCENTE/STAFF/PRESIDE -----#}
+    {% include 'ruolo_docente/menu.html.twig' %}
+
+  {% elseif is_granted('ROLE_GENITORE') %} {#----- GENITORE -----#}
+    {% include 'ruolo_genitore/menu.html.twig' %}
+
+  {% elseif is_granted('ROLE_SEGRETERIA') %}
+<p>SEGRETERIA</p>
+
+  {% elseif is_granted('ROLE_AMMINISTRATORE') %} {#----- AMMINISTRATORE -----#}
+    {% include 'ruolo_amministratore/menu.html.twig' %}
+  {% endif %}
+
+{% else %} {#----- menubar mostrata quando nessun utente è connesso -----#}
+<ul class="nav navbar-nav gs-navbar-nav">
+  <li{% if app.request.attributes.get('_route') == 'login_form' %} class="active"{% endif %}>
+    <a href="{{ path('login_form') }}" title="Accedi al registro usando utente e password"><span class="glyphicon glyphicon-user gs-mr-2"></span>Accesso al Registro Elettronico</a>
+  </li>
+  <li{% if (app.request.attributes.get('_route') == 'login_card') or (app.request.attributes.get('_route') == 'login_card_errore')  %} class="active"{% endif %}>
+    <a href="{{ path('login_card_errore') }}" title="Accedi al registro usando la Carta Nazionale dei Servizi"><span class="glyphicon glyphicon-credit-card gs-mr-2"></span>Accesso con Tessera Sanitaria</a>
+  </li>
+  <li{% if (app.request.attributes.get('_route') == 'login_recovery') %} class="active"{% endif %}>
+    <a href="{{ path('login_recovery') }}" title="Solo per i genitori: recupera la password tramite l'email"><span class="glyphicon glyphicon-repeat gs-mr-2"></span>Recupero Password Genitori</a>
+  </li>
+</ul>
+{% endif %}

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_menu %}
+  {% include 'ruolo_docente/menu.html.twig' with {'attivo': 'lezioni'} %}
+{% endblock %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
+</div>
+{% endblock %}

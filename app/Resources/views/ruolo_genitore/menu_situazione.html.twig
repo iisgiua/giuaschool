@@ -1,0 +1,8 @@
+<nav>
+  <ul class="nav nav-tabs">
+    <li role="presentation"{{ attivo is defined and attivo == 'voti' ? ' class="active"' }}><a href="{{ path('genitori_voti') }}" title="Mostra le le valutazioni di ogni materia">Voti</a></li>
+    <li role="presentation"{{ attivo is defined and attivo == 'assenze' ? ' class="active"' }}><a href="{{ path('genitori_assenze') }}" title="Mostra le assenze, i ritardi e le uscite anticipate">Assenze</a></li>
+    <li role="presentation"{{ attivo is defined and attivo == 'note' ? ' class="active"' }}><a href="{{ path('genitori_note') }}" title="Mostra le note disciplinari">Note</a></li>
+    <li role="presentation"{{ attivo is defined and attivo == 'osservazioni' ? ' class="active"' }}><a href="{{ path('genitori_osservazioni') }}" title="Mostra le osservazioni dei docenti">Osservazioni</a></li>
+  </ul>
+</nav>
