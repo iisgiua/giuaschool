@@ -66,6 +66,25 @@ computer, seguendo i passi descritti di seguito.
 
 ### 1. Installare il web server e il database server
 
+Scaricare [XAMPP](https://www.apachefriends.org/it/download.html), facendo
+attenzione a scegliere la versione per il proprio sistema operativo che
+includa il **PHP 5.x** (non quelle con il *PHP 7.x*).
+
+Installare XAMPP sul proprio computer; in caso di difficoltà consultare la
+sezione delle FAQ presente sul loro sito.
+
+È sufficente installare i seguenti componenti:
+  - Apache
+  - MySQL/MariaDB
+  - PHP
+
+
+### 2. Scaricare giua@school
+
+Scaricare sul proprio computer l'ultima versione disponibile di giua@school.
+Estrarre il file compresso nella directory usata da XAMPP per la
+visualizzazione dei siti web, solitamente:
+
 
 
 
