@@ -89,10 +89,10 @@ quindi estrarre i file nella cartella usata da XAMPP per contenere i siti web.
 Normalmente il percorso di questa cartella è simile a quanto segue:
 ```
 ### SISTEMI WINDOWS
-<percorso_installazione>\xampp\htdocs
+<percorso_installazione_xampp>\xampp\htdocs
 
 ### SISTEMI LINUX
-<percorso_installazione>/lampp/htdocs
+<percorso_installazione_xampp>/lampp/htdocs
 ```
 
 Aprire una finestra di terminale (o *Prompt dei comandi* per
@@ -125,7 +125,7 @@ editor di testo il file:
 ```
 <percorso_installazione_xampp>\xampp\php\php.ini
 ```
-Quindi cercare la riga seguente e rimuovere il carattere iniziale ";":
+Quindi cercare la riga seguente, rimuovere il punto e virgola iniziale (carattere ";") e salvare il file:
 ```
 ;extension=php_intl.dll
 ```
