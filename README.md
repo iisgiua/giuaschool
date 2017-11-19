@@ -88,7 +88,11 @@ Scaricare sul proprio computer l'ultima versione disponibile di *giua@school*,
 quindi estrarre i file nella cartella usata da XAMPP per contenere i siti web.
 Normalmente il percorso di questa cartella è simile a quanto segue:
 ```
-        <percorso_installazione>\xampp\htdocs
+### SISTEMI WINDOWS
+<percorso_installazione>\xampp\htdocs
+
+### SISTEMI LINUX
+<percorso_installazione>/lampp/htdocs
 ```
 
 Aprire una finestra di terminale (o *Prompt dei comandi* per
