@@ -210,5 +210,15 @@ Per terminare l'applicazione: chiudere la finestra di terminale, quindi disattiv
 database server *MySQL/MariaDB* usando il *Control Panel* di XAMPP.
 
 
-
 ## CREDITS
+
+Si desidera ringraziare per il loro importante contributo, tutti i membri della comunità dell'Open Source, e in particolare i creatori di:
+- Lampschool
+- Symfony
+- Doctrine
+- Twig
+- Jquery
+- Boostrap
+- Apache
+- Mysql/MariaDB
+- Debian
