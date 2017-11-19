@@ -40,7 +40,7 @@ Il progetto **giua@school** è basato sull'uso di:
   - [Symfony](https://symfony.com/) per la gestione generale del sistema e in particolare della sicurezza;
   - [Doctrine](http://www.doctrine-project.org/) per la gestione del livello di astrazione del database;
   - [Twig](https://twig.symfony.com/) per la gestione dei *template*;
-  - [Bootstrap](https://getbootstrap.com/) per l'interfaccia grafica.
+  - [Jquery](https://jquery.com/) e [Bootstrap](https://getbootstrap.com/) per l'interfaccia grafica.
 
 
 ## REQUISITI DI SISTEMA
@@ -212,13 +212,10 @@ database server *MySQL/MariaDB* usando il *Control Panel* di XAMPP.
 
 ## CREDITS
 
-Si desidera ringraziare per il loro importante contributo, tutti i membri della comunità dell'Open Source, e in particolare i creatori di:
-- Lampschool
-- Symfony
-- Doctrine
-- Twig
-- Jquery
-- Boostrap
-- Apache
-- Mysql/MariaDB
-- Debian
+Si desidera ringraziare, per il loro importante contributo, tutti i membri della comunità dell'Open Source, e in particolare gli sviluppatori coinvolti nei seguenti progetti:
+- [Lampschool](http://www.lampschool.it/)
+- [Symfony](https://symfony.com/)
+- [Doctrine](http://www.doctrine-project.org/)
+- [Twig](https://twig.symfony.com/)
+- [Jquery](https://jquery.com/)
+- [Bootstrap](https://getbootstrap.com/)
