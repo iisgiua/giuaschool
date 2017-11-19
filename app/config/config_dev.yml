@@ -6,23 +6,22 @@ imports:
 
 ### configurazione framework
 framework:
-  test: ~
+  test: false
   profiler:
-    enabled: true
-    collect: true
-    only_exceptions: false
+    enabled: false
   router:
-    resource: '%kernel.project_dir%/app/config/routing_dev.yml'
-    strict_requirements: true
+    resource: '%kernel.project_dir%/app/config/routing.yml'
+    strict_requirements: ~
+
 
 ### configurazione swiftmailer
 #swiftmailer:
 #  delivery_address: test-email
 
 ### configurazione webprofiler
-web_profiler:
-  toolbar: true
-  intercept_redirects: false
+#web_profiler:
+#  toolbar: true
+#  intercept_redirects: false
 
 ### configurazione monolog
 monolog:
