@@ -219,3 +219,9 @@ Si desidera ringraziare, per il loro importante contributo, tutti i membri della
 - [Twig](https://twig.symfony.com/)
 - [Jquery](https://jquery.com/)
 - [Bootstrap](https://getbootstrap.com/)
+
+
+## DOWNLOAD
+
+Scarica l'ultima versione disponibile:
+- [giua@school](https://github.com/trinko/giua-school/releases/latest)
