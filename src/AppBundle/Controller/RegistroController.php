@@ -30,6 +30,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use AppBundle\Entity\Annotazione;
+use AppBundle\Entity\Avviso;
 use AppBundle\Entity\Firma;
 use AppBundle\Entity\FirmaSostegno;
 use AppBundle\Entity\Lezione;
@@ -37,6 +38,7 @@ use AppBundle\Entity\Nota;
 use AppBundle\Entity\Staff;
 use AppBundle\Util\LogHandler;
 use AppBundle\Util\RegistroUtil;
+use AppBundle\Util\BachecaUtil;
 
 
 /**
@@ -51,6 +53,7 @@ class RegistroController extends Controller {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
@@ -66,12 +69,13 @@ class RegistroController extends Controller {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function firmeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                               RegistroUtil $reg, $cattedra, $classe, $data, $vista) {
+                               RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
     $dati = null;
     $annotazioni = null;
+    $num_avvisi = 0;
     $note = null;
     $assenti = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
@@ -158,7 +162,14 @@ class RegistroController extends Controller {
       // controllo data
       $errore = $reg->controlloData($data_obj, $classe->getSede());
       if (!$errore) {
-        // non festivo: recupera dati
+        // non festivo
+        $adesso = (new \DateTime())->format('H:i');
+        if ($adesso >= $session->get('/CONFIG/SCUOLA/lezioni_inizio', '00:00') &&
+            $adesso <= $session->get('/CONFIG/SCUOLA/lezioni_fine', '23:59')) {
+          // avvisi alla classe
+          $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
+        }
+        // recupera dati
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
         if ($vista == 'G') {
           // dati sugli assenti
@@ -184,6 +195,7 @@ class RegistroController extends Controller {
       'info' => $info,
       'dati' => $dati,
       'assenti' => $assenti,
+      'avvisi' => $num_avvisi,
     ));
   }
 
@@ -244,7 +256,11 @@ class RegistroController extends Controller {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla permessi
-    if (!$reg->azioneLezione('add', $data_obj, $ora, $this->getUser(), $classe, $materia)) {
+    $perm = $reg->azioneLezione('add', $data_obj, $ora, $this->getUser(), $classe, $materia);
+    if ($perm === null) {
+      // errore: lezione esiste già (ignora)
+      return $this->redirectToRoute('lezioni_registro_firme');
+    } elseif (!$perm) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -462,12 +478,12 @@ class RegistroController extends Controller {
         'disabled' => true,
         'required' => true))
       ->add('argomenti', TextareaType::class, array(
-        'data' => ($materia->getTipo() == 'S' ? ($firma_docente ? $firma_docente->getArgomento() : '') : $lezione->getArgomento()),
+        'data' => ($materia->getTipo() == 'S' ? (($firma_docente && $firma_docente instanceof FirmaSostegno) ? $firma_docente->getArgomento() : '') : $lezione->getArgomento()),
         'label' => ($materia->getTipo() == 'S' ? 'label.argomenti_sostegno' : 'label.argomenti'),
         'trim' => true,
         'required' => false))
       ->add('attivita', TextareaType::class, array(
-        'data' => ($materia->getTipo() == 'S' ? ($firma_docente ? $firma_docente->getAttivita() : '') : $lezione->getAttivita()),
+        'data' => ($materia->getTipo() == 'S' ? (($firma_docente && $firma_docente instanceof FirmaSostegno) ? $firma_docente->getAttivita() : '') : $lezione->getAttivita()),
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
         'required' => false))
@@ -712,6 +728,7 @@ class RegistroController extends Controller {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
    * @param string $data Data del giorno
@@ -726,24 +743,13 @@ class RegistroController extends Controller {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function annotazioneEditAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
-                                         $classe, $data, $id) {
+  public function annotazioneEditAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, BachecaUtil $bac,
+                                         LogHandler $dblogger, $classe, $data, $id) {
     // inizializza
     $label = array();
-    // imposta redirect
-    $referer = $request->headers->get('referer');
-    $referer = str_replace($request->getSchemeAndHttpHost().$request->getBaseUrl(), '', $referer);
-    if ($this->getUser() instanceof Staff && substr($referer, 0, 18) == '/staff/annotazioni') {
-      // pagina dello staff
-      $redirect = 'staff_annotazioni';
-      $template = 'ruolo_staff/annotazione_edit.html.twig';
-      $titolo_pagina = 'page.staff_annotazioni';
-    } else {
-      // default
-      $redirect = 'lezioni_registro_firme';
-      $template = 'lezioni/annotazione_edit.html.twig';
-      $titolo_pagina = 'page.lezioni_registro';
-    }
+    $dest_filtro['sedi'] = [];
+    $dest_filtro['classi'] = [];
+    $dest_filtro['utenti'] = [];
     // controlla classe
     $classe = $em->getRepository('AppBundle:Classe')->find($classe);
     if (!$classe) {
@@ -765,21 +771,27 @@ class RegistroController extends Controller {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $annotazione_old['docente'] = $annotazione->getDocente()->getId();
-      $annotazione_old['testo'] = $annotazione->getTesto();
-      $annotazione_old['visibile'] = $annotazione->getVisibile();
-      $annotazione->setDocente($this->getUser());
+      if ($annotazione->getAvviso()) {
+        $dest_filtro = $bac->filtriAvviso($annotazione->getAvviso());
+      }
+      $annotazione_old = clone $annotazione;
     } else {
       // azione add
       $annotazione = (new Annotazione())
         ->setData($data_obj)
         ->setClasse($classe)
-        ->setDocente($this->getUser());
+        ->setVisibile(false);
       $em->persist($annotazione);
     }
+    // imposta autore dell'annotazione
+    $annotazione->setDocente($this->getUser());
     // controlla permessi
     if (!$reg->azioneAnnotazione(($id > 0 ? 'edit' : 'add'), $data_obj, $this->getUser(), $classe, ($id > 0 ? $annotazione : null))) {
       // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    if ($annotazione->getAvviso() && !$annotazione->getVisibile()) {
+      // errore: creato da gestione avvisi (staff/coordinatore)
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati in formato stringa
@@ -788,68 +800,144 @@ class RegistroController extends Controller {
     $label['data'] =  $formatter->format($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
-    // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('annotazione_edit', FormType::class, $annotazione);
-    if ($this->getUser() instanceof Staff) {
-      $form = $form
-        ->add('referer', HiddenType::class, array(
-          'data' => $referer,
-          'mapped' => false));
+    // opzione scelta filtro
+    $alunno = null;
+    if (isset($dest_filtro['utenti'][0])) {
+      $alunno = $em->getRepository('AppBundle:Alunno')->find($dest_filtro['utenti'][0]['alunno']);
     }
-    $form = $form
+    // form di inserimento
+    $form = $this->container->get('form.factory')->createNamedBuilder('annotazione_edit', FormType::class, $annotazione)
       ->add('testo', TextareaType::class, array(
         'label' => 'label.testo',
         'trim' => true,
         'required' => true))
-      ->add('visibile', ChoiceType::class, array('label' => 'label.visibile_genitori',
+      ->add('visibile', ChoiceType::class, array('label' => false,
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
         'required' => true))
+      ->add('filtroIndividuale', EntityType::class, array('label' => false,
+        'data' => $alunno,
+        'class' => 'AppBundle:Alunno',
+        'choice_label' => function ($obj) {
+            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
+          },
+        'query_builder' => function (EntityRepository $er) use ($classe) {
+            return $er->createQueryBuilder('a')
+              ->where('a.classe=:classe and a.abilitato=:abilitato')
+              ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+              ->setParameters(['classe' => $classe, 'abilitato' => 1]);
+          },
+        'expanded' => true,
+        'multiple' => false,
+        'placeholder' => false,
+        'label_attr' => ['class' => 'gs-pt-0 gs-ml-3 radio-inline checkbox-split-vertical'],
+        'required' => false,
+        'mapped' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl($redirect)."'"]))
+        'onclick' => "location.href='".$this->generateUrl('lezioni_registro_firme')."'"]))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // imposta redirect
-      if ($this->getUser() instanceof Staff && substr($form->get('referer')->getData(), 0, 18) == '/staff/annotazioni') {
-        // pagina dello staff
-        $redirect = 'staff_annotazioni';
-        $template = 'ruolo_staff/annotazione_edit.html.twig';
-        $titolo_pagina = 'page.staff_annotazioni';
-      } else {
-        // default
-        $redirect = 'lezioni_registro_firme';
-        $template = 'lezioni/annotazione_edit.html.twig';
-        $titolo_pagina = 'page.lezioni_registro';
+      // recupera dati
+      $val_filtro_alunno = $form->get('filtroIndividuale')->getData();
+      // controllo errori
+      if ($annotazione->getVisibile() && !$val_filtro_alunno) {
+        // errore: filtro vuoto
+        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_mancanti')));
       }
-      // ok: memorizza dati
-      $em->flush();
-      // log azione
-      if (!$id) {
-        // nuovo
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea annotazione', __METHOD__, array(
-          'Annotazione' => $annotazione->getId()
-          ));
-      } else {
-        // modifica
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica annotazione', __METHOD__, array(
-          'Annotazione' => $annotazione->getId(),
-          'Docente' => $annotazione_old['docente'],
-          'Testo' => $annotazione_old['testo'],
-          'Visibile' => $annotazione_old['visibile']
-          ));
+      // controllo permessi
+      if ($annotazione->getVisibile()) {
+        // permessi avviso
+        if (!$bac->azioneAvviso('add', $data_obj, $this->getUser(), null)) {
+          // errore: azione non permessa
+          $form->addError(new FormError($this->get('translator')->trans('exception.notifica_non_permessa')));
+        }
       }
-      // redirezione
-      return $this->redirectToRoute($redirect);
+      if ($annotazione->getAvviso()) {
+        if (!$bac->azioneAvviso('delete', $data_obj, $this->getUser(), $annotazione->getAvviso())) {
+          // errore: cancellazione non permessa
+          $form->addError(new FormError($this->get('translator')->trans('exception.notifica_non_permessa')));
+        }
+      }
+      // modifica dati
+      if ($form->isValid()) {
+        // cancella avviso
+        $log_avviso = null;
+        if ($annotazione->getAvviso()) {
+          $log_avviso = $annotazione->getAvviso()->getId();
+          $log_destinatari_delete = $bac->eliminaFiltriAvviso($annotazione->getAvviso());
+          $em->remove($annotazione->getAvviso());
+          $annotazione->setAvviso(null);
+        }
+        // crea avviso
+        $avviso = null;
+        if ($annotazione->getVisibile()) {
+          // nuovo avviso
+          $docente = ($this->getUser()->getSesso() == 'M' ? ' prof. ' : 'la prof.ssa ').
+            $this->getUser()->getNome().' '.$this->getUser()->getCognome();
+          $avviso = (new Avviso())
+            ->setTipo('D')
+            ->setDestinatariStaff(false)
+            ->setDestinatariCoordinatori(false)
+            ->setDestinatariDocenti(false)
+            ->setDestinatariGenitori(true)
+            ->setDestinatariAlunni(false)
+            ->setDestinatariIndividuali(true)
+            ->setData($annotazione->getData())
+            ->setOggetto($this->get('translator')->trans('message.avviso_individuale_oggetto', ['%docente%' => $docente]))
+            ->setTesto($annotazione->getTesto())
+            ->setDocente($this->getUser())
+            ->addAnnotazione($annotazione);
+          $em->persist($avviso);
+          $annotazione->setAvviso($avviso);
+          // destinatari
+          $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, 'N', [], ['G'], 'I',
+            $val_filtro_alunno->getId());
+        }
+        // ok: memorizza dati
+        $em->flush();
+        // log azione
+        if (!$id) {
+          // nuovo
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea annotazione', __METHOD__, array(
+            'Annotazione' => $annotazione->getId(),
+            'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null),
+            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
+                return $a['genitore'].'->'.$a['alunno'];
+              }, (isset($log_destinatari['utenti']['add']) ? $log_destinatari['utenti']['add'] : []))),
+            ));
+        } else {
+          // modifica
+          if (isset($log_destinatari_delete)) {
+            $log_destinatari['utenti']['delete'] = $log_destinatari_delete['utenti'];
+          }
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica annotazione', __METHOD__, array(
+            'Annotazione' => $annotazione->getId(),
+            'Docente' => $annotazione_old->getDocente()->getId(),
+            'Testo' => $annotazione_old->getTesto(),
+            'Visibile' => $annotazione_old->getVisibile(),
+            'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null),
+            'Avviso cancellato' => $log_avviso,
+            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
+                return $a['genitore'].'->'.$a['alunno'];
+              }, (isset($log_destinatari['utenti']['add']) ? $log_destinatari['utenti']['add'] : []))),
+            'Utenti cancellati' => implode(', ', array_map(function ($a) {
+                return $a['genitore'].'->'.$a['alunno'];
+              }, (isset($log_destinatari['utenti']['delete']) ? $log_destinatari['utenti']['delete'] : []))),
+            ));
+        }
+        // redirezione
+        return $this->redirectToRoute('lezioni_registro_firme');
+      }
     }
     // mostra la pagina di risposta
-    return $this->render($template, array(
-      'pagina_titolo' => $titolo_pagina,
+    return $this->render('lezioni/annotazione_edit.html.twig', array(
+      'pagina_titolo' => 'page.lezioni_registro',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_annotazione' : 'title.nuova_annotazione'),
       'label' => $label,
@@ -862,6 +950,7 @@ class RegistroController extends Controller {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo dell'annotazione
    *
@@ -873,18 +962,8 @@ class RegistroController extends Controller {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function annotazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
-                                           $id) {
-    // imposta redirect
-    $referer = $request->headers->get('referer');
-    $referer = str_replace($request->getSchemeAndHttpHost().$request->getBaseUrl(), '', $referer);
-    if ($this->getUser() instanceof Staff && substr($referer, 0, 18) == '/staff/annotazioni') {
-      // pagina dello staff
-      $redirect = 'staff_annotazioni';
-    } else {
-      // default
-      $redirect = 'lezioni_registro_firme';
-    }
+  public function annotazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, BachecaUtil $bac,
+                                           LogHandler $dblogger, $id) {
     // controlla annotazione
     $annotazione = $em->getRepository('AppBundle:Annotazione')->find($id);
     if (!$annotazione) {
@@ -895,6 +974,22 @@ class RegistroController extends Controller {
     if (!$reg->azioneAnnotazione('delete', $annotazione->getData(), $this->getUser(), $annotazione->getClasse(), $annotazione)) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
+    }
+    if ($annotazione->getAvviso() &&
+        !$bac->azioneAvviso('delete', $annotazione->getData(), $this->getUser(), $annotazione->getAvviso())) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    if ($annotazione->getAvviso() && !$annotazione->getVisibile()) {
+      // errore: creato da gestione avvisi (staff/coordinatore)
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // cancella avviso
+    if ($annotazione->getAvviso()) {
+      $log_avviso = $annotazione->getAvviso()->getId();
+      $log_destinatari = $bac->eliminaFiltriAvviso($annotazione->getAvviso());
+      $em->remove($annotazione->getAvviso());
+      $annotazione->setAvviso(null);
     }
     // cancella annotazione
     $annotazione_id = $annotazione->getId();
@@ -908,10 +1003,14 @@ class RegistroController extends Controller {
       'Docente' => $annotazione->getDocente()->getId(),
       'Data' => $annotazione->getData()->format('Y-m-d'),
       'Testo' => $annotazione->getTesto(),
-      'Visibile' => $annotazione->getVisibile()
+      'Visibile' => $annotazione->getVisibile(),
+      'Avviso cancellato' => isset($log_avviso) ? $log_avviso : null,
+      'Utenti cancellati' => implode(', ', array_map(function ($a) {
+          return $a['genitore'].'->'.$a['alunno'];
+        }, (isset($log_destinatari['utenti']) ? $log_destinatari['utenti'] : []))),
       ));
     // redirezione
-    return $this->redirectToRoute($redirect);
+    return $this->redirectToRoute('lezioni_registro_firme');
   }
 
   /**
@@ -1043,13 +1142,13 @@ class RegistroController extends Controller {
       } else {
         // nota di classe
         $nota->setAlunni(new ArrayCollection());
-      }
-      // valida testo: errore se contiene nomi di alunni
-      $nome = $reg->contieneNomiAlunni($data_obj, $classe, $nota->getTesto());
-      if ($nome) {
-        // errore
-        $form->get('testo')->addError(
-          new FormError($this->get('translator')->trans('exception.nota_con_nome', ['%nome%' => $nome])));
+        // valida testo: errore se contiene nomi di alunni
+        $nome = $reg->contieneNomiAlunni($data_obj, $classe, $nota->getTesto());
+        if ($nome) {
+          // errore
+          $form->get('testo')->addError(
+            new FormError($this->get('translator')->trans('exception.nota_con_nome', ['%nome%' => $nome])));
+        }
       }
       if ($form->isValid()) {
         // imposta valori

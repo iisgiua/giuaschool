@@ -49,22 +49,6 @@
       {% endfor %}
     </tbody>
   </table>
-  <div class="row">
-    <div class="col-xs-12 bg-info">
-      <div class="gs-mt-2 gs-mb-2">
-        <h3 class="gs-h3 gs-inline">Annotazioni sul Registro</h3>
-      </div>
-      <div class="list-group">
-        {% for k,v in dati['annotazioni'] %}
-        <div class="list-group-item">
-          <div class="list-group-item-text">{{ v }}</div>
-        </div>
-        {% else %}
-        <div class="list-group-item"></div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
   {% endif %}
 </div>
 {% endblock %}

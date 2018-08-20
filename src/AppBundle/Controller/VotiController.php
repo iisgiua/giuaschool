@@ -31,6 +31,7 @@ use Symfony\Component\Form\FormError;
 use AppBundle\Util\LogHandler;
 use AppBundle\Util\RegistroUtil;
 use AppBundle\Util\GenitoriUtil;
+use AppBundle\Util\PdfManager;
 use AppBundle\Form\VotoClasseType;
 use AppBundle\Entity\Valutazione;
 
@@ -107,7 +108,7 @@ class VotiController extends Controller {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      if ($cattedra->getTipo() == 'S') {
+      if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
         // cattedra di sostegno: redirezione
         return $this->redirectToRoute('lezioni_voti_sostegno', ['cattedra' => $cattedra->getId()]);
       }
@@ -142,8 +143,13 @@ class VotiController extends Controller {
       if (!$errore) {
         // non festivo: recupera dati
         $info['periodo'] = $reg->periodo($data_obj);
-        if ($cattedra->getTipo() != 'S') {
+        if ($cattedra->getTipo() != 'S' && $cattedra->getMateria()->getTipo() != 'S') {
           $lezione = $reg->lezioneCattedra($data_obj, $this->getUser(), $classe, $cattedra->getMateria());
+          // controlla permessi
+          if ($lezione && !$reg->azioneVoti($data_obj, $this->getUser(), null, $classe, $cattedra->getMateria())) {
+            // azione non permessa
+            $lezione = null;
+          }
           $dati = $reg->quadroVoti($data_obj, $info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
         }
       }
@@ -575,7 +581,7 @@ class VotiController extends Controller {
     if ($cattedra) {
       // lista alunni
       $alunni = $em->getRepository('AppBundle:Alunno')->createQueryBuilder('a')
-        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note,a.religione')
         ->where('a.classe=:classe AND a.abilitato=:abilitato')
         ->setParameters(['classe' => $classe, 'abilitato' => 1])
         ->getQuery()
@@ -648,7 +654,7 @@ class VotiController extends Controller {
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
       $cattedra = $em->getRepository('AppBundle:Cattedra')->findOneBy(['id' => $cattedra,
-        'docente' => $this->getUser(), 'attiva' => 1, 'tipo' => 'S']);
+        'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -700,6 +706,77 @@ class VotiController extends Controller {
       'info' => $info,
       'dati' => $dati,
     ));
+  }
+
+  /**
+   * Stampa del quadro dei voti
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param PdfManager $pdf Gestore dei documenti PDF
+   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $classe Identificativo della classe
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/lezioni/voti/stampa/{cattedra}/{classe}", name="lezioni_voti_stampa",
+   *    requirements={"cattedra": "\d+", "classe": "\d+"},
+   *    defaults={"cattedra": 0, "classe": 0})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_DOCENTE')")
+   */
+  public function votiStampaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+                                    PdfManager $pdf, $cattedra, $classe) {
+    // inizializza variabili
+    $dati = null;
+    // parametri cattedra/classe
+    if ($cattedra == 0 && $classe == 0) {
+      // recupera parametri da sessione
+      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+    } else {
+      // memorizza su sessione
+      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+    }
+    // data in formato stringa
+    $data_obj = new \DateTime('today');
+    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter->setPattern('EEEE d MMMM yyyy');
+    $info['data_label'] =  $formatter->format($data_obj);
+    // controllo cattedra
+    $cattedra = $em->getRepository('AppBundle:Cattedra')->findOneBy(['id' => $cattedra,
+      'docente' => $this->getUser(), 'attiva' => 1]);
+    if (!$cattedra) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
+      // cattedra di sostegno: errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // informazioni necessarie
+    $classe = $cattedra->getClasse();
+    $info['materia'] = $cattedra->getMateria()->getNomeBreve();
+    $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
+    // recupera dati
+    $info['periodo'] = $reg->periodo($data_obj);
+    $dati = $reg->quadroVotiStampa($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
+    // crea documento PDF
+    $pdf->configure('Istituto di Istruzione Superiore',
+      'Voti della classe '.$classe->getAnno().'ª '.$classe->getSezione().' - '.$info['materia']);
+    $html = $this->renderView('pdf/voti_quadro.html.twig', array(
+      'classe' => $classe,
+      'info' => $info,
+      'dati' => $dati,
+      ));
+    $pdf->createFromHtml($html);
+    // invia il documento
+    $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'-'.
+      strtoupper(str_replace(' ', '-', $info['materia'])).'.pdf';
+    return $pdf->send($nomefile);
   }
 
 }

@@ -29,105 +29,72 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
-    {% else %}
-      {% for periodo,v in dati.lista %}
+    {% endif %}
+    {% for periodo,v in dati.lista %}
   <div class="row gs-mb-1">
     <div class="col-sm-6 text-info">
       <strong class="gs-big">{{ periodo }}</strong>
     </div>
     <div class="col-sm-6 text-right">
-        {% if dati.add is defined %}
+      {% if dati.add is defined %}
       <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a>
-        {% endif %}
+      {% endif %}
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">
     <thead class="bg-success">
       <tr>
-        <th>{{ cattedra.tipo == 'S' ? 'Materia' : 'Alunno' }}</th>
+        <th>Alunno</th>
         <th>Osservazioni</th>
       </tr>
     </thead>
     <tbody>
-        {% if dati.cattedra[periodo] is defined %}
-          {% for data,v2 in dati.cattedra[periodo] %}
-            {% if loop.first %}
+      {% for alunno_id,v1 in v %}
+        {% for data,v2 in v1 %}
+          {% if loop.first %}
       <tr>
         <td class="col-sm-3">
           <strong>{{ v2[0].nome }}</strong>
-        </td>
-        <td class="col-sm-9">
-          <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione</button>
-          <div class="list-group gs-mb-0" style="display:none">
-            {% endif %}
-            {% for e in v2 %}
-            <div class="list-group-item">
-              <div>
-                <strong>{{ e.data }}</strong>
-              {% if e.delete %}
-                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-              {% endif %}
-              {% if e.edit %}
-                <a class="btn btn-primary btn-xs pull-right gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione sull'alunno"><span class="glyphicon glyphicon-edit"></span></a>
-              {% endif %}
-              </div>
-              <div class="list-group-item-text">
-                <small>{{ e.testo }}</small>
-              </div>
-            </div>
-            {% endfor %}
-          {% endfor %}
-          </div>
-        </td>
-      </tr>
-        {% endif %}
-        {% for alunno_id,v1 in v %}
-          {% for data,v2 in v1 %}
-            {% if loop.first %}
-      <tr>
-        <td class="col-sm-3">
-          <strong>{{ v2[0].nome }}</strong>
-              {% if v2[0].bes is defined and v2[0].bes != 'N' %}
+            {% if v2[0].bes is defined and v2[0].bes != 'N' %}
           <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~v2[0].bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-              {% endif %}
-              {% if v2[0].note is defined and v2[0].note is not empty %}
+            {% endif %}
+            {% if v2[0].note is defined and v2[0].note is not empty %}
           <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v2[0].note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-              {% endif %}
+            {% endif %}
         </td>
         <td class="col-sm-9">
           <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione</button>
           <div class="list-group gs-mb-0" style="display:none">
-            {% endif %}
-            {% for e in v2 %}
+          {% endif %}
+          {% for e in v2 %}
             <div class="list-group-item">
               <div>
-                <strong>{{ e.data }}</strong>
-              {% if e.delete %}
+                <strong>{{ e.data }}</strong> <em>({{ e.materia }})</em>
+            {% if e.delete %}
                 <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-              {% endif %}
-              {% if e.edit %}
+            {% endif %}
+            {% if e.edit %}
                 <a class="btn btn-primary btn-xs pull-right gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione sull'alunno"><span class="glyphicon glyphicon-edit"></span></a>
-              {% endif %}
+            {% endif %}
               </div>
               <div class="list-group-item-text">
                 <small>{{ e.testo }}</small>
               </div>
             </div>
-            {% endfor %}
           {% endfor %}
+        {% endfor %}
           </div>
         </td>
       </tr>
-        {% endfor %}
+      {% endfor %}
     </tbody>
   </table>
-      {% else %}
-        {% if dati.add is defined %}
+    {% else %}
+      {% if dati.add is defined %}
       <div><a class="btn btn-primary btn-xs pull-right" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a></div>
         {% endif %}
-      {% endfor %}
-      {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
-    {% endif %}
+    {% endfor %}
+    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
   {% endif %}
 </div>
 {% endblock %}

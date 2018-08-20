@@ -20,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use AppBundle\Util\RegistroUtil;
+use AppBundle\Util\StaffUtil;
 
 
 /**
@@ -145,7 +146,7 @@ class LezioniController extends Controller {
       }
       // informazioni necessarie
       $classe = $cattedra->getClasse();
-      $template = 'lezioni/argomenti'.($cattedra->getTipo() == 'S' ? '_sostegno' : '').'.html.twig';
+      $template = 'lezioni/argomenti'.(($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') ? '_sostegno' : '').'.html.twig';
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
@@ -233,7 +234,7 @@ class LezioniController extends Controller {
     }
     // informazioni necessarie
     $classe = $cattedra->getClasse();
-    $template = 'lezioni/argomenti_riepilogo'.($cattedra->getTipo() == 'S' ? '_sostegno' : '').'.html.twig';
+    $template = 'lezioni/argomenti_riepilogo'.(($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') ? '_sostegno' : '').'.html.twig';
     $info['materia'] = $cattedra->getMateria()->getNomeBreve();
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     $info['alunno'] = $cattedra->getAlunno();
@@ -248,6 +249,219 @@ class LezioniController extends Controller {
       'info' => $info,
       'dati' => $dati,
     ));
+  }
+
+  /**
+   * Mostra le note disciplinari della classe.
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param StaffUtil $staff Funzioni di utilità per lo staff
+   * @param int $cattedra Identificativo della cattedra
+   * @param int $classe Identificativo della classe
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/lezioni/note/{cattedra}/{classe}", name="lezioni_note",
+   *    requirements={"cattedra": "\d+", "classe": "\d+"},
+   *    defaults={"cattedra": 0, "classe": 0})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_DOCENTE')")
+   */
+  public function noteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                              StaffUtil $staff, $cattedra, $classe) {
+    // inizializza variabili
+    $dati = null;
+    $info = null;
+    // parametri cattedra/classe
+    if ($cattedra == 0 && $classe == 0) {
+      // recupera parametri da sessione
+      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+    } else {
+      // memorizza su sessione
+      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+    }
+    // controllo cattedra/supplenza
+    if ($cattedra > 0) {
+      // lezione in propria cattedra: controlla esistenza
+      $cattedra = $em->getRepository('AppBundle:Cattedra')->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'attiva' => 1]);
+      if (!$cattedra) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      // informazioni necessarie
+      $classe = $cattedra->getClasse();
+      $info['materia'] = $cattedra->getMateria()->getNomeBreve();
+      $info['alunno'] = $cattedra->getAlunno();
+    } elseif ($classe > 0) {
+      // supplenza
+      $classe = $em->getRepository('AppBundle:Classe')->find($classe);
+      if (!$classe) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $materia = $em->getRepository('AppBundle:Materia')->findOneByTipo('U');
+      if (!$materia) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+      // informazioni necessarie
+      $cattedra = null;
+      $info['materia'] = $materia->getNomeBreve();
+      $info['alunno'] = null;
+    }
+    if ($classe) {
+      // recupera dati
+      $dati = $staff->note($classe);
+    }
+    // salva pagina visitata
+    $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
+    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    // visualizza pagina
+    return $this->render('lezioni/note.html.twig', array(
+      'pagina_titolo' => 'page.lezioni_note',
+      'cattedra' => $cattedra,
+      'classe' => $classe,
+      'info' => $info,
+      'dati' => $dati,
+    ));
+  }
+
+  /**
+   * Crea automaticamente il programma svolto.
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param int $cattedra Identificativo della cattedra
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/lezioni/argomenti/programma/{cattedra}", name="lezioni_argomenti_programma",
+   *    requirements={"cattedra": "\d+"})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_DOCENTE')")
+   */
+  public function argomentiProgrammaAction(EntityManagerInterface $em, RegistroUtil $reg, $cattedra) {
+    // inizializza
+    $info = null;
+    $dati = null;
+    $dir = $this->getParameter('kernel.project_dir').'/documenti/tmp/';
+    $nomefile = md5(uniqid()).'-'.rand(1,1000).'.docx';
+    // controlla cattedra
+    $cattedra = $em->getRepository('AppBundle:Cattedra')->findOneBy(['id' => $cattedra,
+      'docente' => $this->getUser(), 'attiva' => 1]);
+    if (!$cattedra || $cattedra->getMateria()->getTipo() == 'S') {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // recupera dati
+    $dati = $reg->programma($cattedra);
+    // info dati
+    $info['classe'] = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
+    $info['classe_corso'] = $info['classe'].' - '.$cattedra->getClasse()->getCorso().' - '.
+      $cattedra->getClasse()->getSede()->getCitta();
+    $info['materia'] = $cattedra->getMateria()->getNome();
+    $info['docenti'] = (count($dati['docenti']) == 1) ? 'Docente: ' : 'Docenti: ';
+    foreach ($dati['docenti'] as $doc) {
+      $info['docenti'] .= $doc['nome'].' '. $doc['cognome'].', ';
+    }
+    $info['docenti'] = substr($info['docenti'], 0, -2);
+    $m = strtoupper(preg_replace('/\W+/','-', $cattedra->getMateria()->getNomeBreve()));
+    if (substr($m, -1) == '-') {
+      $m = substr($m, 0, -1);
+    }
+    $info['documento'] = 'PROGRAMMA-'.$cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione().
+      '-'.$m.'.docx';
+    // configurazione documento
+    \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
+    $phpWord = new \PhpOffice\PhpWord\PhpWord();
+    $properties = $phpWord->getDocInfo();
+    $properties->setCreator('Istituto di Istruzione Superiore');
+    $properties->setTitle('Programma svolto - '.$info['classe'].' - '.$info['materia']);
+    $properties->setDescription('');
+    $properties->setSubject('');
+    $properties->setKeywords('');
+    // stili predefiniti
+    $phpWord->setDefaultFontName('Times New Roman');
+    $phpWord->setDefaultFontSize(12);
+    $phpWord->setDefaultParagraphStyle(array(
+      'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH,
+      'spaceAfter' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.2)));
+    $lista_paragrafo = array('spaceAfter' => 0);
+    $lista_stile = 'multilevel';
+    $phpWord->addNumberingStyle($lista_stile, array(
+      'type' => 'multilevel',
+      'levels' => array(
+        array('format' => 'decimal', 'text' => '%1)', 'left' => 720, 'hanging' => 360, 'tabPos' => 720))));
+    // imposta pagina
+    $section = $phpWord->addSection(array(
+      'orientation' => 'portrait',
+      'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
+      'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
+      'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
+      'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
+      'headerHeight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0),
+      'footerHeight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1.5),
+      'pageSizeH' =>  \PhpOffice\PhpWord\Shared\Converter::cmToTwip(29.70),
+      'pageSizeW' =>  \PhpOffice\PhpWord\Shared\Converter::cmToTwip(21)
+      ));
+    $footer = $section->addFooter();
+    $footer->addPreserveText('- Pag. {PAGE}/{NUMPAGES} -',
+      array('name' => 'Arial', 'size' => 9),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    // intestazione
+    $section->addImage($this->getParameter('kernel.project_dir').'/web/img/logo-italia.png', array(
+      'width' => 55,
+      'height' => 55,
+      'positioning' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE,
+      'posHorizontal' => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_CENTER,
+      'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_COLUMN,
+      'posVertical' => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_TOP,
+      'posVerticalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_LINE
+      ));
+    $section->addTextBreak(1);
+    $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE STATALE',
+      array('bold' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addText('',
+      array('bold' => true, 'italic' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addText('',
+      array('bold' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addTextBreak(1);
+    $section->addText('ANNO SCOLASTICO 2017/2018',
+      array('bold' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addTextBreak(1);
+    $section->addText('PROGRAMMA SVOLTO',
+      array('bold' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addText('Classe: '.$info['classe_corso'],
+      array('bold' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addText('Materia: '.$info['materia'],
+      array('bold' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addText($info['docenti'],
+      array('bold' => true),
+      array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
+    $section->addTextBreak(2);
+    // programma
+    foreach ($dati['argomenti'] as $arg) {
+      $section->addListItem($arg, 0, null, null, $lista_paragrafo);
+    }
+    // salva documento
+    $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+    $objWriter->save($dir.$nomefile);
+    // invia il documento
+    return $this->file($dir.$nomefile, $info['documento']);
   }
 
 }

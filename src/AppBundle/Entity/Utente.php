@@ -308,6 +308,18 @@ class Utente implements UserInterface, \Serializable {
   }
 
   /**
+   * Modifica l'identificativo univoco per l'utente
+   *
+   * @param integer $id Identificativo univoco per l'utente
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setId($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  /**
    * Restituisce la data/ora dell'ultima modifica dei dati dell'utente
    *
    * @return \DateTime Data/ora dell'ultima modifica

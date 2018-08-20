@@ -91,4 +91,23 @@ class PdfManager {
     $this->pdf->Output($filename, 'D');
   }
 
+  /**
+   * Salva localmente sul server il file PDF creato
+   *
+   * @param string $filename Nome del file da salvare
+   */
+  public function save($filename) {
+    $this->pdf->lastPage();
+    $this->pdf->Output($filename, 'F');
+  }
+
+  /**
+   * Restituisce il gestore del documento PDF
+   *
+   * @return TCPDF Restituisce il gestore del documento
+   */
+  public function getHandler() {
+    return $this->pdf;
+  }
+
 }

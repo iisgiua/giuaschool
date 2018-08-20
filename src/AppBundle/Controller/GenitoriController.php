@@ -18,9 +18,18 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormError;
+use AppBundle\Entity\RichiestaColloquio;
 use AppBundle\Util\GenitoriUtil;
 use AppBundle\Util\RegistroUtil;
+use AppBundle\Util\BachecaUtil;
+use AppBundle\Util\AgendaUtil;
 
 
 /**
@@ -396,6 +405,474 @@ class GenitoriController extends Controller {
       'classe' => $classe,
       'errore' => $errore,
       'dati' => $dati,
+    ));
+  }
+
+  /**
+   * Mostra le pagelle dell'alunno.
+   *
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param $string $periodo Periodo dello scrutinio
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/pagelle/{periodo}", name="genitori_pagelle",
+   *    requirements={"periodo": "P|S|F|R|1|2|0"},
+   *    defaults={"periodo": "0"})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function pagelleAction(TranslatorInterface $trans, GenitoriUtil $gen,
+                                 $periodo) {
+    // inizializza variabili
+    $errore = null;
+    $dati = array();
+    $lista_periodi = null;
+    $info = array();
+    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info['giudizi']['1']['N'] = [30 => 'Non Classificato', 31 => 'Scarso', 32 => 'Insufficiente', 33 => 'Mediocre', 34 => 'Sufficiente', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
+    $info['giudizi']['1']['C'] = [40 => 'Non Classificata', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
+    $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    // legge l'alunno
+    $alunno = $gen->alunno($this->getUser());
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // legge la classe (può essere null)
+    $classe = $alunno->getClasse();
+    if ($classe) {
+      // legge lista periodi
+      $lista_periodi = $gen->periodiScrutini($classe);
+      if ($periodo == '0') {
+        // ultimo scrutinio visibile
+        $scrutinio = $gen->scrutinioVisibile($classe);
+        $periodo = $scrutinio['periodo'];
+      } elseif (!isset($lista_periodi[$periodo]) || $lista_periodi[$periodo] != 'C' ||
+                !$gen->scrutinioVisibile($classe, $periodo)) {
+        // periodo indicato non valido
+        $periodo = null;
+      }
+      if ($periodo) {
+        // pagella
+        $dati = $gen->pagelle($classe, $alunno, $periodo);
+      }
+    } else {
+      // nessuna classe
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+    }
+    // visualizza pagina
+    return $this->render('ruolo_genitore/pagelle.html.twig', array(
+      'pagina_titolo' => 'page.genitori_pagelle',
+      'alunno' => $alunno,
+      'classe' => $classe,
+      'errore' => $errore,
+      'dati' => $dati,
+      'info' => $info,
+      'periodo' => $periodo,
+      'lista_periodi' => $lista_periodi,
+    ));
+  }
+
+  /**
+   * Mostra le ore di colloquio dei docenti.
+   *
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/colloqui", name="genitori_colloqui")
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function colloquiAction(TranslatorInterface $trans, GenitoriUtil $gen) {
+    // inizializza variabili
+    $errore = null;
+    $dati = null;
+    $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    // legge l'alunno
+    $alunno = $gen->alunno($this->getUser());
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // legge la classe (può essere null)
+    $classe = $alunno->getClasse();
+    if ($classe) {
+      // recupera dati
+      $dati = $gen->colloqui($classe, $alunno);
+    } else {
+      // nessuna classe
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+    }
+    // visualizza pagina
+    return $this->render('ruolo_genitore/colloqui.html.twig', array(
+      'pagina_titolo' => 'page.genitori_colloqui',
+      'alunno' => $alunno,
+      'classe' => $classe,
+      'errore' => $errore,
+      'dati' => $dati,
+      'settimana' => $settimana,
+    ));
+  }
+
+  /**
+   * Invia la prenotazione per il colloquio con un docente.
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/colloqui/prenota/{colloquio}", name="genitori_colloqui_prenota")
+   *    requirements={"colloquio": "\d+"})
+   * @Method({"GET","POST"})
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function colloquiPrenotaAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
+                                         $colloquio) {
+    // inizializza variabili
+    $dati['errore'] = null;
+    $dati['lista'] = array();
+    $label = array();
+    // controlla colloquio
+    $colloquio = $em->getRepository('AppBundle:Colloquio')->find($colloquio);
+    if (!$colloquio) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // legge l'alunno
+    $alunno = $gen->alunno($this->getUser());
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // legge la classe
+    $classe = $alunno->getClasse();
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // lista date
+    $dati = $gen->dateColloquio($colloquio);
+    // info
+    $label['docente'] = $colloquio->getDocente()->getCognome().' '.$colloquio->getDocente()->getNome();
+    $label['materie'] = $gen->materieDocente($colloquio->getDocente(), $classe, $alunno);
+    // form di inserimento
+    $form = $this->container->get('form.factory')->createNamedBuilder('colloqui_prenota', FormType::class)
+      ->add('data', ChoiceType::class, array('label' => 'label.data_colloquio',
+        'choices' => $dati['lista'],
+        'expanded' => true,
+        'multiple' => false,
+        'translation_domain' => false,
+        'required' => true))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']))
+      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end',
+        'onclick' => "location.href='".$this->generateUrl('genitori_colloqui')."'"]))
+      ->getForm();
+    $form->handleRequest($request);
+    if (!$dati['errore'] && $form->isSubmitted() && $form->isValid()) {
+      $richiesta = $em->getRepository('AppBundle:RichiestaColloquio')->createQueryBuilder('rc')
+        ->where('rc.colloquio=:colloquio AND rc.alunno=:alunno AND rc.data=:data AND rc.stato!=:stato')
+        ->setParameters(['colloquio' => $colloquio, 'alunno' => $alunno,
+          'data' => $form->get('data')->getData(), 'stato' => 'A'])
+        ->getQuery()
+        ->getArrayResult();
+      if (!empty($richiesta)) {
+        // esiste già richiesta
+        $form->addError(new FormError($this->get('translator')->trans('exception.colloqui_esiste')));
+      } else {
+        // nuova richiesta
+        $richiesta = (new RichiestaColloquio)
+          ->setData(\DateTime::createFromFormat('Y-m-d', $form->get('data')->getData()))
+          ->setColloquio($colloquio)
+          ->setAlunno($alunno)
+          ->setStato('R');
+        $em->persist($richiesta);
+        // ok: memorizza dati
+        $em->flush();
+        // redirezione
+        return $this->redirectToRoute('genitori_colloqui');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->render('ruolo_genitore/colloqui_prenota.html.twig', array(
+      'pagina_titolo' => 'page.genitori_colloqui',
+      'form' => $form->createView(),
+      'form_title' => 'title.prenota_colloqui',
+      'label' => $label,
+      'errore' => $dati['errore'],
+    ));
+  }
+
+  /**
+   * Invia la disdetta per la richiesta di colloquio con un docente.
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/colloqui/disdetta/{richiesta}", name="genitori_colloqui_disdetta")
+   *    requirements={"richiesta": "\d+"})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function colloquiDisdettaAction(EntityManagerInterface $em, GenitoriUtil $gen, $richiesta) {
+    // legge l'alunno
+    $alunno = $gen->alunno($this->getUser());
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // legge la classe
+    $classe = $alunno->getClasse();
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla richiesta
+    $richiesta = $em->getRepository('AppBundle:RichiestaColloquio')->findBy(['id' => $richiesta, 'alunno' => $alunno]);
+    if (empty($richiesta)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // cancella richiesta
+    $richiesta[0]
+      ->setStato('A')
+      ->setMessaggio(null);
+    // ok: memorizza dati
+    $em->flush();
+    // redirezione
+    return $this->redirectToRoute('genitori_colloqui');
+  }
+
+  /**
+   * Visualizza gli avvisi destinati ai genitori
+   *
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/avvisi/{pagina}", name="genitori_avvisi",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": "0"})
+   * @Method({"GET"})
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function avvisiAction(SessionInterface $session, GenitoriUtil $gen, BachecaUtil $bac, $pagina) {
+    // inizializza variabili
+    $dati = null;
+    $maxPages = 1;
+    $limite = 15;
+    // recupera criteri dalla sessione
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $session->get('/APP/ROUTE/genitori_avvisi/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $session->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
+    }
+    // legge l'alunno
+    $alunno = $gen->alunno($this->getUser());
+    if ($alunno) {
+      // recupera dati
+      $ultimo_accesso = \DateTime::createFromFormat('d/m/Y H:i:s',
+        ($session->get('/APP/UTENTE/ultimo_accesso') ? $session->get('/APP/UTENTE/ultimo_accesso') : '01/01/2018 00:00:00'));
+      $dati = $bac->bachecaAvvisiGenitori($pagina, $limite, $this->getUser(), $alunno, $ultimo_accesso);
+      $maxPages = ceil($dati['lista']->count() / $limite);
+    }
+    // mostra la pagina di risposta
+    return $this->render('bacheca/avvisi_genitori.html.twig', array(
+      'pagina_titolo' => 'page.genitori_avvisi',
+      'page' => $pagina,
+      'maxPages' => $maxPages,
+      'dati' => $dati,
+    ));
+  }
+
+  /**
+   * Mostra i dettagli di un avviso destinato al genitore
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param int $id ID dell'avviso
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/avvisi/dettagli/{id}", name="genitori_avvisi_dettagli",
+   *    requirements={"id": "\d+"})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function avvisiDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
+    // inizializza
+    $dati = null;
+    $letto = null;
+    // controllo avviso
+    $avviso = $em->getRepository('AppBundle:Avviso')->find($id);
+    if (!$avviso) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if (!$bac->destinatario($avviso, $this->getUser(), $letto)) {
+      // errore: non è destinatario dell'avviso
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // legge dati
+    $dati = $bac->dettagliAvviso($avviso);
+    // visualizza pagina
+    return $this->render('bacheca/scheda_avviso_genitori.html.twig', array(
+      'dati' => $dati,
+      'letto' => $letto,
+    ));
+  }
+
+  /**
+   * Conferma la lettura dell'avviso destinato ai genitori
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param int $id ID dell'avviso
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/avvisi/firma/{id}", name="genitori_avvisi_firma",
+   *    requirements={"id": "\d+"})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function avvisiFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
+    $letto = null;
+    // controllo avviso
+    $avviso = $em->getRepository('AppBundle:Avviso')->find($id);
+    if (!$avviso) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if (!$bac->destinatario($avviso, $this->getUser(), $letto)) {
+      // errore: non è destinatario dell'avviso
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // aggiorna firma
+    if ($avviso->getDestinatariIndividuali() && !$letto) {
+      $bac->letturaAvvisoGenitori($avviso, $this->getUser());
+      // ok: memorizza dati
+      $em->flush();
+    }
+    // redirect
+    return $this->redirectToRoute('genitori_avvisi');
+  }
+
+  /**
+   * Visualizza gli eventi destinati ai genitori
+   *
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
+   * @param string $mese Anno e mese della pagina da visualizzare dell'agenda
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/eventi/{mese}", name="genitori_eventi",
+   *    requirements={"mese": "\d\d\d\d-\d\d"},
+   *    defaults={"mese": "0000-00"})
+   * @Method({"GET"})
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function eventiAction(SessionInterface $session, GenitoriUtil $gen, AgendaUtil $age,
+                                $mese) {
+    $dati = null;
+    $info = null;
+    // parametro data
+    if ($mese == '0000-00') {
+      // mese non specificato
+      if ($session->get('/APP/ROUTE/genitori_eventi/mese')) {
+        // recupera data da sessione
+        $mese = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/genitori_eventi/mese').'-01');
+      } else {
+        // imposta data odierna
+        $mese = (new \DateTime())->modify('first day of this month');
+      }
+    } else {
+      // imposta data indicata e la memorizza in sessione
+      $mese = \DateTime::createFromFormat('Y-m-d', $mese.'-01');
+      $session->set('/APP/ROUTE/genitori_eventi/mese', $mese->format('Y-m'));
+    }
+    // nome/url mese
+    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter->setPattern('MMMM yyyy');
+    $info['mese'] =  ucfirst($formatter->format($mese));
+    $m = clone $mese;
+    $mese_succ = $m->modify('first day of next month');
+    $info['mese_succ'] = ucfirst($formatter->format($mese_succ));
+    $info['url_succ'] = $mese_succ->format('Y-m');
+    $m = clone $mese;
+    $mese_prec = $m->modify('first day of previous month');
+    $info['mese_prec'] = ucfirst($formatter->format($mese_prec));
+    $info['url_prec'] = $mese_prec->format('Y-m');
+    // presentazione calendario
+    $info['inizio'] = (intval($mese->format('w')) - 1);
+    $m = clone $mese;
+    $info['ultimo_giorno'] = $m->modify('last day of this month')->format('j');
+    $info['fine'] = (intval($m->format('w')) == 0 ? 0 : 6 - intval($m->format('w')));
+    // legge l'alunno
+    $alunno = $gen->alunno($this->getUser());
+    if ($alunno) {
+      // recupera dati
+      $dati = $age->agendaEventiGenitori($alunno, $mese);
+    }
+    // mostra la pagina di risposta
+    return $this->render('agenda/eventi_genitori.html.twig', array(
+      'pagina_titolo' => 'page.genitori_eventi',
+      'mese' => $mese,
+      'info' => $info,
+      'dati' => $dati,
+    ));
+  }
+
+  /**
+   * Mostra i dettagli di un evento destinato ai genitori
+   *
+   * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
+   * @param string $data Data dell'evento (AAAA-MM-GG)
+   * @param string $tipo Tipo dell'evento
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/eventi/dettagli/{data}/{tipo}", name="genitori_eventi_dettagli",
+   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "tipo": "C|A|V"})
+   * @Method("GET")
+   *
+   * @Security("has_role('ROLE_GENITORE')")
+   */
+  public function eventoDettagliAction(AgendaUtil $age, $data, $tipo) {
+    // inizializza
+    $dati = null;
+    // data
+    $data = \DateTime::createFromFormat('Y-m-d', $data);
+    // legge dati
+    $dati = $age->dettagliEventoGenitore($this->getUser()->getAlunno(), $data, $tipo);
+    // visualizza pagina
+    return $this->render('agenda/scheda_evento_genitori_'.$tipo.'.html.twig', array(
+      'dati' => $dati,
+      'data' => $data,
     ));
   }
 

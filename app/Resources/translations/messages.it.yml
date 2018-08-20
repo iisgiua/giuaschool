@@ -116,13 +116,132 @@ label.voto_giudizio: Giudizio
 label.scelta_materia: Scegli la materia
 label.ogni_materia: Tutte le materie
 label.qualsiasi_classe: Tutte le classi
+label.qualsiasi_sede: Tutte le sedi
 label.uscite: Uscite
 label.conteggio_entrate: Valido per il conteggio dei ritardi?
 label.conteggio_uscite: Valido per il conteggio delle uscite?
 label.annotazione: Annotazione sul registro
 label.scegli_alunno: Scegli l'alunno
 label.scegli_materia: Scegli la materia
-
+label.periodo_P: Primo Trimestre
+label.periodo_S: ~
+label.periodo_F: Scrutinio Finale
+label.periodo_R: Ripresa Scrutinio Finale
+label.periodo_1: Valutazione Intermedia
+label.periodo_2: ~
+label.scegli_periodo: Scegli il periodo
+label.recupero_A: Recupero autonomo
+label.recupero_C: Corso di recupero
+label.recupero_S: Sportello didattico
+label.recupero_R: Recuperato
+label.recupero_N: Non recuperato
+label.scegli_recupero: Scegli la modalità di recupero
+label.scegli_recupero_2: Indica se il debito formativo è stato recuperato
+label.visualizza: Visualizza
+label.indietro: Indietro
+label.stampa: Stampa su PDF
+label.scrutinio_presente: Presente
+label.scrutinio_assente: Assente
+label.scrutinio_sostituto: Sostituto (cognome e nome)
+label.scrutinio_presiede_ds: Il Dirigente Scolastico
+label.scrutinio_presiede_docente: Il docente (su delega)
+label.scegli_docente: Scegli il docente
+label.votazione_unanimita: Unanimità
+label.votazione_maggioranza: Maggioranza
+label.colloquio: Colloquio
+label.data_colloquio: Data del colloquio
+label.messaggio_colloquio: Messaggio per i genitori
+label.stato_colloquio: Stato della richiesta
+label.stato_colloquio_C: Colloquio confermato
+label.stato_colloquio_N: Colloquio rifiutato
+label.duplica_dati: Duplica dati su
+label.data_evento: Data dell'evento
+label.oggetto: Oggetto
+label.crea_annotazione: Annotazione sul registro
+label.genitori: Genitori
+label.staff: Staff
+label.coordinatori: Coordinatori
+label.docenti: Docenti
+label.leggere_in_classe: Leggere agli alunni
+label.destinatari: Destinatari
+label.filtro_tutti: Tutti
+label.filtro_nessuno: Nessuno
+label.filtro_sede: Filtra per sede
+label.filtro_classe: Filtra per classe
+label.filtro_materia: Filtra per materia
+label.filtro_individuale: Filtra per utente
+label.autore: Autore
+label.upload_cancella: Annulla
+label.upload_rimuove_file: Cancella
+label.tutti_docenti: Tutti i docenti
+label.tutti_staff: Tutto lo staff
+label.tutti_destinatari: Tutti i destinatari
+label.data: Data
+label.scegli_classe: Scegli la classe
+label.ora: Ora
+label.ora_inizio: Ora inizio
+label.ora_fine: Ora fine
+label.faccio_subito: Lo faccio subito
+label.faccio_dopo: Lo faccio dopo
+label.docenti_classe: Docenti della classe
+label.genitori_classe: Genitori della classe
+label.lunedi: Lunedì
+label.martedi: Martedì
+label.mercoledi: Mercoledì
+label.giovedi: Giovedì
+label.venerdi: Venerdì
+label.sabato: Sabato
+label.data_verifica: Data
+label.cattedra_verifica: Classe e materia
+label.descrizione_verifica: Descrizione o argomenti
+label.filtro_alunno: Filtra per alunno
+label.scegli_cattedra: Scegli la classe e la materia
+label.cattedra: Classe e materia
+label.documento: Documento
+label.documento_mancante: Documento non inserito
+label.no_scrutinabile_cessata_frequenza: Non scrutinabile perché ha cessato di frequentare entro il 15 marzo (senza formalizzare il ritiro)
+label.label.no_scrutinabile_assenze: Non scrutinabile per superamento del limite di assenze
+label.scrutinabile_deroga: Scrutinabile in deroga con la seguente motivazione
+label.inserisci_motivazione: Inserisci la motivazione predefinita
+label.deroga_salute: Deroga per motivi di salute
+label.deroga_famiglia: Deroga per gravi situazioni famigliari
+label.deroga_sport: Deroga per partecipazione ad attività sportive
+label.deroga_religione: Deroga per religione che considera il sabato come giorno di riposo
+label.esito_A: Ammesso
+label.esito_N: Non Ammesso
+label.esito_S: Giudizio Sospeso
+label.scegli_esito: Scegli l'esito dello scrutinio
+label.criterio_credito_F: Frequenza
+label.criterio_credito_I: Interesse e impegno
+label.criterio_credito_A: Alternanza scuola lavoro
+label.criterio_credito_P: Progetti
+label.criterio_credito_O: Organi collegiali
+label.criterio_credito_S: Credito formativo (Attività sociali e sportive)
+label.criterio_credito_L: Credito formativo (Lingue)
+label.criterio_credito_desc_F: Frequenza assidua
+label.criterio_credito_desc_I: Interesse e impegno
+label.criterio_credito_desc_A: Partecipazione alle attività di Alternanza Scuola Lavoro
+label.criterio_credito_desc_P: Partecipazione ad altri progetti
+label.criterio_credito_desc_O: Rappresentante negli Organi Collegiali scolastici
+label.criterio_credito_desc_S: Attività sociali e sportive certificate da un ente esterno
+label.criterio_credito_desc_L: Corsi di lingue certificati da un ente esterno
+label.credito_scolastico: Credito scolastico
+label.credito_formativo: Credito formativo
+label.certificazione_livello_B: Livello base
+label.certificazione_livello_I: Livello intermedio
+label.certificazione_livello_A: Livello avanzato
+label.certificazione_livello_N: Livello base non raggiunto
+label.certificazione_italiano: Asse dei linguaggi - Lingua italiana
+label.certificazione_lingua: Asse dei linguaggi - Lingua straniera
+label.certificazione_linguaggio: Asse dei linguaggi - Altri linguaggi
+label.certificazione_matematica: Asse matematico
+label.certificazione_scienze: Asse scientifico-tecnologico
+label.certificazione_storia: Asse storico-sociale
+label.registro_docente: Registro del docente
+label.registro_sostegno: Registro di sostegno
+label.registro_classe: Registro di classe
+label.nessuno: Nessuno
+label.tutte_classi: Tutte le classi
 
 page.login: Accesso al Registro Elettronico
 page.enroll: Registrazione Docenti
@@ -170,6 +289,42 @@ page.lezioni_osservazioni: Osservazioni sugli Alunni
 page.lezioni_osservazioni_personali: Diario Personale
 page.lezioni_voti_dettagli: Dettagli Valutazioni
 page.recovery: Recupero Password
+page.lezioni_proposte: Proposte di Voto
+page.coordinatore_classe: Classe
+page.coordinatore_note: Note della Classe
+page.coordinatore_assenze: Assenze della Classe
+page.segreteria_assenze: Frequenza
+page.coordinatore_voti: Voti della Classe
+page.coordinatore_scrutinio: Gestione Scrutinio
+page.lezioni_note: Note Disciplinari
+page.lezioni_tabellone: Tabellone Scrutini
+page.genitori_pagelle: Pagelle
+page.genitori_colloqui: Prenotazione Colloqui
+page.staff_colloqui: Ore Colloqui
+page.docenti_colloqui: Colloqui Docenti
+page.colloqui_edit: Risposta Colloquio Richiesto
+page.coordinatore_situazione: Situazione Alunni
+page.staff_situazione: Situazione Alunni
+page.staff_statistiche: Statistiche Lezioni
+page.staff_avvisi: Avvisi Generici
+page.staff_avvisi_entrate: Avvisi Ingresso
+page.staff_avvisi_uscite: Avvisi Uscita
+page.staff_avvisi_attivita: Avvisi Attività
+page.staff_avvisi_individuali: Avvisi Individuali
+page.bacheca_avvisi: Avvisi Docenti
+page.genitori_avvisi: Avvisi Genitori
+page.coordinatore_avvisi: Gestione Avvisi
+page.agenda_eventi: Agenda Docenti
+page.agenda_verifica: Agenda Verifiche
+page.genitori_eventi: Agenda Genitori
+page.documenti_programmi: Inserimento Programmi
+page.manutenzione: Manutenzione Registro
+page.documenti_relazioni: Inserimento Relazioni
+page.staff_programmi: Inserimento Programmi
+page.staff_relazioni: Inserimento Relazioni
+page.segreteria_scrutini: Scrutini
+page.segreteria_scrutini_mostra: Scrutinio Alunno
+page.archiviazione: Archiviazione Registri
 
 
 title.alias: Impersona un altro utente
@@ -226,6 +381,66 @@ title.lezioni_osservazioni_personali: Diario personale della classe
 title.nuova_osservazione_personale: Inserisci l'osservazione personale
 title.modifica_osservazione_personale: Modifica l'osservazione personale
 title.lezioni_voti_dettagli: Dettagli delle valutazioni della classe
+title.lezioni_proposte: Proposte di voto per la classe
+title.coordinatore_classe: Scegli la classe
+title.coordinatore_note: Note della classe
+title.coordinatore_assenze: Assenze della classe
+title.segreteria_assenze: Visualizza la frequenza
+title.coordinatore_voti: Medie dei voti della classe
+title.lezioni_note: Note della classe
+title.coordinatore_scrutinio: Scrutinio della classe
+title.coordinatore_valutazione_intermedia: Valutazione intermedia della classe
+title.lezioni_tabellone: Tabellone dello scrutinio della classe
+title.genitori_pagelle: Pagelle dell'alunn%sex%
+title.nuovo_colloquio: Aggiunge un orario di colloquio individuale
+title.modifica_colloquio: Modifica l'orario di colloquio individuale
+title.docenti_colloqui_importa: Importa le ore di colloquio individuale dei docenti da file
+title.genitori_colloqui: Colloqui individuali con i docenti
+title.ore_colloqui: Ore di ricevimento per i colloqui individuali
+title.richieste_colloqui: Richieste di colloquio inoltrate
+title.prenota_colloqui: Prenota il colloquio con il docente
+title.docenti_colloqui: Gestione dei colloqui individuali
+title.risposta_colloqui: Risposta ad una richiesta di colloquio
+title.coordinatore_situazione: Situazione degli alunni della classe
+title.coordinatore_situazione_alunno: Situazione dell'alunn%sex%
+title.staff_situazione: Visualizza situazione degli alunni
+title.statistiche_lezioni: Statistiche sulle ore di lezione dei docenti
+title.staff_avvisi: Avvisi di tipo generico
+title.nuovo_avviso: Inserisci un nuovo avviso
+title.modifica_avviso: Modifica l'avviso
+title.staff_avvisi_entrate: Avvisi per l'ingresso posticipato delle classi
+title.staff_avvisi_uscite: Avvisi per l'uscita anticipata delle classi
+title.staff_avvisi_attivita: Avvisi per lo svolgimento di attività per le classi
+title.staff_avvisi_individuali: Avvisi individuali per i genitori
+title.nuovo_avviso_entrate: Inserisci un nuovo avviso per l'ingresso posticipato
+title.modifica_avviso_entrate: Modifica l'avviso per l'ingresso posticipato
+title.nuovo_avviso_uscite: Inserisci un nuovo avviso per l'uscita anticipata
+title.modifica_avviso_uscite: Modifica l'avviso per l'uscita anticipata
+title.nuovo_avviso_attivita: Inserisci un nuovo avviso per lo svolgimento di un'attività
+title.modifica_avviso_attivita: Modifica l'avviso per lo svolgimento di un'attività
+title.nuovo_avviso_individuale: Inserisci un nuovo avviso individuale per i genitori
+title.modifica_avviso_individuale: Modifica l'avviso individuale per i genitori
+title.bacheca_avvisi: Avvisi indirizzati al docente
+title.genitori_avvisi: Avvisi indirizzati al genitore
+title.coordinatore_avvisi: Gestione degli avvisi per la classe
+title.nuovo_avviso_coordinatore: Inserisci un nuovo avviso per la classe
+title.modifica_avviso_coordinatore: Modifica l'avviso per la classe
+title.agenda_eventi: Agenda degli eventi per il docente
+title.nuova_verifica: Inserisci una nuova verifica nell'agenda
+title.modifica_verifica: Modifica la verifica esistente nell'agenda
+title.genitori_eventi: Agenda degli eventi per il genitore
+title.documenti_programmi: Inserimento dei programmi svolti
+title.nuovo_programma: Inserisci il programma svolto
+title.modifica_programma: Modifica il programma svolto
+title.manutenzione: Impostazione della modalità manutenzione per il registro
+title.documenti_relazioni: Inserimento delle relazioni finali
+title.nuova_relazione: Inserisci la relazione finale
+title.modifica_relazione: Modifica la relazione finale
+title.staff_programmi: Inserimento dei programmi svolti
+title.staff_relazioni: Inserimento delle relazioni finali
+title.segreteria_scrutini: Visualizza gli scrutini
+title.segreteria_scrutini_mostra: Documenti dello scrutinio
+title.archiviazione: Creazione e archiviazione dei registri
 
 
 message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbligatori.
@@ -253,7 +468,65 @@ message.nessun_dato: Non sono presenti dati da visualizzare
 message.osservazioni_supplenza: Non è possibile inserire osservazioni per una supplenza.
 message.cancella_osservazione: Verrà cancellata l'osservazione inserita. Vuoi continuare?
 message.recovery_ok: Procedura eseguita senza errori. Tra qualche minuto riceverai, all'indirizzo indicato, un'email con le nuove credenziali di accesso al Registro Elettronico.
-
+message.no_proposte: Non è ancora possibile inserire le proposte di voto
+message.proposte: Inserisci la proposta di voto, indicando anche la modalità e gli argomenti del recupero nel caso di insufficienza.
+message.proposte_religione: Inserisci la proposta di voto, scegliendola tra i giudizi possibili.
+message.proposte_intermedia: Inserisci la valutazione intermedia, indicando anche se si è recuperato l'eventuale debito formativo.
+message.proposte_no: Le proposte di voto non sono più modificabili.
+message.proposte_non_previste: Non è previsto l'inserimento di proposte di voto.
+message.classe_mancante: Devi prima scegliere la classe per poter visualizzare questa pagina.
+message.scrutinio_non_attivo: Non è possibile inserire o modificare i dati dello scrutinio.
+message.giudizio_condotta_5: "Ha assunto comportamenti di particolare gravità riconducibili alle fattispecie per le quali lo Statuto delle studentesse e degli studenti, nonché il Regolamento di Istituto, prevedano l’irrogazione di sanzioni disciplinari che comportino l’allontanamento temporaneo dello studente dalla comunità scolastica per periodi superiori a 15 giorni; non ha dimostrato apprezzabili e concreti cambiamenti nel comportamento, tali da evidenziare un sufficiente livello di miglioramento nel suo percorso di crescita e di maturazione in ordine alle finalità educative della scuola."
+message.giudizio_condotta_6: "Ha un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento poco rispettoso nei confronti dei docenti o del personale d’Istituto; spesso ha un comportamento poco responsabile; non è puntuale nello svolgimento degli impegni scolastici; non frequenta con regolarità; ha scarso rispetto dell’integrità delle strutture e degli spazi dell’Istituto; non partecipa al dialogo educativo, spesso non mostra interesse per l’apprendimento, non sempre esegue i compiti assegnati; non sempre rispetta le norme di sicurezza."
+message.giudizio_condotta_7: "Ha un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento non sempre rispettoso nei confronti dei docenti o del personale dell’Istituto; talvolta ha un comportamento poco responsabile; talvolta non rispetta le consegne e i regolamenti; non frequenta con regolarità; non partecipa al dialogo educativo, spesso non mostrando interesse per l’apprendimento, non sempre esegue i compiti assegnati; non sempre rispetta le norme di sicurezza."
+message.giudizio_condotta_8: "Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni; ha un atteggiamento responsabile; è puntuale nell’adempimento degli impegni scolastici; frequenta con regolarità; partecipa alle attività didattiche; è interessato all’apprendimento, ma non sempre esegue i compiti assegnati; rispetta le norme di sicurezza."
+message.giudizio_condotta_9: "Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni; dimostra autocontrollo e civismo; rispetta le consegne e i regolamenti; frequenta con regolarità; partecipa in modo costruttivo alle attività; è interessato e motivato all’apprendimento, esegue i compiti assegnati; rispetta le norme di sicurezza."
+message.giudizio_condotta_10: "Si relaziona sempre correttamente con i docenti, i collaboratori scolastici e i compagni; dimostra autocontrollo e civismo; rispetta le consegne e i regolamenti; è sempre puntuale e frequenta assiduamente; mostra interesse costruttivo e ha un ruolo propositivo all’interno della classe; è interessato e motivato all’apprendimento, esegue sempre i compiti assegnati; rispetta le norme di sicurezza."
+message.no_scrutini_svolti: Non esistono ancora scrutini svolti.
+message.docenti_colloqui_importa: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
+  \"Docente, Username, Sede, Giorno, Ora, Frequenza, Note\".
+  Se si attiva il controllo SOLO NUOVI verranno inseriti solo i dati dei colloqui che non risultano già presenti;
+  in caso contrario, verranno modificati anche i dati dei colloqui esistenti."
+message.disdetta_colloquio: Verrà cancellata la richiesta di colloquio con il docente. Vuoi continuare?
+message.rifiuto_colloquio: Verrà rifiutata la richiesta di colloquio con il genitore. Vuoi continuare?
+message.login_genitore: "Dal menu <strong>LEZIONI</strong> puoi visualizzare le lezioni svolte; dal menu <strong>SITUAZIONE</strong> puoi vedere i voti, le assenze, le note disciplinari e le osservazioni dei docenti; dal menu <strong>PAGELLE</strong> puoi vedere le comunicazioni sugli scrutini svolti; dal menu <strong>COLLOQUI</strong> puoi prenotare un colloquio con i docenti; dal menu <strong>BACHECA</strong> puoi leggere gli avvisi; dal menu <strong>AGENDA</strong> puoi visualizzare gli eventi in agenda.<br><br>
+        Sei non l'hai già fatto, <strong>configura la tua email</strong>: in questo modo, se dimentichi la password, potrai usare l'apposita procedura per recuperarla. Per configurare la tua email, clicca sul nome dell'alunno presente in alto, nella prima riga."
+message.login_docente: "Dal menu <strong>LEZIONI</strong> puoi compilare il registro e gestire le lezioni, le assenze e le valutazioni; dal menu <strong>COLLOQUI</strong> puoi gestire le richieste di colloquio individuale; dal menu <strong>BACHECA</strong> puoi leggere gli avvisi; dal menu <strong>AGENDA</strong> puoi visualizzare gli eventi in agenda; se sei coordinatore, dal menu <strong>COORDINATORE</strong> puoi utilizzare le funzioni previste per i coordinatori."
+message.upload_dropzone: Clicca o trascina qui i file per caricarli
+message.single_upload_dropzone: Clicca o trascina qui il file per caricarlo
+message.upload_cancella: Sei sicuro di voler annullare il caricamento in corso?
+message.cancella_avviso: Verrà cancellato l'avviso e le annotazioni sul registro collegate. Vuoi continuare?
+message.cancella_avviso_coordinatore: Verrà cancellato l'avviso. Vuoi continuare?
+message.orario_edit: Il testo dell'avviso utilizza i campi <strong>%DATA%</strong> e <strong>%ORA%</strong> che verranno sostituiti automaticamente con la data e l'ora indicata.
+message.avviso_entrata_oggetto: Modifica orario di ingresso della classe
+message.avviso_entrata_testo: Si comunica che il giorno %DATA% la classe entrerà alle ore %ORA%.
+message.avviso_uscita_oggetto: Modifica orario di uscita della classe
+message.avviso_uscita_testo: Si comunica che il giorno %DATA% la classe uscirà alle ore %ORA%.
+message.avviso_attivita_oggetto: Prevista attività per la classe
+message.avviso_attivita_testo: "Si comunica che il giorno %DATA%, dalle ore %INIZIO% alle ore %FINE%, si svolgerà la seguente attività: "
+message.attivita_edit: Il testo dell'avviso utilizza i campi <strong>%DATA%</strong>, <strong>%INIZIO%</strong> e <strong>%FINE%</strong> che verranno sostituiti automaticamente con la data e l'ora di inizio e fine dell'attività indicata.
+message.presenti_avvisi: "È presente %num% avviso da leggere alla classe|Sono presenti %num% avvisi da leggere alla classe"
+message.presenti_nuovi_avvisi: "È presente %num% nuovo avviso da leggere|Sono presenti %num% nuovi avvisi da leggere"
+message.avviso_coordinatore_oggetto: Messaggio dal coordinatore della classe %classe%
+message.avviso_individuale_oggetto: "Messaggio dal%docente%"
+message.info_avviso_con_annotazione: All'avviso sarà associata una annotazione sul registro, inserita nella data e nelle classi indicate.
+message.verifica_oggetto: "Verifica per la materia %materia%"
+message.verifiche_presenti: "ATTENZIONE: sono previste altre verifiche per la data e la classe indicate.<br>Puoi scegliere se modificare la verifica inserita o confermarla senza effettuare cambiamenti."
+message.cancella_verifica: Verrà cancellata la verifica e l'annotazione sul registro collegata. Vuoi continuare?
+message.presenti_verifiche_oggi: "È prevista %num% verifica per oggi|Sono previste %num% verifiche per oggi"
+message.presenti_verifiche_prossime: "È prevista %num% verifica per i prossimi giorni|Sono previste %num% verifiche per i prossimi giorni"
+message.inserimento_programmi: "Inserire il programma svolto creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire il programma svolto assieme a quello del docente di teoria, in un unico documento."
+message.cancella_programma: Verrà cancellato il documento del programma svolto. Vuoi continuare?
+message.no_cattedra_programmi: Non è previsto il caricamento dei programmi svolti per questa cattedra.
+message.cancella_relazione: Verrà cancellato il documento della relazione finale. Vuoi continuare?
+message.no_cattedra_relazioni: Non è previsto il caricamento delle relazioni finali per questa cattedra.
+message.inserimento_relazioni: "Inserire la relazione finale creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire la relazione finale assieme a quella del docente di teoria, in un unico documento."
+message.proposte_quinte: Inserisci la proposta di voto.
+message.motivazione_deroga_S: Vista la situazione di salute, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
+message.motivazione_deroga_F: Vista la grave situazione famigliare, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
+message.motivazione_deroga_P: Vista la partecipazione ad attività sportive, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
+message.motivazione_deroga_R: Vista l'adesione a una confessione religiosa che considera il sabato come giorno di riposo, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
+message.giudizio_non_ammissione: Esaminati tutti gli elementi valutativi, tenuto conto delle gravi carenze di base nella maggior parte delle discipline, considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrato nel corso dell’anno scolastico, il Consiglio di Classe ritiene che l’alunn%sex% non possieda le competenze e le conoscenze adeguate per affrontare %classe%.
 
 exception.auth_required: Devi autenticarti per accedere alla pagina richiesta.
 exception.invalid_csrf: Pagina scaduta. Reinserisci le credenziali di accesso.
@@ -286,6 +559,11 @@ exception.file_alunno_duplicato: L'alunno indicato nel record %num% è presente 
 exception.file_tipo: Il tipo indicato nel record %num% è incongruente con gli altri dati.
 exception.file_cattedra: La cattedra indicata nel record %num% è già presente nel sistema.
 exception.file_date: La data '%date%' non è valida nel record %num%.
+exception.file_sede: La sede non è corretta nel record %num%.
+exception.file_orario: Impossibile trovare l'orario attuale della sede presente nel record %num%.
+exception.file_giorno: Il giorno non è valido nel record %num%.
+exception.file_ora: L'ora non è valida nel record %num%.
+exception.file_frequenza: La frequenza non è valida nel record %num%.
 exception.date_start_end: La data iniziale è successiva a quella finale.
 exception.prima_inizio_anno: La data è precedente all'inizio dell'anno scolastico.
 exception.dopo_fine_anno: La data è successiva alla fine dell'anno scolastico.
@@ -298,4 +576,62 @@ exception.genitori_classe_nulla: L'alunn%sex% non risulta iscritt%sex%
 exception.festivo_per_classi: La data risulta festiva per la sede di alcune classi
 exception.nota_con_nome: Il testo della nota non può contenere i nomi degli alunni (%nome%)
 exception.error_recovery: "Impossibile spedire l'email all'indirizzo indicato. Potrebbe essere un problema temporaneo del sistema di posta elettronica: riprova più tardi."
-
+exception.no_recupero: Manca la modalità del recupero per uno o più alunni con voto insufficiente.
+exception.no_recupero_eseguito: Manca l'indicazione sul recupero per uno o più alunni con debito formativo.
+exception.no_debito: Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente.
+exception.no_voto: Manca il voto per uno o più alunni.
+exception.voto_errato: Sono presenti uno o più voti con valori non ammessi.
+exception.no_voto_scrutinio: "<strong>%materia%</strong>: manca il voto per uno o più alunni."
+exception.no_recupero_scrutinio: "<strong>%materia%</strong>: manca la modalità del recupero per uno o più alunni con voto insufficiente."
+exception.no_recupero_debito_scrutinio: "<strong>%materia%</strong>: manca l'indicazione sul recupero di uno o più alunni con debito formativo."
+exception.no_debito_scrutinio: "<strong>%materia%</strong>: mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente."
+exception.scrutinio_data: Data dello scrutinio non valida.
+exception.scrutinio_inizio: Ora di inizio dello scrutinio non valida.
+exception.scrutinio_fine: Ora della fine dello scrutinio non valida.
+exception.scrutinio_presidente: Non hai inserito chi presiede lo scrutinio.
+exception.scrutinio_segretario: Non hai inserito il segretario dello scrutinio.
+exception.scrutinio_presenza: Non hai inserito la presenza o il sostituto di uno o più docenti.
+exception.voto_condotta: Manca il voto di condotta per uno o più alunni.
+exception.motivazione_condotta: Manca la motivazione per uno o più voti di condotta.
+exception.delibera_condotta: Non è stata indicata la delibera per uno o più voti di condotta.
+exception.contrari_condotta: Non è stato indicato il numero di docenti contrari per una o più delibere a maggioranza.
+exception.colloqui_sospesi: Il ricevimento dei genitori è sospeso negli ultimi 30 giorni di lezione.
+exception.colloqui_errore: È presente un errore nell'impostazione dell'orario del colloquio del docente.
+exception.colloqui_esiste: Esiste già una richiesta per il colloquio con il docente.
+exception.destinatari_mancanti: Devi indicare almeno un destinatario.
+exception.destinatari_filtro_mancanti: Devi indicare almeno un destinatario nel filtro indicato.
+exception.upload_no_dropzone: Il programma di navigazione usato non permette di inviare i file! Probabilmente va aggiornato ad una versione recente.
+exception.upload_tipo: Questo tipo di file non è permesso!
+exception.upload_dimensione: La dimensione di questo file è superiore ai limiti previsti!
+exception.upload_numero: Non puoi caricare altri file!
+exception.avviso_non_permesso: Spiacente non puoi creare o modificare l'avviso.
+exception.annotazione_non_permessa: Spiacente non puoi creare o modificare l'annotazione sul Registro.
+exception.annotazione_solo_staff: Non puoi creare l'annotazione sul Registro per un avviso indirizzato solo allo staff.
+exception.annotazione_no_classi: Non puoi creare l'annotazione sul Registro senza indicare le classi.
+exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
+exception.data_festiva: La data risulta un giorno festivo.
+exception.campo_data_mancante: Il campo %DATA% non è presente nel testo.
+exception.cattedra_sostegno: Non puoi inserire una verifica per una cattedra di sostegno
+exception.notifica_non_permessa: Spiacente non puoi aggiungere o modificare una notifica al genitore.
+exception.file_mancante: Non hai caricato nessun documento.
+exception.scrutinio_tipo_scrutinabile: Non hai indicato se uno o più alunni sono scrutinabili o no.
+exception.scrutinio_motivazione_deroga: Non hai indicato le motivazioni della deroga per uno o più alunni.
+exception.scrutinio_lista_no_scrutinabili: Si è verificato un errore di sistema. Riprova ad inviare i dati.
+exception.no_voto_esito: Mancano uno o più voti per l'esito dell'alunn%sex% %alunno%.
+exception.manca_esito: Non è stato indicato l'esito dell'alunn%sex% %alunno%.
+exception.delibera_esito: Non è stata indicata la delibera per l'esito dell'alunn%sex% %alunno%.
+exception.contrari_esito: Non è stato indicato il numero di docenti contrari all'esito dell'alunn%sex% %alunno%.
+exception.giudizio_esito: Non è stato inserito il giudizio di non ammissione dell'alunn%sex% %alunno%.
+exception.insufficienze_ammissione_esito: Sono presenti insufficienze con un esito di ammissione per l'alunn%sex% %alunno%.
+exception.sufficienze_non_ammissione_esito: Sono presenti solo voti sufficienti con un esito di non ammissione per l'alunn%sex% %alunno%.
+exception.sufficienze_sospensione_esito: Sono presenti solo voti sufficienti con un giudizio sospeso per l'alunn%sex% %alunno%.
+exception.voto_religione_esito: Il voto insufficiente di religione non è coerente con l'esito dell'alunn%sex% %alunno%.
+exception.voto_condotta_esito: Il voto insufficiente della condotta non è coerente con l'esito dell'alunn%sex% %alunno%.
+exception.quinta_sospeso_esito: Impossibile sospendere il giudizio per una classe quinta.
+exception.no_credito_esito: Non è stato inserito il credito per l'alunn%sex% %alunno%.
+exception.no_certificazione_esito: Non è stata compilata la certificazione delle competenze per l'alunn%sex% %alunno%.
+exception.no_motivazione_certificazione: Non è stata inserita la motivazione di almeno un "Livello base non raggiunto" per l'alunn%sex% %alunno%.
+exception.no_recupero_esito: Manca la modalità del recupero di una o più materie per l'alunn%sex% %alunno%.
+exception.no_debito_esito: Mancano gli argomenti da recuperare di una o più materie per l'alunn%sex% %alunno%.
+exception.no_comunicazione_debiti: Non è stata compilata la comunicazione dei debiti formativi per l'alunn%sex% %alunno%.
+exception.no_comunicazione_carenze: Non è stata confermata la comunicazione delle carenze per l'alunn%sex% %alunno%.

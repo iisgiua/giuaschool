@@ -30,6 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use AppBundle\Util\LogHandler;
 use AppBundle\Util\RegistroUtil;
+use AppBundle\Util\BachecaUtil;
 use AppBundle\Entity\Assenza;
 use AppBundle\Entity\Alunno;
 use AppBundle\Entity\Entrata;
@@ -51,6 +52,7 @@ class AssenzeController extends Controller {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
@@ -66,11 +68,12 @@ class AssenzeController extends Controller {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function quadroAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                RegistroUtil $reg, $cattedra, $classe, $data, $vista) {
+                                RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
     $dati = null;
+    $num_avvisi = 0;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // parametri cattedra/classe
@@ -157,7 +160,14 @@ class AssenzeController extends Controller {
       // controllo data
       $errore = $reg->controlloData($data_obj, $classe->getSede());
       if (!$errore) {
-        // non festivo: recupera dati
+        // non festivo
+        $adesso = (new \DateTime())->format('H:i');
+        if ($adesso >= $session->get('/CONFIG/SCUOLA/lezioni_inizio', '00:00') &&
+            $adesso <= $session->get('/CONFIG/SCUOLA/lezioni_fine', '23:59')) {
+          // avvisi alla classe
+          $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
+        }
+        // recupera dati
         $dati = $reg->quadroAssenzeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
       }
     }
@@ -178,6 +188,7 @@ class AssenzeController extends Controller {
       'lista_festivi' => $lista_festivi,
       'info' => $info,
       'dati' => $dati,
+      'avvisi' => $num_avvisi,
     ));
   }
 
@@ -681,6 +692,12 @@ class AssenzeController extends Controller {
         $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
       }
       $uscita->setOra($ora);
+      if ($this->getUser() instanceof Staff && substr($referer, 0, 16) == '/staff/autorizza') {
+        // precompila testo
+        $sex = ($alunno->getSesso() == 'M' ? 'o' : 'a');
+        $nota = "Si autorizza l'uscita anticipata dell'alunn$sex ".$alunno->getCognome().' '.$alunno->getNome().", accompagnat$sex da un genitore";
+        $uscita->setNote($nota);
+      }
       $em->persist($uscita);
     }
     // controlla permessi
@@ -1013,7 +1030,7 @@ class AssenzeController extends Controller {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // elenco di alunni per l'appello
-    $elenco = $reg->elencoAppello($data_obj, $classe);
+    $elenco = $reg->elencoAppello($data_obj, $classe, ($cattedra && $cattedra->getMateria()->getTipo() == 'R'));
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');

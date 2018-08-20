@@ -19,7 +19,9 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use AppBundle\Entity\Genitore;
 use AppBundle\Entity\Alunno;
 use AppBundle\Entity\Classe;
+use AppBundle\Entity\Docente;
 use AppBundle\Entity\Materia;
+use AppBundle\Entity\Colloquio;
 
 
 /**
@@ -509,14 +511,29 @@ class GenitoriUtil {
         $dati['lista'][$periodi[$k]['nome']] = $dati_periodo[$k];
       }
     }
-    // totale ore di assenza
+    // totale ore di assenza (escluso sostegno/supplenza/religione)
     $totale = $this->em->getRepository('AppBundle:AssenzaLezione')->createQueryBuilder('al')
       ->select('SUM(al.ore)')
       ->join('al.lezione', 'l')
-      ->where('al.alunno=:alunno AND l.classe=:classe')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe])
+      ->join('l.materia', 'm')
+      ->where('al.alunno=:alunno AND l.classe=:classe AND m.tipo=:tipo')
+      ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'N'])
       ->getQuery()
       ->getSingleScalarResult();
+    if ($alunno->getReligione() == 'S') {
+      // aggiunge assenze di religione
+      $ass_rel = $this->em->getRepository('AppBundle:AssenzaLezione')->createQueryBuilder('al')
+        ->select('SUM(al.ore)')
+        ->join('al.lezione', 'l')
+        ->join('l.materia', 'm')
+        ->where('al.alunno=:alunno AND l.classe=:classe AND m.tipo=:tipo')
+        ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'R'])
+        ->getQuery()
+        ->getSingleScalarResult();
+      if ($ass_rel) {
+        $totale += $ass_rel;
+      }
+    }
     // percentuale ore di assenza
     $monte = $classe->getOreSettimanali() * 33;
     $perc = round($totale / $monte * 100, 2);
@@ -562,11 +579,12 @@ class GenitoriUtil {
       $data = $n['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
       $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-      $dati_periodo[$numperiodo][$data]['classe']['data'] = $data_str;
-      $dati_periodo[$numperiodo][$data]['classe']['nota'] = $n['testo'];
-      $dati_periodo[$numperiodo][$data]['classe']['nota_doc'] = $n['docente'];
-      $dati_periodo[$numperiodo][$data]['classe']['provvedimento'] = $n['provvedimento'];
-      $dati_periodo[$numperiodo][$data]['classe']['provvedimento_doc'] = $n['docente_prov'];
+      $dati_periodo[$numperiodo][$data]['classe'][] = array(
+        'data' => $data_str,
+        'nota' => $n['testo'],
+        'nota_doc' => $n['docente'],
+        'provvedimento' => $n['provvedimento'],
+        'provvedimento_doc' => $n['docente_prov']);
     }
     // legge note individuali
     $individuali = $this->em->getRepository('AppBundle:Nota')->createQueryBuilder('n')
@@ -583,11 +601,12 @@ class GenitoriUtil {
       $data = $i['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
       $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-      $dati_periodo[$numperiodo][$data]['individuale']['data'] = $data_str;
-      $dati_periodo[$numperiodo][$data]['individuale']['nota'] = $i['testo'];
-      $dati_periodo[$numperiodo][$data]['individuale']['nota_doc'] = $i['docente'];
-      $dati_periodo[$numperiodo][$data]['individuale']['provvedimento'] = $i['provvedimento'];
-      $dati_periodo[$numperiodo][$data]['individuale']['provvedimento_doc'] = $i['docente_prov'];
+      $dati_periodo[$numperiodo][$data]['individuale'][] = array(
+        'data' => $data_str,
+        'nota' => $i['testo'],
+        'nota_doc' => $i['docente'],
+        'provvedimento' => $i['provvedimento'],
+        'provvedimento_doc' => $i['docente_prov']);
     }
     // ordina periodi
     for ($k = 3; $k >= 1; $k--) {
@@ -628,12 +647,436 @@ class GenitoriUtil {
       $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
       $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-      $dati[$periodo][$data]['data'] = $data_str;
-      $dati[$periodo][$data]['materia'] = $o['nomeBreve'];
-      $dati[$periodo][$data]['docente'] = $o['nome'].' '.$o['cognome'];
-      $dati[$periodo][$data]['testo'] = $o['testo'];
+      $dati[$periodo][$data][] = array(
+        'data' => $data_str,
+        'materia' => $o['nomeBreve'],
+        'docente' => $o['nome'].' '.$o['cognome'],
+        'testo' => $o['testo']);
     }
     // restituisce dati come array associativo
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista dei periodi inseriti per lo scrutinio
+   *
+   * @param Classe $classe Classe di cui leggere i periodi attivi dello scrutinio
+   *
+   * @return array Dati formattati come un array associativo
+   */
+  public function periodiScrutini(Classe $classe) {
+    // legge periodi per classe
+    $periodi = $this->em->getRepository('AppBundle:Scrutinio')->createQueryBuilder('s')
+      ->select('s.periodo,s.stato')
+      ->where('s.classe=:classe')
+      ->setParameters(['classe' => $classe])
+      ->getQuery()
+      ->getArrayResult();
+    $lista = array();
+    foreach ($periodi as $p) {
+      $lista[$p['periodo']] = $p['stato'];
+    }
+    // restituisce valori
+    return $lista;
+  }
+
+  /**
+   * Restituisce lo scrutinio visibile più recente o controlla se nel periodo indicato è visibile
+   *
+   * @param Classe $classe Classe di cui leggere i dati dello scrutinio
+   * @param string $periodo Se specificato, indica il periodo dello scrutinio da controllare
+   *
+   * @return array Dati formattati come un array associativo
+   */
+  public function scrutinioVisibile(Classe $classe, $periodo=null) {
+    // legge periodi per classe
+    $scrutinio = $this->em->getRepository('AppBundle:Scrutinio')->createQueryBuilder('s')
+      ->select('s.periodo,s.stato')
+      ->where('s.classe=:classe AND s.stato=:stato AND s.visibile<=:ora')
+      ->setParameters(['classe' => $classe, 'stato' => 'C',
+        'ora' => (new \DateTime())->format('Y-m-d H:i:00')])
+      ->orderBy('s.data', 'DESC')
+      ->setMaxResults(1);
+    if ($periodo) {
+      // controlla solo il periodo indicato
+      $scrutinio = $scrutinio
+        ->andWhere('s.periodo=:periodo')
+        ->setParameter('periodo', $periodo);
+    }
+    // esegue query
+    $scrutinio = $scrutinio
+      ->getQuery()
+      ->getOneOrNullResult();
+    // restituisce valori
+    return $scrutinio;
+  }
+
+  /**
+   * Restituisce pagelle e altre comunicazioni dello scrutinio dell'alunno indicato.
+   *
+   * @param Classe $classe Classe dell'alunno
+   * @param Alunno $alunno Alunno di cui si desiderano le assenze
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function pagelle(Classe $classe, Alunno $alunno, $periodo) {
+    $dati = array();
+    // legge materie
+    $materie = $this->em->getRepository('AppBundle:Materia')->createQueryBuilder('m')
+      ->select('DISTINCT m.id,m.nome,m.tipo')
+      ->join('AppBundle:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
+      ->orderBy('m.ordinamento', 'ASC')
+      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N'])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($materie as $mat) {
+      $dati['materie'][$mat['id']] = $mat;
+    }
+    $condotta = $this->em->getRepository('AppBundle:Materia')->findOneByTipo('C');
+    $dati['materie'][$condotta->getId()] = array(
+      'id' => $condotta->getId(),
+      'nome' => $condotta->getNome(),
+      'tipo' => $condotta->getTipo());
+    // legge voti
+    $voti = $this->em->getRepository('AppBundle:VotoScrutinio')->createQueryBuilder('vs')
+      ->join('vs.scrutinio', 's')
+      ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno AND vs.unico IS NOT NULL')
+      ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
+      ->getQuery()
+      ->getResult();
+    foreach ($voti as $v) {
+      // inserisce voti/debiti
+      $dati['voti'][$v->getMateria()->getId()] = array(
+        'unico' => $v->getUnico(),
+        'assenze' => $v->getAssenze());
+      // inserisce voti/debiti
+      if ($periodo == 'P') {
+        // primo trimestre
+        if ($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) {
+          $dati['debiti'][$v->getMateria()->getId()] = array(
+            'recupero' => $v->getRecupero(),
+            'debito' => $v->getDebito());
+        }
+      } elseif ($periodo == '1') {
+        // valutazione intermedia
+        $dati['voti'][$v->getMateria()->getId()]['recupero'] = $v->getRecupero();
+      } elseif ($periodo == 'F') {
+        // scrutinio finale
+        if ($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) {
+          $dati['debiti'][$v->getMateria()->getId()] = array(
+            'recupero' => $v->getRecupero(),
+            'debito' => $v->getDebito());
+        }
+      }
+    }
+    // debito formativo esistente
+    if ($periodo == '1') {
+      $voti = $this->em->getRepository('AppBundle:VotoScrutinio')->createQueryBuilder('vs')
+        ->join('vs.scrutinio', 's')
+        ->where('vs.unico<6 AND vs.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
+        ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'periodo' => 'P', 'stato' => 'C'])
+        ->getQuery()
+        ->getResult();
+      foreach ($voti as $v) {
+        // inserisce proposte trovate
+        $dati['debiti'][$v->getMateria()->getId()] = $v;
+      }
+    }
+    // esito scrutinio
+    if ($periodo == 'F') {
+      $scrutinio = $this->em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe,
+        'periodo' => $periodo, 'stato' => 'C']);
+      $noscrut = ($scrutinio->getDato('no_scrutinabili') ? $scrutinio->getDato('no_scrutinabili') : []);
+      if (in_array($alunno->getId(), $noscrut)) {
+        // non scrutinato
+        $dati['noscrutinato'] = $scrutinio->getDato('alunni')[$alunno->getId()]['no_deroga'];
+      } else {
+        // scrutinato
+        $dati['esito'] = $this->em->getRepository('AppBundle:Esito')->findOneBy(['scrutinio' => $scrutinio,
+          'alunno' => $alunno]);
+        if ($dati['esito']->getEsito() != 'N') {
+          // carenze (esclusi non ammessi)
+          $valori = $dati['esito']->getDati();
+          if (isset($valori['carenze']) && isset($valori['carenze_materie']) &&
+              $valori['carenze'] && count($valori['carenze_materie']) > 0) {
+            $dati['carenze'] = 1;
+          }
+        }
+      }
+    } elseif ($periodo == 'R') {
+      $scrutinio = $this->em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe,
+        'periodo' => $periodo, 'stato' => 'C']);
+      // scrutinato
+      $dati['esito'] = $this->em->getRepository('AppBundle:Esito')->findOneBy(['scrutinio' => $scrutinio,
+        'alunno' => $alunno]);
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce gli orari dei colloqui per la classe indicata.
+   *
+   * @param Classe $classe Classe dell'alunno
+   * @param Alunno $alunno Alunno su cui fare i colloqui
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function colloqui(Classe $classe, Alunno $alunno) {
+    $dati = array();
+    $dati['orari'] = null;
+    $dati['colloqui'] = null;
+    $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    // legge cattedre
+    $cattedre = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
+      ->select('d.id,d.cognome,d.nome,m.nomeBreve,m.tipo AS materia_tipo,(c.alunno) AS alunno,c.tipo')
+      ->join('c.materia', 'm')
+      ->join('c.docente', 'd')
+      ->where('c.classe=:classe AND c.attiva=:attiva')
+      ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
+      ->setParameters(['classe' => $classe, 'attiva' => 1])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($cattedre as $doc) {
+      if ($doc['tipo'] != 'P') {
+        // esclusi docenti di potenziamento
+        if ($doc['materia_tipo'] != 'S' || ($alunno->getBes() == 'H' && $doc['alunno'] == $alunno->getId())) {
+          // altre materie o sostegno di alunno
+          $dati['cattedre'][$doc['id']][] = $doc;
+        }
+      }
+    }
+    // legge orari
+    $orari = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
+      ->select('(c.docente) AS docente,co.id AS colloquio,co.frequenza,co.giorno,co.note,so.inizio,so.fine')
+      ->join('AppBundle:Colloquio', 'co', 'WHERE', 'co.docente=c.docente')
+      ->join('AppBundle:Orario', 'o', 'WHERE', 'co.orario=o.id AND o.sede=:sede')
+      ->join('AppBundle:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=co.giorno AND so.ora=co.ora')
+      ->where('c.classe=:classe AND c.attiva=:attiva')
+      ->setParameters(['classe' => $classe, 'attiva' => 1, 'sede' => $classe->getSede()])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($orari as $doc) {
+      if (array_key_exists($doc['docente'], $dati['cattedre'])) {
+        $dati['orari'][$doc['docente']] = $doc;
+      }
+    }
+    // legge colloqui esistenti
+    $colloqui = $this->em->getRepository('AppBundle:RichiestaColloquio')->createQueryBuilder('rc')
+      ->select('rc.id,rc.data,rc.stato,rc.messaggio,c.giorno,so.inizio,so.fine,(c.docente) AS docente')
+      ->join('rc.colloquio', 'c')
+      ->join('c.orario', 'o')
+      ->join('AppBundle:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->where('rc.alunno=:alunno AND rc.data>=:oggi')
+      ->orderBy('rc.data,c.ora', 'ASC')
+      ->setParameters(['alunno' => $alunno, 'oggi' => (new \DateTime())->format('Y-m-d')])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($colloqui as $c) {
+      if (array_key_exists($c['docente'], $dati['orari'])) {
+        $c['data_str'] = $settimana[$c['giorno']].' '.intval($c['data']->format('d')).' '.
+          $mesi[intval($c['data']->format('m'))].' '.$c['data']->format('Y');
+        $c['ora_str'] = 'dalle '.$c['inizio']->format('G:i').' alle '.$c['fine']->format('G:i');
+        $dati['colloqui'][$c['docente']][] = $c;
+      }
+    }
+    // restituisce dati
+    return $dati;
+    }
+
+  /**
+   * Restituisce le materie che il docente insegna nella classe.
+   *
+   * @param Doccente $docente Docente di cui si vogliono sapere le materie insegnate
+   * @param Classe $classe Classe desiderata
+   * @param Alunno $alunno Alunno per la cattedra di sostegno
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function materieDocente(Docente $docente, Classe $classe, Alunno $alunno) {
+    $dati = array();
+    // cattedra
+    $materie = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
+      ->select('m.id,m.nomeBreve,m.tipo,(c.alunno) AS alunno')
+      ->join('c.materia', 'm')
+      ->where('c.docente=:docente AND c.classe=:classe AND c.attiva=:attiva')
+      ->orderBy('m.ordinamento,m.nomeBreve', 'ASC')
+      ->setParameters(['docente' => $docente, 'classe' => $classe, 'attiva' => 1])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($materie as $m) {
+      if ($m['tipo'] != 'S' || !$alunno || ($alunno->getBes() == 'H' && $m['alunno'] == $alunno->getId())) {
+        // aggiunge materie
+        $dati[$m['id']]= $m;
+      }
+    }
+    // restituisce dati
+    return $dati;
+    }
+
+  /**
+   * Restituisce le materie che il docente insegna nella classe.
+   *
+   * @param Doccente $docente Docente di cui si vogliono sapere le materie insegnate
+   * @param Classe $classe Classe desiderata
+   * @param Alunno $alunno Alunno per la cattedra di sostegno
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function dateColloquio(Colloquio $colloquio) {
+    $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    $settimana_en = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    // inizializza
+    $dati['errore'] = null;
+    $dati['lista'] = array();
+    $sede = $colloquio->getOrario()->getSede();
+    // orario colloquio
+    $ora = $this->em->getRepository('AppBundle:ScansioneOraria')->findBy(['orario' => $colloquio->getOrario(),
+      'giorno' => $colloquio->getGiorno(), 'ora' => $colloquio->getOra()]);
+    if (empty($ora) || count($ora) > 1) {
+      // visualizza errore
+      $dati['errore'] = 'exception.colloqui_errore';
+      return $dati;
+    }
+    // fine colloqui
+    $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
+      $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('anno_fine')->getValore().' 00:00:00');
+    $fine->modify('-30 days');
+    // controllo fine
+    $inizio = new \DateTime('today');
+    if ($inizio > $fine) {
+      // visualizza errore
+      $dati['errore'] = 'exception.colloqui_sospesi';
+      return $dati;
+    }
+    // lista date possibili
+    $lista = array();
+    $lista_mesi = array();
+    $freq = ' '.$settimana_en[$colloquio->getGiorno()].' of this month';
+    $ora_str = ' (dalle '.$ora[0]->getInizio()->format('G:i').' alle '.$ora[0]->getFine()->format('G:i').')';
+    $giorno = new \DateTime('today');
+    while ($giorno->format('m') <= $fine->format('m')) {
+      // prima settimana
+      $giorno->modify('first'.$freq);
+      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+        $lista[1][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+        $lista_mesi[intval($giorno->format('m'))] = true;
+      }
+      // seconda settimana
+      $giorno->modify('second'.$freq);
+      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+        $lista[2][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+        $lista_mesi[intval($giorno->format('m'))] = true;
+      }
+      // terza settimana
+      $giorno->modify('third'.$freq);
+      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+        $lista[3][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+        $lista_mesi[intval($giorno->format('m'))] = true;
+      }
+      // ultima settimana
+      $giorno->modify('last'.$freq);
+      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+        $lista[5][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+        $lista_mesi[intval($giorno->format('m'))] = true;
+      }
+      // quarta settimana (può coincidere con ultima)
+      if ($giorno->format('Y-m-d') != $giorno->modify('fourth'.$freq)->format('Y-m-d')) {
+        if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+          $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+            $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+          $lista[4][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista_mesi[intval($giorno->format('m'))] = true;
+        }
+      }
+      // mese successivo
+      $giorno->modify('first day of next month');
+    }
+    // seleziona date effettive
+    switch ($colloquio->getFrequenza()) {
+      case '1': // prima settimana
+        foreach ($lista_mesi as $m=>$v) {
+          if (isset($lista[1][$m])) {
+            $dati['lista'][] = $lista[1][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[2][$m])) {
+            $dati['lista'][] = $lista[2][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[3][$m])) {
+            $dati['lista'][] = $lista[3][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[4][$m])) {
+            $dati['lista'][] = $lista[4][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[5][$m])) {
+            $dati['lista'][] = $lista[5][$m];
+          }
+        }
+        break;
+      case '2': // seconda settimana
+        foreach ($lista_mesi as $m=>$v) {
+          if (isset($lista[2][$m])) {
+            $dati['lista'][] = $lista[2][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[1][$m])) {
+            $dati['lista'][] = $lista[1][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[3][$m])) {
+            $dati['lista'][] = $lista[3][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[4][$m])) {
+            $dati['lista'][] = $lista[4][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[5][$m])) {
+            $dati['lista'][] = $lista[5][$m];
+          }
+        }
+        break;
+      case '3': // terza settimana
+        foreach ($lista_mesi as $m=>$v) {
+          if (isset($lista[3][$m])) {
+            $dati['lista'][] = $lista[3][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[4][$m])) {
+            $dati['lista'][] = $lista[4][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[2][$m])) {
+            $dati['lista'][] = $lista[2][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[1][$m])) {
+            $dati['lista'][] = $lista[1][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[5][$m])) {
+            $dati['lista'][] = $lista[5][$m];
+          }
+        }
+        break;
+      case '4': // ultima settimana
+        foreach ($lista_mesi as $m=>$v) {
+          if (isset($lista[5][$m])) {
+            $dati['lista'][] = $lista[5][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[4][$m])) {
+            $dati['lista'][] = $lista[4][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[3][$m])) {
+            $dati['lista'][] = $lista[3][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[2][$m])) {
+            $dati['lista'][] = $lista[2][$m];
+          } elseif ($m != intval($inizio->format('m')) && isset($lista[1][$m])) {
+            $dati['lista'][] = $lista[1][$m];
+          }
+        }
+        break;
+      case 'S': // tutte settimane
+        foreach ($lista_mesi as $m=>$v) {
+          for ($i = 1; $i <= 5; $i++) {
+            if (isset($lista[$i][$m])) {
+              $dati['lista'][] = $lista[$i][$m];
+            }
+          }
+        }
+        break;
+    }
+    // restituisce dati
     return $dati;
   }
 

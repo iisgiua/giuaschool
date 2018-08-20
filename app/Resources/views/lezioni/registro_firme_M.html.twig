@@ -22,6 +22,13 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% else %}
+      {% if avvisi > 0 %}
+        {% include 'include/modal-popup.html.twig' with {'modal_popup_msg': 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi})} %}
+  <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
+    <strong>{{ 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi}) }}</strong><br>
+    <button class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Visualizza</strong></button>
+  </div>
+      {% endif %}
   <div class="row gs-mb-1">
     <div class="col-sm-9">
       <strong class="gs-big">Data:</strong>
@@ -72,10 +79,10 @@
               {% if v1.alunni is defined %}
                 <small><em>Alunni: {{ v1.alunni }}</em></small><br>
               {% endif %}
-                {{ v1.testo }}
+                {{ v1.testo|nl2br }}
                 <small><em>({{ v1.docente }})</em></small>
               {% if v1.provvedimento %}
-                <br><strong>{{ v1.provvedimento }}
+                <br><strong>{{ v1.provvedimento|nl2br }}
                 <small><em>({{ v1.docente_provvedimento }})</em></small></strong>
               {% endif %}
               </div>
@@ -89,10 +96,10 @@
             {% for k1,v1 in v.annotazioni.lista %}
             <div class="list-group-item">
               <div class="list-group-item-text">
-              {% if not v1.visibile %}
-                <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
+              {% if v1.alunni is not empty %}
+                <strong>Destinatari: {% for al in v1.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
               {% endif %}
-                {{ v1.testo }}
+                {{ v1.testo|nl2br }}
                 <small><em>({{ v1.docente }})</em></small>
               </div>
             </div>
@@ -138,6 +145,7 @@
     </tbody>
   </table>
       {% include 'include/modal-info.html.twig' %}
+      {% include 'include/modal-remote.html.twig' %}
     {% endif %}
   {% endif %}
 </div>
@@ -188,6 +196,24 @@ $(document).ready(function() {
     $(this).find('#gs-modal-info-label').text(title);
     $(this).find('#gs-modal-info-body').html(html);
   });
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    var url = $(e.currentTarget).data('href');
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  {% if avvisi > 0 %}
+  $("#gs-modal-popup-do").click(function(e) {
+    $('#gs-modal-popup').modal('hide');
+
+    $('.gs-button-remote').click();
+  });
+  // init
+  $('#gs-modal-popup').modal('show');
+  {% endif %}
 });
 </script>
 {% endblock %}

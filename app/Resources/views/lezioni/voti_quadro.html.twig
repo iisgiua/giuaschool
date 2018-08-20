@@ -34,8 +34,8 @@
       <strong class="gs-big">{{ info.periodo.nome }}</strong>
     </div>
     <div class="col-sm-4 text-right">
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_stampa', {'cattedra': cattedra.id, 'classe': classe.id}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_dettagli', {'cattedra': cattedra.id, 'classe': classe.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Dettagli</strong></a>
-      <a class="btn btn-success btn-sm disabled" href="" role="button" title="Inserisce le proposte di voto per lo scrutinio"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">
@@ -56,57 +56,64 @@
     </thead>
     <tbody>
       {% for k,v in dati %}
+        {% if cattedra.materia.tipo != 'R' or v.religione == 'S' %}
       <tr>
         <td>
           <strong>{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})</strong>
-        {% if v.bes != 'N' %}
+          {% if v.bes != 'N' %}
           <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~v.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-        {% endif %}
-        {% if v.note is not empty %}
+          {% endif %}
+          {% if v.note is not empty %}
           <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-        {% endif %}
+          {% endif %}
         </td>
-        {% for tipo in ['S','O','P'] %}
-          {% for tempo in ['precedente','attuale','successivo'] %}
+          {% for tipo in ['S','O','P'] %}
+            {% for tempo in ['precedente','attuale','successivo'] %}
         <td{{ tempo == 'attuale' ? ' class="gs-striped-hilited"'}}>
-            {% for ks,vs in v[tipo][tempo] %}
-              {% if vs.voto > 0 and not vs.visibile %}
+              {% for ks,vs in v[tipo][tempo] %}
+                {% if vs.docente_id != app.user.id %}
+          <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ vs.id }}">{% if vs.voto > 0 %}{{ vs.voto_str }}{% else %}<span class="glyphicon glyphicon-asterisk"></span>{% endif %}</button>
+                {% elseif vs.voto > 0 and not vs.visibile %}
           <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ vs.id }}">{{ vs.voto_str }}</button>
-              {% elseif vs.voto > 0 %}
+                {% elseif vs.voto > 0 %}
           <button type="button" class="btn btn-xs btn-{{ vs.voto < 5 ? 'danger' : (vs.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ vs.id }}">{{ vs.voto_str }}</button>
-              {% else %}
+                {% else %}
           <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ vs.id }}"><span class="glyphicon glyphicon-asterisk"></span></button>
-              {% endif %}
+                {% endif %}
           <div id="voti-{{ vs.id }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <p>
-              {% if not vs.visibile %}
+                {% if not vs.visibile %}
                   <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
-              {% endif %}
+                {% endif %}
                   <strong>Data: {{ vs.data|date('d/m/Y') }}</strong>
                 </p>
-              {% if vs.argomento is not empty %}
+                <p>
+                  <strong>Docente: {{ vs.nome }} {{ vs.cognome }}</strong>
+                </p>
+                {% if vs.argomento is not empty %}
                 <p><strong>Argomenti o descrizione della prova:</strong><br>{{ vs.argomento }}</p>
-              {% endif %}
-              {% if vs.giudizio is not empty %}
+                {% endif %}
+                {% if vs.giudizio is not empty %}
                 <p><strong>Giudizio:</strong><br>{{ vs.giudizio }}</p>
-              {% endif %}
+                {% endif %}
               </div>
             </div>
           </div>
-            {% endfor %}
+              {% endfor %}
         </td>
+            {% endfor %}
           {% endfor %}
-        {% endfor %}
         <td>
-        {% if lezione %}
+          {% if lezione %}
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': v.id, 'data': data, 'tipo': 'S'}) }}" role="button" title="Aggiungi o modifica una valutazione scritta per l'alunno">S</a>
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': v.id, 'data': data, 'tipo': 'O'}) }}" role="button" title="Aggiungi o modifica una valutazione orale per l'alunno">O</a>
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': v.id, 'data': data, 'tipo': 'P'}) }}" role="button" title="Aggiungi o modifica una valutazione pratica per l'alunno">P</a>
-        {% endif %}
+          {% endif %}
         </td>
       </tr>
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>

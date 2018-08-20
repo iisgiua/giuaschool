@@ -83,11 +83,11 @@ class VotoScrutinio {
   private $debito;
 
   /**
-   * @var string $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello]
+   * @var string $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, R=recuperato, N=non recuperato]
    *
    * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\Choice(choices={"A","C","S"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","C","S","R","N"}, strict=true, message="field.choice")
    */
   private $recupero;
 
@@ -99,6 +99,13 @@ class VotoScrutinio {
    * @Assert\NotBlank(message="field.notblank")
    */
   private $assenze;
+
+  /**
+   * @var array $dati Lista dei dati sul voto (usati per la condotta)
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $dati;
 
   /**
    * @var Scrutinio $scrutinio Scrutinio a cui si riferisce il voto
@@ -309,6 +316,66 @@ class VotoScrutinio {
    */
   public function setAssenze($assenze) {
     $this->assenze = $assenze;
+    return $this;
+  }
+
+  /**
+   * Restituisce la lista dei dati sul voto (usati per la condotta)
+   *
+   * @return array Lista dei dati sul voto
+   */
+  public function getDati() {
+    return $this->dati;
+  }
+
+  /**
+   * Modifica la lista dei dati sul voto (usati per la condotta)
+   *
+   * @param array $dati Lista dei dati sul voto
+   *
+   * @return VotoScrutinio Oggetto VotoScrutinio
+   */
+  public function setDati($dati) {
+    $this->dati = $dati;
+    return $this;
+  }
+
+  /**
+   * Restituisce il valore del dato indicato all'interno della lista dei dati del voto
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return mixed Valore del dato o null se non esiste
+   */
+  public function getDato($nome) {
+    if (isset($this->dati[$nome])) {
+      return $this->dati[$nome];
+    }
+    return null;
+  }
+
+  /**
+   * Aggiunge/modifica un dato alla lista dei dati del voto
+   *
+   * @param string $nome Nome identificativo del dato
+   * @param mixed $valore Valore del dato
+   *
+   * @return VotoScrutinio Oggetto VotoScrutinio
+   */
+  public function addDato($nome, $valore) {
+    $this->dati[$nome] = $valore;
+    return $this;
+  }
+
+  /**
+   * Elimina un dato dalla lista dei dati del voto
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return VotoScrutinio Oggetto VotoScrutinio
+   */
+  public function removeDato($nome) {
+    unset($this->dati[$nome]);
     return $this;
   }
 

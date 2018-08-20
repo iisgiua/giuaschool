@@ -60,9 +60,7 @@ class Esito {
   /**
    * @var float $media Media dei voti
    *
-   * @ORM\Column(type="float", precision=4, scale=2, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
+   * @ORM\Column(type="float", precision=4, scale=2, nullable=true)
    */
   private $media;
 
@@ -81,11 +79,11 @@ class Esito {
   private $creditoPrecedente;
 
   /**
-   * @var string $giudizio Giudizio di non ammissione o di ammissione all'esame
+   * @var array $dati Lista dei dati sull'esito (giudizio ammissione e delibera)
    *
-   * @ORM\Column(type="text", nullable=true)
+   * @ORM\Column(type="array", nullable=true)
    */
-  private $giudizio;
+  private $dati;
 
   /**
    * @var Scrutinio $scrutinio Scrutinio a cui si riferisce l'esito
@@ -227,23 +225,23 @@ class Esito {
   }
 
   /**
-   * Restituisce il giudizio di non ammissione o di ammissione all'esame
+   * Restituisce la lista dei dati sull'esito (giudizio ammissione e delibera)
    *
-   * @return string Giudizio di non ammissione o di ammissione all'esame
+   * @return array Lista dei dati sull'esito
    */
-  public function getGiudizio() {
-    return $this->giudizio;
+  public function getDati() {
+    return $this->dati;
   }
 
   /**
-   * Modifica il giudizio di non ammissione o di ammissione all'esame
+   * Modifica la lista dei dati sull'esito (giudizio ammissione e delibera)
    *
-   * @param string $giudizio Giudizio di non ammissione o di ammissione all'esame
+   * @param array $dati Lista dei dati sull'esito
    *
    * @return Esito Oggetto Esito
    */
-  public function setGiudizio($giudizio) {
-    $this->giudizio = $giudizio;
+  public function setDati($dati) {
+    $this->dati = $dati;
     return $this;
   }
 

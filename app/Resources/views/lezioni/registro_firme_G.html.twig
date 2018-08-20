@@ -22,7 +22,14 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% else %}
-  <div class="row gs-mb-1">
+      {% if avvisi > 0 %}
+        {% include 'include/modal-popup.html.twig' with {'modal_popup_msg': 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi})} %}
+  <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
+    <strong>{{ 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi}) }}</strong><br>
+    <button class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Visualizza</strong></button>
+  </div>
+      {% endif %}
+  <div class="row gs-mb-2">
     <div class="col-sm-6">
       <strong class="gs-big">Data:</strong>
       <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
@@ -32,6 +39,64 @@
       <a class="btn btn-default btn-sm active" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza i dati del giorno"><span class="glyphicon glyphicon-stop"></span></a>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'S'}) }}" role="button" title="Visualizza i dati della settimana"><span class="glyphicon glyphicon-th-large"></span></a>
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza i dati del mese"><span class="glyphicon glyphicon-th"></span></a>
+    </div>
+  </div>
+  <div class="row gs-row-eq gs-mb-2">
+    <div class="col-sm-6 bg-warning">
+      <div class="gs-mt-2 gs-mb-2">
+        <h3 class="gs-h3 gs-inline">Note disciplinari</h3>
+        {% if dati[data].note.add is defined  %}
+        <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].note.add }}" role="button" title="Aggiungi una nota di classe o individuale"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+        {% endif %}
+      </div>
+      <div class="list-group gs-mb-2">
+        {% for k,v in dati[data].note.lista %}
+        <div class="list-group-item">
+          <div class="list-group-item-text">
+            {% if v.alunni is defined %}
+            <small><em>Alunni: {{ v.alunni }}</em></small><br>
+            {% endif %}
+            {{ v.testo|nl2br }}<br><small><em>({{ v.docente }})</em></small>
+            {% if v.provvedimento %}
+            <br><strong>{{ v.provvedimento|nl2br }}<br><small><em>({{ v.docente_provvedimento }})</em></small></strong>
+            {% endif %}
+            {% if v.delete is defined %}
+            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+            {% endif %}
+            {% if v.edit is defined %}
+            <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica la nota disciplinare"><span class="glyphicon glyphicon-edit"></span></a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-sm-6 bg-info">
+      <div class="gs-mt-2 gs-mb-2">
+        <h3 class="gs-h3 gs-inline">Annotazioni</h3>
+        {% if dati[data].annotazioni.add is defined  %}
+        <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].annotazioni.add }}" role="button" title="Aggiungi una annotazione sul registro"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+        {% endif %}
+      </div>
+      <div class="list-group gs-mb-2">
+        {% for k,v in dati[data].annotazioni.lista %}
+        <div class="list-group-item">
+          <div class="list-group-item-text">
+            {% if v.alunni is not empty %}
+              <strong>Destinatari: {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
+            {% endif %}
+            {{ v.testo|nl2br }}<br>
+            <small><em>({{ v.docente }})</em></small>
+            {% if v.delete is defined and (not v.avviso or v.visibile) %}
+            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella l'annotazione sul registro" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_annotazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+            {% endif %}
+            {% if v.edit is defined and (not v.avviso or v.visibile) %}
+            <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica l'annotazione sul registro"><span class="glyphicon glyphicon-edit"></span></a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped gs-mb-2">
@@ -119,67 +184,8 @@
       {% endif %}
     </div>
   </div>
-  <div class="row gs-row-eq">
-    <div class="col-sm-6 bg-warning">
-      <div class="gs-mt-2 gs-mb-2">
-        <h3 class="gs-h3 gs-inline">Note disciplinari</h3>
-        {% if dati[data].note.add is defined  %}
-        <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].note.add }}" role="button" title="Aggiungi una nota di classe o individuale"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-        {% endif %}
-      </div>
-      <div class="list-group">
-        {% for k,v in dati[data].note.lista %}
-        <div class="list-group-item">
-          <div class="list-group-item-text">
-            {% if v.alunni is defined %}
-            <small><em>Alunni: {{ v.alunni }}</em></small><br>
-            {% endif %}
-            {{ v.testo }}<br><small><em>({{ v.docente }})</em></small>
-            {% if v.provvedimento %}
-            <br><strong>{{ v.provvedimento }}<br><small><em>({{ v.docente_provvedimento }})</em></small></strong>
-            {% endif %}
-            {% if v.delete is defined %}
-            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-            {% endif %}
-            {% if v.edit is defined %}
-            <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica la nota disciplinare"><span class="glyphicon glyphicon-edit"></span></a>
-            {% endif %}
-          </div>
-        </div>
-        {% else %}
-        <div class="list-group-item"></div>
-        {% endfor %}
-      </div>
-    </div>
-    <div class="col-sm-6 bg-info">
-      <div class="gs-mt-2 gs-mb-2">
-        <h3 class="gs-h3 gs-inline">Annotazioni</h3>
-        {% if dati[data].annotazioni.add is defined  %}
-        <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].annotazioni.add }}" role="button" title="Aggiungi una annotazione sul registro"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
-        {% endif %}
-      </div>
-      <div class="list-group">
-        {% for k,v in dati[data].annotazioni.lista %}
-        <div class="list-group-item">
-          <div class="list-group-item-text">
-            {% if not v.visibile %}<span class="glyphicon glyphicon-eye-close text-danger  gs-mr-2" title="Non visibile ai genitori"></span>{% endif %}
-            {{ v.testo }}<br>
-            <small><em>({{ v.docente }})</em></small>
-            {% if v.delete is defined %}
-            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella l'annotazione sul registro" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_annotazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-            {% endif %}
-            {% if v.edit is defined %}
-            <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica l'annotazione sul registro"><span class="glyphicon glyphicon-edit"></span></a>
-            {% endif %}
-          </div>
-        </div>
-        {% else %}
-        <div class="list-group-item"></div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-      {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
+        {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
+        {% include 'include/modal-remote.html.twig' %}
     {% endif %}
   {% endif %}
 </div>
@@ -229,6 +235,24 @@ $(document).ready(function() {
     var text = $(event.relatedTarget).data('text');
     $(this).find('#gs-modal-confirm-msg').text(text);
   });
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    var url = $(e.currentTarget).data('href');
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  {% if avvisi > 0 %}
+  $("#gs-modal-popup-do").click(function(e) {
+    $('#gs-modal-popup').modal('hide');
+
+    $('.gs-button-remote').click();
+  });
+  // init
+  $('#gs-modal-popup').modal('show');
+  {% endif %}
 });
 </script>
 {% endblock %}

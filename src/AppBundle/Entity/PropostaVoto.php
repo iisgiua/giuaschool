@@ -93,20 +93,18 @@ class PropostaVoto {
   private $debito;
 
   /**
-   * @var string $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello]
+   * @var string $recupero Modalità di recupero del debito o l'indicazione sull'avvenuto recupero [A=autonomo, C=corso, S=sportello, R=recuperato, N=non recuperato]
    *
    * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\Choice(choices={"A","C","S"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","C","S","R","N"}, strict=true, message="field.choice")
    */
   private $recupero;
 
   /**
    * @var integer $assenze Numero di ore di assenza nel periodo
    *
-   * @ORM\Column(type="integer", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
+   * @ORM\Column(type="integer", nullable=true)
    */
   private $assenze;
 
@@ -177,6 +175,18 @@ class PropostaVoto {
   }
 
   /**
+   * Modifica l'identificativo univoco per la proposta di voto
+   *
+   * @param integer $id Identificativo univoco per la proposta di voto
+   *
+   * @return PropostaVoto Oggetto PropostaVoto
+   */
+  public function setId($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  /**
    * Restituisce la data/ora dell'ultima modifica dei dati
    *
    * @return \DateTime Data/ora dell'ultima modifica
@@ -202,7 +212,7 @@ class PropostaVoto {
    * @return PropostaVoto Oggetto PropostaVoto
    */
   public function setPeriodo($periodo) {
-    $this->periodo = $periodo;
+    $this->periodo = "".$periodo; // deve essere una stringa
     return $this;
   }
 
@@ -312,7 +322,7 @@ class PropostaVoto {
   }
 
   /**
-   * Restituisce la modalità di recupero del debito [A=autonomo, C=corso, S=sportello]
+   * Restituisce la modalità di recupero del debito o l'indicazione sull'avvenuto recupero [A=autonomo, C=corso, S=sportello, R=recuperato, N=non recuperato]
    *
    * @return string Modalità di recupero del debito
    */
@@ -321,7 +331,7 @@ class PropostaVoto {
   }
 
   /**
-   * Modifica la modalità di recupero del debito [A=autonomo, C=corso, S=sportello]
+   * Modifica la modalità di recupero del debito o l'indicazione sull'avvenuto recupero [A=autonomo, C=corso, S=sportello, R=recuperato, N=non recuperato]
    *
    * @param string $recupero Modalità di recupero del debito
    *

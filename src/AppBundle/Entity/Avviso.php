@@ -13,6 +13,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -46,43 +47,50 @@ class Avviso {
   private $modificato;
 
   /**
-   * @var string $tipo Indica il tipo dell'avviso [V=calendario verifiche, O=modifiche orario, E=evento, C=comunicazione generica, I=comunicazione individuale]
+   * @var string $tipo Indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"V","O","E","C","I"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"U","E","V","A","I","C","D","O"}, strict=true, message="field.choice")
    */
   private $tipo;
 
   /**
-   * @var \DateTime $inizio Data di inizio pubblicazione dell'avviso
+   * @var \DateTime $data Data dell'evento associato all'avviso
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Date(message="field.date")
    */
-  private $inizio;
+  private $data;
 
   /**
-   * @var \DateTime $fine Data di fine pubblicazione dell'avviso
+   * @var \DateTime $ora Ora associata all'evento dell'avviso
    *
-   * @ORM\Column(type="date", nullable=false)
+   * @ORM\Column(type="time", nullable=true)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Time(message="field.time")
    */
-  private $fine;
+  private $ora;
 
   /**
-   * @var \DateTime $evento Data dell'evento associato all'avviso [se presente si collega a dati del giorno indicato]
+   * @var \DateTime $oraFine Ora finale associata all'evento dell'avviso
    *
-   * @ORM\Column(type="date", nullable=true)
+   * @ORM\Column(name="ora_fine", type="time", nullable=true)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Time(message="field.time")
    */
-  private $evento;
+  private $oraFine;
+
+  /**
+   * @var Cattedra $cattedra Cattedra associata ad una verifica
+   *
+   * @ORM\ManyToOne(targetEntity="Cattedra")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $cattedra;
 
   /**
    * @var string $oggetto Oggetto dell'avviso
@@ -111,77 +119,63 @@ class Avviso {
   private $allegati;
 
   /**
-   * @var boolean $alunni Indica se gli alunni sono destinatari dell'avviso o no
+   * @var boolean $destinatariStaff Indica se lo staff è destinatario o meno dell'avviso (in base alla sede)
    *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @ORM\Column(name="destinatari_staff", type="boolean", nullable=false)
    */
-  private $alunni;
+  private $destinatariStaff;
 
   /**
-   * @var boolean $genitori Indica se i genitori sono destinatari dell'avviso o no
+   * @var boolean $destinatariCoordinatori Indica se i coordinatori sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @ORM\Column(name="destinatari_coordinatori", type="boolean", nullable=false)
    */
-  private $genitori;
+  private $destinatariCoordinatori;
 
   /**
-   * @var boolean $docenti Indica se i docenti sono destinatari dell'avviso o no
+   * @var boolean $destinatariDocenti Indica se i docenti sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @ORM\Column(name="destinatari_docenti", type="boolean", nullable=false)
    */
-  private $docenti;
+  private $destinatariDocenti;
 
   /**
-   * @var boolean $docenti Indica se i coordinatori sono destinatari dell'avviso o no
+   * @var boolean $destinatariGenitori Indica se i genitori sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @ORM\Column(name="destinatari_genitori", type="boolean", nullable=false)
    */
-  private $coordinatori;
+  private $destinatariGenitori;
 
   /**
-   * @var boolean $staff Indica se lo staff è destinatario dell'avviso o no
+   * @var boolean $destinatariAlunni Indica se gli alunni sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @ORM\Column(name="destinatari_alunni", type="boolean", nullable=false)
    */
-  private $staff;
+  private $destinatariAlunni;
 
   /**
-   * @var string $filtro Indica il filtro sui destinatari dell'avviso [T=tutti, S=sede, C=classe, M=materia, I=individuale]
+   * @var boolean $destinatariIndividuali Indica se i genitori sono destinatari individuali o meno dell'avviso (in base all'utente)
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
+   * @ORM\Column(name="destinatari_individuali", type="boolean", nullable=false)
+   */
+  private $destinatariIndividuali;
+
+  /**
+   * @var Docente $docente Docente che ha scritto l'avviso
+   *
+   * @ORM\ManyToOne(targetEntity="Docente")
+   * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"T","S","C","M","I"}, strict=true, message="field.choice")
    */
-  private $filtro;
+  private $docente;
 
   /**
-   * @var array $filtroDati Lista dei dati del filtro sui destinatari dell'avviso
+   * @var ArrayCollection $annotazioni Annotazioni associate all'avviso
    *
-   * @ORM\Column(name="filtro_dati", type="simple_array", nullable=true)
+   * @ORM\OneToMany(targetEntity="Annotazione", mappedBy="avviso")
    */
-  private $filtroDati;
-
-  /**
-   * @var boolean $firma Indica se è richiesta la firma ai destinatari dell'avviso o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
-   */
-  private $firma;
-
-  /**
-   * @var boolean $lettura Indica se è richiesta la lettura in classe dell'avviso o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
-   */
-  private $lettura;
-
-  /**
-   * @var array $letturaClassi Lista delle classi nelle quali leggere l'avviso [quando letta, rimossa classe da lista]
-   *
-   * @ORM\Column(name="lettura_classi", type="simple_array", nullable=true)
-   */
-  private $letturaClassi;
+  private $annotazioni;
 
 
   //==================== EVENTI ORM ====================
@@ -201,7 +195,7 @@ class Avviso {
   //==================== METODI SETTER/GETTER ====================
 
   /**
-   * Restituisce l'identificativo univoco per la circolare
+   * Restituisce l'identificativo univoco per l'avviso
    *
    * @return integer Identificativo univoco
    */
@@ -219,7 +213,7 @@ class Avviso {
   }
 
   /**
-   * Restituisce il tipo dell'avviso [V=calendario verifiche, O=modifiche orario, E=evento, C=comunicazione generica, I=comunicazione individuale]
+   * Restituisce il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, A=attività, C=comunicazione generica, I=comunicazione individuale]
    *
    * @return string Tipo dell'avviso
    */
@@ -228,7 +222,7 @@ class Avviso {
   }
 
   /**
-   * Modifica il tipo dell'avviso [V=calendario verifiche, O=modifiche orario, E=evento, C=comunicazione generica, I=comunicazione individuale]
+   * Modifica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, A=attività, C=comunicazione generica, I=comunicazione individuale]
    *
    * @param string $tipo Tipo dell'avviso
    *
@@ -240,65 +234,86 @@ class Avviso {
   }
 
   /**
-   * Restituisce la data di inizio pubblicazione dell'avviso
-   *
-   * @return \DateTime Data di inizio pubblicazione dell'avviso
-   */
-  public function getInizio() {
-    return $this->inizio;
-  }
-
-  /**
-   * Modifica la data di inizio pubblicazione dell'avviso
-   *
-   * @param \DateTime $inizio Data di inizio pubblicazione dell'avviso
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function setInizio($inizio) {
-    $this->inizio = $inizio;
-    return $this;
-  }
-
-  /**
-   * Restituisce la data di fine pubblicazione dell'avviso
-   *
-   * @return \DateTime Data di fine pubblicazione dell'avviso
-   */
-  public function getFine() {
-    return $this->fine;
-  }
-
-  /**
-   * Modifica la data di fine pubblicazione dell'avviso
-   *
-   * @param \DateTime $fine Data di fine pubblicazione dell'avviso
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function setFine($fine) {
-    $this->fine = $fine;
-    return $this;
-  }
-
-  /**
-   * Restituisce la data dell'evento associato all'avviso [se presente si collega a dati del giorno]
+   * Restituisce la data dell'evento associato all'avviso
    *
    * @return \DateTime Data dell'evento associato all'avviso
    */
-  public function getEvento() {
-    return $this->evento;
+  public function getData() {
+    return $this->data;
   }
 
   /**
-   * Modifica la data dell'evento associato all'avviso [se presente si collega a dati del giorno]
+   * Modifica la data dell'evento associato all'avviso
    *
-   * @param \DateTime $evento Data dell'evento associato all'avviso
+   * @param \DateTime $data Data dell'evento associato all'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setEvento($evento) {
-    $this->evento = $evento;
+  public function setData($data) {
+    $this->data = $data;
+    return $this;
+  }
+
+  /**
+   * Restituisce l'ora associata all'evento dell'avviso
+   *
+   * @return \DateTime Ora dell'evento associato all'avviso
+   */
+  public function getOra() {
+    return $this->ora;
+  }
+
+  /**
+   * Modifica l'ora associata all'evento dell'avviso
+   *
+   * @param \DateTime $ora Ora dell'evento associato all'avviso
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setOra($ora) {
+    $this->ora = $ora;
+    return $this;
+  }
+
+  /**
+   * Restituisce l'ora finale dell'evento associato all'avviso
+   *
+   * @return \DateTime Ora finale dell'evento associato all'avviso
+   */
+  public function getOraFine() {
+    return $this->oraFine;
+  }
+
+  /**
+   * Modifica l'ora finale dell'evento associato all'avviso
+   *
+   * @param \DateTime $oraFine Ora finale dell'evento associato all'avviso
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setOraFine($oraFine) {
+    $this->oraFine = $oraFine;
+    return $this;
+  }
+
+  /**
+   * Restituisce la cattedra associata ad una verifica
+   *
+   * @return Cattedra Cattedra associata ad una verifica
+   */
+  public function getCattedra() {
+    return $this->cattedra;
+  }
+
+  /**
+   * Modifica la cattedra associata ad una verifica
+   *
+   * @param Cattedra $cattedra Cattedra associata ad una verifica
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setCattedra(Cattedra $cattedra) {
+    $this->cattedra = $cattedra;
     return $this;
   }
 
@@ -394,267 +409,197 @@ class Avviso {
   }
 
   /**
-   * Indica se gli alunni sono destinatari dell'avviso o no
+   * Indica se lo staff è destinatario o meno dell'avviso (in base alla sede)
    *
-   * @return boolean Vero se gli alunni sono destinatari dell'avviso, falso altrimenti
+   * @return boolean Indica se lo staff è destinatario o meno dell'avviso
    */
-  public function getAlunni() {
-    return $this->alunni;
+  public function getDestinatariStaff() {
+    return $this->destinatariStaff;
   }
 
   /**
-   * Modifica se gli alunni sono destinatari dell'avviso o no
+   * Modifica l'indicazione sul fatto che lo staff è destinatario o meno dell'avviso (in base alla sede)
    *
-   * @param boolean $alunni Vero se gli alunni sono destinatari dell'avviso, falso altrimenti
+   * @param boolean $destinatariStaff Indica se lo staff è destinatario o meno dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setAlunni($alunni) {
-    $this->alunni = ($alunni == true);
+  public function setDestinatariStaff($destinatariStaff) {
+    $this->destinatariStaff = $destinatariStaff;
     return $this;
   }
 
   /**
-   * Indica se i genitori sono destinatari dell'avviso o no
+   * Indica se i coordinatori sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @return boolean Vero se i genitori sono destinatari dell'avviso, falso altrimenti
+   * @return boolean Indica se i coordinatori sono destinatari o meno dell'avviso
    */
-  public function getGenitori() {
-    return $this->genitori;
+  public function getDestinatariCoordinatori() {
+    return $this->destinatariCoordinatori;
   }
 
   /**
-   * Modifica se i genitori sono destinatari dell'avviso o no
+   * Modifica l'indicazione sul fatto che i coordinatori sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @param boolean $genitori Vero se i genitori sono destinatari dell'avviso, falso altrimenti
+   * @param boolean $destinatariCoordinatori Indica se i coordinatori sono destinatari o meno dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setGenitori($genitori) {
-    $this->genitori = ($genitori == true);
+  public function setDestinatariCoordinatori($destinatariCoordinatori) {
+    $this->destinatariCoordinatori = $destinatariCoordinatori;
     return $this;
   }
 
   /**
-   * Indica se i docenti sono destinatari dell'avviso o no
+   * Indica se i docenti sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @return boolean Vero se i docenti sono destinatari dell'avviso, falso altrimenti
+   * @return boolean Indica se i docenti sono destinatari o meno dell'avviso
    */
-  public function getDocenti() {
-    return $this->docenti;
+  public function getDestinatariDocenti() {
+    return $this->destinatariDocenti;
   }
 
   /**
-   * Modifica se i docenti sono destinatari dell'avviso o no
+   * Modifica l'indicazione sul fatto che i docenti sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @param boolean $docenti Vero se i docenti sono destinatari dell'avviso, falso altrimenti
+   * @param boolean $destinatariDocenti Indica se i docenti sono destinatari o meno dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setDocenti($docenti) {
-    $this->docenti = ($docenti == true);
+  public function setDestinatariDocenti($destinatariDocenti) {
+    $this->destinatariDocenti = $destinatariDocenti;
     return $this;
   }
 
   /**
-   * Indica se i coordinatori sono destinatari dell'avviso o no
+   * Indica se i genitori sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @return boolean Vero se i coordinatori sono destinatari dell'avviso, falso altrimenti
+   * @return boolean Indica se i genitori sono destinatari o meno dell'avviso
    */
-  public function getCoordinatori() {
-    return $this->coordinatori;
+  public function getDestinatariGenitori() {
+    return $this->destinatariGenitori;
   }
 
   /**
-   * Modifica se i coordinatori sono destinatari dell'avviso o no
+   * Modifica l'indicazione sul fatto che i genitori sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @param boolean $coordinatori Vero se i coordinatori sono destinatari dell'avviso, falso altrimenti
+   * @param boolean $destinatariGenitori Indica se i genitori sono destinatari o meno dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setCoordinatori($coordinatori) {
-    $this->coordinatori = ($coordinatori == true);
+  public function setDestinatariGenitori($destinatariGenitori) {
+    $this->destinatariGenitori = $destinatariGenitori;
     return $this;
   }
 
   /**
-   * Indica se lo staff è destinatario dell'avviso o no
+   * Indica se gli alunni sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @return boolean Vero se lo staff è destinatario dell'avviso, falso altrimenti
+   * @return boolean Indica se gli alunni sono destinatari o meno dell'avviso
    */
-  public function getStaff() {
-    return $this->staff;
+  public function getDestinatariAlunni() {
+    return $this->destinatariAlunni;
   }
 
   /**
-   * Modifica se lo staff è destinatario dell'avviso o no
+   * Modifica l'indicazione sul fatto che gli alunni sono destinatari o meno dell'avviso (in base alla classe)
    *
-   * @param boolean $staff Vero se lo staff è destinatario dell'avviso, falso altrimenti
+   * @param boolean $destinatariAlunni Indica se gli alunni sono destinatari o meno dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setStaff($staff) {
-    $this->staff = ($staff == true);
+  public function setDestinatariAlunni($destinatariAlunni) {
+    $this->destinatariAlunni = $destinatariAlunni;
     return $this;
   }
 
   /**
-   * Restituisce il filtro sui destinatari dell'avviso [T=tutti, S=sede, C=classe, M=materia, I=individuale]
+   * Indica se i genitori sono destinatari individuali o meno dell'avviso (in base all'utente)
    *
-   * @return string Filtro sui destinatari dell'avviso
+   * @return boolean Indica se i genitori sono destinatari individuali o meno dell'avviso
    */
-  public function getFiltro() {
-    return $this->filtro;
+  public function getDestinatariIndividuali() {
+    return $this->destinatariIndividuali;
   }
 
   /**
-   * Modifica il filtro sui destinatari dell'avviso [T=tutti, S=sede, C=classe, M=materia, I=individuale]
+   * Modifica l'indicazione sul fatto che i genitori sono destinatari individuali o meno dell'avviso (in base all'utente)
    *
-   * @param string $filtro Filtro sui destinatari dell'avviso
+   * @param boolean $destinatariIndividuali Indica se i genitori sono destinatari individuali o meno dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setFiltro($filtro) {
-    $this->filtro = $filtro;
+  public function setDestinatariIndividuali($destinatariIndividuali) {
+    $this->destinatariIndividuali = $destinatariIndividuali;
     return $this;
   }
 
   /**
-   * Restituisce la lista dei dati del filtro sui destinatari dell'avviso
+   * Restituisce il docente che ha scritto l'avviso
    *
-   * @return array Lista dei dati del filtro sui destinatari dell'avviso
+   * @return Docente Docente che ha scritto l'avviso
    */
-  public function getFiltroDati() {
-    return $this->filtroDati;
+  public function getDocente() {
+    return $this->docente;
   }
 
   /**
-   * Modifica la lista dei dati del filtro sui destinatari dell'avviso
+   * Modifica il docente che ha scritto l'avviso
    *
-   * @param array $filtroDati Lista dei dati del filtro sui destinatari dell'avviso
+   * @param Docente $docente Docente che ha scritto l'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setFiltroDati($filtroDati) {
-    $this->filtroDati = $filtroDati;
+  public function setDocente(Docente $docente) {
+    $this->docente = $docente;
     return $this;
   }
 
   /**
-   * Aggiunge un filtro alla lista dei dati del filtro sui destinatari dell'avviso
+   * Restituisce le annotazioni associate all'avviso
    *
-   * @param object $filtro Filtro da aggiungere alla lista
+   * @return ArrayCollection Lista delle annotazioni associate all'avviso
+   */
+  public function getAnnotazioni() {
+    return $this->annotazioni;
+  }
+
+  /**
+   * Modifica le annotazioni associate all'avviso
+   *
+   * @param Annotazione $annotazione Lista delle annotazioni associate all'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function addFiltroDati($filtro) {
-    if (!in_array($filtro->getId(), $this->filtroDati)) {
-      $this->filtroDati[] = $filtro->getId();
+  public function setAnnotazioni(ArrayCollection $annotazioni) {
+    $this->annotazioni = $annotazioni;
+    return $this;
+  }
+
+  /**
+   * Aggiunge una annotazione all'avviso
+   *
+   * @param Annotazione $annotazione L'annotazione da aggiungere
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function addAnnotazione(Annotazione $annotazione) {
+    if (!$this->annotazioni->contains($annotazione)) {
+      $this->annotazioni->add($annotazione);
     }
     return $this;
   }
 
   /**
-   * Rimuove un filtro dalla lista dei dati del filtro sui destinatari dell'avviso
+   * Rimuove una annotazione dall'avviso
    *
-   * @param object $filtro Filtro da rimuovere dalla lista
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function removeFiltroDati($filtro) {
-    if (in_array($filtro->getId(), $this->filtroDati)) {
-      unset($this->filtroDati[array_search($filtro->getId(), $this->filtroDati)]);
-    }
-    return $this;
-  }
-
-  /**
-   * Indica se è richiesta la firma ai destinatari dell'avviso o no
-   *
-   * @return boolean Vero se è richiesta la firma ai destinatari dell'avviso, falso altrimenti
-   */
-  public function getFirma() {
-    return $this->firma;
-  }
-
-  /**
-   * Modifica se è richiesta la firma ai destinatari dell'avviso o no
-   *
-   * @param boolean $firma Vero se è richiesta la firma ai destinatari dell'avviso, falso altrimenti
+   * @param Annotazione $annotazione L'annotazione da rimuovere
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setFirma($firma) {
-    $this->firma = ($firma == true);
-    return $this;
-  }
-
-  /**
-   * Indica se è richiesta la lettura in classe dell'avviso o no
-   *
-   * @return boolean Vero se è richiesta la lettura in classe dell'avviso, falso altrimenti
-   */
-  public function getLettura() {
-    return $this->lettura;
-  }
-
-  /**
-   * Modifica se è richiesta la lettura in classe dell'avviso o no
-   *
-   * @param boolean $lettura Vero se è richiesta la lettura in classe dell'avviso, falso altrimenti
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function setLettura($lettura) {
-    $this->lettura = ($lettura == true);
-    return $this;
-  }
-
-  /**
-   * Restituisce la lista delle classi nelle quali leggere l'avviso [quando letta, rimossa classe da lista]
-   *
-   * @return array Lista delle classi nelle quali leggere l'avviso
-   */
-  public function getLetturaClassi() {
-    return $this->letturaClassi;
-  }
-
-  /**
-   * Modifica la lista delle classi nelle quali leggere l'avviso [quando letta, rimossa classe da lista]
-   *
-   * @param array $letturaClassi Lista delle classi nelle quali leggere l'avviso
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function setLetturaClassi($letturaClassi) {
-    $this->letturaClassi = $letturaClassi;
-    return $this;
-  }
-
-  /**
-   * Aggiunge una classe alla lista di quelle nelle quali leggere l'avviso
-   *
-   * @param Classe $classe Classe da aggiungere alla lista
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function addLetturaClassi(Classe $classe) {
-    if (!in_array($classe->getId(), $this->letturaClassi)) {
-      $this->letturaClassi[] = $classe->getId();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove una classe dalla lista di quelle nelle quali leggere l'avviso
-   *
-   * @param Classe $classe Classe da rimuovere dalla lista
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function removeLetturaClassi(Classe $classe) {
-    if (in_array($classe->getId(), $this->letturaClassi)) {
-      unset($this->letturaClassi[array_search($classe->getId(), $this->letturaClassi)]);
+  public function removeAnnotazione(Annotazione $annotazione) {
+    if ($this->annotazioni->contains($annotazione)) {
+      $this->annotazioni->removeElement($annotazione);
     }
     return $this;
   }
@@ -668,8 +613,7 @@ class Avviso {
   public function __construct() {
     // valori predefiniti
     $this->allegati = array();
-    $this->filtroDati = array();
-    $this->letturaClassi = array();
+    $this->annotazioni = new ArrayCollection();
   }
 
   /**

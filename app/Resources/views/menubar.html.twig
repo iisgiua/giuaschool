@@ -6,8 +6,8 @@
   {% elseif is_granted('ROLE_GENITORE') %} {#----- GENITORE -----#}
     {% include 'ruolo_genitore/menu.html.twig' %}
 
-  {% elseif is_granted('ROLE_SEGRETERIA') %}
-<p>SEGRETERIA</p>
+  {% elseif is_granted('ROLE_SEGRETERIA') %} {#----- SEGRETERIA -----#}
+    {% include 'ruolo_segreteria/menu.html.twig' %}
 
   {% elseif is_granted('ROLE_AMMINISTRATORE') %} {#----- AMMINISTRATORE -----#}
     {% include 'ruolo_amministratore/menu.html.twig' %}

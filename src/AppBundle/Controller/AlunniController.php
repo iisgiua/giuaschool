@@ -725,7 +725,7 @@ class AlunniController extends Controller {
         'ID esecutore' => $this->getUser()->getId()
         ));
       // crea documento PDF
-      $pdf->configure('Istituto di Istruzione Superiore "NOME"',
+      $pdf->configure('Istituto di Istruzione Superiore',
         'Credenziali di accesso al Registro Elettronico');
       // contenuto in formato HTML
       $html = $this->renderView('pdf/credenziali_alunni.html.twig', array(
@@ -752,7 +752,7 @@ class AlunniController extends Controller {
         // alunni presenti
         $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
         // crea documento PDF
-        $pdf->configure('Istituto di Istruzione Superiore "NOME"',
+        $pdf->configure('Istituto di Istruzione Superiore',
           'Credenziali di accesso al Registro Elettronico');
         foreach ($alunni as $alu) {
           // recupera genitori (anche più di uno)

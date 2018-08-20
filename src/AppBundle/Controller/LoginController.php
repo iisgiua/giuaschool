@@ -199,6 +199,8 @@ class LoginController extends Controller {
    * @Security("has_role('ROLE_UTENTE')")
    */
   public function homeAction(NotificheUtil $notifiche) {
+    // imposta info utente
+    $notifiche->infoUtente($this->getUser());
     // legge dati
     $dati = $notifiche->notificheHome($this->getUser());
     // visualizza pagina
@@ -280,8 +282,8 @@ class LoginController extends Controller {
           ));
         // ok crea messaggio
         $message = (new \Swift_Message())
-          ->setSubject('I.I.S. NOME - Recupero credenziali del Registro Elettronico')
-          ->setFrom(['email' => 'I.I.S. NOME'])
+          ->setSubject('Recupero credenziali del Registro Elettronico')
+          ->setFrom(['prova@test.it' => 'Istituto di Istruzione'])
           ->setTo([$email])
           ->setBody($this->renderView('email/credenziali_alunni.html.twig',
             array(

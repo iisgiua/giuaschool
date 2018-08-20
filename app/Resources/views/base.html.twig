@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ pagina_titolo|trans }}</title>
     <meta name="description" content="giua@school: il registro elettronico dell'Istituto di Istruzione Superiore 'Michele Giua'">
-    <meta name="keywords" content="scuola,istituto,istruzione,superiore,registro,elettronico">
+    <meta name="keywords" content="scuola,istituto,istruzione,superiore,tecnico,liceo,scientifico,scienze,applicate,registro,elettronico">
     <meta name="author" content="Antonello Dessì">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap-theme.min.css') }}" rel="stylesheet">
@@ -19,7 +19,7 @@
     <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     <![endif]-->
 {% block pagina_css %}
-    <link href="{{ asset('css/tema.css?v=1.0') }}" rel="stylesheet">
+    <link href="{{ asset('css/tema.css?v='~(filedate('css/tema.css')|date('U'))) }}" rel="stylesheet">
 {% endblock %}
     <!--[if lt IE 9]>
     <script src="{{ asset('vendor/html5shiv.min.js') }}"></script>
@@ -48,7 +48,7 @@
     <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#5bbad5">
   </head>
   <body>
-    <p>
+    <p class="gs-mb-0">
       <a href="#gs-main" class="sr-only sr-only-focusable">Vai al contenuto</a>
       <a href="#gs-footer" class="sr-only sr-only-focusable">Vai a fine pagina</a>
     </p>
@@ -63,22 +63,20 @@
 {{ include('topbar.html.twig') }}
           </div>
           <nav class="navbar navbar-default gs-navbar">
-            <div class="container-fluid">
-              <div class="navbar-header gs-navbar-header">
-                <button type="button" class="navbar-toggle collapsed gs-navbar-toggle" data-toggle="collapse" data-target="#gs-navbar-collapse-1" aria-expanded="false">
-                  <span class="gs-mr-2">MENU</span>
-                  <span class="glyphicon glyphicon-menu-hamburger"></span>
-                </button>
-                <div class="visible-xs-block text-center gs-mt-2">
-                  <strong>Istituto Scolastico"</strong>
-                  {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SCUOLA/anno_scolastico') }}{% endif %}
-                </div>
+            <div class="navbar-header gs-navbar-header">
+              <button type="button" class="navbar-toggle collapsed gs-navbar-toggle" data-toggle="collapse" data-target="#gs-navbar-collapse-1" aria-expanded="false">
+                <span class="gs-mr-2">MENU</span>
+                <span class="glyphicon glyphicon-menu-hamburger"></span>
+              </button>
+              <div class="visible-xs-block text-center gs-mt-2">
+                <strong>I.I.S. </strong>
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SCUOLA/anno_scolastico') }}{% endif %}
               </div>
-              <div class="collapse navbar-collapse" id="gs-navbar-collapse-1">
+            </div>
+            <div class="collapse navbar-collapse" id="gs-navbar-collapse-1">
 {% block pagina_menu %}
 {{ include('menubar.html.twig') }}
 {% endblock %}
-              </div>
             </div>
           </nav>
         </header>
@@ -99,27 +97,26 @@
             <div class="row">
               <div class="col-sm-6 hidden-xs text-center small">
                 <div class="row">
-                  <strong>Istituto di Istruzione Superiore<br><em>Nome</em></strong>
+                  <strong>Istituto di Istruzione Superiore<br><em></em></strong>
                 </div>
                 <div class="row">
                   <div class="col-sm-6">
                     <address class="text-center pull-right">
-                      <strong>Sede Centrale</strong><br>Via ...<br>CITTA'<br>Telefono: ...
+                      <strong>Sede Centrale</strong><br>
                     </address>
                   </div>
                   <div class="col-sm-6">
                     <address class="text-center pull-left">
-                      <strong>Sede Staccata</strong><br>Via ...<br>CITTA<br>Telefono: ...
+                      <strong>Sede Staccata</strong><br>
                     </address>
                   </div>
                 </div>
               </div>
               <div class="col-sm-5 col-xs-10 text-center">
                 <p>
-{#<!--
-                  <a href="#" title="vai alla pagina..."><img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em><strong>giua@school {{ app.session.get('CONFIG/SISTEMA/versione') }}</strong></em></a>
--->#}
-                  <img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em style="color:#337ab7"><strong>giua@school {{ app.session.get('CONFIG/SISTEMA/versione') }}</strong></em>
+                  <a href="https://github.com/trinko/giua-school#giuaschool" target="_blank" title="Vai alla pagina del Progetto giua@school">
+                    <img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em style="color:#337ab7"><strong>giua@school {{ app.session.get('CONFIG/SISTEMA/versione') }}</strong></em>
+                  </a>
                   <em class="hidden-xs gs-big"><br>il registro elettronico<br>dell'Istituto "Michele Giua"</em>
                 </p>
               </div>

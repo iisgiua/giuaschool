@@ -14,15 +14,16 @@
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
       <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Nota</th>
-        <th>Provvedimento</th>
+        <th class="col-sm-2">Data</th>
+        <th class="col-sm-2">Tipo</th>
+        <th class="col-sm-5">Nota</th>
+        <th class="col-sm-3">Provvedimento</th>
       </tr>
     </thead>
     <tbody>
       {% for data,v1 in v %}
-        {% for tipo,e in v1 %}
+        {% for tipo,v2 in v1 %}
+          {% for k,e in v2 %}
       <tr>
           {% if tipo == 'classe' %}
         <td><strong>{{ e.data }}</strong></td>
@@ -33,9 +34,10 @@
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Nota individuale</strong></td>
         <td>{{ e.nota }}<br><em>({{ e.nota_doc }})</em></td>
-        <td>{{ e.provvedimento ? (e.provvedimento~'<br><em>('~e.nota_doc~')</em>')|raw }}</td>
+        <td>{{ e.provvedimento ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</td>
           {% endif %}
       </tr>
+          {% endfor %}
         {% endfor %}
       {% endfor %}
     </tbody>

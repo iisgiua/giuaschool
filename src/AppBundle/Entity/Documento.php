@@ -84,14 +84,32 @@ class Documento {
   private $mime;
 
   /**
-   * @var Cattedra $cattedra Cattedra del docente che carica il documento
+   * @var Docente $docente Docente che carica il documento
    *
-   * @ORM\ManyToOne(targetEntity="Cattedra")
+   * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $cattedra;
+  private $docente;
+
+  /**
+   * @var Classe $classe Classe a cui è riferito il documento
+   *
+   * @ORM\ManyToOne(targetEntity="Classe")
+   * @ORM\JoinColumn(nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   */
+  private $classe;
+
+  /**
+   * @var Materia $materia Materia a cui è riferito il documento (può essere NULL)
+   *
+   * @ORM\ManyToOne(targetEntity="Materia")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $materia;
 
 
   //==================== EVENTI ORM ====================
@@ -152,7 +170,7 @@ class Documento {
   /**
    * Restituisce il file del documento
    *
-   * @return string|File File del documento
+   * @return string File del documento
    */
   public function getFile() {
     return $this->file;
@@ -161,11 +179,11 @@ class Documento {
   /**
    * Modifica il file del documento
    *
-   * @param File $file File del documento
+   * @param string $file File del documento
    *
    * @return Documento Oggetto Documento
    */
-  public function setFile(File $file) {
+  public function setFile($file) {
     $this->file = $file;
     return $this;
   }
@@ -213,23 +231,65 @@ class Documento {
   }
 
   /**
-   * Restituisce la cattedra del docente che carica il documento
+   * Restituisce il docente che carica il documento
    *
-   * @return Cattedra Cattedra del docente che carica il documento
+   * @return Docente Docente che carica il documento
    */
-  public function getCattedra() {
-    return $this->cattedra;
+  public function getDocente() {
+    return $this->docente;
   }
 
   /**
-   * Modifica la cattedra del docente che carica il documento
+   * Modifica il docente che carica il documento
    *
-   * @param Cattedra $cattedra Cattedra del docente che carica il documento
+   * @param Docente $docente Docente che carica il documento
    *
    * @return Documento Oggetto Documento
    */
-  public function setCattedra(Cattedra $cattedra) {
-    $this->cattedra = $cattedra;
+  public function setDocente(Docente $docente) {
+    $this->docente = $docente;
+    return $this;
+  }
+
+  /**
+   * Restituisce la classe a cui è riferito il documento
+   *
+   * @return Classe Classe a cui è riferito il documento
+   */
+  public function getClasse() {
+    return $this->classe;
+  }
+
+  /**
+   * Modifica la classe a cui è riferito il documento
+   *
+   * @param Classe $classe Classe a cui è riferito il documento
+   *
+   * @return Documento Oggetto Documento
+   */
+  public function setClasse(Classe $classe) {
+    $this->classe = $classe;
+    return $this;
+  }
+
+  /**
+   * Restituisce la materia a cui è riferito il documento (può essere NULL)
+   *
+   * @return Materia Materia a cui è riferito il documento
+   */
+  public function getMateria() {
+    return $this->materia;
+  }
+
+  /**
+   * Modifica la materia a cui è riferito il documento (può essere NULL)
+   *
+   * @param Materia $materia Materia a cui è riferito il documento
+   *
+   * @return Documento Oggetto Documento
+   */
+  public function setMateria(Materia $materia=null) {
+    $this->materia = $materia;
     return $this;
   }
 

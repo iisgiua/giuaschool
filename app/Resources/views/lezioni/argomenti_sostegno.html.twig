@@ -17,6 +17,7 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_argomenti'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
     {% for periodo,v in dati %}
+      {% if loop.index == 1 %}
   <div class="row gs-mb-1">
     <div class="col-sm-6 text-info">
       <strong class="gs-big">{{ periodo }}</strong>
@@ -35,24 +36,25 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for materia,v2 in v1 %}
-          {% for e in v2 %}
+        {% for data,v1 in v %}
+          {% for materia,v2 in v1 %}
+            {% for e in v2 %}
       <tr>
-            {% if loop.first %}
+              {% if loop.first %}
         <td style="background-color:#ffffff" rowspan="{{ v2|length }}">
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
         </td>
         <td style="background-color:#ffffff" rowspan="{{ v2|length }}"><small>{{ materia }}</small></td>
-            {% endif %}
+              {% endif %}
         <td><small>{{ e.argomento }}{{ e.argomento and e.attivita ? '<br>' }}{{ e.attivita }}</small></td>
         <td><small>{{ e.argomento_sost }}{{ e.argomento_sost and e.attivita_sost ? '<br>' }}{{ e.attivita_sost }}</small></td>
       </tr>
+            {% endfor %}
           {% endfor %}
         {% endfor %}
-      {% endfor %}
     </tbody>
   </table>
+      {% endif %}
     {% endfor %}
   {% endif %}
 </div>

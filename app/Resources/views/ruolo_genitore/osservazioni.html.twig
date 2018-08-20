@@ -14,18 +14,20 @@
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
       <tr>
-        <th>Data</th>
-        <th>Materia</th>
-        <th>Osservazioni</th>
+        <th class="col-sm-2">Data</th>
+        <th class="col-sm-3">Materia</th>
+        <th class="col-sm-7">Osservazioni</th>
       </tr>
     </thead>
     <tbody>
-      {% for data,e in v %}
+      {% for data,v1 in v %}
+        {% for k,e in v1 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>{{ e.materia }}</strong><br><small><em>({{ e.docente }})</em></small></td>
         <td>{{ e.testo }}</td>
       </tr>
+        {% endfor %}
       {% endfor %}
     </tbody>
   </table>

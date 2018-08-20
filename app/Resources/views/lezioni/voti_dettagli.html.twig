@@ -29,14 +29,15 @@
     {% endif %}
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
     {% for k,v in alunni %}
+      {% if cattedra.materia.tipo != 'R' or v.religione == 'S' %}
           <li{{ v.id == idalunno ? ' class="active"' }}><a href="{{ path('lezioni_voti_dettagli', {'cattedra': cattedra.id, 'classe': classe.id, 'alunno': v.id}) }}">{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})</a></li>
+      {% endif %}
     {% endfor %}
         </ul>
       </div>
     </div>
     <div class="col-sm-4 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_quadro', {'cattedra': cattedra.id, 'classe': classe.id}) }}" role="button" title="Visualizza il quadro delle valutazioni"><span class="glyphicon glyphicon-list-alt gs-mr-3"></span><strong>Quadro</strong></a>
-      <a class="btn btn-success btn-sm disabled" href="" role="button" title="Inserisce le proposte di voto per lo scrutinio"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
     </div>
   </div>
     {% if idalunno %}
@@ -80,8 +81,8 @@
           {% endif %}
         {% endfor %}
         {% if dati.media[periodo]['totale'] is defined %}
-  <div class="alert alert-success text-center" role="alert">
-    <strong class="gs-big"><em>Media Complessiva {{ dati.media[periodo]['totale'] }}</em></strong>
+  <div class="alert alert-warning text-center" role="alert">
+    <strong class="gs-big"><em>{{ periodo }} - Media Complessiva {{ dati.media[periodo]['totale'] }}</em></strong>
   </div>
         {% endif %}
       {% else %}

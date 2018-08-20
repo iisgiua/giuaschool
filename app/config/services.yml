@@ -20,7 +20,7 @@ services:
     resource: '../../src/AppBundle/*'
     # you can exclude directories or files
     # but if a service is unused, it's removed anyway
-    exclude: '../../src/AppBundle/{Entity,Repository,Command}'
+    exclude: '../../src/AppBundle/{Entity,Repository}'
 
   # controllers are imported separately to make sure they're public
   # and have a tag that allows actions to type-hint services
@@ -50,3 +50,28 @@ services:
     arguments:
       $pdfcontroller: '@white_october.tcpdf'
 
+  # necessario per aggiungere parametro di configurazione
+  AppBundle\Util\ScrutinioUtil:
+    arguments:
+      $root: '%kernel.project_dir%'
+
+  # necessario per aggiungere parametro di configurazione
+  AppBundle\Util\PagelleUtil:
+    arguments:
+      $root: '%kernel.project_dir%'
+
+  # necessario per aggiungere parametro di configurazione
+  AppBundle\Util\DocumentiUtil:
+    arguments:
+      $root: '%kernel.project_dir%'
+
+  # necessario per aggiungere parametro di configurazione
+  AppBundle\Util\ArchiviazioneUtil:
+    arguments:
+      $root: '%kernel.project_dir%'
+
+  # necessario per aggiungere un processor a monolog
+  AppBundle\Util\LogProcessor:
+    autowire: true
+    tags:
+      - { name: monolog.processor, method: processRecord }

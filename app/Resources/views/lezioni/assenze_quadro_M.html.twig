@@ -22,6 +22,13 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% else %}
+      {% if avvisi > 0 %}
+        {% include 'include/modal-popup.html.twig' with {'modal_popup_msg': 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi})} %}
+  <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
+    <strong>{{ 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi}) }}</strong><br>
+    <button class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Visualizza</strong></button>
+  </div>
+      {% endif %}
   <div class="row gs-mb-1">
     <div class="col-sm-9">
       <strong class="gs-big">Data:</strong>
@@ -50,35 +57,38 @@
     </thead>
     <tbody>
       {% for ka,va in dati.alunni %}
+        {% if not cattedra or cattedra.materia.tipo != 'R' or va.religione == 'S' %}
       <tr>
         <td class=" gs-pt-1 gs-pb-1">
           <small><strong>{{ va.cognome }} {{ va.nome }} ({{ va.dataNascita|date('d/m/Y') }})</strong></small>
         </td>
-        {% for k,v in dati.lista %}
-          {% if v.errore is not defined and v[va.id_alunno] is defined %}
+          {% for k,v in dati.lista %}
+            {% if v.errore is not defined and v[va.id_alunno] is defined %}
         <td class="gs-pr-0 gs-pl-0 gs-pt-1 gs-pb-1">
-            {% if v[va.id_alunno].id_assenza and v[va.id_alunno].assenza_giust %}
+              {% if v[va.id_alunno].id_assenza and v[va.id_alunno].assenza_giust %}
           <span class="label label-default gs-pr-1 gs-pl-1">A</span>
-            {% elseif v[va.id_alunno].id_assenza %}
+              {% elseif v[va.id_alunno].id_assenza %}
           <span class="label label-danger gs-pr-1 gs-pl-1" title="Assenza da giustificare">A</span>
-            {% endif %}
-            {% if v[va.id_alunno].id_entrata and v[va.id_alunno].entrata_giust %}
+              {% endif %}
+              {% if v[va.id_alunno].id_entrata and v[va.id_alunno].entrata_giust %}
           <span class="label label-default gs-pr-1 gs-pl-1" title="Note sul ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}">R</span>
-            {% elseif v[va.id_alunno].id_entrata %}
+              {% elseif v[va.id_alunno].id_entrata %}
           <span class="label label-danger gs-pr-1 gs-pl-1" title="Note sul ritardo (da giustificare)" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_entrata|date('H:i') }} {{ v[va.id_alunno].note_entrata }}">R</span>
-            {% endif %}
-            {% if v[va.id_alunno].id_uscita %}
+              {% endif %}
+              {% if v[va.id_alunno].id_uscita %}
           <span class="label label-default gs-pr-1 gs-pl-1" title="Note sull'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v[va.id_alunno].ora_uscita|date('H:i') }} {{ v[va.id_alunno].note_uscita }}">U</span>
-            {% endif %}
+              {% endif %}
         </td>
-          {% elseif v.errore is not defined %}
+            {% elseif v.errore is not defined %}
         <td class="gs-bg-muted"></td>
-          {% endif %}
-        {% endfor %}
+            {% endif %}
+          {% endfor %}
       </tr>
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>
+      {% include 'include/modal-remote.html.twig' %}
     {% endif %}
   {% endif %}
 </div>
@@ -122,6 +132,24 @@ $(document).ready(function() {
       window.location.href = url;
   });
   $('[data-toggle="popover"]').popover();
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    var url = $(e.currentTarget).data('href');
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  {% if avvisi > 0 %}
+  $("#gs-modal-popup-do").click(function(e) {
+    $('#gs-modal-popup').modal('hide');
+
+    $('.gs-button-remote').click();
+  });
+  // init
+  $('#gs-modal-popup').modal('show');
+  {% endif %}
 });
 </script>
 {% endblock %}

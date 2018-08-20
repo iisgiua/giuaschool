@@ -6,5 +6,7 @@
   <li{{ app.request.attributes.get('_route') == 'procedure_alias' ? ' class="active"' }}><a href="{{ path('procedure_alias') }}">Alias</a></li>
   <li{{ app.request.attributes.get('_route') == 'procedure_password' ? ' class="active"' }}><a href="{{ path('procedure_password') }}">Password</a></li>
   <li{{ app.request.attributes.get('_route') == 'procedure_ricalcola' ? ' class="active"' }}><a href="{{ path('procedure_ricalcola') }}">Ricalcola assenze</a></li>
+  <li{{ app.request.attributes.get('_route') == 'procedure_manutenzione' ? ' class="active"' }}><a href="{{ path('procedure_manutenzione') }}">Manutenzione</a></li>
+  <li{{ app.request.attributes.get('_route') == 'procedure_archiviazione' ? ' class="active"' }}><a href="{{ path('procedure_archiviazione') }}">Archiviazione</a></li>
 </ul>
 {% endblock %}

@@ -1,41 +1,65 @@
 {% extends 'base.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container gs-mt-4">
-  <div class="panel panel-info" >
-    <div class="panel-heading">
-      <div class="panel-title">Ultimo accesso: {{ app.session.get('APP/UTENTE/ultimo_accesso') }}</div>
+<div class="container-fluid">
+  <div class="panel panel-info gs-mb-5">
+    <div class="panel-heading gs-pt-1 gs-pb-1">
+      <div class="panel-title"><strong>Ultimo accesso: {{ app.session.get('APP/UTENTE/ultimo_accesso') }}</strong></div>
     </div>
-    <div class="panel-body" >
+    <div class="panel-body">
   {% if is_granted('ROLE_DOCENTE') %}
-
-      <p><strong>Ciao {{ app.user.nome }}, benvenut{{ app.user.sesso == 'M' ? 'o' : 'a' }} nel nuovo registro elettronico dell'Istituto!</strong></p>
-      <p>Dal menu <strong>LEZIONI</strong> puoi utilizzare le funzioni per gestire le lezioni, le assenze e le valutazioni.</p>
-      <p><strong class="gs-big">Si prega di prendere visione del manuale d'uso:</strong><br>
-        <ul>
-          <li><a href="{{ asset('doc/giuaschool_manuale_docenti_10-10-2017.pdf') }}"><span class="gs-big">Manuale per i docenti (aggiornato al 10/10/2017)</span></a></li>
-        </ul>
-      </p>
-
-  {% elseif is_granted('ROLE_GENITORE') %}
-
-      <p>Dal menu <strong>LEZIONI</strong> puoi visualizzare le lezioni svolte, mentre dal menu <strong>SITUAZIONE</strong> puoi vedere i voti, le assenze, le note disciplinari e le osservazioni dei docenti.</p>
-      <p>
-        Sei non l'hai già fatto, <strong>configura la tua email</strong>: in questo modo, se dimentichi la password, potrai usare l'apposita procedura per recuperarla.<br>
-        Per configurare la tua email, clicca sul nome dell'alunno presente in alto, nella prima riga.
-      </p>
-
-    {% if dati %}
-      <p><strong>Ultime annotazioni sul Registro di Classe:</strong></p>
-      <ul class="list-group">
-      {% for e in dati %}
-        <li class="list-group-item"><strong>{{ e.data|date('d/m/Y') }}</strong><br>{{ e.testo }}</li>
-      {% endfor %}
-      </ul>
+    {% if dati.richieste > 0 %}
+      <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1 richiesta' : 'Sono presenti '~dati.richieste~' richieste' }} di colloquio a cui rispondere: <a href="{{ path('colloqui') }}">vai alla gestione dei colloqui</a></strong></div>
     {% endif %}
-
+    {% if dati.colloqui %}
+      {% for c in dati.colloqui %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} (classe {{ c.anno }}ª {{ c.sezione }}): {{ c.data_str }} {{ c.ora_str }}</strong></div>
+      {% endfor %}
+    {% endif %}
+    {% if dati.avvisi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|transchoice(dati.avvisi, {'%num%': dati.avvisi}) }}: <a href="{{ path('bacheca_avvisi') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+    {% endif %}
+    {% if dati.verifiche.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|transchoice(dati.verifiche.oggi, {'%num%': dati.verifiche.oggi}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
+    {% endif %}
+    {% if dati.verifiche.prossime > 0 %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|transchoice(dati.verifiche.prossime, {'%num%': dati.verifiche.prossime}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
+    {% endif %}
+  {% elseif is_granted('ROLE_GENITORE') %}
+    {% if dati.colloqui %}
+      {% for c in dati.colloqui %}
+      <div class="alert alert-success gs-mb-2 gs-big" role="alert">
+        Colloquio con {{ c.sesso == 'M' ? 'il prof.' : 'la prof.ssa' }} {{ c.cognome }} {{ c.nome }}: <strong>{{ c.data_str }} {{ c.ora_str }}</strong>
+        {% if c.messaggio is not empty %}
+        <br>Messaggio del docente: <em>{{ c.messaggio }}</em>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% endif %}
+    {% if dati.avvisi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|transchoice(dati.avvisi, {'%num%': dati.avvisi}) }}: <a href="{{ path('genitori_avvisi') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+    {% endif %}
+    {% if dati.verifiche.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|transchoice(dati.verifiche.oggi, {'%num%': dati.verifiche.oggi}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
+    {% endif %}
+    {% if dati.verifiche.prossime > 0 %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|transchoice(dati.verifiche.prossime, {'%num%': dati.verifiche.prossime}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
+    {% endif %}
   {% endif %}
     </div>
   </div>
+  {% if is_granted('ROLE_DOCENTE') %}
+  <p><em>{{ 'message.login_docente'|trans|raw }}</em></p>
+  <p class="gs-mb-0"><strong>Si prega di prendere visione del manuale d'uso:</strong></p>
+  <ul class="gs-mb-0">
+    <li><a href="{{ asset('doc/giuaschool_manuale_docenti.pdf') }}">Manuale per i docenti (aggiornato al {{ filedate('doc/giuaschool_manuale_docenti.pdf')|date('d/m/Y') }})</a></li>
+  </ul>
+  {% elseif is_granted('ROLE_GENITORE') %}
+  <p><em>{{ 'message.login_genitore'|trans|raw }}</em></p>
+  <p class="gs-mb-0"><strong>Si prega di prendere visione del manuale d'uso:</strong></p>
+  <ul class="gs-mb-0">
+    <li><a href="{{ asset('doc/giuaschool_manuale_genitori.pdf') }}">Manuale per i genitori (aggiornato al {{ filedate('doc/giuaschool_manuale_genitori.pdf')|date('d/m/Y') }})</a></li>
+  </ul>
+  {% endif %}
 </div>
 {% endblock %}

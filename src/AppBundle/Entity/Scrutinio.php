@@ -60,9 +60,8 @@ class Scrutinio {
   /**
    * @var \DateTime $data Data dello scrutinio
    *
-   * @ORM\Column(type="date", nullable=false)
+   * @ORM\Column(type="date", nullable=true)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Date(message="field.date")
    */
   private $data;
@@ -70,9 +69,8 @@ class Scrutinio {
   /**
    * @var \DateTime $inizio Ora dell'apertura dello scrutinio
    *
-   * @ORM\Column(type="time", nullable=false)
+   * @ORM\Column(type="time", nullable=true)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Time(message="field.time")
    */
   private $inizio;
@@ -123,12 +121,11 @@ class Scrutinio {
   private $visibile;
 
   /**
-   * @var string $stato Stato della sincronizzazione dei dati dello scrutinio [N=non esportato, E=esportato, C=caricato, V=validato]
+   * @var string $stato Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
+   * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","E","C","V"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"E","C","V","B"}, strict=true, message="field.choice")
    */
   private $sincronizzazione;
 

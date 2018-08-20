@@ -6,6 +6,7 @@
   <li{{ app.request.attributes.get('_route') == 'docenti_importa' ? ' class="active"' }}><a href="{{ path('docenti_importa') }}">Importa</a></li>
   <li{{ app.request.attributes.get('_route')|slice(0,16) == 'docenti_modifica' ? ' class="active"' }}><a href="{{ path('docenti_modifica') }}">Modifica</a></li>
   <li{{ app.request.attributes.get('_route')|slice(0,16) == 'docenti_cattedre' ? ' class="active"' }}><a href="{{ path('docenti_cattedre') }}">Cattedre</a></li>
+  <li{{ app.request.attributes.get('_route')|slice(0,16) == 'docenti_colloqui' ? ' class="active"' }}><a href="{{ path('docenti_colloqui') }}">Colloqui</a></li>
   <li class="disabled"><a href="#">Orario</a></li>
 </ul>
 {% endblock %}

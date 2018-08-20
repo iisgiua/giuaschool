@@ -105,5 +105,22 @@ class AlunnoRepository extends UtenteRepository {
     return $this->paginate($query->getQuery(), $page, $limit);
   }
 
+  /**
+   * Restituisce una lista vuota (usata come pagina iniziale)
+   *
+   * @param int $page Pagina corrente
+   * @param int $limit Numero di elementi per pagina
+   *
+   * @return Paginator Oggetto Paginator
+   */
+  public function listaVuota($pagina, $limite) {
+    // crea query base
+    $query = $this->createQueryBuilder('a')
+      ->where('a.abilitato=:abilitato')
+      ->setParameters(['abilitato' => -1]);
+    // crea lista con pagine
+    return $this->paginate($query->getQuery(), $pagina, $limite);
+  }
+
 }
 

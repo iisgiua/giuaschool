@@ -12,11 +12,49 @@
 
 namespace AppBundle\Repository;
 
+use Doctrine\ORM\EntityRepository;
+use AppBundle\Entity\Docente;
+
 
 /**
  * RichiestaColloquio - repository
  */
-class RichiestaColloquioRepository extends \Doctrine\ORM\EntityRepository {
+class RichiestaColloquioRepository extends EntityRepository {
+
+  /**
+   * Restituisce gli appuntamenti richiesti al docente
+   *
+   * @param Docente $docente Docente a cui sono inviate le richieste di colloquio
+   * @param \DateTime $data Data del colloquio da cui iniziare la ricerca
+   * @param \DateTime $ora Ora del colloquio da cui iniziare la ricerca
+   *
+   * @return array Dati restituiti
+   */
+  public function colloquiDocente(Docente $docente, $stato=null, \DateTime $data=null, \DateTime $ora=null) {
+    if (!$data) {
+      $data = new \DateTime('today');
+    }
+    if (!$ora) {
+      $ora = new \DateTime('now');
+    }
+    $colloqui = $this->createQueryBuilder('rc')
+      ->select('rc.id,rc.data,rc.stato,rc.messaggio,c.giorno,so.inizio,so.fine,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione')
+      ->join('rc.alunno', 'a')
+      ->join('a.classe', 'cl')
+      ->join('rc.colloquio', 'c')
+      ->join('c.orario', 'o')
+      ->join('AppBundle:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->where('c.docente=:docente AND (rc.data>:data OR (rc.data=:data AND so.fine<=:ora))')
+      ->orderBy('rc.data,c.ora,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
+      ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d'), 'ora' => $ora->format('H:i:s')]);
+    if (!empty($stato)) {
+      $colloqui->andWhere('rc.stato IN (:stato)')->setParameter('stato', $stato);
+    }
+    $colloqui = $colloqui
+      ->getQuery()
+      ->getArrayResult();
+    return $colloqui;
+  }
 
 }
 

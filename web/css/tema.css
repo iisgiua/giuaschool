@@ -1,14 +1,4 @@
-html {
-  height: 100%;
-}
-
-body {
-  padding-top: 80px;
-  padding-bottom: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
+/***** CLASSI PERSONALIZZZATE *****/
 
 .gs-page-container {
   height: 100%;
@@ -34,9 +24,11 @@ body {
   background-color: #0066cc;
   border-radius: 0;
   border: none;
+  min-height: auto;
 }
 .gs-navbar .gs-navbar-nav>li>a {
   color: #ffffff;
+  padding: 1rem;
 }
 .gs-navbar .gs-navbar-nav>li>a:hover,
 .gs-navbar .gs-navbar-nav>li>a:focus {
@@ -94,12 +86,6 @@ body {
 .navbar-inverse .gs-navbar-toggle-bottom:active  {
   background-color: #cccccc;
   color: #000000;
-}
-
-.form-group>label.required:after {
-  content: "*";
-  margin-left: 0.25rem;
-  color: #0066cc;
 }
 
 .gs-checkbox-inline {
@@ -230,6 +216,16 @@ body {
   font-weight: bold;
 }
 
+.gs-noborder {
+  border: none !important;
+}
+
+.gs-hr {
+  height: 10px;
+  border: 0;
+  box-shadow: 0 10px 10px -10px #8c8b8b inset;
+}
+
 .gs-inline {
   display: inline;
 }
@@ -277,6 +273,42 @@ body {
 .gs-pl-2 {
   padding-left: 0.5rem !important;
 }
+.gs-pt-3 {
+  padding-top: 1rem !important;
+}
+.gs-pb-3 {
+  padding-bottom: 1rem !important;
+}
+.gs-pr-3 {
+  padding-right: 1rem !important;
+}
+.gs-pl-3 {
+  padding-left: 1rem !important;
+}
+.gs-pt-4 {
+  padding-top: 1.5rem !important;
+}
+.gs-pb-4 {
+  padding-bottom: 1.5rem !important;
+}
+.gs-pr-4 {
+  padding-right: 1.5rem !important;
+}
+.gs-pl-4 {
+  padding-left: 1.5rem !important;
+}
+.gs-pt-5 {
+  padding-top: 3rem !important;
+}
+.gs-pb-5 {
+  padding-bottom: 3rem !important;
+}
+.gs-pr-5 {
+  padding-right: 3rem !important;
+}
+.gs-pl-5 {
+  padding-left: 3rem !important;
+}
 
 .gs-bg-muted {
   background-color: #777;
@@ -297,6 +329,34 @@ body {
 .gs-vertical-center {
   display: flex;
   align-items: center;
+}
+
+.gs-placeholder {
+  font-style: italic;
+  font-weight: bold;
+}
+.gs-no-placeholder {
+  font-style: normal;
+  font-weight: normal;
+}
+
+.gs-button-round {
+  border-radius: 50%;
+}
+
+
+/***** MODIFICHE A CLASSI ESISTENTI *****/
+
+html {
+  height: 100%;
+}
+
+body {
+  padding-top: 80px;
+  padding-bottom: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .bootstrap-datetimepicker-widget table {
@@ -348,3 +408,21 @@ body {
 .table-hover>tbody>tr:hover>td.gs-striped-hilited {
   background-color: #cccccc;
 }
+
+.table > tbody > tr > td.gs-td-middle {
+  vertical-align: middle;
+}
+
+.form-group>label.required:after {
+  content: "*";
+  margin-left: 0.25rem;
+  color: #0066cc;
+}
+
+.radio-inline:hover {
+  background-color: #cccccc;
+}
+.radio-inline.active {
+  font-weight: bold;
+}
+

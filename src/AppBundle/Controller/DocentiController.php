@@ -520,5 +520,46 @@ class DocentiController extends Controller {
     }
   }
 
+  /**
+   * Importa docenti da file
+   *
+   * @param Request $request Pagina richiesta
+   * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/colloqui/", name="docenti_colloqui")
+   * @Method({"GET", "POST"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function colloquiAction(Request $request, CsvImporter $importer) {
+    $lista = null;
+    // form
+    $form = $this->container->get('form.factory')->createNamedBuilder('docenti_colloqui', FormType::class)
+      ->add('file', FileType::class, array('label' => 'label.csv_file',
+        'required' => true
+        ))
+      ->add('onlynew', CheckboxType::class, array('label' => 'label.solo_nuovi',
+        'required' => false
+        ))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // importa file
+      $file = $form->get('file')->getData();
+      $lista = $importer->importaColloqui($file, $form);
+    }
+    return $this->render('docenti/colloqui.html.twig', array(
+      'pagina_titolo' => 'page.docenti_colloqui',
+      'lista' => $lista,
+      'form' => $form->createView(),
+      'form_title' => 'title.docenti_colloqui_importa',
+      'form_help' => 'message.docenti_colloqui_importa',
+      'form_success' => null,
+    ));
+  }
+
 }
 

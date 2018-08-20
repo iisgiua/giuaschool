@@ -19,9 +19,45 @@
         <div class="col-sm-10"><span class="gs-big">{{ label.docente }}</span></div>
       </div>
       {{ form_start(form) }}
-      {{ form_widget(form) }}
+      {{ form_errors(form) }}
+      {{ form_row(form.testo) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">Notifica al genitore</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.visibile) }}
+          <div id="individuale" class="gs-mt-3" style="display:none">
+            {{ form_widget(form.filtroIndividuale) }}
+          </div>
+        </div>
+      </div>
       {{ form_end(form) }}
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('label.gs-checkbox-inline input').change(function() {
+    $('label.gs-checkbox-inline').removeClass('active');
+    if (this.checked) {
+      $(this).parent().addClass('active');
+    }
+  });
+  $('input[name="annotazione_edit[visibile]"]').change(function() {
+    if ($(this).val() == '1') {
+      $('#individuale').show();
+    } else {
+      $('#individuale').hide();
+    }
+  });
+  // init
+  if ($('input[name="annotazione_edit[visibile]"]:checked').val() == '1') {
+    $('#individuale').show();
+    $('label.gs-checkbox-inline input:checked').parent().addClass('active');
+  }
+});
+</script>
 {% endblock %}

@@ -71,6 +71,14 @@ class Annotazione {
   private $visibile;
 
   /**
+   * @var Avviso $avviso Avviso a cui è associata l'annotazione
+   *
+   * @ORM\ManyToOne(targetEntity="Avviso", inversedBy="annotazioni")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $avviso;
+
+  /**
    * @var Classe $classe Classe a cui è riferita l'annotazione
    *
    * @ORM\ManyToOne(targetEntity="Classe")
@@ -185,6 +193,27 @@ class Annotazione {
    */
   public function setVisibile($visibile) {
     $this->visibile = ($visibile == true);
+    return $this;
+  }
+
+  /**
+   * Restituisce l'avviso a cui è associata l'annotazione
+   *
+   * @return Avviso Avviso a cui è associata l'annotazione
+   */
+  public function getAvviso() {
+    return $this->avviso;
+  }
+
+  /**
+   * Modifica l'avviso a cui è associata l'annotazione
+   *
+   * @param Avviso $avviso Avviso a cui è associata l'annotazione
+   *
+   * @return Annotazione Oggetto Annotazione
+   */
+  public function setAvviso(Avviso $avviso=null) {
+    $this->avviso = $avviso;
     return $this;
   }
 

@@ -18,10 +18,13 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
     {% for periodo,v in dati %}
   <div class="row gs-mb-1">
-    <div class="col-sm-6 text-info">
+    <div class="col-sm-4 text-info">
       <strong class="gs-big">{{ periodo }}</strong>
     </div>
-    <div class="col-sm-6 text-right">
+    <div class="col-sm-4 text-center">
+      <a class="btn btn-primary btn-sm" href="{{ path('lezioni_argomenti_programma', {'cattedra': cattedra.id}) }}" role="button" title="Scarica il programma svolto"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Programma svolto</strong></a>
+    </div>
+    <div class="col-sm-4 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {'cattedra': cattedra.id}) }}" role="button" title="Visualizza il riepilogo mensile delle lezioni"><span class="glyphicon glyphicon-list-alt gs-mr-3"></span><strong>Riepilogo mensile</strong></a>
     </div>
   </div>
