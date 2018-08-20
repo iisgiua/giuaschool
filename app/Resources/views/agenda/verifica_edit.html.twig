@@ -1,0 +1,131 @@
+{% extends 'agenda/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="panel panel-primary" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body">
+  {% if app.session.get('/APP/ROUTE/agenda_verifica_edit/conferma') > 0 %}
+    <div class="alert alert-warning" role="alert">
+      <div class="text-center"><strong class="gs-big">{{ 'message.verifiche_presenti'|trans|raw }}</strong></div>
+      <ol>
+    {% for v in verifiche %}
+        <li><strong>Materia: {{ v.cattedra.materia.nomeBreve }}</strong></li>
+    {% endfor %}
+      </ol>
+    </div>
+  {% endif %}
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+      {{ form_row(form.data) }}
+      {{ form_row(form.cattedra) }}
+      {{ form_row(form.testo) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required" for="avviso_edit_destinatari">Destinatari</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.filtro) }}
+          <div id="individuale" style="display:none">
+            <div class="col-sm-6"></div>
+            <div class="col-sm-6"></div>
+            {{ form_widget(form.filtroIndividuale) }}
+          </div>
+        </div>
+      </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+  {% include 'include/modal-waiting.html.twig' %}
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ date()|date('d/m/Y') }}",
+    datesDisabled: {{ lista_festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('#individuale').on('change', 'label.gs-checkbox-inline input', function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  });
+  // init
+  var cattedra = "{{ form.cattedra.vars.value }}";
+  $('#verifica_edit_cattedra').change(function() {
+    $(this).data("old", $(this).data("new") || cattedra);
+    $(this).data("new", $(this).val());
+    var v_old = $('#verifica_edit_cattedra option[value="'+$(this).data("old")+'"]').text() || "";
+    var v_new = $('#verifica_edit_cattedra option[value="'+$(this).data("new")+'"]').text() || "";
+    if (v_old.substring(0,4) != v_new.substring(0,4)) {
+      $('#verifica_edit_filtro').val('T').change();
+    }
+  });
+  // init
+  var preset=[{% for id in form.filtroIndividuale.vars.data|split(',') %}{{ id }},{% endfor %}];
+  $('#verifica_edit_filtro').change(function() {
+    if ($(this).val() == 'I') {
+      var l = $('#individuale').find('div.col-sm-6:nth-child(1)');
+      var r = $('#individuale').find('div.col-sm-6:nth-child(2)');
+      l.html('');
+      r.html('');
+      $('#gs-modal-waiting').modal('show');
+      $.ajax({
+        url: "{{ path('agenda_cattedra') }}/"+$('#verifica_edit_cattedra').val(),
+        dataType: "json",
+        external_preset: preset,
+        success: function (data) {
+          var sl='';
+          var sr='';
+          $.each(data, function(idx,item){
+            var s='<label class="gs-pt-0 gs-checkbox-split gs-checkbox-inline">'+
+                '<input type="checkbox" id="verifica_edit_filtroIndividuale_'+idx+
+                '" name="verifica_edit[filtroIndividuale][]" value="'+item.id+'"> '+item.nome+'</label>';
+            if (idx % 2 === 0) {
+              sl+=s;
+            } else {
+              sr+=s;
+            }
+            });
+          l.html(sl);
+          r.html(sr);
+          for (i in this.external_preset) {
+            $('input[name="verifica_edit[filtroIndividuale][]"][value="'+this.external_preset[i]+'"]').prop("checked", true).parent().addClass('active');
+          }
+          $('#individuale').show();
+          },
+        });
+      $('#gs-modal-waiting').modal('hide');
+      preset=[];
+    } else {
+      $('#individuale').hide();
+    }
+  }).change();
+  $('form[name="verifica_edit"]').submit(function() {
+    var opt = $('input[name="verifica_edit[filtroIndividuale][]"]:checked').map(function(i,el){return el.value;}).get();
+    $('#verifica_edit_filtroIndividuale').val(opt);
+  });
+});
+</script>
+{% endblock %}

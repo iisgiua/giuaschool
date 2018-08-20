@@ -1,0 +1,62 @@
+<p style="text-align:center; font-family:times; font-size:12pt">
+  <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
+  <strong><i></i></strong><br>
+</p>
+<p style="text-align:center; font-size:13pt">
+  <strong>Anno Scolastico 2017/2018</strong><br>
+  <strong>Assenze della classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
+</p>
+<br>
+<table border="1" cellpadding="2" style="font-size:10pt">
+  <tr nobr="true">
+    <td width="40%" style="text-align:center"><strong>Alunno</strong></td>
+    <td width="18%" style="text-align:center"><strong>Assenze</strong></td>
+    <td width="18%" style="text-align:center"><strong>Ritardi<br><em>(brevi)</em></strong></td>
+    <td width="8%" style="text-align:center"><strong>Uscite</strong></td>
+    <td width="16%" style="text-align:center"><strong>Ore totali<br><em>(% su {{ dati.monte }})</em></strong></td>
+  </tr>
+{% for alunno,a in dati.alunni %}
+  <tr nobr="true">
+    <td><strong>{{ a.nome }}</strong></td>
+    <td>
+  {% if dati.statistiche[alunno].assenze is defined %}
+      <strong>{{ dati.statistiche[alunno].assenze }}</strong>
+    {% if dati.statistiche[alunno]['giustifica-ass'] > 0 %}
+      <br><em>da giustificare: {{ dati.statistiche[alunno]['giustifica-ass'] }}</em>
+    {% endif %}
+  {% else %}
+      <strong>0</strong>
+  {% endif %}
+    </td>
+    <td>
+  {% if dati.statistiche[alunno].ritardi is defined %}
+      <strong>{{ dati.statistiche[alunno].ritardi }}</strong>
+    {% if dati.statistiche[alunno].brevi > 0 %}
+      <em>({{ dati.statistiche[alunno].brevi }})</em>
+    {% endif %}
+    {% if dati.statistiche[alunno]['giustifica-rit'] > 0 %}
+      <br><em>da giustificare: {{ dati.statistiche[alunno]['giustifica-rit'] }}</em>
+    {% endif %}
+  {% else %}
+      <strong>0</strong>
+  {% endif %}
+    </td>
+    <td>
+  {% if dati.statistiche[alunno].uscite is defined %}
+      <strong>{{ dati.statistiche[alunno].uscite }}</strong>
+  {% else %}
+      <strong>0</strong>
+  {% endif %}
+    </td>
+    <td>
+  {% if dati.statistiche[alunno].ore is defined %}
+      <strong>{{ dati.statistiche[alunno].ore }}</strong>
+      <br> <em>({{ dati.statistiche[alunno].perc }}%)</em>
+  {% else %}
+      <strong>0</strong>
+  {% endif %}
+    </td>
+  </tr>
+{% endfor %}
+</table>

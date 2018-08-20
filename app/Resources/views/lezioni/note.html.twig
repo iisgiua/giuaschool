@@ -1,0 +1,53 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
+  {% if not cattedra and not classe %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_note'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_note'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+    {% for periodo,v in dati %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-2">Data</th>
+        <th class="col-sm-2">Destinatari</th>
+        <th class="col-sm-5">Nota</th>
+        <th class="col-sm-3">Provvedimento</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for data,v1 in v %}
+        {% for tipo,v2 in v1 %}
+          {% for k,e in v2 %}
+      <tr>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza il registro del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
+        </td>
+          {% if tipo == 'classe' %}
+        <td><em>Tutta la classe</em></td>
+          {% else %}
+        <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
+          {% endif %}
+        <td><small>{{ e.nota }}<br><em>({{ e.nota_doc }})</em></small></td>
+        <td><small>{{ e.provvedimento ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</small></td>
+      </tr>
+          {% endfor %}
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+    {% else %}
+  <div class="alert alert-info" role="alert">
+    <strong class="gs-big">Non sono presenti note disciplinari</strong>
+  </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

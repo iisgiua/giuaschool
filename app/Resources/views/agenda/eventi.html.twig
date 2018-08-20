@@ -1,0 +1,99 @@
+{% extends 'agenda/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2 gs-mb-2">{{ 'title.agenda_eventi'|trans }}</h1>
+  <div class="row text-center gs-mb-3">
+    <a class="btn btn-primary" href="{{ path('agenda_eventi', {'mese': info.url_prec}) }}" title="Vai al mese precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span>{{ info.mese_prec }}</a>
+    <strong class="gs-big gs-mr-4 gs-ml-4">{{ info.mese }}</strong>
+    <a class="btn btn-primary" href="{{ path('agenda_eventi', {'mese': info.url_succ}) }}" title="Vai al mese successivo"><span class="glyphicon glyphicon-forward gs-mr-2"></span>{{ info.mese_succ }}</a>
+  </div>
+  <div class="row gs-mb-1">
+    <div class="col-sm-6">
+    </div>
+    <div class="col-sm-6 text-right">
+  {% if dati.azioni.add is defined %}
+      <a class="btn btn-primary" href="{{ path('agenda_verifica_edit', {'id': 0}) }}" role="button" title="Aggiungi una nuova verifica"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi verifica</a>
+  {% endif %}
+    </div>
+  </div>
+  <table class="table table-bordered gs-mb-5">
+    <thead class="bg-success">
+      <tr>
+        <th class="text-center col-sm-2">{{ 'label.lunedi'|trans }}</th>
+        <th class="text-center col-sm-2">{{ 'label.martedi'|trans }}</th>
+        <th class="text-center col-sm-2">{{ 'label.mercoledi'|trans }}</th>
+        <th class="text-center col-sm-2">{{ 'label.giovedi'|trans }}</th>
+        <th class="text-center col-sm-2">{{ 'label.venerdi'|trans }}</th>
+        <th class="text-center col-sm-2">{{ 'label.sabato'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+  {% for i in (1-info.inizio) .. info.ultimo_giorno %}
+    {% if i < 1 %}
+      <td class="gs-bg-muted">&nbsp;</td>
+    {% else %}
+      {% if loop.index % 7 == 0 %}
+        {% if not loop.last %}
+    </tr>
+    <tr>
+        {% endif %}
+      {% elseif dati[i].festivo is defined %}
+      <td class="text-center bg-warning gs-td-middle gs-pt-5 gs-pb-5">
+        <strong class="text-warning gs-big">{{ i }}</strong>
+      </td>
+      {% else %}
+      <td class="text-center gs-td-middle {{ dati[i] is defined ? 'bg-info gs-pt-1 gs-pb-1' : 'gs-pt-5 gs-pb-5' }}">
+        <strong class="gs-big">{{ i }}</strong>
+        {% if dati[i] is defined %}
+        <div class="btn-group-vertical" role="group">
+          {% if dati[i].colloqui is defined %}
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i colloqui previsti in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('agenda_eventi_dettagli', {'data': (mese|date('Y-m-'))~('%02d'|format(i)), 'tipo': 'C'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Colloqui</strong></button>
+          {% endif %}
+          {% if dati[i].verifiche is defined %}
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('agenda_eventi_dettagli', {'data': (mese|date('Y-m-'))~('%02d'|format(i)), 'tipo': 'V'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche</strong></button>
+          {% endif %}
+          {% if dati[i].attivita is defined %}
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le attività previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('agenda_eventi_dettagli', {'data': (mese|date('Y-m-'))~('%02d'|format(i)), 'tipo': 'A'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Attività</strong></button>
+          {% endif %}
+        </div>
+        {% endif %}
+      </td>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  {% if info.fine > 0 %}
+    {% for i in 1 .. info.fine %}
+      <td class="gs-bg-muted">&nbsp;</td>
+    {% endfor %}
+  {% endif %}
+      </tr>
+    </tbody>
+  </table>
+  {% include 'include/modal-remote.html.twig' %}
+  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_verifica'} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+});
+</script>
+{% endblock %}

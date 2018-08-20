@@ -1,0 +1,15 @@
+{% extends 'procedure/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  {% for tipo,m in app.flashes %}
+  <div class="alert alert-{{ tipo }} gs-mb-1" role="alert">
+    {% for messaggio in m %}
+    {{ messaggio|raw }}<br>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  {% include('include/form.html.twig') %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,41 @@
+<p style="text-align:center; font-family:times; font-size:12pt">
+  <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
+  <strong><i></i></strong><br>
+</p>
+<p style="text-align:center; font-size:13pt">
+  <strong>Anno Scolastico 2017/2018</strong><br>
+  <strong>Medie dei voti della classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
+</p>
+<br>
+<div style="text-align:center"><strong>{{ dati.periodo }}</strong></div>
+<table border="1" cellpadding="2" style="font-size:9pt">
+  <tr nobr="true">
+    <td style="text-align:center"><strong>Alunno</strong></td>
+{% for materia,m in dati.materie %}
+    <td style="text-align:center"><strong>{{ m.nomeBreve }}</strong></td>
+{% endfor %}
+    <td style="text-align:center"><strong>Media</strong></td>
+  </tr>
+{% for alunno,a in dati.alunni %}
+  <tr nobr="true">
+    <td><strong>{{ a.nome }}</strong><br><span style="font-size:8pt">({{ a.nascita }})</span></td>
+  {% for materia,m in dati.materie %}
+    <td>
+    {% if dati.medie[alunno][materia] is defined %}
+      {{ dati.medie[alunno][materia] }}
+    {% else %}
+      --
+    {% endif %}
+    </td>
+  {% endfor %}
+    <td>
+  {% if dati.medie[alunno][0] is defined %}
+    <strong>{{ dati.medie[alunno][0] }}</strong>
+  {% else %}
+    --
+  {% endif %}
+    </td>
+  </tr>
+{% endfor %}
+</table>

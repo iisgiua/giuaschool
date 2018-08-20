@@ -1,0 +1,70 @@
+{% extends 'documenti/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% include 'ruolo_docente/menu_documenti.html.twig' %}
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_relazioni'|trans }}</h1>
+  {% if dati is empty %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.no_cattedra_relazioni'|trans }}</strong>
+  </div>
+  {% else %}
+  <table class="table table-bordered table-hover table-striped gs-mt-5">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-5">{{ 'label.cattedra'|trans }}</th>
+        <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for d in dati %}
+      <tr>
+        <td>
+          <strong>{{ d.anno }}ª {{ d.sezione }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
+          <strong>{{ d.materia }}</strong>
+        </td>
+        <td>
+      {% if d.documento_id %}
+          <a class="" href="{{ path('file_documento', {'tipo': 'R', 'id': d.documento_id}) }}" title="Scarica la relazione indicata">
+          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.file }}</strong>
+          </a><br>
+          <small>Dimensione: {{ d.dimensione }} KB</small>
+      {% else %}
+          <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
+      {% endif %}
+        </td>
+        <td>
+      {% if d.add is defined %}
+          <a class="btn btn-primary btn-xs" href="{{ path('documenti_relazione_edit', {'classe': d.classe_id, 'materia': d.materia_id, 'id': 0}) }}" role="button" title="Inserisci la relazione finale"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+      {% else %}
+        {% if d.edit is defined %}
+          <a class="btn btn-primary btn-xs gs-mr-2 gs-mb-1" href="{{ path('documenti_relazione_edit', {'classe': d.classe_id, 'materia': d.materia_id, 'id': d.documento_id}) }}" role="button" title="Modifica la relazione indicata"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
+        {% endif %}
+        {% if d.delete is defined %}
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la relazione indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'id': d.documento_id, 'tipo': 'R'}) }}" data-text="{{ 'message.cancella_relazione'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+        {% endif %}
+      {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_relazione'} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+});
+</script>
+{% endblock %}

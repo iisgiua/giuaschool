@@ -1,0 +1,6 @@
+<nav>
+  <ul class="nav nav-tabs">
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'bacheca_avvisi' ? ' class="active"' }}><a href="{{ path('bacheca_avvisi') }}" title="Visualizza gli avvisi indirizzati al docente">Avvisi</a></li>
+  </ul>
+</nav>
+

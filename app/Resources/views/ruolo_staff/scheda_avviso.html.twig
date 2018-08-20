@@ -1,0 +1,95 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">
+    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    <span class="sr-only">{{ 'label.close'|trans }}</span>
+  </button>
+  <h3 class="modal-title gs-h3">{{ dati.avviso.data|date('d/m/Y') }}</h3>
+  <h4 class="modal-title gs-h4"><em>{{ dati.avviso.oggetto }}</em></h4>
+</div>
+<div class="modal-body">
+  <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
+    <div class="gs-text-normal">{{ dati.testo|nl2br }}</div>
+    <div class="text-right gs-text-normal"><em>({{ dati.avviso.docente.nome }} {{ dati.avviso.docente.cognome }})</em></div>
+  </div>
+{% if dati.avviso.destinatariStaff %}
+  <div class="gs-mt-2">
+    <strong>Destinatari dello staff:</strong> {% for s in dati.sedi %}{{ s.citta }}{{ not loop.last ? ', ' }}{% endfor %}
+  </div>
+{% endif %}
+{% if dati.avviso.destinatariCoordinatori + dati.avviso.destinatariDocenti + dati.avviso.destinatariGenitori + dati.avviso.destinatariAlunni - dati.avviso.destinatariIndividuali > 0 %}
+  <div class="gs-mt-2">
+    <strong>Destinatari:</strong>
+  {% if dati.avviso.destinatariCoordinatori %}
+      Coordinatori{{ dati.avviso.destinatariDocenti + dati.avviso.destinatariGenitori + dati.avviso.destinatariAlunni - dati.avviso.destinatariIndividuali > 0 ? ',' }}
+  {% endif %}
+  {% if dati.avviso.destinatariDocenti %}
+      Docenti{{ dati.avviso.destinatariGenitori + dati.avviso.destinatariAlunni - dati.avviso.destinatariIndividuali > 0 ? ',' }}
+  {% endif %}
+  {% if dati.avviso.destinatariGenitori and not dati.avviso.destinatariIndividuali %}
+      Genitori{{ dati.avviso.destinatariAlunni ? ',' }}
+  {% endif %}
+  {% if dati.avviso.destinatariAlunni %}
+      Alunni
+  {% endif %}
+  </div>
+{% endif %}
+{% if dati.classi|length > 0 %}
+  <div class="gs-mt-2">
+    <strong>Classi:</strong>
+  {% for c in dati.classi %}
+    {{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ',' }}
+  {% endfor %}
+  </div>
+{% endif %}
+{% if dati.utenti|length > 0 %}
+  <div class="gs-mt-2">
+    <strong>Singoli genitori (classe {{ dati.utenti[0].anno }}ª {{ dati.utenti[0].sezione }}):</strong>
+  {% for u in dati.utenti %}
+    {{ u.cognome }} {{ u.nome }} ({{ u.letto ? 'letto '~(u.letto|date('d/m/Y G:i')) : 'non letto' }}){{ not loop.last ? ',' }}
+  {% endfor %}
+  </div>
+{% endif %}
+{% if dati.avviso.destinatariAlunni %}
+  <div class="gs-mt-2">
+    <strong>Letto nelle classi:</strong>
+  {% set letto = false %}
+  {% for c in dati.classi %}{% if c.lettoAlunni %}{{ letto ? ', ' }}{{ c.anno }}ª {{ c.sezione }} ({{ c.lettoAlunni|date('d/m/Y G:i') }}){% set letto = true %}{% endif %}{% endfor %}
+  {% if not letto %}NESSUNA{% endif %}
+  </div>
+{% endif %}
+{% if dati.avviso.destinatariCoordinatori %}
+  <div class="gs-mt-2">
+    <strong>Letto dai coordinatori:</strong>
+  {% set letto = false %}
+  {% for c in dati.classi %}{% if c.lettoCoordinatore %}{{ letto ? ', ' }}{{ c.anno }}ª {{ c.sezione }} ({{ c.lettoCoordinatore|date('d/m/Y G:i') }}){% set letto = true %}{% endif %}{% endfor %}
+  {% if not letto %}NESSUNO{% endif %}
+  </div>
+{% endif %}
+{% if dati.avviso.allegati|length > 0 %}
+  <div class="gs-mt-2">
+    <strong>Allegati:</strong>
+  {% for a in dati.avviso.allegati %}
+    <a class="gs-ml-3" href="{{ path('file_avviso', {'avviso': dati.avviso.id, 'allegato': loop.index}) }}" title="Scarica l'allegato"><strong>Allegato-{{ loop.index }}</strong></a>
+  {% endfor %}
+  </div>
+{% endif %}
+  <div class="gs-mt-2">
+    <strong>Annotazione sul Registro:</strong> {{ dati.avviso.annotazioni|length > 0 ? 'Si' : 'No' }}
+  </div>
+  <div class="gs-mt-2">
+    <strong>Tipo di avviso:</strong>
+  {% if dati.avviso.tipo == 'U' %}
+    Uscita anticipata della classe
+  {% elseif dati.avviso.tipo == 'E' %}
+    Ingresso posticipato della classe
+  {% elseif dati.avviso.tipo == 'V' %}
+    Calendario verifiche
+  {% elseif dati.avviso.tipo == 'A' %}
+    Calendario attività
+  {% elseif dati.avviso.tipo == 'C' %}
+    Comunicazione generica
+  {% elseif dati.avviso.tipo == 'I' %}
+    Comunicazione individuale
+  {% endif %}
+  </div>
+</div>

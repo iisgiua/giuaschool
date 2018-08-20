@@ -1,0 +1,7 @@
+<nav>
+  <ul class="nav nav-tabs">
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'documenti_programmi' ? ' class="active"' }}><a href="{{ path('documenti_programmi') }}" title="Inserimento dei programmi svolti">Programmi</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'documenti_relazioni' ? ' class="active"' }}><a href="{{ path('documenti_relazioni') }}" title="Inserimento delle relazioni finali">Relazioni</a></li>
+  </ul>
+</nav>
+
