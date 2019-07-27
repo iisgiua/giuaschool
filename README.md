@@ -98,14 +98,14 @@ Normalmente il percorso di questa cartella è simile a quanto segue:
 Aprire una finestra di terminale (o *Prompt dei comandi* per
 i sistemi Windows) e posizionarsi all'interno della cartella dove si sono
 estratti i file di *giua@school*.
-Ad esempio, il comando per posizionarsi nella cartella "giua-school", dove si trovano i file
+Ad esempio, il comando per posizionarsi nella cartella "giuaschool", dove si trovano i file
 dell'applicazione, sarà il seguente:
 ```
 ### SISTEMI WINDOWS
-cd <percorso_installazione_xampp>\xampp\htdocs\giua-school
+cd <percorso_installazione_xampp>\xampp\htdocs\giuaschool
 
 ### SISTEMI LINUX
-cd <percorso_installazione_xampp>/lampp/htdocs/giua-school
+cd <percorso_installazione_xampp>/lampp/htdocs/giuaschool
 ```
 
 Sempre dalla finestra di terminale, eseguire il seguente comando per verificare che i requisiti di sistema siano
@@ -166,10 +166,10 @@ A questo punto, inserire i dati iniziali del sistema, eseguendo il seguente coma
 dalla finestra di terminale:
 ```
 ### SISTEMI WINDOWS
-<percorso_installazione_xampp>\xampp\php\php bin\console doctrine:database:import dati_iniziali.sql
+<percorso_installazione_xampp>\xampp\php\php bin\console doctrine:fixtures:load
 
 ### SISTEMI LINUX
-<percorso_installazione_xampp>/lampp/bin/php bin/console doctrine:database:import dati_iniziali.sql
+<percorso_installazione_xampp>/lampp/bin/php bin/console doctrine:fixtures:load
 ```
 
 
@@ -194,14 +194,6 @@ andando all'indirizzo: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 Per poter provare l'applicazione, sono stati configurati alcuni utenti:
   - **admin**: amministratore di sistema
   - **preside**: preside
-  - **docente1**: docente di Informatica (fa parte dei collaboratori del dirigente)
-  - **docente2**: docente di Lettere
-  - **docente3**: ITP di Informatica
-  - **docente4**: docente di Matematica
-  - **docente5**: docente di Sostegno
-  - **alunno1.f1**: genitore di un alunno con sostegno
-  - **alunno2.f1**: genitore di un alunno
-  - **alunno3.f1**: genitore di un alunno
 
 La password è uguale per tutti gli utenti ed è la seguente:
   - **12345678**
