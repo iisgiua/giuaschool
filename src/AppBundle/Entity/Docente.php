@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -47,33 +47,61 @@ class Docente extends Utente {
   private $chiave3;
 
   /**
-   * @var boolean $rappresentanteIstituto Indica se il docente è rappresentante di istituto
+   * @var string $otp Codice segreto per accesso con OTP (se NULL non è attivato)
    *
-   * @ORM\Column(name="rappresentante_istituto", type="boolean", nullable=false)
+   * @ORM\Column(type="string", length=128, nullable=true)
    */
-  private $rappresentanteIstituto;
+  private $otp;
+
+  /**
+   * @var string $ultimoOtp Codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @ORM\Column(name="ultimo_otp", type="string", length=16, nullable=true)
+   */
+  private $ultimoOtp;
 
 
   //==================== METODI SETTER/GETTER ====================
 
   /**
-   * Indica se il docente è rappresentante di istituto oppure no
+   * Restituisce il token segreto per l'accesso con OTP (se NULL non è attivato)
    *
-   * @return boolean Vero se il docente è rappresentante di istituto, falso altrimenti
+   * @return string $otp Token segreto per l'accesso con OTP
    */
-  public function getRappresentanteIstituto() {
-    return $this->rappresentanteIstituto;
+  public function getOtp() {
+    return $this->otp;
   }
 
   /**
-   * Modifica se il docente è rappresentante di istituto oppure no
+   * Modifica il token segreto per l'accesso con OTP (se NULL non è attivato)
    *
-   * @param boolean $rappresentanteIstituto Vero se il docente è rappresentante di istituto, falso altrimenti
+   * @param string $otp Token segreto per l'accesso con OTP
    *
    * @return Docente Oggetto Docente
    */
-  public function setRappresentanteIstituto($rappresentanteIstituto) {
-    $this->rappresentanteIstituto = ($rappresentanteIstituto == true);
+  public function setOtp($otp) {
+    $this->otp = $otp;
+    return $this;
+  }
+
+  /**
+   * Restituisce il codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @return string Codice OTP usato l'ultima volta
+   */
+  public function getUltimoOtp() {
+    return $this->ultimoOtp;
+  }
+
+  /**
+   * Modifica il codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @param string $ultimoOtp Codice OTP usato l'ultima volta
+   *
+   * @return Docente Oggetto Docente
+   */
+  public function setUltimoOtp($ultimoOtp) {
+    $this->ultimoOtp = $ultimoOtp;
     return $this;
   }
 
@@ -86,7 +114,6 @@ class Docente extends Utente {
   public function __construct() {
     // valori predefiniti
     parent::__construct();
-    $this->rappresentanteIstituto = false;
   }
 
   /**

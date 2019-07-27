@@ -12,8 +12,8 @@
 namespace Symfony\Component\Translation\Tests\Dumper;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Dumper\FileDumper;
+use Symfony\Component\Translation\MessageCatalogue;
 
 class FileDumperTest extends TestCase
 {
@@ -28,6 +28,8 @@ class FileDumperTest extends TestCase
         $dumper->dump($catalogue, array('path' => $tempDir));
 
         $this->assertFileExists($tempDir.'/messages.en.concrete');
+
+        @unlink($tempDir.'/messages.en.concrete');
     }
 
     /**

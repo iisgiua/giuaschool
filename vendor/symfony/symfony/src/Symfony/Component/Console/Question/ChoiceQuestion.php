@@ -26,8 +26,6 @@ class ChoiceQuestion extends Question
     private $errorMessage = 'Value "%s" is invalid';
 
     /**
-     * Constructor.
-     *
      * @param string $question The question to ask to the user
      * @param array  $choices  The list of available choices
      * @param mixed  $default  The default answer to return
@@ -158,7 +156,7 @@ class ChoiceQuestion extends Question
                     }
                 }
 
-                if (count($results) > 1) {
+                if (\count($results) > 1) {
                     throw new InvalidArgumentException(sprintf('The provided answer is ambiguous. Value should be one of %s.', implode(' or ', $results)));
                 }
 

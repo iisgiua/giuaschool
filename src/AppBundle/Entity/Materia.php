@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -68,12 +68,12 @@ class Materia {
   private $nomeBreve;
 
   /**
-   * @var string $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, U=supplenza, A=alternanza scuola-lavoro]
+   * @var string $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, U=supplenza]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","R","S","C","U","A"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","R","S","C","U"}, strict=true, message="field.choice")
    */
   private $tipo;
 
@@ -179,7 +179,7 @@ class Materia {
   }
 
   /**
-   * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, A=alternanza, P=potenziamento]
+   * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, U=supplenza]
    *
    * @return string Tipo della materia
    */
@@ -188,7 +188,7 @@ class Materia {
   }
 
   /**
-   * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, A=alternanza, P=potenziamento]
+   * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, U=supplenza]
    *
    * @param string $tipo Tipo della materia
    *

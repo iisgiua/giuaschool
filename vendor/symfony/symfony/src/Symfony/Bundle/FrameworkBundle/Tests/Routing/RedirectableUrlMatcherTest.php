@@ -12,10 +12,10 @@
 namespace Symfony\Bundle\FrameworkBundle\Tests\Routing;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
 use Symfony\Bundle\FrameworkBundle\Routing\RedirectableUrlMatcher;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\RouteCollection;
 
 class RedirectableUrlMatcherTest extends TestCase
 {
@@ -25,10 +25,6 @@ class RedirectableUrlMatcherTest extends TestCase
         $coll->add('foo', new Route('/foo/'));
 
         $matcher = new RedirectableUrlMatcher($coll, $context = new RequestContext());
-        $parameters = $matcher->match('/foo');
-        if ('foo' === $parameters['_route']) {
-            $parameters['_route'] = null; // FC with behavior on 3.4
-        }
 
         $this->assertEquals(array(
                 '_controller' => 'Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction',
@@ -37,9 +33,9 @@ class RedirectableUrlMatcherTest extends TestCase
                 'scheme' => null,
                 'httpPort' => $context->getHttpPort(),
                 'httpsPort' => $context->getHttpsPort(),
-                '_route' => null,
+                '_route' => 'foo',
             ),
-            $parameters
+            $matcher->match('/foo')
         );
     }
 

@@ -195,18 +195,18 @@ class Parser
                     default:
                         if ('(' === $this->stream->current->value) {
                             if (false === isset($this->functions[$token->value])) {
-                                throw new SyntaxError(sprintf('The function "%s" does not exist', $token->value), $token->cursor, $this->stream->getExpression());
+                                throw new SyntaxError(sprintf('The function "%s" does not exist', $token->value), $token->cursor, $this->stream->getExpression(), $token->value, array_keys($this->functions));
                             }
 
                             $node = new Node\FunctionNode($token->value, $this->parseArguments());
                         } else {
-                            if (!in_array($token->value, $this->names, true)) {
-                                throw new SyntaxError(sprintf('Variable "%s" is not valid', $token->value), $token->cursor, $this->stream->getExpression());
+                            if (!\in_array($token->value, $this->names, true)) {
+                                throw new SyntaxError(sprintf('Variable "%s" is not valid', $token->value), $token->cursor, $this->stream->getExpression(), $token->value, $this->names);
                             }
 
                             // is the name used in the compiled code different
                             // from the name used in the expression?
-                            if (is_int($name = array_search($token->value, $this->names))) {
+                            if (\is_int($name = array_search($token->value, $this->names))) {
                                 $name = $token->value;
                             }
 
@@ -305,14 +305,14 @@ class Parser
     public function parsePostfixExpression($node)
     {
         $token = $this->stream->current;
-        while ($token->type == Token::PUNCTUATION_TYPE) {
+        while (Token::PUNCTUATION_TYPE == $token->type) {
             if ('.' === $token->value) {
                 $this->stream->next();
                 $token = $this->stream->current;
                 $this->stream->next();
 
                 if (
-                    $token->type !== Token::NAME_TYPE
+                    Token::NAME_TYPE !== $token->type
                     &&
                     // Operators like "not" and "matches" are valid method or property names,
                     //
@@ -325,7 +325,7 @@ class Parser
                     // Other types, such as STRING_TYPE and NUMBER_TYPE, can't be parsed as property nor method names.
                     //
                     // As a result, if $token is NOT an operator OR $token->value is NOT a valid property or method name, an exception shall be thrown.
-                    ($token->type !== Token::OPERATOR_TYPE || !preg_match('/[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/A', $token->value))
+                    (Token::OPERATOR_TYPE !== $token->type || !preg_match('/[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/A', $token->value))
                 ) {
                     throw new SyntaxError('Expected name', $token->cursor, $this->stream->getExpression());
                 }

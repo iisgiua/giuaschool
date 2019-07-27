@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,8 +14,7 @@ namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -29,8 +28,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use AppBundle\Entity\Cattedra;
 use AppBundle\Util\CsvImporter;
+use AppBundle\Util\LogHandler;
+use AppBundle\Util\PdfManager;
 
 
 /**
@@ -43,8 +45,8 @@ class DocentiController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/", name="docenti")
-   * @Method("GET")
+   * @Route("/docenti/", name="docenti",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -62,8 +64,8 @@ class DocentiController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/importa/", name="docenti_importa")
-   * @Method({"GET", "POST"})
+   * @Route("/docenti/importa/", name="docenti_importa",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -120,10 +122,10 @@ class DocentiController extends Controller {
    * @param SessionInterface $session Gestore delle sessioni
    * @param int $page Numero di pagina per la lista dei docenti
    *
-   * @Route("/docenti/modifica/", name="docenti_modifica", defaults={"page": 0})
-   * @Route("/docenti/modifica/{page}", name="docenti_modifica-param", requirements={"page": "\d+"})
-   *
-   * @Method({"GET", "POST"})
+   * @Route("/docenti/modifica/", name="docenti_modifica", defaults={"page": 0},
+   *    methods={"GET", "POST"})
+   * @Route("/docenti/modifica/{page}", name="docenti_modifica-param", requirements={"page": "\d+"},
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -191,8 +193,8 @@ class DocentiController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/docenti/modifica/enable/{id}/{enable}", name="docenti_modifica_enable",
-   *    requirements={"id": "\d+", "enable": "true|false"})
-   * @Method({"GET"})
+   *    requirements={"id": "\d+", "enable": "true|false"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -219,16 +221,21 @@ class DocentiController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/modifica/edit/{id}", name="docenti_modifica_edit", requirements={"id": "\d+"})
-   * @Method({"GET", "POST"})
+   * @Route("/docenti/modifica/edit/{id}", name="docenti_modifica_edit",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
   public function modificaEditAction(Request $request, EntityManagerInterface $em, $id) {
+    // edit
     $docente = $em->getRepository('AppBundle:Docente')->find($id);
-    if ($docente) {
-      // form
-      $form = $this->container->get('form.factory')->createNamedBuilder('docenti_modifica_edit', FormType::class, $docente)
+    if (!$docente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // form
+    $form = $this->container->get('form.factory')->createNamedBuilder('docenti_modifica_edit', FormType::class, $docente)
         ->add('nome', TextType::class, array('label' => 'label.nome',
           'required' => true))
         ->add('cognome', TextType::class, array('label' => 'label.cognome',
@@ -239,35 +246,33 @@ class DocentiController extends Controller {
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline'],
           'required' => true))
-        ->add('email', TextType::class, array('label' => 'label.email',
-          'required' => true))
-        ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
-          'required' => false))
-        ->add('submit', SubmitType::class, array('label' => 'label.submit',
-          'attr' => ['widget' => 'gs-button-start']))
-        ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-          'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$this->generateUrl('docenti_modifica')."'"]))
-        ->getForm();
-      $form->handleRequest($request);
-      if ($form->isSubmitted() && $form->isValid()) {
-        // memorizza modifiche
-        $em->flush();
-        // redirect
-        return $this->redirectToRoute('docenti_modifica');
-      }
-      // mostra la pagina di risposta
-      return $this->render('docenti/edit.html.twig', array(
-        'pagina_titolo' => 'page.modifica_docenti',
-        'form' => $form->createView(),
-        'form_title' => 'title.modifica_docenti',
-        'form_help' => 'message.required_fields',
-        'form_success' => null,
-      ));
-    } else {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
+      ->add('username', TextType::class, array('label' => 'label.username',
+        'required' => true))
+      ->add('email', TextType::class, array('label' => 'label.email',
+        'required' => true))
+      ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']))
+      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$this->generateUrl('docenti_modifica')."'"]))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // memorizza modifiche
+      $em->flush();
+      // redirect
+      return $this->redirectToRoute('docenti_modifica');
     }
-  }
+    // mostra la pagina di risposta
+    return $this->render('docenti/edit.html.twig', array(
+      'pagina_titolo' => 'page.modifica_docenti',
+      'form' => $form->createView(),
+      'form_title' => 'title.modifica_docenti',
+      'form_help' => 'message.required_fields',
+      'form_success' => null,
+    ));
+   }
 
   /**
    * Gestisce la modifica delle cattedre dei docenti
@@ -277,10 +282,10 @@ class DocentiController extends Controller {
    * @param SessionInterface $session Gestore delle sessioni
    * @param int $page Numero di pagina per la lista delle cattedre
    *
-   * @Route("/docenti/cattedre/", name="docenti_cattedre", defaults={"page": 0})
-   * @Route("/docenti/cattedre/{page}", name="docenti_cattedre-param", requirements={"page": "\d+"})
-   *
-   * @Method({"GET", "POST"})
+   * @Route("/docenti/cattedre/", name="docenti_cattedre", defaults={"page": 0},
+   *    methods={"GET", "POST"})
+   * @Route("/docenti/cattedre/{page}", name="docenti_cattedre-param", requirements={"page": "\d+"},
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -377,9 +382,8 @@ class DocentiController extends Controller {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    *
-   * @Route("/docenti/cattedre/add/", name="docenti_cattedre_add")
-   *
-   * @Method({"GET", "POST"})
+   * @Route("/docenti/cattedre/add/", name="docenti_cattedre_add",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -433,7 +437,7 @@ class DocentiController extends Controller {
           },
         'required' => false))
       ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-        'choices' => array('label.tipo_N' => 'N', 'label.tipo_I' => 'I', 'label.tipo_S' => 'S', 'label.tipo_P' => 'P'),
+        'choices' => array('label.tipo_N' => 'N', 'label.tipo_I' => 'I', 'label.tipo_P' => 'P'),
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
@@ -451,7 +455,7 @@ class DocentiController extends Controller {
       $cattedra->setAttiva(true);
       if ($cattedra->getMateria()->getTipo() == 'S') {
         // sostegno
-        $cattedra->setTipo('S');
+        //-- $cattedra->setTipo('S');
         if ($cattedra->getAlunno() && $cattedra->getAlunno()->getClasse() != $cattedra->getClasse()) {
           // classe diversa da quella di alunno
           $form->get('classe')->addError(new FormError($this->get('translator')->trans('exception.classe_errata')));
@@ -501,8 +505,8 @@ class DocentiController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/docenti/cattedre/enable/{id}/{enable}", name="docenti_cattedre_enable",
-   *    requirements={"id": "\d+", "enable": "true|false"})
-   * @Method({"GET"})
+   *    requirements={"id": "\d+", "enable": "true|false"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -528,8 +532,8 @@ class DocentiController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/colloqui/", name="docenti_colloqui")
-   * @Method({"GET", "POST"})
+   * @Route("/docenti/colloqui/", name="docenti_colloqui",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -559,6 +563,384 @@ class DocentiController extends Controller {
       'form_help' => 'message.docenti_colloqui_importa',
       'form_success' => null,
     ));
+  }
+
+  /**
+   * Gestione dell'assegnamento del ruolo di staff
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/staff/", name="docenti_staff",
+   *    methods={"GET", "POST"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function staffAction(Request $request, EntityManagerInterface $em) {
+    // form
+    $form = $this->container->get('form.factory')->createNamedBuilder('docenti_staff', FormType::class)
+      ->add('docente', EntityType::class, array('label' => 'label.docente',
+        'class' => 'AppBundle:Docente',
+        'choice_label' => function ($obj) {
+            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')';
+          },
+        'placeholder' => 'label.choose_option',
+        'query_builder' => function (EntityRepository $er) {
+            return $er->createQueryBuilder('d')
+              ->where('d INSTANCE OF AppBundle:Docente AND d.abilitato=1')
+              ->orderBy('d.cognome,d.nome', 'ASC');
+          },
+        'required' => true))
+      ->add('sede', EntityType::class, array('label' => 'label.sede',
+        'class' => 'AppBundle:Sede',
+        'choice_label' => 'citta',
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // form inviato
+      $docente = $form->get('docente')->getData();
+      if ($docente && $docente->getAbilitato()) {
+        // ruolo di staff
+        $sede = ($form->get('sede')->getData() ? $form->get('sede')->getData()->getId() : null);
+        $sql = "UPDATE gs_utente SET modificato=NOW(),ruolo='STA',sede_id=:sede WHERE id=:id";
+        $params = array('id' => $docente->getId(), 'sede' => $sede);
+        $em->getConnection()->prepare($sql)->execute($params);
+        // svuota cache
+        $em->clear();
+      }
+    }
+    // lista staff aggiornata
+    $staff = $em->getRepository('AppBundle:Staff')->findBy(array(), array('cognome' => 'ASC', 'nome' => 'ASC'));
+    // mostra la pagina di risposta
+    return $this->render('docenti/staff.html.twig', array(
+      'pagina_titolo' => 'page.staff',
+      'staff' => $staff,
+      'form' => $form->createView(),
+      'form_title' => 'title.staff',
+      'form_help' => 'message.required_fields',
+      'form_success' => null,
+    ));
+  }
+
+  /**
+   * Gestione della cancellazione del ruolo di staff
+   *
+   * @param int $id ID dell'utente
+   * @param EntityManagerInterface $em Gestore delle entità
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/staff/delete/{id}", name="docenti_staff_delete", requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function staffDeleteAction($id, EntityManagerInterface $em) {
+    $user = $em->getRepository('AppBundle:Staff')->find($id);
+    if ($user) {
+      // toglie ruolo di staff
+      $sql = "UPDATE gs_utente SET modificato=NOW(),ruolo='DOC',sede_id=:sede WHERE id=:id";
+      $params = array('id' => $user->getId(), 'sede' => null);
+      $em->getConnection()->prepare($sql)->execute($params);
+    } else {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // redirezione
+    return $this->redirectToRoute('docenti_staff');
+  }
+
+  /**
+   * Gestione dell'assegnamento del ruolo di coordinatore
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/coordinatore/", name="docenti_coordinatori",
+   *    methods={"GET", "POST"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function coordinatoriAction(Request $request, EntityManagerInterface $em) {
+    // form
+    $form = $this->container->get('form.factory')->createNamedBuilder('docenti_coordinatori', FormType::class)
+      ->add('classe', EntityType::class, array('label' => 'label.classe',
+        'class' => 'AppBundle:Classe',
+        'choice_label' => function ($obj) {
+            return $obj->getAnno().' '.$obj->getSezione();
+          },
+        'placeholder' => 'label.choose_option',
+        'query_builder' => function (EntityRepository $er) {
+            return $er->createQueryBuilder('c')->orderBy('c.anno,c.sezione', 'ASC');
+          },
+        'group_by' => 'sede.citta',
+        'required' => true))
+      ->add('docente', EntityType::class, array('label' => 'label.docente',
+        'class' => 'AppBundle:Docente',
+        'choice_label' => function ($obj) {
+            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')';
+          },
+        'placeholder' => 'label.choose_option',
+        'query_builder' => function (EntityRepository $er) {
+            return $er->createQueryBuilder('d')
+              ->where('d NOT INSTANCE OF AppBundle:Preside AND d.abilitato=1')
+              ->orderBy('d.cognome,d.nome', 'ASC');
+          },
+        'required' => true))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // form inviato
+      $classe = $form->get('classe')->getData();
+      $docente = $form->get('docente')->getData();
+      if ($classe && $docente && $docente->getAbilitato()) {
+        // coordinatore
+        $classe->setCoordinatore($docente);
+        $em->flush();
+      }
+    }
+    // lista aggiornata
+    $lista = $em->getRepository('AppBundle:Classe')->createQueryBuilder('c')
+      ->select('c.id,c.anno,c.sezione,co.cognome,co.nome,co.username,s.citta')
+      ->join('c.coordinatore', 'co')
+      ->join('c.sede', 's')
+      ->orderBy('c.sede,c.anno,c.sezione', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    // mostra la pagina di risposta
+    return $this->render('docenti/coordinatori.html.twig', array(
+      'pagina_titolo' => 'page.coordinatore',
+      'lista' => $lista,
+      'form' => $form->createView(),
+      'form_title' => 'title.coordinatore',
+      'form_help' => 'message.required_fields',
+      'form_success' => null,
+    ));
+  }
+
+  /**
+   * Gestione della cancellazione del ruolo di coordinatore
+   *
+   * @param int $id ID dell'utente
+   * @param EntityManagerInterface $em Gestore delle entità
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/coordinatori/delete/{id}", name="docenti_coordinatori_delete", requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function coordinatoriDeleteAction($id, EntityManagerInterface $em) {
+    $classe = $em->getRepository('AppBundle:Classe')->find($id);
+    if ($classe) {
+      // toglie ruolo di coordinatore
+      $classe->setCoordinatore(null);
+      $em->flush();
+    } else {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // redirezione
+    return $this->redirectToRoute('docenti_coordinatori');
+  }
+
+  /**
+   * Gestione dell'assegnamento del ruolo di segretario
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/segretari/", name="docenti_segretari",
+   *    methods={"GET", "POST"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function segretariAction(Request $request, EntityManagerInterface $em) {
+    // form
+    $form = $this->container->get('form.factory')->createNamedBuilder('docenti_coordinatori', FormType::class)
+      ->add('classe', EntityType::class, array('label' => 'label.classe',
+        'class' => 'AppBundle:Classe',
+        'choice_label' => function ($obj) {
+            return $obj->getAnno().' '.$obj->getSezione();
+          },
+        'placeholder' => 'label.choose_option',
+        'query_builder' => function (EntityRepository $er) {
+            return $er->createQueryBuilder('c')->orderBy('c.anno,c.sezione', 'ASC');
+          },
+        'group_by' => 'sede.citta',
+        'required' => true))
+      ->add('docente', EntityType::class, array('label' => 'label.docente',
+        'class' => 'AppBundle:Docente',
+        'choice_label' => function ($obj) {
+            return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')';
+          },
+        'placeholder' => 'label.choose_option',
+        'query_builder' => function (EntityRepository $er) {
+            return $er->createQueryBuilder('d')
+              ->where('d NOT INSTANCE OF AppBundle:Preside AND d.abilitato=1')
+              ->orderBy('d.cognome,d.nome', 'ASC');
+          },
+        'required' => true))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // form inviato
+      $classe = $form->get('classe')->getData();
+      $docente = $form->get('docente')->getData();
+      if ($classe && $docente && $docente->getAbilitato()) {
+        // segretario
+        $classe->setSegretario($docente);
+        $em->flush();
+      }
+    }
+    // lista aggiornata
+    $lista = $em->getRepository('AppBundle:Classe')->createQueryBuilder('c')
+      ->select('c.id,c.anno,c.sezione,se.cognome,se.nome,se.username,s.citta')
+      ->join('c.segretario', 'se')
+      ->join('c.sede', 's')
+      ->orderBy('c.sede,c.anno,c.sezione', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    // mostra la pagina di risposta
+    return $this->render('docenti/segretari.html.twig', array(
+      'pagina_titolo' => 'page.segretario',
+      'lista' => $lista,
+      'form' => $form->createView(),
+      'form_title' => 'title.segretario',
+      'form_help' => 'message.required_fields',
+      'form_success' => null,
+    ));
+  }
+
+  /**
+   * Gestione della cancellazione del ruolo di segretario
+   *
+   * @param int $id ID dell'utente
+   * @param EntityManagerInterface $em Gestore delle entità
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/segretari/delete/{id}", name="docenti_segretari_delete", requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function segretarioDeleteAction($id, EntityManagerInterface $em) {
+    $classe = $em->getRepository('AppBundle:Classe')->find($id);
+    if ($classe) {
+      // toglie ruolo di segretario
+      $classe->setSegretario(null);
+      $em->flush();
+    } else {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // redirezione
+    return $this->redirectToRoute('docenti_segretari');
+  }
+
+  /**
+   * Generazione della password per i docenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param PdfManager $pdf Gestore dei documenti PDF
+   * @param int $id ID del docente
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/modifica/password/{id}", name="docenti_modifica_password",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function passwordCreateAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
+                                        LogHandler $dblogger, PdfManager $pdf, $id) {
+    // controlla docente
+    $docente = $em->getRepository('AppBundle:Docente')->find($id);
+    if (!$docente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // crea password
+    $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
+    $password = substr(str_shuffle($pwdchars), 0, 5).substr(str_shuffle($pwdchars), 0, 5);
+    $docente->setPasswordNonCifrata($password);
+    $pswd = $encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
+    $docente->setPassword($pswd);
+    // memorizza su db
+    $em->flush();
+    // log azione
+    $dblogger->write($docente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
+      'Username esecutore' => $this->getUser()->getUsername(),
+      'Ruolo esecutore' => $this->getUser()->getRoles()[0],
+      'ID esecutore' => $this->getUser()->getId()
+      ));
+    // crea documento PDF
+    $pdf->configure('Istituto di Istruzione Superiore ""',
+      'Credenziali di accesso al Registro Elettronico');
+    // contenuto in formato HTML
+    $html = $this->renderView('pdf/credenziali_docenti.html.twig', array(
+      'docente' => $docente,
+      'password' => $password,
+      ));
+    $pdf->createFromHtml($html);
+    // invia il documento
+    $nome = mb_strtoupper(str_replace(
+      array("'",' ','à','è','é','ì','ò','ù','À','È','É','Ì','Ò','Ù'),
+      array('', '-','A','E','E','I','O','U','A','E','E','I','O','U'),
+      $docente->getCognome().'-'.$docente->getNome()));
+    return $pdf->send('credenziali-registro-'.$nome.'.pdf');
+  }
+
+  /**
+   * Reset della funzione OTP per i docenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id ID dell'utente
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/modifica/otp/{id}", name="docenti_modifica_otp",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function modificaOtpAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger, $id) {
+    $docente = $em->getRepository('AppBundle:Docente')->find($id);
+    if ($docente) {
+      // abilita o disabilita
+      $docente->setOtp(null);
+      $em->flush();
+      // log azione
+      $dblogger->write($docente, $request->getClientIp(), 'SICUREZZA', 'Reset OTP', __METHOD__, array(
+        'Username esecutore' => $this->getUser()->getUsername(),
+        'Ruolo esecutore' => $this->getUser()->getRoles()[0],
+        'ID esecutore' => $this->getUser()->getId()
+        ));
+      // redirezione
+      return $this->redirectToRoute('docenti_modifica');
+    } else {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
   }
 
 }

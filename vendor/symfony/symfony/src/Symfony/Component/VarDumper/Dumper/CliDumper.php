@@ -12,6 +12,7 @@
 namespace Symfony\Component\VarDumper\Dumper;
 
 use Symfony\Component\VarDumper\Cloner\Cursor;
+use Symfony\Component\VarDumper\Cloner\Stub;
 
 /**
  * CliDumper dumps variables for command line output.
@@ -51,6 +52,9 @@ class CliDumper extends AbstractDumper
         "\033" => '\e',
     );
 
+    protected $collapseNextHash = false;
+    protected $expandNextHash = false;
+
     /**
      * {@inheritdoc}
      */
@@ -58,7 +62,7 @@ class CliDumper extends AbstractDumper
     {
         parent::__construct($output, $charset, $flags);
 
-        if ('\\' === DIRECTORY_SEPARATOR && 'ON' !== @getenv('ConEmuANSI') && 'xterm' !== @getenv('TERM')) {
+        if ('\\' === \DIRECTORY_SEPARATOR && !$this->isWindowsTrueColor()) {
             // Use only the base 16 xterm colors when using ANSICON or standard Windows 10 CLI
             $this->setStyles(array(
                 'default' => '31',
@@ -182,7 +186,7 @@ class CliDumper extends AbstractDumper
                 unset($str[1]);
                 $str[0] .= "\n";
             }
-            $m = count($str) - 1;
+            $m = \count($str) - 1;
             $i = $lineCut = 0;
 
             if (self::DUMP_STRING_LENGTH & $this->flags) {
@@ -252,6 +256,11 @@ class CliDumper extends AbstractDumper
     public function enterHash(Cursor $cursor, $type, $class, $hasChild)
     {
         $this->dumpKey($cursor);
+
+        if ($this->collapseNextHash) {
+            $cursor->skipChildren = true;
+            $this->collapseNextHash = $hasChild = false;
+        }
 
         $class = $this->utf8Encode($class);
         if (Cursor::HASH_OBJECT === $type) {
@@ -328,8 +337,9 @@ class CliDumper extends AbstractDumper
                         break;
                     }
                     $style = 'index';
+                    // no break
                 case Cursor::HASH_ASSOC:
-                    if (is_int($key)) {
+                    if (\is_int($key)) {
                         $this->line .= $this->style($style, $key).' => ';
                     } else {
                         $this->line .= $bin.'"'.$this->style($style, $key).'" => ';
@@ -338,7 +348,7 @@ class CliDumper extends AbstractDumper
 
                 case Cursor::HASH_RESOURCE:
                     $key = "\0~\0".$key;
-                    // No break;
+                    // no break
                 case Cursor::HASH_OBJECT:
                     if (!isset($key[0]) || "\0" !== $key[0]) {
                         $this->line .= '+'.$bin.$this->style('public', $key).': ';
@@ -368,7 +378,15 @@ class CliDumper extends AbstractDumper
                                 break;
                         }
 
-                        $this->line .= $bin.$this->style($style, $key[1], $attr).': ';
+                        if (isset($attr['collapse'])) {
+                            if ($attr['collapse']) {
+                                $this->collapseNextHash = true;
+                            } else {
+                                $this->expandNextHash = true;
+                            }
+                        }
+
+                        $this->line .= $bin.$this->style($style, $key[1], $attr).(isset($attr['separator']) ? $attr['separator'] : ': ');
                     } else {
                         // This case should not happen
                         $this->line .= '-'.$bin.'"'.$this->style('private', $key, array('class' => '')).'": ';
@@ -397,6 +415,21 @@ class CliDumper extends AbstractDumper
             $this->colors = $this->supportsColors();
         }
 
+        if (isset($attr['ellipsis'], $attr['ellipsis-type'])) {
+            $prefix = substr($value, 0, -$attr['ellipsis']);
+            if ('cli' === \PHP_SAPI && 'path' === $attr['ellipsis-type'] && isset($_SERVER[$pwd = '\\' === \DIRECTORY_SEPARATOR ? 'CD' : 'PWD']) && 0 === strpos($prefix, $_SERVER[$pwd])) {
+                $prefix = '.'.substr($prefix, \strlen($_SERVER[$pwd]));
+            }
+            if (!empty($attr['ellipsis-tail'])) {
+                $prefix .= substr($value, -$attr['ellipsis'], $attr['ellipsis-tail']);
+                $value = substr($value, -$attr['ellipsis'] + $attr['ellipsis-tail']);
+            } else {
+                $value = substr($value, -$attr['ellipsis']);
+            }
+
+            return $this->style('default', $prefix).$this->style($style, $value);
+        }
+
         $style = $this->styles[$style];
 
         $map = static::$controlCharsMap;
@@ -406,7 +439,7 @@ class CliDumper extends AbstractDumper
             $s = $startCchr;
             $c = $c[$i = 0];
             do {
-                $s .= isset($map[$c[$i]]) ? $map[$c[$i]] : sprintf('\x%02X', ord($c[$i]));
+                $s .= isset($map[$c[$i]]) ? $map[$c[$i]] : sprintf('\x%02X', \ord($c[$i]));
             } while (isset($c[++$i]));
 
             return $s.$endCchr;
@@ -414,12 +447,12 @@ class CliDumper extends AbstractDumper
 
         if ($this->colors) {
             if ($cchrCount && "\033" === $value[0]) {
-                $value = substr($value, strlen($startCchr));
+                $value = substr($value, \strlen($startCchr));
             } else {
                 $value = "\033[{$style}m".$value;
             }
-            if ($cchrCount && $endCchr === substr($value, -strlen($endCchr))) {
-                $value = substr($value, 0, -strlen($endCchr));
+            if ($cchrCount && $endCchr === substr($value, -\strlen($endCchr))) {
+                $value = substr($value, 0, -\strlen($endCchr));
             } else {
                 $value .= "\033[{$this->styles['default']}m";
             }
@@ -434,14 +467,14 @@ class CliDumper extends AbstractDumper
     protected function supportsColors()
     {
         if ($this->outputStream !== static::$defaultOutput) {
-            return @(is_resource($this->outputStream) && function_exists('posix_isatty') && posix_isatty($this->outputStream));
+            return $this->hasColorSupport($this->outputStream);
         }
         if (null !== static::$defaultColors) {
             return static::$defaultColors;
         }
         if (isset($_SERVER['argv'][1])) {
             $colors = $_SERVER['argv'];
-            $i = count($colors);
+            $i = \count($colors);
             while (--$i > 0) {
                 if (isset($colors[$i][5])) {
                     switch ($colors[$i]) {
@@ -462,22 +495,10 @@ class CliDumper extends AbstractDumper
             }
         }
 
-        if ('\\' === DIRECTORY_SEPARATOR) {
-            static::$defaultColors = @(
-                '10.0.10586' === PHP_WINDOWS_VERSION_MAJOR.'.'.PHP_WINDOWS_VERSION_MINOR.'.'.PHP_WINDOWS_VERSION_BUILD
-                || false !== getenv('ANSICON')
-                || 'ON' === getenv('ConEmuANSI')
-                || 'xterm' === getenv('TERM')
-            );
-        } elseif (function_exists('posix_isatty')) {
-            $h = stream_get_meta_data($this->outputStream) + array('wrapper_type' => null);
-            $h = 'Output' === $h['stream_type'] && 'PHP' === $h['wrapper_type'] ? fopen('php://stdout', 'wb') : $this->outputStream;
-            static::$defaultColors = @posix_isatty($h);
-        } else {
-            static::$defaultColors = false;
-        }
+        $h = stream_get_meta_data($this->outputStream) + array('wrapper_type' => null);
+        $h = 'Output' === $h['stream_type'] && 'PHP' === $h['wrapper_type'] ? fopen('php://stdout', 'wb') : $this->outputStream;
 
-        return static::$defaultColors;
+        return static::$defaultColors = $this->hasColorSupport($h);
     }
 
     /**
@@ -493,12 +514,84 @@ class CliDumper extends AbstractDumper
 
     protected function endValue(Cursor $cursor)
     {
-        if (self::DUMP_TRAILING_COMMA & $this->flags && 0 < $cursor->depth) {
-            $this->line .= ',';
-        } elseif (self::DUMP_COMMA_SEPARATOR & $this->flags && 1 < $cursor->hashLength - $cursor->hashIndex) {
-            $this->line .= ',';
+        if (Stub::ARRAY_INDEXED === $cursor->hashType || Stub::ARRAY_ASSOC === $cursor->hashType) {
+            if (self::DUMP_TRAILING_COMMA & $this->flags && 0 < $cursor->depth) {
+                $this->line .= ',';
+            } elseif (self::DUMP_COMMA_SEPARATOR & $this->flags && 1 < $cursor->hashLength - $cursor->hashIndex) {
+                $this->line .= ',';
+            }
         }
 
         $this->dumpLine($cursor->depth, true);
+    }
+
+    /**
+     * Returns true if the stream supports colorization.
+     *
+     * Reference: Composer\XdebugHandler\Process::supportsColor
+     * https://github.com/composer/xdebug-handler
+     *
+     * @param mixed $stream A CLI output stream
+     *
+     * @return bool
+     */
+    private function hasColorSupport($stream)
+    {
+        if (!\is_resource($stream) || 'stream' !== get_resource_type($stream)) {
+            return false;
+        }
+
+        if ('Hyper' === getenv('TERM_PROGRAM')) {
+            return true;
+        }
+
+        if (\DIRECTORY_SEPARATOR === '\\') {
+            return (\function_exists('sapi_windows_vt100_support')
+                && @sapi_windows_vt100_support($stream))
+                || false !== getenv('ANSICON')
+                || 'ON' === getenv('ConEmuANSI')
+                || 'xterm' === getenv('TERM');
+        }
+
+        if (\function_exists('stream_isatty')) {
+            return @stream_isatty($stream);
+        }
+
+        if (\function_exists('posix_isatty')) {
+            return @posix_isatty($stream);
+        }
+
+        $stat = @fstat($stream);
+        // Check if formatted mode is S_IFCHR
+        return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
+    }
+
+    /**
+     * Returns true if the Windows terminal supports true color.
+     *
+     * Note that this does not check an output stream, but relies on environment
+     * variables from known implementations, or a PHP and Windows version that
+     * supports true color.
+     *
+     * @return bool
+     */
+    private function isWindowsTrueColor()
+    {
+        $result = 183 <= getenv('ANSICON_VER')
+            || 'ON' === getenv('ConEmuANSI')
+            || 'xterm' === getenv('TERM')
+            || 'Hyper' === getenv('TERM_PROGRAM');
+
+        if (!$result && \PHP_VERSION_ID >= 70200) {
+            $version = sprintf(
+                '%s.%s.%s',
+                PHP_WINDOWS_VERSION_MAJOR,
+                PHP_WINDOWS_VERSION_MINOR,
+                PHP_WINDOWS_VERSION_BUILD
+            );
+            $result = $version >= '10.0.15063';
+        }
+
+        return $result;
     }
 }

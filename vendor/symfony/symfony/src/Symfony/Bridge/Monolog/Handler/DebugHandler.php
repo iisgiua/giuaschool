@@ -11,10 +11,10 @@
 
 namespace Symfony\Bridge\Monolog\Handler;
 
-@trigger_error('The '.__NAMESPACE__.'\DebugHandler class is deprecated since version 3.2 and will be removed in 4.0. Use Symfony\Bridge\Monolog\Processor\DebugProcessor instead.', E_USER_DEPRECATED);
+@trigger_error('The '.__NAMESPACE__.'\DebugHandler class is deprecated since Symfony 3.2 and will be removed in 4.0. Use Symfony\Bridge\Monolog\Processor\DebugProcessor instead.', E_USER_DEPRECATED);
 
-use Monolog\Logger;
 use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
 /**
@@ -55,7 +55,7 @@ class DebugHandler extends TestHandler implements DebugLoggerInterface
         $levels = array(Logger::ERROR, Logger::CRITICAL, Logger::ALERT, Logger::EMERGENCY);
         foreach ($levels as $level) {
             if (isset($this->recordsByLevel[$level])) {
-                $cnt += count($this->recordsByLevel[$level]);
+                $cnt += \count($this->recordsByLevel[$level]);
             }
         }
 

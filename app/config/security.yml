@@ -18,6 +18,7 @@ security:
   firewalls:
     main:
       provider: db_provider
+      logout_on_user_change: true
       anonymous: ~
       switch_user: { role: ROLE_AMMINISTRATORE, parameter: _alias }
       logout:
@@ -30,6 +31,7 @@ security:
           - AppBundle\Security\FormAuthenticator
           - AppBundle\Security\TokenAuthenticator
           - AppBundle\Security\CardAuthenticator
+          - AppBundle\Security\AppAuthenticator
           - AppBundle\Security\EnrollAuthenticator
         entry_point: AppBundle\Security\FormAuthenticator
 

@@ -2,19 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,11 +27,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormError;
 use AppBundle\Util\LogHandler;
 use AppBundle\Util\ScrutinioUtil;
+use AppBundle\Util\RegistroUtil;
 use AppBundle\Form\PropostaVotoType;
 use AppBundle\Form\VotoScrutinioType;
 use AppBundle\Entity\Staff;
 use AppBundle\Entity\Preside;
 use AppBundle\Entity\Alunno;
+use AppBundle\Entity\Assenza;
+
+use AppBundle\Entity\DefinizioneScrutinio;
 
 
 /**
@@ -55,9 +58,9 @@ class ScrutinioController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/scrutinio/proposte/{cattedra}/{classe}/{periodo}", name="lezioni_scrutinio_proposte",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|R|1|2|0"},
-   *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"})
-   * @Method({"GET","POST"})
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|I|1|2|0"},
+   *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -76,16 +79,16 @@ class ScrutinioController extends Controller {
     $valutazioni['1']['R'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
-    $valutazioni['R']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['R']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['I']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
+    $valutazioni['I']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
     $title['P']['N'] = 'message.proposte';
     $title['P']['R'] = 'message.proposte_religione';
     $title['1']['N'] = 'message.proposte_intermedia';
     $title['1']['R'] = 'message.proposte_religione';
     $title['F']['N'] = 'message.proposte';
     $title['F']['R'] = 'message.proposte_religione';
-    $title['R']['N'] = 'message.proposte_non_previste';
-    $title['R']['R'] = 'message.proposte_non_previste';
+    $title['I']['N'] = 'message.proposte_non_previste';
+    $title['I']['R'] = 'message.proposte_non_previste';
     $info['valutazioni'] = $valutazioni['P']['N'];
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
@@ -275,8 +278,8 @@ class ScrutinioController extends Controller {
    *
    * @Route("/coordinatore/scrutinio/{classe}/{stato}/{posizione}", name="coordinatore_scrutinio",
    *    requirements={"classe": "\d+", "stato": "N|C|\d", "posizione": "\d+"},
-   *    defaults={"classe": 0, "stato": 0, "posizione": 0})
-   * @Method({"GET","POST"})
+   *    defaults={"classe": 0, "stato": 0, "posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -342,30 +345,31 @@ class ScrutinioController extends Controller {
         // scrutinio o chiuso o inesitente
         $scrutinio = $scr->scrutinioChiuso($classe);
         if (!$scrutinio) {
-          // errore
-          throw $this->createNotFoundException('exception.invalid_params');
-        }
-        // legge i dati attuali
-        $dati = $scr->datiScrutinio($this->getUser(), $classe, $scrutinio['periodo'], $scrutinio['stato']);
-        $form = $this->container->get('form.factory')->createNamedBuilder('scrutinio', FormType::class);
-        $form = $scr->formScrutinio($classe, $scrutinio['periodo'], $scrutinio['stato'], $form, $dati);
-        // controllo stato
-        if ($stato != '0' && $stato != $scrutinio['stato']) {
-          // esegue passaggio di stato
-          $scrutinio['stato'] = $scr->passaggioStato($this->getUser(), $request, $form,
-            $classe, $scrutinio['periodo'], $stato);
-          if ($scrutinio['stato'] === null) {
-            // errore
-            throw $this->createNotFoundException('exception.invalid_params');
-          } elseif ($scrutinio['stato'] == $stato) {
-            // passaggio avvenuto con successo, carico nuovi dati
-            $dati = $scr->datiScrutinio($this->getUser(), $classe, $scrutinio['periodo'], $scrutinio['stato']);
-            $form = $this->container->get('form.factory')->createNamedBuilder('scrutinio', FormType::class);
-            $form = $scr->formScrutinio($classe, $scrutinio['periodo'], $scrutinio['stato'], $form, $dati);
+          // scrutinio non esiste
+          $template = 'coordinatore/scrutinio_X_X.html.twig';
+        } else {
+          // legge i dati attuali
+          $dati = $scr->datiScrutinio($this->getUser(), $classe, $scrutinio['periodo'], $scrutinio['stato']);
+          $form = $this->container->get('form.factory')->createNamedBuilder('scrutinio', FormType::class);
+          $form = $scr->formScrutinio($classe, $scrutinio['periodo'], $scrutinio['stato'], $form, $dati);
+          // controllo stato
+          if ($stato != '0' && $stato != $scrutinio['stato']) {
+            // esegue passaggio di stato
+            $scrutinio['stato'] = $scr->passaggioStato($this->getUser(), $request, $form,
+              $classe, $scrutinio['periodo'], $stato);
+            if ($scrutinio['stato'] === null) {
+              // errore
+              throw $this->createNotFoundException('exception.invalid_params');
+            } elseif ($scrutinio['stato'] == $stato) {
+              // passaggio avvenuto con successo, carico nuovi dati
+              $dati = $scr->datiScrutinio($this->getUser(), $classe, $scrutinio['periodo'], $scrutinio['stato']);
+              $form = $this->container->get('form.factory')->createNamedBuilder('scrutinio', FormType::class);
+              $form = $scr->formScrutinio($classe, $scrutinio['periodo'], $scrutinio['stato'], $form, $dati);
+            }
           }
+          // imposta il template
+          $template = 'coordinatore/scrutinio_'.$scrutinio['periodo'].'_'.$scrutinio['stato'].'.html.twig';
         }
-        // imposta il template
-        $template = 'coordinatore/scrutinio_'.$scrutinio['periodo'].'_'.$scrutinio['stato'].'.html.twig';
       }
     }
     // visualizza pagina
@@ -390,17 +394,20 @@ class ScrutinioController extends Controller {
    * @param int $classe Identificativo della classe
    * @param int $materia Identificativo della materia
    * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/scrutinio/proposte/{classe}/{materia}/{periodo}", name="coordinatore_scrutinio_proposte",
-   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|R|1|2"})
-   * @Method({"GET","POST"})
+   * @Route("/coordinatore/scrutinio/proposte/{classe}/{materia}/{periodo}/{posizione}", name="coordinatore_scrutinio_proposte",
+   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioProposteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                           ScrutinioUtil $scr, LogHandler $dblogger, $classe, $materia, $periodo) {
+                                           ScrutinioUtil $scr, LogHandler $dblogger, $classe, $materia, $periodo,
+                                           $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -428,8 +435,8 @@ class ScrutinioController extends Controller {
     // controllo materia
     $materia = $em->getRepository('AppBundle:Materia')->createQueryBuilder('m')
       ->join('AppBundle:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
-      ->where('m.id=:materia AND c.classe=:classe AND c.attiva=:attiva AND c.tipo IN (:tipi)')
-      ->setParameters(['materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipi' => ['N','R']])
+      ->where('m.id=:materia AND c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
+      ->setParameters(['materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipo' => 'N'])
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -439,7 +446,7 @@ class ScrutinioController extends Controller {
     }
     // controllo periodo
     $scrutinio = $scr->scrutinioAttivo($classe);
-    if ($periodo != $scrutinio['periodo']) {
+    if (!$scrutinio || $periodo != $scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -483,7 +490,7 @@ class ScrutinioController extends Controller {
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('proposte', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_proposte', ['classe' => $classe->getId(),
-        'materia' => $materia->getId(), 'periodo' => $periodo]))
+        'materia' => $materia->getId(), 'periodo' => $periodo, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $elenco['proposte'],
         'entry_type' => PropostaVotoType::class,
@@ -535,7 +542,7 @@ class ScrutinioController extends Controller {
           }, $log['edit'])),
         ));
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     return $this->render('coordinatore/proposte_'.$periodo.'.html.twig', array(
@@ -555,17 +562,20 @@ class ScrutinioController extends Controller {
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $alunno ID del singolo alunno o zero per l'intera classe
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/scrutinio/condotta/{classe}/{periodo}", name="coordinatore_scrutinio_condotta",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|R|1|2"})
-   * @Method({"GET","POST"})
+   * @Route("/coordinatore/scrutinio/condotta/{classe}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_condotta",
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioCondottaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                           ScrutinioUtil $scr, $classe, $periodo) {
+                                           ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
     $info['valutazioni'] = ['min' => 4, 'max' => 10, 'start' => 6, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
@@ -600,10 +610,19 @@ class ScrutinioController extends Controller {
     }
     // elenco voti/alunni
     $dati = $scr->elencoVoti($this->getUser(), $classe, $condotta, $periodo);
+    if ($alunno > 0) {
+      // singolo alunno
+      foreach ($dati['voti'] as $key=>$val) {
+        if ($key != $alunno) {
+          // toglie altri alunni
+          unset($dati['voti'][$key]);
+        }
+      }
+    }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('condotta', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_condotta', ['classe' => $classe->getId(),
-        'periodo' => $periodo]))
+        'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
@@ -639,19 +658,19 @@ class ScrutinioController extends Controller {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore', $msg);
+        $session->getFlashBag()->add('errore', $this->get('translator')->trans($msg));
       }
       // ok: memorizza dati (anche errati)
       $em->flush();
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
         $session->getFlashBag()->add('errore', $error->getMessage());
       }
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     return $this->render('coordinatore/condotta_'.$periodo.'.html.twig', array(
@@ -672,23 +691,30 @@ class ScrutinioController extends Controller {
    * @param int $classe Identificativo della classe
    * @param int $materia Identificativo della materia
    * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $alunno ID del singolo alunno o zero per l'intera classe
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/scrutinio/voti/{classe}/{materia}/{periodo}", name="coordinatore_scrutinio_voti",
-   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|R|1|2"})
-   * @Method({"GET","POST"})
+   * @Route("/coordinatore/scrutinio/voti/{classe}/{materia}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_voti",
+   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioVotiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                       ScrutinioUtil $scr, $classe, $materia, $periodo) {
+                                       ScrutinioUtil $scr, $classe, $materia, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['P']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
     $valutazioni['1']['N'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
     $valutazioni['1']['R'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
+    $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
+    $valutazioni['F']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['I']['N'] = $valutazioni['F']['N'];
+    $valutazioni['I']['R'] = $valutazioni['F']['R'];
     $info['valutazioni'] = $valutazioni['P']['N'];
     $dati = array();
     $dati['alunni'] = array();
@@ -736,10 +762,19 @@ class ScrutinioController extends Controller {
     }
     // elenco voti/alunni
     $dati = $scr->elencoVoti($this->getUser(), $classe, $materia, $periodo);
+    if ($alunno > 0) {
+      // singolo alunno
+      foreach ($dati['voti'] as $key=>$val) {
+        if ($key != $alunno) {
+          // toglie altri alunni
+          unset($dati['voti'][$key]);
+        }
+      }
+    }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_voti', ['classe' => $classe->getId(),
-        'materia' => $materia->getId(), 'periodo' => $periodo]))
+        'materia' => $materia->getId(), 'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
@@ -763,10 +798,10 @@ class ScrutinioController extends Controller {
           // voto non ammesso o non presente
           $em->detach($voto);
           $errore['exception.no_voto_scrutinio'] = true;
-        } elseif ($voto->getUnico() < 6 && !$voto->getRecupero()) {
+        } elseif ($voto->getUnico() < 6 && !$voto->getRecupero() && $periodo != 'I') {
           // manca indicazione recupero
           $errore['exception.no_recupero_scrutinio'] = true;
-        } elseif ($voto->getUnico() < 6 && !$voto->getDebito()) {
+        } elseif ($voto->getUnico() < 6 && !$voto->getDebito() && $periodo != 'I') {
           // manca indicazione argomenti
           $errore['exception.no_debito_scrutinio'] = true;
         } elseif ($voto->getUnico() >= 30 && $voto->getRecupero() === null &&
@@ -782,14 +817,14 @@ class ScrutinioController extends Controller {
       // memorizza dati (anche se errati)
       $em->flush();
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
         $session->getFlashBag()->add('errore', $error->getMessage());
       }
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     return $this->render('coordinatore/voti_'.$periodo.'.html.twig', array(
@@ -814,9 +849,9 @@ class ScrutinioController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/scrutinio/svolto/{cattedra}/{classe}/{periodo}", name="lezioni_scrutinio_svolto",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|R|1|2|0"},
-   *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"})
-   * @Method("GET")
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|I|1|2|0"},
+   *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
+   *    methods="GET")
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -829,7 +864,7 @@ class ScrutinioController extends Controller {
     $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
     $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insuff.', 33 => 'Mediocre', 34 => 'Suff.', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
-    $info['giudizi']['R']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
+    $info['giudizi']['I']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
     $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
@@ -902,17 +937,20 @@ class ScrutinioController extends Controller {
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $alunno ID del singolo alunno o zero per l'intera classe
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/scrutinio/condotta/giudizio/{classe}/{periodo}", name="coordinatore_scrutinio_condotta_giudizio",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|R|1|2"})
-   * @Method({"GET","POST"})
+   * @Route("/coordinatore/scrutinio/condotta/giudizio/{classe}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_condotta_giudizio",
+   *    requirements={"classe": "\d+", "periodo": "1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioCondottaGiudizioAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                                   ScrutinioUtil $scr, $classe, $periodo) {
+                                                   ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
     $info['valutazioni'] = ['min' => 40, 'max' => 43, 'start' => 43, 'ticks' => '40, 41, 42, 43', 'labels' => '"NC", "Scorretta", "", "Corretta"'];
@@ -947,14 +985,23 @@ class ScrutinioController extends Controller {
     }
     // elenco voti/alunni
     $dati = $scr->elencoVoti($this->getUser(), $classe, $condotta, $periodo);
+    if ($alunno > 0) {
+      // singolo alunno
+      foreach ($dati['voti'] as $key=>$val) {
+        if ($key != $alunno) {
+          // toglie altri alunni
+          unset($dati['voti'][$key]);
+        }
+      }
+    }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('condotta', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_condotta_giudizio', ['classe' => $classe->getId(),
-        'periodo' => $periodo]))
+        'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false)))
+        'entry_options' => array('label' => false, 'attr' => ['subType' => 'condotta'])))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -976,19 +1023,19 @@ class ScrutinioController extends Controller {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore', $msg);
+        $session->getFlashBag()->add('errore', $this->get('translator')->trans($msg));
       }
       // ok: memorizza dati (anche errati)
       $em->flush();
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
         $session->getFlashBag()->add('errore', $error->getMessage());
       }
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     return $this->render('coordinatore/condotta_'.$periodo.'.html.twig', array(
@@ -1013,9 +1060,9 @@ class ScrutinioController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/esito/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_esito",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|R|1|2", "posizione": "\d+"},
-   *    defaults={"posizione": 0})
-   * @Method({"GET","POST"})
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -1051,12 +1098,18 @@ class ScrutinioController extends Controller {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // elenco voti
-    if ($periodo == 'R') {
-      // ripresa scrutinio sospeso: solo voti insuff.
+    if ($periodo == 'I') {
+      // scrutinio integrativo: solo voti insuff.
       $dati = $scr->elencoVotiAlunnoSospeso($this->getUser(), $alunno, $periodo);
     } else {
       // scrutinio finale: tutti i voti
       $dati = $scr->elencoVotiAlunno($this->getUser(), $alunno, $periodo);
+    }
+    // esiti possibili
+    $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
+    if ($periodo == 'I') {
+      // integrazione scrutinio finale
+      $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_X' => 'X');
     }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('esito', FormType::class)
@@ -1068,7 +1121,7 @@ class ScrutinioController extends Controller {
         'entry_options' => array('label' => false, 'attr' => ['subType' => 'esito'] )))
       ->add('esito', ChoiceType::class, array('label' => false,
         'data' => $dati['esito']->getEsito(),
-        'choices' => ['label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S'],
+        'choices' => $lista_esiti,
         'placeholder' => 'label.scegli_esito',
         'expanded' => false,
         'multiple' => false,
@@ -1133,10 +1186,10 @@ class ScrutinioController extends Controller {
         // manca esito
         $errore['exception.manca_esito'] = true;
       }
-      if ($form->get('unanimita')->getData() === null) {
+      if ($form->get('unanimita')->getData() === null && $form->get('esito')->getData() != 'X') {
         // manca delibera
         $errore['exception.delibera_esito'] = true;
-      } elseif ($form->get('unanimita')->getData() === false && !$form->get('contrari')->getData()) {
+      } elseif ($form->get('unanimita')->getData() === false && !$form->get('contrari')->getData() && $form->get('esito')->getData() != 'X') {
         // mancano contrari
         $errore['exception.contrari_esito'] = true;
       }
@@ -1144,8 +1197,12 @@ class ScrutinioController extends Controller {
         // manca giudizio
         $errore['exception.giudizio_esito'] = true;
       }
-      if ($form->get('esito')->getData() == 'A' && $insuff_cont > 0) {
-        // insufficienze con ammissione
+      if ($form->get('esito')->getData() == 'X' && !$form->get('giudizio')->getData()) {
+        // manca giudizio
+        $errore['exception.motivo_scrutinio_rinviato'] = true;
+      }
+      if ($form->get('esito')->getData() == 'A' && $insuff_cont > 0 && $alunno->getClasse()->getAnno() != 5) {
+        // insufficienze con ammissione (escluse quinte)
         $errore['exception.insufficienze_ammissione_esito'] = true;
       }
       if ($form->get('esito')->getData() == 'N' && $insuff_cont == 0) {
@@ -1156,8 +1213,8 @@ class ScrutinioController extends Controller {
         // solo sufficienze con sospensione
         $errore['exception.sufficienze_sospensione_esito'] = true;
       }
-      if ($form->get('esito')->getData() != 'N' && $insuff_religione) {
-        // insuff. religione incoerente con esito
+      if ($form->get('esito')->getData() != 'N' && $insuff_religione && $alunno->getClasse()->getAnno() != 5) {
+        // insuff. religione incoerente con esito (escluse quinte)
         $errore['exception.voto_religione_esito'] = true;
       }
       if ($form->get('esito')->getData() != 'N' && $insuff_condotta) {
@@ -1167,6 +1224,10 @@ class ScrutinioController extends Controller {
       if ($form->get('esito')->getData() == 'S' && $alunno->getClasse()->getAnno() == 5) {
         // sospensione in quinta
         $errore['exception.quinta_sospeso_esito'] = true;
+      }
+      if ($form->get('esito')->getData() == 'A' && $alunno->getClasse()->getAnno() == 5 && $insuff_cont > 1) {
+        // ammissione in quinta con più insufficienze
+        $errore['exception.insufficienze_ammissione_quinta'] = true;
       }
       foreach ($errore as $msg=>$v) {
         $session->getFlashBag()->add('errore', $this->get('translator')->trans($msg, [
@@ -1215,14 +1276,15 @@ class ScrutinioController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/scrutinio/credito/{alunno}/{periodo}", name="coordinatore_scrutinio_credito",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|R|1|2"})
-   * @Method({"GET","POST"})
+   * @Route("/coordinatore/scrutinio/credito/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_credito",
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioCreditoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                          ScrutinioUtil $scr, $alunno, $periodo) {
+                                          ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -1231,9 +1293,9 @@ class ScrutinioController extends Controller {
     $info['valutazioni'] = $valutazioni['F']['N'];
     $info['giudizi'] = $valutazioni['F']['R'];
     $credito = array();
-    $credito[3] = [6 => 3, 7 => 4, 8 => 5, 9 => 6, 10 => 7];
-    $credito[4] = [6 => 3, 7 => 4, 8 => 5, 9 => 6, 10 => 7];
-    $credito[5] = [6 => 4, 7 => 5, 8 => 6, 9 => 7, 10 => 8];
+    $credito[3] = [6 => 7, 7 =>  8, 8 =>  9, 9 => 10, 10 => 11];
+    $credito[4] = [6 => 8, 7 =>  9, 8 => 10, 9 => 11, 10 => 12];
+    $credito[5] = [5 => 7, 6 => 9, 7 => 10, 8 => 11, 9 => 13, 10 => 14];
     $dati = array();
     // controllo alunno
     $alunno = $em->getRepository('AppBundle:Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
@@ -1259,23 +1321,16 @@ class ScrutinioController extends Controller {
     // elenco voti
     $dati = $scr->elencoVotiAlunno($this->getUser(), $alunno, $periodo);
     $valori = $dati['esito']->getDati();
-    $dati['credito'] = $credito[$alunno->getClasse()->getAnno()][ceil($dati['esito']->getMedia())];
+    $m = ($dati['esito']->getMedia() < 6 ? 5 : ceil($dati['esito']->getMedia()));
+    $dati['credito'] = $credito[$alunno->getClasse()->getAnno()][$m];
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('credito', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_credito', ['alunno' => $alunno->getId(),
-        'periodo' => $periodo]))
+        'periodo' => $periodo, 'posizione' => $posizione]))
       ->add('creditoScolastico', ChoiceType::class, array('label' => 'label.credito_scolastico',
         'data' => isset($valori['creditoScolastico']) ? $valori['creditoScolastico'] : null,
         'choices' => ['label.criterio_credito_desc_F' => 'F', 'label.criterio_credito_desc_I' => 'I',
-          'label.criterio_credito_desc_A' => 'A', 'label.criterio_credito_desc_P' => 'P',
-          'label.criterio_credito_desc_O' => 'O'],
-        'placeholder' => null,
-        'expanded' => true,
-        'multiple' => true,
-        'required' => false))
-      ->add('creditoFormativo', ChoiceType::class, array('label' => 'label.credito_formativo',
-        'data' => isset($valori['creditoFormativo']) ? $valori['creditoFormativo'] : null,
-        'choices' => ['label.criterio_credito_desc_S' => 'S', 'label.criterio_credito_desc_L' => 'L'],
+          'label.criterio_credito_desc_P' => 'P', 'label.criterio_credito_desc_O' => 'O'],
         'placeholder' => null,
         'expanded' => true,
         'multiple' => true,
@@ -1286,18 +1341,11 @@ class ScrutinioController extends Controller {
     if ($form->isSubmitted() && $form->isValid()) {
       // modifica criteri
       $valori['creditoScolastico'] = $form->get('creditoScolastico')->getData();
-      $valori['creditoFormativo'] = $form->get('creditoFormativo')->getData();
       $valori['creditoMinimo'] = $dati['credito'];
       $dati['esito']->setDati($valori);
       // modifica credito
       $criteri_cont = 0;
       foreach ($dati['esito']->getDati()['creditoScolastico'] as $c) {
-        // conta criteri selezionati
-        if ($c != '') {
-          $criteri_cont++;
-        }
-      }
-      foreach ($dati['esito']->getDati()['creditoFormativo'] as $c) {
         // conta criteri selezionati
         if ($c != '') {
           $criteri_cont++;
@@ -1311,7 +1359,7 @@ class ScrutinioController extends Controller {
       // memorizza dati
       $em->flush();
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     return $this->render('coordinatore/crediti_'.$periodo.'.html.twig', array(
@@ -1336,9 +1384,9 @@ class ScrutinioController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/certificazione/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_certificazione",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|R|1|2", "posizione": "\d+"},
-   *    defaults={"posizione": 0})
-   * @Method({"GET","POST"})
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -1566,14 +1614,15 @@ class ScrutinioController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/scrutinio/debiti/{alunno}/{periodo}", name="coordinatore_scrutinio_debiti",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|R|1|2"})
-   * @Method({"GET","POST"})
+   * @Route("/coordinatore/scrutinio/debiti/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_debiti",
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioDebitiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                         ScrutinioUtil $scr, $alunno, $periodo) {
+                                         ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -1605,7 +1654,7 @@ class ScrutinioController extends Controller {
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('debiti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_debiti', ['alunno' => $alunno->getId(),
-        'periodo' => $periodo]))
+        'periodo' => $periodo, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['debiti'],
         'entry_type' => VotoScrutinioType::class,
@@ -1651,7 +1700,7 @@ class ScrutinioController extends Controller {
       // memorizza dati
       $em->flush();
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     return $this->render('coordinatore/debiti_'.$periodo.'.html.twig', array(
@@ -1674,14 +1723,15 @@ class ScrutinioController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/scrutinio/carenze/{alunno}/{periodo}", name="coordinatore_scrutinio_carenze",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|R|1|2"})
-   * @Method({"GET","POST"})
+   * @Route("/coordinatore/scrutinio/carenze/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_carenze",
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioCarenzeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                          ScrutinioUtil $scr, $alunno, $periodo) {
+                                          ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -1713,7 +1763,7 @@ class ScrutinioController extends Controller {
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('carenze', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_carenze', ['alunno' => $alunno->getId(),
-        'periodo' => $periodo]))
+        'periodo' => $periodo, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['carenze'],
         'entry_type' => VotoScrutinioType::class,
@@ -1745,7 +1795,7 @@ class ScrutinioController extends Controller {
       // memorizza dati
       $em->flush();
       // redirect
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId()]);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $alunno->getClasse()->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
     return $this->render('coordinatore/carenze_'.$periodo.'.html.twig', array(
@@ -1754,6 +1804,254 @@ class ScrutinioController extends Controller {
       'dati' => $dati,
       'form' => $form->createView(),
     ));
+  }
+
+  /**
+   * Gestione dello scrutinio della classe.
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
+   * @param int $classe Identificativo della classe
+   * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $step Passo della struttura del verbale da modificare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/scrutinio/verbale/{classe}/{periodo}/{step}", name="coordinatore_scrutinio_verbale",
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "step": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @Security("has_role('ROLE_DOCENTE')")
+   */
+  public function verbaleAction(Request $request, EntityManagerInterface $em, SessionInterface $session, ScrutinioUtil $scr,
+                                 $classe, $periodo, $step) {
+    // inizializza variabili
+    $dati = null;
+    $form = null;
+    // controllo classe
+    $classe = $em->getRepository('AppBundle:Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo periodo
+    $scrutinio_chiuso = $scr->scrutinioChiuso($classe);
+    if ($periodo != $scrutinio_chiuso['periodo']) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // legge definizione scrutinio e scrutinio
+    $def = $em->getRepository('AppBundle:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    $scrutinio = $em->getRepository('AppBundle:Scrutinio')->findOneBy(['periodo' => $periodo,
+      'classe' => $classe, 'stato' => 'C']);
+    if (!$def || !$scrutinio) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo step
+    if (empty($def->getStruttura()[$step][1])) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    $passo_verbale = $def->getStruttura()[$step];
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // esegue funzioni
+    $func_dati = 'verbaleDati'.$passo_verbale[0];
+    $func_form = 'verbaleForm'.$passo_verbale[0];
+    $func_valida = 'verbaleValida'.$passo_verbale[0];
+    $dati = $scr->$func_dati($classe, $periodo, $def, $scrutinio, $passo_verbale);
+    $form = $this->container->get('form.factory')->createNamedBuilder('verbale', FormType::class,
+      null, array('allow_extra_fields' => true));
+    $form = $scr->$func_form($classe, $periodo, $form, $dati, $step, $passo_verbale);
+    // legge dati form
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+      // validazione
+      $scr->$func_valida($this->getUser(), $request, $scrutinio, $form, $step, $passo_verbale);
+      // redirezione
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'stato' => 'C']);
+    }
+    // visualizza pagina
+    return $this->render('coordinatore/verbale_'.strtolower($passo_verbale[0]).'.html.twig', array(
+      'classe' => $classe,
+      'dati' => $dati,
+      'form' => ($form ? $form->createView() : null),
+    ));
+  }
+
+  /**
+   * Forza la cessata frequenza dal 15 marzo.
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $classe Identificativo della classe
+   * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $alunno Identificativo dell'alunno
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/scrutinio/frequenza/{classe}/{periodo}/{alunno}", name="coordinatore_scrutinio_frequenza",
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("has_role('ROLE_DOCENTE')")
+   */
+  public function scrutinioFrequenzaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                            RegistroUtil $reg, ScrutinioUtil $scr, LogHandler $dblogger,
+                                            $classe, $periodo, $alunno) {
+    // controllo classe
+    $classe = $em->getRepository('AppBundle:Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controllo periodo
+    $scrutinio_periodo = $scr->scrutinioAttivo($classe);
+    if ($periodo != $scrutinio_periodo['periodo']) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controllo scrutinio
+    $scrutinio = $em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
+    if (!$scrutinio) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controllo alunno
+    $alunno = $em->getRepository('AppBundle:Alunno')->find($alunno);
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // lezioni dal 15 marzo
+    $giorni_lezione = $scr->lezioniDal15Marzo($classe);
+    // controlla presenze
+    $presenze = $scr->presenzeDal15Marzo($alunno->getId(), $giorni_lezione);
+    if ($presenze['stato'] != 1) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // crea nuove assenze
+    foreach ($presenze['giorni'] as $g) {
+      $assenza = (new Assenza())
+        ->setData($g)
+        ->setAlunno($alunno)
+        ->setDocente($this->getUser());
+      $em->persist($assenza);
+    }
+    $giorni = array_map(function($d) { return $d->format('Y-m-d'); }, $presenze['giorni']);
+    // memorizza date salvate
+    $dati_scrutinio = $scrutinio->getDati();
+    $dati_scrutinio['forza_assenze'][$alunno->getId()] = $giorni;
+    $scrutinio->setDati($dati_scrutinio);
+    // ok: memorizza dati
+    $em->flush();
+    // ricalcola ore assenza
+    foreach ($presenze['giorni'] as $g) {
+      $reg->ricalcolaOreAlunno($g, $alunno);
+    }
+    // log
+    $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Dichiara cessata frequenza', __METHOD__, array(
+      'Alunno' => $alunno->getId(),
+      'Assenze' => implode(', ', $giorni),
+      ));
+    // redirezione
+    return $this->redirectToRoute('coordinatore_scrutinio');
+  }
+
+  /**
+   * Annulla la cessata frequenza dal 15 marzo.
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $classe Identificativo della classe
+   * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $alunno Identificativo dell'alunno
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/scrutinio/frequenza/annulla/{classe}/{periodo}/{alunno}", name="coordinatore_scrutinio_frequenza_annulla",
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("has_role('ROLE_STAFF')")
+   */
+  public function scrutinioFrequenzaAnnullaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
+                                                   ScrutinioUtil $scr, LogHandler $dblogger,
+                                                   $classe, $periodo, $alunno) {
+    // controllo classe
+    $classe = $em->getRepository('AppBundle:Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo periodo
+    $scrutinio_periodo = $scr->scrutinioAttivo($classe);
+    if ($periodo != $scrutinio_periodo['periodo']) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controllo scrutinio
+    $scrutinio = $em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
+    if (!$scrutinio) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controllo alunno
+    $alunno = $em->getRepository('AppBundle:Alunno')->find($alunno);
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // legge assenze
+    $dati_scrutinio = $scrutinio->getDati();
+    $lista_giorni = $dati_scrutinio['forza_assenze'][$alunno->getId()];
+    $giorni = array_map(function($d) { return \DateTime::createFromFormat('!Y-m-d', $d); }, $lista_giorni);
+    // elimina assenze
+    foreach ($giorni as $g) {
+      $assenza = $em->getRepository('AppBundle:Assenza')->findOneBy(['alunno' => $alunno, 'data' => $g]);
+      $em->remove($assenza);
+    }
+    unset($dati_scrutinio['forza_assenze'][$alunno->getId()]);
+    $scrutinio->setDati($dati_scrutinio);
+    // ok: memorizza dati
+    $em->flush();
+    // ricalcola ore assenza
+    foreach ($giorni as $g) {
+      $reg->ricalcolaOreAlunno($g, $alunno);
+    }
+    // log
+    $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Annulla dichiarazione cessata frequenza', __METHOD__, array(
+      'Alunno' => $alunno->getId(),
+      ));
+    // redirezione
+    return $this->redirectToRoute('coordinatore_scrutinio');
   }
 
 }

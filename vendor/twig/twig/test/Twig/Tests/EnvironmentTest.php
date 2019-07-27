@@ -11,7 +11,7 @@
 
 require_once dirname(__FILE__).'/FilesystemHelper.php';
 
-class Twig_Tests_EnvironmentTest extends PHPUnit_Framework_TestCase
+class Twig_Tests_EnvironmentTest extends \PHPUnit\Framework\TestCase
 {
     private $deprecations = array();
 
@@ -61,7 +61,7 @@ class Twig_Tests_EnvironmentTest extends PHPUnit_Framework_TestCase
         ));
 
         $this->assertEquals('foo&lt;br/ &gt; foo&lt;br/ &gt;', $twig->render('html', array('foo' => 'foo<br/ >')));
-        $this->assertEquals('foo\x3Cbr\x2F\x20\x3E foo\x3Cbr\x2F\x20\x3E', $twig->render('js', array('bar' => 'foo<br/ >')));
+        $this->assertEquals('foo\u003Cbr\/\u0020\u003E foo\u003Cbr\/\u0020\u003E', $twig->render('js', array('bar' => 'foo<br/ >')));
     }
 
     public function escapingStrategyCallback($name)
@@ -478,6 +478,33 @@ EOF
         $this->assertEquals('foo', $twig->render('func_string'));
         $this->assertEquals('bar', $twig->render('func_string_default'));
         $this->assertEquals('foo', $twig->render('func_string_named_args'));
+    }
+
+    /**
+     * @expectedException Twig_Error_Runtime
+     * @expectedExceptionMessage Circular reference detected for Twig template "base.html.twig", path: base.html.twig -> base.html.twig in "base.html.twig" at line 1
+     */
+    public function testFailLoadTemplateOnCircularReference()
+    {
+        $twig = new Twig_Environment(new Twig_Loader_Array(array(
+            'base.html.twig' => '{% extends "base.html.twig" %}',
+        )));
+
+        $twig->loadTemplate('base.html.twig');
+    }
+
+    /**
+     * @expectedException Twig_Error_Runtime
+     * @expectedExceptionMessage Circular reference detected for Twig template "base1.html.twig", path: base1.html.twig -> base2.html.twig -> base1.html.twig in "base1.html.twig" at line 1
+     */
+    public function testFailLoadTemplateOnComplexCircularReference()
+    {
+        $twig = new Twig_Environment(new Twig_Loader_Array(array(
+            'base1.html.twig' => '{% extends "base2.html.twig" %}',
+            'base2.html.twig' => '{% extends "base1.html.twig" %}',
+        )));
+
+        $twig->loadTemplate('base1.html.twig');
     }
 
     protected function getMockLoader($templateName, $templateContent)

@@ -1,4 +1,4 @@
-<nav>
+<nav class="gs-navbar-submenu">
   <ul class="nav nav-tabs">
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,14) == 'lezioni_classe' ? ' class="active"' }}><a href="{{ path('lezioni_classe') }}" title="{{ 'title.lezioni_classe'|trans }}">Classe/Materia</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,16) == 'lezioni_registro' ? ' class="active"' }}><a href="{{ path('lezioni_registro_firme') }}" title="Registro di classe">Registro</a></li>

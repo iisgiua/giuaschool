@@ -20,9 +20,6 @@ namespace Symfony\Component\Intl\DateFormatter\DateFormat;
  */
 class MonthTransformer extends Transformer
 {
-    /**
-     * @var array
-     */
     protected static $months = array(
         'January',
         'February',
@@ -40,31 +37,22 @@ class MonthTransformer extends Transformer
 
     /**
      * Short months names (first 3 letters).
-     *
-     * @var array
      */
     protected static $shortMonths = array();
 
     /**
      * Flipped $months array, $name => $index.
-     *
-     * @var array
      */
     protected static $flippedMonths = array();
 
     /**
      * Flipped $shortMonths array, $name => $index.
-     *
-     * @var array
      */
     protected static $flippedShortMonths = array();
 
-    /**
-     * Constructor.
-     */
     public function __construct()
     {
-        if (0 === count(self::$shortMonths)) {
+        if (0 === \count(self::$shortMonths)) {
             self::$shortMonths = array_map(function ($month) {
                 return substr($month, 0, 3);
             }, self::$months);

@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,14 +14,17 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * Assenza - entità
  *
  * @ORM\Entity(repositoryClass="AppBundle\Repository\AssenzaRepository")
- * @ORM\Table(name="gs_assenza")
+ * @ORM\Table(name="gs_assenza", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
  * @ORM\HasLifecycleCallbacks
+ *
+ * @UniqueEntity(fields={"data","alunno"}, message="field.unique")
  */
 class Assenza {
 
@@ -62,6 +65,15 @@ class Assenza {
    * @Assert\Date(message="field.date")
    */
   private $giustificato;
+
+  /**
+   * @var string $motivazione Motivazione dell'assenza
+   *
+   * @ORM\Column(type="string", length=255, nullable=true)
+   *
+   * @Assert\Length(max=255, maxMessage="field.maxlength")
+   */
+  private $motivazione;
 
   /**
    * @var Alunno $alunno Alunno al quale si riferisce l'assenza
@@ -165,6 +177,27 @@ class Assenza {
    */
   public function setGiustificato($giustificato) {
     $this->giustificato = $giustificato;
+    return $this;
+  }
+
+  /**
+   * Restituisce la motivazione dell'assenza
+   *
+   * @return string Motivazione dell'assenza
+   */
+  public function getMotivazione() {
+    return $this->motivazione;
+  }
+
+  /**
+   * Modifica la motivazione dell'assenza
+   *
+   * @param string $motivazione Motivazione dell'assenza
+   *
+   * @return Assenza Oggetto Assenza
+   */
+  public function setMotivazione($motivazione) {
+    $this->motivazione = $motivazione;
     return $this;
   }
 

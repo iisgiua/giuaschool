@@ -29,29 +29,14 @@ use Symfony\Component\Intl\Locale;
  */
 class LocaleDataGenerator
 {
-    /**
-     * @var string
-     */
     private $dirName;
-
-    /**
-     * @var LanguageDataProvider
-     */
     private $languageDataProvider;
-
-    /**
-     * @var ScriptDataProvider
-     */
     private $scriptDataProvider;
-
-    /**
-     * @var RegionDataProvider
-     */
     private $regionDataProvider;
 
     public function __construct($dirName, LanguageDataProvider $languageDataProvider, ScriptDataProvider $scriptDataProvider, RegionDataProvider $regionDataProvider)
     {
-        $this->dirName = $dirName;
+        $this->dirName = (string) $dirName;
         $this->languageDataProvider = $languageDataProvider;
         $this->scriptDataProvider = $scriptDataProvider;
         $this->regionDataProvider = $regionDataProvider;
@@ -121,7 +106,7 @@ class LocaleDataGenerator
             }
 
             // If no names remain to be saved for the current locale, skip it
-            if (0 === count($localeNames[$displayLocale])) {
+            if (0 === \count($localeNames[$displayLocale])) {
                 continue;
             }
 
@@ -162,7 +147,7 @@ class LocaleDataGenerator
 
         // Currently the only available variant is POSIX, which we don't want
         // to include in the list
-        if (count($variants) > 0) {
+        if (\count($variants) > 0) {
             return;
         }
 
@@ -207,7 +192,7 @@ class LocaleDataGenerator
             $extras[] = $regionName;
         }
 
-        if (count($extras) > 0) {
+        if (\count($extras) > 0) {
             // Remove any existing extras
             // For example, in German, zh_Hans is "Chinesisch (vereinfacht)".
             // The latter is the script part which is already included in the
@@ -234,7 +219,7 @@ class LocaleDataGenerator
             while (null !== ($fallback = Locale::getFallback($fallback))) {
                 // Currently, no locale has an alias as fallback locale.
                 // If this starts to be the case, we need to add code here.
-                assert(!isset($aliases[$fallback]));
+                \assert(!isset($aliases[$fallback]));
 
                 // Check whether the fallback exists
                 if (isset($displayLocales[$fallback])) {

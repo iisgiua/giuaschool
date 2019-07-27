@@ -178,10 +178,6 @@ table tbody td {
     border-width: 1px 0;
 }
 
-table tbody td {
-    {{ mixins.break_long_words|raw }}
-}
-
 table tbody div {
     margin: .25em 0;
 }
@@ -832,6 +828,8 @@ tr.status-warning td {
 .tab-navigation li .badge.status-warning { background: {{ colors.warning|raw }}; color: #FFF; }
 .tab-navigation li .badge.status-error { background: {{ colors.error|raw }}; color: #FFF; }
 
+.sf-tabs .tab:not(:first-child) { display: none; }
+
 {# Toggles
    ========================================================================= #}
 .sf-toggle-content {
@@ -874,10 +872,43 @@ table.logs .metadata {
     margin: .5em 0;
     padding: 1em;
 }
+.sql-explain {
+    overflow-x: auto;
+    max-width: 920px;
+}
+.sql-explain table td, .sql-explain table tr {
+    word-break: normal;
+}
 .queries-table pre {
     {{ mixins.break_long_words|raw }}
     margin: 0;
     white-space: pre-wrap;
+}
+
+{# Validator panel
+   ========================================================================= #}
+
+#collector-content .sf-validator {
+    margin-bottom: 2em;
+}
+
+#collector-content .sf-validator .sf-validator-context,
+#collector-content .sf-validator .trace {
+    border: 1px solid #DDD;
+    background: #FFF;
+    padding: 10px;
+    margin: 0.5em 0;
+    overflow: auto;
+}
+#collector-content .sf-validator .trace {
+    font-size: 12px;
+}
+#collector-content .sf-validator .trace li {
+    margin-bottom: 0;
+    padding: 0;
+}
+#collector-content .sf-validator .trace li.selected {
+    background: rgba(255, 255, 153, 0.5);
 }
 
 {# Dump panel
@@ -899,6 +930,7 @@ table.logs .metadata {
     background: #FFF;
     padding: 10px;
     margin: 0.5em 0;
+    overflow: auto;
 }
 
 #collector-content pre.sf-dump,

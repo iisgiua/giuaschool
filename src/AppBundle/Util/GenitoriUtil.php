@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -17,11 +17,13 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use AppBundle\Entity\Genitore;
+use AppBundle\Entity\Utente;
 use AppBundle\Entity\Alunno;
 use AppBundle\Entity\Classe;
 use AppBundle\Entity\Docente;
 use AppBundle\Entity\Materia;
 use AppBundle\Entity\Colloquio;
+use AppBundle\Entity\Scrutinio;
 
 
 /**
@@ -130,7 +132,7 @@ class GenitoriUtil {
         if ($alunno->getBes() == 'H') {
           // legge sostegno
           $sostegno = $this->em->getRepository('AppBundle:FirmaSostegno')->createQueryBuilder('fs')
-            ->where('fs.lezione=:lezione AND fs.alunno=:alunno')
+            ->where('fs.lezione=:lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
             ->setParameters(['lezione' => $lezione, 'alunno' => $alunno])
             ->getQuery()
             ->getResult();
@@ -211,7 +213,7 @@ class GenitoriUtil {
     // legge lezioni
     $lezioni = $this->em->getRepository('AppBundle:Lezione')->createQueryBuilder('l')
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost')
-      ->leftJoin('AppBundle:FirmaSostegno', 'fs', 'WHERE', 'l.id=fs.lezione AND fs.alunno=:alunno')
+      ->leftJoin('AppBundle:FirmaSostegno', 'fs', 'WHERE', 'l.id=fs.lezione AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
       ->where('l.classe=:classe AND l.materia=:materia')
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('l.ora', 'ASC')
@@ -292,7 +294,7 @@ class GenitoriUtil {
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost,m.nomeBreve')
       ->join('l.materia', 'm')
       ->join('AppBundle:FirmaSostegno', 'fs', 'WHERE', 'l.id=fs.lezione')
-      ->where('l.classe=:classe AND fs.alunno=:alunno')
+      ->where('l.classe=:classe AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('m.nomeBreve,l.ora', 'ASC')
       ->setParameters(['classe' => $classe, 'alunno' => $alunno])
@@ -367,7 +369,7 @@ class GenitoriUtil {
    *
    * @return array Dati restituiti come array associativo
    */
-  public function voti(Classe $classe, Materia $materia=null, Alunno $alunno) {
+  public function voti(Classe $classe, Materia $materia=null, Alunno $alunno=null) {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->regUtil->infoPeriodi();
     $dati = array();
@@ -376,7 +378,8 @@ class GenitoriUtil {
       ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,l.data,m.nomeBreve')
       ->join('v.lezione', 'l')
       ->join('l.materia', 'm')
-      ->where('v.alunno=:alunno AND v.visibile=:visibile AND l.classe=:classe')
+      ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=v.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->where('v.alunno=:alunno AND v.visibile=:visibile AND (l.classe=:classe OR l.classe=cc.classe)')
       ->orderBy('m.nomeBreve', 'ASC')
       ->addOrderBy('l.data', 'DESC')
       ->setParameters(['alunno' => $alunno, 'visibile' => 1, 'classe' => $classe]);
@@ -435,7 +438,7 @@ class GenitoriUtil {
     $dati['lista'] = array();
     // legge assenze
     $assenze = $this->em->getRepository('AppBundle:Alunno')->createQueryBuilder('a')
-      ->select('ass.data,ass.giustificato')
+      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id')
       ->join('AppBundle:Assenza', 'ass', 'WHERE', 'a.id=ass.alunno')
       ->where('a.id=:alunno AND a.classe=:classe')
       ->setParameters(['alunno' => $alunno, 'classe' => $classe])
@@ -448,11 +451,15 @@ class GenitoriUtil {
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
       $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
       $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
-      $dati_periodo[$numperiodo][$data]['assenza']['giustificato'] = ($a['giustificato'] !== null);
+      $dati_periodo[$numperiodo][$data]['assenza']['giustificato'] =
+        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
+      $dati_periodo[$numperiodo][$data]['assenza']['motivazione'] = $a['motivazione'];
+      $dati_periodo[$numperiodo][$data]['assenza']['id'] = $a['id'];
+      $dati_periodo[$numperiodo][$data]['assenza']['permesso'] = $this->azioneGiustifica($a['data'], $alunno);
     }
     // legge ritardi
     $ritardi = $this->em->getRepository('AppBundle:Alunno')->createQueryBuilder('a')
-      ->select('e.data,e.ora,e.note,e.giustificato,e.valido')
+      ->select('e.data,e.ora,e.ritardoBreve,e.note,e.giustificato,e.valido,e.motivazione,(e.docenteGiustifica) AS docenteGiustifica,e.id')
       ->join('AppBundle:Entrata', 'e', 'WHERE', 'a.id=e.alunno')
       ->where('a.id=:alunno AND a.classe=:classe')
       ->setParameters(['alunno' => $alunno, 'classe' => $classe])
@@ -466,8 +473,7 @@ class GenitoriUtil {
       $data = $r['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
       $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-      $breve = $this->regUtil->seRitardoBreve($r['data'], $r['ora'], $classe->getSede());
-      if ($breve) {
+      if ($r['ritardoBreve']) {
         $num_brevi++;
       } else {
         $num_ritardi++;
@@ -477,10 +483,14 @@ class GenitoriUtil {
       }
       $dati_periodo[$numperiodo][$data]['ritardo']['data'] = $data_str;
       $dati_periodo[$numperiodo][$data]['ritardo']['ora'] = $r['ora'];
-      $dati_periodo[$numperiodo][$data]['ritardo']['breve'] = $breve;
+      $dati_periodo[$numperiodo][$data]['ritardo']['breve'] = $r['ritardoBreve'];
       $dati_periodo[$numperiodo][$data]['ritardo']['note'] = $r['note'];
-      $dati_periodo[$numperiodo][$data]['ritardo']['giustificato'] = ($r['giustificato'] !== null);
       $dati_periodo[$numperiodo][$data]['ritardo']['valido'] = $r['valido'];
+      $dati_periodo[$numperiodo][$data]['ritardo']['giustificato'] =
+        ($r['giustificato'] ? (($r['docenteGiustifica'] || $r['ritardoBreve']) ? 'D' : 'G') : null);
+      $dati_periodo[$numperiodo][$data]['ritardo']['motivazione'] = $r['motivazione'];
+      $dati_periodo[$numperiodo][$data]['ritardo']['id'] = $r['id'];
+      $dati_periodo[$numperiodo][$data]['ritardo']['permesso'] = $this->azioneGiustifica($r['data'], $alunno);
     }
     // legge uscite anticipate
     $uscite = $this->em->getRepository('AppBundle:Alunno')->createQueryBuilder('a')
@@ -516,7 +526,8 @@ class GenitoriUtil {
       ->select('SUM(al.ore)')
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
-      ->where('al.alunno=:alunno AND l.classe=:classe AND m.tipo=:tipo')
+      ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->where('al.alunno=:alunno AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
       ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'N'])
       ->getQuery()
       ->getSingleScalarResult();
@@ -526,7 +537,8 @@ class GenitoriUtil {
         ->select('SUM(al.ore)')
         ->join('al.lezione', 'l')
         ->join('l.materia', 'm')
-        ->where('al.alunno=:alunno AND l.classe=:classe AND m.tipo=:tipo')
+        ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+        ->where('al.alunno=:alunno AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
         ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'R'])
         ->getQuery()
         ->getSingleScalarResult();
@@ -569,8 +581,9 @@ class GenitoriUtil {
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where('n.tipo=:tipo AND n.classe=:classe')
-      ->setParameters(['tipo' => 'C', 'classe' => $classe])
+      ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=:alunno AND n.data BETWEEN cc.inizio AND cc.fine')
+      ->where('n.tipo=:tipo AND (n.classe=:classe OR n.classe=cc.classe)')
+      ->setParameters(['tipo' => 'C', 'classe' => $classe, 'alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per note di classe
@@ -592,7 +605,8 @@ class GenitoriUtil {
       ->join('n.alunni', 'a')
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
-      ->where('n.tipo=:tipo AND n.classe=:classe AND a.id=:alunno')
+      ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=a.id AND n.data BETWEEN cc.inizio AND cc.fine')
+      ->where('n.tipo=:tipo AND a.id=:alunno AND (n.classe=:classe OR n.classe=cc.classe)')
       ->setParameters(['tipo' => 'I', 'classe' => $classe, 'alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
@@ -641,7 +655,7 @@ class GenitoriUtil {
       ->setParameters(['alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
-    // imposta array associativo per note di classe
+    // imposta array associativo per osservazioni
     foreach ($osservazioni as $o) {
       $data = $o['data']->format('Y-m-d');
       $periodo = ($data <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
@@ -712,7 +726,7 @@ class GenitoriUtil {
   }
 
   /**
-   * Restituisce pagelle e altre comunicazioni dello scrutinio dell'alunno indicato.
+   * Restituisce pagella e altre comunicazioni dello scrutinio dell'alunno indicato.
    *
    * @param Classe $classe Classe dell'alunno
    * @param Alunno $alunno Alunno di cui si desiderano le assenze
@@ -722,13 +736,17 @@ class GenitoriUtil {
    */
   public function pagelle(Classe $classe, Alunno $alunno, $periodo) {
     $dati = array();
+    // legge scrutinio
+    $scrutinio = $this->em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe,
+      'periodo' => $periodo, 'stato' => 'C']);
+    $dati['scrutinio'] = $scrutinio;
     // legge materie
     $materie = $this->em->getRepository('AppBundle:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.tipo')
       ->join('AppBundle:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
+      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N'])
+      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -759,6 +777,9 @@ class GenitoriUtil {
             'recupero' => $v->getRecupero(),
             'debito' => $v->getDebito());
         }
+        // nuovi crediti
+        $nuovicrediti = $scrutinio->getDato('nuovicrediti')[$alunno->getId()];
+        $dati['nuovicrediti'] = (is_array($nuovicrediti) ? $nuovicrediti[0] : $nuovicrediti);
       } elseif ($periodo == '1') {
         // valutazione intermedia
         $dati['voti'][$v->getMateria()->getId()]['recupero'] = $v->getRecupero();
@@ -786,13 +807,9 @@ class GenitoriUtil {
     }
     // esito scrutinio
     if ($periodo == 'F') {
-      $scrutinio = $this->em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe,
-        'periodo' => $periodo, 'stato' => 'C']);
-      $noscrut = ($scrutinio->getDato('no_scrutinabili') ? $scrutinio->getDato('no_scrutinabili') : []);
-      if (in_array($alunno->getId(), $noscrut)) {
-        // non scrutinato
-        $dati['noscrutinato'] = $scrutinio->getDato('alunni')[$alunno->getId()]['no_deroga'];
-      } else {
+      $scrutinati = ($scrutinio->getDato('scrutinabili') == null ? [] : array_keys($scrutinio->getDato('scrutinabili')));
+      $cessata_frequenza = ($scrutinio->getDato('cessata_frequenza') == null ? [] : $scrutinio->getDato('cessata_frequenza'));
+      if (in_array($alunno->getId(), $scrutinati)) {
         // scrutinato
         $dati['esito'] = $this->em->getRepository('AppBundle:Esito')->findOneBy(['scrutinio' => $scrutinio,
           'alunno' => $alunno]);
@@ -804,10 +821,23 @@ class GenitoriUtil {
             $dati['carenze'] = 1;
           }
         }
+        // legge proposte
+        $proposte = $this->em->getRepository('AppBundle:PropostaVoto')->createQueryBuilder('pv')
+          ->where('pv.classe=:classe AND pv.alunno=:alunno AND pv.periodo=:periodo AND pv.unico IS NOT NULL')
+          ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
+          ->getQuery()
+          ->getResult();
+        foreach ($proposte as $p) {
+          // inserisce proposte
+          $dati['proposte'][$p->getMateria()->getId()] = array(
+            'unico' => $p->getUnico());
+          // inserisce voti/debiti
+        }
+      } else {
+        // non scrutinato
+        $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
       }
-    } elseif ($periodo == 'R') {
-      $scrutinio = $this->em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe,
-        'periodo' => $periodo, 'stato' => 'C']);
+    } elseif ($periodo == 'I') {
       // scrutinato
       $dati['esito'] = $this->em->getRepository('AppBundle:Esito')->findOneBy(['scrutinio' => $scrutinio,
         'alunno' => $alunno]);
@@ -959,7 +989,7 @@ class GenitoriUtil {
     $freq = ' '.$settimana_en[$colloquio->getGiorno()].' of this month';
     $ora_str = ' (dalle '.$ora[0]->getInizio()->format('G:i').' alle '.$ora[0]->getFine()->format('G:i').')';
     $giorno = new \DateTime('today');
-    while ($giorno->format('m') <= $fine->format('m')) {
+    while ($giorno <= $fine) {
       // prima settimana
       $giorno->modify('first'.$freq);
       if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
@@ -1078,6 +1108,83 @@ class GenitoriUtil {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Restituisce la lista delle pagelle esistenti per l'alunno indicato
+   *
+   * @param Alunno $alunno Alunno di riferimento
+   *
+   * @return array Restituisce i dati come array associativo
+   */
+  public function pagelleAlunno(Alunno $alunno) {
+    $periodi = array();
+    $adesso = (new \DateTime())->format('Y-m-d H:i:0');
+    // scrutini di classe corrente o altre di cambio classe
+    $scrutini = $this->em->getRepository('AppBundle:Scrutinio')->createQueryBuilder('s')
+      ->leftJoin('s.classe', 'c')
+      ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=:alunno')
+      ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso')
+      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(),
+        'stato' => 'C', 'adesso' => $adesso])
+      ->orderBy('s.data', 'DESC')
+      ->getQuery()
+      ->getResult();
+    // controlla presenza alunno in scrutinio
+    foreach ($scrutini as $sc) {
+      $alunni = ($sc->getPeriodo() == 'I' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
+      if (in_array($alunno->getId(), $alunni)) {
+        $periodi[] = array($sc->getPeriodo(), $sc);
+      }
+    }
+    // restituisce dati come array associativo
+    return $periodi;
+  }
+
+  /**
+   * Restituisce se l'utente corrente è abilitato alla giustificazione online
+   *
+   * @param Utente $utente Utente corrente (alunno o genitore)
+   *
+   * @return bool Restituisce vero se l'utente è abilitato alla giustificazione online, falso altrimenti
+   */
+  public function giusticazioneOnline(Utente $utente) {
+    $abilitato = false;
+    if ($utente instanceOf Genitore) {
+      // utente è genitore
+      $abilitato = $utente->getGiustificaOnline();
+    } elseif (($utente instanceOf Alunno) && $utente->getGiustificaOnline()) {
+      // utente è alunno, controlla se è maggiorenne
+      $maggiorenne = (new \DateTime('today'))->modify('-18 years');
+      $abilitato = ($utente->getDataNascita() <= $maggiorenne);
+    }
+    // restituisce se è abilitato o no
+    return $abilitato;
+  }
+
+  /**
+   * Controlla se è possibile giustifacare l'assenza.
+   *
+   * @param \DateTime $data Data della lezione
+   * @param Alunno $alunno Alunno che si deve giustificare
+   *
+   * @return bool Restituisce vero se l'azione è permessa
+   */
+  public function azioneGiustifica(\DateTime $data, Alunno $alunno) {
+    if ($this->regUtil->bloccoScrutinio($data, $alunno->getClasse())) {
+      // blocco scrutinio
+      return false;
+    }
+    $oggi = new \DateTime();
+    if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
+      // data non nel futuro
+      if ($alunno->getClasse()) {
+        // alunno non è trasferito
+        return true;
+      }
+    }
+    // non consentito
+    return false;
   }
 
 }

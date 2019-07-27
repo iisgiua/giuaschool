@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\Process\Pipes;
 
-use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\RuntimeException;
+use Symfony\Component\Process\Process;
 
 /**
  * WindowsPipes implementation uses temporary files as handles.
@@ -26,16 +26,12 @@ use Symfony\Component\Process\Exception\RuntimeException;
  */
 class WindowsPipes extends AbstractPipes
 {
-    /** @var array */
     private $files = array();
-    /** @var array */
     private $fileHandles = array();
-    /** @var array */
     private $readBytes = array(
         Process::STDOUT => 0,
         Process::STDERR => 0,
     );
-    /** @var bool */
     private $haveReadSupport;
 
     public function __construct($input, $haveReadSupport)
@@ -145,7 +141,7 @@ class WindowsPipes extends AbstractPipes
             $data = stream_get_contents($fileHandle, -1, $this->readBytes[$type]);
 
             if (isset($data[0])) {
-                $this->readBytes[$type] += strlen($data);
+                $this->readBytes[$type] += \strlen($data);
                 $read[$type] = $data;
             }
             if ($close) {

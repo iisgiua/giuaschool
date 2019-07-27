@@ -1,6 +1,68 @@
 CHANGELOG
 =========
 
+3.4.0
+-----
+
+ * Added `translator.default_path` option and parameter
+ * Session `use_strict_mode` is now enabled by default and the corresponding option has been deprecated
+ * Made the `cache:clear` command to *not* clear "app" PSR-6 cache pools anymore,
+   but to still clear "system" ones; use the `cache:pool:clear` command to clear "app" pools instead
+ * Always register a minimalist logger that writes in `stderr`
+ * Deprecated `profiler.matcher` option
+ * Added support for `EventSubscriberInterface` on `MicroKernelTrait`
+ * Removed `doctrine/cache` from the list of required dependencies in `composer.json`
+ * Deprecated `validator.mapping.cache.doctrine.apc` service
+ * The `symfony/stopwatch` dependency has been removed, require it via `composer
+   require symfony/stopwatch` in your `dev` environment.
+ * Deprecated using the `KERNEL_DIR` environment variable with `KernelTestCase::getKernelClass()`.
+ * Deprecated the `KernelTestCase::getPhpUnitXmlDir()` and `KernelTestCase::getPhpUnitCliConfigArgument()` methods.
+ * Deprecated `AddCacheClearerPass`, use tagged iterator arguments instead.
+ * Deprecated `AddCacheWarmerPass`, use tagged iterator arguments instead.
+ * Deprecated `TranslationDumperPass`, use 
+   `Symfony\Component\Translation\DependencyInjection\TranslationDumperPass` instead
+ * Deprecated `TranslationExtractorPass`, use 
+   `Symfony\Component\Translation\DependencyInjection\TranslationExtractorPass` instead
+ * Deprecated `TranslatorPass`, use 
+   `Symfony\Component\Translation\DependencyInjection\TranslatorPass` instead
+ * Added `command` attribute to the `console.command` tag which takes the command
+   name as value, using it makes the command lazy
+ * Added `cache:pool:prune` command to allow manual stale cache item pruning of supported PSR-6 and PSR-16 cache pool
+   implementations
+ * Deprecated `Symfony\Bundle\FrameworkBundle\Translation\TranslationLoader`, use 
+   `Symfony\Component\Translation\Reader\TranslationReader` instead
+ * Deprecated `translation.loader` service, use `translation.reader` instead
+ * `AssetsInstallCommand::__construct()` now takes an instance of
+   `Symfony\Component\Filesystem\Filesystem` as first argument
+ * `CacheClearCommand::__construct()` now takes an instance of
+   `Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface` as
+    first argument
+ * `CachePoolClearCommand::__construct()` now takes an instance of
+   `Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer` as
+    first argument
+ * `EventDispatcherDebugCommand::__construct()` now takes an instance of
+   `Symfony\Component\EventDispatcher\EventDispatcherInterface` as
+    first argument
+ * `RouterDebugCommand::__construct()` now takes an instance of
+   `Symfony\Component\Routing\RouterInterface` as
+    first argument
+ * `RouterMatchCommand::__construct()` now takes an instance of
+   `Symfony\Component\Routing\RouterInterface` as
+    first argument
+ * `TranslationDebugCommand::__construct()` now takes an instance of
+   `Symfony\Component\Translation\TranslatorInterface` as
+    first argument
+ * `TranslationUpdateCommand::__construct()` now takes an instance of
+   `Symfony\Component\Translation\TranslatorInterface` as
+    first argument
+ * `AssetsInstallCommand`, `CacheClearCommand`, `CachePoolClearCommand`,
+   `EventDispatcherDebugCommand`, `RouterDebugCommand`, `RouterMatchCommand`,
+   `TranslationDebugCommand`, `TranslationUpdateCommand`, `XliffLintCommand`
+    and `YamlLintCommand` classes have been marked as final
+ * Added `asset.request_context.base_path` and `asset.request_context.secure` parameters
+   to provide a default request context in case the stack is empty (similar to `router.request_context.*` parameters)
+ * Display environment variables managed by `Dotenv` in `AboutCommand`
+
 3.3.0
 -----
 
@@ -28,7 +90,7 @@ CHANGELOG
  * Deprecated `SessionListener`
  * Deprecated `TestSessionListener`
  * Deprecated `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ConfigCachePass`.
-   Use `Symfony\Component\Console\DependencyInjection\ConfigCachePass` instead.
+   Use tagged iterator arguments instead.
  * Deprecated `PropertyInfoPass`, use `Symfony\Component\PropertyInfo\DependencyInjection\PropertyInfoPass` instead
  * Deprecated `ControllerArgumentValueResolverPass`. Use
    `Symfony\Component\HttpKernel\DependencyInjection\ControllerArgumentValueResolverPass` instead
@@ -47,8 +109,12 @@ CHANGELOG
    `Symfony\Component\Validator\DependencyInjection\AddConstraintValidatorsPass` instead
  * Deprecated `ValidateWorkflowsPass`, use
    `Symfony\Component\Workflow\DependencyInjection\ValidateWorkflowsPass` instead
- * Deprecated `ConstraintValidatorFactory`, use 
+ * Deprecated `ConstraintValidatorFactory`, use
    `Symfony\Component\Validator\ContainerConstraintValidatorFactory` instead.
+ * Deprecated `PhpStringTokenParser`, use
+   `Symfony\Component\Translation\Extractor\PhpStringTokenParser` instead.
+ * Deprecated `PhpExtractor`, use
+   `Symfony\Component\Translation\Extractor\PhpExtractor` instead.
 
 3.2.0
 -----

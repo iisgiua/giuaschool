@@ -1,10 +1,49 @@
 UPGRADE FROM 3.x to 4.0
 =======================
 
+Symfony Framework
+-----------------
+
+The first step to upgrade a Symfony 3.x application to 4.x is to update the
+file and directory structure of your application:
+
+| Symfony 3.x                         | Symfony 4.x
+| ----------------------------------- | --------------------------------
+| `app/config/`                       | `config/`
+| `app/config/*.yml`                  | `config/*.yaml` and `config/packages/*.yaml`
+| `app/config/parameters.yml.dist`    | `config/services.yaml` and `.env.dist`
+| `app/config/parameters.yml`         | `config/services.yaml` and `.env`
+| `app/Resources/<BundleName>/views/` | `templates/bundles/<BundleName>/`
+| `app/Resources/`                    | `src/Resources/`
+| `app/Resources/assets/`             | `assets/`
+| `app/Resources/translations/`       | `translations/`
+| `app/Resources/views/`              | `templates/`
+| `src/AppBundle/`                    | `src/`
+| `var/logs/`                         | `var/log/`
+| `web/`                              | `public/`
+| `web/app.php`                       | `public/index.php`
+| `web/app_dev.php`                   | `public/index.php`
+
+Then, upgrade the contents of your console script and your front controller:
+
+* `bin/console`: https://github.com/symfony/recipes/blob/master/symfony/console/3.3/bin/console
+* `public/index.php`: https://github.com/symfony/recipes/blob/master/symfony/framework-bundle/3.3/public/index.php
+
+Lastly, read the following article to add Symfony Flex to your application and
+upgrade the configuration files: https://symfony.com/doc/current/setup/flex.html
+
+If you use Symfony components instead of the whole framework, you can find below
+the upgrading instructions for each individual bundle and component.
+
 ClassLoader
 -----------
 
  * The component has been removed. Use Composer instead.
+
+Config
+------
+
+ * The protected `TreeBuilder::$builder` property has been removed.
 
 Console
 -------
@@ -61,6 +100,8 @@ Console
  * The `console.exception` event and the related `ConsoleExceptionEvent` class have
    been removed in favor of the `console.error` event and the `ConsoleErrorEvent` class.
 
+ * The `SymfonyQuestionHelper::ask` default validation has been removed in favor of `Question::setValidator`.
+
 Debug
 -----
 
@@ -70,10 +111,70 @@ Debug
  * `FlattenException::getTrace()` now returns additional type descriptions
    `integer` and `float`.
 
+ * Support for stacked errors in the `ErrorHandler` has been removed
+
 DependencyInjection
 -------------------
 
- * Autowiring services based on the types they implement is not supported anymore. Rename (or alias) your services to their FQCN id to make them autowirable.
+ * Definitions and aliases are now private by default in 4.0. You should either use service injection
+   or explicitly define your services as public if you really need to inject the container.
+
+ * Relying on service auto-registration while autowiring is not supported anymore.
+   Explicitly inject your dependencies or create services whose ids are
+   their fully-qualified class name.
+
+   Before:
+
+   ```php
+   namespace App\Controller;
+
+   use App\Mailer;
+
+   class DefaultController
+   {
+       public function __construct(Mailer $mailer) {
+           // ...
+       }
+
+       // ...
+   }
+   ```
+   ```yml
+   services:
+       App\Controller\DefaultController:
+           autowire: true
+   ```
+
+   After:
+
+   ```php
+   // same PHP code
+   ```
+   ```yml
+   services:
+       App\Controller\DefaultController:
+           autowire: true
+
+       # or
+       # App\Controller\DefaultController:
+       #     arguments: { $mailer: "@App\Mailer" }
+
+       App\Mailer:
+           autowire: true
+    ```
+
+ * Autowiring services based on the types they implement is not supported anymore.
+   It will only look for an alias or a service id that matches a given FQCN.
+   Rename (or alias) your services to their FQCN id to make them autowirable.
+   In 3.4, you can activate this behavior instead of having deprecation messages
+   by setting the following parameter:
+
+   ```yml
+   parameters:
+       container.autowiring.strict_mode: true
+   ```
+
+   From 4.0, you can remove it as it's the default behavior and the parameter is not handled anymore.
 
  * `_defaults` and `_instanceof` are now reserved service names in Yaml configurations. Please rename any services with that names.
 
@@ -98,7 +199,7 @@ DependencyInjection
    <service id="Doctrine\Common\Annotations\Reader" alias="annotations.reader" public="false" />
    ```
 
- * Service identifiers are now case sensitive.
+ * Service identifiers and parameter names are now case sensitive.
 
  * The `Reference` and `Alias` classes do not make service identifiers lowercase anymore.
 
@@ -110,6 +211,9 @@ DependencyInjection
 
  * The `DefinitionDecorator` class has been removed. Use the `ChildDefinition`
    class instead.
+
+ * The `ResolveDefinitionTemplatesPass` class has been removed.
+   Use the `ResolveChildDefinitionsPass` class instead.
 
  * Using unsupported configuration keys in YAML configuration files raises an
    exception.
@@ -128,11 +232,35 @@ DependencyInjection
  * The ``strict`` attribute in service arguments has been removed.
    The attribute is ignored since 3.0, so you can simply remove it.
 
+ * Top-level anonymous services in XML are no longer supported.
+
+ * The `ExtensionCompilerPass` has been moved to before-optimization passes with priority -1000.
+
+ * In 3.4, parameter `container.dumper.inline_class_loader` was introduced. Unless
+   you're using a custom autoloader, you should enable this parameter. This can
+   drastically improve DX by reducing the time to load classes when the `DebugClassLoader`
+   is enabled. If you're using `FrameworkBundle`, this performance improvement will
+   also impact the "dev" environment:
+
+   ```yml
+   parameters:
+       container.dumper.inline_class_loader: true
+   ```
+
+DoctrineBridge
+--------------
+
+* The `Symfony\Bridge\Doctrine\HttpFoundation\DbalSessionHandler` and
+  `Symfony\Bridge\Doctrine\HttpFoundation\DbalSessionHandlerSchema` have been removed. Use
+  `Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler` instead.
+
 EventDispatcher
 ---------------
 
  * The `ContainerAwareEventDispatcher` class has been removed.
    Use `EventDispatcher` with closure factories instead.
+
+ * The `reset()` method has been added to `TraceableEventDispatcherInterface`.
 
 ExpressionLanguage
 ------------------
@@ -141,13 +269,27 @@ ExpressionLanguage
    class has been removed. You should use the `CacheItemPoolInterface` interface
    instead.
 
+Filesystem
+----------
+
+ * The `Symfony\Component\Filesystem\LockHandler` has been removed,
+   use the `Symfony\Component\Lock\Store\FlockStore` class
+   or  the `Symfony\Component\Lock\Store\FlockStore\SemaphoreStore` class directly instead.
+ * Support for passing relative paths to `Filesystem::makePathRelative()` has been removed.
+
 Finder
 ------
 
  * The `ExceptionInterface` has been removed.
+ * The `Symfony\Component\Finder\Iterator\FilterIterator` class has been
+   removed as it used to fix a bug which existed before version 5.5.23/5.6.7
 
 Form
 ----
+
+* The values of the `FormEvents::*` constants have been updated to match the
+  constant names. You should only update your application if you relied on the
+  constant values instead of their names.
 
  * The `choices_as_values` option of the `ChoiceType` has been removed.
 
@@ -220,8 +362,43 @@ Form
    ));
    ```
 
+ * Removed `ChoiceLoaderInterface` implementation in `TimezoneType`. Use the "choice_loader" option instead.
+
+   Before:
+   ```php
+   class MyTimezoneType extends TimezoneType
+   {
+       public function loadChoiceList()
+       {
+           // override the method
+       }
+   }
+   ```
+
+   After:
+   ```php
+   class MyTimezoneType extends AbstractType
+   {
+       public function getParent()
+       {
+           return TimezoneType::class;
+       }
+
+       public function configureOptions(OptionsResolver $resolver)
+       {
+           $resolver->setDefault('choice_loader', ...); // override the option instead
+       }
+   }
+   ```
+
+ * `FormRendererInterface::setTheme` and `FormRendererEngineInterface::setTheme` have a new optional argument `$useDefaultThemes` with a default value set to `true`.
+
 FrameworkBundle
 ---------------
+
+ * The `session.use_strict_mode` option has been removed and strict mode is always enabled.
+
+ * The `validator.mapping.cache.doctrine.apc` service has been removed.
 
  * The "framework.trusted_proxies" configuration option and the corresponding "kernel.trusted_proxies" parameter have been removed. Use the `Request::setTrustedProxies()` method in your front controller instead.
 
@@ -285,7 +462,7 @@ FrameworkBundle
    class instead.
 
  * The `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ConfigCachePass` class has been removed.
-   Use `Symfony\Component\Config\DependencyInjection\ConfigCachePass` class instead.
+   Use tagged iterator arguments instead.
 
  * The `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\PropertyInfoPass` class has been
    removed. Use the `Symfony\Component\PropertyInfo\DependencyInjection\PropertyInfoPass`
@@ -324,8 +501,84 @@ FrameworkBundle
    has been removed. Use the `Symfony\Component\Workflow\DependencyInjection\ValidateWorkflowsPass`
    class instead.
 
+ * Using the `KERNEL_DIR` environment variable and the automatic guessing based
+   on the `phpunit.xml` file location have been removed from the `KernelTestCase::getKernelClass()`
+   method implementation. Set the `KERNEL_CLASS` environment variable to the
+   fully-qualified class name of your Kernel or override the `KernelTestCase::createKernel()`
+   or `KernelTestCase::getKernelClass()` method instead.
+
+ * The methods `KernelTestCase::getPhpUnitXmlDir()` and `KernelTestCase::getPhpUnitCliConfigArgument()`
+   have been removed.
+
  * The `Symfony\Bundle\FrameworkBundle\Validator\ConstraintValidatorFactory` class has been removed.
    Use `Symfony\Component\Validator\ContainerConstraintValidatorFactory` instead.
+
+ * The `--no-prefix` option of the `translation:update` command has
+   been removed.
+
+ * The `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddCacheClearerPass` class has been removed.
+   Use tagged iterator arguments instead.
+
+ * The `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddCacheWarmerPass` class has been removed.
+   Use tagged iterator arguments instead.
+
+ * The `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\TranslationDumperPass`
+   class has been removed. Use the
+   `Symfony\Component\Translation\DependencyInjection\TranslationDumperPass` class instead.
+
+ * The `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\TranslationExtractorPass`
+   class has been removed. Use the
+   `Symfony\Component\Translation\DependencyInjection\TranslationExtractorPass` class instead.
+
+ * The `Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\TranslatorPass`
+   class has been removed. Use the
+   `Symfony\Component\Translation\DependencyInjection\TranslatorPass` class instead.
+
+ * The `Symfony\Bundle\FrameworkBundle\Translation\TranslationLoader`
+   class has been deprecated and will be removed in 4.0. Use the
+   `Symfony\Component\Translation\Reader\TranslationReader` class instead.
+
+ * The `translation.loader` service has been removed.
+   Use the `translation.reader` service instead.
+
+ * `AssetsInstallCommand::__construct()` now requires an instance of
+   `Symfony\Component\Filesystem\Filesystem` as first argument.
+
+ * `CacheClearCommand::__construct()` now requires an instance of
+   `Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface` as
+    first argument.
+
+ * `CachePoolClearCommand::__construct()` now requires an instance of
+   `Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer` as
+    first argument.
+
+ * `EventDispatcherDebugCommand::__construct()` now requires an instance of
+   `Symfony\Component\EventDispatcher\EventDispatcherInterface` as
+    first argument.
+
+ * `RouterDebugCommand::__construct()` now requires an instance of
+   `Symfony\Component\Routing\RouterInterface` as
+    first argument.
+
+ * `RouterMatchCommand::__construct()` now requires an instance of
+   `Symfony\Component\Routing\RouterInterface` as
+    first argument.
+
+ * `TranslationDebugCommand::__construct()` now requires an instance of
+   `Symfony\Component\Translation\TranslatorInterface` as
+    first argument.
+
+ * `TranslationUpdateCommand::__construct()` now requires an instance of
+   `Symfony\Component\Translation\TranslatorInterface` as
+    first argument.
+
+ * The `Symfony\Bundle\FrameworkBundle\Translation\PhpExtractor`
+   class has been deprecated and will be removed in 4.0. Use the
+   `Symfony\Component\Translation\Extractor\PhpExtractor` class instead.
+
+ * The `Symfony\Bundle\FrameworkBundle\Translation\PhpStringTokenParser`
+   class has been deprecated and will be removed in 4.0. Use the
+   `Symfony\Component\Translation\Extractor\PhpStringTokenParser` class instead.
 
 HttpFoundation
 --------------
@@ -358,14 +611,48 @@ HttpFoundation
  * The ability to check only for cacheable HTTP methods using `Request::isMethodSafe()` is
    not supported anymore, use `Request::isMethodCacheable()` instead.
 
+ * The `Symfony\Component\HttpFoundation\Session\Storage\Handler\WriteCheckSessionHandler` class has been
+   removed. Implement `SessionUpdateTimestampHandlerInterface` or extend `AbstractSessionHandler` instead.
+
+ * The `Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeSessionHandler` and
+   `Symfony\Component\HttpFoundation\Session\Storage\Proxy\NativeProxy` classes have been removed.
+
+ * The `Symfony\Component\HttpFoundation\Session\Storage\Handler\MongoDbSessionHandler` does not work with the legacy
+   mongo extension anymore. It requires mongodb/mongodb package and ext-mongodb.
+
+ * The `Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcacheSessionHandler` class has been removed.
+   Use `Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler` instead.
+
 HttpKernel
 ----------
 
- * Removed the `kernel.root_dir` parameter. Use the `kernel.project_dir` parameter
-   instead.
+ * Bundle inheritance has been removed.
 
- * Removed the `Kernel::getRootDir()` method. Use the `Kernel::getProjectDir()`
-   method instead.
+ * Relying on convention-based commands discovery is not supported anymore.
+   Use PSR-4 based service discovery instead.
+
+   Before:
+
+   ```yml
+   # app/config/services.yml
+   services:
+       # ...
+
+       # implicit registration of all commands in the `Command` folder
+   ```
+
+   After:
+
+   ```yml
+   # app/config/services.yml
+   services:
+       # ...
+
+       # explicit commands registration
+       AppBundle\Command\:
+           resource: '../../src/AppBundle/Command/*'
+           tags: ['console.command']
+   ```
 
  * The `Extension::addClassesToCompile()` and `Extension::getClassesToCompile()` methods have been removed.
 
@@ -396,6 +683,23 @@ HttpKernel
    by Symfony. Use the `%env()%` syntax to get the value of any environment
    variable from configuration files instead.
 
+ * The `getCacheDir()` method of your kernel should not be called while building the container.
+   Use the `%kernel.cache_dir%` parameter instead. Not doing so may break the `cache:clear` command.
+
+ * The `Symfony\Component\HttpKernel\Config\EnvParametersResource` class has been removed.
+
+ * The `reset()` method has been added to `Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface`.
+
+ * The `clear()` method has been added to `Symfony\Component\HttpKernel\Log\DebugLoggerInterface`.
+
+ * The `ChainCacheClearer::add()` method has been removed,
+   inject the list of clearers as a constructor argument instead.
+
+ * The `CacheWarmerAggregate::add()` and `setWarmers()` methods have been removed,
+   inject the list of clearers as a constructor argument instead.
+
+ * The `CacheWarmerAggregate` and `ChainCacheClearer` classes have been made final.
+
 Ldap
 ----
 
@@ -403,6 +707,11 @@ Ldap
 
 Process
 -------
+
+ * Passing a not existing working directory to the constructor of the `Symfony\Component\Process\Process` class is not supported anymore.
+
+ * The `Symfony\Component\Process\ProcessBuilder` class has been removed,
+   use the `Symfony\Component\Process\Process` class directly instead.
 
  * The `ProcessUtils::escapeArgument()` method has been removed, use a command line array or give env vars to the `Process::start/run()` method instead.
 
@@ -414,6 +723,13 @@ Process
 
  * Extending `Process::run()`, `Process::mustRun()` and `Process::restart()` is
    not supported anymore.
+
+ * The `getEnhanceWindowsCompatibility()` and `setEnhanceWindowsCompatibility()` methods of the `Process` class have been removed.
+
+Profiler
+--------
+
+ * The `profiler.matcher` option has been removed.
 
 ProxyManager
 ------------
@@ -431,6 +747,21 @@ Security
  * The `AccessDecisionManager::setVoters()` method has been removed. Pass the
    voters to the constructor instead.
 
+ * Support for defining voters that don't implement the `VoterInterface` has been removed.
+
+ * Calling `ContextListener::setLogoutOnUserChange(false)` won't have any
+   effect anymore.
+
+ * Removed the HTTP digest authentication system. The `NonceExpiredException`,
+   `DigestAuthenticationListener` and `DigestAuthenticationEntryPoint` classes
+   have been removed. Use another authentication system like `http_basic` instead.
+
+ * The `GuardAuthenticatorInterface` interface has been removed.
+   Use `AuthenticatorInterface` instead.
+
+ * When extending `AbstractGuardAuthenticator` getCredentials() cannot return
+   `null` anymore, return false from `supports()` if no credentials available instead.
+
 SecurityBundle
 --------------
 
@@ -441,6 +772,22 @@ SecurityBundle
  * The `UserPasswordEncoderCommand` class does not allow `null` as the first argument anymore.
 
  * `UserPasswordEncoderCommand` does not extend `ContainerAwareCommand` nor implement `ContainerAwareInterface` anymore.
+
+ * `InitAclCommand` has been removed. Use `Symfony\Bundle\AclBundle\Command\InitAclCommand` instead
+
+ * `SetAclCommand` has been removed. Use `Symfony\Bundle\AclBundle\Command\SetAclCommand` instead
+
+ * The firewall option `logout_on_user_change` is now always true, which will
+   trigger a logout if the user changes between requests.
+
+ * Removed the HTTP digest authentication system. The `HttpDigestFactory` class
+   has been removed. Use another authentication system like `http_basic` instead.
+
+ * The `switch_user.stateless` option is now always true if the firewall is stateless.
+
+ * Not configuring explicitly the provider on a firewall is ambiguous when there is more than one registered provider.
+   The first configured provider is not used anymore and an exception is thrown instead.
+   Explicitly configure the provider to use on your firewalls.
 
 Serializer
 ----------
@@ -461,14 +808,29 @@ Translation
 
  * Removed the backup feature from the file dumper classes.
 
+ * The default value of the `$readerServiceId` argument of `TranslatorPass::__construct()` has been changed to `"translation.reader"`.
+
+ * Removed `Symfony\Component\Translation\Writer\TranslationWriter::writeTranslations`,
+   use `Symfony\Component\Translation\Writer\TranslationWriter::write` instead.
+
+ * Removed support for passing `Symfony\Component\Translation\MessageSelector` as a second argument to the
+   `Translator::__construct()`. You should pass an instance of `Symfony\Component\Translation\Formatter\MessageFormatterInterface` instead.
+
 TwigBundle
 ----------
 
 * The `ContainerAwareRuntimeLoader` class has been removed. Use the
   Twig `Twig_ContainerRuntimeLoader` class instead.
 
+ * Removed `DebugCommand` in favor of `Symfony\Bridge\Twig\Command\DebugCommand`.
+
+ * Removed `ContainerAwareInterface` implementation in `Symfony\Bundle\TwigBundle\Command\LintCommand`.
+
 TwigBridge
 ----------
+
+ * removed the `Symfony\Bridge\Twig\Form\TwigRenderer` class, use the `FormRenderer`
+   class from the Form component instead
 
  * Removed the possibility to inject the Form `TwigRenderer` into the `FormExtension`.
    Upgrade Twig to `^1.30`, inject the `Twig_Environment` into the `TwigRendererEngine` and load
@@ -504,8 +866,18 @@ TwigBridge
  * The `TwigRendererEngine::setEnvironment()` method has been removed.
    Pass the Twig Environment as second argument of the constructor instead.
 
+ * Removed `DebugCommand::set/getTwigEnvironment`. Pass an instance of
+   `Twig\Environment` as first argument of the constructor instead.
+
+ * Removed `LintCommand::set/getTwigEnvironment`. Pass an instance of
+   `Twig\Environment` as first argument of the constructor instead.
+
+
 Validator
 ---------
+
+ * The default value of the `strict` option of the `Choice` constraint was changed
+   to `true`. Using any other value will throw an exception.
 
  * The `DateTimeValidator::PATTERN` constant was removed.
 
@@ -536,9 +908,59 @@ Validator
    }
    ```
 
- * The default value of the strict option of the `Choice` Constraint has been
-   changed to `true` as of 4.0. If you need the previous behaviour ensure to
-   set the option to `false`.
+ * Setting the `checkDNS` option of the `Url` constraint to `true` is dropped
+   in favor of `Url::CHECK_DNS_TYPE_*` constants values.
+
+   Before:
+
+   ```php
+   $constraint = new Url(['checkDNS' => true]);
+   ```
+
+   After:
+
+   ```php
+   $constraint = new Url(['checkDNS' => Url::CHECK_DNS_TYPE_ANY]);
+   ```
+
+VarDumper
+---------
+
+ * The `VarDumperTestTrait::assertDumpEquals()` method expects a 3rd `$context = null`
+   argument and moves `$message = ''` argument at 4th position.
+
+   Before:
+
+   ```php
+   VarDumperTestTrait::assertDumpEquals($dump, $data, $message = '');
+   ```
+
+   After:
+
+   ```php
+   VarDumperTestTrait::assertDumpEquals($dump, $data, $filter = 0, $message = '');
+   ```
+
+ * The `VarDumperTestTrait::assertDumpMatchesFormat()` method expects a 3rd `$context = null`
+   argument and moves `$message = ''` argument at 4th position.
+
+   Before:
+
+   ```php
+   VarDumperTestTrait::assertDumpMatchesFormat($dump, $data, $message = '');
+   ```
+
+   After:
+
+   ```php
+   VarDumperTestTrait::assertDumpMatchesFormat($dump, $data, $filter = 0, $message = '');
+   ```
+
+WebProfilerBundle
+-----------------
+
+ * Removed the `getTemplates()` method of the `TemplateManager` class in favor
+   of the `getNames()` method
 
 Workflow
 --------
@@ -547,6 +969,8 @@ Workflow
 
 Yaml
 ----
+
+ * Support for the `!str` tag was removed, use the `!!str` tag instead.
 
  * Starting an unquoted string with a question mark followed by a space
    throws a `ParseException`.
@@ -571,6 +995,32 @@ Yaml
 
    ```php
 
+   $yaml = <<<YAML
+   "null": null key
+   "true": boolean true
+   "2.0": float key
+   YAML;
+
+   Yaml::parse($yaml);
+   ```
+
+ * Removed the `Yaml::PARSE_KEYS_AS_STRINGS` flag.
+
+   Before:
+
+   ```php
+   $yaml = <<<YAML
+   null: null key
+   true: boolean true
+   2.0: float key
+   YAML;
+
+   Yaml::parse($yaml, Yaml::PARSE_KEYS_AS_STRINGS);
+   ```
+
+   After:
+
+   ```php
    $yaml = <<<YAML
    "null": null key
    "true": boolean true
@@ -673,3 +1123,24 @@ Yaml
 
  * The constructor arguments `$offset`, `$totalNumberOfLines` and
    `$skippedLineNumbers` of the `Parser` class were removed.
+
+ * The behavior of the non-specific tag `!` is changed and now forces
+   non-evaluating your values.
+
+ * The `!php/object:` tag was removed in favor of the `!php/object` tag (without
+   the colon).
+
+ * The `!php/const:` tag was removed in favor of the `!php/const` tag (without
+   the colon).
+
+   Before:
+
+   ```yml
+   !php/const:PHP_INT_MAX
+   ```
+
+   After:
+
+   ```yml
+   !php/const PHP_INT_MAX
+   ```

@@ -12,40 +12,34 @@
 namespace Symfony\Component\Form\Extension\Core\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\Form\ReversedTransformer;
+use Symfony\Component\Form\Extension\Core\DataTransformer\ArrayToPartsTransformer;
 use Symfony\Component\Form\Extension\Core\DataTransformer\DataTransformerChain;
 use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToArrayTransformer;
-use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToStringTransformer;
 use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToLocalizedStringTransformer;
-use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToTimestampTransformer;
 use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToRfc3339Transformer;
-use Symfony\Component\Form\Extension\Core\DataTransformer\ArrayToPartsTransformer;
+use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToStringTransformer;
+use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToTimestampTransformer;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\Form\ReversedTransformer;
+use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DateTimeType extends AbstractType
 {
     const DEFAULT_DATE_FORMAT = \IntlDateFormatter::MEDIUM;
-
     const DEFAULT_TIME_FORMAT = \IntlDateFormatter::MEDIUM;
 
     /**
      * This is not quite the HTML5 format yet, because ICU lacks the
-     * capability of parsing and generating RFC 3339 dates, which
-     * are like the below pattern but with a timezone suffix. The
-     * timezone suffix is.
-     *
-     *  * "Z" for UTC
-     *  * "(-|+)HH:mm" for other timezones (note the colon!)
+     * capability of parsing and generating RFC 3339 dates.
      *
      * For more information see:
      *
      * http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
-     * http://www.w3.org/TR/html-markup/input.datetime.html
+     * https://www.w3.org/TR/html5/sec-forms.html#local-date-and-time-state-typedatetimelocal
      * http://tools.ietf.org/html/rfc3339
      *
      * An ICU ticket was created:
@@ -55,7 +49,7 @@ class DateTimeType extends AbstractType
      * yet. To temporarily circumvent this issue, DateTimeToRfc3339Transformer
      * is used when the format matches this constant.
      */
-    const HTML5_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    const HTML5_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     private static $acceptedFormats = array(
         \IntlDateFormatter::FULL,
@@ -83,12 +77,12 @@ class DateTimeType extends AbstractType
             $timeParts[] = 'second';
         }
 
-        $dateFormat = is_int($options['date_format']) ? $options['date_format'] : self::DEFAULT_DATE_FORMAT;
+        $dateFormat = \is_int($options['date_format']) ? $options['date_format'] : self::DEFAULT_DATE_FORMAT;
         $timeFormat = self::DEFAULT_TIME_FORMAT;
         $calendar = \IntlDateFormatter::GREGORIAN;
-        $pattern = is_string($options['format']) ? $options['format'] : null;
+        $pattern = \is_string($options['format']) ? $options['format'] : null;
 
-        if (!in_array($dateFormat, self::$acceptedFormats, true)) {
+        if (!\in_array($dateFormat, self::$acceptedFormats, true)) {
             throw new InvalidOptionsException('The "date_format" option must be one of the IntlDateFormatter constants (FULL, LONG, MEDIUM, SHORT) or a string representing a custom format.');
         }
 
@@ -193,7 +187,7 @@ class DateTimeType extends AbstractType
         //  * the format matches the one expected by HTML5
         //  * the html5 is set to true
         if ($options['html5'] && 'single_text' === $options['widget'] && self::HTML5_FORMAT === $options['format']) {
-            $view->vars['type'] = 'datetime';
+            $view->vars['type'] = 'datetime-local';
         }
     }
 

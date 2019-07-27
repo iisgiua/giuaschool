@@ -48,7 +48,7 @@ final class Dotenv
     public function load($path/*, ...$paths*/)
     {
         // func_get_args() to be replaced by a variadic argument for Symfony 4.0
-        foreach (func_get_args() as $path) {
+        foreach (\func_get_args() as $path) {
             if (!is_readable($path) || is_dir($path)) {
                 throw new PathException($path);
             }
@@ -109,10 +109,10 @@ final class Dotenv
         $this->data = str_replace(array("\r\n", "\r"), "\n", $data);
         $this->lineno = 1;
         $this->cursor = 0;
-        $this->end = strlen($this->data);
+        $this->end = \strlen($this->data);
         $this->state = self::STATE_VARNAME;
         $this->values = array();
-        $name = $value = '';
+        $name = '';
 
         $this->skipEmptyLines();
 
@@ -173,7 +173,7 @@ final class Dotenv
 
     private function lexValue()
     {
-        if (preg_match('/[ \t]*+(?:#.*)?$/Am', $this->data, $matches, null, $this->cursor)) {
+        if (preg_match('/[ \t]*+(?:#.*)?$/Am', $this->data, $matches, 0, $this->cursor)) {
             $this->moveCursor($matches[0]);
             $this->skipEmptyLines();
 
@@ -231,7 +231,7 @@ final class Dotenv
             } else {
                 $value = '';
                 $prevChr = $this->data[$this->cursor - 1];
-                while ($this->cursor < $this->end && !in_array($this->data[$this->cursor], array("\n", '"', "'"), true) && !((' ' === $prevChr || "\t" === $prevChr) && '#' === $this->data[$this->cursor])) {
+                while ($this->cursor < $this->end && !\in_array($this->data[$this->cursor], array("\n", '"', "'"), true) && !((' ' === $prevChr || "\t" === $prevChr) && '#' === $this->data[$this->cursor])) {
                     if ('\\' === $this->data[$this->cursor] && isset($this->data[$this->cursor + 1]) && ('"' === $this->data[$this->cursor + 1] || "'" === $this->data[$this->cursor + 1])) {
                         ++$this->cursor;
                     }
@@ -295,7 +295,7 @@ final class Dotenv
 
     private function skipEmptyLines()
     {
-        if (preg_match('/(?:\s*+(?:#[^\n]*+)?+)++/A', $this->data, $match, null, $this->cursor)) {
+        if (preg_match('/(?:\s*+(?:#[^\n]*+)?+)++/A', $this->data, $match, 0, $this->cursor)) {
             $this->moveCursor($match[0]);
         }
     }
@@ -321,7 +321,7 @@ final class Dotenv
                 return substr($matches[0], 1);
             }
 
-            if ('\\' === DIRECTORY_SEPARATOR) {
+            if ('\\' === \DIRECTORY_SEPARATOR) {
                 throw new \LogicException('Resolving commands is not supported on Windows.');
             }
 
@@ -390,7 +390,7 @@ final class Dotenv
 
     private function moveCursor($text)
     {
-        $this->cursor += strlen($text);
+        $this->cursor += \strlen($text);
         $this->lineno += substr_count($text, "\n");
     }
 

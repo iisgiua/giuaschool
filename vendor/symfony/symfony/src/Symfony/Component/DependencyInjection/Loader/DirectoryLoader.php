@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\DependencyInjection\Loader;
 
-use Symfony\Component\Config\Resource\DirectoryResource;
-
 /**
  * DirectoryLoader is a recursive loader to go through directories.
  *
@@ -51,6 +49,6 @@ class DirectoryLoader extends FileLoader
             return true;
         }
 
-        return null === $type && is_string($resource) && '/' === substr($resource, -1);
+        return null === $type && \is_string($resource) && '/' === substr($resource, -1);
     }
 }

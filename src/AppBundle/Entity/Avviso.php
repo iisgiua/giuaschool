@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -47,12 +47,12 @@ class Avviso {
   private $modificato;
 
   /**
-   * @var string $tipo Indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
+   * @var string $tipo Indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, P=compiti, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"U","E","V","A","I","C","D","O"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"U","E","V","P","A","I","C","D","O"}, strict=true, message="field.choice")
    */
   private $tipo;
 
@@ -376,6 +376,10 @@ class Avviso {
    * @return Avviso Oggetto Avviso
    */
   public function setAllegati($allegati) {
+    if ($allegati === $this->allegati) {
+      // clona array per forzare update su doctrine
+      $allegati = unserialize(serialize($allegati));
+    }
     $this->allegati = $allegati;
     return $this;
   }

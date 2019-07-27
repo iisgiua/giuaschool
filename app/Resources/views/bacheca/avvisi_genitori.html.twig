@@ -2,8 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_genitore/menu_bacheca.html.twig' with {'attivo': 'avvisi'} %}
-  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.genitori_avvisi'|trans }}</h1>
+  <h1 class="text-center gs-h2 gs-mt-2">{{ (is_granted('ROLE_GENITORE') ? 'title.genitori_avvisi' : 'title.alunni_avvisi')|trans }}</h1>
   {% if page == 1 and dati.nuovi|length > 0 %}
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <caption class="text-info text-center gs-big gs-pb-0"><strong>Nuovi avvisi</strong></caption>

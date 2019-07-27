@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -26,7 +26,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\HasLifecycleCallbacks
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="ruolo", type="string", length=3)
- * @ORM\DiscriminatorMap({"UTE"="Utente","AMM"="Amministratore","ATA"="Ata","SEG"="Segreteria","DSG"="Dsga",
+ * @ORM\DiscriminatorMap({"UTE"="Utente","AMM"="Amministratore","ATA"="Ata",
  *    "DOC"="Docente","STA"="Staff","PRE"="Preside","ALU"="Alunno","GEN"="Genitore"})
  *
  * @UniqueEntity(fields="username", message="field.unique", entityClass="AppBundle\Entity\Utente")
@@ -105,6 +105,20 @@ class Utente implements UserInterface, \Serializable {
    * @ORM\Column(name="token_creato", type="datetime", nullable=true)
    */
   private $tokenCreato;
+
+  /**
+   * @var string $prelogin Codice di pre-login
+   *
+   * @ORM\Column(type="string", length=255, nullable=true)
+   */
+  private $prelogin;
+
+  /**
+   * @var \DateTime $preloginCreato Data/ora di creazione del codice di pre-login
+   *
+   * @ORM\Column(name="prelogin_creato", type="datetime", nullable=true)
+   */
+  private $preloginCreato;
 
   /**
    * @var boolean $abilitato Indica se l'utente è abilitato al login o no
@@ -201,6 +215,13 @@ class Utente implements UserInterface, \Serializable {
    * @ORM\Column(name="numeri_telefono", type="array", nullable=true)
    */
   private $numeriTelefono;
+
+  /**
+   * @var array $notifica Parametri di notifica per i servizi esterni
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $notifica;
 
 
   //==================== EVENTI ORM ====================
@@ -410,6 +431,48 @@ class Utente implements UserInterface, \Serializable {
    */
   public function getTokenCreato() {
     return $this->tokenCreato;
+  }
+
+  /**
+   * Restituisce il codice di pre-login
+   *
+   * @return string Codice di pre-login
+   */
+  public function getPrelogin() {
+    return $this->prelogin;
+  }
+
+  /**
+   * Modifica il codice di pre-login
+   *
+   * @param string $prelogin Codice di pre-login
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setPrelogin($prelogin) {
+    $this->prelogin = $prelogin;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data/ora di creazione del codice di pre-login
+   *
+   * @return string Data/ora di creazione del codice di pre-login
+   */
+  public function getPreloginCreato() {
+    return $this->preloginCreato;
+  }
+
+  /**
+   * Modifica la data/ora di creazione del codice di pre-login
+   *
+   * @param string $preloginCreato Data/ora di creazione del codice di pre-login
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setPreloginCreato($preloginCreato) {
+    $this->preloginCreato = $preloginCreato;
+    return $this;
   }
 
   /**
@@ -639,6 +702,10 @@ class Utente implements UserInterface, \Serializable {
    * @return Utente Oggetto Utente
    */
   public function setNumeriTelefono($numeriTelefono) {
+    if ($numeriTelefono === $this->numeriTelefono) {
+      // clona array per forzare update su doctrine
+      $numeriTelefono = unserialize(serialize($numeriTelefono));
+    }
     $this->numeriTelefono = $numeriTelefono;
     return $this;
   }
@@ -671,6 +738,31 @@ class Utente implements UserInterface, \Serializable {
     return $this;
   }
 
+  /**
+   * Restituisce i parametri di notifica per i servizi esterni
+   *
+   * @return array Parametri di notifica per i servizi esterni
+   */
+  public function getNotifica() {
+    return $this->notifica;
+  }
+
+  /**
+   * Modifica i parametri di notifica per i servizi esterni
+   *
+   * @param array $notifica Parametri di notifica per i servizi esterni
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setNotifica($notifica) {
+    if ($notifica === $this->notifica) {
+      // clona array per forzare update su doctrine
+      $notifica = unserialize(serialize($notifica));
+    }
+    $this->notifica = $notifica;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -680,6 +772,7 @@ class Utente implements UserInterface, \Serializable {
   public function __construct() {
     // valori predefiniti
     $this->numeriTelefono = array();
+    $this->notifica = array();
     $this->abilitato = false;
   }
 

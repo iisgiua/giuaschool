@@ -1,23 +1,5 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
-
 namespace Doctrine\Bundle\DoctrineCacheBundle\Tests\DependencyInjection;
 
 use Doctrine\Bundle\DoctrineCacheBundle\Tests\TestCase;
@@ -194,6 +176,7 @@ abstract class AbstractDoctrineCacheExtensionTest extends TestCase
         $drivers   = array(
             'doctrine_cache.providers.foo_namespace_provider' => 'foo_namespace',
             'doctrine_cache.providers.barNamespaceProvider'   => 'barNamespace',
+            'doctrine_cache.providers.my_custom_type_namespace_provider'   => 'my_namespace',
         );
 
         foreach ($drivers as $key => $value) {
@@ -219,7 +202,7 @@ abstract class AbstractDoctrineCacheExtensionTest extends TestCase
             $this->assertTrue($container->hasDefinition($key));
 
             foreach ($aliases as $alias) {
-                $this->assertEquals(strtolower($key), (string) $container->getAlias($alias));
+                $this->assertEquals(strtolower($key), strtolower($container->getAlias($alias)));
             }
         }
     }
@@ -370,7 +353,10 @@ abstract class AbstractDoctrineCacheExtensionTest extends TestCase
 
         $compilerPassConfig = $container->getCompilerPassConfig();
 
-        $compilerPassConfig->setOptimizationPasses(array(new ResolveDefinitionTemplatesPass()));
+        $pass = class_exists('Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass')
+            ? 'Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass'
+            : 'Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass';
+        $compilerPassConfig->setOptimizationPasses(array(new $pass()));
         $compilerPassConfig->setRemovingPasses(array());
 
         $this->loadFromFile($container, $file);

@@ -32,7 +32,7 @@ class DumpExtension extends AbstractExtension
     public function __construct(ClonerInterface $cloner, HtmlDumper $dumper = null)
     {
         $this->cloner = $cloner;
-        $this->dumper = $dumper ?: new HtmlDumper();
+        $this->dumper = $dumper;
     }
 
     public function getFunctions()
@@ -58,7 +58,7 @@ class DumpExtension extends AbstractExtension
             return;
         }
 
-        if (2 === func_num_args()) {
+        if (2 === \func_num_args()) {
             $vars = array();
             foreach ($context as $key => $value) {
                 if (!$value instanceof Template) {
@@ -68,11 +68,12 @@ class DumpExtension extends AbstractExtension
 
             $vars = array($vars);
         } else {
-            $vars = func_get_args();
+            $vars = \func_get_args();
             unset($vars[0], $vars[1]);
         }
 
         $dump = fopen('php://memory', 'r+b');
+        $this->dumper = $this->dumper ?: new HtmlDumper();
         $this->dumper->setCharset($env->getCharset());
 
         foreach ($vars as $value) {

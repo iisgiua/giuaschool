@@ -11,12 +11,12 @@
 
 namespace Symfony\Bridge\Doctrine\Security\RememberMe;
 
-use Symfony\Component\Security\Core\Authentication\RememberMe\TokenProviderInterface;
-use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentTokenInterface;
-use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentToken;
-use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type as DoctrineType;
+use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentToken;
+use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentTokenInterface;
+use Symfony\Component\Security\Core\Authentication\RememberMe\TokenProviderInterface;
+use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
 
 /**
  * This class provides storage for the tokens that is set in "remember me"
@@ -37,19 +37,8 @@ use Doctrine\DBAL\Types\Type as DoctrineType;
  */
 class DoctrineTokenProvider implements TokenProviderInterface
 {
-    /**
-     * Doctrine DBAL database connection
-     * F.ex. service id: doctrine.dbal.default_connection.
-     *
-     * @var Connection
-     */
     private $conn;
 
-    /**
-     * new DoctrineTokenProvider for the RememberMe authentication service.
-     *
-     * @param Connection $conn
-     */
     public function __construct(Connection $conn)
     {
         $this->conn = $conn;

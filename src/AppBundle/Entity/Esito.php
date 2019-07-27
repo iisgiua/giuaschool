@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -48,12 +48,12 @@ class Esito {
   private $modificato;
 
   /**
-   * @var string $esito Esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze]
+   * @var string $esito Esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"A","N","S","R","L"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","N","S","R","L","E","X"}, strict=true, message="field.choice")
    */
   private $esito;
 
@@ -141,7 +141,7 @@ class Esito {
   }
 
   /**
-   * Restituisce l'esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze]
+   * Restituisce l'esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
    * @return string Esito dello scrutinio
    */
@@ -150,7 +150,7 @@ class Esito {
   }
 
   /**
-   * Modifica l'esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze]
+   * Modifica l'esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
    * @param string $esito Esito dello scrutinio
    *
@@ -241,6 +241,10 @@ class Esito {
    * @return Esito Oggetto Esito
    */
   public function setDati($dati) {
+    if ($dati === $this->dati) {
+      // clona array per forzare update su doctrine
+      $dati = unserialize(serialize($dati));
+    }
     $this->dati = $dati;
     return $this;
   }

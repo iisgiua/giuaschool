@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_coordinatore.html.twig' %}
   {% if not classe %}
   <div class="alert alert-warning gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
@@ -10,70 +9,64 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Valutazione intermedia della classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 3: riepilogo finale</h2>
-    {% for messaggio in app.flashes('errore') %}
-      {% if loop.first %}
-  <div class="alert alert-danger gs-mb-3" role="alert">
-      {% endif %}
-    <strong>{{ messaggio|trans }}</strong><br>
-      {% if loop.last %}
-  </div>
-      {% endif %}
-    {% endfor %}
+    {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
-      <tr>
-        <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+  <div id="gs-fixed-header">
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
     {% for materia,m in dati.materie %}
-        <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-          <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
-        </th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
+          </th>
     {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
+        </tr>
+      </thead>
+      <tbody>
     {% for alunno,a in dati.alunni %}
-      <tr>
-        <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-          <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+        <tr>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
       {% if a.bes != 'N' %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
       {% if a.note is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
-        </td>
+          </td>
       {% for materia,m in dati.materie %}
-        <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'C' %}
           {% if dati.voti[alunno][materia].unico is not defined %}
-          <span>--</span>
+            <span>--</span>
           {% else %}
-          <span class="label label-{{ dati.voti[alunno][materia].unico < 42 ? 'danger' : (dati.voti[alunno][materia].unico < 43 ? 'warning' : 'success') }}">{{ info.condotta['1'][dati.voti[alunno][materia].unico] }}</span>
+            <span class="label label-{{ dati.voti[alunno][materia].unico < 42 ? 'danger' : (dati.voti[alunno][materia].unico < 43 ? 'warning' : 'success') }}">{{ info.condotta['1'][dati.voti[alunno][materia].unico] }}</span>
           {% endif %}
         {% else %}
           {% if m.tipo == 'R' and a.religione != 'S' %}
-            <span>NA</span>
+              <span>NA</span>
           {% elseif dati.voti[alunno][materia].unico is not defined %}
-            <span>--</span>
+              <span>--</span>
           {% else %}
-            <span class="label label-{{ dati.voti[alunno][materia].unico < 33 ? 'danger' : (dati.voti[alunno][materia].unico < 34 ? 'warning' : 'success') }}">{{ info.giudizi['1'][dati.voti[alunno][materia].unico] }}</span>
+              <span class="label label-{{ dati.voti[alunno][materia].unico < 33 ? 'danger' : (dati.voti[alunno][materia].unico < 34 ? 'warning' : 'success') }}">{{ info.giudizi['1'][dati.voti[alunno][materia].unico] }}</span>
           {% endif %}
         {% endif %}
         {% if m.tipo == 'N' and dati.debiti[alunno][materia] is defined %}
-          <br>
+            <br>
           {% if dati.voti[alunno][materia].recupero is not defined or dati.voti[alunno][materia].recupero is empty %}
-          <span>--</span>
+            <span>--</span>
           {% else %}
-          <small>{{ ('label.recupero_'~dati.voti[alunno][materia].recupero)|trans }}</small>
+            <small>{{ ('label.recupero_'~dati.voti[alunno][materia].recupero)|trans }}</small>
           {% endif %}
         {% endif %}
-        </td>
+          </td>
       {% endfor %}
-      </tr>
+        </tr>
     {% endfor %}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </div>
   <div class="form-group">
     <label class="col-sm-4 control-label gs-big" for="scrutinio_data">Data del Consiglio di Classe</label>
     <div class="col-sm-5">
@@ -82,17 +75,18 @@
   </div>
   <div class="alert alert-info text-center gs-big gs-mt-5 gs-mb-3">
     <strong>Controllare i dati inseriti prima di chiudere la procedura.<br>
-    Una volta chiusa la procedura, le valutazioni saranno visibili ai genitori.</strong>
+    Le valutazioni saranno visibili ai genitori un'ora dopo la chiusura della procedura.</strong>
   </div>
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
-      <a class="btn btn-primary" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '2'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '2'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
-      <button class="btn btn-primary" role="button" title="Termina la procedura della valutazione intermedia"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Chiudi la valutazione intermedia</strong></button>
+      <button class="btn btn-primary" role="button" title="Termina la procedura della valutazione intermedia" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Chiudi la valutazione intermedia</strong></button>
     </div>
   </div>
     {{ form_end(form) }}
+    {% include 'include/modal-waiting.html.twig' %}
   {% endif %}
 </div>
 {% endblock %}
@@ -106,9 +100,10 @@
 {{ parent() }}
 <script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/floatThead/jquery.floatThead.min.js') }}"></script>
 <script>
 $(document).ready(function() {
-  $('[data-toggle="popover"]').popover();
+  $('[data-toggle="popover"]').popover({container: 'body'});
   $('.input-group.date').datepicker({
     format: "dd/mm/yyyy",
     weekStart: 1,
@@ -120,6 +115,35 @@ $(document).ready(function() {
     language: "it",
     zIndexOffset: 1200
   });
+  $('#gs-modal-waiting').on('shown.bs.modal', function (event) {
+    $('form[name="scrutinio"]').submit();
+  });
+  $('a.gs-wait-page').click(function (event) {
+    $('#gs-modal-waiting').modal('show');
+    return true;
+  });
+  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
+    var c=floatContainer.find('thead');
+    if(isFloated){
+      c.hide();
+      c.removeClass("bg-success").addClass("bg-info");
+      c.fadeIn();
+    } else {
+      c.removeClass("bg-info").addClass("bg-success");
+    }
+  });
+  // init
+  $('#gs-fixed-header table').floatThead({top: 60});
+  {% for messaggio in app.flashes('errore') %}
+    {% if loop.first %}
+  var m = '';
+    {% endif %}
+  m = m + "{{ messaggio|raw }}<br>";
+    {% if loop.last %}
+  $('#gs-modal-error-text').html(m);
+  $('#gs-modal-error').modal('show');
+    {% endif %}
+  {% endfor %}
 });
 </script>
 {% endblock %}

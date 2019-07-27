@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\Security\Core\Authentication\Token;
 
+use Symfony\Component\Security\Core\Role\RoleInterface;
+
 /**
  * UsernamePasswordToken implements a username and password token.
  *
@@ -22,8 +24,6 @@ class UsernamePasswordToken extends AbstractToken
     private $providerKey;
 
     /**
-     * Constructor.
-     *
      * @param string|object            $user        The username (like a nickname, email address, etc.), or a UserInterface instance or an object implementing a __toString method
      * @param mixed                    $credentials This usually is the password of the user
      * @param string                   $providerKey The provider key
@@ -43,7 +43,7 @@ class UsernamePasswordToken extends AbstractToken
         $this->credentials = $credentials;
         $this->providerKey = $providerKey;
 
-        parent::setAuthenticated(count($roles) > 0);
+        parent::setAuthenticated(\count($roles) > 0);
     }
 
     /**

@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
   {% if not cattedra and not classe %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_voti_dettagli'|trans }}</h1>
   <div class="alert alert-warning" role="alert">

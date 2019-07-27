@@ -11,9 +11,12 @@
 
 namespace Symfony\Bundle\WebServerBundle\Command;
 
+use Monolog\Formatter\FormatterInterface;
 use Symfony\Bridge\Monolog\Formatter\ConsoleFormatter;
 use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\LogicException;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,9 +32,16 @@ class ServerLogCommand extends Command
     private $el;
     private $handler;
 
+    protected static $defaultName = 'server:log';
+
     public function isEnabled()
     {
         if (!class_exists(ConsoleFormatter::class)) {
+            return false;
+        }
+
+        // based on a symfony/symfony package, it crashes due a missing FormatterInterface from monolog/monolog
+        if (!interface_exists(FormatterInterface::class)) {
             return false;
         }
 
@@ -40,8 +50,6 @@ class ServerLogCommand extends Command
 
     protected function configure()
     {
-        $this->setName('server:log');
-
         if (!class_exists(ConsoleFormatter::class)) {
             return;
         }
@@ -72,7 +80,7 @@ EOF
         $filter = $input->getOption('filter');
         if ($filter) {
             if (!class_exists(ExpressionLanguage::class)) {
-                throw new \LogicException('Package "symfony/expression-language" is required to use the "filter" option.');
+                throw new LogicException('Package "symfony/expression-language" is required to use the "filter" option.');
             }
             $this->el = new ExpressionLanguage();
         }
@@ -91,7 +99,7 @@ EOF
         }
 
         if (!$socket = stream_socket_server($host, $errno, $errstr)) {
-            throw new \RuntimeException(sprintf('Server start failed on "%s": %s %s.', $host, $errstr, $errno));
+            throw new RuntimeException(sprintf('Server start failed on "%s": %s %s.', $host, $errstr, $errno));
         }
 
         foreach ($this->getLogs($socket) as $clientId => $message) {

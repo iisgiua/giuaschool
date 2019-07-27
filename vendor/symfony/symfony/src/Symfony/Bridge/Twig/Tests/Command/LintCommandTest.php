@@ -16,8 +16,8 @@ use Symfony\Bridge\Twig\Command\LintCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class LintCommandTest extends TestCase
 {
@@ -69,14 +69,29 @@ class LintCommandTest extends TestCase
     }
 
     /**
+     * @group legacy
+     * @expectedDeprecation Passing a command name as the first argument of "Symfony\Bridge\Twig\Command\LintCommand::__construct()" is deprecated since Symfony 3.4 and support for it will be removed in 4.0. If the command was registered by convention, make it a service instead.
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage The Twig environment needs to be set.
+     */
+    public function testLegacyLintCommand()
+    {
+        $command = new LintCommand();
+
+        $application = new Application();
+        $application->add($command);
+        $command = $application->find('lint:twig');
+
+        $tester = new CommandTester($command);
+        $tester->execute(array());
+    }
+
+    /**
      * @return CommandTester
      */
     private function createCommandTester()
     {
-        $twig = new Environment(new FilesystemLoader());
-
-        $command = new LintCommand();
-        $command->setTwigEnvironment($twig);
+        $command = new LintCommand(new Environment(new FilesystemLoader()));
 
         $application = new Application();
         $application->add($command);

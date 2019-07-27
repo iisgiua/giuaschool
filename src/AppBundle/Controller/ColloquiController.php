@@ -2,19 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,8 +39,8 @@ class ColloquiController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui", name="colloqui")
-   * @Method("GET")
+   * @Route("/colloqui", name="colloqui",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -84,8 +83,8 @@ class ColloquiController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/colloqui/edit/{richiesta}/{azione}", name="colloqui_edit",
-   *    requirements={"richiesta": "\d+", "azione": "C|N|X"})
-   * @Method({"GET","POST"})
+   *    requirements={"richiesta": "\d+", "azione": "C|N|X"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */

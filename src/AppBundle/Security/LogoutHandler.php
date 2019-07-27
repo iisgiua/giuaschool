@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
 use AppBundle\Util\LogHandler;
 
@@ -61,6 +62,10 @@ class LogoutHandler implements LogoutHandlerInterface {
    * @param TokenInterface $token Token di autenticazione (contiene l'utente)
    */
   public function logout(Request $request, Response $response, TokenInterface $token) {
+    if ($token instanceOf AnonymousToken) {
+      // logout già eseguito
+      return;
+    }
     // la sessione è già invalidata se è settato il parametro 'invalidate_session' in 'security.yml'
     $request->getSession()->invalidate();
     // log azione

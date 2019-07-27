@@ -69,6 +69,21 @@ class Dummy extends ParentDummy
     public $g;
 
     /**
+     * @var ?string
+     */
+    public $h;
+
+    /**
+     * @var ?string|int
+     */
+    public $i;
+
+    /**
+     * @var ?\DateTime
+     */
+    public $j;
+
+    /**
      * This should not be removed.
      *
      * @var
@@ -125,6 +140,20 @@ class Dummy extends ParentDummy
     }
 
     public function get123()
+    {
+    }
+
+    /**
+     * @param self $self
+     */
+    public function setSelf(self $self)
+    {
+    }
+
+    /**
+     * @param parent $realParent
+     */
+    public function setRealParent(parent $realParent)
     {
     }
 }

@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -32,6 +32,7 @@ use AppBundle\Entity\Staff;
 use AppBundle\Entity\Preside;
 use AppBundle\Util\ConfigLoader;
 use AppBundle\Util\LogHandler;
+use AppBundle\Util\OtpUtil;
 
 
 /**
@@ -63,6 +64,11 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
   private $csrf;
 
   /**
+   * @var OtpUtil $otp Gestione del codice OTP
+   */
+  private $otp;
+
+  /**
    * @var LoggerInterface $logger Gestore dei log su file
    */
   private $logger;
@@ -87,17 +93,19 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param CsrfTokenManagerInterface $csrf Gestore dei token CRSF
+   * @param OtpUtil $otp Gestione del codice OTP
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
-                               CsrfTokenManagerInterface $csrf, LoggerInterface $logger, LogHandler $dblogger,
+                               CsrfTokenManagerInterface $csrf, OtpUtil $otp, LoggerInterface $logger, LogHandler $dblogger,
                                ConfigLoader $config) {
     $this->router = $router;
     $this->em = $em;
     $this->encoder = $encoder;
     $this->csrf = $csrf;
+    $this->otp = $otp;
     $this->logger = $logger;
     $this->dblogger = $dblogger;
     $this->config = $config;
@@ -130,10 +138,6 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @return mixed|null Le credenziali dell'autenticazione o null
    */
   public function getCredentials(Request $request) {
-    if ($request->getPathInfo() != '/login/form/' || !$request->isMethod('POST')) {
-      // la richiesta non proviene dalla pagina di login, annulla autenticazione
-      return null;
-    }
     // protezione CSRF
     $csrfToken = $request->get('_csrf_token');
     $intention = 'authenticate';
@@ -147,10 +151,12 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     // restituisce le credenziali
     $username = $request->request->get('_username');
     $password = $request->request->get('_password');
+    $otp = $request->request->get('_otp');
     $request->getSession()->set(Security::LAST_USERNAME, $username);
     return array(
       'username' => $username,
       'password' => $password,
+      'otp' => $otp,
       'ip' => $request->getClientIp());
   }
 
@@ -200,19 +206,48 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     // controllo username/password
     $plainPassword = $credentials['password'];
     if ($this->encoder->isPasswordValid($user, $plainPassword)) {
-      // credenziali ok, legge configurazione
-      $time_start_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('ora_blocco_inizio');
-      $time_start = ($time_start_conf === null ? '00:00' : $time_start_conf->getValore());
-      $time_end_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('ora_blocco_fine');
-      $time_end = ($time_end_conf === null ? '00:00' : $time_end_conf->getValore());
+      // password ok
+      if (($user instanceof Docente) && $user->getOtp()) {
+        // controllo otp
+        if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
+          // otp corretto
+          if ($credentials['otp'] != $user->getUltimoOtp()) {
+            // ok
+            return true;
+          } else {
+            // otp riusato (replay attack)
+            $otp_errore_log = 'OTP riusato (replay attack) nella richiesta di login.';
+            $otp_errore_messaggio = 'exception.invalid_credentials';
+          }
+        } elseif ($credentials['otp'] == '') {
+          // no OTP
+          $otp_errore_log = 'OTP non presente nella richiesta di login.';
+          $otp_errore_messaggio = 'exception.missing_otp_credentials';
+        } else {
+          // OTP errato
+          $otp_errore_log = 'OTP errato nella richiesta di login.';
+          $otp_errore_messaggio = 'exception.invalid_credentials';
+        }
+        // validazione fallita
+        $this->logger->error($otp_errore_log, array(
+          'username' => $credentials['username'],
+          'ip' => $credentials['ip'],
+          ));
+        throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
+      }
+      // legge configurazione
+      $time_start_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('blocco_inizio');
+      $time_start = ($time_start_conf === null ? '' : $time_start_conf->getValore());
+      $time_end_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('blocco_fine');
+      $time_end = ($time_end_conf === null ? '' : $time_end_conf->getValore());
       if (($user instanceof Docente) && !($user instanceof Staff) && !($user instanceof Preside) &&
-          ($time_start !== '00:00' || $time_end !== '00:00')) {
+          ($time_start !== '' || $time_end !== '')) {
         // l'utente è un docente: controllo orario di blocco
         $now = date('H:i');
         if ($now >= $time_start && $now <= $time_end &&
             !$this->em->getRepository('AppBundle:Festivita')->giornoFestivo(new \DateTime())) {
           // in orario di blocco e in un giorno non festivo, controlla giorni settimana
-          $weekdays_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('giorni_festivi');
+          $weekdays_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('giorni_festivi_istituto');
           $weekdays = ($weekdays_conf === null ? array() : explode(',', $weekdays_conf->getValore()));
           if (!in_array(date('w'), $weekdays)) {
             // non è giorno settimanale festivo: blocca
@@ -251,16 +286,21 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
       // se non presente, usa l'homepage
       $url = $this->router->generate('home');
     }
+    // tipo di login
+    $tipo_accesso = (($token->getUser() instanceof Docente) && $token->getUser()->getOtp()) ? 'form/OTP' : 'form';
+    $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
     // ultimo accesso dell'utente
     $last_login = $token->getUser()->getUltimoAccesso();
     $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($last_login ? $last_login->format('d/m/Y H:i:s') : null));
     $token->getUser()->setUltimoAccesso(new \DateTime());
+    if ($tipo_accesso != 'form') {
+      // memorizza ultimo codice OTP usato
+      $token->getUser()->setUltimoOtp($request->request->get('_otp'));
+    }
     $this->em->flush($token->getUser());
-    // tipo di login
-    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'form');
     // log azione
     $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Login', __METHOD__, array(
-      'Login' => 'form',
+      'Login' => $tipo_accesso,
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole()
       ));
@@ -291,8 +331,19 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @return bool Vero se supportato il cookie RICORDAMI, falso altrimenti
    */
   public function supportsRememberMe() {
-    // nessun supporto per il cookie ROCORDAMI
+    // nessun supporto per il cookie RICORDAMI
     return false;
+  }
+
+  /**
+   * Indica se l'autenticatore supporta o meno la richiesta attuale.
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return bool Vero se supportato, falso altrimenti
+   */
+  public function supports(Request $request) {
+    return ($request->getPathInfo() == '/login/form/' && $request->isMethod('POST'));
   }
 
 }

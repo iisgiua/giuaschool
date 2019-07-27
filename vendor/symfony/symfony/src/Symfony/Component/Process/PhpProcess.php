@@ -25,8 +25,6 @@ use Symfony\Component\Process\Exception\RuntimeException;
 class PhpProcess extends Process
 {
     /**
-     * Constructor.
-     *
      * @param string      $script  The PHP script to run (as a string)
      * @param string|null $cwd     The working directory or null to use the working dir of the current PHP process
      * @param array|null  $env     The environment variables or null to use the same environment as the current PHP process
@@ -41,7 +39,7 @@ class PhpProcess extends Process
         } else {
             $php = array_merge(array($php), $executableFinder->findArguments());
         }
-        if ('phpdbg' === PHP_SAPI) {
+        if ('phpdbg' === \PHP_SAPI) {
             $file = tempnam(sys_get_temp_dir(), 'dbg');
             file_put_contents($file, $script);
             register_shutdown_function('unlink', $file);
@@ -49,7 +47,7 @@ class PhpProcess extends Process
             $script = null;
         }
         if (null !== $options) {
-            @trigger_error(sprintf('The $options parameter of the %s constructor is deprecated since version 3.3 and will be removed in 4.0.', __CLASS__), E_USER_DEPRECATED);
+            @trigger_error(sprintf('The $options parameter of the %s constructor is deprecated since Symfony 3.3 and will be removed in 4.0.', __CLASS__), E_USER_DEPRECATED);
         }
 
         parent::__construct($php, $cwd, $env, $script, $timeout, $options);
@@ -71,7 +69,7 @@ class PhpProcess extends Process
         if (null === $this->getCommandLine()) {
             throw new RuntimeException('Unable to find the PHP executable.');
         }
-        $env = 1 < func_num_args() ? func_get_arg(1) : null;
+        $env = 1 < \func_num_args() ? func_get_arg(1) : null;
 
         parent::start($callback, $env);
     }

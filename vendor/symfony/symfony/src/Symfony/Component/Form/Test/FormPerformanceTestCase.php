@@ -35,7 +35,7 @@ abstract class FormPerformanceTestCase extends FormIntegrationTestCase
         parent::runTest();
         $time = microtime(true) - $s;
 
-        if ($this->maxRunningTime != 0 && $time > $this->maxRunningTime) {
+        if (0 != $this->maxRunningTime && $time > $this->maxRunningTime) {
             $this->fail(
                 sprintf(
                     'expected running time: <= %s but was: %s',
@@ -54,7 +54,7 @@ abstract class FormPerformanceTestCase extends FormIntegrationTestCase
      */
     public function setMaxRunningTime($maxRunningTime)
     {
-        if (is_int($maxRunningTime) && $maxRunningTime >= 0) {
+        if (\is_int($maxRunningTime) && $maxRunningTime >= 0) {
             $this->maxRunningTime = $maxRunningTime;
         } else {
             throw new \InvalidArgumentException();

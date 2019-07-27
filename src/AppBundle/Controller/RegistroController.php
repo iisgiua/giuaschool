@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -15,8 +15,7 @@ namespace AppBundle\Controller;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -63,8 +62,8 @@ class RegistroController extends Controller {
    *
    * @Route("/lezioni/registro/firme/{cattedra}/{classe}/{data}/{vista}", name="lezioni_registro_firme",
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|S|M"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -76,10 +75,13 @@ class RegistroController extends Controller {
     $dati = null;
     $annotazioni = null;
     $num_avvisi = 0;
+    $num_circolari = 0;
     $note = null;
     $assenti = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    $data_succ = null;
+    $data_prec = null;
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
@@ -125,6 +127,8 @@ class RegistroController extends Controller {
       // vista giornaliera
       $data_inizio = $data_obj;
       $data_fine = $data_obj;
+      $data_succ = null;
+      $data_prec = null;
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
@@ -157,17 +161,25 @@ class RegistroController extends Controller {
       $info['alunno'] = null;
     }
     if ($classe) {
+      // data prec/succ
+      $data_succ = (clone $data_fine);
+      $data_succ = $em->getRepository('AppBundle:Festivita')->giornoSuccessivo($data_succ);
+      $data_prec = (clone $data_inizio);
+      $data_prec = $em->getRepository('AppBundle:Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
       $errore = $reg->controlloData($data_obj, $classe->getSede());
       if (!$errore) {
         // non festivo
-        $adesso = (new \DateTime())->format('H:i');
-        if ($adesso >= $session->get('/CONFIG/SCUOLA/lezioni_inizio', '00:00') &&
-            $adesso <= $session->get('/CONFIG/SCUOLA/lezioni_fine', '23:59')) {
+        $oggi = new \DateTime();
+        $adesso = $oggi->format('H:i');
+        if ($oggi->format('w') != 0 &&
+            $adesso >= $em->getRepository('AppBundle:ScansioneOraria')->inizioLezioni($oggi, $classe->getSede()) &&
+            $adesso <= $em->getRepository('AppBundle:ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
           // avvisi alla classe
           $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
+          $num_circolari = $em->getRepository('AppBundle:Circolare')->numeroCircolariClasse($classe);
         }
         // recupera dati
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
@@ -188,6 +200,8 @@ class RegistroController extends Controller {
       'data' => $data_obj->format('Y-m-d'),
       'data_inizio' => $data_inizio->format('d/m/Y'),
       'data_fine' => $data_fine->format('d/m/Y'),
+      'data_succ' => $data_succ,
+      'data_prec' => $data_prec,
       'settimana' => $settimana,
       'mesi' => $mesi,
       'errore' => $errore,
@@ -196,6 +210,7 @@ class RegistroController extends Controller {
       'dati' => $dati,
       'assenti' => $assenti,
       'avvisi' => $num_avvisi,
+      'circolari' => $num_circolari,
     ));
   }
 
@@ -214,8 +229,8 @@ class RegistroController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/registro/add/{cattedra}/{classe}/{data}/{ora}", name="lezioni_registro_add",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"})
-   * @Method({"GET","POST"})
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -278,7 +293,7 @@ class RegistroController extends Controller {
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['materia'] = $materia->getNomeBreve();
-    if ($cattedra && $materia->getTipo() == 'S') {
+    if ($cattedra && $materia->getTipo() == 'S' && $cattedra->getAlunno()) {
       // sostegno
       $label['materia'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
@@ -389,8 +404,8 @@ class RegistroController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/registro/edit/{cattedra}/{classe}/{data}/{ora}", name="lezioni_registro_edit",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"})
-   * @Method({"GET","POST"})
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -463,7 +478,7 @@ class RegistroController extends Controller {
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['materia'] = $materia->getNomeBreve();
-    if ($cattedra && $materia->getTipo() == 'S') {
+    if ($cattedra && $materia->getTipo() == 'S' && $cattedra->getAlunno()) {
       // sostegno
       $label['materia'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
@@ -585,8 +600,8 @@ class RegistroController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/registro/delete/{classe}/{data}/{ora}", name="lezioni_registro_delete",
-   *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"})
-   * @Method({"GET"})
+   *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -738,8 +753,8 @@ class RegistroController extends Controller {
    *
    * @Route("/lezioni/registro/annotazione/edit/{classe}/{data}/{id}", name="lezioni_registro_annotazione_edit",
    *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
-   *    defaults={"id": 0})
-   * @Method({"GET","POST"})
+   *    defaults={"id": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -801,9 +816,11 @@ class RegistroController extends Controller {
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     // opzione scelta filtro
-    $alunno = null;
-    if (isset($dest_filtro['utenti'][0])) {
-      $alunno = $em->getRepository('AppBundle:Alunno')->find($dest_filtro['utenti'][0]['alunno']);
+    $alunni = array();
+    if (!empty($dest_filtro['utenti'])) {
+      foreach ($dest_filtro['utenti'] as $id) {
+        $alunni[] = $em->getRepository('AppBundle:Alunno')->find($id['alunno']);
+      }
     }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('annotazione_edit', FormType::class, $annotazione)
@@ -818,7 +835,7 @@ class RegistroController extends Controller {
         'label_attr' => ['class' => 'radio-inline'],
         'required' => true))
       ->add('filtroIndividuale', EntityType::class, array('label' => false,
-        'data' => $alunno,
+        'data' => $alunni,
         'class' => 'AppBundle:Alunno',
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
@@ -830,9 +847,9 @@ class RegistroController extends Controller {
               ->setParameters(['classe' => $classe, 'abilitato' => 1]);
           },
         'expanded' => true,
-        'multiple' => false,
+        'multiple' => true,
         'placeholder' => false,
-        'label_attr' => ['class' => 'gs-pt-0 gs-ml-3 radio-inline checkbox-split-vertical'],
+        'label_attr' => ['class' => 'gs-pt-0 gs-ml-3 checkbox-split-vertical'],
         'required' => false,
         'mapped' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
@@ -844,9 +861,13 @@ class RegistroController extends Controller {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // recupera dati
-      $val_filtro_alunno = $form->get('filtroIndividuale')->getData();
+      $val_filtro_alunni = $form->get('filtroIndividuale')->getData();
+      $val_filtro_alunni_id = array();
+      foreach ($val_filtro_alunni as $alu) {
+        $val_filtro_alunni_id[] = $alu->getId();
+      }
       // controllo errori
-      if ($annotazione->getVisibile() && !$val_filtro_alunno) {
+      if ($annotazione->getVisibile() && empty($val_filtro_alunni)) {
         // errore: filtro vuoto
         $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_mancanti')));
       }
@@ -896,8 +917,9 @@ class RegistroController extends Controller {
           $em->persist($avviso);
           $annotazione->setAvviso($avviso);
           // destinatari
+          $dest_filtro['utenti'] = array();
           $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, 'N', [], ['G'], 'I',
-            $val_filtro_alunno->getId());
+            $val_filtro_alunni_id);
         }
         // ok: memorizza dati
         $em->flush();
@@ -957,8 +979,8 @@ class RegistroController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/registro/annotazione/delete/{id}", name="lezioni_registro_annotazione_delete",
-   *    requirements={"id": "\d+"})
-   * @Method({"GET"})
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -1028,8 +1050,8 @@ class RegistroController extends Controller {
    *
    * @Route("/lezioni/registro/nota/edit/{classe}/{data}/{id}", name="lezioni_registro_nota_edit",
    *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
-   *    defaults={"id": 0})
-   * @Method({"GET","POST"})
+   *    defaults={"id": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -1059,7 +1081,6 @@ class RegistroController extends Controller {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $disabilitato = ($docente_staff && $this->getUser()->getId() != $nota->getDocente()->getId());
       $nota_old['testo'] = $nota->getTesto();
       $nota_old['provvedimento'] = $nota->getProvvedimento();
       $nota_old['docenteProvvedimento'] = $nota->getDocenteProvvedimento() ? $nota->getDocenteProvvedimento()->getId() : null;
@@ -1096,7 +1117,7 @@ class RegistroController extends Controller {
         'choices' => ['label.nota_classe' => 'C', 'label.nota_individuale' => 'I'],
         'expanded' => true,
         'multiple' => false,
-        'disabled' => $disabilitato,
+        'disabled' => false,
         'label_attr' => ['class' => 'radio-inline'],
         'required' => true))
       ->add('alunni', EntityType::class, array('label' => 'label.alunni',
@@ -1112,12 +1133,12 @@ class RegistroController extends Controller {
           },
         'expanded' => true,
         'multiple' => true,
-        'disabled' => $disabilitato,
+        'disabled' => false,
         'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
         'required' => true))
       ->add('testo', TextareaType::class, array('label' => 'label.testo',
         'trim' => true,
-        'disabled' => $disabilitato,
+        'disabled' => false,
         'required' => true));
     if ($docente_staff) {
       // docente è dello staff
@@ -1204,8 +1225,8 @@ class RegistroController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/registro/nota/delete/{id}", name="lezioni_registro_nota_delete",
-   *    requirements={"id": "\d+"})
-   * @Method({"GET"})
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */

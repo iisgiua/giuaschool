@@ -2,19 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,7 +45,7 @@ use AppBundle\Form\AppelloType;
 class AssenzeController extends Controller {
 
   /**
-   * Gestione delle assenze
+   * Mostra quadro delle assenze
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
@@ -62,8 +61,8 @@ class AssenzeController extends Controller {
    *
    * @Route("/lezioni/assenze/quadro/{cattedra}/{classe}/{data}/{vista}", name="lezioni_assenze_quadro",
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "vista": "G|S|M"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -74,8 +73,11 @@ class AssenzeController extends Controller {
     $errore = null;
     $dati = null;
     $num_avvisi = 0;
+    $num_circolari = 0;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    $data_succ = null;
+    $data_prec = null;
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
@@ -155,17 +157,25 @@ class AssenzeController extends Controller {
       $info['alunno'] = null;
     }
     if ($classe) {
+      // data prec/succ
+      $data_succ = (clone $data_fine);
+      $data_succ = $em->getRepository('AppBundle:Festivita')->giornoSuccessivo($data_succ);
+      $data_prec = (clone $data_inizio);
+      $data_prec = $em->getRepository('AppBundle:Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
       $errore = $reg->controlloData($data_obj, $classe->getSede());
       if (!$errore) {
         // non festivo
-        $adesso = (new \DateTime())->format('H:i');
-        if ($adesso >= $session->get('/CONFIG/SCUOLA/lezioni_inizio', '00:00') &&
-            $adesso <= $session->get('/CONFIG/SCUOLA/lezioni_fine', '23:59')) {
+        $oggi = new \DateTime();
+        $adesso = $oggi->format('H:i');
+        if ($oggi->format('w') != 0 &&
+            $adesso >= $em->getRepository('AppBundle:ScansioneOraria')->inizioLezioni($oggi, $classe->getSede()) &&
+            $adesso <= $em->getRepository('AppBundle:ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
           // avvisi alla classe
           $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
+          $num_circolari = $em->getRepository('AppBundle:Circolare')->numeroCircolariClasse($classe);
         }
         // recupera dati
         $dati = $reg->quadroAssenzeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
@@ -182,6 +192,8 @@ class AssenzeController extends Controller {
       'data' => $data_obj->format('Y-m-d'),
       'data_inizio' => $data_inizio->format('d/m/Y'),
       'data_fine' => $data_fine->format('d/m/Y'),
+      'data_succ' => $data_succ,
+      'data_prec' => $data_prec,
       'settimana' => $settimana,
       'mesi' => $mesi,
       'errore' => $errore,
@@ -189,6 +201,7 @@ class AssenzeController extends Controller {
       'info' => $info,
       'dati' => $dati,
       'avvisi' => $num_avvisi,
+      'circolari' => $num_circolari,
     ));
   }
 
@@ -208,8 +221,8 @@ class AssenzeController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/assenze/assenza/{cattedra}/{classe}/{data}/{alunno}/{id}", name="lezioni_assenze_assenza",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "id": "\d+"})
-   * @Method("GET")
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -354,8 +367,8 @@ class AssenzeController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/assenze/entrata/{cattedra}/{classe}/{data}/{alunno}", name="lezioni_assenze_entrata",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"})
-   * @Method({"GET","POST"})
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -373,20 +386,6 @@ class AssenzeController extends Controller {
     } else {
       // supplenza
       $cattedra = null;
-    }
-    // imposta redirect/template/info pagine
-    $referer = $request->headers->get('referer');
-    $referer = str_replace($request->getSchemeAndHttpHost().$request->getBaseUrl(), '', $referer);
-    if ($this->getUser() instanceof Staff && substr($referer, 0, 16) == '/staff/autorizza') {
-      // pagina dello staff
-      $redirect = 'staff_autorizza';
-      $template = 'ruolo_staff/entrata.html.twig';
-      $titolo_pagina = 'page.staff_autorizza';
-    } else {
-      // default
-      $redirect = 'lezioni_assenze_quadro';
-      $template = 'lezioni/entrata_edit.html.twig';
-      $titolo_pagina = 'page.lezioni_assenze';
     }
     // controlla classe
     $classe = $em->getRepository('AppBundle:Classe')->find($classe);
@@ -419,7 +418,12 @@ class AssenzeController extends Controller {
       $entrata_old['giustificato'] = $entrata->getGiustificato();
       $entrata_old['docente'] = $entrata->getDocente();
       $entrata_old['docenteGiustifica'] = $entrata->getDocenteGiustifica();
-      $entrata->setDocente($this->getUser());
+      // elimina giustificazione
+      $entrata
+        ->setDocente($this->getUser())
+        ->setRitardoBreve(false)
+        ->setGiustificato(null)
+        ->setDocenteGiustifica(null);
     } else {
       // nuovo
       $entrata = (new Entrata())
@@ -435,15 +439,6 @@ class AssenzeController extends Controller {
         $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['inizio']);
       }
       $entrata->setOra($ora);
-      if ($this->getUser() instanceof Staff && substr($referer, 0, 16) == '/staff/autorizza') {
-        // precompila ora e testo
-        $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['inizio']);
-        $ora->modify('+60 minutes');
-        $entrata->setOra($ora);
-        $sex = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-        $nota = "L'alunn$sex ".$alunno->getCognome().' '.$alunno->getNome()." è autorizzat$sex ad entrare alla seconda ora";
-        $entrata->setNote($nota);
-      }
       $em->persist($entrata);
     }
     // controlla permessi
@@ -464,20 +459,7 @@ class AssenzeController extends Controller {
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
-        'required' => true));
-    if ($this->getUser() instanceof Staff) {
-      $form = $form
-        ->add('valido', ChoiceType::class, array('label' => 'label.conteggio_entrate',
-          'choices' => ['label.si' => true, 'label.no' => false],
-          'expanded' => true,
-          'multiple' => false,
-          'label_attr' => ['class' => 'radio-inline'],
-          'required' => true))
-        ->add('referer', HiddenType::class, array(
-          'data' => $referer,
-          'mapped' => false));
-    }
-    $form = $form
+        'required' => true))
       ->add('note', TextareaType::class, array('label' => 'label.note',
         'trim' => true,
         'required' => false))
@@ -491,25 +473,13 @@ class AssenzeController extends Controller {
     $form = $form
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl($redirect)."'"]))
+        'onclick' => "location.href='".$this->generateUrl('lezioni_assenze_quadro')."'"]))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      // imposta redirect
-      if ($this->getUser() instanceof Staff && substr($form->get('referer')->getData(), 0, 16) == '/staff/autorizza') {
-        // pagina dello staff
-        $redirect = 'staff_autorizza';
-        $template = 'ruolo_staff/entrata.html.twig';
-        $titolo_pagina = 'page.staff_autorizza';
-      } else {
-        // default
-        $redirect = 'lezioni_assenze_quadro';
-        $template = 'lezioni/entrata_edit.html.twig';
-        $titolo_pagina = 'page.lezioni_assenze';
-      }
       if (!isset($entrata_old) && isset($request->request->get('entrata_edit')['delete'])) {
         // ritardo non esiste, niente da fare
-        return $this->redirectToRoute($redirect);
+        return $this->redirectToRoute('lezioni_assenze_quadro');
       } elseif ($form->get('ora')->getData()->format('H:i:00') <= $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
@@ -526,6 +496,7 @@ class AssenzeController extends Controller {
           if ($form->get('ora')->getData() <= $inizio) {
             // ritardo breve: giustificazione automatica (non imposta docente)
             $entrata
+              ->setRitardoBreve(true)
               ->setGiustificato($data_obj)
               ->setDocenteGiustifica(null)
               ->setValido(false);
@@ -585,12 +556,12 @@ class AssenzeController extends Controller {
             ));
         }
         // redirezione
-        return $this->redirectToRoute($redirect);
+        return $this->redirectToRoute('lezioni_assenze_quadro');
       }
     }
     // mostra la pagina di risposta
-    return $this->render($template, array(
-      'pagina_titolo' => $titolo_pagina,
+    return $this->render('lezioni/entrata_edit.html.twig', array(
+      'pagina_titolo' => 'page.lezioni_assenze',
       'form' => $form->createView(),
       'form_title' => (isset($entrata_old) ? 'title.modifica_entrata' : 'title.nuova_entrata'),
       'label' => $label,
@@ -613,8 +584,8 @@ class AssenzeController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/assenze/uscita/{cattedra}/{classe}/{data}/{alunno}", name="lezioni_assenze_uscita",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"})
-   * @Method({"GET","POST"})
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -632,20 +603,6 @@ class AssenzeController extends Controller {
     } else {
       // supplenza
       $cattedra = null;
-    }
-    // imposta redirect/template/info pagine
-    $referer = $request->headers->get('referer');
-    $referer = str_replace($request->getSchemeAndHttpHost().$request->getBaseUrl(), '', $referer);
-    if ($this->getUser() instanceof Staff && substr($referer, 0, 16) == '/staff/autorizza') {
-      // pagina dello staff
-      $redirect = 'staff_autorizza';
-      $template = 'ruolo_staff/uscita.html.twig';
-      $titolo_pagina = 'page.staff_autorizza';
-    } else {
-      // default
-      $redirect = 'lezioni_assenze_quadro';
-      $template = 'lezioni/uscita_edit.html.twig';
-      $titolo_pagina = 'page.lezioni_assenze';
     }
     // controlla classe
     $classe = $em->getRepository('AppBundle:Classe')->find($classe);
@@ -692,12 +649,6 @@ class AssenzeController extends Controller {
         $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
       }
       $uscita->setOra($ora);
-      if ($this->getUser() instanceof Staff && substr($referer, 0, 16) == '/staff/autorizza') {
-        // precompila testo
-        $sex = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-        $nota = "Si autorizza l'uscita anticipata dell'alunn$sex ".$alunno->getCognome().' '.$alunno->getNome().", accompagnat$sex da un genitore";
-        $uscita->setNote($nota);
-      }
       $em->persist($uscita);
     }
     // controlla permessi
@@ -718,20 +669,7 @@ class AssenzeController extends Controller {
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
-        'required' => true));
-    if ($this->getUser() instanceof Staff) {
-      $form = $form
-        ->add('valido', ChoiceType::class, array('label' => 'label.conteggio_uscite',
-          'choices' => ['label.si' => true, 'label.no' => false],
-          'expanded' => true,
-          'multiple' => false,
-          'label_attr' => ['class' => 'radio-inline'],
-          'required' => true))
-        ->add('referer', HiddenType::class, array(
-          'data' => $referer,
-          'mapped' => false));
-    }
-    $form = $form
+        'required' => true))
       ->add('note', TextareaType::class, array('label' => 'label.note',
         'trim' => true,
         'required' => false))
@@ -745,25 +683,13 @@ class AssenzeController extends Controller {
     $form = $form
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
         'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl($redirect)."'"]))
+        'onclick' => "location.href='".$this->generateUrl('lezioni_assenze_quadro')."'"]))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      // imposta redirect
-      if ($this->getUser() instanceof Staff && substr($form->get('referer')->getData(), 0, 16) == '/staff/autorizza') {
-        // pagina dello staff
-        $redirect = 'staff_autorizza';
-        $template = 'ruolo_staff/uscita.html.twig';
-        $titolo_pagina = 'page.staff_autorizza';
-      } else {
-        // default
-        $redirect = 'lezioni_assenze_quadro';
-        $template = 'lezioni/uscita_edit.html.twig';
-        $titolo_pagina = 'page.lezioni_assenze';
-      }
       if (!isset($uscita_old) && isset($request->request->get('uscita_edit')['delete'])) {
         // ritardo non esiste, niente da fare
-        return $this->redirectToRoute($redirect);
+        return $this->redirectToRoute('lezioni_assenze_quadro');
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') >= $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
@@ -825,12 +751,12 @@ class AssenzeController extends Controller {
             ));
         }
         // redirezione
-        return $this->redirectToRoute($redirect);
+        return $this->redirectToRoute('lezioni_assenze_quadro');
       }
     }
     // mostra la pagina di risposta
-    return $this->render($template, array(
-      'pagina_titolo' => $titolo_pagina,
+    return $this->render('lezioni/uscita_edit.html.twig', array(
+      'pagina_titolo' => 'page.lezioni_assenze',
       'form' => $form->createView(),
       'form_title' => (isset($uscita_old) ? 'title.modifica_uscita' : 'title.nuova_uscita'),
       'label' => $label,
@@ -838,7 +764,7 @@ class AssenzeController extends Controller {
   }
 
   /**
-   * Aggiunge, modifica o elimina un ritardo
+   * Giustifica assenze e ritardi di un alunno
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
@@ -852,8 +778,8 @@ class AssenzeController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/assenze/giustifica/{cattedra}/{classe}/{data}/{alunno}", name="lezioni_assenze_giustifica",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"})
-   * @Method({"GET","POST"})
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -908,6 +834,30 @@ class AssenzeController extends Controller {
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_edit', FormType::class)
+      ->add('convalida_assenze', ChoiceType::class, array('label' => 'label.convalida_assenze',
+        'choices' => $giustifica['convalida_assenze'],
+        'choice_label' => function ($value, $key, $index) use ($settimana) {
+            return $settimana[$value->getData()->format('w')].' '.$value->getData()->format('d/m/Y').
+              '<br>Motivazione: <em>'.$value->getMotivazione().'</em>';
+          },
+        'choice_value' => 'id',
+        'label_attr' => ['class' => 'gs-checkbox'],
+        'choice_translation_domain' => false,
+        'expanded' => true,
+        'multiple' => true,
+        'required' => false))
+      ->add('convalida_ritardi', ChoiceType::class, array('label' => 'label.convalida_ritardi',
+        'choices' => $giustifica['convalida_ritardi'],
+        'choice_label' => function ($value, $key, $index) use ($settimana) {
+            return $settimana[$value->getData()->format('w')].' '.$value->getData()->format('d/m/Y').
+              ' ore '.$value->getOra()->format('H:i').'<br>Motivazione: <em>'.$value->getMotivazione().'</em>';
+          },
+        'choice_value' => 'id',
+        'label_attr' => ['class' => 'gs-checkbox'],
+        'choice_translation_domain' => false,
+        'expanded' => true,
+        'multiple' => true,
+        'required' => false))
       ->add('assenze', ChoiceType::class, array('label' => 'label.assenze',
         'choices' => $giustifica['assenze'],
         'choice_label' => function ($value, $key, $index) use ($settimana) {
@@ -949,19 +899,27 @@ class AssenzeController extends Controller {
           ->setGiustificato($data_obj)
           ->setDocenteGiustifica($this->getUser());
       }
+      foreach ($form->get('convalida_assenze')->getData() as $ass) {
+        $ass
+          ->setDocenteGiustifica($this->getUser());
+      }
+      foreach ($form->get('convalida_ritardi')->getData() as $rit) {
+        $rit
+          ->setDocenteGiustifica($this->getUser());
+      }
       // ok: memorizza dati
       $em->flush();
       // log azione
-      foreach ($form->get('assenze')->getData() as $ass) {
-        // giustifica assenza
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustifica assenza', __METHOD__, array(
-          'Assenza' => $ass->getId()
+      if (count($form->get('assenze')->getData()) + count($form->get('ritardi')->getData()) > 0) {
+        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustifica', __METHOD__, array(
+          'Assenze' => implode(', ', array_map(function ($a) { return $a->getId(); }, $form->get('assenze')->getData())),
+          'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('ritardi')->getData())),
           ));
       }
-      foreach ($form->get('ritardi')->getData() as $rit) {
-        // giustifica ritardo
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustifica ritardo', __METHOD__, array(
-          'Entrata' => $rit->getId()
+      if (count($form->get('convalida_assenze')->getData()) + count($form->get('convalida_ritardi')->getData()) > 0) {
+        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Convalida', __METHOD__, array(
+          'Assenze' => implode(', ', array_map(function ($a) { return $a->getId(); }, $form->get('convalida_assenze')->getData())),
+          'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('convalida_ritardi')->getData())),
           ));
       }
       // redirezione
@@ -973,6 +931,8 @@ class AssenzeController extends Controller {
       'form' => $form->createView(),
       'form_title' => 'title.giustifica',
       'label' => $label,
+      'giustificazioni' => $giustifica['tot_giustificazioni'],
+      'convalide' => $giustifica['tot_convalide'],
     ));
   }
 
@@ -991,8 +951,8 @@ class AssenzeController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/assenze/appello/{cattedra}/{classe}/{data}", name="lezioni_assenze_appello",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"})
-   * @Method({"GET","POST"})
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -1111,6 +1071,13 @@ class AssenzeController extends Controller {
               $log['entrata_delete'][] = array($entrata->getId(), $entrata);
               $em->remove($entrata);
             }
+            // controlla esistenza uscita
+            $uscita = $em->getRepository('AppBundle:Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            if ($uscita) {
+              // rimuove uscita
+              $log['uscita_delete'][] = array($uscita->getId(), $uscita);
+              $em->remove($uscita);
+            }
             break;
           case 'R':   // ritardo
             // validazione orario
@@ -1128,15 +1095,22 @@ class AssenzeController extends Controller {
                 $log['entrata_edit'][] = array($entrata->getId(), $entrata->getAlunno()->getId(),
                   $entrata->getOra()->format('H:i'), $entrata->getNote(), $entrata->getGiustificato(),
                   $entrata->getDocente()->getId(), $entrata->getDocenteGiustifica());
-                $entrata->setOra($appello->getOra());
-                $entrata->setDocente($this->getUser());
+                $entrata
+                  ->setOra($appello->getOra())
+                  ->setDocente($this->getUser())
+                  ->setRitardoBreve(false)
+                  ->setGiustificato(null)
+                  ->setDocenteGiustifica(null);
                 // controlla ritardo breve
                 $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
                 $inizio->modify('+' . $session->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
                 if ($appello->getOra() <= $inizio) {
                   // ritardo breve: giustificazione automatica (non imposta docente)
-                  $entrata->setGiustificato($data_obj);
-                  $entrata->setDocenteGiustifica(null);
+                  $entrata
+                    ->setRitardoBreve(true)
+                    ->setGiustificato($data_obj)
+                    ->setDocenteGiustifica(null)
+                    ->setValido(false);
                 }
               }
             } else {
@@ -1152,8 +1126,10 @@ class AssenzeController extends Controller {
               $inizio->modify('+' . $session->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
               if ($appello->getOra() <= $inizio) {
                 // ritardo breve: giustificazione automatica (non imposta docente)
-                $entrata->setGiustificato($data_obj);
-                $entrata->setDocenteGiustifica(null);
+                $entrata
+                  ->setRitardoBreve(true)
+                  ->setGiustificato($data_obj)
+                  ->setDocenteGiustifica(null);
               }
               $em->persist($entrata);
               $log['entrata_create'][] = $entrata;

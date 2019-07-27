@@ -17,7 +17,7 @@
         </service>
         <service id="Symfony\Component\Validator\Validator\ValidatorInterface" alias="validator" />
 
-        <service id="validator.builder" class="Symfony\Component\Validator\ValidatorBuilderInterface" public="true">
+        <service id="validator.builder" class="Symfony\Component\Validator\ValidatorBuilderInterface">
             <factory class="Symfony\Component\Validator\Validation" method="createValidatorBuilder" />
             <call method="setConstraintValidatorFactory">
                 <argument type="service" id="validator.validator_factory" />
@@ -57,17 +57,18 @@
                     </call>
                 </service>
             </argument>
+            <deprecated>The "%service_id%" service is deprecated since Symfony 3.4 and will be removed in 4.0. Use a Psr6 cache like "validator.mapping.cache.symfony" instead.</deprecated>
         </service>
 
         <service id="validator.validator_factory" class="Symfony\Component\Validator\ContainerConstraintValidatorFactory">
             <argument /> <!-- Constraint validators locator -->
         </service>
 
-        <service id="validator.expression" class="Symfony\Component\Validator\Constraints\ExpressionValidator" public="true">
+        <service id="validator.expression" class="Symfony\Component\Validator\Constraints\ExpressionValidator">
             <tag name="validator.constraint_validator" alias="validator.expression" />
         </service>
 
-        <service id="validator.email" class="Symfony\Component\Validator\Constraints\EmailValidator" public="true">
+        <service id="validator.email" class="Symfony\Component\Validator\Constraints\EmailValidator">
             <argument></argument>
             <tag name="validator.constraint_validator" alias="Symfony\Component\Validator\Constraints\EmailValidator" />
         </service>

@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -243,6 +243,10 @@ class Log {
    * @return Log Oggetto Log
    */
   public function setDati($dati) {
+    if ($dati === $this->dati) {
+      // clona array per forzare update su doctrine
+      $dati = unserialize(serialize($dati));
+    }
     $this->dati = $dati;
     return $this;
   }
@@ -284,7 +288,7 @@ class Log {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return $this->categoria.': '.$this->azione;
+    return $this->modificato->format('d/m/Y H:i').' - '.$this->azione;
   }
 
 }

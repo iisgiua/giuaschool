@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -23,10 +23,10 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Circolare - entità
  *
  * @ORM\Entity(repositoryClass="AppBundle\Repository\CircolareRepository")
- * @ORM\Table(name="gs_circolare")
+ * @ORM\Table(name="gs_circolare", uniqueConstraints={@ORM\UniqueConstraint(columns={"numero"})})
  * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields="numero", message="field.unique")
+ * @UniqueEntity(fields={"numero"}, message="field.unique")
  */
 class Circolare {
 
@@ -62,9 +62,9 @@ class Circolare {
   private $sedi;
 
   /**
-   * @var string $numero Numero univoco della circolare [suffisso di sede se vale solo su sede secondaria]
+   * @var integer $numero Numero della circolare (univoco solo assieme alla sede)
    *
-   * @ORM\Column(type="string", length=32, nullable=false, unique=true)
+   * @ORM\Column(type="integer", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
@@ -94,9 +94,6 @@ class Circolare {
    * @var string $documento Documento della circolare
    *
    * @ORM\Column(type="string", length=255, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\File()
    */
   private $documento;
 
@@ -122,60 +119,12 @@ class Circolare {
   private $dsga;
 
   /**
-   * @var boolean $rapprIstituto Indica se i rappresentanti di istituto sono destinatari della circolare o no
-   *
-   * @ORM\Column(name="rappr_istituto", type="boolean", nullable=false)
-   */
-  private $rapprIstituto;
-
-  /**
-   * @var boolean $rapprConsulta Indica se i rappresentanti della consulta provinciale sono destinatari della circolare o no
-   *
-   * @ORM\Column(name="rappr_consulta", type="boolean", nullable=false)
-   */
-  private $rapprConsulta;
-
-  /**
-   * @var string $rapprGenClasse Indica quali rappresentanti di classe dei genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
-   *
-   * @ORM\Column(name="rappr_gen_classe", type="string", length=1, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
-   */
-  private $rapprGenClasse;
-
-  /**
-   * @var array $filtroRapprGenClasse Lista dei filtri per i rappresentanti di classe dei genitori
-   *
-   * @ORM\Column(name="filtro_rappr_gen_classe", type="simple_array", nullable=true)
-   */
-  private $filtroRapprGenClasse;
-
-  /**
-   * @var string $rapprAluClasse Indica quali rappresentanti di classe degli alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
-   *
-   * @ORM\Column(name="rappr_alu_classe", type="string", length=1, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
-   */
-  private $rapprAluClasse;
-
-  /**
-   * @var array $filtroRapprAluClasse Lista dei filtri per i rappresentanti di classe degli alunni
-   *
-   * @ORM\Column(name="filtro_rappr_alu_classe", type="simple_array", nullable=true)
-   */
-  private $filtroRapprAluClasse;
-
-  /**
-   * @var string $genitori Indica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, I=filtro individuale]
+   * @var string $genitori Indica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","T","C","I"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
   private $genitori;
 
@@ -187,12 +136,12 @@ class Circolare {
   private $filtroGenitori;
 
   /**
-   * @var string $alunni Indica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, I=filtro individuale]
+   * @var string $alunni Indica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","T","C","I"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
   private $alunni;
 
@@ -221,12 +170,12 @@ class Circolare {
   private $filtroCoordinatori;
 
   /**
-   * @var string $docenti Indica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, I=filtro individuale]
+   * @var string $docenti Indica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","T","C","M","I"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
   private $docenti;
 
@@ -238,32 +187,42 @@ class Circolare {
   private $filtroDocenti;
 
   /**
-   * @var array $altri Altri destinatari della circolare
+   * @var ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinata la circolare
+   *
+   * @ORM\ManyToMany(targetEntity="ListaDistribuzione")
+   * @ORM\JoinTable(name="gs_circolare_lista_distribuzione",
+   *    joinColumns={@ORM\JoinColumn(name="circolare_id", nullable=false)},
+   *    inverseJoinColumns={@ORM\JoinColumn(name="lista_distribuzione_id", nullable=false)})
+   */
+  private $listeDistribuzione;
+
+  /**
+   * @var array $altri Altri destinatari della circolare non riferiti ad utenti sul registro
    *
    * @ORM\Column(type="simple_array", nullable=true)
    */
   private $altri;
 
   /**
-   * @var array $classi Lista delle classi che devono prendere visione della circolare [quando letta, aggiunta annotazione automatica su registro e rimossa classe da lista]
+   * @var boolean $firma Indica se è richiesta la conferma esplicita di lettura della circolare o no
    *
-   * @ORM\Column(type="simple_array", nullable=true)
+   * @ORM\Column(type="boolean", nullable=false)
    */
-  private $classi;
+  private $firma;
 
   /**
-   * @var boolean $firmaGenitori Indica se è richiesta la firma della circolare da parte dei genitori o no
+   * @var boolean $notifica Indica se è richiesta la notifica della circolare ai destinatari o no
    *
-   * @ORM\Column(name="firma_genitori", type="boolean", nullable=false)
+   * @ORM\Column(type="boolean", nullable=false)
    */
-  private $firmaGenitori;
+  private $notifica;
 
   /**
-   * @var boolean $firmaDocenti Indica se è richiesta la firma della circolare da parte dei docenti o no
+   * @var boolean $pubblicata Indica se la circolare è pubblicata o no
    *
-   * @ORM\Column(name="firma_docenti", type="boolean", nullable=false)
+   * @ORM\Column(type="boolean", nullable=false)
    */
-  private $firmaDocenti;
+  private $pubblicata;
 
 
   //==================== EVENTI ORM ====================
@@ -348,18 +307,18 @@ class Circolare {
   }
 
   /**
-   * Restituisce il numero univoco della circolare [suffisso di sede se vale solo su sede secondaria]
+   * Restituisce il numero della circolare (univoco solo assieme alla sede)
    *
-   * @return string Numero univoco della circolare
+   * @return integer Numero della circolare
    */
   public function getNumero() {
     return $this->numero;
   }
 
   /**
-   * Modifica il numero univoco della circolare [suffisso di sede se vale solo su sede secondaria]
+   * Modifica il numero della circolare (univoco solo assieme alla sede)
    *
-   * @param string $numero Numero univoco della circolare
+   * @param integer $numero Numero della circolare
    *
    * @return Circolare Oggetto Circolare
    */
@@ -413,7 +372,7 @@ class Circolare {
   /**
    * Restituisce il Documento della circolare
    *
-   * @return string|File Documento della circolare
+   * @return string Documento della circolare
    */
   public function getDocumento() {
     return $this->documento;
@@ -427,7 +386,7 @@ class Circolare {
    * @return Circolare Oggetto Circolare
    */
   public function setDocumento(File $documento) {
-    $this->documento = $documento;
+    $this->documento = $documento->getBasename();
     return $this;
   }
 
@@ -448,6 +407,10 @@ class Circolare {
    * @return Circolare Oggetto Circolare
    */
   public function setAllegati($allegati) {
+    if ($allegati === $this->allegati) {
+      // clona array per forzare update su doctrine
+      $allegati = unserialize(serialize($allegati));
+    }
     $this->allegati = $allegati;
     return $this;
   }
@@ -523,189 +486,7 @@ class Circolare {
   }
 
   /**
-   * Indica se i rappresentanti di istituto sono destinatari della circolare o no
-   *
-   * @return boolean Vero se i rappresentanti di istituto sono destinatari della circolare, falso altrimenti
-   */
-  public function getRapprIstituto() {
-    return $this->rapprIstituto;
-  }
-
-  /**
-   * Modifica se i rappresentanti di istituto sono destinatari della circolare o no
-   *
-   * @param boolean $rapprIstituto Vero se i rappresentanti di istituto sono destinatari della circolare, falso altrimenti
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setRapprIstituto($rapprIstituto) {
-    $this->rapprIstituto = ($rapprIstituto == true);
-    return $this;
-  }
-
-  /**
-   * Indica se i rappresentanti della consulta provinciale sono destinatari della circolare o no
-   *
-   * @return boolean Vero se i rappresentanti della consulta provinciale sono destinatari della circolare, falso altrimenti
-   */
-  public function getRapprConsulta() {
-    return $this->rapprConsulta;
-  }
-
-  /**
-   * Modifica se i rappresentanti della consulta provinciale sono destinatari della circolare o no
-   *
-   * @param boolean $rapprConsulta Vero se i rappresentanti della consulta provinciale sono destinatari della circolare, falso altrimenti
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setRapprConsulta($rapprConsulta) {
-    $this->rapprConsulta = ($rapprConsulta == true);
-    return $this;
-  }
-
-  /**
-   * Restituisce quali rappresentanti di classe dei genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
-   *
-   * @return string Indica quali rappresentanti di classe dei genitori sono destinatari della circolare
-   */
-  public function getRapprGenClasse() {
-    return $this->rapprGenClasse;
-  }
-
-  /**
-   * Modifica quali rappresentanti di classe dei genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
-   *
-   * @param string $rapprGenClasse Indica quali rappresentanti di classe dei genitori sono destinatari della circolare
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setRapprGenClasse($rapprGenClasse) {
-    $this->rapprGenClasse = $rapprGenClasse;
-    return $this;
-  }
-
-  /**
-   * Restituisce la lista dei filtri per i rappresentanti di classe dei genitori
-   *
-   * @return array Lista dei filtri per i rappresentanti di classe dei genitori
-   */
-  public function getFiltroRapprGenClasse() {
-    return $this->filtroRapprGenClasse;
-  }
-
-  /**
-   * Modifica la lista dei filtri per i rappresentanti di classe dei genitori
-   *
-   * @param array $filtroRapprGenClasse Lista dei filtri per i rappresentanti di classe dei genitori
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setFiltroRapprGenClasse($filtroRapprGenClasse) {
-    $this->filtroRapprGenClasse = $filtroRapprGenClasse;
-    return $this;
-  }
-
-  /**
-   * Aggiunge un filtro alla lista dei filtri per i rappresentanti di classe dei genitori
-   *
-   * @param object $filtro Filtro da aggiungere alla lista dei filtri
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function addFiltroRapprGenClasse($filtro) {
-    if (!in_array($filtro->getId(), $this->filtroRapprGenClasse)) {
-      $this->filtroRapprGenClasse[] = $filtro->getId();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un filtro dalla lista dei filtri per i rappresentanti di classe dei genitori
-   *
-   * @param object $filtro Filtro da rimuovere dalla lista dei filtri
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function removeFiltroRapprGenClasse($filtro) {
-    if (in_array($filtro->getId(), $this->filtroRapprGenClasse)) {
-      unset($this->filtroRapprGenClasse[array_search($filtro->getId(), $this->filtroRapprGenClasse)]);
-    }
-    return $this;
-  }
-
-  /**
-   * Restituisce quali rappresentanti di classe degli alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
-   *
-   * @return string Indica quali rappresentanti di classe degli alunni sono destinatari della circolare
-   */
-  public function getRapprAluClasse() {
-    return $this->rapprAluClasse;
-  }
-
-  /**
-   * Modifica quali rappresentanti di classe degli alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
-   *
-   * @param string $rapprAluClasse Indica quali rappresentanti di classe degli alunni sono destinatari della circolare
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setRapprAluClasse($rapprAluClasse) {
-    $this->rapprAluClasse = $rapprAluClasse;
-    return $this;
-  }
-
-  /**
-   * Restituisce la lista dei filtri per i rappresentanti di classe degli alunni
-   *
-   * @return array Lista dei filtri per i rappresentanti di classe degli alunni
-   */
-  public function getFiltroRapprAluClasse() {
-    return $this->filtroRapprAluClasse;
-  }
-
-  /**
-   * Modifica la lista dei filtri per i rappresentanti di classe degli alunni
-   *
-   * @param array $filtroRapprAluClasse Lista dei filtri per i rappresentanti di classe degli alunni
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setFiltroRapprAluClasse($filtroRapprAluClasse) {
-    $this->filtroRapprAluClasse = $filtroRapprAluClasse;
-    return $this;
-  }
-
-  /**
-   * Aggiunge un filtro alla lista dei filtri per i rappresentanti di classe degli alunni
-   *
-   * @param object $filtro Filtro da aggiungere alla lista dei filtri
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function addFiltroRapprAluClasse($filtro) {
-    if (!in_array($filtro->getId(), $this->filtroRapprAluClasse)) {
-      $this->filtroRapprAluClasse[] = $filtro->getId();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un filtro dalla lista dei filtri per i rappresentanti di classe degli alunni
-   *
-   * @param object $filtro Filtro da rimuovere dalla lista dei filtri
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function removeFiltroRapprAluClasse($filtro) {
-    if (in_array($filtro->getId(), $this->filtroRapprAluClasse)) {
-      unset($this->filtroRapprAluClasse[array_search($filtro->getId(), $this->filtroRapprAluClasse)]);
-    }
-    return $this;
-  }
-
-  /**
-   * Restituisce quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, I=filtro individuale]
+   * Restituisce quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @return string Indica quali genitori sono destinatari della circolare
    */
@@ -714,7 +495,7 @@ class Circolare {
   }
 
   /**
-   * Modifica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, I=filtro individuale]
+   * Modifica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @param string $genitori Indica quali genitori sono destinatari della circolare
    *
@@ -775,7 +556,7 @@ class Circolare {
   }
 
   /**
-   * Restituisce quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, I=filtro individuale]
+   * Restituisce quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @return string Indica quali alunni sono destinatari della circolare
    */
@@ -784,7 +565,7 @@ class Circolare {
   }
 
   /**
-   * Modifica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, I=filtro individuale]
+   * Modifica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @param string $alunni Indica quali alunni sono destinatari della circolare
    *
@@ -915,7 +696,7 @@ class Circolare {
   }
 
   /**
-   * Restituisce quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, I=filtro individuale]
+   * Restituisce quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @return string Indica quali docenti sono destinatari della circolare
    */
@@ -924,7 +705,7 @@ class Circolare {
   }
 
   /**
-   * Modifica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, I=filtro individuale]
+   * Modifica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @param string $docenti Indica quali docenti sono destinatari della circolare
    *
@@ -985,7 +766,28 @@ class Circolare {
   }
 
   /**
-   * Restituisce gli altri destinatari della circolare
+   * Restituisce le liste di destinatari a cui è destinata la circolare
+   *
+   * @return ArrayCollection Liste di destinatari a cui è destinata la circolare
+   */
+  public function getListeDistribuzione() {
+    return $this->listeDistribuzione;
+  }
+
+  /**
+   * Modifica le liste di destinatari a cui è destinata la circolare
+   *
+   * @param ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinata la circolare
+   *
+   * @return Circolare Oggetto Circolare
+   */
+  public function setListeDistribuzione(ArrayCollection $listeDistribuzione) {
+    $this->listeDistribuzione = $listeDistribuzione;
+    return $this;
+  }
+
+  /**
+   * Restituisce gli altri destinatari della circolare non riferiti ad utenti sul registro
    *
    * @return array Altri destinatari della circolare
    */
@@ -994,7 +796,7 @@ class Circolare {
   }
 
   /**
-   * Modifica gli altri destinatari della circolare
+   * Modifica gli altri destinatari della circolare non riferiti ad utenti sul registro
    *
    * @param array $altri Altri destinatari della circolare
    *
@@ -1006,7 +808,7 @@ class Circolare {
   }
 
   /**
-   * Aggiunge un destinatario alla lista degli altri destinatari
+   * Aggiunge un destinatario alla lista degli altri destinatari della circolare
    *
    * @param string $altro Altro destinatario da aggiungere alla lista
    *
@@ -1020,7 +822,7 @@ class Circolare {
   }
 
   /**
-   * Rimuove un destinatario dalla lista degli altri destinatari
+   * Rimuove un destinatario dalla lista degli altri destinatari della circolare
    *
    * @param string $altro Altro destinatario da rimuovere dalla lista
    *
@@ -1034,93 +836,65 @@ class Circolare {
   }
 
   /**
-   * Restituisce la lista delle classi che devono prendere visione della circolare [quando letta, aggiunta annotazione automatica su registro e rimossa classe da lista]
+   * Indica se è richiesta la conferma esplicita di lettura della circolare o no
    *
-   * @return array Lista delle classi che devono prendere visione della circolare
+   * @return boolean Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
    */
-  public function getClassi() {
-    return $this->classi;
+  public function getFirma() {
+    return $this->firma;
   }
 
   /**
-   * Modifica la lista delle classi che devono prendere visione della circolare [quando letta, aggiunta annotazione automatica su registro e rimossa classe da lista]
+   * Modifica se è richiesta la conferma esplicita di lettura della circolare o no
    *
-   * @param array $classi Lista delle classi che devono prendere visione della circolare
+   * @param boolean $firma Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
    *
    * @return Circolare Oggetto Circolare
    */
-  public function setClassi($classi) {
-    $this->classi = $classi;
+  public function setFirma($firma) {
+    $this->firma = ($firma == true);
     return $this;
   }
 
   /**
-   * Aggiunge una classe alla lista di quelle che devono prendere visione della circolare
+   * Indica se è richiesta la notifica della circolare ai destinatari o no
    *
-   * @param Classe $classe Classe da aggiungere alla lista
+   * @return boolean Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
+   */
+  public function getNotifica() {
+    return $this->notifica;
+  }
+
+  /**
+   * Modifica se è richiesta la notifica della circolare ai destinatari o no
+   *
+   * @param boolean $notifica Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
    *
    * @return Circolare Oggetto Circolare
    */
-  public function addClasse(Classe $classe) {
-    if (!in_array($classe->getId(), $this->classi)) {
-      $this->classi[] = $classe->getId();
-    }
+  public function setNotifica($notifica) {
+    $this->notifica = ($notifica == true);
     return $this;
   }
 
   /**
-   * Rimuove una classe dalla lista di quelle che devono prendere visione della circolare
+   * Indica se la circolare è pubblicata o no
    *
-   * @param Classe $classe Classe da rimuovere dalla lista
+   * @return bool Vero se la circolare è pubblicata, falso altrimenti
+   */
+  public function getPubblicata() {
+    return $this->pubblicata;
+  }
+
+  /**
+   * Modifica se la circolare è pubblicata o no
+   *
+   * @param bool $pubblicata Vero se la circolare è pubblicata, falso altrimenti
    *
    * @return Circolare Oggetto Circolare
    */
-  public function removeClasse(Classe $classe) {
-    if (in_array($classe->getId(), $this->classi)) {
-      unset($this->classi[array_search($classe->getId(), $this->classi)]);
-    }
-    return $this;
-  }
-
-  /**
-   * Indica se è richiesta la firma della circolare da parte dei genitori o no
-   *
-   * @return boolean Vero se è richiesta la firma della circolare da parte dei genitori, falso altrimenti
-   */
-  public function getFirmaGenitori() {
-    return $this->firmaGenitori;
-  }
-
-  /**
-   * Modifica se è richiesta la firma della circolare da parte dei genitori o no
-   *
-   * @param boolean $firmaGenitori Vero se è richiesta la firma della circolare da parte dei genitori, falso altrimenti
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setFirmaGenitori($firmaGenitori) {
-    $this->firmaGenitori = ($firmaGenitori == true);
-    return $this;
-  }
-
-  /**
-   * Indica se è richiesta la firma della circolare da parte dei docenti o no
-   *
-   * @return boolean Vero se è richiesta la firma della circolare da parte dei docenti, falso altrimenti
-   */
-  public function getFirmaDocenti() {
-    return $this->firmaDocenti;
-  }
-
-  /**
-   * Modifica se è richiesta la firma della circolare da parte dei docenti o no
-   *
-   * @param boolean $firmaDocenti Vero se è richiesta la firma della circolare da parte dei docenti, falso altrimenti
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setFirmaDocenti($firmaDocenti) {
-    $this->firmaDocenti = ($firmaDocenti == true);
+  public function setPubblicata($pubblicata) {
+    $this->pubblicata = ($pubblicata == true);
     return $this;
   }
 
@@ -1134,14 +908,18 @@ class Circolare {
     // valori predefiniti
     $this->sedi = new ArrayCollection();
     $this->allegati = array();
-    $this->filtroRapprGenClasse = array();
-    $this->filtroRapprAluClasse = array();
     $this->filtroGenitori = array();
     $this->filtroAlunni = array();
     $this->filtroCoordinatori = array();
     $this->filtroDocenti = array();
+    $this->listeDistribuzione = new ArrayCollection();
     $this->altri = array();
     $this->classi = array();
+    $this->ata = false;
+    $this->dsga = false;
+    $this->firma = false;
+    $this->notifica = false;
+    $this->pubblicata = false;
   }
 
   /**

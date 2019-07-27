@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -44,9 +44,9 @@ class RichiestaColloquioRepository extends EntityRepository {
       ->join('rc.colloquio', 'c')
       ->join('c.orario', 'o')
       ->join('AppBundle:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
-      ->where('c.docente=:docente AND (rc.data>:data OR (rc.data=:data AND so.fine<=:ora))')
+      ->where('c.docente=:docente AND rc.data>=:data')
       ->orderBy('rc.data,c.ora,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
-      ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d'), 'ora' => $ora->format('H:i:s')]);
+      ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d')]);
     if (!empty($stato)) {
       $colloqui->andWhere('rc.stato IN (:stato)')->setParameter('stato', $stato);
     }

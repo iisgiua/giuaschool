@@ -48,8 +48,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * Creates a new violation path from a string.
      *
-     * @param string $violationPath The property path of a {@link \Symfony\Component\Validator\ConstraintViolation}
-     *                              object.
+     * @param string $violationPath The property path of a {@link \Symfony\Component\Validator\ConstraintViolation} object
      */
     public function __construct($violationPath)
     {
@@ -57,7 +56,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
         $elements = $path->getElements();
         $data = false;
 
-        for ($i = 0, $l = count($elements); $i < $l; ++$i) {
+        for ($i = 0, $l = \count($elements); $i < $l; ++$i) {
             if (!$data) {
                 // The element "data" has not yet been passed
                 if ('children' === $elements[$i] && $path->isProperty($i)) {
@@ -108,7 +107,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
             }
         }
 
-        $this->length = count($this->elements);
+        $this->length = \count($this->elements);
 
         $this->buildString();
     }
@@ -210,7 +209,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
      *
      * @return bool Whether the element maps to a form
      *
-     * @throws OutOfBoundsException If the offset is invalid.
+     * @throws OutOfBoundsException if the offset is invalid
      */
     public function mapsForm($index)
     {

@@ -23,9 +23,6 @@ use Symfony\Component\ExpressionLanguage\ParserCache\ParserCacheInterface;
  */
 class ExpressionLanguage
 {
-    /**
-     * @var CacheItemPoolInterface
-     */
     private $cache;
     private $lexer;
     private $parser;
@@ -74,7 +71,7 @@ class ExpressionLanguage
      * @param Expression|string $expression The expression to compile
      * @param array             $values     An array of values
      *
-     * @return string The result of the evaluation of the expression
+     * @return mixed The result of the evaluation of the expression
      */
     public function evaluate($expression, $values = array())
     {
@@ -99,7 +96,7 @@ class ExpressionLanguage
         $cacheKeyItems = array();
 
         foreach ($names as $nameKey => $name) {
-            $cacheKeyItems[] = is_int($nameKey) ? $name : $nameKey.':'.$name;
+            $cacheKeyItems[] = \is_int($nameKey) ? $name : $nameKey.':'.$name;
         }
 
         $cacheItem = $this->cache->getItem(rawurlencode($expression.'//'.implode('|', $cacheKeyItems)));

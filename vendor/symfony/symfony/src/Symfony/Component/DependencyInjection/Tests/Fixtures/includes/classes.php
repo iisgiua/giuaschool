@@ -9,7 +9,7 @@ function sc_configure($instance)
     $instance->configure();
 }
 
-class BarClass
+class BarClass extends BazClass
 {
     protected $baz;
     public $foo = 'foo';
@@ -85,17 +85,17 @@ class DummyProxyDumper implements ProxyDumper
 {
     public function isProxyCandidate(Definition $definition)
     {
-        return false;
+        return $definition->isLazy();
     }
 
-    public function getProxyFactoryCode(Definition $definition, $id, $methodName = null)
+    public function getProxyFactoryCode(Definition $definition, $id, $factoryCall = null)
     {
-        return '';
+        return "        // lazy factory for {$definition->getClass()}\n\n";
     }
 
     public function getProxyCode(Definition $definition)
     {
-        return '';
+        return "// proxy code for {$definition->getClass()}\n";
     }
 }
 
@@ -108,5 +108,29 @@ class LazyContext
     {
         $this->lazyValues = $lazyValues;
         $this->lazyEmptyValues = $lazyEmptyValues;
+    }
+}
+
+class FoobarCircular
+{
+    public function __construct(FooCircular $foo)
+    {
+        $this->foo = $foo;
+    }
+}
+
+class FooCircular
+{
+    public function __construct(BarCircular $bar)
+    {
+        $this->bar = $bar;
+    }
+}
+
+class BarCircular
+{
+    public function addFoobar(FoobarCircular $foobar)
+    {
+        $this->foobar = $foobar;
     }
 }

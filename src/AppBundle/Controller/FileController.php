@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,14 +14,14 @@ namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Filesystem\Filesystem;
 use AppBundle\Entity\Staff;
 use AppBundle\Entity\Preside;
@@ -44,8 +44,8 @@ class FileController extends Controller {
    * @return JsonResponse Informazioni di risposta
    *
    * @Route("/file/upload/{pagina}/{param}", name="file_upload",
-   *    requirements={"pagina": "\w+", "param": "\w+"})
-   * @Method("POST")
+   *    requirements={"pagina": "\w+", "param": "\w+"},
+   *    methods={"POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -54,7 +54,7 @@ class FileController extends Controller {
     // legge file
     $files = $request->files->get($param);
     // imposta directory temporanea
-    $dir = $this->getParameter('kernel.project_dir').'/documenti/tmp';
+    $dir = $this->getParameter('dir_tmp');
     // controlla upload
     foreach ($files as $k=>$file) {
       $nomefile = md5(uniqid()).'-'.rand(1,1000);
@@ -63,6 +63,7 @@ class FileController extends Controller {
         $risposta[$k]['type'] = 'uploaded';
         $risposta[$k]['temp'] = $nomefile;
         $risposta[$k]['name'] = $file->getClientOriginalName();
+        $risposta[$k]['ext'] = $file->getClientOriginalExtension();
         $risposta[$k]['size'] = $file->getClientSize();
       } else {
         // errore
@@ -88,8 +89,8 @@ class FileController extends Controller {
    * @return JsonResponse Informazioni di risposta
    *
    * @Route("/file/remove/{pagina}/{param}", name="file_remove",
-   *    requirements={"pagina": "\w+", "param": "\w+"})
-   * @Method("POST")
+   *    requirements={"pagina": "\w+", "param": "\w+"},
+   *    methods={"POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -97,7 +98,7 @@ class FileController extends Controller {
     // legge file
     $file = $request->request->get($param);
     // imposta directory temporanea
-    $dir = $this->getParameter('kernel.project_dir').'/documenti/tmp';
+    $dir = $this->getParameter('dir_tmp');
     // rimuove file
     if ($file) {
       $fs = new Filesystem();
@@ -137,10 +138,10 @@ class FileController extends Controller {
    * @return Response Documento inviato in risposta
    *
    * @Route("/file/avviso/{avviso}/{allegato}", name="file_avviso",
-   *    requirements={"avviso": "\d+", "allegato": "\d+"})
-   * @Method("GET")
+   *    requirements={"avviso": "\d+", "allegato": "\d+"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_UTENTE')")
    */
   public function avvisoAction(EntityManagerInterface $em, BachecaUtil $bac,
                                 $avviso, $allegato) {
@@ -161,12 +162,12 @@ class FileController extends Controller {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // file
-    $file = new File($this->getParameter('kernel.project_dir').'/documenti/avvisi/'.
+    $file = new File($this->getParameter('dir_avvisi').'/'.
       array_values($avviso->getAllegati())[$allegato - 1]);
     // nome da visualizzare
     $nome = 'avviso-'.$avviso->getId().'-allegato-'.$allegato.'.'.$file->guessExtension();
     // invia il documento
-    return $this->file($file, $nome);
+    return $this->file($file, $nome, ResponseHeaderBag::DISPOSITION_INLINE);
   }
 
   /**
@@ -179,8 +180,8 @@ class FileController extends Controller {
    * @return Response Documento inviato in risposta
    *
    * @Route("/file/documento/{tipo}/{id}", name="file_documento",
-   *    requirements={"tipo": "P|R", "id": "\d+"})
-   * @Method("GET")
+   *    requirements={"tipo": "L|P|R|M", "id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -192,7 +193,7 @@ class FileController extends Controller {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // file
-    $file = new File($this->getParameter('kernel.project_dir').'/documenti/classe/'.
+    $file = new File($this->getParameter('dir_classi').'/'.
       $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().'/'.$documento->getFile());
     // nome da visualizzare
     $nome = $documento->getFile();

@@ -12,10 +12,10 @@
 namespace Symfony\Component\Form\Tests\Extension\Csrf\Type;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\Test\TypeTestCase;
-use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
 use Symfony\Component\Security\Csrf\CsrfToken;
 
 class FormTypeCsrfExtensionTest_ChildType extends AbstractType
@@ -72,7 +72,7 @@ class FormTypeCsrfExtensionTest extends TypeTestCase
             ))
             ->createView();
 
-        $this->assertTrue(isset($view['csrf']));
+        $this->assertArrayHasKey('csrf', $view);
     }
 
     public function testNoCsrfProtectionByDefaultIfCompoundButNotRoot()
@@ -89,7 +89,7 @@ class FormTypeCsrfExtensionTest extends TypeTestCase
             ->get('form')
             ->createView();
 
-        $this->assertFalse(isset($view['csrf']));
+        $this->assertArrayNotHasKey('csrf', $view);
     }
 
     public function testNoCsrfProtectionByDefaultIfRootButNotCompound()
@@ -101,7 +101,7 @@ class FormTypeCsrfExtensionTest extends TypeTestCase
             ))
             ->createView();
 
-        $this->assertFalse(isset($view['csrf']));
+        $this->assertArrayNotHasKey('csrf', $view);
     }
 
     public function testCsrfProtectionCanBeDisabled()
@@ -114,7 +114,7 @@ class FormTypeCsrfExtensionTest extends TypeTestCase
             ))
             ->createView();
 
-        $this->assertFalse(isset($view['csrf']));
+        $this->assertArrayNotHasKey('csrf', $view);
     }
 
     public function testGenerateCsrfToken()
@@ -357,7 +357,7 @@ class FormTypeCsrfExtensionTest extends TypeTestCase
             ->createView()
             ->vars['prototype'];
 
-        $this->assertFalse(isset($prototypeView['csrf']));
+        $this->assertArrayNotHasKey('csrf', $prototypeView);
         $this->assertCount(1, $prototypeView);
     }
 
@@ -391,7 +391,7 @@ class FormTypeCsrfExtensionTest extends TypeTestCase
         $expected = new FormError('[trans]Foobar[/trans]');
         $expected->setOrigin($form);
 
-        $this->assertGreaterThan(0, count($errors));
+        $this->assertGreaterThan(0, \count($errors));
         $this->assertEquals($expected, $errors[0]);
     }
 }

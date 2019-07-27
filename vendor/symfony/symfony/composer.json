@@ -18,19 +18,20 @@
     "require": {
         "php": "^5.5.9|>=7.0.8",
         "ext-xml": "*",
-        "doctrine/common": "~2.4",
+        "doctrine/common": "~2.4@stable",
         "fig/link-util": "^1.0",
-        "twig/twig": "~1.34|~2.4",
+        "twig/twig": "^1.35|^2.4.4",
         "psr/cache": "~1.0",
         "psr/container": "^1.0",
         "psr/link": "^1.0",
         "psr/log": "~1.0",
         "psr/simple-cache": "^1.0",
+        "symfony/polyfill-apcu": "~1.1",
+        "symfony/polyfill-ctype": "~1.8",
         "symfony/polyfill-intl-icu": "~1.0",
         "symfony/polyfill-mbstring": "~1.0",
         "symfony/polyfill-php56": "~1.0",
-        "symfony/polyfill-php70": "~1.0",
-        "symfony/polyfill-util": "~1.0"
+        "symfony/polyfill-php70": "~1.6"
     },
     "replace": {
         "symfony/asset": "self.version",
@@ -57,6 +58,7 @@
         "symfony/inflector": "self.version",
         "symfony/intl": "self.version",
         "symfony/ldap": "self.version",
+        "symfony/lock": "self.version",
         "symfony/monolog-bridge": "self.version",
         "symfony/options-resolver": "self.version",
         "symfony/process": "self.version",
@@ -86,29 +88,29 @@
     },
     "require-dev": {
         "cache/integration-tests": "dev-master",
+        "doctrine/annotations": "~1.0",
         "doctrine/cache": "~1.6",
         "doctrine/data-fixtures": "1.0.*",
         "doctrine/dbal": "~2.4",
-        "doctrine/orm": "~2.4,>=2.4.5",
+        "doctrine/orm": "~2.4,>=2.4.5,<=2.7.0",
         "doctrine/doctrine-bundle": "~1.4",
         "monolog/monolog": "~1.11",
         "ocramius/proxy-manager": "~0.4|~1.0|~2.0",
         "predis/predis": "~1.0",
         "egulias/email-validator": "~1.2,>=1.2.8|~2.0",
-        "symfony/phpunit-bridge": "~3.2",
-        "symfony/polyfill-apcu": "~1.1",
+        "symfony/phpunit-bridge": "~3.4|~4.0",
         "symfony/security-acl": "~2.8|~3.0",
-        "phpdocumentor/reflection-docblock": "^3.0|^4.0",
-        "sensio/framework-extra-bundle": "^3.0.2"
+        "phpdocumentor/reflection-docblock": "^3.0|^4.0"
     },
     "conflict": {
         "phpdocumentor/reflection-docblock": "<3.0||>=3.2.0,<3.2.2",
-        "phpdocumentor/type-resolver": "<0.2.0",
+        "phpdocumentor/type-resolver": "<0.3.0",
         "phpunit/phpunit": "<4.8.35|<5.4.3,>=5.0"
     },
     "provide": {
         "psr/cache-implementation": "1.0",
         "psr/container-implementation": "1.0",
+        "psr/log-implementation": "1.0",
         "psr/simple-cache-implementation": "1.0"
     },
     "autoload": {
@@ -133,7 +135,7 @@
     "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "dev-master": "3.3-dev"
+            "dev-master": "3.4-dev"
         }
     }
 }

@@ -11,16 +11,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ pagina_titolo|trans }}</title>
     <meta name="description" content="giua@school: il registro elettronico dell'Istituto di Istruzione Superiore 'Michele Giua'">
-    <meta name="keywords" content="scuola,istituto,istruzione,superiore,tecnico,liceo,scientifico,scienze,applicate,registro,elettronico">
+    <meta name="keywords" content="scuola,istituto,istruzione,superiore,tecnico,liceo,scientifico,scienze,applicate,giua,cagliari,assemini,registro,elettronico">
     <meta name="author" content="Antonello Dessì">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap-theme.min.css') }}" rel="stylesheet">
     <!--[if IE 10]>
     <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     <![endif]-->
-{% block pagina_css %}
     <link href="{{ asset('css/tema.css?v='~(filedate('css/tema.css')|date('U'))) }}" rel="stylesheet">
+{% block pagina_css %}
 {% endblock %}
+{% if app.session.get('/APP/APP/css') %}
+    <link href="{{ asset('app/'~app.session.get('/APP/APP/css')~'.css?v='~(filedate('css/'~app.session.get('/APP/APP/css')~'.css')|date('U'))) }}" rel="stylesheet">
+{% endif %}
     <!--[if lt IE 9]>
     <script src="{{ asset('vendor/html5shiv.min.js') }}"></script>
     <script src="{{ asset('vendor/respond.min.js') }}"></script>
@@ -64,13 +67,13 @@
           </div>
           <nav class="navbar navbar-default gs-navbar">
             <div class="navbar-header gs-navbar-header">
-              <button type="button" class="navbar-toggle collapsed gs-navbar-toggle" data-toggle="collapse" data-target="#gs-navbar-collapse-1" aria-expanded="false">
+              <button type="button" class="navbar-toggle collapsed gs-navbar-toggle gs-pt-1 gs-pb-1 gs-mt-2 gs-mb-0" data-toggle="collapse" data-target="#gs-navbar-collapse-1" aria-expanded="false">
                 <span class="gs-mr-2">MENU</span>
                 <span class="glyphicon glyphicon-menu-hamburger"></span>
               </button>
-              <div class="visible-xs-block text-center gs-mt-2">
-                <strong>I.I.S. </strong>
-                {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SCUOLA/anno_scolastico') }}{% endif %}
+              <div class="visible-xs-block text-center">
+                <strong>I.I.S. "NOME"</strong>
+                  {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SISTEMA/anno_scolastico') }}{% endif %}
               </div>
             </div>
             <div class="collapse navbar-collapse" id="gs-navbar-collapse-1">
@@ -80,11 +83,13 @@
             </div>
           </nav>
         </header>
+{% block pagina_submenu %}
+{% endblock %}
       </div><!-- fine intestazione -->
 
       <!-- contenuto -->
       <div class="gs-main-container clearfix">
-        <div class="" id="gs-main" tabindex="-1" style="outline:none;padding-top:100px;margin-top:-100px;">
+        <div id="gs-main">
 {% block pagina_contenuto %}
 {% endblock %}
         </div>
@@ -97,25 +102,25 @@
             <div class="row">
               <div class="col-sm-6 hidden-xs text-center small">
                 <div class="row">
-                  <strong>Istituto di Istruzione Superiore<br><em></em></strong>
+                  <strong>Istituto di Istruzione Superiore<br><em>NOME</em></strong>
                 </div>
                 <div class="row">
                   <div class="col-sm-6">
                     <address class="text-center pull-right">
-                      <strong>Sede Centrale</strong><br>
+                      <strong>Sede Centrale</strong><br>Via <br>città<br>Telefono: 000
                     </address>
                   </div>
                   <div class="col-sm-6">
                     <address class="text-center pull-left">
-                      <strong>Sede Staccata</strong><br>
+                      <strong>Sede Staccata</strong><br>Via <br>città<br>Telefono: 000
                     </address>
                   </div>
                 </div>
               </div>
               <div class="col-sm-5 col-xs-10 text-center">
                 <p>
-                  <a href="https://github.com/trinko/giua-school#giuaschool" target="_blank" title="Vai alla pagina del Progetto giua@school">
-                    <img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em style="color:#337ab7"><strong>giua@school {{ app.session.get('CONFIG/SISTEMA/versione') }}</strong></em>
+                  <a href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai alla pagina del Progetto giua@school">
+                    <img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em style="color:#337ab7"><strong>giua@school {{ app.session.get('/CONFIG/SISTEMA/versione') }}</strong></em>
                   </a>
                   <em class="hidden-xs gs-big"><br>il registro elettronico<br>dell'Istituto "Michele Giua"</em>
                 </p>
@@ -151,6 +156,7 @@
     <!--[if IE 10]>
     <script src="{{ asset('vendor/bootstrap/js/ie10-viewport-bug-workaround.js') }}"></script>
     <![endif]-->
+    <script src="{{ asset('js/script.js?v='~(filedate('js/script.js')|date('U'))) }}"></script>
 {% block pagina_js_fine %}
 {% endblock %}
   </body>

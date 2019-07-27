@@ -49,6 +49,7 @@ class SimplePreAuthenticationFactory implements SecurityFactoryInterface
             ->replaceArgument(0, new Reference($config['authenticator']))
             ->replaceArgument(1, new Reference($userProvider))
             ->replaceArgument(2, $id)
+            ->replaceArgument(3, new Reference('security.user_checker.'.$id))
         ;
 
         // listener
@@ -56,6 +57,7 @@ class SimplePreAuthenticationFactory implements SecurityFactoryInterface
         $listener = $container->setDefinition($listenerId, new ChildDefinition('security.authentication.listener.simple_preauth'));
         $listener->replaceArgument(2, $id);
         $listener->replaceArgument(3, new Reference($config['authenticator']));
+        $listener->addMethodCall('setSessionAuthenticationStrategy', array(new Reference('security.authentication.session_strategy.'.$id)));
 
         return array($provider, $listenerId, null);
     }

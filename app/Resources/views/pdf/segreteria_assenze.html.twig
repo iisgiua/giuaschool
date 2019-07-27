@@ -2,10 +2,13 @@
   <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
   <strong><i></i></strong><br>
+  <span style="font-size:11pt">Via <br>
+  TEL. 000<br>
+  Email: 000@istruzione.it &nbsp;&nbsp;&nbsp;&nbsp; Sito: www.nome.edu.it</span>
 </p>
 <p>&nbsp;</p>
 <p style="text-align:center; font-size:13pt">
-  <strong>Anno Scolastico 2017/2018</strong><br>
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico')[4:] }}</strong><br>
   <strong>Frequenza di {{ alunno.cognome }} {{ alunno.nome }} (nat{{ sesso }} il {{ alunno.dataNascita|date('d/m/Y') }})</strong><br>
   <strong>Classe {{ dati.classe }}</strong>
 {% if dati.note is defined %}
@@ -39,4 +42,4 @@
 {% endfor %}
 <div style="text-align:center">Legenda: <strong>A</strong> = assenza, <strong>R</strong> = ingresso in ritardo, <strong>U</strong> = uscita anticipata.</div>
 <br>
-<p> {{ date()|date('d/m/Y') }}.</p>
+<p>Cagliari, {{ date()|date('d/m/Y') }}.</p>

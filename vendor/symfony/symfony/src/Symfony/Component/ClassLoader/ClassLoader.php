@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\ClassLoader;
 
-@trigger_error('The '.__NAMESPACE__.'\ClassLoader class is deprecated since version 3.3 and will be removed in 4.0. Use Composer instead.', E_USER_DEPRECATED);
+@trigger_error('The '.__NAMESPACE__.'\ClassLoader class is deprecated since Symfony 3.3 and will be removed in 4.0. Use Composer instead.', E_USER_DEPRECATED);
 
 /**
  * ClassLoader implements an PSR-0 class loader.
@@ -95,12 +95,12 @@ class ClassLoader
             return;
         }
         if (isset($this->prefixes[$prefix])) {
-            if (is_array($paths)) {
+            if (\is_array($paths)) {
                 $this->prefixes[$prefix] = array_unique(array_merge(
                     $this->prefixes[$prefix],
                     $paths
                 ));
-            } elseif (!in_array($paths, $this->prefixes[$prefix])) {
+            } elseif (!\in_array($paths, $this->prefixes[$prefix])) {
                 $this->prefixes[$prefix][] = $paths;
             }
         } else {
@@ -174,7 +174,7 @@ class ClassLoader
     {
         if (false !== $pos = strrpos($class, '\\')) {
             // namespaced class name
-            $classPath = str_replace('\\', DIRECTORY_SEPARATOR, substr($class, 0, $pos)).DIRECTORY_SEPARATOR;
+            $classPath = str_replace('\\', \DIRECTORY_SEPARATOR, substr($class, 0, $pos)).\DIRECTORY_SEPARATOR;
             $className = substr($class, $pos + 1);
         } else {
             // PEAR-like class name
@@ -182,21 +182,21 @@ class ClassLoader
             $className = $class;
         }
 
-        $classPath .= str_replace('_', DIRECTORY_SEPARATOR, $className).'.php';
+        $classPath .= str_replace('_', \DIRECTORY_SEPARATOR, $className).'.php';
 
         foreach ($this->prefixes as $prefix => $dirs) {
             if ($class === strstr($class, $prefix)) {
                 foreach ($dirs as $dir) {
-                    if (file_exists($dir.DIRECTORY_SEPARATOR.$classPath)) {
-                        return $dir.DIRECTORY_SEPARATOR.$classPath;
+                    if (file_exists($dir.\DIRECTORY_SEPARATOR.$classPath)) {
+                        return $dir.\DIRECTORY_SEPARATOR.$classPath;
                     }
                 }
             }
         }
 
         foreach ($this->fallbackDirs as $dir) {
-            if (file_exists($dir.DIRECTORY_SEPARATOR.$classPath)) {
-                return $dir.DIRECTORY_SEPARATOR.$classPath;
+            if (file_exists($dir.\DIRECTORY_SEPARATOR.$classPath)) {
+                return $dir.\DIRECTORY_SEPARATOR.$classPath;
             }
         }
 

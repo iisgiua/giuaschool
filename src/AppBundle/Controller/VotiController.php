@@ -2,19 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -24,6 +23,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -34,6 +34,7 @@ use AppBundle\Util\GenitoriUtil;
 use AppBundle\Util\PdfManager;
 use AppBundle\Form\VotoClasseType;
 use AppBundle\Entity\Valutazione;
+use AppBundle\Entity\Notifica;
 
 
 /**
@@ -50,55 +51,31 @@ class VotiController extends Controller {
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
-   * @param string $data Data del giorno (AAAA-MM-GG)
+   * @param string $periodo Periodo relativo allo scrutinio
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/voti/quadro/{cattedra}/{classe}/{data}", name="lezioni_voti_quadro",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"})
-   * @Method("GET")
+   * @Route("/lezioni/voti/quadro/{cattedra}/{classe}/{periodo}", name="lezioni_voti_quadro",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "1|2|3|0"},
+   *    defaults={"cattedra": 0, "classe": 0, "periodo": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function votiAction(Request $request, EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
-                              $cattedra, $classe, $data) {
+                              $cattedra, $classe, $periodo) {
     // inizializza variabili
-    $lista_festivi = null;
-    $errore = null;
-    $dati = null;
-    $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $lezione = null;
-    // parametri cattedra/classe
+    $dati = array();
+    $dati['alunni'] = array();
+    $info = null;
+    $azione_edit = false;
+    $lista_periodi = null;
+    // parametri cattedra/classe/periodo
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
       $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
       $classe = $session->get('/APP/DOCENTE/classe_lezione');
-    } else {
-      // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
     }
-    // parametro data
-    if ($data == '0000-00-00') {
-      // data non specificata
-      if ($session->get('/APP/DOCENTE/data_lezione')) {
-        // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
-      } else {
-        // imposta data odierna
-        $data_obj = new \DateTime();
-      }
-    } else {
-      // imposta data indicata e la memorizza in sessione
-      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $session->set('/APP/DOCENTE/data_lezione', $data);
-    }
-    // data in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
@@ -108,7 +85,7 @@ class VotiController extends Controller {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
+      if ($cattedra->getMateria()->getTipo() == 'S') {
         // cattedra di sostegno: redirezione
         return $this->redirectToRoute('lezioni_voti_sostegno', ['cattedra' => $cattedra->getId()]);
       }
@@ -117,6 +94,9 @@ class VotiController extends Controller {
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
       $info['alunno'] = $cattedra->getAlunno();
+      // memorizza parametri in sessione
+      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra->getId());
+      $session->set('/APP/DOCENTE/classe_lezione', $classe->getId());
     } elseif ($classe > 0) {
       // supplenza
       $classe = $em->getRepository('AppBundle:Classe')->find($classe);
@@ -136,22 +116,34 @@ class VotiController extends Controller {
       $info['alunno'] = null;
     }
     if ($cattedra) {
-      // recupera festivi per calendario
-      $lista_festivi = $reg->listaFestivi($classe->getSede());
-      // controllo data
-      $errore = $reg->controlloData($data_obj, $classe->getSede());
-      if (!$errore) {
-        // non festivo: recupera dati
-        $info['periodo'] = $reg->periodo($data_obj);
-        if ($cattedra->getTipo() != 'S' && $cattedra->getMateria()->getTipo() != 'S') {
-          $lezione = $reg->lezioneCattedra($data_obj, $this->getUser(), $classe, $cattedra->getMateria());
-          // controlla permessi
-          if ($lezione && !$reg->azioneVoti($data_obj, $this->getUser(), null, $classe, $cattedra->getMateria())) {
-            // azione non permessa
-            $lezione = null;
-          }
-          $dati = $reg->quadroVoti($data_obj, $info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
+      // periodo
+      $lista_periodi = $reg->infoPeriodi();
+      // seleziona periodo se non indicato
+      if ($periodo == 0) {
+        // seleziona periodo in base alla data
+        if ($session->get('/APP/DOCENTE/data_lezione')) {
+          // recupera data da sessione
+          $data = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+        } else {
+          // imposta data odierna
+          $data = new \DateTime();
         }
+        $periodo = $reg->periodo($data);
+        if ($periodo) {
+          $periodo = $periodo['periodo'];
+        }
+      }
+      if ($periodo) {
+        // dati periodo
+        $inizio = \DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['inizio']);
+        $fine = \DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['fine']);
+        // controlla permessi
+        if ($reg->azioneVoti($inizio, $this->getUser(), null, $classe, $cattedra->getMateria())) {
+          // edit permesso
+          $azione_edit = true;
+        }
+        // legge voti
+        $dati = $reg->quadroVoti($inizio, $fine, $this->getUser(), $cattedra);
       }
     }
     // salva pagina visitata
@@ -162,14 +154,11 @@ class VotiController extends Controller {
       'pagina_titolo' => 'page.lezioni_voti',
       'cattedra' => $cattedra,
       'classe' => $classe,
-      'lezione' => $lezione,
-      'data' => $data_obj->format('Y-m-d'),
-      'settimana' => $settimana,
-      'mesi' => $mesi,
-      'errore' => $errore,
-      'lista_festivi' => $lista_festivi,
       'info' => $info,
       'dati' => $dati,
+      'edit' => $azione_edit,
+      'lista_periodi' => $lista_periodi,
+      'periodo' => $periodo,
     ));
   }
 
@@ -178,25 +167,29 @@ class VotiController extends Controller {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
-   * @param int $classe Identificativo della classe
-   * @param string $data Data del giorno (AAAA-MM-GG)
+   * @param int $cattedra Identificativo della cattedra
    * @param string $tipo Tipo della valutazione (S,O,P)
+   * @param string $data Data del giorno (AAAA-MM-GG)
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/voti/classe/{cattedra}/{data}/{tipo}", name="lezioni_voti_classe",
-   *    requirements={"cattedra": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "tipo": "S|O|P"})
-   * @Method({"GET","POST"})
+   * @Route("/lezioni/voti/classe/{cattedra}/{tipo}/{data}", name="lezioni_voti_classe",
+   *    requirements={"cattedra": "\d+", "tipo": "S|O|P", "data": "\d\d\d\d-\d\d-\d\d"},
+   *    defaults={"data": "0000-00-00"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function votiClasseAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
-                                    $cattedra, $data, $tipo) {
+  public function votiClasseAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                    RegistroUtil $reg, LogHandler $dblogger, $cattedra, $tipo, $data) {
     // inizializza
     $label = array();
+    $visibile = true;
+    $argomento = null;
+    $elenco = null;
     // controllo cattedra
     $cattedra = $em->getRepository('AppBundle:Cattedra')->find($cattedra);
     if (!$cattedra) {
@@ -206,35 +199,33 @@ class VotiController extends Controller {
     // recupera classe
     $classe = $cattedra->getClasse();
     // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $classe->getSede());
-    if ($errore) {
-      // errore: festivo
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
-    // controlla lezione
-    $lezione = $reg->lezioneCattedra($data_obj, $this->getUser(), $classe, $cattedra->getMateria());
-    if (!$lezione) {
-      // lezione non esiste
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
-    // controlla permessi
-    if (!$reg->azioneVoti($data_obj, $this->getUser(), null, $classe, $cattedra->getMateria())) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
+    if ($data == '0000-00-00') {
+      // data non specificata
+      $data = new \DateTime();
+    } else {
+      // data esistente
+      $data = \DateTime::createFromFormat('Y-m-d', $data);
     }
     // elenco di alunni
-    $elenco = $reg->elencoVoto($data_obj, $this->getUser(), $classe, $cattedra->getMateria(), $tipo, $argomento, $visibile);
+    $elenco = $reg->elencoVoti($data, $this->getUser(), $classe, $cattedra->getMateria(), $tipo, $argomento, $visibile);
     $elenco_precedente = unserialize(serialize($elenco)); // clona oggetti
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
-    $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
+    $label['materia'] = $cattedra->getMateria()->getNomeBreve();
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['tipo'] = 'label.voti_'.$tipo;
+    $label['festivi'] = $reg->listaFestivi();
+    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $session->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
+    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $session->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_classe', FormType::class)
+      ->add('data', DateType::class, array('label' => 'label.data',
+        'data' => $data,
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-picker'],
+        'format' => 'dd/MM/yyyy',
+        'mapped' => false,
+        'required' => true))
       ->add('visibile', ChoiceType::class, array('label' => 'label.visibile_genitori',
         'data' => $visibile,
         'choices' => ['label.si' => true, 'label.no' => false],
@@ -258,82 +249,130 @@ class VotiController extends Controller {
         'onclick' => "location.href='".$this->generateUrl('lezioni_voti_quadro')."'"]))
       ->getForm();
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // imposta voti
-      $log['create'] = array();
-      $log['edit'] = array();
-      $log['delete'] = array();
-      foreach ($form->get('lista')->getData() as $key=>$voto) {
-        $alunno = $em->getRepository('AppBundle:Alunno')->find($voto->getId());
-        if (!$alunno) {
-          // alunno non esiste, salta
-          continue;
-        }
-        if (!$elenco_precedente[$key]->getVotoId() && ($voto->getVoto() > 0 || !empty($voto->getGiudizio()))) {
-          // valutazione aggiunta
-          $valutazione = (new Valutazione())
-            ->setTipo($tipo)
-            ->setVisibile($form->get('visibile')->getData())
-            ->setMedia($form->get('visibile')->getData())
-            ->setArgomento($form->get('argomento')->getData())
-            ->setDocente($this->getUser())
-            ->setLezione($lezione)
-            ->setAlunno($alunno)
-            ->setVoto($voto->getVoto())
-            ->setGiudizio($voto->getGiudizio());
-          $em->persist($valutazione);
-          $log['create'][] = $valutazione;
-        } elseif ($elenco_precedente[$key]->getVotoId() && $voto->getVoto() == 0 && empty($voto->getGiudizio())) {
-          // valutazione cancellata
-          $valutazione = $em->getRepository('AppBundle:Valutazione')->find($elenco_precedente[$key]->getVotoId());
-          if (!$valutazione) {
-            // valutazione non esiste, salta
-            continue;
-          }
-          $log['delete'][] = array($valutazione->getId(), $valutazione);
-          $em->remove($valutazione);
-        } elseif ($elenco_precedente[$key]->getVotoId() && ($elenco_precedente[$key]->getVoto() != $voto->getVoto() ||
-                  $elenco_precedente[$key]->getGiudizio() != $voto->getGiudizio() ||
-                  $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData())) {
-          // valutazione modificata
-          $valutazione = $em->getRepository('AppBundle:Valutazione')->find($elenco_precedente[$key]->getVotoId());
-          if (!$valutazione) {
-            // valutazione non esiste, salta
-            continue;
-          }
-          $log['edit'][] = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
-            $valutazione->getVoto(), $valutazione->getGiudizio());
-          $valutazione
-            ->setVisibile($form->get('visibile')->getData())
-            ->setMedia($form->get('visibile')->getData())
-            ->setArgomento($form->get('argomento')->getData())
-            ->setVoto($voto->getVoto())
-            ->setGiudizio($voto->getGiudizio());
+    if ($form->isSubmitted()) {
+      // controllo data
+      $errore = $reg->controlloData($form->get('data')->getData(), null);
+      if ($errore) {
+        // errore: festivo
+        $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+      }
+      // controlla lezione
+      $lezione = $reg->lezioneCattedra($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria());
+      if (!$lezione) {
+        // lezione non esiste
+        $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.lezione_non_esiste',
+          ['%materia%' => $cattedra->getMateria()->getNomeBreve()])));
+      }
+      // controlla permessi
+      if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), null, $classe, $cattedra->getMateria())) {
+        // errore: azione non permessa
+        $form->addError(new FormError($this->get('translator')->trans('exception.non_permesso_in_data')));
+      }
+      // controllo alunni
+      $lista_alunni = $reg->alunniInData($form->get('data')->getData(), $classe);
+      foreach ($form->get('lista')->getData() as $valutazione) {
+        // controlla alunno
+        if (!in_array($valutazione->getId(), $lista_alunni) &&
+            ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
+          // errore: alunno non presente in data
+          $form->addError(new FormError($this->get('translator')->trans('exception.alunno_no_classe_in_data',
+            ['%alunno%' => $valutazione->getAlunno()])));
         }
       }
-      // ok: memorizza dati
-      $em->flush();
-      // log azione
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Voti della classe', __METHOD__, array(
-        'Data' => $data,
-        'Tipo' => $tipo,
-        'Lezione' => $lezione->getId(),
-        'Voti creati' => implode(', ', array_map(function ($e) {
-            return $e->getId();
-          }, $log['create'])),
-        'Voti modificati' => implode(', ', array_map(function ($e) {
-            return '[Id: '.$e[0].', Visibile: '.$e[1].', Argomento: "'.$e[2].'"'.
-              ', Voto: '.$e[3].', Giudizio: "'.$e[4].'"'.']';
-          }, $log['edit'])),
-        'Voti cancellati' => implode(', ', array_map(function ($e) {
-            return '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
-              ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
-              ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
-              ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']';
-          }, $log['delete']))
-        ));
+      if ($form->isValid()) {
+        $log['create'] = array();
+        $log['edit'] = array();
+        $log['delete'] = array();
+        foreach ($form->get('lista')->getData() as $key=>$valutazione) {
+          // correzione voto
+          if ($valutazione->getVoto() > 0 && $valutazione->getVoto() < 1) {
+            $valutazione->setVoto(1);
+          } elseif ($valutazione->getVoto() > 10) {
+            $valutazione->setVoto(10);
+          }
+          // legge alunno
+          $alunno = $em->getRepository('AppBundle:Alunno')->find($valutazione->getId());
+          // legge vecchio voto
+          $voto = ($elenco_precedente[$key]->getVotoId() ?
+            $em->getRepository('AppBundle:Valutazione')->find($elenco_precedente[$key]->getVotoId()) : null);
+          if (!$voto && ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
+            // valutazione aggiunta
+            $voto = (new Valutazione())
+              ->setTipo($tipo)
+              ->setVisibile($form->get('visibile')->getData())
+              ->setMedia($form->get('visibile')->getData())
+              ->setArgomento($form->get('argomento')->getData())
+              ->setDocente($this->getUser())
+              ->setLezione($lezione)
+              ->setAlunno($alunno)
+              ->setVoto($valutazione->getVoto())
+              ->setGiudizio($valutazione->getGiudizio());
+            $em->persist($voto);
+            $log['create'][] = $voto;
+          } elseif ($voto && $valutazione->getVoto() == 0 && empty($valutazione->getGiudizio())) {
+            // valutazione cancellata
+            $log['delete'][] = array($voto->getId(), $voto);
+            $em->remove($voto);
+          } elseif ($voto && ($elenco_precedente[$key]->getVoto() != $valutazione->getVoto() ||
+                    $elenco_precedente[$key]->getGiudizio() != $valutazione->getGiudizio() ||
+                    $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData() ||
+                    $voto->getLezione()->getId() != $lezione->getId())) {
+            // valutazione modificata
+            $log['edit'][] = array($voto->getId(), $voto->getVisibile(), $voto->getArgomento(),
+              $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio());
+            $voto
+              ->setVisibile($form->get('visibile')->getData())
+              ->setMedia($form->get('visibile')->getData())
+              ->setLezione($lezione)
+              ->setArgomento($form->get('argomento')->getData())
+              ->setVoto($valutazione->getVoto())
+              ->setGiudizio($valutazione->getGiudizio());
+          }
+        }
+        // ok: memorizza dati
+        $em->flush();
+        // log azione e notifica
+        foreach ($log['create'] as $obj) {
+          $notifica = (new Notifica())
+            ->setOggettoNome('Valutazione')
+            ->setOggettoId($obj->getId())
+            ->setAzione('A');
+          $em->persist($notifica);
+        }
+        foreach ($log['edit'] as $obj) {
+          $notifica = (new Notifica())
+            ->setOggettoNome('Valutazione')
+            ->setOggettoId($obj[0])
+            ->setAzione('E');
+          $em->persist($notifica);
+        }
+        foreach ($log['delete'] as $obj) {
+          $notifica = (new Notifica())
+            ->setOggettoNome('Valutazione')
+            ->setOggettoId($obj[0])
+            ->setAzione('D');
+          $em->persist($notifica);
+        }
+        $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Voti della classe', __METHOD__, array(
+          'Tipo' => $tipo,
+          'Voti creati' => implode(', ', array_map(function ($e) {
+              return $e->getId();
+            }, $log['create'])),
+          'Voti modificati' => implode(', ', array_map(function ($e) {
+              return '[Id: '.$e[0].', Visibile: '.$e[1].', Argomento: "'.$e[2].'"'.
+                ', Lezione: '.$e[3].
+                ', Voto: '.$e[4].', Giudizio: "'.$e[5].'"'.']';
+            }, $log['edit'])),
+          'Voti cancellati' => implode(', ', array_map(function ($e) {
+              return '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
+                ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
+                ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
+                ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']';
+            }, $log['delete']))
+          ));
         // redirezione
         return $this->redirectToRoute('lezioni_voti_quadro');
+      }
     }
     // mostra la pagina di risposta
     return $this->render('lezioni/voti_classe_edit.html.twig', array(
@@ -349,23 +388,25 @@ class VotiController extends Controller {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
-   * @param int $classe Identificativo della classe
-   * @param string $data Data del giorno (AAAA-MM-GG)
+   * @param int $cattedra Identificativo della cattedra
+   * @param int $alunno Identificativo dell'alunno
    * @param string $tipo Tipo della valutazione (S,O,P)
+   * @param int $id Identificativo del voto (0=nuovo)
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/voti/alunno/{cattedra}/{alunno}/{data}/{tipo}", name="lezioni_voti_alunno",
-   *    requirements={"cattedra": "\d+", "alunno": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "tipo": "S|O|P"})
-   * @Method({"GET","POST"})
+   * @Route("/lezioni/voti/alunno/{cattedra}/{alunno}/{tipo}/{id}", name="lezioni_voti_alunno",
+   *    requirements={"cattedra": "\d+", "alunno": "\d+", "tipo": "S|O|P", "id": "\d+"},
+   *    defaults={"id": "0"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function votiAlunnoAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
-                                    $cattedra, $alunno, $data, $tipo) {
+  public function votiAlunnoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                    RegistroUtil $reg, LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
     // inizializza
     $label = array();
     // controllo cattedra
@@ -382,55 +423,47 @@ class VotiController extends Controller {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controlla data
-    $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $classe->getSede());
-    if ($errore) {
-      // errore: festivo
-      throw $this->createNotFoundException('exception.invalid_params');
+    // controllo voto
+    if ($id) {
+      // legge voto
+      $valutazione = $em->getRepository('AppBundle:Valutazione')->findOneBy(['id' => $id, 'alunno' => $alunno,
+        'docente' => $this->getUser(), 'tipo' => $tipo]);
+      if ($valutazione) {
+        $valutazione_precedente = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
+          $valutazione->getVoto(), $valutazione->getGiudizio(), $valutazione->getLezione()->getId());
+        $data = $valutazione->getLezione()->getData();
+      }
     }
-    // controlla lezione
-    $lezione = $reg->lezioneCattedra($data_obj, $this->getUser(), $classe, $cattedra->getMateria());
-    if (!$lezione) {
-      // lezione non esiste
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
-    // controlla permessi
-    if (!$reg->azioneVoti($data_obj, $this->getUser(), $alunno, $classe, $cattedra->getMateria())) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
-    // recupera voti di alunno
-    $valutazione = $reg->alunnoVoto($data_obj, $this->getUser(), $alunno, $lezione, $tipo);
-    if ($valutazione) {
-      $valutazione_precedente = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
-        $valutazione->getVoto(), $valutazione->getGiudizio());
-      $voto_int = intval($valutazione->getVoto() + 0.25);
-      $voto_dec = $valutazione->getVoto() - intval($valutazione->getVoto());
-      $label['voto'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
-    } else {
+    if (!$id || !$valutazione) {
       // aggiungi voto
       $valutazione = (new Valutazione())
         ->setTipo($tipo)
         ->setDocente($this->getUser())
-        ->setLezione($lezione)
         ->setAlunno($alunno)
         ->setVisibile(true);
       $em->persist($valutazione);
       $valutazione_precedente = null;
-      $label['voto'] = '--';
+      $data = new \DateTime();
     }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
-    $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
+    $label['materia'] = $cattedra->getMateria()->getNomeBreve();
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.$alunno->getDataNascita()->format('d/m/Y').')';
     $label['bes'] = $alunno->getBes();
+    $label['festivi'] = $reg->listaFestivi();
+    $label['inizio'] = \DateTime::createFromFormat('Y-m-d', $session->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
+    $label['fine'] = \DateTime::createFromFormat('Y-m-d', $session->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_alunno', FormType::class, $valutazione)
+      ->add('data', DateType::class, array('label' => 'label.data',
+        'data' => $data,
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-picker'],
+        'format' => 'dd/MM/yyyy',
+        'mapped' => false,
+        'required' => true))
       ->add('visibile', ChoiceType::class, array('label' => 'label.visibile_genitori',
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
@@ -457,22 +490,57 @@ class VotiController extends Controller {
         'onclick' => "location.href='".$this->generateUrl('lezioni_voti_quadro')."'"]))
       ->getForm();
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted()) {
+      // correzione voto
+      if ($valutazione->getVoto() > 0 && $valutazione->getVoto() < 1) {
+        $valutazione->setVoto(1);
+      } elseif ($valutazione->getVoto() > 10) {
+        $valutazione->setVoto(10);
+      }
+      // controlli
       if ($valutazione_precedente && $form->get('delete')->isClicked()) {
         // cancella voto
         $em->remove($valutazione);
-      } elseif (empty($valutazione->getVoto()) && empty($valutazione->getGiudizio())) {
-        // errore di validazione
-        $form->addError(new FormError($this->get('translator')->trans('exception.voto_vuoto')));
+      } else {
+        // controllo data
+        $errore = $reg->controlloData($form->get('data')->getData(), null);
+        if ($errore) {
+          // errore: festivo
+          $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+        }
+        // controlla lezione
+        $lezione = $reg->lezioneCattedra($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria());
+        if (!$lezione) {
+          // lezione non esiste
+          $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.lezione_non_esiste',
+            ['%materia%' => $cattedra->getMateria()->getNomeBreve()])));
+        } else {
+          // inserisce lezione
+          $valutazione->setLezione($lezione);
+        }
+        // controlla permessi
+        if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), $alunno, $classe, $cattedra->getMateria())) {
+          // errore: azione non permessa
+          $form->addError(new FormError($this->get('translator')->trans('exception.non_permesso_in_data')));
+        }
+        // controlla voto
+        if (empty($valutazione->getVoto()) && empty($valutazione->getGiudizio())) {
+          // errore di validazione
+          $form->addError(new FormError($this->get('translator')->trans('exception.voto_vuoto')));
+        }
       }
       if ($form->isValid()) {
         // crea o modifica voto
         $valutazione->setMedia($valutazione->getVisibile());
         // ok: memorizza dati
         $em->flush();
-        // log azione
+        // log azione e notifica
+        $notifica = (new Notifica())
+          ->setOggettoNome('Valutazione');
+        $em->persist($notifica);
         if ($valutazione_precedente && $form->get('delete')->isClicked()) {
-          // log cancellazione
+          // cancellazione
+          $notifica->setAzione('D')->setOggettoId($valutazione_precedente[0]);
           $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Cancella voto', __METHOD__, array(
             'Id' => $valutazione_precedente[0],
             'Tipo' => $tipo,
@@ -482,19 +550,25 @@ class VotiController extends Controller {
             'Giudizio' => $valutazione_precedente[4],
             'Docente' => $valutazione->getDocente()->getId(),
             'Alunno' => $valutazione->getAlunno()->getId(),
-            'Lezione' => $valutazione->getLezione()->getId()
+            'Lezione' => $valutazione_precedente[5]
             ));
-        } elseif ($valutazione_precedente) {
-          // log modifica
+        } elseif ($valutazione_precedente && ($valutazione_precedente[3] != $valutazione->getVoto() ||
+                  $valutazione_precedente[4] != $valutazione->getGiudizio() ||
+                  $valutazione_precedente[2] != $valutazione->getArgomento() ||
+                  $valutazione_precedente[1] != $valutazione->getVisibile())) {
+          // modifica
+          $notifica->setAzione('E')->setOggettoId($valutazione->getId());
           $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Modifica voto', __METHOD__, array(
             'Id' => $valutazione_precedente[0],
             'Visibile' => $valutazione_precedente[1],
             'Argomento' => $valutazione_precedente[2],
             'Voto' => $valutazione_precedente[3],
-            'Giudizio' => $valutazione_precedente[4]
+            'Giudizio' => $valutazione_precedente[4],
+            'Lezione' => $valutazione_precedente[5]
             ));
-        } else {
-          // log creazione
+        } elseif (!$valutazione_precedente) {
+          // creazione
+          $notifica->setAzione('A')->setOggettoId($valutazione->getId());
           $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Crea voto', __METHOD__, array(
             'Id' => $valutazione->getId()
             ));
@@ -528,8 +602,8 @@ class VotiController extends Controller {
    *
    * @Route("/lezioni/voti/dettagli/{cattedra}/{classe}/{alunno}", name="lezioni_voti_dettagli",
    *    requirements={"cattedra": "\d+", "classe": "\d+", "alunno": "\d+"},
-   *    defaults={"cattedra": 0, "classe": 0, "alunno": 0})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "classe": 0, "alunno": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -633,8 +707,8 @@ class VotiController extends Controller {
    *
    * @Route("/lezioni/voti/sostegno/{cattedra}/{materia}", name="lezioni_voti_sostegno",
    *    requirements={"cattedra": "\d+", "materia": "\d+"},
-   *    defaults={"cattedra": 0, "materia": 0})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "materia": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -717,18 +791,19 @@ class VotiController extends Controller {
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
+   * @param string $data Data del giorno (AAAA-MM-GG)
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/voti/stampa/{cattedra}/{classe}", name="lezioni_voti_stampa",
-   *    requirements={"cattedra": "\d+", "classe": "\d+"},
-   *    defaults={"cattedra": 0, "classe": 0})
-   * @Method("GET")
+   * @Route("/lezioni/voti/stampa/{cattedra}/{classe}/{data}", name="lezioni_voti_stampa",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
+   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function votiStampaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
-                                    PdfManager $pdf, $cattedra, $classe) {
+                                    PdfManager $pdf, $cattedra, $classe, $data) {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -741,8 +816,21 @@ class VotiController extends Controller {
       $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
       $session->set('/APP/DOCENTE/classe_lezione', $classe);
     }
+    // parametro data
+    if ($data == '0000-00-00') {
+      // data non specificata
+      if ($session->get('/APP/DOCENTE/data_lezione')) {
+        // recupera data da sessione
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+      } else {
+        // imposta data odierna
+        $data_obj = new \DateTime();
+      }
+    } else {
+      // imposta data indicata
+      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    }
     // data in formato stringa
-    $data_obj = new \DateTime('today');
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
@@ -763,9 +851,9 @@ class VotiController extends Controller {
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     // recupera dati
     $info['periodo'] = $reg->periodo($data_obj);
-    $dati = $reg->quadroVotiStampa($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
+    $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
     // crea documento PDF
-    $pdf->configure('Istituto di Istruzione Superiore',
+    $pdf->configure('Istituto di Istruzione Superiore ""',
       'Voti della classe '.$classe->getAnno().'ª '.$classe->getSezione().' - '.$info['materia']);
     $html = $this->renderView('pdf/voti_quadro.html.twig', array(
       'classe' => $classe,

@@ -2,18 +2,17 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -28,8 +27,8 @@ class SistemaController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/sistema/", name="sistema")
-   * @Method("GET")
+   * @Route("/sistema/", name="sistema",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */

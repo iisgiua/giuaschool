@@ -27,8 +27,6 @@ class TemplateLocator implements FileLocatorInterface
     private $cacheHits = array();
 
     /**
-     * Constructor.
-     *
      * @param FileLocatorInterface $locator  A FileLocatorInterface instance
      * @param string               $cacheDir The cache path
      */
@@ -43,8 +41,6 @@ class TemplateLocator implements FileLocatorInterface
 
     /**
      * Returns a full path for a given file.
-     *
-     * @param TemplateReferenceInterface $template A template
      *
      * @return string The full path for the file
      */

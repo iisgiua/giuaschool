@@ -112,14 +112,14 @@ class GuardAuthenticationFactory implements SecurityFactoryInterface
         }
 
         $authenticatorIds = $config['authenticators'];
-        if (count($authenticatorIds) == 1) {
+        if (1 == \count($authenticatorIds)) {
             // if there is only one authenticator, use that as the entry point
             return array_shift($authenticatorIds);
         }
 
         // we have multiple entry points - we must ask them to configure one
         throw new \LogicException(sprintf(
-            'Because you have multiple guard configurators, you need to set the "guard.entry_point" key to one of you configurators (%s)',
+            'Because you have multiple guard configurators, you need to set the "guard.entry_point" key to one of your configurators (%s)',
             implode(', ', $authenticatorIds)
         ));
     }

@@ -14,9 +14,9 @@ namespace Symfony\Bundle\FrameworkBundle\Tests\Translation;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;
-use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Translation\MessageSelector;
+use Symfony\Component\Translation\Formatter\MessageFormatter;
+use Symfony\Component\Translation\MessageCatalogue;
 
 class TranslatorTest extends TestCase
 {
@@ -45,7 +45,7 @@ class TranslatorTest extends TestCase
 
     /**
      * @group legacy
-     * @expectedDeprecation Method Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct() takes the default locale as 3rd argument since version 3.3. Not passing it is deprecated and will trigger an error in 4.0.
+     * @expectedDeprecation The "Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct()" method takes the default locale as the 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.
      */
     public function testTransWithoutCachingOmittingLocale()
     {
@@ -66,7 +66,7 @@ class TranslatorTest extends TestCase
 
     /**
      * @group legacy
-     * @expectedDeprecation Method Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct() takes the default locale as 3rd argument since version 3.3. Not passing it is deprecated and will trigger an error in 4.0.
+     * @expectedDeprecation The "Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct()" method takes the default locale as the 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.
      */
     public function testTransWithCachingOmittingLocale()
     {
@@ -106,7 +106,7 @@ class TranslatorTest extends TestCase
 
     /**
      * @group legacy
-     * @expectedDeprecation Method Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct() takes the default locale as 3rd argument since version 3.3. Not passing it is deprecated and will trigger an error in 4.0.
+     * @expectedDeprecation The "Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct()" method takes the default locale as the 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.
      * @expectedException \InvalidArgumentException
      */
     public function testTransWithCachingWithInvalidLocaleOmittingLocale()
@@ -119,7 +119,7 @@ class TranslatorTest extends TestCase
 
     /**
      * @group legacy
-     * @expectedDeprecation Method Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct() takes the default locale as 3rd argument since version 3.3. Not passing it is deprecated and will trigger an error in 4.0.
+     * @expectedDeprecation The "Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct()" method takes the default locale as the 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.
      */
     public function testLoadResourcesWithoutCachingOmittingLocale()
     {
@@ -138,7 +138,7 @@ class TranslatorTest extends TestCase
 
     /**
      * @group legacy
-     * @expectedDeprecation Method Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct() takes the default locale as 3rd argument since version 3.3. Not passing it is deprecated and will trigger an error in 4.0.
+     * @expectedDeprecation The "Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct()" method takes the default locale as the 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.
      */
     public function testGetDefaultLocaleOmittingLocale()
     {
@@ -149,7 +149,7 @@ class TranslatorTest extends TestCase
             ->with('kernel.default_locale')
             ->will($this->returnValue('en'))
         ;
-        $translator = new Translator($container, new MessageSelector());
+        $translator = new Translator($container, new MessageFormatter());
 
         $this->assertSame('en', $translator->getLocale());
     }
@@ -162,12 +162,12 @@ class TranslatorTest extends TestCase
     public function testGetDefaultLocaleOmittingLocaleWithPsrContainer()
     {
         $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $translator = new Translator($container, new MessageSelector());
+        $translator = new Translator($container, new MessageFormatter());
     }
 
     /**
      * @group legacy
-     * @expectedDeprecation Method Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct() takes the default locale as 3rd argument since version 3.3. Not passing it is deprecated and will trigger an error in 4.0.
+     * @expectedDeprecation The "Symfony\Bundle\FrameworkBundle\Translation\Translator::__construct()" method takes the default locale as the 3rd argument since Symfony 3.3. Not passing it is deprecated and will trigger an error in 4.0.
      */
     public function testWarmupOmittingLocale()
     {
@@ -277,7 +277,7 @@ class TranslatorTest extends TestCase
     public function testGetDefaultLocale()
     {
         $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
-        $translator = new Translator($container, new MessageSelector(), 'en');
+        $translator = new Translator($container, new MessageFormatter(), 'en');
 
         $this->assertSame('en', $translator->getLocale());
     }
@@ -290,7 +290,7 @@ class TranslatorTest extends TestCase
     {
         $container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerInterface')->getMock();
 
-        (new Translator($container, new MessageSelector(), 'en', array(), array('foo' => 'bar')));
+        (new Translator($container, new MessageFormatter(), 'en', array(), array('foo' => 'bar')));
     }
 
     /** @dataProvider getDebugModeAndCacheDirCombinations */
@@ -468,7 +468,7 @@ class TranslatorTest extends TestCase
         if (null === $defaultLocale) {
             return new $translatorClass(
                 $this->getContainer($loader),
-                new MessageSelector(),
+                new MessageFormatter(),
                 array($loaderFomat => array($loaderFomat)),
                 $options
             );
@@ -476,7 +476,7 @@ class TranslatorTest extends TestCase
 
         return new $translatorClass(
             $this->getContainer($loader),
-            new MessageSelector(),
+            new MessageFormatter(),
             $defaultLocale,
             array($loaderFomat => array($loaderFomat)),
             $options

@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,14 +14,17 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * Uscita - entità
  *
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UscitaRepository")
- * @ORM\Table(name="gs_uscita")
+ * @ORM\Table(name="gs_uscita", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
  * @ORM\HasLifecycleCallbacks
+ *
+ * @UniqueEntity(fields={"data","alunno"}, message="field.unique")
  */
 class Uscita {
 
@@ -268,7 +271,7 @@ class Uscita {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return $this->data->format('d/m/Y').' '.$this->ora->format('H:i').', '.$this->alunno;
+    return $this->data->format('d/m/Y').' '.$this->ora->format('H:i').' - '.$this->alunno;
   }
 
 }

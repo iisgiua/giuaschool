@@ -13,9 +13,9 @@ namespace Symfony\Component\Console\Tests\Helper;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableStyle;
-use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableSeparator;
+use Symfony\Component\Console\Helper\TableStyle;
 use Symfony\Component\Console\Output\StreamOutput;
 
 class TableTest extends TestCase
@@ -724,6 +724,22 @@ TABLE;
 TABLE;
 
         $this->assertEquals($expected, $this->getOutputContent($output));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Console\Exception\InvalidArgumentException
+     * @expectedExceptionMessage A cell must be a TableCell, a scalar or an object implementing __toString, array given.
+     */
+    public function testThrowsWhenTheCellInAnArray()
+    {
+        $table = new Table($output = $this->getOutputStream());
+        $table
+            ->setHeaders(array('ISBN', 'Title', 'Author', 'Price'))
+            ->setRows(array(
+                array('99921-58-10-7', array(), 'Dante Alighieri', '9.95'),
+            ));
+
+        $table->render();
     }
 
     public function testColumnWith()

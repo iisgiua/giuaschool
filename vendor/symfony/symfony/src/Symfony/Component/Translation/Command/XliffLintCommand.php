@@ -12,6 +12,7 @@
 namespace Symfony\Component\Translation\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -26,6 +27,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class XliffLintCommand extends Command
 {
+    protected static $defaultName = 'lint:xliff';
+
     private $format;
     private $displayCorrectFiles;
     private $directoryIteratorProvider;
@@ -45,7 +48,6 @@ class XliffLintCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('lint:xliff')
             ->setDescription('Lints a XLIFF file and outputs encountered errors')
             ->addArgument('filename', null, 'A file or a directory or STDIN')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'The output format', 'txt')
@@ -80,14 +82,14 @@ EOF
 
         if (!$filename) {
             if (!$stdin = $this->getStdin()) {
-                throw new \RuntimeException('Please provide a filename or pipe file content to STDIN.');
+                throw new RuntimeException('Please provide a filename or pipe file content to STDIN.');
             }
 
             return $this->display($io, array($this->validate($stdin)));
         }
 
         if (!$this->isReadable($filename)) {
-            throw new \RuntimeException(sprintf('File or directory "%s" is not readable.', $filename));
+            throw new RuntimeException(sprintf('File or directory "%s" is not readable.', $filename));
         }
 
         $filesInfo = array();
@@ -135,13 +137,13 @@ EOF
             case 'json':
                 return $this->displayJson($io, $files);
             default:
-                throw new \InvalidArgumentException(sprintf('The format "%s" is not supported.', $this->format));
+                throw new InvalidArgumentException(sprintf('The format "%s" is not supported.', $this->format));
         }
     }
 
     private function displayTxt(SymfonyStyle $io, array $filesInfo)
     {
-        $countFiles = count($filesInfo);
+        $countFiles = \count($filesInfo);
         $erroredFiles = 0;
 
         foreach ($filesInfo as $info) {
@@ -191,7 +193,7 @@ EOF
         }
 
         foreach ($this->getDirectoryIterator($fileOrDirectory) as $file) {
-            if (!in_array($file->getExtension(), array('xlf', 'xliff'))) {
+            if (!\in_array($file->getExtension(), array('xlf', 'xliff'))) {
                 continue;
             }
 
@@ -223,7 +225,7 @@ EOF
         };
 
         if (null !== $this->directoryIteratorProvider) {
-            return call_user_func($this->directoryIteratorProvider, $directory, $default);
+            return \call_user_func($this->directoryIteratorProvider, $directory, $default);
         }
 
         return $default($directory);
@@ -236,7 +238,7 @@ EOF
         };
 
         if (null !== $this->isReadableProvider) {
-            return call_user_func($this->isReadableProvider, $fileOrDirectory, $default);
+            return \call_user_func($this->isReadableProvider, $fileOrDirectory, $default);
         }
 
         return $default($fileOrDirectory);

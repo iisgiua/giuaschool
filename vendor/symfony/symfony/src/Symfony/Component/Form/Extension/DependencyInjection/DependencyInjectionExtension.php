@@ -12,9 +12,9 @@
 namespace Symfony\Component\Form\Extension\DependencyInjection;
 
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\FormExtensionInterface;
 use Symfony\Component\Form\FormTypeGuesserChain;
-use Symfony\Component\Form\Exception\InvalidArgumentException;
 
 class DependencyInjectionExtension implements FormExtensionInterface
 {
@@ -29,8 +29,6 @@ class DependencyInjectionExtension implements FormExtensionInterface
     private $guesserServiceIds;
 
     /**
-     * Constructor.
-     *
      * @param ContainerInterface $typeContainer
      * @param iterable[]         $typeExtensionServices
      * @param iterable           $guesserServices

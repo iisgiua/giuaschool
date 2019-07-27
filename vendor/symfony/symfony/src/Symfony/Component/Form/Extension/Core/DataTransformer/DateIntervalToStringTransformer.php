@@ -23,20 +23,17 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 class DateIntervalToStringTransformer implements DataTransformerInterface
 {
     private $format;
-    private $parseSigned;
 
     /**
      * Transforms a \DateInterval instance to a string.
      *
      * @see \DateInterval::format() for supported formats
      *
-     * @param string $format      The date format
-     * @param bool   $parseSigned Whether to parse as a signed interval
+     * @param string $format The date format
      */
-    public function __construct($format = 'P%yY%mM%dDT%hH%iM%sS', $parseSigned = false)
+    public function __construct($format = 'P%yY%mM%dDT%hH%iM%sS')
     {
         $this->format = $format;
-        $this->parseSigned = $parseSigned;
     }
 
     /**
@@ -46,7 +43,7 @@ class DateIntervalToStringTransformer implements DataTransformerInterface
      *
      * @return string An ISO 8601 or relative date string like date interval presentation
      *
-     * @throws UnexpectedTypeException If the given value is not a \DateInterval instance.
+     * @throws UnexpectedTypeException if the given value is not a \DateInterval instance
      */
     public function transform($value)
     {
@@ -67,15 +64,15 @@ class DateIntervalToStringTransformer implements DataTransformerInterface
      *
      * @return \DateInterval An instance of \DateInterval
      *
-     * @throws UnexpectedTypeException       If the given value is not a string.
-     * @throws TransformationFailedException If the date interval could not be parsed.
+     * @throws UnexpectedTypeException       if the given value is not a string
+     * @throws TransformationFailedException if the date interval could not be parsed
      */
     public function reverseTransform($value)
     {
         if (null === $value) {
             return;
         }
-        if (!is_string($value)) {
+        if (!\is_string($value)) {
             throw new UnexpectedTypeException($value, 'string');
         }
         if ('' === $value) {

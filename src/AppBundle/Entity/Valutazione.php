@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -72,8 +72,6 @@ class Valutazione {
    * @var float $voto Voto numerico della valutazione [0|null=non presente, 1, 1.25, 1.50, 1.75, 2, ...]
    *
    * @ORM\Column(type="float", precision=4, scale=2, nullable=true)
-   *
-   * @Assert\Range(min=0,max=10,minMessage="field.choice",maxMessage="field.choice",invalidMessage="field.choice")
    */
   private $voto;
 
@@ -116,8 +114,6 @@ class Valutazione {
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
    * @ORM\JoinColumn(nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
   private $lezione;
 
@@ -238,6 +234,24 @@ class Valutazione {
   public function setVoto($voto) {
     $this->voto = $voto;
     return $this;
+  }
+
+  /**
+   * Restituisce il voto visualizzato come testo (es. 6-, 7+, 4½)
+   *
+   * @return string Voto come stringa di testo
+   */
+  public function getVotoVisualizzabile() {
+    if ($this->voto > 0) {
+      // voto presente
+      $voto_int = intval($this->voto + 0.25);
+      $voto_dec = $this->voto - intval($this->voto);
+      $voto_str = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
+    } else {
+      // voto non presente
+      $voto_str = '--';
+    }
+    return $voto_str;
   }
 
   /**

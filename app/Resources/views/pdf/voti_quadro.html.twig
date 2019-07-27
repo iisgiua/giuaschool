@@ -2,9 +2,12 @@
   <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
   <strong><i></i></strong><br>
+  <span style="font-size:11pt">Via <br>
+  TEL. 000<br>
+  Email: 000@istruzione.it &nbsp;&nbsp;&nbsp;&nbsp; Sito: www.nome.edu.it</span>
 </p>
 <p style="text-align:center; font-size:13pt">
-  <strong>Anno Scolastico 2017/2018</strong><br>
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico')[4:] }}</strong><br>
   <strong>Valutazioni della classe {{ classe.anno }}ª {{ classe.sezione }}</strong><br>
   <strong>{{ info.materia }} - {{ info.periodo.nome }}</strong>
 </p>
@@ -26,7 +29,7 @@
   <tr nobr="true">
     <td style="font-size:9pt">{{ e.data|date('d/m/Y') }}</td>
     <td style="font-size:9pt">{{ e.argomento }}</td>
-    <td style="text-align:center"><strong>{{ e.voto_str }}</strong></td>
+    <td style="text-align:center"><strong>{{ e.voto_str is defined ? e.voto_str }}</strong></td>
     <td style="font-size:9pt">{{ e.giudizio }}</td>
   </tr>
       {% endfor %}

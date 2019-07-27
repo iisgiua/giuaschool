@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -21,6 +21,7 @@ use AppBundle\Entity\Genitore;
 use AppBundle\Entity\Alunno;
 use AppBundle\Entity\Classe;
 use AppBundle\Entity\Docente;
+use AppBundle\Entity\Ata;
 
 
 /**
@@ -83,9 +84,12 @@ class NotificheUtil {
     $ora = new \DateTime('now');
     if ($utente instanceof Genitore) {
       // notifiche per i genitori
-      //-- $dati['annotazioni'] = null;
       $dati['colloqui'] = null;
       $dati['avvisi'] = 0;
+      $dati['circolari'] = 0;
+      $dati['verifiche']['oggi'] = 0;
+      $dati['verifiche']['prossime'] = 0;
+      $dati['compiti']['domani'] = 0;
       $alunno = $this->em->getRepository('AppBundle:Alunno')->createQueryBuilder('a')
         ->join('a.classe', 'c')
         ->join('AppBundle:Genitore', 'g', 'WHERE', 'a.id=g.alunno')
@@ -96,13 +100,25 @@ class NotificheUtil {
       if ($alunno) {
         // legge colloqui
         $dati['colloqui'] = $this->colloquiGenitore($oggi, $ora, $alunno);
-        //-- // legge le annotazioni
-        //-- $dati['annotazioni'] = $this->annotazioniGenitore($oggi, $alunno->getClasse());
         // legge avvisi
         $dati['avvisi'] = $this->numeroAvvisiGenitori($utente, $alunno);
+        // legge circolari
+        $dati['circolari'] = $this->em->getRepository('AppBundle:Circolare')->numeroCircolariUtente($utente);
         // legge verifiche
         $dati['verifiche'] = $this->numeroVerificheGenitori($alunno);
+        // legge compiti
+        $dati['compiti'] = $this->numeroCompitiGenitori($alunno);
       }
+    } elseif ($utente instanceof Alunno) {
+      // notifiche per gli alunni
+      // legge avvisi
+      $dati['avvisi'] = $this->numeroAvvisiGenitoriAlunni($utente);
+      // legge circolari
+      $dati['circolari'] = $this->em->getRepository('AppBundle:Circolare')->numeroCircolariUtente($utente);
+      // legge verifiche
+      $dati['verifiche'] = $this->numeroVerificheGenitori($utente);
+      // legge compiti
+      $dati['compiti'] = $this->numeroCompitiGenitori($utente);
     } elseif ($utente instanceof Docente) {
       // notifiche per i docenti
       $richieste = $this->em->getRepository('AppBundle:RichiestaColloquio')->colloquiDocente($utente, ['R']);
@@ -110,8 +126,13 @@ class NotificheUtil {
       $dati['colloqui'] = $this->colloquiDocente($oggi, $ora, $utente);
       // legge avvisi
       $dati['avvisi'] = $this->numeroAvvisi($utente);
+      // legge circolari
+      $dati['circolari'] = $this->em->getRepository('AppBundle:Circolare')->numeroCircolariUtente($utente);
       // legge verifiche
       $dati['verifiche'] = $this->numeroVerifiche($utente);
+    } elseif ($utente instanceof Ata) {
+      // notifiche per gli ata
+      $dati['circolari'] = $this->em->getRepository('AppBundle:Circolare')->numeroCircolariUtente($utente);
     }
     return $dati;
   }
@@ -267,7 +288,7 @@ class NotificheUtil {
       ->leftJoin('avi.genitore', 'g')
       ->leftJoin('avi.alunno', 'al')
       ->where('(a.destinatariGenitori=:destinatario AND a.modificato>=:ultimo_accesso AND cl.id IS NOT NULL AND cl.id=:classe) OR '.
-              '(a.destinatariIndividuali=:destinatario AND g.id=:genitore AND al.id=:alunno AND avi.letto IS NULL)')
+              '(a.destinatariGenitori=:destinatario AND a.destinatariIndividuali=:destinatario AND g.id=:genitore AND al.id=:alunno AND avi.letto IS NULL)')
       ->setParameters(['destinatario' => 1, 'ultimo_accesso' => $ultimo_accesso->format('Y-m-d H:i:s'),
         'classe' => $alunno->getClasse(), 'genitore' => $genitore, 'alunno' => $alunno])
       ->getQuery()
@@ -287,11 +308,24 @@ class NotificheUtil {
     // conta verifiche di oggi
     $ora = new \DateTime();
     $dati['oggi'] = 0;
-    if ($ora->format('H:i') < $this->session->get('/CONFIG/SCUOLA/lezioni_fine', '23:59')) {
+    if ($ora->format('w') != 0 &&
+        $ora->format('H:i') < $this->em->getRepository('AppBundle:ScansioneOraria')->fineLezioniDocente($ora, $docente)) {
+      // verifiche per giorno di lezione
       $dati['oggi'] = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
         ->select('COUNT(DISTINCT a)')
         ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:oggi')
         ->setParameters(['tipo' => 'V', 'docente' => $docente, 'oggi' => $ora->format('Y-m-d')])
+        ->getQuery()
+        ->getSingleScalarResult();
+      $dati['oggi'] += $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
+        ->select('COUNT(DISTINCT a)')
+        ->join('a.cattedra', 'c')
+        ->join('AppBundle:Cattedra', 'c2', 'WHERE', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
+        ->leftJoin('AppBundle:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+        ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
+        ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
+        ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $ora->format('Y-m-d'), 'attiva' => 1,
+          'no_destinatario' => 0])
         ->getQuery()
         ->getSingleScalarResult();
     }
@@ -299,12 +333,23 @@ class NotificheUtil {
     $inizio = clone $ora;
     $inizio->modify('+1 day');
     $fine = clone $inizio;
-    $fine->modify('+1 days');
+    $fine->modify('+2 days');
     $dati['prossime'] = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
       ->select('COUNT(DISTINCT a)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data BETWEEN :inizio AND :fine')
       ->setParameters(['tipo' => 'V', 'docente' => $docente, 'inizio' => $inizio->format('Y-m-d'),
         'fine' => $fine->format('Y-m-d')])
+      ->getQuery()
+      ->getSingleScalarResult();
+    $dati['prossime'] += $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
+      ->select('COUNT(DISTINCT a)')
+      ->join('a.cattedra', 'c')
+      ->join('AppBundle:Cattedra', 'c2', 'WHERE', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
+      ->leftJoin('AppBundle:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND c2.attiva=:attiva')
+      ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
+      ->setParameters(['docente' => $docente, 'tipo' => 'V', 'inizio' => $inizio->format('Y-m-d'),
+        'fine' => $fine->format('Y-m-d'), 'attiva' => 1, 'no_destinatario' => 0])
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -314,7 +359,6 @@ class NotificheUtil {
   /**
    * Controlla la presenza di verifiche previste per l'alunno
    *
-   * @param Genitore $genitore Genitore a cui sono indirizzati gli avvisi
    * @param Alunno $alunno Alunno del genitore a cui sono indirizzati gli avvisi
    *
    * @return int Numero di veriche previste
@@ -323,7 +367,9 @@ class NotificheUtil {
     // conta verifiche di oggi
     $ora = new \DateTime();
     $dati['oggi'] = 0;
-    if ($ora->format('H:i') < $this->session->get('/CONFIG/SCUOLA/lezioni_fine', '23:59')) {
+    if ($alunno->getClasse() && $ora->format('w') != 0 &&
+        $ora->format('H:i') < $this->em->getRepository('AppBundle:ScansioneOraria')->fineLezioni($ora, $alunno->getClasse()->getSede())) {
+      // verifiche per giorno di lezione
       $dati['oggi'] = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
         ->select('COUNT(DISTINCT a)')
         ->join('a.cattedra', 'c')
@@ -340,7 +386,7 @@ class NotificheUtil {
     $inizio = clone $ora;
     $inizio->modify('+1 day');
     $fine = clone $inizio;
-    $fine->modify('+1 days');
+    $fine->modify('+2 days');
     $dati['prossime'] = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
       ->select('COUNT(DISTINCT a)')
       ->join('a.cattedra', 'c')
@@ -349,6 +395,56 @@ class NotificheUtil {
       ->where('a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND c.classe=:classe')
       ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
       ->setParameters(['tipo' => 'V', 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
+        'classe' => $alunno->getClasse(), 'no_destinatario' => 0, 'alunno' => $alunno])
+      ->getQuery()
+      ->getSingleScalarResult();
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Controlla la presenza di nuovi avvisi destinati all'alunno indicato
+   *
+   * @param Alunno $alunno Alunno a cui sono indirizzati gli avvisi
+   *
+   * @return int Numero di avvisi da leggere
+   */
+  public function numeroAvvisiGenitoriAlunni(Alunno $alunno) {
+    $ultimo_accesso = \DateTime::createFromFormat('d/m/Y H:i:s',
+      ($this->session->get('/APP/UTENTE/ultimo_accesso') ? $this->session->get('/APP/UTENTE/ultimo_accesso') : '01/01/2018 00:00:00'));
+    // lista nuovi avvisi (successivi ultimo accesso o non letti)
+    $avvisi = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
+      ->select('COUNT(DISTINCT a)')
+      ->join('AppBundle:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('avc.classe', 'cl')
+      ->where('a.destinatariAlunni=:destinatario AND a.modificato>=:ultimo_accesso AND cl.id=:classe')
+      ->setParameters(['destinatario' => 1, 'ultimo_accesso' => $ultimo_accesso->format('Y-m-d H:i:s'),
+        'classe' => $alunno->getClasse()])
+      ->getQuery()
+      ->getSingleScalarResult();
+    // restituisce numero avvisi
+    return $avvisi;
+  }
+
+  /**
+   * Controlla la presenza di compiti assegati all'alunno
+   *
+   * @param Alunno $alunno Alunno del genitore a cui sono indirizzati gli avvisi
+   *
+   * @return int Numero di compiti assegnati
+   */
+  public function numeroCompitiGenitori(Alunno $alunno) {
+    // conta compiti di domani
+    $domani = new \DateTime('tomorrow');
+    // verifiche per il giorno dopo
+    $dati['domani'] = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
+      ->select('COUNT(DISTINCT a)')
+      ->join('a.cattedra', 'c')
+      ->leftJoin('AppBundle:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->leftJoin('avi.alunno', 'al')
+      ->where('a.tipo=:tipo AND a.data=:oggi AND c.classe=:classe')
+      ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
+      ->setParameters(['tipo' => 'P', 'oggi' => $domani->format('Y-m-d'),
         'classe' => $alunno->getClasse(), 'no_destinatario' => 0, 'alunno' => $alunno])
       ->getQuery()
       ->getSingleScalarResult();

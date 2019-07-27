@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\Security\Http;
 
-use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 
 /**
  * AccessMap allows configuration of different access control rules for
@@ -25,8 +25,6 @@ class AccessMap implements AccessMapInterface
     private $map = array();
 
     /**
-     * Constructor.
-     *
      * @param RequestMatcherInterface $requestMatcher A RequestMatcherInterface instance
      * @param array                   $attributes     An array of attributes to pass to the access decision manager (like roles)
      * @param string|null             $channel        The channel to enforce (http, https, or null)

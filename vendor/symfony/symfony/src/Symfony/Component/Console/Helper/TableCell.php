@@ -18,14 +18,7 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
  */
 class TableCell
 {
-    /**
-     * @var string
-     */
     private $value;
-
-    /**
-     * @var array
-     */
     private $options = array(
         'rowspan' => 1,
         'colspan' => 1,
@@ -37,7 +30,7 @@ class TableCell
      */
     public function __construct($value = '', array $options = array())
     {
-        if (is_numeric($value) && !is_string($value)) {
+        if (is_numeric($value) && !\is_string($value)) {
             $value = (string) $value;
         }
 

@@ -413,8 +413,8 @@ UPGRADE FROM 2.x to 3.0
    $form = $this->createForm(MyType::class);
    ```
 
- * Passing custom data to forms now needs to be done 
-   through the options resolver. 
+ * Passing custom data to forms now needs to be done
+   through the options resolver.
 
     In the controller:
 
@@ -425,7 +425,7 @@ UPGRADE FROM 2.x to 3.0
         'method' => 'PUT',
     ));
     ```
-    After: 
+    After:
     ```php
     $form = $this->createForm(MyType::class, $entity, array(
         'action' => $this->generateUrl('action_route'),
@@ -434,13 +434,13 @@ UPGRADE FROM 2.x to 3.0
     ));
     ```
     In the form type:
-    
+
     Before:
     ```php
     class MyType extends AbstractType
     {
         private $value;
-    
+
         public function __construct($variableValue)
         {
             $this->value = $value;
@@ -448,7 +448,7 @@ UPGRADE FROM 2.x to 3.0
         // ...
     }
     ```
-    
+
     After:
     ```php
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -456,7 +456,7 @@ UPGRADE FROM 2.x to 3.0
         $value = $options['custom_value'];
         // ...
     }
-    
+
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
@@ -464,7 +464,7 @@ UPGRADE FROM 2.x to 3.0
         ));
     }
     ```
- 
+
  * The alias option of the `form.type_extension` tag was removed in favor of
    the `extended_type`/`extended-type` option.
 
@@ -594,6 +594,24 @@ UPGRADE FROM 2.x to 3.0
           // ...
       }
    }
+   ```
+   
+   If the form is submitted with a different request method than `POST`, you need to configure this in the form:
+
+   Before:
+
+   ```php
+   $form = $this->createForm(FormType::class, $entity);
+   $form->submit($request);
+   ```
+
+   After:
+
+   ```php
+   $form = $this->createForm(FormType::class, $entity, [
+       'method' => 'PUT',
+   ]);
+   $form->handleRequest($request);
    ```
 
  * The events `PRE_BIND`, `BIND` and `POST_BIND` were renamed to `PRE_SUBMIT`, `SUBMIT`

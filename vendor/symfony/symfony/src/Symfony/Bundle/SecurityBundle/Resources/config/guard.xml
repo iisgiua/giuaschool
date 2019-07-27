@@ -9,11 +9,16 @@
 
         <service id="security.authentication.guard_handler"
                  class="Symfony\Component\Security\Guard\GuardAuthenticatorHandler"
-                 public="true"
             >
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="event_dispatcher" on-invalid="null" />
+            <argument /> <!-- stateless firewall keys -->
+            <call method="setSessionAuthenticationStrategy">
+                <argument type="service" id="security.authentication.session_strategy" />
+            </call>
         </service>
+        
+        <service id="Symfony\Component\Security\Guard\GuardAuthenticatorHandler" alias="security.authentication.guard_handler" />
 
         <!-- See GuardAuthenticationFactory -->
         <service id="security.authentication.provider.guard"

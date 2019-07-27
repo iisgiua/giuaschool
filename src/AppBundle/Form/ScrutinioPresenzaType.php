@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -40,6 +40,11 @@ class ScrutinioPresenzaType extends AbstractType {
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline gs-pt-0 gs-mr-5'],
+        'required' => true))
+      ->add('sessoSostituto', ChoiceType::class, array('label' => false,
+        'choices' => ['label.prof_M' => 'M', 'label.prof_F' => 'F'],
+        'expanded' => false,
+        'multiple' => false,
         'required' => true))
       ->add('sostituto', TextType::class, array(
         'label' => 'label.scrutinio_sostituto',

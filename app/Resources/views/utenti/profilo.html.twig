@@ -1,24 +1,32 @@
-{% extends 'base.html.twig' %}
+{% extends 'utenti/index.html.twig' %}
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <nav>
-    <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation"{{ app.request.attributes.get('action') == 'email' ? ' class="active"' }}><a href="#tab_email" aria-controls="tab_email" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-envelope gs-mr-2" aria-hidden="true"></span>{{ 'title.modifica_email'|trans }}</a></li>
-      {% if is_granted('ROLE_GENITORE') %}
-      <li role="presentation"{{ app.request.attributes.get('action') == 'password' ? ' class="active"' }}><a href="#tab_password" aria-controls="tab_password" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-lock gs-mr-2" aria-hidden="true"></span>{{ 'title.modifica_password'|trans }}</a></li>
-      {% endif %}
-    </ul>
-    <div class="tab-content">
-      <div role="tabpanel" class="tab-pane fade{{ app.request.attributes.get('action') == 'email' ? ' in active' }}" id="tab_email">
-        {% include 'include/form.html.twig' with {'form': form1, 'form_title': form1_title, 'form_help': form1_help, 'form_success': form1_success} %}
-      </div>
-      {% if is_granted('ROLE_GENITORE') %}
-      <div role="tabpanel" class="tab-pane fade{{ app.request.attributes.get('action') == 'password' ? ' in active' }}" id="tab_password">
-        {% include 'include/form.html.twig' with {'form': form2, 'form_title': form2_title, 'form_help': form2_help, 'form_success': form2_success} %}
-      </div>
-      {% endif %}
+  <div class="panel panel-success gs-mt-5" >
+    <div class="panel-heading">
+      <div class="panel-title"><strong class="gs-big">{{ 'title.utenti_profilo'|trans }}</strong></div>
     </div>
-  </nav>
+    <div class="panel-body" >
+      <dl class="dl-horizontal gs-big">
+        <dt class="text-success">Utente:</dt>
+        <dd>{{ app.user.nome }} {{ app.user.cognome }}</dd>
+        <dt class="text-success">Ruolo:</dt>
+        <dd><strong>{{ ('label.'~app.user.roles[0])|trans }}</strong>
+        </dd>
+  {% if is_granted('ROLE_ATA') %}
+        <dt class="text-success">Mansioni:</dt>
+        <dd>{{ ('label.ata_tipo_'~app.user.tipo)|trans }}</dd>
+        <dt class="text-success">Segreteria:</dt>
+        <dd>{{ app.user.segreteria ? 'ABILITATO' : 'NON ABILITATO' }}</dd>
+  {% endif %}
+        <dt class="text-success">Email:</dt>
+        <dd>{{ app.user.email[-6:] == '.local' ? 'NON PRESENTE' : app.user.email }}</dd>
+  {% if is_granted('ROLE_DOCENTE') %}
+        <dt class="text-success">OTP:</dt>
+        <dd>{{ app.user.otp ? 'ABILITATO' : 'NON ABILITATO' }}</dd>
+  {% endif %}
+      </dl>
+    </div>
+  </div>
 </div>
 {% endblock %}

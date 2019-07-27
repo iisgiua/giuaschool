@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,8 +14,7 @@ namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -51,8 +50,8 @@ class OsservazioniController extends Controller {
    *
    * @Route("/lezioni/osservazioni/{cattedra}/{classe}/{data}", name="lezioni_osservazioni",
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -67,6 +66,8 @@ class OsservazioniController extends Controller {
     $info['sostegno'] = false;
     $dati = null;
     $template = 'lezioni/osservazioni.html.twig';
+    $data_succ = null;
+    $data_prec = null;
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
@@ -128,6 +129,11 @@ class OsservazioniController extends Controller {
       } else {
         $dati = $reg->osservazioni($data_obj, $this->getUser(), $cattedra);
       }
+      // data prec/succ
+      $data_succ = (clone $data_obj);
+      $data_succ = $em->getRepository('AppBundle:Festivita')->giornoSuccessivo($data_succ);
+      $data_prec = (clone $data_obj);
+      $data_prec = $em->getRepository('AppBundle:Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -145,6 +151,8 @@ class OsservazioniController extends Controller {
       'cattedra' => $cattedra,
       'classe' => $classe,
       'data' => $data_obj->format('Y-m-d'),
+      'data_succ' => $data_succ,
+      'data_prec' => $data_prec,
       'settimana' => $settimana,
       'mesi' => $mesi,
       'errore' => $errore,
@@ -169,8 +177,8 @@ class OsservazioniController extends Controller {
    *
    * @Route("/lezioni/osservazioni/edit/{cattedra}/{data}/{id}", name="lezioni_osservazioni_edit",
    *    requirements={"cattedra": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
-   *    defaults={"id": 0})
-   * @Method({"GET","POST"})
+   *    defaults={"id": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -212,7 +220,9 @@ class OsservazioniController extends Controller {
         ->setCattedra($cattedra);
       if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
         // cattedra di sostegno
-        $osservazione->setAlunno($cattedra->getAlunno());
+        if ($cattedra->getAlunno()) {
+          $osservazione->setAlunno($cattedra->getAlunno());
+        }
       }
     }
     // controlla permessi
@@ -302,8 +312,8 @@ class OsservazioniController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/osservazioni/delete/{id}", name="lezioni_osservazioni_delete",
-   *    requirements={"id": "\d+"})
-   * @Method({"GET"})
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -353,8 +363,8 @@ class OsservazioniController extends Controller {
    *
    * @Route("/lezioni/osservazioni/personali/{cattedra}/{classe}/{data}", name="lezioni_osservazioni_personali",
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
-   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -420,6 +430,11 @@ class OsservazioniController extends Controller {
       $cattedra = null;
     }
     if ($cattedra) {
+      // data prec/succ
+      $data_succ = (clone $data_obj);
+      $data_succ = $em->getRepository('AppBundle:Festivita')->giornoSuccessivo($data_succ);
+      $data_prec = (clone $data_obj);
+      $data_prec = $em->getRepository('AppBundle:Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -438,6 +453,8 @@ class OsservazioniController extends Controller {
       'cattedra' => $cattedra,
       'classe' => $classe,
       'data' => $data_obj->format('Y-m-d'),
+      'data_succ' => $data_succ,
+      'data_prec' => $data_prec,
       'settimana' => $settimana,
       'mesi' => $mesi,
       'errore' => $errore,
@@ -462,8 +479,8 @@ class OsservazioniController extends Controller {
    *
    * @Route("/lezioni/osservazioni/personali/edit/{cattedra}/{data}/{id}", name="lezioni_osservazioni_personali_edit",
    *    requirements={"cattedra": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "id": "\d+"},
-   *    defaults={"id": 0})
-   * @Method({"GET","POST"})
+   *    defaults={"id": 0},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -569,8 +586,8 @@ class OsservazioniController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/osservazioni/personali/delete/{id}", name="lezioni_osservazioni_personali_delete",
-   *    requirements={"id": "\d+"})
-   * @Method({"GET"})
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */

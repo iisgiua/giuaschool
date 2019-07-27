@@ -91,7 +91,7 @@ class RoutingExtension extends AbstractExtension
      *
      * @return array An array with the contexts the URL is safe
      *
-     * To be made @final in 3.4, and the type-hint be changed to "\Twig\Node\Node" in 4.0.
+     * @final since version 3.4, type-hint to be changed to "\Twig\Node\Node" in 4.0
      */
     public function isUrlGenerationSafe(\Twig_Node $argsNode)
     {
@@ -100,7 +100,7 @@ class RoutingExtension extends AbstractExtension
             $argsNode->hasNode(1) ? $argsNode->getNode(1) : null
         );
 
-        if (null === $paramsNode || $paramsNode instanceof ArrayExpression && count($paramsNode) <= 2 &&
+        if (null === $paramsNode || $paramsNode instanceof ArrayExpression && \count($paramsNode) <= 2 &&
             (!$paramsNode->hasNode(1) || $paramsNode->getNode(1) instanceof ConstantExpression)
         ) {
             return array('html');

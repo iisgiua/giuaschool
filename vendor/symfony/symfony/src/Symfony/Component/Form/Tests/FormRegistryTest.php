@@ -20,6 +20,10 @@ use Symfony\Component\Form\Tests\Fixtures\FooSubType;
 use Symfony\Component\Form\Tests\Fixtures\FooType;
 use Symfony\Component\Form\Tests\Fixtures\FooTypeBarExtension;
 use Symfony\Component\Form\Tests\Fixtures\FooTypeBazExtension;
+use Symfony\Component\Form\Tests\Fixtures\FormWithSameParentType;
+use Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeBar;
+use Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeBaz;
+use Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeFoo;
 use Symfony\Component\Form\Tests\Fixtures\TestExtension;
 
 /**
@@ -82,7 +86,7 @@ class FormRegistryTest extends TestCase
             ->with($type)
             ->willReturn($resolvedType);
 
-        $this->assertSame($resolvedType, $this->registry->getType(get_class($type)));
+        $this->assertSame($resolvedType, $this->registry->getType(\get_class($type)));
     }
 
     public function testLoadUnregisteredType()
@@ -130,7 +134,7 @@ class FormRegistryTest extends TestCase
             ->with($type, array($ext1, $ext2))
             ->willReturn($resolvedType);
 
-        $this->assertSame($resolvedType, $this->registry->getType(get_class($type)));
+        $this->assertSame($resolvedType, $this->registry->getType(\get_class($type)));
     }
 
     public function testGetTypeConnectsParent()
@@ -153,7 +157,37 @@ class FormRegistryTest extends TestCase
             ->with($type, array(), $parentResolvedType)
             ->willReturn($resolvedType);
 
-        $this->assertSame($resolvedType, $this->registry->getType(get_class($type)));
+        $this->assertSame($resolvedType, $this->registry->getType(\get_class($type)));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Form\Exception\LogicException
+     * @expectedExceptionMessage Circular reference detected for form type "Symfony\Component\Form\Tests\Fixtures\FormWithSameParentType" (Symfony\Component\Form\Tests\Fixtures\FormWithSameParentType > Symfony\Component\Form\Tests\Fixtures\FormWithSameParentType).
+     */
+    public function testFormCannotHaveItselfAsAParent()
+    {
+        $type = new FormWithSameParentType();
+
+        $this->extension2->addType($type);
+
+        $this->registry->getType(FormWithSameParentType::class);
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Form\Exception\LogicException
+     * @expectedExceptionMessage Circular reference detected for form type "Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeFoo" (Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeFoo > Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeBar > Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeBaz > Symfony\Component\Form\Tests\Fixtures\RecursiveFormTypeFoo).
+     */
+    public function testRecursiveFormDependencies()
+    {
+        $foo = new RecursiveFormTypeFoo();
+        $bar = new RecursiveFormTypeBar();
+        $baz = new RecursiveFormTypeBaz();
+
+        $this->extension2->addType($foo);
+        $this->extension2->addType($bar);
+        $this->extension2->addType($baz);
+
+        $this->registry->getType(RecursiveFormTypeFoo::class);
     }
 
     /**
@@ -176,7 +210,7 @@ class FormRegistryTest extends TestCase
 
         $this->extension2->addType($type);
 
-        $this->assertTrue($this->registry->hasType(get_class($type)));
+        $this->assertTrue($this->registry->hasType(\get_class($type)));
     }
 
     public function testHasTypeIfFQCN()

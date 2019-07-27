@@ -25,9 +25,6 @@ class GlobalVariables
 {
     protected $container;
 
-    /**
-     * @param ContainerInterface $container The DI container
-     */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -52,7 +49,7 @@ class GlobalVariables
         }
 
         $user = $token->getUser();
-        if (!is_object($user)) {
+        if (!\is_object($user)) {
             return;
         }
 

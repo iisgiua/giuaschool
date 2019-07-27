@@ -543,7 +543,7 @@ to host all the specific tags and filters you want to add to Twig.
 .. note::
 
     Before writing your own extensions, have a look at the Twig official
-    extension repository: http://github.com/twigphp/Twig-extensions.
+    extension repository: https://github.com/twigphp/Twig-extensions.
 
 An extension is a class that implements the following interface::
 
@@ -800,7 +800,7 @@ The simplest way to use methods is to define them on the extension itself::
 
         public function rot13($value)
         {
-            return $rot13Provider->rot13($value);
+            return $this->rot13Provider->rot13($value);
         }
     }
 
@@ -849,7 +849,7 @@ It is now possible to move the runtime logic to a new
 
         public function rot13($value)
         {
-            return $rot13Provider->rot13($value);
+            return $this->rot13Provider->rot13($value);
         }
     }
 
@@ -957,6 +957,6 @@ Testing the node visitors can be complex, so extend your test cases from
 ``Twig_Test_NodeTestCase``. Examples can be found in the Twig repository
 `tests/Twig/Node`_ directory.
 
-.. _`rot13`:                   http://www.php.net/manual/en/function.str-rot13.php
+.. _`rot13`:                   https://secure.php.net/manual/en/function.str-rot13.php
 .. _`tests/Twig/Fixtures`:     https://github.com/twigphp/Twig/tree/master/test/Twig/Tests/Fixtures
 .. _`tests/Twig/Node`:         https://github.com/twigphp/Twig/tree/master/test/Twig/Tests/Node

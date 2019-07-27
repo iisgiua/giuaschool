@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -233,7 +233,7 @@ class StaffUtil {
     }
     // legge ritardi
     $entrate = $this->em->getRepository('AppBundle:Entrata')->createQueryBuilder('e')
-      ->select('(e.alunno) AS id,e.data,e.ora,e.giustificato')
+      ->select('(e.alunno) AS id,e.data,e.ora,e.ritardoBreve,e.giustificato,e.valido')
       ->where('e.alunno IN (:lista)')
       ->setParameters(['lista' => $lista_alunni])
       ->getQuery()
@@ -244,33 +244,44 @@ class StaffUtil {
         $dati['statistiche'][$e['id']]['ritardi'] = 0;
         $dati['statistiche'][$e['id']]['brevi'] = 0;
         $dati['statistiche'][$e['id']]['giustifica-rit'] = 0;
+        $dati['statistiche'][$e['id']]['conta-ritardi'] = 0;
       }
       $dati['statistiche'][$e['id']]['ritardi']++;
-      if ($this->regUtil->seRitardoBreve($e['data'], $e['ora'], $classe->getSede())) {
+      if ($e['ritardoBreve']) {
         $dati['statistiche'][$e['id']]['brevi']++;
       }
       if (!$e['giustificato']) {
         $dati['statistiche'][$e['id']]['giustifica-rit']++;
       }
+      if ($e['valido']) {
+        $dati['statistiche'][$e['id']]['conta-ritardi']++;
+      }
     }
     // legge uscite anticipate
     $uscite = $this->em->getRepository('AppBundle:Uscita')->createQueryBuilder('u')
-      ->select('(u.alunno) AS id,COUNT(u.id) AS num')
+      ->select('(u.alunno) AS id,u.data,u.ora,u.valido')
       ->where('u.alunno IN (:lista)')
-      ->groupBy('u.alunno')
       ->setParameters(['lista' => $lista_alunni])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per le uscite
     foreach ($uscite as $u) {
-      $dati['statistiche'][$u['id']]['uscite'] = $u['num'];
+      if (!isset($dati['statistiche'][$u['id']]['uscite'])) {
+        $dati['statistiche'][$u['id']]['uscite'] = 0;
+        $dati['statistiche'][$u['id']]['conta-uscite'] = 0;
+      }
+      $dati['statistiche'][$u['id']]['uscite']++;
+      if ($u['valido']) {
+        $dati['statistiche'][$u['id']]['conta-uscite']++;
+      }
     }
     // ore di assenza (escluso sostegno/supplenza/religione)
     $ore_N = $this->em->getRepository('AppBundle:AssenzaLezione')->createQueryBuilder('al')
       ->select('(al.alunno) AS id,SUM(al.ore) AS ore')
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
-      ->where('al.alunno IN (:lista) AND l.classe=:classe AND m.tipo=:tipo')
+      ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->where('al.alunno IN (:lista) AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
       ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'tipo' => 'N'])
       ->getQuery()
@@ -281,7 +292,8 @@ class StaffUtil {
       ->join('al.lezione', 'l')
       ->join('al.alunno', 'a')
       ->join('l.materia', 'm')
-      ->where('al.alunno IN (:lista) AND l.classe=:classe AND a.religione=:religione AND m.tipo=:tipo')
+      ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->where('al.alunno IN (:lista) AND a.religione=:religione AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
       ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'religione' => 'S', 'tipo' => 'R'])
       ->getQuery()
@@ -461,7 +473,8 @@ class StaffUtil {
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     $alunni = $this->em->getRepository('AppBundle:Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.note,a.religione')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.note,a.religione,g.ultimoAccesso')
+      ->join('AppBundle:Genitore', 'g', 'WHERE', 'g.alunno=a.id')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista_alunni])
@@ -474,6 +487,7 @@ class StaffUtil {
       $dati['alunni'][$a['id']]['bes'] = $a['bes'];
       $dati['alunni'][$a['id']]['note'] = $a['note'];
       $dati['alunni'][$a['id']]['religione'] = $a['religione'];
+      $dati['alunni'][$a['id']]['accesso'] = $a['ultimoAccesso'];
     }
     // restituisce dati come array associativo
     return $dati;
@@ -500,7 +514,12 @@ class StaffUtil {
     }
     // scrutini
     if ($tipo == 'S' || $tipo == 'T') {
-      $dati['scrutini']['P'] = $this->genUtil->pagelle($alunno->getClasse(), $alunno, 'P');
+      // tutti gli scrutini svolti
+      $lista = $this->genUtil->pagelleAlunno($alunno);
+      foreach ($lista as $d) {
+        $dati['scrutini'][$d[1]->getPeriodo()] =
+          $this->genUtil->pagelle($d[1]->getClasse(), $alunno, $d[1]->getPeriodo());
+      }
     }
     // assenze
     if ($tipo == 'A' || $tipo == 'T') {
@@ -578,7 +597,7 @@ class StaffUtil {
   }
 
   /**
-   * Recupera i programmi svolti secomndo i criteri di ricerca indicati
+   * Recupera i programmi svolti secondo i criteri di ricerca indicati
    *
    * @param array $search Criteri di ricerca
    * @param int $pagina Pagina corrente
@@ -637,7 +656,7 @@ class StaffUtil {
   }
 
   /**
-   * Recupera le relazioni finali secomndo i criteri di ricerca indicati
+   * Recupera le relazioni finali secondo i criteri di ricerca indicati
    *
    * @param array $search Criteri di ricerca
    * @param int $pagina Pagina corrente
@@ -693,6 +712,211 @@ class StaffUtil {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Recupera i piani di lavoro secondo i criteri di ricerca indicati
+   *
+   * @param array $search Criteri di ricerca
+   * @param int $pagina Pagina corrente
+   * @param int $limite Numero di elementi per pagina
+   *
+   * @return Array Dati formattati come array associativo
+   */
+  public function piani($search, $pagina, $limite) {
+    // lista cattedre e programmi
+    $param = ['attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S'];
+    $cattedre = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
+      ->join('c.materia', 'm')
+      ->join('c.classe', 'cl')
+      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno');
+    if ($search['docente']) {
+      $cattedre = $cattedre
+        ->andWhere('c.docente=:docente');
+      $param['docente'] = $search['docente'];
+    }
+    if ($search['classe']) {
+      $cattedre = $cattedre
+        ->andWhere('c.classe=:classe');
+      $param['classe'] = $search['classe'];
+    }
+    $cattedre = $cattedre
+      ->groupBy('cl.anno,cl.sezione,m.nomeBreve')
+      ->orderBy('cl.anno,cl.sezione,m.nomeBreve', 'ASC')
+      ->setParameters($param)
+      ->getQuery();
+    // paginazione
+    $paginator = new Paginator($cattedre);
+    $paginator->getQuery()
+      ->setFirstResult($limite * ($pagina - 1))
+      ->setMaxResults($limite);
+    $dati['lista'] = $paginator;
+    // aggiunge info
+    foreach ($paginator as $k=>$c) {
+      // legge docenti
+      $dati['docenti'][$k] = $this->em->getRepository('AppBundle:Docente')->createQueryBuilder('d')
+        ->join('AppBundle:Cattedra', 'c', 'WHERE', 'c.docente=d.id AND c.attiva=:attiva AND c.tipo!=:potenziamento')
+        ->where('d.abilitato=:abilitato AND c.materia=:materia AND c.classe=:classe')
+        ->orderBy('d.cognome,d.nome', 'ASC')
+        ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'abilitato' => 1,
+          'materia' => $c->getMateria(), 'classe' => $c->getClasse()])
+        ->getQuery()
+        ->getArrayResult();
+      // legge documenti
+      $dati['documenti'][$k] = $this->em->getRepository('AppBundle:Documento')->createQueryBuilder('d')
+        ->where('d.tipo=:tipo AND d.materia=:materia AND d.classe=:classe')
+        ->setParameters(['tipo' => 'L', 'materia' => $c->getMateria(), 'classe' => $c->getClasse()])
+        ->getQuery()
+        ->getOneOrNullResult();
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera i documenti del 15 maggio secondo i criteri di ricerca indicati
+   *
+   * @param array $search Criteri di ricerca
+   * @param int $pagina Pagina corrente
+   * @param int $limite Numero di elementi per pagina
+   *
+   * @return Array Dati formattati come array associativo
+   */
+  public function doc15($search, $pagina, $limite) {
+    // lista cattedre e programmi
+    $param = ['quinta' => 5, 'documento' => 'M'];
+    $cattedre = $this->em->getRepository('AppBundle:Classe')->createQueryBuilder('cl')
+      ->addSelect('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,d.id AS documento_id,d.file,d.dimensione')
+      ->join('cl.corso', 'co')
+      ->join('cl.sede', 's')
+      ->leftJoin('AppBundle:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id')
+      ->where('cl.anno=:quinta');
+    if ($search['classe']) {
+      $cattedre = $cattedre
+        ->andWhere('cl.id=:classe');
+      $param['classe'] = $search['classe'];
+    }
+    $cattedre = $cattedre
+      ->orderBy('cl.anno,cl.sezione', 'ASC')
+      ->setParameters($param)
+      ->getQuery();
+    // paginazione
+    $paginator = new Paginator($cattedre);
+    $paginator->getQuery()
+      ->setFirstResult($limite * ($pagina - 1))
+      ->setMaxResults($limite);
+    $dati['lista'] = $paginator;
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera le statistiche sulle presenze secondo i criteri di ricerca indicati
+   *
+   * @param DateTime $data Data per la generazione delle statistiche
+   * @param array $search Criteri di ricerca
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function statisticheAlunni(\DateTime $data, $search) {
+    $dati = [];
+    $param = [];
+    // lista classi
+    $classi = $this->em->getRepository('AppBundle:Classe')->createQueryBuilder('c')
+      ->join('c.corso', 'co')
+      ->join('c.sede', 's');
+    if ($search['sede']) {
+      $classi = $classi
+        ->andWhere('c.sede=:sede');
+      $param['sede'] = $search['sede'];
+    }
+    if ($search['classe']) {
+      $classi = $classi
+        ->andWhere('c.id=:classe');
+      $param['classe'] = $search['classe'];
+    }
+    $classi = $classi
+      ->orderBy('c.anno,c.sezione', 'ASC')
+      ->setParameters($param)
+      ->getQuery()
+      ->getResult();
+    foreach ($classi as $c) {
+      // alunni in classe
+      $lista = $this->regUtil->alunniInData($data, $c);
+      $totale = count($lista);
+      // assenti e presenti
+      $assenti = $this->em->getRepository('AppBundle:Assenza')->createQueryBuilder('a')
+        ->select('COUNT(a.id)')
+        ->where('a.data=:data AND a.alunno IN (:lista)')
+        ->setParameters(['data' => $data->format('Y-m-d'), 'lista' => $lista])
+        ->getQuery()
+        ->getSingleScalarResult();
+      $presenti = $totale - $assenti;
+      // formatta i dati
+      $dati[$c->getId()] = array(
+        'classe' => $c->getAnno().'ª '.$c->getSezione().' - '.$c->getCorso()->getNomeBreve(),
+        'sede' => $c->getSede()->getCitta(),
+        'totale' => $totale,
+        'assenti' => $assenti,
+        'presenti' => $presenti,
+        'percentuale' => number_format($presenti / $totale * 100, 2, ',', ''));
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce le statistiche per la stampa in PDF delle ore di lezione dei docenti
+   *
+   * @param mixed $docente Docente selezionato
+   * @param \DateTime $inizio Data iniziale delle lezioni
+   * @param \DateTime $fine Data finale delle lezioni
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function statisticheStampa($docente, $inizio, $fine) {
+
+    if ($docente instanceOf Docente) {
+      // statistiche di singolo docente
+      $stat = $this->em->getRepository('AppBundle:Docente')->createQueryBuilder('d')
+        ->select('d.cognome,d.nome,SUM(so.durata/60) AS ore')
+        ->join('AppBundle:Firma', 'f', 'WHERE', 'd.id=f.docente')
+        ->join('f.lezione', 'l')
+        ->join('l.classe', 'cl')
+        ->join('AppBundle:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('so.orario', 'o')
+        ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
+        ->andWhere('f.docente=:docente')
+        ->setParameters(['abilitato' => 1, 'inizio' => $inizio->format('Y-m-d'),
+          'fine' => $fine->format('Y-m-d'), 'docente' => $docente])
+        ->groupBy('d.id')
+        ->getQuery()
+        ->getArrayResult();
+    } elseif ($docente == -1) {
+      // statistiche di tutti i docenti
+      $stat = $this->em->getRepository('AppBundle:Docente')->createQueryBuilder('d')
+        ->select('d.cognome,d.nome,SUM(so.durata/60) AS ore')
+        ->join('AppBundle:Firma', 'f', 'WHERE', 'd.id=f.docente')
+        ->join('f.lezione', 'l')
+        ->join('l.classe', 'cl')
+        ->join('AppBundle:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('so.orario', 'o')
+        ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
+        ->orderBy('d.cognome,d.nome', 'ASC')
+        ->setParameters(['abilitato' => 1, 'inizio' => $inizio->format('Y-m-d'),
+          'fine' => $fine->format('Y-m-d')])
+        ->groupBy('d.id')
+        ->getQuery()
+        ->getArrayResult();
+    } else {
+      // query vuota
+      $stat = $this->em->getRepository('AppBundle:Docente')->createQueryBuilder('d')
+        ->where('d.id=:valore')
+        ->setParameters(['valore' => -999])
+        ->getQuery();
+    }
+    // restituisce dati
+    return $stat;
   }
 
 }

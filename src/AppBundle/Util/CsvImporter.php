@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -21,6 +21,7 @@ use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\ValidatorBuilderInterface;
 use AppBundle\Entity\Cattedra;
 use AppBundle\Entity\Docente;
+use AppBundle\Entity\Ata;
 use AppBundle\Entity\Classe;
 use AppBundle\Entity\Materia;
 use AppBundle\Entity\Alunno;
@@ -362,7 +363,7 @@ class CsvImporter {
       // controlli incrociati su sostegno
       if ($materia->getTipo() == 'S') {
         // sostegno
-        $fields['tipo'] = 'S';
+        //-- $fields['tipo'] = 'S';
         if ($alunno && $alunno->getClasse() != $classe) {
           // classe diversa da quella di alunno
           fclose($this->fh);
@@ -834,6 +835,140 @@ class CsvImporter {
     return $imported;
   }
 
+  /**
+   * Importa i dati del personale ATA da file CSV
+   *
+   * @param UploadedFile $file File da importare
+   * @param Form $form Form su cui visualizzare gli errori
+   *
+   * @return array Lista degli ATA importati
+   */
+  public function importaAta(UploadedFile $file, Form $form) {
+    $header = array('cognome', 'nome', 'sesso', 'username', 'password', 'email', 'sede', 'tipo');
+    // controllo file
+    $error = $this->checkFile($file, $header);
+    if ($error) {
+      // errore
+      if ($this->fh) {
+        fclose($this->fh);
+        $this->fh = null;
+      }
+      $form->get('file')->addError(new FormError($this->trans->trans($error)));
+      return null;
+    }
+    // lettura dati
+    $imported = array();
+    $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
+    $count = 0;
+    while (($data = fgetcsv($this->fh)) !== false) {
+      $count++;
+      if (count($data) == 0 || (count($data) == 1 && $data[0] == '')) {
+        // riga vuota, salta
+        continue;
+      }
+      // controllo numero campi
+      if (count($data) != count($header)) {
+        // errore
+        fclose($this->fh);
+        $this->fh = null;
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['%num%' => $count])));
+        return $imported;
+      }
+      // lettura campi
+      $fields = array();
+      $empty_fields = array();
+      foreach ($data as $key=>$val) {
+        $fields[$this->header[$key]] = $val;
+      }
+      // formattazione campi
+      $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['cognome']))));
+      $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['nome']))));
+      $fields['sesso'] = strtoupper(trim($fields['sesso']));
+      $fields['username'] = strtolower(trim($fields['username']));
+      $fields['password'] = trim($fields['password']);
+      $fields['email'] = trim($fields['email']);
+      $fields['sede'] = strtoupper(trim($fields['sede']));
+      $fields['tipo'] = strtoupper(trim($fields['tipo']));
+      // controlla campi obbligatori
+      if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso'])) {
+        // errore
+        fclose($this->fh);
+        $this->fh = null;
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['%num%' => $count])));
+        return $imported;
+      }
+      if (empty($fields['username'])) {
+        // crea username
+        $empty_fields['username'] = true;
+        $username = $fields['nome'].'.'.$fields['cognome'];
+        $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
+        $fields['username'] = preg_replace('/[^a-z\.]+/', '', $username);
+      }
+      if (empty($fields['password'])) {
+        // crea password
+        $empty_fields['password'] = true;
+        $fields['password'] = substr(str_shuffle($pwdchars), 0, 4).substr(str_shuffle($pwdchars), 0, 4);
+      }
+      if (empty($fields['email'])) {
+        // crea finta email
+        $empty_fields['email'] = true;
+        $fields['email'] = $fields['username'].'@noemail.local';
+      }
+      if (empty($fields['sede'])) {
+        // valore null
+        $empty_fields['sede'] = true;
+        $fields['sede'] = null;
+      }
+      if (empty($fields['tipo'])) {
+        // default: amministrativo
+        $empty_fields['tipo'] = true;
+        $fields['sede'] = 'A';
+      }
+      // controlla esistenza
+      $ata = $this->em->getRepository('AppBundle:Ata')->findOneByUsername($fields['username']);
+      if ($ata) {
+        // utente esiste
+        if ($form->get('onlynew')->getData()) {
+          // nessuna modifica
+          $imported['NONE'][$count] = $fields;
+        } else {
+          // modifica utente
+          if (isset($empty_fields['username'])) {
+            // errore: non modifica utente con username generata automaticamente
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError($this->trans->trans('exception.file_duplicated', ['%num%' => $count])));
+            return $imported;
+          }
+          $error = $this->modificaAta($ata, $fields, $empty_fields);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['EDIT'][$count] = $fields;
+        }
+      } else {
+        // crea nuovo
+        $error = $this->nuovoAta($fields);
+        if ($error) {
+          // errore
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError('# '.$count.': '.$error));
+          return $imported;
+        }
+        $imported['NEW'][$count] = $fields;
+      }
+    }
+    // ok
+    fclose($this->fh);
+    $this->fh = null;
+    return $imported;
+  }
+
 
   //==================== METODI PRIVATI ====================
 
@@ -902,8 +1037,7 @@ class CsvImporter {
       ->setNome($fields['nome'])
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso'])
-      ->setCodiceFiscale($fields['codiceFiscale'])
-      ->setRappresentanteIstituto(false);
+      ->setCodiceFiscale($fields['codiceFiscale']);
     $password = $this->encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
     $docente->setPassword($password);
     // valida dati
@@ -1023,9 +1157,6 @@ class CsvImporter {
       ->setIndirizzo($fields['indirizzo'])
       ->setNumeriTelefono($fields['numeriTelefono'])
       ->setBes($fields['bes'])
-      ->setRappresentanteClasse(false)
-      ->setRappresentanteIstituto(false)
-      ->setRappresentanteConsulta(false)
       ->setFrequenzaEstero($fields['frequenzaEstero'])
       ->setReligione($fields['religione'])
       ->setCredito3($fields['credito3'])
@@ -1035,7 +1166,8 @@ class CsvImporter {
     $errors = $this->validator->validate($alunno);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage().
+        ' ['.$fields[$errors[0]->getPropertyPath()].']';
     }
     $this->em->persist($alunno);
     // crea oggetto genitore (con password per abilitarne il login)
@@ -1047,8 +1179,6 @@ class CsvImporter {
       ->setNome($fields['nome'])
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso'])
-      ->setRappresentanteClasse(false)
-      ->setRappresentanteIstituto(false)
       ->setAlunno($alunno);
     $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
@@ -1056,7 +1186,8 @@ class CsvImporter {
     $errors = $this->validator->validate($genitore);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+      return $errors[0]->getPropertyPath().' genitore: '.$errors[0]->getMessage().
+        ' ['.$fields[$errors[0]->getPropertyPath()].']';
     }
     $this->em->persist($genitore);
     // ok, memorizza su db
@@ -1132,13 +1263,15 @@ class CsvImporter {
     $errors = $this->validator->validate($alunno);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage().
+        ' ['.$fields[$errors[0]->getPropertyPath()].']';
     }
     foreach ($genitori as $gen) {
       $errors = $this->validator->validate($gen);
       if (count($errors) > 0) {
         // errore (restituisce solo il primo)
-        return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+        return $errors[0]->getPropertyPath().' genitore: '.$errors[0]->getMessage().
+          ' ['.$fields[$errors[0]->getPropertyPath()].']';
       }
     }
     // ok, memorizza su db
@@ -1202,6 +1335,104 @@ class CsvImporter {
       ->setNote($note);
     // valida dati
     $errors = $this->validator->validate($colloquio);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+    } else {
+      // ok, memorizza su db
+      $this->em->flush();
+      return null;
+    }
+  }
+
+  /**
+   * Crea un nuovo ATA
+   *
+   * @param array $fields Lista dei dati dell'utente
+   *
+   * @return string|null Messaggio di errore o NULL se tutto ok
+   */
+  private function nuovoAta($fields) {
+    // legge sede
+    $sede = $this->em->getRepository('AppBundle:Sede')->findOneByCitta($fields['sede']);
+    if ($fields['sede'] && !$sede) {
+      // errore (restituisce solo il primo)
+      $error = $this->trans->trans('exception.file_ata_sede');
+      return $error;
+    }
+    // crea oggetto
+    $ata = (new Ata())
+      ->setUsername($fields['username'])
+      ->setPasswordNonCifrata($fields['password'])
+      ->setEmail($fields['email'])
+      ->setAbilitato(true)
+      ->setNome($fields['nome'])
+      ->setCognome($fields['cognome'])
+      ->setSesso($fields['sesso'])
+      ->setSede($sede)
+      ->setTipo($fields['tipo']);
+    $password = $this->encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
+    $ata->setPassword($password);
+    // valida dati
+    $errors = $this->validator->validate($ata);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+    } else {
+      // ok, memorizza su db
+      $this->em->persist($ata);
+      $this->em->flush();
+      return null;
+    }
+  }
+
+  /**
+   * Modifica un ATA esistente
+   *
+   * @param Ata $ata Utente da modificare
+   * @param array $fields Lista dei dati dell'utente
+   * @param array $empty_fields Lista dei dati nulli
+   *
+   * @return string|null Messaggio di errore o NULL se tutto ok
+   */
+  private function modificaAta(Ata $ata, &$fields, $empty_fields) {
+    // modifica dati obbligatori
+    $ata
+      ->setNome($fields['nome'])
+      ->setCognome($fields['cognome'])
+      ->setSesso($fields['sesso']);
+    // modifica dati opzionali solo se specificati
+    if (!isset($empty_fields['email'])) {
+      $ata->setEmail($fields['email']);
+    } else {
+      unset($fields['email']);
+    }
+    if (!isset($empty_fields['password'])) {
+      $ata->setPasswordNonCifrata($fields['password']);
+      $password = $this->encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
+      $ata->setPassword($password);
+    } else {
+      unset($fields['password']);
+    }
+    if (!isset($empty_fields['tipo'])) {
+      $ata->setTipo($fields['tipo']);
+    } else {
+      unset($fields['tipo']);
+    }
+    // legge sede
+    $sede = $this->em->getRepository('AppBundle:Sede')->findOneByCitta($fields['sede']);
+    if (!isset($empty_fields['sede']) && !$sede) {
+      // errore (restituisce solo il primo)
+      $error = $this->trans->trans('exception.file_ata_sede');
+      return $error;
+    }
+    if (!isset($empty_fields['sede'])) {
+      $ata->setSede($sede);
+    } else {
+      unset($fields['sede']);
+    }
+    // valida dati
+    $errors = $this->validator->validate($ata);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
       return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();

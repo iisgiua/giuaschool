@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_genitore/menu_lezioni.html.twig' with {'attivo': 'lezioni'} %}
   {% if classe %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_lezioni'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
   {% else %}
@@ -11,8 +10,9 @@
   {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-xs-12">
-      <strong class="gs-big">Data:</strong>
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
   </div>
   <div class="alert alert-warning" role="alert">
@@ -20,9 +20,10 @@
   </div>
   {% else %}
   <div class="row gs-mb-1">
-    <div class="col-xs-12">
-      <strong class="gs-big">Data:</strong>
-      <button class="btn btn-primary" id="gs-button-date" title="Clicca per cambiare data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+    <div class="col-sm-12">
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">
@@ -71,7 +72,7 @@ $(document).ready(function() {
     daysOfWeekDisabled: "0",
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
-    endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
+    endDate: "{{ date()|date('Y-m-d') }}",
     datesDisabled: {{ lista_festivi|raw }},
     todayBtn: "linked",
     todayHighlight: true,

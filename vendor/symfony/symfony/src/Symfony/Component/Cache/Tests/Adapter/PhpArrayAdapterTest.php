@@ -50,6 +50,7 @@ class PhpArrayAdapterTest extends AdapterTestCase
         'testDeleteItemsInvalidKeys' => 'PhpArrayAdapter does not throw exceptions on invalid key.',
 
         'testDefaultLifeTime' => 'PhpArrayAdapter does not allow configuring a default lifetime.',
+        'testPrune' => 'PhpArrayAdapter just proxies',
     );
 
     protected static $file;
@@ -121,7 +122,7 @@ class PhpArrayAdapterWrapper extends PhpArrayAdapter
 {
     public function save(CacheItemInterface $item)
     {
-        call_user_func(\Closure::bind(function () use ($item) {
+        \call_user_func(\Closure::bind(function () use ($item) {
             $this->values[$item->getKey()] = $item->get();
             $this->warmUp($this->values);
             $this->values = eval(substr(file_get_contents($this->file), 6));

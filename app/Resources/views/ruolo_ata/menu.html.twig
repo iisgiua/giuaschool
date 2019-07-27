@@ -1,0 +1,7 @@
+<ul class="nav navbar-nav gs-navbar-nav">
+  <li{{ app.request.attributes.get('_route') == 'home' ? ' class="active"' }}><a href="{{ path('home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
+  {% if app.user.segreteria %}
+  <li{{ app.request.attributes.get('_route')|slice(0,11) == 'segreteria_' ? ' class="active"' }}><a href="{{ path('segreteria_assenze') }}" title="Funzioni per la segreteria"><span class="glyphicon glyphicon-list-alt gs-mr-2" aria-hidden="true"></span>Segreteria</a></li>
+  {% endif %}
+  <li{{ app.request.attributes.get('_route') == 'circolari_ata' ? ' class="active"' }} ><a href="{{ path('circolari_ata') }}" title="Visualizza le circolari indirizzate al personale ATA"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Circolari</a></li>
+</ul>

@@ -13,8 +13,8 @@ namespace Symfony\Bundle\FrameworkBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Console\Helper\DescriptorHelper;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -23,16 +23,38 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * A console command for retrieving information about event dispatcher.
  *
  * @author Matthieu Auger <mail@matthieuauger.com>
+ *
+ * @final since version 3.4
  */
 class EventDispatcherDebugCommand extends ContainerAwareCommand
 {
+    protected static $defaultName = 'debug:event-dispatcher';
+    private $dispatcher;
+
+    /**
+     * @param EventDispatcherInterface $dispatcher
+     */
+    public function __construct($dispatcher = null)
+    {
+        if (!$dispatcher instanceof EventDispatcherInterface) {
+            @trigger_error(sprintf('%s() expects an instance of "%s" as first argument since Symfony 3.4. Not passing it is deprecated and will throw a TypeError in 4.0.', __METHOD__, EventDispatcherInterface::class), E_USER_DEPRECATED);
+
+            parent::__construct($dispatcher);
+
+            return;
+        }
+
+        parent::__construct();
+
+        $this->dispatcher = $dispatcher;
+    }
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this
-            ->setName('debug:event-dispatcher')
             ->setDefinition(array(
                 new InputArgument('event', InputArgument::OPTIONAL, 'An event name'),
                 new InputOption('format', null, InputOption::VALUE_REQUIRED, 'The output format  (txt, xml, json, or md)', 'txt'),
@@ -59,12 +81,16 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // BC to be removed in 4.0
+        if (null === $this->dispatcher) {
+            $this->dispatcher = $this->getEventDispatcher();
+        }
+
         $io = new SymfonyStyle($input, $output);
-        $dispatcher = $this->getEventDispatcher();
 
         $options = array();
         if ($event = $input->getArgument('event')) {
-            if (!$dispatcher->hasListeners($event)) {
+            if (!$this->dispatcher->hasListeners($event)) {
                 $io->getErrorStyle()->warning(sprintf('The event "%s" does not have any registered listeners.', $event));
 
                 return;
@@ -77,11 +103,13 @@ EOF
         $options['format'] = $input->getOption('format');
         $options['raw_text'] = $input->getOption('raw');
         $options['output'] = $io;
-        $helper->describe($io, $dispatcher, $options);
+        $helper->describe($io, $this->dispatcher, $options);
     }
 
     /**
      * Loads the Event Dispatcher from the container.
+     *
+     * BC to removed in 4.0
      *
      * @return EventDispatcherInterface
      */

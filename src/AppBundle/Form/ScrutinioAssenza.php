@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -32,7 +32,7 @@ class ScrutinioAssenza {
   private $sesso;
 
   /**
-   * @var string $scrutinabile Indica se l'alunno è scrutinabile o no [C=cessata frequenza, A=limite assenze, D=deroga]
+   * @var string $scrutinabile Indica se l'alunno è scrutinabile o no [A=limite assenze, D=deroga]
    */
   private $scrutinabile;
 
@@ -87,7 +87,7 @@ class ScrutinioAssenza {
   }
 
   /**
-   * Restituisce se l'alunno è scrutinabile o no [C=no per cessata frequenza, A=no per limite assenze, D=si per deroga]
+   * Restituisce se l'alunno è scrutinabile o no [A=no per limite assenze, D=si per deroga]
    *
    * @return string Indica se l'alunno è scrutinabile o no
    */
@@ -96,7 +96,7 @@ class ScrutinioAssenza {
   }
 
   /**
-   * Modifica se l'alunno è scrutinabile o no [C=no per cessata frequenza, A=no per limite assenze, D=si per deroga]
+   * Modifica se l'alunno è scrutinabile o no [A=no per limite assenze, D=si per deroga]
    *
    * @var string $scrutinabile Indica se l'alunno è scrutinabile o no
    *

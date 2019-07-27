@@ -1,0 +1,53 @@
+{{ form_start(form) }}
+  <div class="modal-header">
+    <h3 class="modal-title gs-h3">{{ dati.sezione }} all'ordine del giorno</h3>
+    <h4 class="modal-title gs-h4"><em>{{ dati.argomento }}</em></h4>
+  </div>
+  <div class="modal-body">
+  {% if classe.anno < 4 or dati.alunni|length == 0 %}
+    <div class="alert alert-info gs-mb-3" role="alert">
+      <strong class="gs-big">L'adeguamento dei crediti non riguarda la classe scrutinata.</strong>
+    </div>
+  {% else %}
+    <table class="table table-bordered table-hover table-striped">
+      <caption class="text-info text-center gs-big"><strong>Adeguamento ai nuovi crediti per gli studenti per i quali non risulta effettuato</strong></caption>
+      <thead class="bg-success">
+        <tr>
+          <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Classe 3ª</small></th>
+    {% if classe.anno == 5 %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Classe 4ª</small></th>
+    {% endif %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Nuovo</small></th>
+        </tr>
+      </thead>
+      <tbody>
+    {% for a,alu in dati.alunni %}
+      <tr>
+        <td class="bg-info gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><strong>{{ alu.cognome }} {{ alu.nome }}</strong> ({{ alu.dataNascita|date('d/m/Y') }})</td>
+        <td class="bg-info gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">{{ alu.credito3 }}</td>
+        {% if classe.anno == 5 %}
+        <td class="bg-info gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">{{ alu.credito4 }}</td>
+        {% endif %}
+        <td class="bg-info gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          <label class="control-label required" for="verbale_credito_{{ a }}">Credito:</label>
+          <input type="text" style="width:4em; display:inline;" class="form-control" id="verbale_credito_{{ a }}" name="verbale[credito][{{ a }}]" required="required" value="{{ dati.nuovicrediti[a][0] }}">
+        </td>
+      </tr>
+      <tr>
+        <td class="bg-info gs-pt-1 gs-pb-1 gs-pl-4 gs-pr-4" colspan="{{ classe.anno == 5  ? 4 : 3 }}">
+          <label style="text-align: center" class="control-label" for="verbale_motivazione_{{ a }}">Indica la situazione dell'alunno come risulta dai documenti in possesso della scuola e motiva l'attribuzione del credito o l'impossibilità di farlo:</label>
+          <textarea id="verbale_motivazione_{{ a }}" name="verbale[motivazione][{{ a }}]" required="required" rows="5" class="form-control">{{ dati.nuovicrediti[a][1] }}</textarea>
+        </td>
+      </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  </div>
+  <div class="modal-footer">
+    {{ form_widget(form.submit) }}
+    <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+  </div>
+  {{ form_widget(form._token) }}
+{{ form_end(form, {'render_rest': false}) }}

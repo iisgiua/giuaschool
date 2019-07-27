@@ -1,29 +1,14 @@
 <?php
 
-/*
- * This file is part of the Doctrine Bundle
- *
- * The code was originally distributed inside the Symfony framework.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- * (c) Doctrine Project, Benjamin Eberlei <kontakt@beberlei.de>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Doctrine\Bundle\DoctrineBundle\Command;
 
 use Doctrine\DBAL\DriverManager;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Database tool allows you to easily drop and create your configured databases.
- *
- * @author Fabien Potencier <fabien@symfony.com>
- * @author Jonathan H. Wage <jonwage@gmail.com>
  */
 class DropDatabaseDoctrineCommand extends DoctrineCommand
 {
@@ -65,7 +50,7 @@ EOT
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $connection = $this->getDoctrineConnection($input->getOption('connection'));
-        $ifExists = $input->getOption('if-exists');
+        $ifExists   = $input->getOption('if-exists');
 
         $params = $connection->getParams();
         if (isset($params['master'])) {
@@ -78,7 +63,7 @@ EOT
             $params = array_merge($params, $params['global']);
             if ($input->getOption('shard')) {
                 foreach ($shards as $shard) {
-                    if ($shard['id'] === (int)$input->getOption('shard')) {
+                    if ($shard['id'] === (int) $input->getOption('shard')) {
                         // Select sharded database
                         $params = $shard;
                         unset($params['id']);
@@ -89,37 +74,12 @@ EOT
         }
 
         $name = isset($params['path']) ? $params['path'] : (isset($params['dbname']) ? $params['dbname'] : false);
-        if (!$name) {
+        if (! $name) {
             throw new \InvalidArgumentException("Connection does not contain a 'path' or 'dbname' parameter and cannot be dropped.");
         }
-        unset($params['dbname']);
+        unset($params['dbname'], $params['url']);
 
-        if ($input->getOption('force')) {
-            // Reopen connection without database name set
-            // as some vendors do not allow dropping the database connected to.
-            $connection->close();
-            $connection = DriverManager::getConnection($params);
-            $shouldDropDatabase = !$ifExists || in_array($name, $connection->getSchemaManager()->listDatabases());
-
-            // Only quote if we don't have a path
-            if (!isset($params['path'])) {
-                $name = $connection->getDatabasePlatform()->quoteSingleIdentifier($name);
-            }
-
-            try {
-                if ($shouldDropDatabase) {
-                    $connection->getSchemaManager()->dropDatabase($name);
-                    $output->writeln(sprintf('<info>Dropped database for connection named <comment>%s</comment></info>', $name));
-                } else {
-                    $output->writeln(sprintf('<info>Database for connection named <comment>%s</comment> doesn\'t exist. Skipped.</info>', $name));
-                }
-            } catch (\Exception $e) {
-                $output->writeln(sprintf('<error>Could not drop database for connection named <comment>%s</comment></error>', $name));
-                $output->writeln(sprintf('<error>%s</error>', $e->getMessage()));
-
-                return self::RETURN_CODE_NOT_DROP;
-            }
-        } else {
+        if (! $input->getOption('force')) {
             $output->writeln('<error>ATTENTION:</error> This operation should not be executed in a production environment.');
             $output->writeln('');
             $output->writeln(sprintf('<info>Would drop the database named <comment>%s</comment>.</info>', $name));
@@ -127,6 +87,31 @@ EOT
             $output->writeln('<error>All data will be lost!</error>');
 
             return self::RETURN_CODE_NO_FORCE;
+        }
+
+        // Reopen connection without database name set
+        // as some vendors do not allow dropping the database connected to.
+        $connection->close();
+        $connection         = DriverManager::getConnection($params);
+        $shouldDropDatabase = ! $ifExists || in_array($name, $connection->getSchemaManager()->listDatabases());
+
+        // Only quote if we don't have a path
+        if (! isset($params['path'])) {
+            $name = $connection->getDatabasePlatform()->quoteSingleIdentifier($name);
+        }
+
+        try {
+            if ($shouldDropDatabase) {
+                $connection->getSchemaManager()->dropDatabase($name);
+                $output->writeln(sprintf('<info>Dropped database for connection named <comment>%s</comment></info>', $name));
+            } else {
+                $output->writeln(sprintf('<info>Database for connection named <comment>%s</comment> doesn\'t exist. Skipped.</info>', $name));
+            }
+        } catch (\Exception $e) {
+            $output->writeln(sprintf('<error>Could not drop database for connection named <comment>%s</comment></error>', $name));
+            $output->writeln(sprintf('<error>%s</error>', $e->getMessage()));
+
+            return self::RETURN_CODE_NOT_DROP;
         }
     }
 }

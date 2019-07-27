@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,8 +14,7 @@ namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -51,8 +50,8 @@ class CoordinatoreController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore", name="coordinatore")
-   * @Method("GET")
+   * @Route("/coordinatore", name="coordinatore",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -84,8 +83,8 @@ class CoordinatoreController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/coordinatore/classe/", name="coordinatore_classe")
-   * @Method("GET")
+   * @Route("/coordinatore/classe/", name="coordinatore_classe",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -140,8 +139,8 @@ class CoordinatoreController extends Controller {
    *
    * @Route("/coordinatore/note/{classe}", name="coordinatore_note",
    *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0})
-   * @Method("GET")
+   *    defaults={"classe": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -195,8 +194,8 @@ class CoordinatoreController extends Controller {
    *
    * @Route("/coordinatore/assenze/{classe}", name="coordinatore_assenze",
    *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0})
-   * @Method("GET")
+   *    defaults={"classe": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -250,8 +249,8 @@ class CoordinatoreController extends Controller {
    *
    * @Route("/coordinatore/voti/{classe}", name="coordinatore_voti",
    *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0})
-   * @Method("GET")
+   *    defaults={"classe": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -305,8 +304,8 @@ class CoordinatoreController extends Controller {
    *
    * @Route("/coordinatore/situazione/{classe}", name="coordinatore_situazione",
    *    requirements={"classe": "\d+"},
-   *    defaults={"classe": 0})
-   * @Method("GET")
+   *    defaults={"classe": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -363,8 +362,8 @@ class CoordinatoreController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/situazione/alunno/{alunno}/{tipo}/{formato}", name="coordinatore_situazione_alunno",
-   *    requirements={"alunno": "\d+", "tipo": "V|S|A|N|O|T", "formato": "H|P"})
-   * @Method("GET")
+   *    requirements={"alunno": "\d+", "tipo": "V|S|A|N|O|T", "formato": "H|P"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -373,6 +372,9 @@ class CoordinatoreController extends Controller {
     // inizializza variabili
     $dati = null;
     $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insufficiente', 33 => 'Mediocre', 34 => 'Sufficiente', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
+    $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
+    $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
     // controllo alunno
     $alunno = $em->getRepository('AppBundle:Alunno')->find($alunno);
     if (!$alunno) {
@@ -396,7 +398,7 @@ class CoordinatoreController extends Controller {
     }
     // pagina di ritorno
     if ($this->getUser() instanceOf Staff) {
-      $info['back'] = 'staff_situazione';
+      $info['back'] = 'staff_studenti_situazione';
     } else {
       $info['back'] = 'coordinatore_situazione';
     }
@@ -405,7 +407,7 @@ class CoordinatoreController extends Controller {
     // controllo formato
     if ($formato == 'P') {
       // crea documento PDF
-      $pdf->configure('Istituto di Istruzione Superiore',
+      $pdf->configure('Istituto di Istruzione Superiore "Michele Giua"',
         'Situazione alunn'.($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
       $html = $this->renderView('pdf/situazione_alunno.html.twig', array(
         'classe' => $classe,
@@ -443,8 +445,8 @@ class CoordinatoreController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/assenze/stampa/{classe}", name="coordinatore_assenze_stampa",
-   *    requirements={"classe": "\d+"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -470,7 +472,7 @@ class CoordinatoreController extends Controller {
     // legge dati
     $dati = $staff->assenze($classe);
     // crea documento PDF
-    $pdf->configure('Istituto di Istruzione Superiore',
+    $pdf->configure('Istituto di Istruzione Superiore "Michele Giua"',
       'Assenze della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/assenze_classe.html.twig', array(
       'classe' => $classe,
@@ -494,8 +496,8 @@ class CoordinatoreController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/note/stampa/{classe}", name="coordinatore_note_stampa",
-   *    requirements={"classe": "\d+"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -521,7 +523,7 @@ class CoordinatoreController extends Controller {
     // legge dati
     $dati = $staff->note($classe);
     // crea documento PDF
-    $pdf->configure('Istituto di Istruzione Superiore',
+    $pdf->configure('Istituto di Istruzione Superiore "Michele Giua"',
       'Note disciplinari della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/note_classe.html.twig', array(
       'classe' => $classe,
@@ -545,8 +547,8 @@ class CoordinatoreController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/voti/stampa/{classe}", name="coordinatore_voti_stampa",
-   *    requirements={"classe": "\d+"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -572,7 +574,7 @@ class CoordinatoreController extends Controller {
     // legge dati
     $dati = $staff->voti($classe);
     // crea documento PDF
-    $pdf->configure('Istituto di Istruzione Superiore',
+    $pdf->configure('Istituto di Istruzione Superiore ""',
       'Medie dei voti della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $pdf->getHandler()->setPageOrientation('L', true, 20);
     $html = $this->renderView('pdf/voti_classe.html.twig', array(
@@ -598,8 +600,8 @@ class CoordinatoreController extends Controller {
    *
    * @Route("/coordinatore/avvisi/{classe}/{pagina}", name="coordinatore_avvisi",
    *    requirements={"classe": "\d+", "pagina": "\d+"},
-   *    defaults={"classe": 0, "pagina": "0"})
-   * @Method("GET")
+   *    defaults={"classe": 0, "pagina": "0"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -671,8 +673,8 @@ class CoordinatoreController extends Controller {
    *
    * @Route("/coordinatore/avvisi/edit/{classe}/{id}", name="coordinatore_avviso_edit",
    *    requirements={"classe": "\d+", "id": "\d+"},
-   *    defaults={"id": "0"})
-   * @Method({"GET","POST"})
+   *    defaults={"id": "0"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -888,8 +890,8 @@ class CoordinatoreController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/avvisi/dettagli/{classe}/{id}", name="coordinatore_avviso_dettagli",
-   *    requirements={"classe": "\d+", "id": "\d+"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+", "id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -945,8 +947,8 @@ class CoordinatoreController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/avvisi/delete/{classe}/{id}", name="coordinatore_avviso_delete",
-   *    requirements={"classe": "\d+", "id": "\d+"})
-   * @Method({"GET"})
+   *    requirements={"classe": "\d+", "id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */

@@ -36,7 +36,7 @@
 {% spaceless %}
   {% if attr.widget is defined and attr.widget == 'gs-picker' %}
     <div class="input-group date">
-      {{ form_widget(form, {'attr': {'widget': false}}) }}
+      {{ form_widget(form, {'attr': {'widget': false, 'autocomplete': 'off'}}) }}
       <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
     </div>
   {% else %}
@@ -49,7 +49,7 @@
 {% spaceless %}
   {% if attr.widget is defined and attr.widget == 'gs-picker' %}
     <div class="input-group time">
-      {{ form_widget(form, {'attr': {'widget': false}}) }}
+      {{ form_widget(form, {'attr': {'widget': false, 'autocomplete': 'off'}}) }}
       <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-time"></span></span>
     </div>
   {% else %}

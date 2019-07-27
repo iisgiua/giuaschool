@@ -83,7 +83,7 @@ class AppVariable
         }
 
         $user = $token->getUser();
-        if (is_object($user)) {
+        if (\is_object($user)) {
             return $user;
         }
     }
@@ -156,10 +156,9 @@ class AppVariable
      */
     public function getFlashes($types = null)
     {
-        // needed to avoid starting the session automatically when looking for flash messages
         try {
             $session = $this->getSession();
-            if (null === $session || !$session->isStarted()) {
+            if (null === $session) {
                 return array();
             }
         } catch (\RuntimeException $e) {
@@ -170,7 +169,7 @@ class AppVariable
             return $session->getFlashBag()->all();
         }
 
-        if (is_string($types)) {
+        if (\is_string($types)) {
             return $session->getFlashBag()->get($types);
         }
 

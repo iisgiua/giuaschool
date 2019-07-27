@@ -12,10 +12,10 @@
 namespace Symfony\Component\Intl\Data\Generator;
 
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Intl\Data\Bundle\Reader\BundleReaderInterface;
-use Symfony\Component\Intl\Data\Util\LocaleScanner;
 use Symfony\Component\Intl\Data\Bundle\Compiler\GenrbCompiler;
+use Symfony\Component\Intl\Data\Bundle\Reader\BundleReaderInterface;
 use Symfony\Component\Intl\Data\Bundle\Reader\IntlBundleReader;
+use Symfony\Component\Intl\Data\Util\LocaleScanner;
 
 /**
  * The rule for compiling the currency bundle.
@@ -26,20 +26,13 @@ use Symfony\Component\Intl\Data\Bundle\Reader\IntlBundleReader;
  */
 abstract class AbstractDataGenerator
 {
-    /**
-     * @var GenrbCompiler
-     */
     private $compiler;
-
-    /**
-     * @var string
-     */
     private $dirName;
 
     public function __construct(GenrbCompiler $compiler, $dirName)
     {
         $this->compiler = $compiler;
-        $this->dirName = $dirName;
+        $this->dirName = (string) $dirName;
     }
 
     public function generateData(GeneratorConfig $config)

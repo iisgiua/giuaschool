@@ -12,8 +12,9 @@
 namespace Symfony\Bundle\FrameworkBundle\Command;
 
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer;
@@ -25,13 +26,34 @@ use Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer;
  */
 final class CachePoolClearCommand extends ContainerAwareCommand
 {
+    protected static $defaultName = 'cache:pool:clear';
+
+    private $poolClearer;
+
+    /**
+     * @param Psr6CacheClearer $poolClearer
+     */
+    public function __construct($poolClearer = null)
+    {
+        if (!$poolClearer instanceof Psr6CacheClearer) {
+            @trigger_error(sprintf('%s() expects an instance of "%s" as first argument since Symfony 3.4. Not passing it is deprecated and will throw a TypeError in 4.0.', __METHOD__, Psr6CacheClearer::class), E_USER_DEPRECATED);
+
+            parent::__construct($poolClearer);
+
+            return;
+        }
+
+        parent::__construct();
+
+        $this->poolClearer = $poolClearer;
+    }
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this
-            ->setName('cache:pool:clear')
             ->setDefinition(array(
                 new InputArgument('pools', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'A list of cache pools or cache pool clearers'),
             ))
@@ -50,32 +72,36 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // BC to be removed in 4.0
+        if (null === $this->poolClearer) {
+            $this->poolClearer = $this->getContainer()->get('cache.global_clearer');
+            $cacheDir = $this->getContainer()->getParameter('kernel.cache_dir');
+        }
+
         $io = new SymfonyStyle($input, $output);
+        $kernel = $this->getApplication()->getKernel();
         $pools = array();
         $clearers = array();
-        $container = $this->getContainer();
-        $cacheDir = $container->getParameter('kernel.cache_dir');
-        $globalClearer = $container->get('cache.global_clearer');
 
         foreach ($input->getArgument('pools') as $id) {
-            if ($globalClearer->hasPool($id)) {
+            if ($this->poolClearer->hasPool($id)) {
                 $pools[$id] = $id;
             } else {
-                $pool = $container->get($id);
+                $pool = $kernel->getContainer()->get($id);
 
                 if ($pool instanceof CacheItemPoolInterface) {
                     $pools[$id] = $pool;
                 } elseif ($pool instanceof Psr6CacheClearer) {
                     $clearers[$id] = $pool;
                 } else {
-                    throw new \InvalidArgumentException(sprintf('"%s" is not a cache pool nor a cache clearer.', $id));
+                    throw new InvalidArgumentException(sprintf('"%s" is not a cache pool nor a cache clearer.', $id));
                 }
             }
         }
 
         foreach ($clearers as $id => $clearer) {
             $io->comment(sprintf('Calling cache clearer: <info>%s</info>', $id));
-            $clearer->clear($cacheDir);
+            $clearer->clear(isset($cacheDir) ? $cacheDir : $kernel->getContainer()->getParameter('kernel.cache_dir'));
         }
 
         foreach ($pools as $id => $pool) {
@@ -84,7 +110,7 @@ EOF
             if ($pool instanceof CacheItemPoolInterface) {
                 $pool->clear();
             } else {
-                $globalClearer->clearPool($id);
+                $this->poolClearer->clearPool($id);
             }
         }
 

@@ -12,8 +12,8 @@
 namespace Symfony\Bundle\WebProfilerBundle\Profiler;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\HttpKernel\Profiler\Profile;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Loader\ExistsLoaderInterface;
@@ -63,8 +63,6 @@ class TemplateManager
     /**
      * Gets the templates for a given profile.
      *
-     * @param Profile $profile
-     *
      * @return Template[]
      *
      * @deprecated not used anymore internally
@@ -82,8 +80,6 @@ class TemplateManager
 
     /**
      * Gets template names of templates that are present in the viewed profile.
-     *
-     * @param Profile $profile
      *
      * @return array
      *
@@ -127,7 +123,7 @@ class TemplateManager
         }
 
         try {
-            if ($loader instanceof SourceContextLoaderInterface) {
+            if ($loader instanceof SourceContextLoaderInterface || method_exists($loader, 'getSourceContext')) {
                 $loader->getSourceContext($template);
             } else {
                 $loader->getSource($template);

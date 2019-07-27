@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\ClassLoader;
 
-@trigger_error('The '.__NAMESPACE__.'\Psr4ClassLoader class is deprecated since version 3.3 and will be removed in 4.0. Use Composer instead.', E_USER_DEPRECATED);
+@trigger_error('The '.__NAMESPACE__.'\Psr4ClassLoader class is deprecated since Symfony 3.3 and will be removed in 4.0. Use Composer instead.', E_USER_DEPRECATED);
 
 /**
  * A PSR-4 compatible class loader.
@@ -24,9 +24,6 @@ namespace Symfony\Component\ClassLoader;
  */
 class Psr4ClassLoader
 {
-    /**
-     * @var array
-     */
     private $prefixes = array();
 
     /**
@@ -36,7 +33,7 @@ class Psr4ClassLoader
     public function addPrefix($prefix, $baseDir)
     {
         $prefix = trim($prefix, '\\').'\\';
-        $baseDir = rtrim($baseDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        $baseDir = rtrim($baseDir, \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR;
         $this->prefixes[] = array($prefix, $baseDir);
     }
 
@@ -51,8 +48,8 @@ class Psr4ClassLoader
 
         foreach ($this->prefixes as list($currentPrefix, $currentBaseDir)) {
             if (0 === strpos($class, $currentPrefix)) {
-                $classWithoutPrefix = substr($class, strlen($currentPrefix));
-                $file = $currentBaseDir.str_replace('\\', DIRECTORY_SEPARATOR, $classWithoutPrefix).'.php';
+                $classWithoutPrefix = substr($class, \strlen($currentPrefix));
+                $file = $currentBaseDir.str_replace('\\', \DIRECTORY_SEPARATOR, $classWithoutPrefix).'.php';
                 if (file_exists($file)) {
                     return $file;
                 }

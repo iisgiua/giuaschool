@@ -1,28 +1,32 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %} {#----- menubar mostrata quando un utente è connesso -----#}
-
   {% if is_granted('ROLE_DOCENTE') %} {#----- DOCENTE/STAFF/PRESIDE -----#}
     {% include 'ruolo_docente/menu.html.twig' %}
-
   {% elseif is_granted('ROLE_GENITORE') %} {#----- GENITORE -----#}
-    {% include 'ruolo_genitore/menu.html.twig' %}
-
-  {% elseif is_granted('ROLE_SEGRETERIA') %} {#----- SEGRETERIA -----#}
-    {% include 'ruolo_segreteria/menu.html.twig' %}
-
+    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
+  {% elseif is_granted('ROLE_ALUNNO') %} {#----- ALUNNO -----#}
+    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
+  {% elseif is_granted('ROLE_ATA') %} {#----- ATA -----#}
+    {% include 'ruolo_ata/menu.html.twig' %}
   {% elseif is_granted('ROLE_AMMINISTRATORE') %} {#----- AMMINISTRATORE -----#}
     {% include 'ruolo_amministratore/menu.html.twig' %}
+  {% else %} {#----- UTENTE NON RICONOSCIUTO -----#}
+<ul class="nav navbar-nav gs-navbar-nav">
+  <li class="active"><a href="{{ path('home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
+</ul>
   {% endif %}
-
 {% else %} {#----- menubar mostrata quando nessun utente è connesso -----#}
 <ul class="nav navbar-nav gs-navbar-nav">
-  <li{% if app.request.attributes.get('_route') == 'login_form' %} class="active"{% endif %}>
+  <li role="presentation"{{ app.request.attributes.get('_route') == 'login_form' ? ' class="active"' }}>
     <a href="{{ path('login_form') }}" title="Accedi al registro usando utente e password"><span class="glyphicon glyphicon-user gs-mr-2"></span>Accesso al Registro Elettronico</a>
   </li>
-  <li{% if (app.request.attributes.get('_route') == 'login_card') or (app.request.attributes.get('_route') == 'login_card_errore')  %} class="active"{% endif %}>
+  <li role="presentation"{{ app.request.attributes.get('_route')[:10] == 'login_card' ? ' class="active"' }}>
     <a href="{{ path('login_card_errore') }}" title="Accedi al registro usando la Carta Nazionale dei Servizi"><span class="glyphicon glyphicon-credit-card gs-mr-2"></span>Accesso con Tessera Sanitaria</a>
   </li>
-  <li{% if (app.request.attributes.get('_route') == 'login_recovery') %} class="active"{% endif %}>
-    <a href="{{ path('login_recovery') }}" title="Solo per i genitori: recupera la password tramite l'email"><span class="glyphicon glyphicon-repeat gs-mr-2"></span>Recupero Password Genitori</a>
+  <li role="presentation"{{ app.request.attributes.get('_route') == 'login_recovery' ? ' class="active"' }}>
+    <a href="{{ path('login_recovery') }}" title="Recupera la password di accesso tramite l'email"><span class="glyphicon glyphicon-repeat gs-mr-2"></span>Recupero Password</a>
+  </li>
+  <li role="presentation"{{ app.request.attributes.get('_route') == 'app_info' ? ' class="active"' }}>
+    <a href="{{ path('app_info') }}" title="Informazioni su app e servizi disponibili"><span class="glyphicon glyphicon-phone gs-mr-2"></span>App e Servizi</a>
   </li>
 </ul>
 {% endif %}

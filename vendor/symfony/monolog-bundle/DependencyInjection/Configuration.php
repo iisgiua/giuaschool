@@ -89,6 +89,7 @@ use Monolog\Logger;
  *   - handler: the wrapped handler's name
  *   - [action_level|activation_strategy]: minimum level or service id to activate the handler, defaults to WARNING
  *   - [excluded_404s]: if set, the strategy will be changed to one that excludes 404s coming from URLs matching any of those patterns
+ *   - [excluded_http_codes]: if set, the strategy will be changed to one that excludes specific HTTP codes (requires Symfony Monolog bridge 4.1+)
  *   - [buffer_size]: defaults to 0 (unlimited)
  *   - [stop_buffering]: bool to disable buffering once the handler has been activated, defaults to true
  *   - [passthru_level]: level name or int value for messages to always flush, disabled by default
@@ -170,6 +171,8 @@ use Monolog\Logger;
  *   - [title]: optional title for messages, defaults to the server hostname
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
  *
  * - raven:
  *   - dsn: connection string
@@ -177,7 +180,7 @@ use Monolog\Logger;
  *   - [release]: release number of the application that will be attached to logs, defaults to null
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
- *   - [auto_stack_logs]: bool, defaults to false
+ *   - [auto_log_stacks]: bool, defaults to false
  *
  * - newrelic:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -195,6 +198,8 @@ use Monolog\Logger;
  *   - [message_format]: text or html, defaults to text
  *   - [host]: defaults to "api.hipchat.com"
  *   - [api_version]: defaults to "v1"
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
  *
  * - slack:
  *   - token: slack api token
@@ -206,6 +211,8 @@ use Monolog\Logger;
  *   - [include_extra]: bool, defaults to false
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [timeout]: float
+ *   - [connection_timeout]: float
  *
  * - slackwebhook:
  *   - webhook_url: slack webhook URL
@@ -316,6 +323,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('array')
                         ->fixXmlConfig('member')
                         ->fixXmlConfig('excluded_404')
+                        ->fixXmlConfig('excluded_http_code')
                         ->fixXmlConfig('tag')
                         ->fixXmlConfig('accepted_level')
                         ->canBeUnset()
@@ -363,6 +371,40 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
                             ->end()
+                            ->arrayNode('excluded_http_codes') // fingers_crossed
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->always(function ($values) {
+                                        return array_map(function ($value) {
+                                            /*
+                                             * Allows YAML:
+                                             *   excluded_http_codes: [403, 404, { 400: ['^/foo', '^/bar'] }]
+                                             *
+                                             * and XML:
+                                             *   <monolog:excluded-http-code code="403">
+                                             *     <monolog:url>^/foo</monolog:url>
+                                             *     <monolog:url>^/bar</monolog:url>
+                                             *   </monolog:excluded-http-code>
+                                             *   <monolog:excluded-http-code code="404" />
+                                             */
+
+                                            if (is_array($value)) {
+                                                return isset($value['code']) ? $value : array('code' => key($value), 'urls' => current($value));
+                                            }
+
+                                            return array('code' => $value, 'urls' => array());
+                                        }, $values);
+                                    })
+                                ->end()
+                                ->prototype('array')
+                                    ->children()
+                                        ->scalarNode('code')->end()
+                                        ->arrayNode('urls')
+                                            ->prototype('scalar')->end()
+                                        ->end()
+                                    ->end()
+                                ->end()
+                            ->end()
                             ->arrayNode('accepted_levels') // filter
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
@@ -406,7 +448,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id'=> $v); })
+                                    ->then(function ($v) { return array('id' => $v); })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -425,7 +467,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id'=> $v); })
+                                    ->then(function ($v) { return array('id' => $v); })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -453,7 +495,7 @@ class Configuration implements ConfigurationInterface
                                 ->canBeUnset()
                                 ->beforeNormalization()
                                     ->ifString()
-                                    ->then(function ($v) { return array('id'=> $v); })
+                                    ->then(function ($v) { return array('id' => $v); })
                                 ->end()
                                 ->children()
                                     ->scalarNode('id')->end()
@@ -506,11 +548,11 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->booleanNode('lazy')->defaultValue(true)->end() // swift_mailer
                             ->scalarNode('connection_string')->end() // socket_handler
-                            ->scalarNode('timeout')->end() // socket_handler & logentries
+                            ->scalarNode('timeout')->end() // socket_handler, logentries, pushover, hipchat & slack
                             ->scalarNode('time')->defaultValue(60)->end() // deduplication
                             ->scalarNode('deduplication_level')->defaultValue(Logger::ERROR)->end() // deduplication
                             ->scalarNode('store')->defaultNull()->end() // deduplication
-                            ->scalarNode('connection_timeout')->end() // socket_handler & logentries
+                            ->scalarNode('connection_timeout')->end() // socket_handler, logentries, pushover, hipchat & slack
                             ->booleanNode('persistent')->end() // socket_handler
                             ->scalarNode('dsn')->end() // raven_handler
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler
@@ -651,12 +693,20 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('Service handlers can not have a formatter configured in the bundle, you must reconfigure the service itself instead')
                         ->end()
                         ->validate()
-                            ->ifTrue(function ($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type']) && 1 !== count($v['handler']); })
+                            ->ifTrue(function ($v) { return ('fingers_crossed' === $v['type'] || 'buffer' === $v['type'] || 'filter' === $v['type']) && empty($v['handler']); })
                             ->thenInvalid('The handler has to be specified to use a FingersCrossedHandler or BufferHandler or FilterHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_404s']) && !empty($v['activation_strategy']); })
                             ->thenInvalid('You can not use excluded_404s together with a custom activation_strategy in a FingersCrossedHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_http_codes']) && !empty($v['activation_strategy']); })
+                            ->thenInvalid('You can not use excluded_http_codes together with a custom activation_strategy in a FingersCrossedHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'fingers_crossed' === $v['type'] && !empty($v['excluded_http_codes']) && !empty($v['excluded_404s']); })
+                            ->thenInvalid('You can not use excluded_http_codes together with excluded_404s in a FingersCrossedHandler')
                         ->end()
                         ->validate()
                             ->ifTrue(function ($v) { return 'filter' === $v['type'] && "DEBUG" !== $v['min_level'] && !empty($v['accepted_levels']); })

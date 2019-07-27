@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -46,12 +46,12 @@ class Documento {
   private $modificato;
 
   /**
-   * @var string $tipo Tipo di documento [I=programmazione iniziale, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES]
+   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"I","P","R","H","D"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"L","P","R","H","D","M"}, strict=true, message="field.choice")
    */
   private $tipo;
 
@@ -147,7 +147,7 @@ class Documento {
   }
 
   /**
-   * Restituisce il tipo di documento [I=programmazione iniziale, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES]
+   * Restituisce il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio]
    *
    * @return string Tipo di documento
    */
@@ -156,7 +156,7 @@ class Documento {
   }
 
   /**
-   * Modifica il tipo di documento [I=programmazione iniziale, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES]
+   * Modifica il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio]
    *
    * @param string $tipo Tipo di documento
    *

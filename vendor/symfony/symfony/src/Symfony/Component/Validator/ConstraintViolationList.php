@@ -120,7 +120,7 @@ class ConstraintViolationList implements \IteratorAggregate, ConstraintViolation
      */
     public function count()
     {
-        return count($this->violations);
+        return \count($this->violations);
     }
 
     /**
@@ -164,14 +164,14 @@ class ConstraintViolationList implements \IteratorAggregate, ConstraintViolation
      *
      * @param string|string[] $codes The codes to find
      *
-     * @return static New instance which contains only specific errors.
+     * @return static new instance which contains only specific errors
      */
     public function findByCodes($codes)
     {
         $codes = (array) $codes;
         $violations = array();
         foreach ($this as $violation) {
-            if (in_array($violation->getCode(), $codes, true)) {
+            if (\in_array($violation->getCode(), $codes, true)) {
                 $violations[] = $violation;
             }
         }

@@ -1,22 +1,4 @@
 <?php
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
-
 namespace Doctrine\Bundle\DoctrineCacheBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -102,9 +84,15 @@ class SymfonyBridgeAdapter
 
         if ( ! isset($cacheDriver['namespace'])) {
             // generate a unique namespace for the given application
-            $environment = $container->getParameter('kernel.root_dir').$container->getParameter('kernel.environment');
-            $hash        = hash('sha256', $environment);
-            $namespace   = 'sf2' . $this->mappingResourceName .'_' . $objectManagerName . '_' . $hash;
+            $seed = '_'.$container->getParameter('kernel.root_dir');
+
+            if ($container->hasParameter('cache.prefix.seed')) {
+                $seed = '.'.$container->getParameterBag()->resolveValue($container->getParameter('cache.prefix.seed'));
+            }
+
+            $seed .= '.'.$container->getParameter('kernel.name').'.'.$container->getParameter('kernel.environment');
+            $hash      = hash('sha256', $seed);
+            $namespace = 'sf_' . $this->mappingResourceName .'_' . $objectManagerName . '_' . $hash;
 
             $cacheDriver['namespace'] = $namespace;
         }
@@ -125,6 +113,17 @@ class SymfonyBridgeAdapter
                 'port' => !empty($port) ? $port : 6379,
                 'password' => !empty($password) ? $password : null,
                 'database' => !empty($database) ? $database : 0
+            );
+        }
+
+        if ($type === 'predis') {
+            $config[$type] = array(
+                'scheme' => 'tcp',
+                'host' => !empty($host) ? $host : 'localhost',
+                'port' => !empty($port) ? $port : 6379,
+                'password' => !empty($password) ? $password : null,
+                'database' => !empty($database) ? $database : 0,
+                'timeout' => null,
             );
         }
 

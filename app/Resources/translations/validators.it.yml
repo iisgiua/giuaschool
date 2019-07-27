@@ -22,4 +22,4 @@ image.corrupted: È impossibile leggere l'immagine caricata.
 password.nomatch: Le due password devono essere identiche.
 password.wrong: Il valore non corrisponde alla password memorizzata.
 
-
+"The CSRF token is invalid. Please try to resubmit the form.": Pagina scaduta. Invia nuovamente le credenziali di accesso.

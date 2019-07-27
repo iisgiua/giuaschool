@@ -13,6 +13,8 @@ namespace Symfony\Component\Cache\Simple;
 
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Exception\InvalidArgumentException;
+use Symfony\Component\Cache\PruneableInterface;
+use Symfony\Component\Cache\ResettableInterface;
 
 /**
  * Chains several caches together.
@@ -22,7 +24,7 @@ use Symfony\Component\Cache\Exception\InvalidArgumentException;
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class ChainCache implements CacheInterface
+class ChainCache implements CacheInterface, PruneableInterface, ResettableInterface
 {
     private $miss;
     private $caches = array();
@@ -41,13 +43,13 @@ class ChainCache implements CacheInterface
 
         foreach ($caches as $cache) {
             if (!$cache instanceof CacheInterface) {
-                throw new InvalidArgumentException(sprintf('The class "%s" does not implement the "%s" interface.', get_class($cache), CacheInterface::class));
+                throw new InvalidArgumentException(sprintf('The class "%s" does not implement the "%s" interface.', \get_class($cache), CacheInterface::class));
             }
         }
 
         $this->miss = new \stdClass();
         $this->caches = array_values($caches);
-        $this->cacheCount = count($this->caches);
+        $this->cacheCount = \count($this->caches);
         $this->defaultLifetime = 0 < $defaultLifetime ? (int) $defaultLifetime : null;
     }
 
@@ -56,7 +58,7 @@ class ChainCache implements CacheInterface
      */
     public function get($key, $default = null)
     {
-        $miss = null !== $default && is_object($default) ? $default : $this->miss;
+        $miss = null !== $default && \is_object($default) ? $default : $this->miss;
 
         foreach ($this->caches as $i => $cache) {
             $value = $cache->get($key, $miss);
@@ -78,7 +80,7 @@ class ChainCache implements CacheInterface
      */
     public function getMultiple($keys, $default = null)
     {
-        $miss = null !== $default && is_object($default) ? $default : $this->miss;
+        $miss = null !== $default && \is_object($default) ? $default : $this->miss;
 
         return $this->generateItems($this->caches[0]->getMultiple($keys, $miss), 0, $miss, $default);
     }
@@ -218,5 +220,33 @@ class ChainCache implements CacheInterface
         }
 
         return $saved;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function prune()
+    {
+        $pruned = true;
+
+        foreach ($this->caches as $cache) {
+            if ($cache instanceof PruneableInterface) {
+                $pruned = $cache->prune() && $pruned;
+            }
+        }
+
+        return $pruned;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
+    {
+        foreach ($this->caches as $cache) {
+            if ($cache instanceof ResettableInterface) {
+                $cache->reset();
+            }
+        }
     }
 }

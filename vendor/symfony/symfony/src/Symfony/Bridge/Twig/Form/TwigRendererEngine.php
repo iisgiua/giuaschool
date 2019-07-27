@@ -34,7 +34,7 @@ class TwigRendererEngine extends AbstractRendererEngine implements TwigRendererE
     public function __construct(array $defaultThemes = array(), Environment $environment = null)
     {
         if (null === $environment) {
-            @trigger_error(sprintf('Not passing a Twig Environment as the second argument for "%s" constructor is deprecated since version 3.2 and won\'t be possible in 4.0.', static::class), E_USER_DEPRECATED);
+            @trigger_error(sprintf('Not passing a Twig Environment as the second argument for "%s" constructor is deprecated since Symfony 3.2 and won\'t be possible in 4.0.', static::class), E_USER_DEPRECATED);
         }
 
         parent::__construct($defaultThemes);
@@ -49,7 +49,7 @@ class TwigRendererEngine extends AbstractRendererEngine implements TwigRendererE
     public function setEnvironment(Environment $environment)
     {
         if ($this->environment) {
-            @trigger_error(sprintf('The "%s()" method is deprecated since version 3.3 and will be removed in 4.0. Pass the Twig Environment as second argument of the constructor instead.', __METHOD__), E_USER_DEPRECATED);
+            @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 3.3 and will be removed in 4.0. Pass the Twig Environment as second argument of the constructor instead.', __METHOD__), E_USER_DEPRECATED);
         }
 
         $this->environment = $environment;
@@ -116,7 +116,7 @@ class TwigRendererEngine extends AbstractRendererEngine implements TwigRendererE
 
         // Check each theme whether it contains the searched block
         if (isset($this->themes[$cacheKey])) {
-            for ($i = count($this->themes[$cacheKey]) - 1; $i >= 0; --$i) {
+            for ($i = \count($this->themes[$cacheKey]) - 1; $i >= 0; --$i) {
                 $this->loadResourcesFromTheme($cacheKey, $this->themes[$cacheKey][$i]);
                 // CONTINUE LOADING (see doc comment)
             }
@@ -124,9 +124,11 @@ class TwigRendererEngine extends AbstractRendererEngine implements TwigRendererE
 
         // Check the default themes once we reach the root view without success
         if (!$view->parent) {
-            for ($i = count($this->defaultThemes) - 1; $i >= 0; --$i) {
-                $this->loadResourcesFromTheme($cacheKey, $this->defaultThemes[$i]);
-                // CONTINUE LOADING (see doc comment)
+            if (!isset($this->useDefaultThemes[$cacheKey]) || $this->useDefaultThemes[$cacheKey]) {
+                for ($i = \count($this->defaultThemes) - 1; $i >= 0; --$i) {
+                    $this->loadResourcesFromTheme($cacheKey, $this->defaultThemes[$i]);
+                    // CONTINUE LOADING (see doc comment)
+                }
             }
         }
 

@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -136,10 +136,6 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
    * @return mixed|null Le credenziali dell'autenticazione o null
    */
   public function getCredentials(Request $request) {
-    if ($request->getPathInfo() != '/login/registrazione/' || !$request->isMethod('POST')) {
-      // la richiesta non proviene dalla pagina di login, annulla autenticazione
-      return null;
-    }
     // protezione CSRF
     $csrfToken = $request->get('_csrf_token');
     $intention = 'authenticate';
@@ -287,6 +283,17 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
   public function supportsRememberMe() {
     // nessun supporto per il cookie RICORDAMI
     return false;
+  }
+
+  /**
+   * Indica se l'autenticatore supporta o meno la richiesta attuale.
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return bool Vero se supportato, falso altrimenti
+   */
+  public function supports(Request $request) {
+    return ($request->getPathInfo() == '/login/registrazione/' && $request->isMethod('POST'));
   }
 
 }

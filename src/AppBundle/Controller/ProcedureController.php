@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,8 +14,7 @@ namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -48,8 +47,8 @@ class ProcedureController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/procedure/", name="procedure")
-   * @Method("GET")
+   * @Route("/procedure/", name="procedure",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -69,8 +68,8 @@ class ProcedureController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/procedure/password/", name="procedure_password")
-   * @Method({"GET", "POST"})
+   * @Route("/procedure/password/", name="procedure_password",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -139,8 +138,8 @@ class ProcedureController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/procedure/alias/", name="procedure_alias")
-   * @Method({"GET", "POST"})
+   * @Route("/procedure/alias/", name="procedure_alias",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -202,8 +201,8 @@ class ProcedureController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/procedure/alias/exit", name="procedure_alias_exit")
-   * @Method("GET")
+   * @Route("/procedure/alias/exit", name="procedure_alias_exit",
+   *    methods={"GET"})
    */
   public function aliasExitAction(Request $request, SessionInterface $session, LogHandler $dblogger) {
     // log azione
@@ -235,8 +234,8 @@ class ProcedureController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/procedure/ricalcola", name="procedure_ricalcola")
-   * @Method({"GET", "POST"})
+   * @Route("/procedure/ricalcola", name="procedure_ricalcola",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -296,8 +295,8 @@ class ProcedureController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/procedure/manutenzione/", name="procedure_manutenzione")
-   * @Method({"GET", "POST"})
+   * @Route("/procedure/manutenzione/", name="procedure_manutenzione",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -318,7 +317,7 @@ class ProcedureController extends Controller {
     }
     //crea valori per form
     $manutenzione = true;
-    if (empty($dati)) {
+    if (empty($dati) || count($dati) < 3) {
       $manutenzione = false;
       $adesso = new \DateTime();
       $dati[0] = $adesso->format('Y-m-d');
@@ -398,8 +397,8 @@ class ProcedureController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/procedure/archiviazione/", name="procedure_archiviazione")
-   * @Method({"GET", "POST"})
+   * @Route("/procedure/archiviazione/", name="procedure_archiviazione",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */

@@ -13,7 +13,7 @@
   <div class="gs-mt-2">
     <strong>Allegati:</strong>
   {% for al in a.allegati %}
-    <a class="gs-ml-3" href="{{ path('file_avviso', {'avviso': a.id, 'allegato': loop.index}) }}" title="Scarica l'allegato"><strong>Allegato-{{ loop.index }}</strong></a>
+    <a class="gs-ml-3" target="_blank" href="{{ path('file_avviso', {'avviso': a.id, 'allegato': loop.index}) }}" title="Scarica l'allegato"><strong>Allegato-{{ loop.index }}</strong></a>
   {% endfor %}
   </div>
   {% endif %}

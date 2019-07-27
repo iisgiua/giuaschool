@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -26,18 +26,11 @@ class Genitore extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var boolean $rappresentanteClasse Indica se il genitore è rappresentante di classe
+   * @var boolean $giustificaOnline Indica se il genitore può effettuare la giustificazione online oppure no
    *
-   * @ORM\Column(name="rappresentante_classe", type="boolean", nullable=false)
+   * @ORM\Column(name="giustifica_online", type="boolean", nullable=false)
    */
-  private $rappresentanteClasse;
-
-  /**
-   * @var boolean $rappresentanteIstituto Indica se il genitore è rappresentante di istituto
-   *
-   * @ORM\Column(name="rappresentante_istituto", type="boolean", nullable=false)
-   */
-  private $rappresentanteIstituto;
+  private $giustificaOnline;
 
   /**
    * @var Alunno L'alunno figlio
@@ -51,44 +44,23 @@ class Genitore extends Utente {
   //==================== METODI SETTER/GETTER ====================
 
   /**
-   * Indica se il genitore è rappresentante di classe oppure no
+   * Indica se il genitore può effettuare la giustificazione online oppure no
    *
-   * @return boolean Vero se il genitore è rappresentante di classe, falso altrimenti
+   * @return boolean Vero se il genitore può effettuare la giustificazione online, falso altrimenti
    */
-  public function getRappresentanteClasse() {
-    return $this->rappresentanteClasse;
+  public function getGiustificaOnline() {
+    return $this->giustificaOnline;
   }
 
   /**
-   * Modifica se il genitore è rappresentante di classe oppure no
+   * Modifica se il genitore può effettuare la giustificazione online oppure no
    *
-   * @param boolean $rappresentanteClasse Vero se il genitore è rappresentante di classe, falso altrimenti
+   * @param boolean $giustificaOnline Vero se il genitore può effettuare la giustificazione online, falso altrimenti
    *
    * @return Genitore Oggetto Genitore
    */
-  public function setRappresentanteClasse($rappresentanteClasse) {
-    $this->rappresentanteClasse = ($rappresentanteClasse == true);
-    return $this;
-  }
-
-  /**
-   * Indica se il genitore è rappresentante di istituto oppure no
-   *
-   * @return boolean Vero se il genitore è rappresentante di istituto, falso altrimenti
-   */
-  public function getRappresentanteIstituto() {
-    return $this->rappresentanteIstituto;
-  }
-
-  /**
-   * Modifica se il genitore è rappresentante di istituto oppure no
-   *
-   * @param boolean $rappresentanteIstituto Vero se il genitore è rappresentante di istituto, falso altrimenti
-   *
-   * @return Genitore Oggetto Genitore
-   */
-  public function setRappresentanteIstituto($rappresentanteIstituto) {
-    $this->rappresentanteIstituto = ($rappresentanteIstituto == true);
+  public function setGiustificaOnline($giustificaOnline) {
+    $this->giustificaOnline = ($giustificaOnline == true);
     return $this;
   }
 
@@ -122,8 +94,7 @@ class Genitore extends Utente {
   public function __construct() {
     // valori predefiniti
     parent::__construct();
-    $this->rappresentanteClasse = false;
-    $this->rappresentanteIstituto = false;
+    $this->giustificaOnline = false;
   }
 
   /**

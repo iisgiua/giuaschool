@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,14 +14,17 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * Entrata - entità
  *
  * @ORM\Entity(repositoryClass="AppBundle\Repository\EntrataRepository")
- * @ORM\Table(name="gs_entrata")
+ * @ORM\Table(name="gs_entrata", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
  * @ORM\HasLifecycleCallbacks
+ *
+ * @UniqueEntity(fields={"data","alunno"}, message="field.unique")
  */
 class Entrata {
 
@@ -65,6 +68,13 @@ class Entrata {
   private $ora;
 
   /**
+   * @var boolean $ritardoBreve Indica se l'entrata in ritardo è un ritardo breve oppure no
+   *
+   * @ORM\Column(name="ritardo_breve", type="boolean", nullable=false)
+   */
+  private $ritardoBreve;
+
+  /**
    * @var string $note Note informative sull'entrata in ritardo
    *
    * @ORM\Column(type="text", nullable=true)
@@ -74,9 +84,18 @@ class Entrata {
   /**
    * @var boolean $valido Indica se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
    *
-   * @ORM\Column(name="valido", type="boolean", nullable=false)
+   * @ORM\Column(type="boolean", nullable=false)
    */
   private $valido;
+
+  /**
+   * @var string $motivazione Motivazione dell'assenza
+   *
+   * @ORM\Column(type="string", length=255, nullable=true)
+   *
+   * @Assert\Length(max=255, maxMessage="field.maxlength")
+   */
+  private $motivazione;
 
   /**
    * @var \DateTime $giustificato Data della giustificazione
@@ -193,6 +212,27 @@ class Entrata {
   }
 
   /**
+   * Indica se l'entrata in ritardo è un ritardo breve oppure no
+   *
+   * @return boolean Vero se è un ritardo breve, falso altrimenti
+   */
+  public function getRitardoBreve() {
+    return $this->ritardoBreve;
+  }
+
+  /**
+   * Modifica se l'entrata in ritardo è un ritardo breve oppure no
+   *
+   * @param boolean $ritardoBreve Vero se è un ritardo breve, falso altrimenti
+   *
+   * @return Entrata Oggetto Entrata
+   */
+  public function setRitardoBreve($ritardoBreve) {
+    $this->ritardoBreve = $ritardoBreve;
+    return $this;
+  }
+
+  /**
    * Restituisce le note informative sull'entrata in ritardo
    *
    * @return string Note informative sull'entrata in ritardo
@@ -231,6 +271,27 @@ class Entrata {
    */
   public function setValido($valido) {
     $this->valido = $valido;
+    return $this;
+  }
+
+  /**
+   * Restituisce la motivazione dell'assenza
+   *
+   * @return string Motivazione dell'assenza
+   */
+  public function getMotivazione() {
+    return $this->motivazione;
+  }
+
+  /**
+   * Modifica la motivazione dell'assenza
+   *
+   * @param string $motivazione Motivazione dell'assenza
+   *
+   * @return Entrata Oggetto Entrata
+   */
+  public function setMotivazione($motivazione) {
+    $this->motivazione = $motivazione;
     return $this;
   }
 
@@ -322,12 +383,21 @@ class Entrata {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->ritardoBreve = false;
+    $this->valido = false;
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return $this->data->format('d/m/Y').' '.$this->ora->format('H:i').', '.$this->alunno;
+    return $this->data->format('d/m/Y').' '.$this->ora->format('H:i').' - '.$this->alunno;
   }
 
 }

@@ -428,6 +428,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             // array(1.125, '1.13'),
             array(1.127, '1.13'),
             array(1.129, '1.13'),
+            array(1020 / 100, '10.20'),
         );
     }
 
@@ -451,6 +452,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             array(1.125, '1.12'),
             array(1.127, '1.13'),
             array(1.129, '1.13'),
+            array(1020 / 100, '10.20'),
         );
     }
 
@@ -474,6 +476,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             array(1.125, '1.12'),
             array(1.127, '1.13'),
             array(1.129, '1.13'),
+            array(1020 / 100, '10.20'),
         );
     }
 
@@ -498,6 +501,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             array(-1.123, '-1.12'),
             array(-1.125, '-1.12'),
             array(-1.127, '-1.12'),
+            array(1020 / 100, '10.20'),
         );
     }
 
@@ -522,6 +526,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             array(-1.123, '-1.13'),
             array(-1.125, '-1.13'),
             array(-1.127, '-1.13'),
+            array(1020 / 100, '10.20'),
         );
     }
 
@@ -546,6 +551,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             array(-1.123, '-1.12'),
             array(-1.125, '-1.12'),
             array(-1.127, '-1.12'),
+            array(1020 / 100, '10.20'),
         );
     }
 
@@ -570,6 +576,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             array(-1.123, '-1.13'),
             array(-1.125, '-1.13'),
             array(-1.127, '-1.13'),
+            array(1020 / 100, '10.20'),
         );
     }
 
@@ -621,7 +628,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
         $this->assertSame($expected, $parsedValue, $message);
         $this->assertSame($expectedPosition, $position, $message);
 
-        if ($expected === false) {
+        if (false === $expected) {
             $errorCode = IntlGlobals::U_PARSE_ERROR;
             $errorMessage = 'Number parsing failed: U_PARSE_ERROR';
         } else {
@@ -631,10 +638,10 @@ abstract class AbstractNumberFormatterTest extends TestCase
 
         $this->assertSame($errorMessage, $this->getIntlErrorMessage());
         $this->assertSame($errorCode, $this->getIntlErrorCode());
-        $this->assertSame($errorCode !== 0, $this->isIntlFailure($this->getIntlErrorCode()));
+        $this->assertSame(0 !== $errorCode, $this->isIntlFailure($this->getIntlErrorCode()));
         $this->assertSame($errorMessage, $formatter->getErrorMessage());
         $this->assertSame($errorCode, $formatter->getErrorCode());
-        $this->assertSame($errorCode !== 0, $this->isIntlFailure($formatter->getErrorCode()));
+        $this->assertSame(0 !== $errorCode, $this->isIntlFailure($formatter->getErrorCode()));
     }
 
     public function parseProvider()
@@ -644,7 +651,7 @@ abstract class AbstractNumberFormatterTest extends TestCase
             array('1.4suffix', (float) 1.4, '->parse() parses a number with a string suffix.', 3),
             array('-.4suffix', (float) -0.4, '->parse() parses a negative dot float with suffix.', 3),
             array('-123,4', false, '->parse() does not parse when invalid grouping used.', 6),
-            array('-1234,567', false, '->parse() does not parse when invalid grouping used.', 5),
+            array('-123,4567', false, '->parse() does not parse when invalid grouping used.', 9),
             array('-123,,456', false, '->parse() does not parse when invalid grouping used.', 4),
             array('-123,,456', -123.0, '->parse() parses when grouping is disabled.', 4, false),
         );

@@ -114,8 +114,6 @@ class GenericMetadata implements MetadataInterface
      *  - {@link TraversalStrategy::IMPLICIT} if $traverse is enabled
      *  - {@link TraversalStrategy::NONE} if $traverse is disabled
      *
-     * @param Constraint $constraint The constraint to add
-     *
      * @return $this
      *
      * @throws ConstraintDefinitionException When trying to add the
@@ -127,11 +125,11 @@ class GenericMetadata implements MetadataInterface
             throw new ConstraintDefinitionException(sprintf(
                 'The constraint "%s" can only be put on classes. Please use '.
                 '"Symfony\Component\Validator\Constraints\Valid" instead.',
-                get_class($constraint)
+                \get_class($constraint)
             ));
         }
 
-        if ($constraint instanceof Valid) {
+        if ($constraint instanceof Valid && null === $constraint->groups) {
             $this->cascadingStrategy = CascadingStrategy::CASCADE;
 
             if ($constraint->traverse) {
@@ -183,7 +181,7 @@ class GenericMetadata implements MetadataInterface
      */
     public function hasConstraints()
     {
-        return count($this->constraints) > 0;
+        return \count($this->constraints) > 0;
     }
 
     /**

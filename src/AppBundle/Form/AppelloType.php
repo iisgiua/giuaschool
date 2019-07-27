@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -45,6 +45,7 @@ class AppelloType extends AbstractType {
       ->add('ora', TimeType::class, array('label' => false,
         'widget' => 'single_text',
         'html5' => false,
+        'attr' => ['widget' => 'gs-picker'],
         'required' => true));
   }
 

@@ -11,13 +11,13 @@
 
 namespace Symfony\Component\Security\Core\Authorization\Voter;
 
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\ExpressionLanguage;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
-use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * ExpressionVoter votes based on the evaluation of an expression.
@@ -30,13 +30,6 @@ class ExpressionVoter implements VoterInterface
     private $trustResolver;
     private $roleHierarchy;
 
-    /**
-     * Constructor.
-     *
-     * @param ExpressionLanguage                   $expressionLanguage
-     * @param AuthenticationTrustResolverInterface $trustResolver
-     * @param RoleHierarchyInterface|null          $roleHierarchy
-     */
     public function __construct(ExpressionLanguage $expressionLanguage, AuthenticationTrustResolverInterface $trustResolver, RoleHierarchyInterface $roleHierarchy = null)
     {
         $this->expressionLanguage = $expressionLanguage;

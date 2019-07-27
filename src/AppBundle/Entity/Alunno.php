@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -44,27 +44,6 @@ class Alunno extends Utente {
    * @Assert\Choice(choices={"N","H","D","B"}, strict=true, message="field.choice")
    */
   private $bes;
-
-  /**
-   * @var boolean $rappresentanteClasse Indica se l'alunno è rappresentante di classe
-   *
-   * @ORM\Column(name="rappresentante_classe", type="boolean", nullable=false)
-   */
-  private $rappresentanteClasse;
-
-  /**
-   * @var boolean $rappresentanteIstituto Indica se l'alunno è rappresentante di istituto
-   *
-   * @ORM\Column(name="rappresentante_istituto", type="boolean", nullable=false)
-   */
-  private $rappresentanteIstituto;
-
-  /**
-   * @var boolean $rappresentanteConsulta Indica se l'alunno è rappresentante della consulta provinciale
-   *
-   * @ORM\Column(name="rappresentante_consulta", type="boolean", nullable=false)
-   */
-  private $rappresentanteConsulta;
 
   /**
    * @var string $autorizzaEntrata Autorizzazione all'entrata in ritardo
@@ -123,6 +102,13 @@ class Alunno extends Utente {
   private $credito4;
 
   /**
+   * @var boolean $giustificaOnline Indica se l'alunno può effettuare la giustificazione online oppure no
+   *
+   * @ORM\Column(name="giustifica_online", type="boolean", nullable=false)
+   */
+  private $giustificaOnline;
+
+  /**
    * @var string $foto Fotografia dell'alunno
    *
    * @ORM\Column(type="string", length=255, nullable=true)
@@ -164,69 +150,6 @@ class Alunno extends Utente {
    */
   public function setBes($bes) {
     $this->bes = $bes;
-    return $this;
-  }
-
-  /**
-   * Indica se l'alunno è rappresentante di classe oppure no
-   *
-   * @return boolean Vero se l'alunno è rappresentante di classe, falso altrimenti
-   */
-  public function getRappresentanteClasse() {
-    return $this->rappresentanteClasse;
-  }
-
-  /**
-   * Modifica se l'alunno è rappresentante di classe oppure no
-   *
-   * @param boolean $rappresentanteClasse Vero se l'alunno è rappresentante di classe, falso altrimenti
-   *
-   * @return Alunno Oggetto Alunno
-   */
-  public function setRappresentanteClasse($rappresentanteClasse) {
-    $this->rappresentanteClasse = ($rappresentanteClasse == true);
-    return $this;
-  }
-
-  /**
-   * Indica se l'alunno è rappresentante di istituto oppure no
-   *
-   * @return boolean Vero se l'alunno è rappresentante di istituto, falso altrimenti
-   */
-  public function getRappresentanteIstituto() {
-    return $this->rappresentanteIstituto;
-  }
-
-  /**
-   * Modifica se l'alunno è rappresentante di istituto oppure no
-   *
-   * @param boolean $rappresentanteIstituto Vero se l'alunno è rappresentante di istituto, falso altrimenti
-   *
-   * @return Alunno Oggetto Alunno
-   */
-  public function setRappresentanteIstituto($rappresentanteIstituto) {
-    $this->rappresentanteIstituto = ($rappresentanteIstituto == true);
-    return $this;
-  }
-
-  /**
-   * Indica se l'alunno è rappresentante della consulta provinciale oppure no
-   *
-   * @return boolean Vero se l'alunno è rappresentante della consulta provinciale, falso altrimenti
-   */
-  public function getRappresentanteConsulta() {
-    return $this->rappresentanteConsulta;
-  }
-
-  /**
-   * Modifica se l'alunno è rappresentante della consulta provinciale oppure no
-   *
-   * @param boolean $rappresentanteConsulta Vero se l'alunno è rappresentante della consulta provinciale, falso altrimenti
-   *
-   * @return Alunno Oggetto Alunno
-   */
-  public function setRappresentanteConsulta($rappresentanteConsulta) {
-    $this->rappresentanteConsulta = ($rappresentanteConsulta == true);
     return $this;
   }
 
@@ -378,6 +301,27 @@ class Alunno extends Utente {
   }
 
   /**
+   * Indica se l'alunno può effettuare la giustificazione online oppure no
+   *
+   * @return boolean Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
+   */
+  public function getGiustificaOnline() {
+    return $this->giustificaOnline;
+  }
+
+  /**
+   * Modifica se l'alunno può effettuare la giustificazione online oppure no
+   *
+   * @param boolean $giustificaOnline Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
+   *
+   * @return Alunno Oggetto Alunno
+   */
+  public function setGiustificaOnline($giustificaOnline) {
+    $this->giustificaOnline = ($giustificaOnline == true);
+    return $this;
+  }
+
+  /**
    * Restituisce la fotografia dell'alunno
    *
    * @return string|File Fotografia dell'alunno
@@ -429,11 +373,9 @@ class Alunno extends Utente {
     // valori predefiniti
     parent::__construct();
     $this->bes = 'N';
-    $this->rappresentanteClasse = false;
-    $this->rappresentanteIstituto = false;
-    $this->rappresentanteConsulta = false;
     $this->frequenzaEstero = false;
     $this->religione = 'S';
+    $this->giustificaOnline = false;
   }
 
   /**

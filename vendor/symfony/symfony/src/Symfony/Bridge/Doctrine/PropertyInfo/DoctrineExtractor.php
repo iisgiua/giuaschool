@@ -27,9 +27,6 @@ use Symfony\Component\PropertyInfo\Type;
  */
 class DoctrineExtractor implements PropertyListExtractorInterface, PropertyTypeExtractorInterface
 {
-    /**
-     * @var ClassMetadataFactory
-     */
     private $classMetadataFactory;
 
     public function __construct(ClassMetadataFactory $classMetadataFactory)
@@ -98,8 +95,18 @@ class DoctrineExtractor implements PropertyListExtractorInterface, PropertyTypeE
 
                 if (isset($associationMapping['indexBy'])) {
                     $indexProperty = $associationMapping['indexBy'];
+                    /** @var ClassMetadataInfo $subMetadata */
                     $subMetadata = $this->classMetadataFactory->getMetadataFor($associationMapping['targetEntity']);
                     $typeOfField = $subMetadata->getTypeOfField($indexProperty);
+
+                    if (null === $typeOfField) {
+                        $associationMapping = $subMetadata->getAssociationMapping($indexProperty);
+
+                        /** @var ClassMetadataInfo $subMetadata */
+                        $indexProperty = $subMetadata->getSingleAssociationReferencedJoinColumnName($indexProperty);
+                        $subMetadata = $this->classMetadataFactory->getMetadataFor($associationMapping['targetEntity']);
+                        $typeOfField = $subMetadata->getTypeOfField($indexProperty);
+                    }
 
                     $collectionKeyType = $this->getPhpType($typeOfField);
                 }
@@ -130,6 +137,15 @@ class DoctrineExtractor implements PropertyListExtractorInterface, PropertyTypeE
                 case 'vardatetime':
                 case DBALType::TIME:
                     return array(new Type(Type::BUILTIN_TYPE_OBJECT, $nullable, 'DateTime'));
+
+                case 'date_immutable':
+                case 'datetime_immutable':
+                case 'datetimetz_immutable':
+                case 'time_immutable':
+                    return array(new Type(Type::BUILTIN_TYPE_OBJECT, $nullable, 'DateTimeImmutable'));
+
+                case 'dateinterval':
+                    return array(new Type(Type::BUILTIN_TYPE_OBJECT, $nullable, 'DateInterval'));
 
                 case DBALType::TARRAY:
                     return array(new Type(Type::BUILTIN_TYPE_ARRAY, $nullable, null, true));

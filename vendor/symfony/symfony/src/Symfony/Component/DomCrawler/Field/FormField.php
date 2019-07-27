@@ -44,8 +44,6 @@ abstract class FormField
     protected $disabled;
 
     /**
-     * Constructor.
-     *
      * @param \DOMElement $node The node associated with this field
      */
     public function __construct(\DOMElement $node)
@@ -77,8 +75,6 @@ abstract class FormField
         if ($labels->length > 0) {
             return $labels->item(0);
         }
-
-        return;
     }
 
     /**

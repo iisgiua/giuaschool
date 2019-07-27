@@ -4,7 +4,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
   <div class="panel panel-primary gs-mt-4" >
     <div class="panel-heading">
       <div class="panel-title">{{ form_title|trans }}</div>
@@ -99,10 +98,7 @@ $(document).ready(function() {
 
 {% block _assenze_appello_lista_entry_widget %}
   {{ form_widget(form.presenza) }}
-  <div class="input-group time col-sm-3" style="">
-    {{ form_widget(form.ora, {'attr': {'widget': false}}) }}
-    <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-time"></span></span>
-  </div>
+  {{ form_widget(form.ora) }}
   {{ form_errors(form.ora) }}
   {{ form_widget(form.id) }}
 {% endblock %}

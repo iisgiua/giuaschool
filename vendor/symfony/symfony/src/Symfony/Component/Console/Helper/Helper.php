@@ -23,9 +23,7 @@ abstract class Helper implements HelperInterface
     protected $helperSet = null;
 
     /**
-     * Sets the helper set associated with this helper.
-     *
-     * @param HelperSet $helperSet A HelperSet instance
+     * {@inheritdoc}
      */
     public function setHelperSet(HelperSet $helperSet = null)
     {
@@ -33,9 +31,7 @@ abstract class Helper implements HelperInterface
     }
 
     /**
-     * Gets the helper set associated with this helper.
-     *
-     * @return HelperSet|null
+     * {@inheritdoc}
      */
     public function getHelperSet()
     {
@@ -52,7 +48,7 @@ abstract class Helper implements HelperInterface
     public static function strlen($string)
     {
         if (false === $encoding = mb_detect_encoding($string, null, true)) {
-            return strlen($string);
+            return \strlen($string);
         }
 
         return mb_strwidth($string, $encoding);
@@ -93,9 +89,9 @@ abstract class Helper implements HelperInterface
         foreach ($timeFormats as $index => $format) {
             if ($secs >= $format[0]) {
                 if ((isset($timeFormats[$index + 1]) && $secs < $timeFormats[$index + 1][0])
-                    || $index == count($timeFormats) - 1
+                    || $index == \count($timeFormats) - 1
                 ) {
-                    if (2 == count($format)) {
+                    if (2 == \count($format)) {
                         return $format[1];
                     }
 

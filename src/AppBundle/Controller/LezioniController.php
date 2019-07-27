@@ -2,19 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,8 +34,8 @@ class LezioniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/", name="lezioni")
-   * @Method("GET")
+   * @Route("/lezioni/", name="lezioni",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -62,8 +61,8 @@ class LezioniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/lezioni/classe/", name="lezioni_classe")
-   * @Method("GET")
+   * @Route("/lezioni/classe/", name="lezioni_classe",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -114,8 +113,8 @@ class LezioniController extends Controller {
    *
    * @Route("/lezioni/argomenti/{cattedra}/{classe}", name="lezioni_argomenti",
    *    requirements={"cattedra": "\d+", "classe": "\d+"},
-   *    defaults={"cattedra": 0, "classe": 0})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "classe": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -196,8 +195,8 @@ class LezioniController extends Controller {
    *
    * @Route("/lezioni/argomenti/riepilogo/{cattedra}/{data}", name="lezioni_argomenti_riepilogo",
    *    requirements={"cattedra": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
-   *    defaults={"data": "0000-00-00"})
-   * @Method("GET")
+   *    defaults={"data": "0000-00-00"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -206,6 +205,7 @@ class LezioniController extends Controller {
     // inizializza variabili
     $dati = null;
     $info = null;
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $template = 'lezioni/argomenti_riepilogo.html.twig';
     // parametro data
     if ($data == '0000-00-00') {
@@ -238,6 +238,12 @@ class LezioniController extends Controller {
     $info['materia'] = $cattedra->getMateria()->getNomeBreve();
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     $info['alunno'] = $cattedra->getAlunno();
+    // data prec/succ
+    $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
+    $data_fine = clone $data_inizio;
+    $data_fine->modify('last day of this month');
+    $data_succ = $em->getRepository('AppBundle:Festivita')->giornoSuccessivo($data_fine);
+    $data_prec = $em->getRepository('AppBundle:Festivita')->giornoPrecedente($data_inizio);
     // recupera dati
     $dati = $reg->riepilogo($data_obj, $cattedra);
     // visualizza pagina
@@ -246,6 +252,9 @@ class LezioniController extends Controller {
       'cattedra' => $cattedra,
       'classe' => $classe,
       'data' => $data_obj->format('Y-m-d'),
+      'data_succ' => $data_succ,
+      'data_prec' => $data_prec,
+      'mesi' => $mesi,
       'info' => $info,
       'dati' => $dati,
     ));
@@ -265,8 +274,8 @@ class LezioniController extends Controller {
    *
    * @Route("/lezioni/note/{cattedra}/{classe}", name="lezioni_note",
    *    requirements={"cattedra": "\d+", "classe": "\d+"},
-   *    defaults={"cattedra": 0, "classe": 0})
-   * @Method("GET")
+   *    defaults={"cattedra": 0, "classe": 0},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -336,22 +345,24 @@ class LezioniController extends Controller {
    * Crea automaticamente il programma svolto.
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    *
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/argomenti/programma/{cattedra}", name="lezioni_argomenti_programma",
-   *    requirements={"cattedra": "\d+"})
-   * @Method("GET")
+   *    requirements={"cattedra": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function argomentiProgrammaAction(EntityManagerInterface $em, RegistroUtil $reg, $cattedra) {
+  public function argomentiProgrammaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+                                            $cattedra) {
     // inizializza
     $info = null;
     $dati = null;
-    $dir = $this->getParameter('kernel.project_dir').'/documenti/tmp/';
+    $dir = $this->getParameter('dir_tmp').'/';
     $nomefile = md5(uniqid()).'-'.rand(1,1000).'.docx';
     // controlla cattedra
     $cattedra = $em->getRepository('AppBundle:Cattedra')->findOneBy(['id' => $cattedra,
@@ -382,7 +393,7 @@ class LezioniController extends Controller {
     \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
     $properties = $phpWord->getDocInfo();
-    $properties->setCreator('Istituto di Istruzione Superiore');
+    $properties->setCreator('Istituto di Istruzione Superiore ""');
     $properties->setTitle('Programma svolto - '.$info['classe'].' - '.$info['materia']);
     $properties->setDescription('');
     $properties->setSubject('');
@@ -417,8 +428,8 @@ class LezioniController extends Controller {
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     // intestazione
     $section->addImage($this->getParameter('kernel.project_dir').'/web/img/logo-italia.png', array(
-      'width' => 55,
-      'height' => 55,
+      'width' => 35,
+      'height' => 35,
       'positioning' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE,
       'posHorizontal' => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_CENTER,
       'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_COLUMN,
@@ -426,17 +437,18 @@ class LezioniController extends Controller {
       'posVerticalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_LINE
       ));
     $section->addTextBreak(1);
-    $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE STATALE',
+    $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE',
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addText('',
       array('bold' => true, 'italic' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText('',
+    $section->addText('CAGLIARI - ASSEMINI',
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addTextBreak(1);
-    $section->addText('ANNO SCOLASTICO 2017/2018',
+    $as = substr($session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $section->addText('ANNO SCOLASTICO '.$as,
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addTextBreak(1);

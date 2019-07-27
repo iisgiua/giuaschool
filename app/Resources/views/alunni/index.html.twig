@@ -1,11 +1,5 @@
 {% extends 'base.html.twig' %}
 
 {% block pagina_menu %}
-<ul class="nav navbar-nav gs-navbar-nav">
-  <li><a href="{{ path('home') }}"><span class="glyphicon glyphicon-backward gs-mr-2" aria-hidden="true"></span>Indietro</a></li>
-  <li{{ app.request.attributes.get('_route') == 'alunni_importa' ? ' class="active"' }}><a href="{{ path('alunni_importa') }}">Importa</a></li>
-  <li{{ app.request.attributes.get('_route')|slice(0,15) == 'alunni_modifica' ? ' class="active"' }}><a href="{{ path('alunni_modifica') }}">Modifica</a></li>
-  <li{{ app.request.attributes.get('_route')|slice(0,13) == 'alunni_classe' ? ' class="active"' }}><a href="{{ path('alunni_classe') }}">Cambio classe</a></li>
-  <li{{ app.request.attributes.get('_route')|slice(0,15) == 'alunni_password' ? ' class="active"' }}><a href="{{ path('alunni_password') }}">Genera Password</a></li>
-</ul>
+  {% include 'ruolo_amministratore/menu.html.twig' with {'attivo': 'alunni'} %}
 {% endblock %}

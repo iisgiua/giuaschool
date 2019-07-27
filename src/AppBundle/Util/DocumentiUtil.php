@@ -2,17 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\File\File;
@@ -77,7 +78,7 @@ class DocumentiUtil {
    * @return Array Dati formattati come array associativo
    */
   public function programmi(Docente $docente) {
-    $dir = $this->root.'/documenti/classe/';
+    $dir = $this->root.'/';
     $dati = null;
     // lista cattedre e programmi
     $cattedre = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
@@ -198,7 +199,7 @@ class DocumentiUtil {
     if ($ext != 'pdf') {
       // conversione
       $nomefile = $file->getRealPath();
-      $proc = new Process('/usr/bin/unoconv --preserve -f pdf -d document "'.$nomefile.'"');
+      $proc = new Process('/usr/bin/unoconv -f pdf -d document "'.$nomefile.'"', $file->getPath());
       $proc->run();
       if ($proc->isSuccessful() && file_exists($nomefile.'.pdf')) {
         // conversione ok
@@ -219,7 +220,7 @@ class DocumentiUtil {
    * @return Array Dati formattati come array associativo
    */
   public function relazioni(Docente $docente) {
-    $dir = $this->root.'/documenti/classe/';
+    $dir = $this->root.'/';
     $dati = null;
     // lista cattedre e relazioni
     $cattedre = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
@@ -233,6 +234,147 @@ class DocumentiUtil {
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
         'documento' => 'R', 'quinta' => 5])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($cattedre as $k=>$c) {
+      $dati[$k] = $c;
+      if ($c['documento_id']) {
+        // dati documento
+        $dati[$k]['dimensione'] = number_format($c['dimensione'] / 1000, 0, ',', '.');
+        // controlla azioni
+        $documento = $this->em->getRepository('AppBundle:Documento')->find($c['documento_id']);
+        // azione edit
+        if ($this->azioneDocumento('edit', new \DateTime(), $docente, $documento)) {
+          $dati[$k]['edit'] = 1;
+        }
+        // azione edit
+        if ($this->azioneDocumento('delete', new \DateTime(), $docente, $documento)) {
+          $dati[$k]['delete'] = 1;
+        }
+      } else {
+        // azione add
+        if ($this->azioneDocumento('add', new \DateTime(), $docente, null)) {
+          $dati[$k]['add'] = 1;
+        }
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera i piani di lavoro del docente indicato
+   *
+   * @param Docente $docente Docente selezionato
+   *
+   * @return Array Dati formattati come array associativo
+   */
+  public function piani(Docente $docente) {
+    $dir = $this->root.'/';
+    $dati = null;
+    // lista cattedre e relazioni
+    $cattedre = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
+      ->select('c.id AS cattedra,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d.id AS documento_id,d.file,d.dimensione')
+      ->join('c.materia', 'm')
+      ->join('c.classe', 'cl')
+      ->join('cl.corso', 'co')
+      ->join('cl.sede', 's')
+      ->leftJoin('AppBundle:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno')
+      ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
+      ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
+        'documento' => 'L'])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($cattedre as $k=>$c) {
+      $dati[$k] = $c;
+      if ($c['documento_id']) {
+        // dati documento
+        $dati[$k]['dimensione'] = number_format($c['dimensione'] / 1000, 0, ',', '.');
+        // controlla azioni
+        $documento = $this->em->getRepository('AppBundle:Documento')->find($c['documento_id']);
+        // azione edit
+        if ($this->azioneDocumento('edit', new \DateTime(), $docente, $documento)) {
+          $dati[$k]['edit'] = 1;
+        }
+        // azione edit
+        if ($this->azioneDocumento('delete', new \DateTime(), $docente, $documento)) {
+          $dati[$k]['delete'] = 1;
+        }
+      } else {
+        // azione add
+        if ($this->azioneDocumento('add', new \DateTime(), $docente, null)) {
+          $dati[$k]['add'] = 1;
+        }
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera i documenti dei Consigli di Classe del docente indicato
+   *
+   * @param Docente $docente Docente selezionato
+   * @param array $search Criteri di ricerca
+   * @param int $pagina Pagina corrente
+   * @param int $limite Numero di elementi per pagina
+   *
+   * @return Array Dati formattati come array associativo
+   */
+  public function classi(Docente $docente, $search, $pagina, $limite) {
+    // lista documenti
+    $param = ['tipi' => ['L', 'M'], 'attiva' => 1, 'docente' => $docente];
+    $documenti = $this->em->getRepository('AppBundle:Documento')->createQueryBuilder('d')
+      ->join('d.classe', 'cl')
+      ->join('AppBundle:Cattedra', 'ca', 'WHERE', 'ca.classe=cl.id')
+      ->leftJoin('d.materia', 'm')
+      ->where('d.tipo IN (:tipi) AND ca.attiva=:attiva AND ca.docente=:docente');
+    if ($search['classe']) {
+      $documenti = $documenti
+        ->andWhere('cl.id=:classe');
+      $param['classe'] = $search['classe'];
+    }
+    if ($search['tipo']) {
+      $documenti = $documenti
+        ->andWhere('d.tipo=:tipo');
+      $param['tipo'] = $search['tipo'];
+    }
+    $documenti = $documenti
+      ->groupBy('cl.anno,cl.sezione,d.tipo,m.nomeBreve')
+      ->orderBy('cl.anno,cl.sezione,d.tipo,m.nomeBreve', 'ASC')
+      ->setParameters($param)
+      ->getQuery();
+    // paginazione
+    $paginator = new Paginator($documenti);
+    $paginator->getQuery()
+      ->setFirstResult($limite * ($pagina - 1))
+      ->setMaxResults($limite);
+    $dati['lista'] = $paginator;
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera i documenti del 15 maggio del docente indicato
+   *
+   * @param Docente $docente Docente selezionato
+   *
+   * @return Array Dati formattati come array associativo
+   */
+  public function doc15(Docente $docente) {
+    $dir = $this->root.'/';
+    $dati = null;
+    // lista cattedre e relazioni
+    $cattedre = $this->em->getRepository('AppBundle:Cattedra')->createQueryBuilder('c')
+      ->select('DISTINCT cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,d.id AS documento_id,d.file,d.dimensione')
+      ->join('c.classe', 'cl')
+      ->join('cl.corso', 'co')
+      ->join('cl.sede', 's')
+      ->leftJoin('AppBundle:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id')
+      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND cl.anno=:quinta AND cl.coordinatore=:docente')
+      ->orderBy('cl.anno,cl.sezione', 'ASC')
+      ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'quinta' => 5, 'documento' => 'M'])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $k=>$c) {

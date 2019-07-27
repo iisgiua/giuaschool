@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
   {% if not cattedra and not classe %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_osservazioni'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
@@ -18,8 +17,9 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
   <div class="row gs-mb-4">
     <div class="col-sm-6">
-      <strong class="gs-big">Data:</strong>
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {'cattedra': cattedra.id, 'classe': classe.id, 'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {'cattedra': cattedra.id, 'classe': classe.id, 'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali') }}" role="button" title="Visualizza il diario personale in cui inserire le proprie osservazioni"><span class="glyphicon glyphicon-book gs-mr-3"></span><strong>Diario personale</strong></a>

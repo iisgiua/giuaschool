@@ -11,12 +11,12 @@
 
 namespace Symfony\Component\Form;
 
-use Symfony\Component\Form\Exception\RuntimeException;
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\Exception\AlreadySubmittedException;
-use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Exception\OutOfBoundsException;
+use Symfony\Component\Form\Exception\RuntimeException;
+use Symfony\Component\Form\Exception\TransformationFailedException;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\Util\FormUtil;
 use Symfony\Component\Form\Util\InheritDataAwareIterator;
 use Symfony\Component\Form\Util\OrderedHashMap;
@@ -49,7 +49,7 @@ use Symfony\Component\PropertyAccess\PropertyPath;
  * either as "Y-m-d" string or as timestamp. Internally we still want to
  * use a DateTime object for processing. To convert the data from string/integer
  * to DateTime you can set a normalization transformer by calling
- * addNormTransformer(). The normalized data is then converted to the displayed
+ * addModelTransformer(). The normalized data is then converted to the displayed
  * data as described before.
  *
  * The conversions (1) -> (2) -> (3) use the transform methods of the transformers.
@@ -160,8 +160,6 @@ class Form implements \IteratorAggregate, FormInterface
 
     /**
      * Creates a new form based on the given configuration.
-     *
-     * @param FormConfigInterface $config The form configuration
      *
      * @throws LogicException if a data mapper is not provided for a compound form
      */
@@ -324,7 +322,7 @@ class Form implements \IteratorAggregate, FormInterface
             return $this;
         }
 
-        if (is_object($modelData) && !$this->config->getByReference()) {
+        if (\is_object($modelData) && !$this->config->getByReference()) {
             $modelData = clone $modelData;
         }
 
@@ -356,9 +354,9 @@ class Form implements \IteratorAggregate, FormInterface
             $dataClass = $this->config->getDataClass();
 
             if (null !== $dataClass && !$viewData instanceof $dataClass) {
-                $actualType = is_object($viewData)
-                    ? 'an instance of class '.get_class($viewData)
-                    : 'a(n) '.gettype($viewData);
+                $actualType = \is_object($viewData)
+                    ? 'an instance of class '.\get_class($viewData)
+                    : 'a(n) '.\gettype($viewData);
 
                 throw new LogicException(
                     'The form\'s view data is expected to be an instance of class '.
@@ -378,7 +376,7 @@ class Form implements \IteratorAggregate, FormInterface
 
         // It is not necessary to invoke this method if the form doesn't have children,
         // even if the form is compound.
-        if (count($this->children) > 0) {
+        if (\count($this->children) > 0) {
             // Update child forms from the data
             $iterator = new InheritDataAwareIterator($this->children);
             $iterator = new \RecursiveIteratorIterator($iterator);
@@ -563,7 +561,7 @@ class Form implements \IteratorAggregate, FormInterface
                     $submittedData = array();
                 }
 
-                if (!is_array($submittedData)) {
+                if (!\is_array($submittedData)) {
                     throw new TransformationFailedException('Compound forms expect an array or NULL on submission.');
                 }
 
@@ -620,7 +618,7 @@ class Form implements \IteratorAggregate, FormInterface
                 // Merge form data from children into existing view data
                 // It is not necessary to invoke this method if the form has no children,
                 // even if it is compound.
-                if (count($this->children) > 0) {
+                if (\count($this->children) > 0) {
                     // Use InheritDataAwareIterator to process children of
                     // descendants that inherit this form's data.
                     // These descendants will not be submitted normally (see the check
@@ -725,7 +723,7 @@ class Form implements \IteratorAggregate, FormInterface
 
         return FormUtil::isEmpty($this->modelData) ||
             // arrays, countables
-            ((is_array($this->modelData) || $this->modelData instanceof \Countable) && 0 === count($this->modelData)) ||
+            ((\is_array($this->modelData) || $this->modelData instanceof \Countable) && 0 === \count($this->modelData)) ||
             // traversables that are not countable
             ($this->modelData instanceof \Traversable && 0 === iterator_count($this->modelData));
     }
@@ -736,7 +734,7 @@ class Form implements \IteratorAggregate, FormInterface
     public function isValid()
     {
         if (!$this->submitted) {
-            @trigger_error('Call Form::isValid() with an unsubmitted form is deprecated since version 3.2 and will throw an exception in 4.0. Use Form::isSubmitted() before Form::isValid() instead.', E_USER_DEPRECATED);
+            @trigger_error('Call Form::isValid() with an unsubmitted form is deprecated since Symfony 3.2 and will throw an exception in 4.0. Use Form::isSubmitted() before Form::isValid() instead.', E_USER_DEPRECATED);
 
             return false;
         }
@@ -745,7 +743,7 @@ class Form implements \IteratorAggregate, FormInterface
             return true;
         }
 
-        return 0 === count($this->getErrors(true));
+        return 0 === \count($this->getErrors(true));
     }
 
     /**
@@ -782,7 +780,7 @@ class Form implements \IteratorAggregate, FormInterface
 
                 $iterator = $child->getErrors(true, $flatten);
 
-                if (0 === count($iterator)) {
+                if (0 === \count($iterator)) {
                     continue;
                 }
 
@@ -844,11 +842,11 @@ class Form implements \IteratorAggregate, FormInterface
         }
 
         if (!$child instanceof FormInterface) {
-            if (!is_string($child) && !is_int($child)) {
+            if (!\is_string($child) && !\is_int($child)) {
                 throw new UnexpectedTypeException($child, 'string, integer or Symfony\Component\Form\FormInterface');
             }
 
-            if (null !== $type && !is_string($type) && !$type instanceof FormTypeInterface) {
+            if (null !== $type && !\is_string($type) && !$type instanceof FormTypeInterface) {
                 throw new UnexpectedTypeException($type, 'string or Symfony\Component\Form\FormTypeInterface');
             }
 
@@ -944,7 +942,7 @@ class Form implements \IteratorAggregate, FormInterface
      *
      * @return FormInterface The child form
      *
-     * @throws \OutOfBoundsException If the named child does not exist.
+     * @throws \OutOfBoundsException if the named child does not exist
      */
     public function offsetGet($name)
     {
@@ -957,8 +955,8 @@ class Form implements \IteratorAggregate, FormInterface
      * @param string        $name  Ignored. The name of the child is used
      * @param FormInterface $child The child to be added
      *
-     * @throws AlreadySubmittedException If the form has already been submitted.
-     * @throws LogicException            When trying to add a child to a non-compound form.
+     * @throws AlreadySubmittedException if the form has already been submitted
+     * @throws LogicException            when trying to add a child to a non-compound form
      *
      * @see self::add()
      */
@@ -972,7 +970,7 @@ class Form implements \IteratorAggregate, FormInterface
      *
      * @param string $name The name of the child to remove
      *
-     * @throws AlreadySubmittedException If the form has already been submitted.
+     * @throws AlreadySubmittedException if the form has already been submitted
      */
     public function offsetUnset($name)
     {
@@ -996,7 +994,7 @@ class Form implements \IteratorAggregate, FormInterface
      */
     public function count()
     {
-        return count($this->children);
+        return \count($this->children);
     }
 
     /**
@@ -1067,7 +1065,7 @@ class Form implements \IteratorAggregate, FormInterface
         try {
             $transformers = $this->config->getModelTransformers();
 
-            for ($i = count($transformers) - 1; $i >= 0; --$i) {
+            for ($i = \count($transformers) - 1; $i >= 0; --$i) {
                 $value = $transformers[$i]->reverseTransform($value);
             }
         } catch (TransformationFailedException $exception) {
@@ -1134,7 +1132,7 @@ class Form implements \IteratorAggregate, FormInterface
         }
 
         try {
-            for ($i = count($transformers) - 1; $i >= 0; --$i) {
+            for ($i = \count($transformers) - 1; $i >= 0; --$i) {
                 $value = $transformers[$i]->reverseTransform($value);
             }
         } catch (TransformationFailedException $exception) {

@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_coordinatore.html.twig' %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_situazione_alunno'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.cognome~' '~alunno.nome }}</h1>
   <div class="row gs-mb-0">
     <div class="text-center">
@@ -96,6 +95,133 @@
           {% endif %}
       </tr>
         {% endfor %}
+    </tbody>
+  </table>
+      {% elseif periodo == '1' %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-5">Materia</th>
+        <th class="col-sm-3">Profitto</th>
+        <th class="col-sm-2">Debito formativo</th>
+        <th class="col-sm-2">Ore di assenza</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for materia,m in v.materie %}
+      <tr>
+        <td><strong>{{ m.nome }}</strong></td>
+          {% if m.tipo == 'R' and alunno.religione != 'S' %}
+        <td><strong>--</strong></td>
+        <td></td>
+        <td></td>
+          {% elseif m.tipo == 'C'  %}
+        <td><span class="label label-{{ v.voti[materia].unico < 42 ? 'danger' : (v.voti[materia].unico < 43 ? 'warning' : 'success') }} gs-big">{{ info.condotta['1'][v.voti[materia].unico] }}</span></td>
+        <td></td>
+        <td></td>
+          {% else %}
+        <td><span class="label label-{{ v.voti[materia].unico < 33 ? 'danger' : (v.voti[materia].unico < 34 ? 'warning' : 'success') }} gs-big">{{ info.giudizi['1'][v.voti[materia].unico] }}</span></td>
+        <td>
+            {% if v.debiti[materia] is defined %}
+          <span class="label label-{{ v.voti[materia].recupero == 'N' ? 'danger' : 'success' }} gs-big">{{ ('label.recupero_'~v.voti[materia].recupero)|trans }}</span>
+            {% endif %}
+        </td>
+        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+          {% endif %}
+      </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+      {% elseif periodo == 'F' %}
+        {% if v.noscrutinato is defined and v.noscrutinato == 'A' %}
+  <div class="alert alert-warning gs-mt-4 text-center" role="alert">
+    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ 'label.no_scrutinabile_assenze'|trans }}</strong>
+  </div>
+        {% elseif v.noscrutinato is defined and v.noscrutinato == 'C' %}
+  <div class="alert alert-warning gs-mt-4 text-center" role="alert">
+    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ 'label.no_scrutinabile_cessata_frequenza'|trans }}</strong>
+  </div>
+        {% else %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-4">Materia</th>
+        <th class="col-sm-2">Proposta</th>
+        <th class="col-sm-4">Voto</th>
+        <th class="col-sm-2">Ore di assenza</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for materia,m in v.materie %}
+      <tr>
+        <td><strong>{{ m.nome }}</strong></td>
+            {% if m.tipo == 'R' %}
+              {% if alunno.religione != 'S' %}
+        <td><strong>--</strong></td>
+        <td><strong>--</strong></td>
+        <td></td>
+              {% else %}
+        <td><span class="label label-{{ v.proposte[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.proposte[materia].unico] }}</span></td>
+        <td><span class="label label-{{ v.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</span></td>
+        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+              {% endif %}
+            {% elseif m.tipo == 'C' %}
+        <td> </td>
+        <td><span class="label label-{{ v.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</span></td>
+        <td></td>
+            {% else %}
+        <td><span class="label label-{{ v.proposte[materia].unico < 5 ? 'danger' : (v.proposte[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ v.proposte[materia].unico == 0 ? 'NC' : v.proposte[materia].unico }}</span></td>
+        <td>
+          <span class="label label-{{ v.voti[materia].unico < 5 ? 'danger' : (v.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}</span>
+              {% if v.debiti[materia] is defined and v.esito.esito == 'S' %}
+              <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
+              <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
+              {% endif %}
+        </td>
+        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+            {% endif %}
+      </tr>
+          {% endfor %}
+    </tbody>
+  </table>
+        {% endif %}
+      {% elseif periodo == 'I' %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-4">Materia</th>
+        <th class="col-sm-6">Voto</th>
+        <th class="col-sm-2">Ore di assenza</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for materia,m in v.materie %}
+      <tr>
+        <td><strong>{{ m.nome }}</strong></td>
+            {% if m.tipo == 'R' %}
+              {% if alunno.religione != 'S' %}
+        <td><strong>--</strong></td>
+        <td></td>
+              {% else %}
+        <td><span class="label label-{{ v.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</span></td>
+        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+              {% endif %}
+            {% elseif m.tipo == 'C' %}
+        <td><span class="label label-{{ v.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</span></td>
+        <td></td>
+            {% else %}
+        <td>
+          <span class="label label-{{ v.voti[materia].unico < 5 ? 'danger' : (v.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}</span>
+        </td>
+        <td><span class="label label-default">{{ v.voti[materia].assenze }}</span></td>
+            {% endif %}
+      </tr>
+          {% endfor %}
     </tbody>
   </table>
       {% endif %}

@@ -34,11 +34,11 @@ class ImageValidator extends FileValidator
             throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\Image');
         }
 
-        $violations = count($this->context->getViolations());
+        $violations = \count($this->context->getViolations());
 
         parent::validate($value, $constraint);
 
-        $failed = count($this->context->getViolations()) !== $violations;
+        $failed = \count($this->context->getViolations()) !== $violations;
 
         if ($failed || null === $value || '' === $value) {
             return;
@@ -46,6 +46,7 @@ class ImageValidator extends FileValidator
 
         if (null === $constraint->minWidth && null === $constraint->maxWidth
             && null === $constraint->minHeight && null === $constraint->maxHeight
+            && null === $constraint->minPixels && null === $constraint->maxPixels
             && null === $constraint->minRatio && null === $constraint->maxRatio
             && $constraint->allowSquare && $constraint->allowLandscape && $constraint->allowPortrait
             && !$constraint->detectCorrupted) {
@@ -54,7 +55,7 @@ class ImageValidator extends FileValidator
 
         $size = @getimagesize($value);
 
-        if (empty($size) || ($size[0] === 0) || ($size[1] === 0)) {
+        if (empty($size) || (0 === $size[0]) || (0 === $size[1])) {
             $this->context->buildViolation($constraint->sizeNotDetectedMessage)
                 ->setCode(Image::SIZE_NOT_DETECTED_ERROR)
                 ->addViolation();
@@ -67,7 +68,7 @@ class ImageValidator extends FileValidator
 
         if ($constraint->minWidth) {
             if (!ctype_digit((string) $constraint->minWidth)) {
-                throw new ConstraintDefinitionException(sprintf('"%s" is not a valid minimum width', $constraint->minWidth));
+                throw new ConstraintDefinitionException(sprintf('"%s" is not a valid minimum width.', $constraint->minWidth));
             }
 
             if ($width < $constraint->minWidth) {
@@ -83,7 +84,7 @@ class ImageValidator extends FileValidator
 
         if ($constraint->maxWidth) {
             if (!ctype_digit((string) $constraint->maxWidth)) {
-                throw new ConstraintDefinitionException(sprintf('"%s" is not a valid maximum width', $constraint->maxWidth));
+                throw new ConstraintDefinitionException(sprintf('"%s" is not a valid maximum width.', $constraint->maxWidth));
             }
 
             if ($width > $constraint->maxWidth) {
@@ -123,6 +124,40 @@ class ImageValidator extends FileValidator
                     ->setParameter('{{ height }}', $height)
                     ->setParameter('{{ max_height }}', $constraint->maxHeight)
                     ->setCode(Image::TOO_HIGH_ERROR)
+                    ->addViolation();
+            }
+        }
+
+        $pixels = $width * $height;
+
+        if (null !== $constraint->minPixels) {
+            if (!ctype_digit((string) $constraint->minPixels)) {
+                throw new ConstraintDefinitionException(sprintf('"%s" is not a valid minimum amount of pixels', $constraint->minPixels));
+            }
+
+            if ($pixels < $constraint->minPixels) {
+                $this->context->buildViolation($constraint->minPixelsMessage)
+                    ->setParameter('{{ pixels }}', $pixels)
+                    ->setParameter('{{ min_pixels }}', $constraint->minPixels)
+                    ->setParameter('{{ height }}', $height)
+                    ->setParameter('{{ width }}', $width)
+                    ->setCode(Image::TOO_FEW_PIXEL_ERROR)
+                    ->addViolation();
+            }
+        }
+
+        if (null !== $constraint->maxPixels) {
+            if (!ctype_digit((string) $constraint->maxPixels)) {
+                throw new ConstraintDefinitionException(sprintf('"%s" is not a valid maximum amount of pixels', $constraint->maxPixels));
+            }
+
+            if ($pixels > $constraint->maxPixels) {
+                $this->context->buildViolation($constraint->maxPixelsMessage)
+                    ->setParameter('{{ pixels }}', $pixels)
+                    ->setParameter('{{ max_pixels }}', $constraint->maxPixels)
+                    ->setParameter('{{ height }}', $height)
+                    ->setParameter('{{ width }}', $width)
+                    ->setCode(Image::TOO_MANY_PIXEL_ERROR)
                     ->addViolation();
             }
         }
@@ -182,7 +217,7 @@ class ImageValidator extends FileValidator
         }
 
         if ($constraint->detectCorrupted) {
-            if (!function_exists('imagecreatefromstring')) {
+            if (!\function_exists('imagecreatefromstring')) {
                 throw new RuntimeException('Corrupted images detection requires installed and enabled GD extension');
             }
 

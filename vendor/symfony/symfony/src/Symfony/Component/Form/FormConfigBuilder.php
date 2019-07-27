@@ -11,14 +11,14 @@
 
 namespace Symfony\Component\Form;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\ImmutableEventDispatcher;
 use Symfony\Component\Form\Exception\BadMethodCallException;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyPath;
 use Symfony\Component\PropertyAccess\PropertyPathInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\EventDispatcher\ImmutableEventDispatcher;
 
 /**
  * A basic form configuration.
@@ -32,7 +32,7 @@ class FormConfigBuilder implements FormConfigBuilderInterface
      *
      * @var NativeRequestHandler
      */
-    private static $nativeRequestProcessor;
+    private static $nativeRequestHandler;
 
     /**
      * The accepted request methods.
@@ -138,7 +138,7 @@ class FormConfigBuilder implements FormConfigBuilderInterface
     private $data;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $dataClass;
 
@@ -181,12 +181,12 @@ class FormConfigBuilder implements FormConfigBuilderInterface
      * Creates an empty form configuration.
      *
      * @param string|int               $name       The form name
-     * @param string                   $dataClass  The class of the form's data
+     * @param string|null              $dataClass  The class of the form's data
      * @param EventDispatcherInterface $dispatcher The event dispatcher
      * @param array                    $options    The form options
      *
-     * @throws InvalidArgumentException If the data class is not a valid class or if
-     *                                  the name contains invalid characters.
+     * @throws InvalidArgumentException if the data class is not a valid class or if
+     *                                  the name contains invalid characters
      */
     public function __construct($name, $dataClass, EventDispatcherInterface $dispatcher, array $options = array())
     {
@@ -496,10 +496,10 @@ class FormConfigBuilder implements FormConfigBuilderInterface
     public function getRequestHandler()
     {
         if (null === $this->requestHandler) {
-            if (null === self::$nativeRequestProcessor) {
-                self::$nativeRequestProcessor = new NativeRequestHandler();
+            if (null === self::$nativeRequestHandler) {
+                self::$nativeRequestHandler = new NativeRequestHandler();
             }
-            $this->requestHandler = self::$nativeRequestProcessor;
+            $this->requestHandler = self::$nativeRequestHandler;
         }
 
         return $this->requestHandler;
@@ -790,7 +790,7 @@ class FormConfigBuilder implements FormConfigBuilderInterface
 
         $upperCaseMethod = strtoupper($method);
 
-        if (!in_array($upperCaseMethod, self::$allowedMethods)) {
+        if (!\in_array($upperCaseMethod, self::$allowedMethods)) {
             throw new InvalidArgumentException(sprintf(
                 'The form method is "%s", but should be one of "%s".',
                 $method,
@@ -852,12 +852,12 @@ class FormConfigBuilder implements FormConfigBuilderInterface
      *
      * @param string|int $name The tested form name
      *
-     * @throws UnexpectedTypeException  If the name is not a string or an integer.
-     * @throws InvalidArgumentException If the name contains invalid characters.
+     * @throws UnexpectedTypeException  if the name is not a string or an integer
+     * @throws InvalidArgumentException if the name contains invalid characters
      */
     public static function validateName($name)
     {
-        if (null !== $name && !is_string($name) && !is_int($name)) {
+        if (null !== $name && !\is_string($name) && !\is_int($name)) {
             throw new UnexpectedTypeException($name, 'string, integer or null');
         }
 

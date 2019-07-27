@@ -2,19 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -24,12 +23,17 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormError;
 use AppBundle\Entity\RichiestaColloquio;
+use AppBundle\Entity\Alunno;
+use AppBundle\Entity\Assenza;
+use AppBundle\Entity\Entrata;
 use AppBundle\Util\GenitoriUtil;
 use AppBundle\Util\RegistroUtil;
 use AppBundle\Util\BachecaUtil;
 use AppBundle\Util\AgendaUtil;
+use AppBundle\Util\LogHandler;
 
 
 /**
@@ -40,6 +44,7 @@ class GenitoriController extends Controller {
   /**
    * Mostra lezioni svolte
    *
+   * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
@@ -50,13 +55,13 @@ class GenitoriController extends Controller {
    *
    * @Route("/genitori/lezioni/{data}", name="genitori_lezioni",
    *    requirements={"data": "\d\d\d\d-\d\d-\d\d"},
-   *    defaults={"data": "0000-00-00"})
-   * @Method("GET")
+   *    defaults={"data": "0000-00-00"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
-  public function lezioniAction(SessionInterface $session, TranslatorInterface $trans, GenitoriUtil $gen,
-                                 RegistroUtil $reg, $data) {
+  public function lezioniAction(EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans,
+                                 GenitoriUtil $gen, RegistroUtil $reg, $data) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
@@ -64,6 +69,8 @@ class GenitoriController extends Controller {
     $info = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    $data_succ = null;
+    $data_prec = null;
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
@@ -80,10 +87,16 @@ class GenitoriController extends Controller {
       $session->set('/APP/GENITORE/data_lezione', $data);
     }
     // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.invalid_params');
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
     }
     // legge la classe (può essere null)
     $classe = $reg->classeInData($data_obj, $alunno);
@@ -92,6 +105,14 @@ class GenitoriController extends Controller {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     if ($classe) {
+      // data prec/succ
+      $data_succ = (clone $data_obj);
+      $data_succ = $em->getRepository('AppBundle:Festivita')->giornoSuccessivo($data_succ);
+      if ($data_succ && $data_succ->format('Y-m-d') > (new \DateTime())->format('Y-m-d')) {
+        $data_succ = null;
+      }
+      $data_prec = (clone $data_obj);
+      $data_prec = $em->getRepository('AppBundle:Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -111,6 +132,8 @@ class GenitoriController extends Controller {
       'alunno' => $alunno,
       'classe' => $classe,
       'data' => $data_obj->format('Y-m-d'),
+      'data_succ' => $data_succ,
+      'data_prec' => $data_prec,
       'settimana' => $settimana,
       'mesi' => $mesi,
       'errore' => $errore,
@@ -133,11 +156,10 @@ class GenitoriController extends Controller {
    *
    * @Route("/genitori/argomenti/{idmateria}", name="genitori_argomenti",
    *    requirements={"idmateria": "\d+"},
-   *    defaults={"idmateria": 0})
+   *    defaults={"idmateria": 0},
+   *    methods={"GET"})
    *
-   * @Method("GET")
-   *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
   public function argomentiAction(EntityManagerInterface $em, TranslatorInterface $trans, GenitoriUtil $gen,
                                    RegistroUtil $reg, $idmateria) {
@@ -158,10 +180,16 @@ class GenitoriController extends Controller {
       $materia = null;
     }
     // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.invalid_params');
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
     }
     // legge la classe (può essere null)
     $classe = $reg->classeInData(new \DateTime(), $alunno);
@@ -214,11 +242,10 @@ class GenitoriController extends Controller {
    *
    * @Route("/genitori/voti/{idmateria}", name="genitori_voti",
    *    requirements={"idmateria": "\d+"},
-   *    defaults={"idmateria": 0})
+   *    defaults={"idmateria": 0},
+   *    methods={"GET"})
    *
-   * @Method("GET")
-   *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
   public function votiAction(EntityManagerInterface $em, TranslatorInterface $trans, GenitoriUtil $gen,
                               RegistroUtil $reg, $idmateria) {
@@ -239,10 +266,16 @@ class GenitoriController extends Controller {
       $materia = null;
     }
     // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.invalid_params');
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
     }
     // legge la classe (può essere null)
     $classe = $reg->classeInData(new \DateTime(), $alunno);
@@ -285,29 +318,39 @@ class GenitoriController extends Controller {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/genitori/assenze/", name="genitori_assenze")
-   * @Method("GET")
+   * @Route("/genitori/assenze/{posizione}", name="genitori_assenze",
+   *    requirements={"posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
-  public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg) {
+  public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg, $posizione) {
     // inizializza variabili
     $errore = null;
     $dati = null;
     // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.invalid_params');
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
     }
     // legge la classe (può essere null)
     $classe = $reg->classeInData(new \DateTime(), $alunno);
     if ($classe) {
       // recupera dati
       $dati = $gen->assenze($classe, $alunno);
+      $dati['giustifica'] = $gen->giusticazioneOnline($this->getUser());
     } else {
       // nessuna classe
       $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
@@ -319,6 +362,7 @@ class GenitoriController extends Controller {
       'classe' => $classe,
       'errore' => $errore,
       'dati' => $dati,
+      'posizione' => $posizione,
     ));
   }
 
@@ -331,20 +375,26 @@ class GenitoriController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/genitori/note/", name="genitori_note")
-   * @Method("GET")
+   * @Route("/genitori/note/", name="genitori_note",
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
   public function noteAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg) {
     // inizializza variabili
     $errore = null;
     $dati = null;
     // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.invalid_params');
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
     }
     // legge la classe (può essere null)
     $classe = $reg->classeInData(new \DateTime(), $alunno);
@@ -374,8 +424,8 @@ class GenitoriController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/genitori/osservazioni/", name="genitori_osservazioni")
-   * @Method("GET")
+   * @Route("/genitori/osservazioni/", name="genitori_osservazioni",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_GENITORE')")
    */
@@ -418,11 +468,11 @@ class GenitoriController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/pagelle/{periodo}", name="genitori_pagelle",
-   *    requirements={"periodo": "P|S|F|R|1|2|0"},
-   *    defaults={"periodo": "0"})
-   * @Method("GET")
+   *    requirements={"periodo": "P|S|F|I|1|2|0"},
+   *    defaults={"periodo": "0"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
   public function pagelleAction(TranslatorInterface $trans, GenitoriUtil $gen,
                                  $periodo) {
@@ -436,27 +486,41 @@ class GenitoriController extends Controller {
     $info['giudizi']['1']['C'] = [40 => 'Non Classificata', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
     // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.invalid_params');
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
     }
     // legge la classe (può essere null)
     $classe = $alunno->getClasse();
     if ($classe) {
       // legge lista periodi
-      $lista_periodi = $gen->periodiScrutini($classe);
-      if ($periodo == '0') {
-        // ultimo scrutinio visibile
-        $scrutinio = $gen->scrutinioVisibile($classe);
-        $periodo = $scrutinio['periodo'];
-      } elseif (!isset($lista_periodi[$periodo]) || $lista_periodi[$periodo] != 'C' ||
-                !$gen->scrutinioVisibile($classe, $periodo)) {
-        // periodo indicato non valido
-        $periodo = null;
+      $dati_periodi = $gen->pagelleAlunno($alunno);
+      // seleziona scrutinio indicato o ultimo
+      $scrutinio = (count($dati_periodi) > 0 ? $dati_periodi[0][1] : null);
+      foreach ($dati_periodi as $per) {
+        if ($per[0] == $periodo) {
+          $scrutinio = $per[1];
+          // periodo indicato è presente
+          break;
+        }
       }
-      if ($periodo) {
+      // lista periodi ammessi
+      foreach ($dati_periodi as $per) {
+        $lista_periodi[$per[0]] = $per[1]->getStato();
+      }
+      // visualizza pagella o lista periodi
+      $periodo = null;
+      if ($scrutinio) {
         // pagella
+        $classe = $scrutinio->getClasse();
+        $periodo = $scrutinio->getPeriodo();
         $dati = $gen->pagelle($classe, $alunno, $periodo);
       }
     } else {
@@ -484,8 +548,8 @@ class GenitoriController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/genitori/colloqui", name="genitori_colloqui")
-   * @Method("GET")
+   * @Route("/genitori/colloqui", name="genitori_colloqui",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_GENITORE')")
    */
@@ -530,8 +594,8 @@ class GenitoriController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/colloqui/prenota/{colloquio}", name="genitori_colloqui_prenota")
-   *    requirements={"colloquio": "\d+"})
-   * @Method({"GET","POST"})
+   *    requirements={"colloquio": "\d+"},
+   *    methods={"GET","POST"})
    *
    * @Security("has_role('ROLE_GENITORE')")
    */
@@ -622,8 +686,8 @@ class GenitoriController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/colloqui/disdetta/{richiesta}", name="genitori_colloqui_disdetta")
-   *    requirements={"richiesta": "\d+"})
-   * @Method("GET")
+   *    requirements={"richiesta": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_GENITORE')")
    */
@@ -668,14 +732,16 @@ class GenitoriController extends Controller {
    *
    * @Route("/genitori/avvisi/{pagina}", name="genitori_avvisi",
    *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": "0"})
-   * @Method({"GET"})
+   *    defaults={"pagina": "0"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
   public function avvisiAction(SessionInterface $session, GenitoriUtil $gen, BachecaUtil $bac, $pagina) {
     // inizializza variabili
-    $dati = null;
+    $dati = array();
+    $dati['nuovi'] = array();
+    $dati['lista'] = array();
     $maxPages = 1;
     $limite = 15;
     // recupera criteri dalla sessione
@@ -686,14 +752,21 @@ class GenitoriController extends Controller {
       // pagina specificata: la conserva in sessione
       $session->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
     }
-    // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if ($alunno) {
-      // recupera dati
-      $ultimo_accesso = \DateTime::createFromFormat('d/m/Y H:i:s',
+    // dati accesso
+    $ultimo_accesso = \DateTime::createFromFormat('d/m/Y H:i:s',
         ($session->get('/APP/UTENTE/ultimo_accesso') ? $session->get('/APP/UTENTE/ultimo_accesso') : '01/01/2018 00:00:00'));
-      $dati = $bac->bachecaAvvisiGenitori($pagina, $limite, $this->getUser(), $alunno, $ultimo_accesso);
+    // legge l'alunno
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $dati = $bac->bachecaAvvisiGenitoriAlunni($pagina, $limite, $this->getUser(), $ultimo_accesso);
       $maxPages = ceil($dati['lista']->count() / $limite);
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if ($alunno) {
+        $dati = $bac->bachecaAvvisiGenitori($pagina, $limite, $this->getUser(), $alunno, $ultimo_accesso);
+        $maxPages = ceil($dati['lista']->count() / $limite);
+      }
     }
     // mostra la pagina di risposta
     return $this->render('bacheca/avvisi_genitori.html.twig', array(
@@ -705,7 +778,7 @@ class GenitoriController extends Controller {
   }
 
   /**
-   * Mostra i dettagli di un avviso destinato al genitore
+   * Mostra i dettagli di un avviso destinato al genitore o all'alunno
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -714,10 +787,10 @@ class GenitoriController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/avvisi/dettagli/{id}", name="genitori_avvisi_dettagli",
-   *    requirements={"id": "\d+"})
-   * @Method("GET")
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
   public function avvisiDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
     // inizializza
@@ -752,8 +825,8 @@ class GenitoriController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/avvisi/firma/{id}", name="genitori_avvisi_firma",
-   *    requirements={"id": "\d+"})
-   * @Method("GET")
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_GENITORE')")
    */
@@ -780,8 +853,9 @@ class GenitoriController extends Controller {
   }
 
   /**
-   * Visualizza gli eventi destinati ai genitori
+   * Visualizza gli eventi destinati ai genitori o agli alunni
    *
+   * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
@@ -791,13 +865,13 @@ class GenitoriController extends Controller {
    *
    * @Route("/genitori/eventi/{mese}", name="genitori_eventi",
    *    requirements={"mese": "\d\d\d\d-\d\d"},
-   *    defaults={"mese": "0000-00"})
-   * @Method({"GET"})
+   *    defaults={"mese": "0000-00"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
-  public function eventiAction(SessionInterface $session, GenitoriUtil $gen, AgendaUtil $age,
-                                $mese) {
+  public function eventiAction(EntityManagerInterface $em, SessionInterface $session, GenitoriUtil $gen,
+                                AgendaUtil $age, $mese) {
     $dati = null;
     $info = null;
     // parametro data
@@ -819,24 +893,32 @@ class GenitoriController extends Controller {
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('MMMM yyyy');
     $info['mese'] =  ucfirst($formatter->format($mese));
-    $m = clone $mese;
-    $mese_succ = $m->modify('first day of next month');
-    $info['mese_succ'] = ucfirst($formatter->format($mese_succ));
-    $info['url_succ'] = $mese_succ->format('Y-m');
-    $m = clone $mese;
-    $mese_prec = $m->modify('first day of previous month');
-    $info['mese_prec'] = ucfirst($formatter->format($mese_prec));
-    $info['url_prec'] = $mese_prec->format('Y-m');
+    // data prec/succ
+    $data_inizio = \DateTime::createFromFormat('Y-m-d', $mese->format('Y-m-01'));
+    $data_fine = clone $data_inizio;
+    $data_fine->modify('last day of this month');
+    $data_succ = (clone $data_fine);
+    $data_succ = $em->getRepository('AppBundle:Festivita')->giornoSuccessivo($data_succ);
+    $info['url_succ'] = ($data_succ ? $data_succ->format('Y-m') : null);
+    $data_prec = (clone $data_inizio);
+    $data_prec = $em->getRepository('AppBundle:Festivita')->giornoPrecedente($data_prec);
+    $info['url_prec'] = ($data_prec ? $data_prec->format('Y-m') : null);
     // presentazione calendario
     $info['inizio'] = (intval($mese->format('w')) - 1);
     $m = clone $mese;
     $info['ultimo_giorno'] = $m->modify('last day of this month')->format('j');
     $info['fine'] = (intval($m->format('w')) == 0 ? 0 : 6 - intval($m->format('w')));
-    // legge l'alunno
-    $alunno = $gen->alunno($this->getUser());
-    if ($alunno) {
-      // recupera dati
-      $dati = $age->agendaEventiGenitori($alunno, $mese);
+    // legge l'utente
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $dati = $age->agendaEventiGenitoriAlunni($this->getUser(), $mese);
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if ($alunno) {
+        // recupera dati
+        $dati = $age->agendaEventiGenitori($alunno, $mese);
+      }
     }
     // mostra la pagina di risposta
     return $this->render('agenda/eventi_genitori.html.twig', array(
@@ -857,10 +939,10 @@ class GenitoriController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/eventi/dettagli/{data}/{tipo}", name="genitori_eventi_dettagli",
-   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "tipo": "C|A|V"})
-   * @Method("GET")
+   *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "tipo": "C|A|V|P"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
    */
   public function eventoDettagliAction(AgendaUtil $age, $data, $tipo) {
     // inizializza
@@ -868,11 +950,263 @@ class GenitoriController extends Controller {
     // data
     $data = \DateTime::createFromFormat('Y-m-d', $data);
     // legge dati
-    $dati = $age->dettagliEventoGenitore($this->getUser()->getAlunno(), $data, $tipo);
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $dati = $age->dettagliEventoGenitoreAlunno($this->getUser(), $data, $tipo);
+    } else {
+      // utente è genitore
+      $dati = $age->dettagliEventoGenitore($this->getUser()->getAlunno(), $data, $tipo);
+    }
     // visualizza pagina
     return $this->render('agenda/scheda_evento_genitori_'.$tipo.'.html.twig', array(
       'dati' => $dati,
       'data' => $data,
+    ));
+  }
+
+  /**
+   * Giustificazione online di un'assenza
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Assenza $assenza Assenza da giustificare
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/giustifica/assenza/{assenza}/{posizione}", name="genitori_giustifica_assenza",
+   *    requirements={"posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
+   *
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   */
+  public function giustificaAssenzaAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
+                                           LogHandler $dblogger, Assenza $assenza, $posizione) {
+    // inizializza
+    $info = array();
+    $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
+    // legge l'alunno
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controlla assenza e possibilità di giustificare
+    if ($assenza->getAlunno() !== $alunno || !$alunno->getAbilitato() || !$alunno->getClasse() ||
+        !$gen->giusticazioneOnline($this->getUser()) || $assenza->getDocenteGiustifica()) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla permessi
+    if (!$gen->azioneGiustifica($assenza->getData(), $alunno)) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // dati in formato stringa
+    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter->setPattern('EEEE d MMMM yyyy');
+    $info['data'] =  $formatter->format($assenza->getData());
+    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
+    $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
+    // form
+    $assenza_old = clone $assenza;
+    $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_assenza', FormType::class, $assenza)
+      ->setAction($this->generateUrl('genitori_giustifica_assenza', ['assenza' => $assenza->getId(), 'posizione' => $posizione]))
+      ->add('tipo', ChoiceType::class, array('label' => 'label.motivazione_assenza',
+        'choices' => $lista_motivazioni,
+        'placeholder' => 'label.scelta_giustifica',
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'mapped' => false,
+        'required' => true))
+      ->add('motivazione', TextareaType::class, array('label' => null,
+        'trim' => true,
+        'attr' => array('rows' => '3'),
+        'required' => true))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']))
+      ->add('delete', SubmitType::class, array('label' => 'label.delete',
+        'attr' => ['class' => 'btn-danger']))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+      if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
+        // errore: motivazione assente
+        $this->addFlash('error', $this->get('translator')->trans('exception.no_motivazione'));
+      } else {
+        // dati validi
+        if ($form->get('delete')->isClicked()) {
+          // cancella
+          $assenza
+            ->setMotivazione(null)
+            ->setGiustificato(null);
+        } else {
+          // aggiorna dati
+          $assenza->setGiustificato(new \DateTime());
+        }
+        // ok: memorizza dati
+        $em->flush();
+        // log azione
+        if ($form->get('delete')->isClicked()) {
+          // cancella
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Elimina giustificazione online', __METHOD__, array(
+            'Assenza' => $assenza->getId(),
+            'Motivazione' => $assenza_old->getMotivazione(),
+            'Giustificato' => $assenza_old->getGiustificato() ? $assenza_old->getGiustificato()->format('Y-m-d') : null,
+            ));
+        } else {
+          // inserisce o modifica
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustificazione online', __METHOD__, array(
+            'Assenza' => $assenza->getId(),
+            'Motivazione' => $assenza_old->getMotivazione(),
+            'Giustificato' => $assenza_old->getGiustificato() ? $assenza_old->getGiustificato()->format('Y-m-d') : null,
+            ));
+        }
+      }
+      // redirezione
+      return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
+    }
+    // visualizza pagina
+    return $this->render('ruolo_genitore/giustifica_assenza.html.twig', array(
+      'info' => $info,
+      'form' => $form->createView(),
+    ));
+  }
+
+  /**
+   * Giustificazione online di un ritardo
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Entrata $entrata Ritardo da giustificare
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/giustifica/ritardo/{entrata}/{posizione}", name="genitori_giustifica_ritardo",
+   *    requirements={"posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
+   *
+   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   */
+  public function giustificaRitardoAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
+                                           LogHandler $dblogger, Entrata $entrata, $posizione) {
+    // inizializza
+    $info = array();
+    $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
+    // legge l'alunno
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controlla assenza e possibilità di giustificare
+    if ($entrata->getAlunno() !== $alunno || !$alunno->getAbilitato() || !$alunno->getClasse() ||
+        !$gen->giusticazioneOnline($this->getUser()) || $entrata->getDocenteGiustifica() ||
+        $entrata->getRitardoBreve()) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla permessi
+    if (!$gen->azioneGiustifica($entrata->getData(), $alunno)) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // dati in formato stringa
+    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter->setPattern('EEEE d MMMM yyyy');
+    $info['data'] =  $formatter->format($entrata->getData());
+    $info['ora'] =  $entrata->getOra()->format('H:i');
+    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
+    $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
+    // form
+    $entrata_old = clone $entrata;
+    $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_ritardo', FormType::class, $entrata)
+      ->setAction($this->generateUrl('genitori_giustifica_ritardo', ['entrata' => $entrata->getId(), 'posizione' => $posizione]))
+      ->add('tipo', ChoiceType::class, array('label' => 'label.motivazione_ritardo',
+        'choices' => $lista_motivazioni,
+        'placeholder' => 'label.scelta_giustifica',
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'mapped' => false,
+        'required' => true))
+      ->add('motivazione', TextareaType::class, array('label' => null,
+        'trim' => true,
+        'attr' => array('rows' => '3'),
+        'required' => true))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']))
+      ->add('delete', SubmitType::class, array('label' => 'label.delete',
+        'attr' => ['class' => 'btn-danger']))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+      if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
+        // errore: motivazione assente
+        $this->addFlash('error', $this->get('translator')->trans('exception.no_motivazione'));
+      } else {
+        // dati validi
+        if ($form->get('delete')->isClicked()) {
+          // cancella
+          $entrata
+            ->setMotivazione(null)
+            ->setGiustificato(null);
+        } else {
+          // aggiorna dati
+          $entrata->setGiustificato(new \DateTime());
+        }
+        // ok: memorizza dati
+        $em->flush();
+        // log azione
+        if ($form->get('delete')->isClicked()) {
+          // cancella
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Elimina giustificazione online', __METHOD__, array(
+            'Ritardo' => $entrata->getId(),
+            'Motivazione' => $entrata_old->getMotivazione(),
+            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null,
+            ));
+        } else {
+          // inserisce o modifica
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustificazione online', __METHOD__, array(
+            'Ritardo' => $entrata->getId(),
+            'Motivazione' => $entrata_old->getMotivazione(),
+            'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null,
+            ));
+        }
+      }
+      // redirezione
+      return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
+    }
+    // visualizza pagina
+    return $this->render('ruolo_genitore/giustifica_ritardo.html.twig', array(
+      'info' => $info,
+      'form' => $form->createView(),
     ));
   }
 

@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use AppBundle\Util\RegistroUtil;
 use AppBundle\Entity\Alunno;
+use AppBundle\Entity\Scrutinio;
 
 
 /**
@@ -69,7 +70,7 @@ class SegreteriaUtil {
     // inizializza
     $dati = array();
     $classe = $alunno->getClasse();
-    $inizio = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_inizio').' 00:00');
+    $inizio = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_inizio').'00:00');
     $fine = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
     $mesi = array(
       1 => ['Gennaio', 1, 31],
@@ -98,11 +99,11 @@ class SegreteriaUtil {
     foreach ($assenze as $a) {
       $dati['lista'][intval($a['data']->format('m'))][intval($a['data']->format('d'))] = 'A';
     }
-    // legge ritardi
+    // legge ritardi (esclusi brevi)
     $entrate = $this->em->getRepository('AppBundle:Entrata')->createQueryBuilder('e')
       ->select('e.data')
-      ->where('e.alunno=:alunno')
-      ->setParameters(['alunno' => $alunno])
+      ->where('e.alunno=:alunno AND e.ritardoBreve!=:breve')
+      ->setParameters(['alunno' => $alunno, 'breve' => 1])
       ->getQuery()
       ->getArrayResult();
     foreach ($entrate as $e) {
@@ -144,8 +145,10 @@ class SegreteriaUtil {
           $dati['iscritto'][intval($d->format('m'))][intval($d->format('d'))] = 'N';
         }
         // periodo successivo
-        for ($d = $c->getFine()->modify('+1 day'); $d <= $fine; $d->modify('+1 day')) {
-          $dati['iscritto'][intval($d->format('m'))][intval($d->format('d'))] = 'N';
+        if ($alunno->getClasse() == null) {
+          for ($d = $c->getFine()->modify('+1 day'); $d <= $fine; $d->modify('+1 day')) {
+            $dati['iscritto'][intval($d->format('m'))][intval($d->format('d'))] = 'N';
+          }
         }
       }
       if ($c->getNote() != '') {
@@ -154,7 +157,7 @@ class SegreteriaUtil {
     }
     $dati['classe'] = ($classe ? $classe->getAnno().'ª '.$classe->getSezione() : 'NON DEFINITA');
     // mesi da visualizzare
-    for ($d = \DateTime::createFromFormat('Y-m-d H:i', '2017-09-01 00:00'); $d <= $fine; $d->modify('+1 month')) {
+    for ($d = clone $inizio; $d <= $fine; $d->modify('first day of next month')) {
       $m = intval($d->format('m'));
       $dati['mese'][$m]['nome'] = $mesi[$m][0].' '.$d->format('Y');
       $dati['mese'][$m]['anno'] = intval($d->format('Y'));
@@ -184,31 +187,28 @@ class SegreteriaUtil {
    */
   public function pagelleAlunni(Paginator $lista) {
     $dati = array();
-    $adesso = (new \DateTime())->format('Y-m-d H:i:s');
+    $adesso = (new \DateTime())->format('Y-m-d H:i:0');
     // trova pagelle di alunni
     foreach ($lista as $alu) {
+      // scrutini di classe corrente o altre di cambio classe
       $scrutini = $this->em->getRepository('AppBundle:Scrutinio')->createQueryBuilder('s')
-        ->select('s.periodo')
-        ->where('s.classe=:classe AND s.stato=:stato AND s.visibile<=:adesso')
-        ->setParameters(['classe' => $alu->getClasse(), 'stato' => 'C', 'adesso' => $adesso])
+        ->leftJoin('s.classe', 'c')
+        ->leftJoin('AppBundle:CambioClasse', 'cc', 'WHERE', 'cc.alunno=:alunno')
+        ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso')
+        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(),
+          'stato' => 'C', 'adesso' => $adesso])
+        ->orderBy('s.data')
         ->getQuery()
-        ->getArrayResult();
-      $scrutini = array_map('current', $scrutini);
-      if (in_array('R', $scrutini)) {
-        // ripresa scrutinio sospeso: controlla esito
-        $esito = $this->em->getRepository('AppBundle:Esito')->createQueryBuilder('e')
-          ->join('e.scrutinio', 's')
-          ->where('s.classe=:classe AND s.periodo=:periodo AND e.alunno=:alunno')
-          ->setParameters(['classe' => $alu->getClasse(), 'periodo' => 'R', 'alunno' => $alu->getId()])
-          ->setMaxResults(1)
-          ->getQuery()
-          ->getOneOrNullResult();
-        if (!$esito) {
-          // alunno non sospeso
-          unset($scrutini[array_search('R', $scrutini)]);
+        ->getResult();
+      // controlla presenza alunno in scrutinio
+      $periodi = array();
+      foreach ($scrutini as $sc) {
+        $alunni = ($sc->getPeriodo() == 'I' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
+        if (in_array($alu->getId(), $alunni)) {
+          $periodi[] = array($sc->getPeriodo(), $sc->getId());
         }
       }
-      $dati[$alu->getId()] = $scrutini;
+      $dati[$alu->getId()] = $periodi;
     }
     // restituisce dati come array associativo
     return $dati;
@@ -218,36 +218,76 @@ class SegreteriaUtil {
    * Restituisce la lista dei documenti dello scrutinio dell'alunno
    *
    * @param Alunno $alunno Alunno di cui si vuole conoscere lo scrutinio
-   * @param string $periodo Periodo dello scrutinio
+   * @param Scrutinio $scrutinio Scrutinio dell'alunno
    *
    * @return array Restituisce i dati come array associativo
    */
-  public function scrutinioAlunno(Alunno $alunno, $periodo) {
+  public function scrutinioAlunno(Alunno $alunno, Scrutinio $scrutinio) {
+    // inizializza
     $dati = array();
-    $adesso = (new \DateTime())->format('Y-m-d H:i:s');
-    // legge scrutinio
-    $dati['scrutinio'] = $this->em->getRepository('AppBundle:Scrutinio')->createQueryBuilder('s')
-      ->where('s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato AND s.visibile<=:adesso')
-      ->setParameters(['classe' => $alunno->getClasse(), 'periodo' => $periodo, 'stato' => 'C', 'adesso' => $adesso])
-      ->getQuery()
-      ->setMaxResults(1)
-      ->getOneOrNullResult();
-    // controlla se non scrutinato
-    $noscrut = ($dati['scrutinio']->getDato('no_scrutinabili') ? $dati['scrutinio']->getDato('no_scrutinabili') : []);
-    if (in_array($alunno->getId(), $noscrut)) {
-      // non scrutinato
-      $dati['noscrutinato'] = $dati['scrutinio']->getDato('alunni')[$alunno->getId()]['no_deroga'];
-    } else {
-      // scrutinato
-      $dati['esito'] = $this->em->getRepository('AppBundle:Esito')->findOneBy(['scrutinio' => $dati['scrutinio'],
-        'alunno' => $alunno]);
-      if ($dati['esito']->getEsito() != 'N') {
-        // carenze (esclusi non ammessi)
-        $valori = $dati['esito']->getDati();
-        if (isset($valori['carenze']) && isset($valori['carenze_materie']) &&
-            $valori['carenze'] && count($valori['carenze_materie']) > 0) {
-          $dati['carenze'] = 1;
+    // legge dati
+    $dati_scrutinio = $scrutinio->getDati();
+    $alunni = ($scrutinio->getPeriodo() == 'I' ? $dati_scrutinio['sospesi'] : $dati_scrutinio['alunni']);
+    // controlla alunno
+    if (in_array($alunno->getId(), $alunni)) {
+      // alunno in scrutinio
+      if ($scrutinio->getPeriodo() == 'P') {
+        $dati['verbale'] = true;
+        // controlla verbale
+        foreach ($dati_scrutinio['verbale'] as $step=>$args) {
+          if ($args['validazione']) {
+            $dati['verbale'] = ($dati['verbale'] && $args['validato']);
+          }
         }
+        // legge i debiti
+        $dati['debiti'] = $this->em->getRepository('AppBundle:VotoScrutinio')->createQueryBuilder('vs')
+          ->join('vs.materia', 'm')
+          ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND m.tipo=:tipo AND vs.unico IS NOT NULL AND vs.unico<:suff')
+          ->orderBy('m.ordinamento', 'ASC')
+          ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'tipo' => 'N', 'suff' => 6])
+          ->getQuery()
+          ->getArrayResult();
+      } elseif ($scrutinio->getPeriodo() == '1') {
+        // verbale non previsto
+        $dati['verbale'] = false;
+      } elseif ($scrutinio->getPeriodo() == 'F') {
+        // controlla verbale
+        $dati['verbale'] = true;
+        foreach ($dati_scrutinio['verbale'] as $step=>$args) {
+          if ($args['validazione']) {
+            $dati['verbale'] = ($dati['verbale'] && $args['validato']);
+          }
+        }
+        // dati esito
+        $scrutinati = ($scrutinio->getDato('scrutinabili') == null ? [] : array_keys($scrutinio->getDato('scrutinabili')));
+        $cessata_frequenza = ($scrutinio->getDato('cessata_frequenza') == null ? [] : $scrutinio->getDato('cessata_frequenza'));
+        if (in_array($alunno->getId(), $scrutinati)) {
+          // scrutinato
+          $dati['esito'] = $this->em->getRepository('AppBundle:Esito')->findOneBy(['scrutinio' => $scrutinio,
+            'alunno' => $alunno]);
+          if ($dati['esito']->getEsito() != 'N') {
+            // carenze (esclusi non ammessi)
+            $valori = $dati['esito']->getDati();
+            if (isset($valori['carenze']) && isset($valori['carenze_materie']) &&
+                $valori['carenze'] && count($valori['carenze_materie']) > 0) {
+              $dati['carenze'] = 1;
+            }
+          }
+        } else {
+          // non scrutinato
+          $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
+        }
+      } elseif ($scrutinio->getPeriodo() == 'I') {
+        // controlla verbale
+        $dati['verbale'] = true;
+        foreach ($dati_scrutinio['verbale'] as $step=>$args) {
+          if ($args['validazione']) {
+            $dati['verbale'] = ($dati['verbale'] && $args['validato']);
+          }
+        }
+        // dati esito
+        $dati['esito'] = $this->em->getRepository('AppBundle:Esito')->findOneBy(['scrutinio' => $scrutinio,
+          'alunno' => $alunno]);
       }
     }
     // restituisce dati come array associativo

@@ -1,0 +1,101 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid gs-mt-4">
+  <div class="panel panel-primary" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body">
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+      <div class="help-block gs-text-normal gs-mt-0"><em>{{ 'message.orario_edit'|trans|raw }}</em></div>
+      {{ form_row(form.data) }}
+      {{ form_row(form.ora) }}
+      {{ form_row(form.testo) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required" for="avvisi_orario_edit_destinatari">Destinatari</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.filtro) }}
+          <div id="sedi" style="display:none">
+            {{ form_widget(form.filtroSedi) }}
+          </div>
+          <div id="classi" style="display:none">
+            {{ form_widget(form.filtroClassi) }}
+          </div>
+        </div>
+      </div>
+      <div class="help-block gs-text-normal"><em>{{ 'message.info_avviso_con_annotazione'|trans }}</em></div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ date()|date('d/m/Y') }}",
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12 ,13, 14],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+  });
+  $('.input-group.time').datetimepicker()
+    .on('dp.show', function(){
+      $(this).find('a.btn').addClass('btn-primary');
+  });
+  $('label.gs-checkbox-inline input').change(function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  }).change();
+  $("#avvisi_orario_edit_filtro").change(function() {
+    $('#sedi').hide();
+    $('#classi').hide();
+    switch ($(this).val()) {
+      case 'S':
+        $('#sedi').show();
+        break;
+      case 'C':
+        $('#classi').show();
+        break;
+    }
+  }).change();
+});
+</script>
+{% endblock %}

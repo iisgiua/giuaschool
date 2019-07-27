@@ -17,8 +17,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Elastica\Client;
 
 /**
  * MonologExtension is an extension for the Monolog library.
@@ -184,22 +182,18 @@ class MonologExtension extends Extension
 
         case 'gelf':
             if (isset($handler['publisher']['id'])) {
-                $publisherId = $handler['publisher']['id'];
+                $publisher = new Reference($handler['publisher']['id']);
             } elseif (class_exists('Gelf\Transport\UdpTransport')) {
                 $transport = new Definition("Gelf\Transport\UdpTransport", array(
                     $handler['publisher']['hostname'],
                     $handler['publisher']['port'],
                     $handler['publisher']['chunk_size'],
                 ));
-                $transportId = uniqid('monolog.gelf.transport.', true);
                 $transport->setPublic(false);
-                $container->setDefinition($transportId, $transport);
 
                 $publisher = new Definition('Gelf\Publisher', array());
-                $publisher->addMethodCall('addTransport', array(new Reference($transportId)));
-                $publisherId = uniqid('monolog.gelf.publisher.', true);
+                $publisher->addMethodCall('addTransport', array($transport));
                 $publisher->setPublic(false);
-                $container->setDefinition($publisherId, $publisher);
             } elseif (class_exists('Gelf\MessagePublisher')) {
                 $publisher = new Definition('Gelf\MessagePublisher', array(
                     $handler['publisher']['hostname'],
@@ -207,15 +201,13 @@ class MonologExtension extends Extension
                     $handler['publisher']['chunk_size'],
                 ));
 
-                $publisherId = uniqid('monolog.gelf.publisher.', true);
                 $publisher->setPublic(false);
-                $container->setDefinition($publisherId, $publisher);
             } else {
                 throw new \RuntimeException('The gelf handler requires the graylog2/gelf-php package to be installed');
             }
 
             $definition->setArguments(array(
-                new Reference($publisherId),
+                $publisher,
                 $handler['level'],
                 $handler['bubble'],
             ));
@@ -223,7 +215,7 @@ class MonologExtension extends Extension
 
         case 'mongo':
             if (isset($handler['mongo']['id'])) {
-                $clientId = $handler['mongo']['id'];
+                $client = new Reference($handler['mongo']['id']);
             } else {
                 $server = 'mongodb://';
 
@@ -237,13 +229,11 @@ class MonologExtension extends Extension
                     $server,
                 ));
 
-                $clientId = uniqid('monolog.mongo.client.', true);
                 $client->setPublic(false);
-                $container->setDefinition($clientId, $client);
             }
 
             $definition->setArguments(array(
-                new Reference($clientId),
+                $client,
                 $handler['mongo']['database'],
                 $handler['mongo']['collection'],
                 $handler['level'],
@@ -253,7 +243,7 @@ class MonologExtension extends Extension
 
         case 'elasticsearch':
             if (isset($handler['elasticsearch']['id'])) {
-                $clientId = $handler['elasticsearch']['id'];
+                $elasticaClient = new Reference($handler['elasticsearch']['id']);
             } else {
                 // elastica client new definition
                 $elasticaClient = new Definition('Elastica\Client');
@@ -268,7 +258,7 @@ class MonologExtension extends Extension
                         $elasticaClientArguments,
                         array(
                             'headers' => array(
-                                'Authorization ' =>  'Basic ' . base64_encode($handler['elasticsearch']['user'] . ':' . $handler['elasticsearch']['password'])
+                                'Authorization' => 'Basic ' . base64_encode($handler['elasticsearch']['user'] . ':' . $handler['elasticsearch']['password'])
                             )
                         )
                     );
@@ -278,14 +268,12 @@ class MonologExtension extends Extension
                     $elasticaClientArguments
                 ));
 
-                $clientId = uniqid('monolog.elastica.client.', true);
                 $elasticaClient->setPublic(false);
-                $container->setDefinition($clientId, $elasticaClient);
             }
 
             // elastica handler definition
             $definition->setArguments(array(
-                new Reference($clientId),
+                $elasticaClient,
                 array(
                     'index' => $handler['index'],
                     'type' => $handler['document_type'],
@@ -336,6 +324,17 @@ class MonologExtension extends Extension
                 ));
                 $container->setDefinition($handlerId.'.not_found_strategy', $activationDef);
                 $activation = new Reference($handlerId.'.not_found_strategy');
+            } elseif (!empty($handler['excluded_http_codes'])) {
+                if (!class_exists('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy')) {
+                    throw new \LogicException('"excluded_http_codes" cannot be used as your version of Monolog bridge does not support it.');
+                }
+                $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy', array(
+                    new Reference('request_stack'),
+                    $handler['excluded_http_codes'],
+                    $handler['action_level']
+                ));
+                $container->setDefinition($handlerId.'.http_code_strategy', $activationDef);
+                $activation = new Reference($handlerId.'.http_code_strategy');
             } else {
                 $activation = $handler['action_level'];
             }
@@ -502,6 +501,12 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            if (isset($handler['timeout'])) {
+                $definition->addMethodCall('setTimeout', array($handler['timeout']));
+            }
+            if (isset($handler['connection_timeout'])) {
+                $definition->addMethodCall('setConnectionTimeout', array($handler['connection_timeout']));
+            }
             break;
 
         case 'hipchat':
@@ -517,6 +522,12 @@ class MonologExtension extends Extension
                 !empty($handler['host']) ? $handler['host'] : 'api.hipchat.com',
                 !empty($handler['api_version']) ? $handler['api_version'] : 'v1',
             ));
+            if (isset($handler['timeout'])) {
+                $definition->addMethodCall('setTimeout', array($handler['timeout']));
+            }
+            if (isset($handler['connection_timeout'])) {
+                $definition->addMethodCall('setConnectionTimeout', array($handler['connection_timeout']));
+            }
             break;
 
         case 'slack':
@@ -531,6 +542,12 @@ class MonologExtension extends Extension
                 $handler['use_short_attachment'],
                 $handler['include_extra'],
             ));
+            if (isset($handler['timeout'])) {
+                $definition->addMethodCall('setTimeout', array($handler['timeout']));
+            }
+            if (isset($handler['connection_timeout'])) {
+                $definition->addMethodCall('setConnectionTimeout', array($handler['connection_timeout']));
+            }
             break;
 
         case 'slackwebhook':

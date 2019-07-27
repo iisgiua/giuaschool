@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <!-- View Factory -->
+        <parameter key="white_october_pagerfanta.view_factory.class">Pagerfanta\View\ViewFactory</parameter>
+    </parameters>
+
+    <services>
+        <!-- View Factory -->
+        <service id="white_october_pagerfanta.view_factory" class="%white_october_pagerfanta.view_factory.class%"/>
+
+        <!-- "default" view -->
+        <service id="pagerfanta.view.default" class="Pagerfanta\View\DefaultView" public="false">
+            <tag name="pagerfanta.view" alias="default" />
+        </service>
+
+        <!-- "default_translated" view -->
+        <service id="pagerfanta.view.default_translated" class="WhiteOctober\PagerfantaBundle\View\DefaultTranslatedView" public="false">
+            <tag name="pagerfanta.view" alias="default_translated" />
+            <argument type="service" id="pagerfanta.view.default" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <!-- "twitter_bootstrap" view -->
+        <service id="pagerfanta.view.twitter_bootstrap" class="Pagerfanta\View\TwitterBootstrapView" public="false">
+            <tag name="pagerfanta.view" alias="twitter_bootstrap" />
+        </service>
+
+        <!-- "twitter_bootstrap3" view -->
+        <service id="pagerfanta.view.twitter_bootstrap3" class="Pagerfanta\View\TwitterBootstrap3View" public="false">
+            <tag name="pagerfanta.view" alias="twitter_bootstrap3" />
+        </service>
+               
+        <!-- "twitter_bootstrap4" view -->
+        <service id="pagerfanta.view.twitter_bootstrap4" class="Pagerfanta\View\TwitterBootstrap4View" public="false">
+            <tag name="pagerfanta.view" alias="twitter_bootstrap4" />
+        </service>
+
+        <!-- "semantic_ui" view -->
+        <service id="pagerfanta.view.semantic_ui" class="Pagerfanta\View\SemanticUiView" public="false">
+            <tag name="pagerfanta.view" alias="semantic_ui" />
+        </service>
+
+        <!-- "twitter_bootstrap4_translated" view -->
+        <service id="pagerfanta.view.twitter_bootstrap4_translated" class="WhiteOctober\PagerfantaBundle\View\TwitterBootstrap4TranslatedView" public="false">
+            <tag name="pagerfanta.view" alias="twitter_bootstrap4_translated" />
+            <argument type="service" id="pagerfanta.view.twitter_bootstrap4" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <!-- "twitter_bootstrap3_translated" view -->
+        <service id="pagerfanta.view.twitter_bootstrap3_translated" class="WhiteOctober\PagerfantaBundle\View\TwitterBootstrap3TranslatedView" public="false">
+            <tag name="pagerfanta.view" alias="twitter_bootstrap3_translated" />
+            <argument type="service" id="pagerfanta.view.twitter_bootstrap3" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <!-- "twitter_bootstrap_translated" view -->
+        <service id="pagerfanta.view.twitter_bootstrap_translated" class="WhiteOctober\PagerfantaBundle\View\TwitterBootstrapTranslatedView" public="false">
+            <tag name="pagerfanta.view" alias="twitter_bootstrap_translated" />
+            <argument type="service" id="pagerfanta.view.twitter_bootstrap" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <!-- "semantic_ui_translated" view -->
+        <service id="pagerfanta.view.semantic_ui_translated" class="WhiteOctober\PagerfantaBundle\View\SemanticUiTranslatedView" public="false">
+            <tag name="pagerfanta.view" alias="semantic_ui_translated" />
+            <argument type="service" id="pagerfanta.view.semantic_ui" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <!-- Twig Extension -->
+        <service id="twig.extension.pagerfanta" class="WhiteOctober\PagerfantaBundle\Twig\PagerfantaExtension" public="false">
+            <tag name="twig.extension" />
+            <argument>%white_october_pagerfanta.default_view%</argument>
+            <argument type="service" id="white_october_pagerfanta.view_factory" />
+            <argument type="service" id="router" />
+            <argument type="service" id="request_stack" on-invalid="null" />
+        </service>
+
+        <service id="pagerfanta.convert_not_valid_max_per_page_to_not_found_listener" class="WhiteOctober\PagerfantaBundle\EventListener\ConvertNotValidMaxPerPageToNotFoundListener">
+            <!-- subscribe tag is added in the extension if convert_not_valid_max_per_page_to_not_found options set to true -->
+        </service>
+
+        <service id="pagerfanta.convert_not_valid_current_page_to_not_found_listener" class="WhiteOctober\PagerfantaBundle\EventListener\ConvertNotValidCurrentPageToNotFoundListener">
+            <!-- subscribe tag is added in the extension if convert_not_valid_current_page_to_not_found options set to true -->
+        </service>
+    </services>
+
+</container>

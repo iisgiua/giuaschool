@@ -353,7 +353,7 @@ class FormDataCollectorTest extends TestCase
         $form2View = new FormView();
         $child1View = new FormView();
         $child1View->vars['is_selected'] = function ($choice, array $values) {
-            return in_array($choice, $values, true);
+            return \in_array($choice, $values, true);
         };
 
         $form1->add($child1);
@@ -690,9 +690,39 @@ class FormDataCollectorTest extends TestCase
 
         $this->assertTrue($formData['has_children_error']);
         $this->assertTrue($child1Data['has_children_error']);
-        $this->assertFalse(isset($child11Data['has_children_error']), 'The leaf data does not contains "has_children_error" property.');
+        $this->assertArrayNotHasKey('has_children_error', $child11Data, 'The leaf data does not contains "has_children_error" property.');
         $this->assertFalse($child2Data['has_children_error']);
-        $this->assertFalse(isset($child21Data['has_children_error']), 'The leaf data does not contains "has_children_error" property.');
+        $this->assertArrayNotHasKey('has_children_error', $child21Data, 'The leaf data does not contains "has_children_error" property.');
+    }
+
+    public function testReset()
+    {
+        $form = $this->createForm('my_form');
+
+        $this->dataExtractor->expects($this->any())
+            ->method('extractConfiguration')
+            ->will($this->returnValue(array()));
+        $this->dataExtractor->expects($this->any())
+            ->method('extractDefaultData')
+            ->will($this->returnValue(array()));
+        $this->dataExtractor->expects($this->any())
+            ->method('extractSubmittedData')
+            ->with($form)
+            ->will($this->returnValue(array('errors' => array('baz'))));
+
+        $this->dataCollector->buildPreliminaryFormTree($form);
+        $this->dataCollector->collectSubmittedData($form);
+
+        $this->dataCollector->reset();
+
+        $this->assertSame(
+            array(
+                'forms' => array(),
+                'forms_by_hash' => array(),
+                'nb_errors' => 0,
+            ),
+            $this->dataCollector->getData()
+        );
     }
 
     private function createForm($name)

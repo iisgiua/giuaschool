@@ -4,7 +4,7 @@
     <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
     <span class="sr-only">{{ 'label.close'|trans }}</span>
   </button>
-{% if dati.avviso.destinatariIndividuali %}
+{% if dati.avviso.destinatariIndividuali and dati.avviso.tipo not in ['V','P'] %}
   <h2 class="modal-title text-center gs-h2">Messaggio personale</h2>
 {% endif %}
   <h3 class="modal-title gs-h3">{{ dati.avviso.data|date('d/m/Y') }}</h3>
@@ -19,7 +19,7 @@
   <div class="gs-mt-2">
     <strong>Allegati:</strong>
   {% for al in dati.avviso.allegati %}
-    <a class="gs-ml-3" href="{{ path('file_avviso', {'avviso': dati.avviso.id, 'allegato': loop.index}) }}" title="Scarica l'allegato"><strong>Allegato-{{ loop.index }}</strong></a>
+    <a class="gs-ml-3" target="_blank" href="{{ path('file_avviso', {'avviso': dati.avviso.id, 'allegato': loop.index}) }}" title="Scarica l'allegato"><strong>Allegato-{{ loop.index }}</strong></a>
   {% endfor %}
   </div>
 {% endif %}
@@ -29,7 +29,7 @@
   </div>
 {% endif %}
 </div>
-{% if dati.avviso.destinatariIndividuali and letto is null %}
+{% if dati.avviso.destinatariIndividuali and letto is null and dati.avviso.tipo not in ['V','P'] %}
 <hr class="gs-hr gs-mb-0">
 <div class="gs-mt-2 gs-mb-3 text-center">
   <div><em><strong>Si chiede di confermare la lettura di questo avviso</strong></em></div>

@@ -12,9 +12,9 @@
 namespace Symfony\Component\Form\Tests\Extension\Core\DataMapper;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Form\Extension\Core\DataMapper\PropertyPathMapper;
 use Symfony\Component\Form\FormConfigBuilder;
 use Symfony\Component\Form\FormConfigInterface;
-use Symfony\Component\Form\Extension\Core\DataMapper\PropertyPathMapper;
 
 class PropertyPathMapperTest extends TestCase
 {
@@ -41,8 +41,6 @@ class PropertyPathMapperTest extends TestCase
     }
 
     /**
-     * @param $path
-     *
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     private function getPropertyPath($path)

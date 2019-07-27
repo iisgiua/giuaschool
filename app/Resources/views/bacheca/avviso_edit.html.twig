@@ -77,10 +77,11 @@
 <script>
 Dropzone.autoDiscover = false;
 new Dropzone(".dropzone", {
-  url: "{{ path('file_upload', {'pagina': 'staff_avviso_edit', 'param': 'files'}) }}",
+  url: "{{ path('file_upload', {'pagina': 'staff_avvisi_edit', 'param': 'files'}) }}",
   maxFiles: 3,
   maxFilesize: 10,
-  acceptedFiles: "application/pdf,application/zip",
+  acceptedFiles: ".pdf,.zip",
+  timeout: 0,
   paramName: "files",
   uploadMultiple: true,
   addRemoveLinks: true,
@@ -105,9 +106,9 @@ new Dropzone(".dropzone", {
     });
     this.on("removedfile", function(file) {
       if (file.uploaded) {
-        $.post("{{ path('file_remove', {'pagina': 'staff_avviso_edit', 'param': 'files'}) }}", {"files": file.uploaded});
+        $.post("{{ path('file_remove', {'pagina': 'staff_avvisi_edit', 'param': 'files'}) }}", {"files": file.uploaded});
       } else if (file.existent) {
-        $.post("{{ path('file_remove', {'pagina': 'staff_avviso_edit', 'param': 'files'}) }}", {"files": file.existent});
+        $.post("{{ path('file_remove', {'pagina': 'staff_avvisi_edit', 'param': 'files'}) }}", {"files": file.existent});
         this.options.maxFiles++;
       }
     });

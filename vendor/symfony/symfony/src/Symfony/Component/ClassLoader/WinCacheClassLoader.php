@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\ClassLoader;
 
-@trigger_error('The '.__NAMESPACE__.'\WinCacheClassLoader class is deprecated since version 3.3 and will be removed in 4.0. Use `composer install --apcu-autoloader` instead.', E_USER_DEPRECATED);
+@trigger_error('The '.__NAMESPACE__.'\WinCacheClassLoader class is deprecated since Symfony 3.3 and will be removed in 4.0. Use `composer install --apcu-autoloader` instead.', E_USER_DEPRECATED);
 
 /**
  * WinCacheClassLoader implements a wrapping autoloader cached in WinCache.
@@ -60,8 +60,6 @@ class WinCacheClassLoader
     protected $decorated;
 
     /**
-     * Constructor.
-     *
      * @param string $prefix    The WinCache namespace prefix to use
      * @param object $decorated A class loader object that implements the findFile() method
      *
@@ -70,7 +68,7 @@ class WinCacheClassLoader
      */
     public function __construct($prefix, $decorated)
     {
-        if (!extension_loaded('wincache')) {
+        if (!\extension_loaded('wincache')) {
             throw new \RuntimeException('Unable to use WinCacheClassLoader as WinCache is not enabled.');
         }
 
@@ -139,6 +137,6 @@ class WinCacheClassLoader
      */
     public function __call($method, $args)
     {
-        return call_user_func_array(array($this->decorated, $method), $args);
+        return \call_user_func_array(array($this->decorated, $method), $args);
     }
 }

@@ -32,7 +32,7 @@ class WebServerConfig
             throw new \InvalidArgumentException(sprintf('Unable to find the front controller under "%s" (none of these files exist: %s).', $documentRoot, implode(', ', $this->getFrontControllerFileNames($env))));
         }
 
-        putenv('APP_FRONT_CONTROLLER='.$file);
+        $_ENV['APP_FRONT_CONTROLLER'] = $file;
 
         $this->documentRoot = $documentRoot;
         $this->env = $env;
@@ -54,6 +54,9 @@ class WebServerConfig
             $this->port = $this->findBestPort();
         } elseif (false !== $pos = strrpos($address, ':')) {
             $this->hostname = substr($address, 0, $pos);
+            if ('*' === $this->hostname) {
+                $this->hostname = '0.0.0.0';
+            }
             $this->port = substr($address, $pos + 1);
         } elseif (ctype_digit($address)) {
             $this->hostname = '127.0.0.1';

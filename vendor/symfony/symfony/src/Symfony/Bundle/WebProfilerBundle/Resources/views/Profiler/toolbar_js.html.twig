@@ -3,7 +3,7 @@
 <style{% if csp_style_nonce %} nonce="{{ csp_style_nonce }}"{% endif %}>
     {{ include('@WebProfiler/Profiler/toolbar.css.twig', { 'position': position, 'floatable': true }) }}
 </style>
-<script{% if csp_script_nonce %} nonce={{ csp_script_nonce }}{% endif %}>/*<![CDATA[*/
+<script{% if csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>/*<![CDATA[*/
     (function () {
         {% if 'top' == position %}
             var sfwdt = document.getElementById('sfwdt{{ token }}');
@@ -93,6 +93,21 @@
                     Sfjs.setPreference('toolbar/displayState', 'block');
                 });
                 Sfjs.renderAjaxRequests();
+                Sfjs.addEventListener(document.querySelector('.sf-toolbar-block-ajax > .sf-toolbar-icon'), 'click', function (event) {
+                    event.preventDefault();
+
+                    Sfjs.toggleClass(this.parentNode, 'hover');
+                });
+
+                var dumpInfo = document.querySelector('.sf-toolbar-block-dump .sf-toolbar-info');
+                if (null !== dumpInfo) {
+                    Sfjs.addEventListener(dumpInfo, 'sfbeforedumpcollapse', function () {
+                        dumpInfo.style.minHeight = dumpInfo.getBoundingClientRect().height+'px';
+                    });
+                    Sfjs.addEventListener(dumpInfo, 'mouseleave', function () {
+                        dumpInfo.style.minHeight = '';
+                    });
+                }
             },
             function(xhr) {
                 if (xhr.status !== 0) {

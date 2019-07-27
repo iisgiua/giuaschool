@@ -1,0 +1,47 @@
+<nav class="gs-navbar-submenu">
+  <ul class="nav nav-tabs">
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:12] == 'staff_avvisi' ? ' active' }}">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione degli avvisi">Avvisi<span class="caret gs-ml-3"></span></a>
+      <ul class="dropdown-menu">
+        <li{{ app.request.attributes.get('_route') in ['staff_avvisi','staff_avvisi_edit'] ? ' class="active"' }}><a href="{{ path('staff_avvisi') }}" title="Gestione degli avvisi di tipo generico">Avviso generico</a></li>
+        <li{{ app.request.attributes.get('_route')[:19] == 'staff_avvisi_orario' and app.request.attributes.get('tipo') == 'E' ? ' class="active"' }}><a href="{{ path('staff_avvisi_orario', {'tipo': 'E'}) }}" title="Gestione degli avvisi per l'ingresso posticipato delle classi">Ingresso posticipato</a></li>
+        <li{{ app.request.attributes.get('_route')[:19] == 'staff_avvisi_orario' and app.request.attributes.get('tipo') == 'U' ? ' class="active"' }}><a href="{{ path('staff_avvisi_orario', {'tipo': 'U'}) }}" title="Gestione degli avvisi per l'uscita anticipata delle classi">Uscita anticipata</a></li>
+        <li{{ app.request.attributes.get('_route')[:21] == 'staff_avvisi_attivita' ? ' class="active"' }}><a href="{{ path('staff_avvisi_attivita') }}" title="Gestione degli avvisi per lo svolgimento di attività per le classi">Svolgimento attività</a></li>
+        <li{{ app.request.attributes.get('_route')[:24] == 'staff_avvisi_individuali' ? ' class="active"' }}><a href="{{ path('staff_avvisi_individuali') }}" title="Gestione degli avvisi individuali per i genitori">Messaggio personale</a></li>
+      </ul>
+    </li>
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:14] == 'staff_studenti' ? ' active' }}">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione degli studenti">Studenti<span class="caret gs-ml-3"></span></a>
+      <ul class="dropdown-menu">
+        <li{{ app.request.attributes.get('_route')[:24] == 'staff_studenti_autorizza' ? ' class="active"' }}><a href="{{ path('staff_studenti_autorizza') }}" title="Gestione dei ritardi e delle uscite anticipate">Ritardi e uscite</a></li>
+        <li{{ app.request.attributes.get('_route')[:22] == 'staff_studenti_assenze' ? ' class="active"' }}><a href="{{ path('staff_studenti_assenze') }}" title="Gestione delle assenze">Assenze</a></li>
+        <li{{ app.request.attributes.get('_route')[:22] == 'staff_studenti_deroghe' ? ' class="active"' }}><a href="{{ path('staff_studenti_deroghe') }}" title="Inserimento delle deroghe sull'ora di entrata o uscita e di altre annotazioni">Gestione deroghe</a></li>
+        <li{{ app.request.attributes.get('_route')[:25] == 'staff_studenti_situazione' ? ' class="active"' }}><a href="{{ path('staff_studenti_situazione') }}" title="Mostra la situazione degli alunni">Situazione alunni</a></li>
+        <li{{ app.request.attributes.get('_route')[:26] == 'staff_studenti_statistiche' ? ' class="active"' }}><a href="{{ path('staff_studenti_statistiche') }}" title="Mostra le statische di presenza degli alunni">Statistiche presenza</a></li>
+      </ul>
+    </li>
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:13] == 'staff_docenti' ? ' active' }}">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Informazioni sui docenti">Docenti<span class="caret gs-ml-3"></span></a>
+      <ul class="dropdown-menu">
+        <li{{ app.request.attributes.get('_route')[:22] == 'staff_docenti_colloqui' ? ' class="active"' }}><a href="{{ path('staff_docenti_colloqui') }}" title="Mostra le ore dei colloqui mensili per i docenti">Colloqui mensili</a></li>
+        <li{{ app.request.attributes.get('_route')[:25] == 'staff_docenti_statistiche' ? ' class="active"' }}><a href="{{ path('staff_docenti_statistiche') }}" title="Mostra le statistiche sulle ore di lezione svolte dai docenti">Statistiche lezioni</a></li>
+      </ul>
+    </li>
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:15] == 'staff_documenti' ? ' active' }}">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Visualizza i documenti delle classi caricati dai docenti">Documenti<span class="caret gs-ml-3"></span></a>
+      <ul class="dropdown-menu">
+        <li{{ app.request.attributes.get('_route')[:21] == 'staff_documenti_piani' ? ' class="active"' }}><a href="{{ path('staff_documenti_piani') }}" title="Inserimento dei piani di lavoro">Piani di lavoro</a></li>
+        <li{{ app.request.attributes.get('_route')[:21] == 'staff_documenti_doc15' ? ' class="active"' }}><a href="{{ path('staff_documenti_doc15') }}" title="Inserimento dei documenti del 15 maggio">15 Maggio</a></li>
+        <li{{ app.request.attributes.get('_route')[:25] == 'staff_documenti_programmi' ? ' class="active"' }}><a href="{{ path('staff_documenti_programmi') }}" title="Inserimento dei programmi svolti">Programmi</a></li>
+        <li{{ app.request.attributes.get('_route')[:25] == 'staff_documenti_relazioni' ? ' class="active"' }}><a href="{{ path('staff_documenti_relazioni') }}" title="Inserimento delle relazioni finali">Relazioni</a></li>
+      </ul>
+    </li>
+    <li{{ app.request.attributes.get('_route')[:14] == 'staff_password' ? ' class="active"' }}><a href="{{ path('staff_password') }}" title="Generazione delle nuove credenziali di accesso per i genitori">Password</a></li>
+  </ul>
+</nav>
+
+
+
+
+
+

@@ -38,7 +38,7 @@
             <argument type="service" id="file_locator" />
         </service>
 
-        <service id="routing.loader.glob" class="Symfony\Component\Config\Loader\GlobFileLoader">
+        <service id="routing.loader.glob" class="Symfony\Component\Routing\Loader\GlobFileLoader">
             <tag name="routing.loader" />
             <argument type="service" id="file_locator" />
         </service>
@@ -59,7 +59,6 @@
         </service>
 
         <service id="router.default" class="Symfony\Bundle\FrameworkBundle\Routing\Router">
-            <tag name="monolog.logger" channel="router" />
             <argument type="service" id="service_container" />
             <argument>%router.resource%</argument>
             <argument type="collection">
@@ -75,7 +74,6 @@
                 <argument key="matcher_cache_class">%router.options.matcher.cache_class%</argument>
             </argument>
             <argument type="service" id="router.request_context" on-invalid="ignore" />
-            <argument type="service" id="logger" on-invalid="ignore" />
             <call method="setConfigCacheFactory">
                 <argument type="service" id="config_cache_factory" />
             </call>
@@ -85,6 +83,7 @@
         <service id="Symfony\Component\Routing\RouterInterface" alias="router" />
         <service id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" alias="router" />
         <service id="Symfony\Component\Routing\Matcher\UrlMatcherInterface" alias="router" />
+        <service id="Symfony\Component\Routing\RequestContextAwareInterface" alias="router" />
 
         <service id="router.request_context" class="Symfony\Component\Routing\RequestContext">
             <argument>%router.request_context.base_url%</argument>
@@ -97,17 +96,31 @@
         <service id="Symfony\Component\Routing\RequestContext" alias="router.request_context" />
 
         <service id="router.cache_warmer" class="Symfony\Bundle\FrameworkBundle\CacheWarmer\RouterCacheWarmer">
+            <tag name="container.service_subscriber" id="router" />
             <tag name="kernel.cache_warmer" />
-            <argument type="service" id="router" />
+            <argument type="service" id="Psr\Container\ContainerInterface" />
         </service>
 
-        <service id="router_listener" class="Symfony\Component\HttpKernel\EventListener\RouterListener" public="true">
+        <service id="router_listener" class="Symfony\Component\HttpKernel\EventListener\RouterListener">
             <tag name="kernel.event_subscriber" />
             <tag name="monolog.logger" channel="request" />
             <argument type="service" id="router" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="router.request_context" on-invalid="ignore" />
             <argument type="service" id="logger" on-invalid="ignore" />
+            <argument>%kernel.project_dir%</argument>
+            <argument>%kernel.debug%</argument>
+        </service>
+
+        <service id="Symfony\Bundle\FrameworkBundle\Controller\RedirectController" public="true">
+            <argument type="service" id="router" />
+            <argument>%request_listener.http_port%</argument>
+            <argument>%request_listener.https_port%</argument>
+        </service>
+
+        <service id="Symfony\Bundle\FrameworkBundle\Controller\TemplateController" public="true">
+            <argument type="service" id="twig" on-invalid="ignore" />
+            <argument type="service" id="templating" on-invalid="ignore" />
         </service>
     </services>
 </container>

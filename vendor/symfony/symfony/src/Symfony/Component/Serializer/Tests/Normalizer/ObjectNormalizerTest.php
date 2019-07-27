@@ -16,19 +16,19 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Tests\Fixtures\CircularReferenceDummy;
+use Symfony\Component\Serializer\Tests\Fixtures\GroupDummy;
 use Symfony\Component\Serializer\Tests\Fixtures\MaxDepthDummy;
 use Symfony\Component\Serializer\Tests\Fixtures\SiblingHolder;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Tests\Fixtures\GroupDummy;
 
 /**
  * @author Kévin Dunglas <dunglas@gmail.com>
@@ -422,7 +422,7 @@ class ObjectNormalizerTest extends TestCase
             array(
                 array(
                     'bar' => function ($bars) {
-                        return count($bars);
+                        return \count($bars);
                     },
                 ),
                 array(new ObjectConstructorDummy('baz', '', false), new ObjectConstructorDummy('quux', '', false)),
@@ -482,7 +482,7 @@ class ObjectNormalizerTest extends TestCase
         $serializer = new Serializer(array($this->normalizer));
         $this->normalizer->setSerializer($serializer);
         $this->normalizer->setCircularReferenceHandler(function ($obj) {
-            return get_class($obj);
+            return \get_class($obj);
         });
 
         $obj = new CircularReferenceDummy();
@@ -628,6 +628,16 @@ class ObjectNormalizerTest extends TestCase
         $serializer->denormalize(array('inners' => array('a' => array('foo' => 1))), ObjectOuter::class);
     }
 
+    public function testDoNotRejectInvalidTypeOnDisableTypeEnforcementContextOption()
+    {
+        $extractor = new PropertyInfoExtractor(array(), array(new PhpDocExtractor()));
+        $normalizer = new ObjectNormalizer(null, null, null, $extractor);
+        $serializer = new Serializer(array($normalizer));
+        $context = array(ObjectNormalizer::DISABLE_TYPE_ENFORCEMENT => true);
+
+        $this->assertSame('foo', $serializer->denormalize(array('number' => 'foo'), JsonNumber::class, null, $context)->number);
+    }
+
     public function testExtractAttributesRespectsFormat()
     {
         $normalizer = new FormatAndContextAwareNormalizer();
@@ -673,6 +683,16 @@ class ObjectNormalizerTest extends TestCase
             ),
             $serializer->normalize($objectDummy, null, $context)
         );
+
+        $context = array('attributes' => array('foo', 'baz', 'object'));
+        $this->assertEquals(
+            array(
+                'foo' => 'foo',
+                'baz' => true,
+                'object' => array('foo' => 'innerFoo', 'bar' => 'innerBar'),
+            ),
+            $serializer->normalize($objectDummy, null, $context)
+        );
     }
 
     public function testAttributesContextDenormalize()
@@ -712,6 +732,37 @@ class ObjectNormalizerTest extends TestCase
             'foo' => 'b',
             'inner' => array('foo' => 'foo', 'bar' => 'bar'),
         ), DummyWithConstructorObjectAndDefaultValue::class, null, $context));
+    }
+
+    public function testNormalizeSameObjectWithDifferentAttributes()
+    {
+        $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+        $this->normalizer = new ObjectNormalizer($classMetadataFactory);
+        $serializer = new Serializer(array($this->normalizer));
+        $this->normalizer->setSerializer($serializer);
+
+        $dummy = new ObjectOuter();
+        $dummy->foo = new ObjectInner();
+        $dummy->foo->foo = 'foo.foo';
+        $dummy->foo->bar = 'foo.bar';
+
+        $dummy->bar = new ObjectInner();
+        $dummy->bar->foo = 'bar.foo';
+        $dummy->bar->bar = 'bar.bar';
+
+        $this->assertEquals(array(
+            'foo' => array(
+                'bar' => 'foo.bar',
+            ),
+            'bar' => array(
+                'foo' => 'bar.foo',
+            ),
+        ), $this->normalizer->normalize($dummy, 'json', array(
+            'attributes' => array(
+                'foo' => array('bar'),
+                'bar' => array('foo'),
+            ),
+        )));
     }
 }
 
@@ -934,11 +985,11 @@ class FormatAndContextAwareNormalizer extends ObjectNormalizer
 {
     protected function isAllowedAttribute($classOrObject, $attribute, $format = null, array $context = array())
     {
-        if (in_array($attribute, array('foo', 'bar')) && 'foo_and_bar_included' === $format) {
+        if (\in_array($attribute, array('foo', 'bar')) && 'foo_and_bar_included' === $format) {
             return true;
         }
 
-        if (in_array($attribute, array('foo', 'bar')) && isset($context['include_foo_and_bar']) && true === $context['include_foo_and_bar']) {
+        if (\in_array($attribute, array('foo', 'bar')) && isset($context['include_foo_and_bar']) && true === $context['include_foo_and_bar']) {
             return true;
         }
 

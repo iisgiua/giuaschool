@@ -12,9 +12,9 @@
 namespace Symfony\Component\ExpressionLanguage\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\ExpressionLanguage\Parser;
 use Symfony\Component\ExpressionLanguage\Lexer;
 use Symfony\Component\ExpressionLanguage\Node;
+use Symfony\Component\ExpressionLanguage\Parser;
 
 class ParserTest extends TestCase
 {
@@ -194,5 +194,17 @@ class ParserTest extends TestCase
                 array('foo'),
             ),
         );
+    }
+
+    /**
+     * @expectedException \Symfony\Component\ExpressionLanguage\SyntaxError
+     * @expectedExceptionMessage Did you mean "baz"?
+     */
+    public function testNameProposal()
+    {
+        $lexer = new Lexer();
+        $parser = new Parser(array());
+
+        $parser->parse($lexer->tokenize('foo > bar'), array('foo', 'baz'));
     }
 }

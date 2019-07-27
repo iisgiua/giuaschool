@@ -2,7 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <div class="panel panel-primary" >
+  <div class="panel panel-primary gs-mt-4">
     <div class="panel-heading">
       <div class="panel-title">{{ form_title|trans }}</div>
     </div>
@@ -47,6 +47,7 @@ var DZ = new Dropzone(".dropzone", {
   maxFiles: 1,
   maxFilesize: 10,
   acceptedFiles: ".pdf,.odt,.doc,.docx,.rtf,.txt",
+  timeout: 0,
   paramName: "files",
   uploadMultiple: true,
   addRemoveLinks: true,
@@ -67,14 +68,17 @@ var DZ = new Dropzone(".dropzone", {
     this.on("successmultiple", function(files, response) {
       $.each(files, function(key,file){
         file.uploaded = response[key];
+        $('#relazione_edit_submit').removeAttr('disabled');
       });
     });
     this.on("removedfile", function(file) {
       if (file.uploaded) {
         $.post("{{ path('file_remove', {'pagina': 'documenti_relazione_edit', 'param': 'files'}) }}", {"files": file.uploaded});
+        $('#relazione_edit_submit').attr('disabled', true);
       } else if (file.existent) {
         $.post("{{ path('file_remove', {'pagina': 'documenti_relazione_edit', 'param': 'files'}) }}", {"files": file.existent});
         this.options.maxFiles++;
+        $('#relazione_edit_submit').attr('disabled', true);
       }
     });
   {% if allegati is not empty %}
@@ -94,6 +98,7 @@ var DZ = new Dropzone(".dropzone", {
       DZ.options.maxFiles--;
     });
   {% endif %}
+    $('#relazione_edit_submit').attr('disabled', true);
   }
 });
 $(document).ready(function() {

@@ -2,39 +2,37 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_classe'|trans }}</h1>
-  <h2 class="text-primary gs-h2 gs-mb-1">Le mie classi:</h2>
+  <h2 class="text-primary gs-h2 gs-mb-1">La mia cattedra:</h2>
   <div class="container-fluid">
     <table class="table table-bordered table-hover table-striped">
       <thead class="bg-success">
         <tr>
           <th>{{ 'label.sede'|trans }}</th>
-          <th>{{ 'label.classe'|trans }}</th>
-          <th>{{ 'label.materia'|trans }}</th>
+          <th>Indirizzo</th>
+          <th>Classe e Materia</th>
         </tr>
       </thead>
       <tbody>
-        {% for k,v in cattedre %}
+  {% for k,v in cattedre %}
         <tr>
           <td>
             <strong class="gs-big">{{ v[0].classe.sede.citta }}</strong>
           </td>
           <td>
-            <strong class="gs-big">{{ v[0].classe.anno }}ª {{ v[0].classe.sezione }}</strong><br>
             <em>{{ v[0].classe.corso.nomeBreve }}</em>
           </td>
           <td>
-            {% for k1,v1 in v %}
-            <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': v1.id, 'classe': 0}) }}" role="button" title="{{ v1.classe.anno }}{{ v1.classe.sezione }} - {{ v1.materia.nome }}">{{ v1.materia.nomeBreve }}{{ v1.materia.tipo == 'S' ? ' ('~v1.alunno.cognome~' '~v1.alunno.nome~')' }}</a>
-            {% endfor %}
+    {% for k1,v1 in v %}
+            <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': v1.id, 'classe': 0}) }}" role="button" title="{{ v1.classe.anno }}{{ v1.classe.sezione }} - {{ v1.materia.nome }}"><strong>{{ v1.classe.anno }}ª {{ v1.classe.sezione }} - {{ v1.materia.nomeBreve }}{{ v1.materia.tipo == 'S' and v1.alunno ? ' ('~v1.alunno.cognome~' '~v1.alunno.nome~')' }}</strong></a>
+    {% endfor %}
           </td>
         </tr>
-        {% endfor %}
+  {% endfor %}
       </tbody>
     </table>
   </div>
-  <h2 class="text-primary gs-h2 gs-mb-1">Tutte le classi:</h2>
+  <h2 class="text-primary gs-h2 gs-mb-1">Lista di tutte le classi per le supplenze:</h2>
   <div class="container-fluid">
     <table class="table table-bordered table-hover table-striped">
       <thead class="bg-success">
@@ -45,7 +43,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for k,v in classi %}
+  {% for k,v in classi %}
         <tr>
           <td>
             <strong class="gs-big">{{ v[0].sede.citta }}</strong>
@@ -54,15 +52,33 @@
             <strong class="gs-big">{{ v[0].sezione }}</strong><br>
           </td>
           <td>
-            {% for k1,v1 in v %}
-            <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" role="button" title="{{ v1.anno }}{{ v1.sezione }} - {{ v1.corso.nome }}">{{ v1.anno }}ª {{ v1.sezione }}</a>
-            {% endfor %}
+    {% for k1,v1 in v %}
+      {% if v1.id in cattedre|keys %}
+            <button class="btn btn-success btn-sm gs-modal-confirm-button" title="{{ v1.anno }}{{ v1.sezione }} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" data-text="{{ 'message.conferma_supplenza'|trans }}"><strong>{{ v1.anno }}ª {{ v1.sezione }}</strong></button>
+      {% else %}
+            <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" role="button" title="{{ v1.anno }}{{ v1.sezione }} - {{ v1.corso.nome }}"><strong>{{ v1.anno }}ª {{ v1.sezione }}</strong></a>
+      {% endif %}
+    {% endfor %}
           </td>
         </tr>
-        {% endfor %}
+  {% endfor %}
       </tbody>
     </table>
+    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_avviso'} %}
   </div>
 </div>
 {% endblock %}
 
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+});
+</script>
+{% endblock %}

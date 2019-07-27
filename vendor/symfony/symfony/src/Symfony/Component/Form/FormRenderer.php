@@ -11,9 +11,10 @@
 
 namespace Symfony\Component\Form;
 
-use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Exception\BadMethodCallException;
+use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Twig\Environment;
 
 /**
  * Renders a form into HTML using a rendering engine.
@@ -24,37 +25,12 @@ class FormRenderer implements FormRendererInterface
 {
     const CACHE_KEY_VAR = 'unique_block_prefix';
 
-    /**
-     * @var FormRendererEngineInterface
-     */
     private $engine;
-
-    /**
-     * @var CsrfTokenManagerInterface
-     */
     private $csrfTokenManager;
-
-    /**
-     * @var array
-     */
     private $blockNameHierarchyMap = array();
-
-    /**
-     * @var array
-     */
     private $hierarchyLevelMap = array();
-
-    /**
-     * @var array
-     */
     private $variableStack = array();
 
-    /**
-     * Constructor.
-     *
-     * @param FormRendererEngineInterface    $engine
-     * @param CsrfTokenManagerInterface|null $csrfTokenManager
-     */
     public function __construct(FormRendererEngineInterface $engine, CsrfTokenManagerInterface $csrfTokenManager = null)
     {
         $this->engine = $engine;
@@ -72,9 +48,10 @@ class FormRenderer implements FormRendererInterface
     /**
      * {@inheritdoc}
      */
-    public function setTheme(FormView $view, $themes)
+    public function setTheme(FormView $view, $themes /*, $useDefaultThemes = true */)
     {
-        $this->engine->setTheme($view, $themes);
+        $args = \func_get_args();
+        $this->engine->setTheme($view, $themes, isset($args[2]) ? (bool) $args[2] : true);
     }
 
     /**
@@ -198,7 +175,7 @@ class FormRenderer implements FormRendererInterface
             foreach ($view->vars['block_prefixes'] as $blockNamePrefix) {
                 $blockNameHierarchy[] = $blockNamePrefix.'_'.$blockNameSuffix;
             }
-            $hierarchyLevel = count($blockNameHierarchy) - 1;
+            $hierarchyLevel = \count($blockNameHierarchy) - 1;
 
             $hierarchyInit = true;
         } else {
@@ -242,7 +219,7 @@ class FormRenderer implements FormRendererInterface
 
         // Escape if no resource exists for this block
         if (!$resource) {
-            if (count($blockNameHierarchy) !== count(array_unique($blockNameHierarchy))) {
+            if (\count($blockNameHierarchy) !== \count(array_unique($blockNameHierarchy))) {
                 throw new LogicException(sprintf('Unable to render the form because the block names array contains duplicates: "%s".', implode('", "', array_reverse($blockNameHierarchy))));
             }
 
@@ -306,5 +283,21 @@ class FormRenderer implements FormRendererInterface
     public function humanize($text)
     {
         return ucfirst(strtolower(trim(preg_replace(array('/([A-Z])/', '/[_\s]+/'), array('_$1', ' '), $text))));
+    }
+
+    /**
+     * @internal
+     */
+    public function encodeCurrency(Environment $environment, $text, $widget = '')
+    {
+        if ('UTF-8' === $charset = $environment->getCharset()) {
+            $text = htmlspecialchars($text, ENT_QUOTES | (\defined('ENT_SUBSTITUTE') ? ENT_SUBSTITUTE : 0), 'UTF-8');
+        } else {
+            $text = htmlentities($text, ENT_QUOTES | (\defined('ENT_SUBSTITUTE') ? ENT_SUBSTITUTE : 0), 'UTF-8');
+            $text = iconv('UTF-8', $charset, $text);
+            $widget = iconv('UTF-8', $charset, $widget);
+        }
+
+        return str_replace('{{ widget }}', $widget, $text);
     }
 }

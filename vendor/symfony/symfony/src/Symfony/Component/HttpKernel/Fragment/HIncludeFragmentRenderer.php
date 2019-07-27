@@ -13,9 +13,9 @@ namespace Symfony\Component\HttpKernel\Fragment;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Templating\EngineInterface;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
 use Symfony\Component\HttpKernel\UriSigner;
+use Symfony\Component\Templating\EngineInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Loader\ExistsLoaderInterface;
@@ -33,8 +33,6 @@ class HIncludeFragmentRenderer extends RoutableFragmentRenderer
     private $charset;
 
     /**
-     * Constructor.
-     *
      * @param EngineInterface|Environment $templating            An EngineInterface or a Twig instance
      * @param UriSigner                   $signer                A UriSigner instance
      * @param string                      $globalDefaultTemplate The global default content (it can be a template name or the content)
@@ -91,7 +89,7 @@ class HIncludeFragmentRenderer extends RoutableFragmentRenderer
             }
 
             // we need to sign the absolute URI, but want to return the path only.
-            $uri = substr($this->signer->sign($this->generateFragmentUri($uri, $request, true)), strlen($request->getSchemeAndHttpHost()));
+            $uri = substr($this->signer->sign($this->generateFragmentUri($uri, $request, true)), \strlen($request->getSchemeAndHttpHost()));
         }
 
         // We need to replace ampersands in the URI with the encoded form in order to return valid html/xml content.
@@ -104,12 +102,12 @@ class HIncludeFragmentRenderer extends RoutableFragmentRenderer
             $content = $template;
         }
 
-        $attributes = isset($options['attributes']) && is_array($options['attributes']) ? $options['attributes'] : array();
+        $attributes = isset($options['attributes']) && \is_array($options['attributes']) ? $options['attributes'] : array();
         if (isset($options['id']) && $options['id']) {
             $attributes['id'] = $options['id'];
         }
         $renderedAttributes = '';
-        if (count($attributes) > 0) {
+        if (\count($attributes) > 0) {
             $flags = ENT_QUOTES | ENT_SUBSTITUTE;
             foreach ($attributes as $attribute => $value) {
                 $renderedAttributes .= sprintf(
@@ -133,7 +131,7 @@ class HIncludeFragmentRenderer extends RoutableFragmentRenderer
         if ($this->templating instanceof EngineInterface) {
             try {
                 return $this->templating->exists($template);
-            } catch (\InvalidArgumentException $e) {
+            } catch (\Exception $e) {
                 return false;
             }
         }

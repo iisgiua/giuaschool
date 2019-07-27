@@ -1,0 +1,158 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.autorizza'|trans }}</h1>
+  {% if errore %}
+  <div class="row gs-mb-5">
+    <div class="col-sm-12">
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+    </div>
+  </div>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+  {% else %}
+    {% include('include/form-inline.html.twig') %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-6">
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+    </div>
+    <div class="col-sm-6 text-right">
+      <strong class="gs-big">{{ info.periodo.nome }}</strong>
+    </div>
+  </div>
+  <table class="table table-bordered table-hover table-striped gs-mb-0">
+    <thead class="bg-success">
+      <tr>
+        <th>{{ 'label.alunno'|trans }}</th>
+        <th>{{ 'label.classe'|trans }}</th>
+        <th>{{ 'label.ritardi'|trans }}</th>
+        <th>{{ 'label.uscite'|trans }}</th>
+        <th>{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in dati.lista %}
+      <tr>
+        <td>{{ a.nome }}</td>
+        <td>{{ a.classe }}</td>
+        <td>
+        {% if a.entrate is not empty %}
+          <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sui ritardi" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sui ritardi" data-body="entrate-{{ a.alunno_id }}">{{ a.entrate|length }}</button>
+          <div id="entrate-{{ a.alunno_id }}" style="display:none">
+          {% for k,v in a.entrate %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <strong>Data: {{ v.data|date('d/m/Y') }}<br>Ora: {{ v.ora|date('H:i') }}</strong><br>
+                <small>{{ v.note }}</small>
+              </div>
+            </div>
+          {% endfor %}
+          </div>
+        {% else %}
+          <span class="label label-default">0</span>
+        {% endif %}
+        </td>
+        <td>
+        {% if a.uscite is not empty %}
+          <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sulle uscite anticipate" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulle uscite anticipate" data-body="uscite-{{ a.alunno_id }}">{{ a.uscite|length }}</button>
+          <div id="uscite-{{ a.alunno_id }}" style="display:none">
+          {% for k,v in a.uscite %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <strong>Data: {{ v.data|date('d/m/Y') }}<br>Ora: {{ v.ora|date('H:i') }}</strong><br>
+                <small>{{ v.note }}</small>
+              </div>
+            </div>
+          {% endfor %}
+          </div>
+        {% else %}
+          <span class="label label-default">0</span>
+        {% endif %}
+        </td>
+        <td>
+        {% if dati.azioni %}
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_entrata', {'data': data, 'classe': a.classe_id, 'alunno': a.alunno_id}) }}" role="button" title="Segna il ritardo dell'alunno">R</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_uscita', {'data': data, 'classe': a.classe_id, 'alunno': a.alunno_id}) }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
+        {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    {% include 'include/modal-info.html.twig' %}
+    {% if maxPages > 1 %}
+  <nav aria-label="Navigazione tra le pagine" class="text-center">
+    <ul class="pagination pagination-sm gs-mt-2">
+      {% if page > 1 %}
+      <li><a href="{{ path('staff_studenti_autorizza', {'data': data, 'pagina': page-1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+      {% else %}
+      <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
+      {% endif %}
+      {% for i in 1..maxPages %}
+      <li {{ page == i ? 'class="active"' }}><a href="{{ path('staff_studenti_autorizza', {'data': data, 'pagina': i}) }}">{{ i }}</a></li>
+      {% endfor %}
+      {% if page < maxPages %}
+      <li><a href="{{ path('staff_studenti_autorizza', {'data': data, 'pagina': page+1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+      {% else %}
+      <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
+      {% endif %}
+    </ul>
+  </nav>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#gs-button-date').datepicker({
+    format: "yyyy-mm-dd",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    defaultViewDate: "{{ data }}",
+    startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
+    endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
+    datesDisabled: {{ lista_festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+    });
+  $('#gs-button-date').datepicker()
+    .on('show', function(ev){
+      $('#gs-button-date').datepicker('update', '{{ data }}');
+  });
+  $('#gs-button-date').datepicker()
+    .on('changeDate', function(ev){
+      $('#gs-button-date').datepicker('hide');
+      url = "{{ path('staff_studenti_autorizza', {'data': '9999-99-99', 'pagina': page}) }}";
+      url = url.replace("9999-99-99", ev.format());
+      window.location.href = url;
+  });
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').text(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
+});
+</script>
+{% endblock %}

@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Command\CachePoolClearCommand;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -57,10 +58,10 @@ class CachePoolClearCommandTest extends WebTestCase
     public function testCallClearer()
     {
         $tester = $this->createCommandTester();
-        $tester->execute(array('pools' => array('cache.default_clearer')), array('decorated' => false));
+        $tester->execute(array('pools' => array('cache.app_clearer')), array('decorated' => false));
 
         $this->assertSame(0, $tester->getStatusCode(), 'cache:pool:clear exits with 0 in case of success');
-        $this->assertContains('Calling cache clearer: cache.default_clearer', $tester->getDisplay());
+        $this->assertContains('Calling cache clearer: cache.app_clearer', $tester->getDisplay());
         $this->assertContains('[OK] Cache was successfully cleared.', $tester->getDisplay());
     }
 
@@ -74,11 +75,28 @@ class CachePoolClearCommandTest extends WebTestCase
             ->execute(array('pools' => array('unknown_pool')), array('decorated' => false));
     }
 
+    /**
+     * @group legacy
+     * @expectedDeprecation Symfony\Bundle\FrameworkBundle\Command\CachePoolClearCommand::__construct() expects an instance of "Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer" as first argument since Symfony 3.4. Not passing it is deprecated and will throw a TypeError in 4.0.
+     */
+    public function testLegacyClearCommand()
+    {
+        $application = new Application(static::$kernel);
+        $application->add(new CachePoolClearCommand());
+
+        $tester = new CommandTester($application->find('cache:pool:clear'));
+
+        $tester->execute(array('pools' => array()));
+
+        $this->assertContains('Cache was successfully cleared', $tester->getDisplay());
+    }
+
     private function createCommandTester()
     {
-        $command = new CachePoolClearCommand();
-        $command->setContainer(static::$kernel->getContainer());
+        $container = static::$kernel->getContainer();
+        $application = new Application(static::$kernel);
+        $application->add(new CachePoolClearCommand($container->get('cache.global_clearer')));
 
-        return new CommandTester($command);
+        return new CommandTester($application->find('cache:pool:clear'));
     }
 }

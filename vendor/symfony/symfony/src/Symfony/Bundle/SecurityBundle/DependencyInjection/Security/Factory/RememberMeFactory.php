@@ -13,8 +13,8 @@ namespace Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory;
 
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\DependencyInjection\ChildDefinition;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 class RememberMeFactory implements SecurityFactoryInterface
 {
@@ -94,7 +94,7 @@ class RememberMeFactory implements SecurityFactoryInterface
                 $userProviders[] = new Reference('security.user.provider.concrete.'.$providerName);
             }
         }
-        if (count($userProviders) === 0) {
+        if (0 === \count($userProviders)) {
             throw new \RuntimeException('You must configure at least one remember-me aware listener (such as form-login) for each firewall that has remember-me enabled.');
         }
 
@@ -139,7 +139,7 @@ class RememberMeFactory implements SecurityFactoryInterface
         ;
 
         foreach ($this->options as $name => $value) {
-            if (is_bool($value)) {
+            if (\is_bool($value)) {
                 $builder->booleanNode($name)->defaultValue($value);
             } else {
                 $builder->scalarNode($name)->defaultValue($value);

@@ -22,19 +22,8 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface
 {
-    /**
-     * @var PropertyInfoExtractorInterface
-     */
     private $propertyInfoExtractor;
-
-    /**
-     * @var CacheItemPoolInterface
-     */
     private $cacheItemPool;
-
-    /**
-     * @var array
-     */
     private $arrayCache = array();
 
     public function __construct(PropertyInfoExtractorInterface $propertyInfoExtractor, CacheItemPoolInterface $cacheItemPool)
@@ -105,7 +94,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface
             $serializedArguments = serialize($arguments);
         } catch (\Exception $exception) {
             // If arguments are not serializable, skip the cache
-            return call_user_func_array(array($this->propertyInfoExtractor, $method), $arguments);
+            return \call_user_func_array(array($this->propertyInfoExtractor, $method), $arguments);
         }
 
         // Calling rawurlencode escapes special characters not allowed in PSR-6's keys
@@ -121,7 +110,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface
             return $this->arrayCache[$key] = $item->get();
         }
 
-        $value = call_user_func_array(array($this->propertyInfoExtractor, $method), $arguments);
+        $value = \call_user_func_array(array($this->propertyInfoExtractor, $method), $arguments);
         $item->set($value);
         $this->cacheItemPool->save($item);
 

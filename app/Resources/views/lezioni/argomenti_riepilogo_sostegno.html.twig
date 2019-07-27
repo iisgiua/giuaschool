@@ -2,13 +2,13 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_riepilogo'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
   <div class="row gs-mb-1">
     <div class="col-sm-6">
-      <strong class="gs-big">Mese:</strong>
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {'cattedra': (cattedra ? cattedra.id : 0), 'data': data_prec|date('Y-m-d')}) }}" role="button" title="Mese precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia mese"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {'cattedra': (cattedra ? cattedra.id : 0), 'data': data_succ|date('Y-m-d')}) }}" role="button" title="Mese successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti', {'cattedra': cattedra.id, 'classe': classe.id}) }}" role="button" title="Visualizza gli argomenti e le attività delle lezioni svolte"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Elenco argomenti</strong></a>

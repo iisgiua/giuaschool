@@ -1,6 +1,6 @@
-{# This file is duplicated in TwigBundle/Resources/views/base_js.html.twig. If you
-   make any change in this file, do the same change in the other file. #}
-<script{% if csp_script_nonce is defined and csp_script_nonce %} nonce={{ csp_script_nonce }}{% endif %}>/*<![CDATA[*/
+{# This file is partially duplicated in TwigBundle/Resources/views/base_js.html.twig. If you
+   make any change in this file, verify the same change is needed in the other file. #}
+<script{% if csp_script_nonce is defined and csp_script_nonce %} nonce="{{ csp_script_nonce }}"{% endif %}>/*<![CDATA[*/
     {# Caution: the contents of this file are processed by Twig before loading
                 them as JavaScript source code. Always use '/*' comments instead
                 of '//' comments to avoid impossible-to-debug side-effects #}
@@ -8,9 +8,7 @@
     Sfjs = (function() {
         "use strict";
 
-        var classListIsSupported = 'classList' in document.documentElement;
-
-        if (classListIsSupported) {
+        if ('classList' in document.documentElement) {
             var hasClass = function (el, cssClass) { return el.classList.contains(cssClass); };
             var removeClass = function(el, cssClass) { el.classList.remove(cssClass); };
             var addClass = function(el, cssClass) { el.classList.add(cssClass); };
@@ -24,7 +22,7 @@
 
         var noop = function() {};
 
-        var profilerStorageKey = 'sf2/profiler/';
+        var profilerStorageKey = 'symfony/profiler/';
 
         var request = function(url, onSuccess, onError, payload, options) {
             var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
@@ -41,7 +39,7 @@
                     setTimeout(function(){
                         options.maxTries--;
                         request(url, onSuccess, onError, payload, options);
-                    }, 500);
+                    }, 1000);
 
                     return null;
                 }
@@ -122,6 +120,11 @@
             var tbody = document.querySelector('.sf-toolbar-ajax-request-list');
             if (!tbody) {
                 return;
+            }
+
+            var nbOfAjaxRequest = tbody.rows.length;
+            if (nbOfAjaxRequest >= 100) {
+                tbody.deleteRow(nbOfAjaxRequest - 1);
             }
 
             var request = requestStack[index];
@@ -252,6 +255,8 @@
                             mode: arguments[0].mode,
                             redirect: arguments[0].redirect
                         };
+                    } else {
+                        url = String(url);
                     }
                     if (!url.match(new RegExp({{ excluded_ajax_paths|json_encode|raw }}))) {
                         var method = 'GET';
@@ -393,7 +398,7 @@
             },
 
             createTabs: function() {
-                var tabGroups = document.querySelectorAll('.sf-tabs');
+                var tabGroups = document.querySelectorAll('.sf-tabs:not([data-processed=true])');
 
                 /* create the tab navigation for each group of tabs */
                 for (var i = 0; i < tabGroups.length; i++) {
@@ -455,11 +460,13 @@
                             document.getElementById(activeTabId).className = 'block';
                         });
                     }
+
+                    tabGroups[i].setAttribute('data-processed', 'true');
                 }
             },
 
             createToggles: function() {
-                var toggles = document.querySelectorAll('.sf-toggle');
+                var toggles = document.querySelectorAll('.sf-toggle:not([data-processed=true])');
 
                 for (var i = 0; i < toggles.length; i++) {
                     var elementSelector = toggles[i].getAttribute('data-toggle-selector');
@@ -512,20 +519,22 @@
                         var altContent = toggle.getAttribute('data-toggle-alt-content');
                         toggle.innerHTML = currentContent !== altContent ? altContent : originalContent;
                     });
-                }
 
-                /* Prevents from disallowing clicks on links inside toggles */
-                var toggleLinks = document.querySelectorAll('.sf-toggle a');
-                for (var i = 0; i < toggleLinks.length; i++) {
-                    addEventListener(toggleLinks[i], 'click', function(e) {
-                        e.stopPropagation();
-                    });
+                    /* Prevents from disallowing clicks on links inside toggles */
+                    var toggleLinks = toggles[i].querySelectorAll('a');
+                    for (var j = 0; j < toggleLinks.length; j++) {
+                        addEventListener(toggleLinks[j], 'click', function(e) {
+                            e.stopPropagation();
+                        });
+                    }
+
+                    toggles[i].setAttribute('data-processed', 'true');
                 }
             }
         };
     })();
 
-    Sfjs.addEventListener(window, 'load', function() {
+    Sfjs.addEventListener(document, 'DOMContentLoaded', function() {
         Sfjs.createTabs();
         Sfjs.createToggles();
     });

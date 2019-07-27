@@ -1,31 +1,16 @@
 <?php
 
-/*
- * This file is part of the Doctrine Bundle
- *
- * The code was originally distributed inside the Symfony framework.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- * (c) Doctrine Project, Benjamin Eberlei <kontakt@beberlei.de>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Doctrine\Bundle\DoctrineBundle\Command;
 
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Doctrine\ORM\Tools\EntityRepositoryGenerator;
 use Doctrine\Bundle\DoctrineBundle\Mapping\DisconnectedMetadataFactory;
+use Doctrine\ORM\Tools\EntityRepositoryGenerator;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Generate entity classes from mapping information
- *
- * @author Fabien Potencier <fabien@symfony.com>
- * @author Jonathan H. Wage <jonwage@gmail.com>
  */
 class GenerateEntitiesDoctrineCommand extends DoctrineCommand
 {
@@ -36,7 +21,7 @@ class GenerateEntitiesDoctrineCommand extends DoctrineCommand
     {
         $this
             ->setName('doctrine:generate:entities')
-            ->setAliases(array('generate:doctrine:entities'))
+            ->setAliases(['generate:doctrine:entities'])
             ->setDescription('Generates entity classes and method stubs from your mapping information')
             ->addArgument('name', InputArgument::REQUIRED, 'A bundle name, a namespace, or a class name')
             ->addOption('path', null, InputOption::VALUE_REQUIRED, 'The path where to generate entities when it cannot be guessed')
@@ -87,6 +72,13 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        trigger_error('The doctrine:generate:entity command has been deprecated.', E_USER_DEPRECATED);
+        $output->writeln([
+            ' <comment>NOTE:</comment> The <info>doctrine:generate:entities</info> command has been deprecated.',
+            '       To read more about the differences between anemic and rich models go here <info>http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/getting-started.html#adding-behavior-to-entities</info>.',
+            '       If you wish to generate your entities, use <info>make:entity --regenerate</info> from MakerBundle instead.',
+        ]);
+
         $manager = new DisconnectedMetadataFactory($this->getContainer()->get('doctrine'));
 
         try {
@@ -96,9 +88,10 @@ EOT
             $metadata = $manager->getBundleMetadata($bundle);
         } catch (\InvalidArgumentException $e) {
             $name = strtr($input->getArgument('name'), '/', '\\');
+            $pos  = strpos($name, ':');
 
-            if (false !== $pos = strpos($name, ':')) {
-                $name = $this->getContainer()->get('doctrine')->getAliasNamespace(substr($name, 0, $pos)).'\\'.substr($name, $pos + 1);
+            if ($pos !== false) {
+                $name = $this->getContainer()->get('doctrine')->getAliasNamespace(substr($name, 0, $pos)) . '\\' . substr($name, $pos + 1);
             }
 
             if (class_exists($name)) {
@@ -112,7 +105,7 @@ EOT
 
         $generator = $this->getEntityGenerator();
 
-        $backupExisting = !$input->getOption('no-backup');
+        $backupExisting = ! $input->getOption('no-backup');
         $generator->setBackupExisting($backupExisting);
 
         $repoGenerator = new EntityRepositoryGenerator();
@@ -130,11 +123,13 @@ EOT
             }
 
             $output->writeln(sprintf('  > generating <comment>%s</comment>', $m->name));
-            $generator->generate(array($m), $entityMetadata->getPath());
+            $generator->generate([$m], $entityMetadata->getPath());
 
-            if ($m->customRepositoryClassName && false !== strpos($m->customRepositoryClassName, $metadata->getNamespace())) {
-                $repoGenerator->writeEntityRepositoryClass($m->customRepositoryClassName, $metadata->getPath());
+            if (! $m->customRepositoryClassName || strpos($m->customRepositoryClassName, $metadata->getNamespace()) === false) {
+                continue;
             }
+
+            $repoGenerator->writeEntityRepositoryClass($m->customRepositoryClassName, $metadata->getPath());
         }
     }
 }

@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_genitore/menu_lezioni.html.twig' with {'attivo': 'argomenti'} %}
   {% if classe %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_argomenti'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
   {% else %}

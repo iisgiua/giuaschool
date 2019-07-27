@@ -58,7 +58,7 @@
 
             <div class="sf-toolbar-info-piece">
                 <b>Route name</b>
-                <span>{{ collector.route|default('NONE') }}</span>
+                <span>{{ collector.route|default('n/a') }}</span>
             </div>
 
             <div class="sf-toolbar-info-piece">
@@ -271,10 +271,8 @@
             <div class="tab-content">
                 {% for child in profile.children %}
                     <h3>
-                        <a href="{{ path('_profiler', { token: child.token }) }}">
-                            {{ helper.set_handler(child.getcollector('request').controller) }}
-                        </a>
-                        <small>(token = {{ child.token }})</small>
+                        {{ helper.set_handler(child.getcollector('request').controller) }}
+                        <small>(token = <a href="{{ path('_profiler', { token: child.token }) }}">{{ child.token }}</a>)</small>
                     </h3>
 
                     {{ include('@WebProfiler/Profiler/bag.html.twig', { bag: child.getcollector('request').requestattributes }, with_context = false) }}

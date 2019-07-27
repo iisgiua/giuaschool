@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -91,7 +91,7 @@ class ArchiviazioneUtil {
     // inizializza
     $fs = new Filesystem();
     // percorso destinazione
-    $percorso = $this->root.'/documenti/registri/docenti';
+    $percorso = $this->root.'/docenti';
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -118,7 +118,7 @@ class ArchiviazioneUtil {
       return;
     }
     // crea documento
-    $this->pdf->configure('Istituto di Istruzione Superiore',
+    $this->pdf->configure('Istituto di Istruzione Superiore ""',
       'Registro del docente - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -177,7 +177,7 @@ class ArchiviazioneUtil {
     // inizializza
     $fs = new Filesystem();
     // percorso destinazione
-    $percorso = $this->root.'/documenti/registri/sostegno';
+    $percorso = $this->root.'/sostegno';
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -205,7 +205,7 @@ class ArchiviazioneUtil {
       return;
     }
     // crea documento
-    $this->pdf->configure('Istituto di Istruzione Superiore',
+    $this->pdf->configure('Istituto di Istruzione Superiore ""',
       'Registro di sostegno - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -264,7 +264,7 @@ class ArchiviazioneUtil {
     // inizializza
     $fs = new Filesystem();
     // percorso destinazione
-    $percorso = $this->root.'/documenti/registri/classi';
+    $percorso = $this->root.'/classi';
     if (!$fs->exists($percorso)) {
       // crea directory
       $fs->mkdir($percorso, 0775);
@@ -272,7 +272,7 @@ class ArchiviazioneUtil {
     // nome documento
     $nomefile = 'registro-classe-'.$classe->getAnno().$classe->getSezione().'.pdf';
     // crea documento
-    $this->pdf->configure('Istituto di Istruzione Superiore',
+    $this->pdf->configure('Istituto di Istruzione Superiore ""',
       'Registro di classe - '.$classe->getAnno().'ª '.$classe->getSezione());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -327,7 +327,8 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i></i></strong>
+                  <br><strong><i>“”</i></strong>
+                  <br><span style="font-size:9pt"></span>
                 </td>
               </tr>
             </table>
@@ -337,7 +338,7 @@ class ArchiviazioneUtil {
       </table>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
-    $annoscolastico = '2017/2018';
+    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
@@ -368,7 +369,8 @@ class ArchiviazioneUtil {
     $materia_s = $cattedra->getMateria()->getNome();
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = '2017/2018 - '.$periodo_s;
+    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+      ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
     $info_voti['N'] = [0 => 'N.C.', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
@@ -799,7 +801,8 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i></i></strong>
+                  <br><strong><i>“”</i></strong>
+                  <br><span style="font-size:9pt"></span>
                 </td>
               </tr>
             </table>
@@ -809,7 +812,7 @@ class ArchiviazioneUtil {
       </table>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
-    $annoscolastico = '2017/2018';
+    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
@@ -842,7 +845,8 @@ class ArchiviazioneUtil {
       ' ('.$cattedra->getAlunno()->getDataNascita()->format('d/m/Y').')';
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = '2017/2018 - '.$periodo_s;
+    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+      ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
     // suddivide per materia
@@ -1174,7 +1178,8 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i></i></strong>
+                  <br><strong><i>“”</i></strong>
+                  <br><span style="font-size:9pt"></span>
                 </td>
               </tr>
             </table>
@@ -1186,7 +1191,8 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = '2017/2018 - '.$periodo_s;
+    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+      ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
     $corso_s = $classe->getCorso()->getNome();
     $sede_s = 'Sede di '.$classe->getSede()->getCitta();
@@ -1209,7 +1215,8 @@ class ArchiviazioneUtil {
     // inizializza dati
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = '2017/2018 - '.$periodo_s;
+    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+      ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
     $corso_s = $classe->getCorso()->getNome().' - Sede di '.$classe->getSede()->getCitta();
     $nomemesi = array('','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre');

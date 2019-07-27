@@ -71,6 +71,7 @@ doctrine:
         year: AppBundle\DQL\YearFunction
         weekday: AppBundle\DQL\WeekdayFunction
       string_functions:
+        date_format: AppBundle\DQL\DateFormatFunction
         replace: AppBundle\DQL\ReplaceFunction
 
 # configurazione swiftmailer
@@ -87,3 +88,8 @@ twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
   form_themes: ['form.html.twig']
+
+### configurazione bundle framework-extra
+sensio_framework_extra:
+    router:
+        annotations: false

@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -38,8 +38,7 @@ class ScrutinioAssenzaType extends AbstractType {
       ->add('alunno', HiddenType::class)
       ->add('sesso', HiddenType::class)
       ->add('scrutinabile', ChoiceType::class, array(
-        'choices' => ['label.no_scrutinabile_cessata_frequenza' => 'C', 'label.label.no_scrutinabile_assenze' => 'A',
-          'label.scrutinabile_deroga' => 'D'],
+        'choices' => ['label.no_scrutinabile_assenze' => 'A', 'label.scrutinabile_deroga' => 'D'],
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'gs-text-normal'],

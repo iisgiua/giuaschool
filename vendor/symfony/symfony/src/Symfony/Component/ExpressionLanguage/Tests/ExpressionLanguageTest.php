@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\ExpressionLanguage\Tests;
 
-use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\ParsedExpression;
 use Symfony\Component\ExpressionLanguage\Tests\Fixtures\TestProvider;
@@ -146,6 +146,16 @@ class ExpressionLanguageTest extends TestCase
         $this->assertSame($expected, $result);
     }
 
+    /**
+     * @expectedException \Symfony\Component\ExpressionLanguage\SyntaxError
+     * @expectedExceptionMessage Unexpected end of expression around position 6 for expression `node.`.
+     */
+    public function testParseThrowsInsteadOfNotice()
+    {
+        $expressionLanguage = new ExpressionLanguage();
+        $expressionLanguage->parse('node.', array('node'));
+    }
+
     public function shortCircuitProviderEvaluate()
     {
         $object = $this->getMockBuilder('stdClass')->setMethods(array('foo'))->getMock();
@@ -176,6 +186,14 @@ class ExpressionLanguageTest extends TestCase
         $expressionLanguage->evaluate($expression, array('a' => 1, 'b' => 1));
         $result = $expressionLanguage->compile($expression, array('a', 'B' => 'b'));
         $this->assertSame('($a + $B)', $result);
+    }
+
+    public function testStrictEquality()
+    {
+        $expressionLanguage = new ExpressionLanguage();
+        $expression = '123 === a';
+        $result = $expressionLanguage->compile($expression, array('a'));
+        $this->assertSame('(123 === $a)', $result);
     }
 
     public function testCachingWithDifferentNamesOrder()
@@ -240,6 +258,16 @@ class ExpressionLanguageTest extends TestCase
         $el = new ExpressionLanguage();
         $el->evaluate('1 + 1');
         $registerCallback($el);
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessageRegExp  /Unable to call method "\w+" of object "\w+"./
+     */
+    public function testCallBadCallable()
+    {
+        $el = new ExpressionLanguage();
+        $el->evaluate('foo.myfunction()', array('foo' => new \stdClass()));
     }
 
     /**

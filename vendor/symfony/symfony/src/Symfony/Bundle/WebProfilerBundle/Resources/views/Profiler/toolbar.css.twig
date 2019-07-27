@@ -40,6 +40,8 @@
     -moz-box-sizing: content-box;
     box-sizing: content-box;
     vertical-align: baseline;
+    letter-spacing: normal;
+    width: auto;
 }
 
 .sf-toolbarreset {
@@ -68,6 +70,7 @@
 .sf-toolbarreset svg,
 .sf-toolbarreset img {
     height: 20px;
+    width: 20px;
     display: inline-block;
 }
 
@@ -158,11 +161,11 @@
     margin-bottom: 0;
 }
 
-.sf-toolbar-block .sf-toolbar-info-piece a {
+div.sf-toolbar .sf-toolbar-block .sf-toolbar-info-piece a {
     color: #99CDD8;
     text-decoration: underline;
 }
-.sf-toolbar-block .sf-toolbar-info-piece a:hover {
+div.sf-toolbar .sf-toolbar-block a:hover {
     text-decoration: none;
 }
 
@@ -250,6 +253,11 @@
     font-size: 12px;
     height: 17px;
     line-height: 17px;
+    margin-right: 5px;
+}
+
+.sf-toolbar-block-ajax .sf-toolbar-icon {
+    cursor: pointer;
 }
 
 .sf-toolbar-status-green .sf-toolbar-label,
@@ -285,6 +293,7 @@
     border-width: 0;
     position: relative;
     top: 8px;
+    vertical-align: baseline;
 }
 
 .sf-toolbar-block .sf-toolbar-icon img + span,
@@ -295,15 +304,21 @@
     margin-left: 4px;
 }
 
-.sf-toolbar-block:hover {
+.sf-toolbar-block:hover,
+.sf-toolbar-block.hover {
     position: relative;
 }
-.sf-toolbar-block:hover .sf-toolbar-icon {
+.sf-toolbar-block:hover .sf-toolbar-icon,
+.sf-toolbar-block.hover .sf-toolbar-icon {
     background-color: #444;
     position: relative;
     z-index: 10002;
 }
-.sf-toolbar-block:hover .sf-toolbar-info {
+.sf-toolbar-block-ajax.hover .sf-toolbar-info {
+    z-index: 10001;
+}
+.sf-toolbar-block:hover .sf-toolbar-info,
+.sf-toolbar-block.hover .sf-toolbar-info {
     display: block;
     padding: 10px;
     max-width: 480px;

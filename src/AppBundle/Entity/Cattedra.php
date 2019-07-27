@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -59,12 +59,12 @@ class Cattedra {
   private $supplenza;
 
   /**
-   * @var string $tipo Tipo della cattedra [N=normale, S=sostegno, I=ITP, P=potenziamento]
+   * @var string $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","S","I","P"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","I","P"}, strict=true, message="field.choice")
    */
   private $tipo;
 

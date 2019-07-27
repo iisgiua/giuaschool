@@ -11,25 +11,23 @@
 
 namespace Symfony\Component\Form\Tests\Extension\Validator\Constraints;
 
-use Symfony\Component\Form\FormBuilder;
-use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\CallbackTransformer;
-use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Extension\Validator\Constraints\Form;
 use Symfony\Component\Form\Extension\Validator\Constraints\FormValidator;
+use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\SubmitButtonBuilder;
 use Symfony\Component\Validator\Constraints\GroupSequence;
-use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Valid;
-use Symfony\Component\Validator\Tests\Constraints\AbstractConstraintValidatorTest;
+use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
- *
- * @todo use ConstraintValidatorTestCase when symfony/validator ~3.2 is required.
  */
-class FormValidatorTest extends AbstractConstraintValidatorTest
+class FormValidatorTest extends ConstraintValidatorTestCase
 {
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -53,6 +51,8 @@ class FormValidatorTest extends AbstractConstraintValidatorTest
         $this->serverParams = $this->getMockBuilder('Symfony\Component\Form\Extension\Validator\Util\ServerParams')->setMethods(array('getNormalizedIniPostMaxSize', 'getContentLength'))->getMock();
 
         parent::setUp();
+
+        $this->constraint = new Form();
     }
 
     protected function createValidator()
@@ -372,6 +372,7 @@ class FormValidatorTest extends AbstractConstraintValidatorTest
             ->getForm();
 
         $this->expectValidateAt(0, 'data', $object, new GroupSequence(array('group1', 'group2')));
+        $this->expectValidateAt(1, 'data', $object, new GroupSequence(array('group1', 'group2')));
 
         $this->validator->validate($form, new Form());
 

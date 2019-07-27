@@ -27,16 +27,21 @@ use Symfony\Component\Cache\DoctrineProvider;
 class AnnotationsCacheWarmer extends AbstractPhpFileCacheWarmer
 {
     private $annotationReader;
+    private $excludeRegexp;
+    private $debug;
 
     /**
      * @param Reader                 $annotationReader
      * @param string                 $phpArrayFile     The PHP file where annotations are cached
      * @param CacheItemPoolInterface $fallbackPool     The pool where runtime-discovered annotations are cached
+     * @param bool                   $debug            Run in debug mode
      */
-    public function __construct(Reader $annotationReader, $phpArrayFile, CacheItemPoolInterface $fallbackPool)
+    public function __construct(Reader $annotationReader, $phpArrayFile, CacheItemPoolInterface $fallbackPool, $excludeRegexp = null, $debug = false)
     {
         parent::__construct($phpArrayFile, $fallbackPool);
         $this->annotationReader = $annotationReader;
+        $this->excludeRegexp = $excludeRegexp;
+        $this->debug = $debug;
     }
 
     /**
@@ -51,9 +56,12 @@ class AnnotationsCacheWarmer extends AbstractPhpFileCacheWarmer
         }
 
         $annotatedClasses = include $annotatedClassPatterns;
-        $reader = new CachedReader($this->annotationReader, new DoctrineProvider($arrayAdapter));
+        $reader = new CachedReader($this->annotationReader, new DoctrineProvider($arrayAdapter), $this->debug);
 
         foreach ($annotatedClasses as $class) {
+            if (null !== $this->excludeRegexp && preg_match($this->excludeRegexp, $class)) {
+                continue;
+            }
             try {
                 $this->readAllComponents($reader, $class);
             } catch (\ReflectionException $e) {

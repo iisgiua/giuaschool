@@ -14,12 +14,13 @@ namespace Symfony\Component\Cache\Adapter;
 use Psr\Cache\CacheItemInterface;
 use Psr\Log\LoggerAwareInterface;
 use Symfony\Component\Cache\CacheItem;
+use Symfony\Component\Cache\ResettableInterface;
 use Symfony\Component\Cache\Traits\ArrayTrait;
 
 /**
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class ArrayAdapter implements AdapterInterface, LoggerAwareInterface
+class ArrayAdapter implements AdapterInterface, LoggerAwareInterface, ResettableInterface
 {
     use ArrayTrait;
 
@@ -120,7 +121,7 @@ class ArrayAdapter implements AdapterInterface, LoggerAwareInterface
             try {
                 $value = serialize($value);
             } catch (\Exception $e) {
-                $type = is_object($value) ? get_class($value) : gettype($value);
+                $type = \is_object($value) ? \get_class($value) : \gettype($value);
                 CacheItem::log($this->logger, 'Failed to save key "{key}" ({type})', array('key' => $key, 'type' => $type, 'exception' => $e));
 
                 return false;

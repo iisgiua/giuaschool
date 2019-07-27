@@ -1,9 +1,0 @@
-<nav>
-  <ul class="nav nav-tabs">
-    <li role="presentation"{{ app.request.attributes.get('_route') == 'staff_avvisi' ? ' class="active"' }}><a href="{{ path('staff_avvisi') }}" title="Gestione degli avvisi di tipo generico">Generico</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route') == 'staff_avvisi_orario' and app.request.attributes.get('tipo') == 'E' ? ' class="active"' }}><a href="{{ path('staff_avvisi_orario', {'tipo': 'E'}) }}" title="Gestione degli avvisi per l'ingresso posticipato delle classi">Ingresso</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route') == 'staff_avvisi_orario' and app.request.attributes.get('tipo') == 'U' ? ' class="active"' }}><a href="{{ path('staff_avvisi_orario', {'tipo': 'U'}) }}" title="Gestione degli avvisi per l'uscita anticipata delle classi">Uscita</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route') == 'staff_avvisi_attivita' ? ' class="active"' }}><a href="{{ path('staff_avvisi_attivita') }}" title="Gestione degli avvisi per lo svolgimento di attività per le classi">Attività</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route') == 'staff_avvisi_individuali' ? ' class="active"' }}><a href="{{ path('staff_avvisi_individuali') }}" title="Gestione degli avvisi individuali per i genitori">Individuale</a></li>
-  </ul>
-</nav>

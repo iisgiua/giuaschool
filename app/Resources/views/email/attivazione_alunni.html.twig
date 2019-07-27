@@ -1,0 +1,23 @@
+<p>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
+  <strong><i></i></strong>
+</p>
+<p>
+  Alunn{{ sesso }}: <strong>{{ alunno.nome }} {{ alunno.cognome }}</strong><br>
+  Classe: <strong>{{ alunno.classe ? alunno.classe.anno~'ª '~alunno.classe.sezione }}</strong>
+</p>
+<p>&nbsp;</p>
+<p>Per confermare l'attivazione dell'accesso al Registro Elettronico per l'alunn{{ sesso }} indicat{{ sesso }}, clicca sul seguente collegamento:</p>
+<ul>
+  <li><strong style="font-family:helvetica; font-size:120%;"><a href="https://.edu.it/login/conferma/{{ alunno.token }}">https://.edu.it/login/conferma/{{ alunno.token }}</a></strong></li>
+</ul>
+<p><em>Se il collegamento non è cliccabile, copialo e incollalo nel tuo programma di navigazione Internet (browser).</em></p>
+<p>&nbsp;</p>
+<hr>
+<p>
+  <em>
+    ATTENZIONE: questo messaggio è stato generato automaticamente a seguito di una richiesta di attivazione.<br>
+    Vi preghiamo pertanto di non rispondere a questa e-mail perché le eventuali comunicazioni andrebbero perse.
+  </em>
+</p>
+<p>&nbsp;</p>

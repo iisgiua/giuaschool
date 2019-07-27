@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -619,6 +619,16 @@ class BachecaUtil {
           return true;
         }
       }
+    } elseif (($utente instanceOf Alunno) && $avviso->getDestinatariAlunni()) {
+      // alunno
+      $avc = $this->em->getRepository('AppBundle:AvvisoClasse')->createQueryBuilder('avc')
+        ->join('avc.classe', 'c')
+        ->join('AppBundle:Alunno', 'a', 'WHERE', 'c.id=a.classe')
+        ->where('avc.avviso=:avviso AND a.id=:utente')
+        ->setParameters(['avviso' => $avviso, 'utente' => $utente])
+        ->getQuery()
+        ->getOneOrNullResult();
+      return ($avc !== null);
     }
     // non è destinatario
     return false;
@@ -844,7 +854,7 @@ class BachecaUtil {
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    * @param int $limite Numero massimo di elementi per pagina
    * @param Genitore $genitore Genitore a cui sono indirizzati gli avvisi
-   * @param Alunno $alunno Alunno del genitore a cui sono indirizzati gli avvisi
+   * @param Alunno $alunno Figlio del genitore a cui sono indirizzati gli avvisi
    * @param \DateTime $ultimo_accesso Ultimo accesso del docente al registro
    *
    * @return Array Dati formattati come array associativo
@@ -858,7 +868,7 @@ class BachecaUtil {
       ->leftJoin('avi.genitore', 'g')
       ->leftJoin('avi.alunno', 'al')
       ->where('(a.destinatariGenitori=:destinatario AND a.modificato>=:ultimo_accesso AND cl.id IS NOT NULL AND cl.id=:classe) OR '.
-              '(a.destinatariIndividuali=:destinatario AND g.id=:genitore AND al.id=:alunno AND avi.letto IS NULL)')
+              '(a.destinatariGenitori=:destinatario AND a.destinatariIndividuali=:destinatario AND g.id=:genitore AND al.id=:alunno AND avi.letto IS NULL)')
       ->orderBy('a.data', 'DESC')
       ->setParameters(['destinatario' => 1, 'ultimo_accesso' => $ultimo_accesso->format('Y-m-d H:i:s'),
         'classe' => $alunno->getClasse(), 'genitore' => $genitore, 'alunno' => $alunno])
@@ -873,7 +883,7 @@ class BachecaUtil {
       ->leftJoin('avi.genitore', 'g')
       ->leftJoin('avi.alunno', 'al')
       ->where('(a.destinatariGenitori=:destinatario AND a.modificato<:ultimo_accesso AND cl.id IS NOT NULL AND cl.id=:classe) OR '.
-              '(a.destinatariIndividuali=:destinatario AND g.id=:genitore AND al.id=:alunno AND avi.letto IS NOT NULL)')
+              '(a.destinatariGenitori=:destinatario AND a.destinatariIndividuali=:destinatario AND g.id=:genitore AND al.id=:alunno AND avi.letto IS NOT NULL)')
       ->orderBy('a.data', 'DESC')
       ->setParameters(['destinatario' => 1, 'ultimo_accesso' => $ultimo_accesso->format('Y-m-d H:i:s'),
         'classe' => $alunno->getClasse(), 'genitore' => $genitore, 'alunno' => $alunno])
@@ -985,6 +995,47 @@ class BachecaUtil {
       // pulsante add
       $dati['azioni']['add'] = 1;
     }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera gli avvisi destinati all'alunno indicato
+   *
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   * @param int $limite Numero massimo di elementi per pagina
+   * @param Alunno $alunno Alunno a cui sono indirizzati gli avvisi
+   * @param \DateTime $ultimo_accesso Ultimo accesso del docente al registro
+   *
+   * @return Array Dati formattati come array associativo
+   */
+  public function bachecaAvvisiGenitoriAlunni($pagina, $limite, Alunno $alunno, \DateTime $ultimo_accesso) {
+    // lista nuovi avvisi (successivi ultimo accesso o non letti)
+    $nuovi = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
+      ->join('AppBundle:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('avc.classe', 'cl')
+      ->where('a.destinatariAlunni=:destinatario AND a.modificato>=:ultimo_accesso AND cl.id=:classe')
+      ->orderBy('a.data', 'DESC')
+      ->setParameters(['destinatario' => 1, 'ultimo_accesso' => $ultimo_accesso->format('Y-m-d H:i:s'),
+        'classe' => $alunno->getClasse()])
+      ->getQuery()
+      ->getResult();
+    $dati['nuovi'] = $nuovi;
+    // lista avvisi (precedenti ultimo accesso o letti)
+    $avvisi = $this->em->getRepository('AppBundle:Avviso')->createQueryBuilder('a')
+      ->join('AppBundle:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('avc.classe', 'cl')
+      ->where('a.destinatariAlunni=:destinatario AND a.modificato<:ultimo_accesso AND cl.id=:classe')
+      ->orderBy('a.data', 'DESC')
+      ->setParameters(['destinatario' => 1, 'ultimo_accesso' => $ultimo_accesso->format('Y-m-d H:i:s'),
+        'classe' => $alunno->getClasse()])
+      ->getQuery();
+    // paginazione
+    $paginator = new Paginator($avvisi);
+    $paginator->getQuery()
+      ->setFirstResult($limite * ($pagina - 1))
+      ->setMaxResults($limite);
+    $dati['lista'] = $paginator;
     // restituisce dati
     return $dati;
   }

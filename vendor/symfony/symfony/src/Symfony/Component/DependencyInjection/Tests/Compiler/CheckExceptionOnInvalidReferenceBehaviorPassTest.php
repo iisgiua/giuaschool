@@ -12,10 +12,11 @@
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\Compiler\CheckExceptionOnInvalidReferenceBehaviorPass;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 class CheckExceptionOnInvalidReferenceBehaviorPassTest extends TestCase
 {
@@ -65,6 +66,20 @@ class CheckExceptionOnInvalidReferenceBehaviorPassTest extends TestCase
         ;
 
         $this->process($container);
+    }
+
+    public function testProcessDefinitionWithBindings()
+    {
+        $container = new ContainerBuilder();
+
+        $container
+            ->register('b')
+            ->setBindings(array(new BoundArgument(new Reference('a'))))
+        ;
+
+        $this->process($container);
+
+        $this->addToAssertionCount(1);
     }
 
     private function process(ContainerBuilder $container)

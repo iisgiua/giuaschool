@@ -17,11 +17,13 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcacheSessionHand
 /**
  * @requires extension memcache
  * @group time-sensitive
+ * @group legacy
  */
 class MemcacheSessionHandlerTest extends TestCase
 {
     const PREFIX = 'prefix_';
     const TTL = 1000;
+
     /**
      * @var MemcacheSessionHandler
      */
@@ -31,7 +33,7 @@ class MemcacheSessionHandlerTest extends TestCase
 
     protected function setUp()
     {
-        if (defined('HHVM_VERSION')) {
+        if (\defined('HHVM_VERSION')) {
             $this->markTestSkipped('PHPUnit_MockObject cannot mock the Memcache class on HHVM. See https://github.com/sebastianbergmann/phpunit-mock-objects/pull/289');
         }
 

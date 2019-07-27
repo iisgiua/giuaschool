@@ -11,9 +11,9 @@
 
 namespace Symfony\Component\Intl\Data\Provider;
 
+use Symfony\Component\Intl\Data\Bundle\Reader\BundleEntryReaderInterface;
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\Intl\Locale;
-use Symfony\Component\Intl\Data\Bundle\Reader\BundleEntryReaderInterface;
 
 /**
  * Data provider for currency-related data.
@@ -25,21 +25,11 @@ use Symfony\Component\Intl\Data\Bundle\Reader\BundleEntryReaderInterface;
 class CurrencyDataProvider
 {
     const INDEX_SYMBOL = 0;
-
     const INDEX_NAME = 1;
-
     const INDEX_FRACTION_DIGITS = 0;
-
     const INDEX_ROUNDING_INCREMENT = 1;
 
-    /**
-     * @var string
-     */
     private $path;
-
-    /**
-     * @var BundleEntryReaderInterface
-     */
     private $reader;
 
     /**

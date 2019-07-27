@@ -12,8 +12,6 @@
 namespace Symfony\Component\BrowserKit;
 
 /**
- * Response object.
- *
  * @author Fabien Potencier <fabien@symfony.com>
  */
 class Response
@@ -23,8 +21,6 @@ class Response
     protected $headers;
 
     /**
-     * Constructor.
-     *
      * The headers array is a set of key/value pairs. If a header is present multiple times
      * then the value is an array of all the values.
      *
@@ -48,7 +44,7 @@ class Response
     {
         $headers = '';
         foreach ($this->headers as $name => $value) {
-            if (is_string($value)) {
+            if (\is_string($value)) {
                 $headers .= $this->buildHeader($name, $value);
             } else {
                 foreach ($value as $headerValue) {
@@ -117,10 +113,10 @@ class Response
         foreach ($this->headers as $key => $value) {
             if (str_replace('-', '_', strtolower($key)) === $normalizedHeader) {
                 if ($first) {
-                    return is_array($value) ? (count($value) ? $value[0] : '') : $value;
+                    return \is_array($value) ? (\count($value) ? $value[0] : '') : $value;
                 }
 
-                return is_array($value) ? $value : array($value);
+                return \is_array($value) ? $value : array($value);
             }
         }
 

@@ -13,14 +13,14 @@ namespace Symfony\Bundle\FrameworkBundle\Routing;
 
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Config\ContainerParametersResource;
-use Symfony\Component\DependencyInjection\ServiceSubscriberInterface;
-use Symfony\Component\Routing\Router as BaseRouter;
-use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
+use Symfony\Component\DependencyInjection\ServiceSubscriberInterface;
+use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\Router as BaseRouter;
 
 /**
  * This Router creates the Loader only when the cache is empty.
@@ -33,8 +33,6 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
     private $collectedParameters = array();
 
     /**
-     * Constructor.
-     *
      * @param ContainerInterface $container A ContainerInterface instance
      * @param mixed              $resource  The main resource to load
      * @param array              $options   An array of options
@@ -86,8 +84,6 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
      * - the route host,
      * - the route schemes,
      * - the route methods.
-     *
-     * @param RouteCollection $collection
      */
     private function resolveParameters(RouteCollection $collection)
     {
@@ -131,7 +127,7 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
      */
     private function resolve($value)
     {
-        if (is_array($value)) {
+        if (\is_array($value)) {
             foreach ($value as $key => $val) {
                 $value[$key] = $this->resolve($val);
             }
@@ -139,7 +135,7 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
             return $value;
         }
 
-        if (!is_string($value)) {
+        if (!\is_string($value)) {
             return $value;
         }
 
@@ -157,7 +153,7 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
 
             $resolved = $container->getParameter($match[1]);
 
-            if (is_string($resolved) || is_numeric($resolved)) {
+            if (\is_string($resolved) || is_numeric($resolved)) {
                 $this->collectedParameters[$match[1]] = $resolved;
 
                 return (string) $resolved;
@@ -168,7 +164,7 @@ class Router extends BaseRouter implements WarmableInterface, ServiceSubscriberI
                 'must be a string or numeric, but it is of type %s.',
                 $match[1],
                 $value,
-                gettype($resolved)
+                \gettype($resolved)
                 )
             );
         }, $value);

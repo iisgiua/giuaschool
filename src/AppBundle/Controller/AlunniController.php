@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -14,8 +14,7 @@ namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -36,6 +35,7 @@ use AppBundle\Entity\CambioClasse;
 use AppBundle\Util\CsvImporter;
 use AppBundle\Util\LogHandler;
 use AppBundle\Util\PdfManager;
+use AppBundle\Form\AlunnoType;
 
 
 /**
@@ -48,8 +48,8 @@ class AlunniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/", name="alunni")
-   * @Method("GET")
+   * @Route("/alunni/", name="alunni",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -67,8 +67,8 @@ class AlunniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/importa/", name="alunni_importa")
-   * @Method({"GET", "POST"})
+   * @Route("/alunni/importa/", name="alunni_importa",
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -109,10 +109,10 @@ class AlunniController extends Controller {
    * @param SessionInterface $session Gestore delle sessioni
    * @param int $page Numero di pagina per la lista dei alunni
    *
-   * @Route("/alunni/modifica/", name="alunni_modifica", defaults={"page": 0})
-   * @Route("/alunni/modifica/{page}", name="alunni_modifica-param", requirements={"page": "\d+"})
-   *
-   * @Method({"GET", "POST"})
+   * @Route("/alunni/modifica/", name="alunni_modifica", defaults={"page": 0},
+   *    methods={"GET", "POST"})
+   * @Route("/alunni/modifica/{page}", name="alunni_modifica-param", requirements={"page": "\d+"},
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -203,8 +203,8 @@ class AlunniController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/alunni/modifica/enable/{id}/{enable}", name="alunni_modifica_enable",
-   *    requirements={"id": "\d+", "enable": "true|false"})
-   * @Method({"GET"})
+   *    requirements={"id": "\d+", "enable": "true|false"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -235,8 +235,8 @@ class AlunniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/modifica/show/{id}", name="alunni_modifica_show", requirements={"id": "\d+"})
-   * @Method({"GET"})
+   * @Route("/alunni/modifica/show/{id}", name="alunni_modifica_show", requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -247,7 +247,7 @@ class AlunniController extends Controller {
       $genitori = $em->getRepository('AppBundle:Genitore')->findBy(['alunno' => $alunno]);
       // form
       $form = $this->container->get('form.factory')->createNamedBuilder('alunni_modifica_show', FormType::class, $alunno)
-        // dat utente
+        // dati utente
         ->add('username', TextType::class, array('label' => 'label.username',
           'data' => $alunno->getUsername().', '.implode(', ',
              array_map(function($g) { return $g->getUsername(); }, $genitori)),
@@ -310,18 +310,6 @@ class AlunniController extends Controller {
           'multiple' => false,
           'disabled' => true,
           'required' => false))
-        ->add('rappresentanteClasse', TextType::class, array('label' => 'label.rappresentante_classe',
-          'data' => $this->get('translator')->trans($alunno->getRappresentanteClasse() ? 'label.si' : 'label.no'),
-          'disabled' => true,
-          'required' => false))
-        ->add('rappresentanteIstituto', TextType::class, array('label' => 'label.rappresentante_istituto',
-          'data' => $this->get('translator')->trans($alunno->getRappresentanteIstituto() ? 'label.si' : 'label.no'),
-          'disabled' => true,
-          'required' => false))
-        ->add('rappresentanteConsulta', TextType::class, array('label' => 'label.rappresentante_consulta',
-          'data' => $this->get('translator')->trans($alunno->getRappresentanteConsulta() ? 'label.si' : 'label.no'),
-          'disabled' => true,
-          'required' => false))
         ->add('autorizzaEntrata', TextType::class, array('label' => 'label.autorizza_entrata',
           'disabled' => true,
           'required' => false))
@@ -378,8 +366,8 @@ class AlunniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/modifica/classe/{id}", name="alunni_modifica_classe", requirements={"id": "\d+"})
-   * @Method({"GET", "POST"})
+   * @Route("/alunni/modifica/classe/{id}", name="alunni_modifica_classe", requirements={"id": "\d+"},
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -464,8 +452,8 @@ class AlunniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/classe/", name="alunni_classe")
-   * @Method("GET")
+   * @Route("/alunni/classe/", name="alunni_classe",
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -493,8 +481,8 @@ class AlunniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/classe/delete/{id}", name="alunni_classe_delete", requirements={"id": "\d+"})
-   * @Method({"GET"})
+   * @Route("/alunni/classe/delete/{id}", name="alunni_classe_delete", requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -521,8 +509,8 @@ class AlunniController extends Controller {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/classe/edit/{id}", name="alunni_classe_edit", requirements={"id": "\d+"})
-   * @Method({"GET", "POST"})
+   * @Route("/alunni/classe/edit/{id}", name="alunni_classe_edit", requirements={"id": "\d+"},
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -599,10 +587,10 @@ class AlunniController extends Controller {
    * @param SessionInterface $session Gestore delle sessioni
    * @param int $page Numero di pagina per la lista dei alunni
    *
-   * @Route("/alunni/password/", name="alunni_password", defaults={"page": 0})
-   * @Route("/alunni/password/{page}", name="alunni_password-param", requirements={"page": "\d+"})
-   *
-   * @Method({"GET", "POST"})
+   * @Route("/alunni/password/", name="alunni_password", defaults={"page": 0},
+   *    methods={"GET", "POST"})
+   * @Route("/alunni/password/{page}", name="alunni_password-param", requirements={"page": "\d+"},
+   *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -697,8 +685,8 @@ class AlunniController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/alunni/password/create/{idalunno}-{idclasse}", name="alunni_password_create",
-   *    requirements={"idalunno": "\d+", "idclasse": "\d+"})
-   * @Method({"GET"})
+   *    requirements={"idalunno": "\d+", "idclasse": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
@@ -725,7 +713,7 @@ class AlunniController extends Controller {
         'ID esecutore' => $this->getUser()->getId()
         ));
       // crea documento PDF
-      $pdf->configure('Istituto di Istruzione Superiore',
+      $pdf->configure('Istituto di Istruzione Superiore ""',
         'Credenziali di accesso al Registro Elettronico');
       // contenuto in formato HTML
       $html = $this->renderView('pdf/credenziali_alunni.html.twig', array(
@@ -736,7 +724,11 @@ class AlunniController extends Controller {
         ));
       $pdf->createFromHtml($html);
       // invia il documento
-      return $pdf->send('credenziali_registro.pdf');
+      $nome = mb_strtoupper(str_replace(
+        array("'",' ','à','è','é','ì','ò','ù','À','È','É','Ì','Ò','Ù'),
+        array('', '-','A','E','E','I','O','U','A','E','E','I','O','U'),
+        $alunno->getCognome().'-'.$alunno->getNome()));
+      return $pdf->send('credenziali-registro-'.$nome.'.pdf');
     } elseif ($idclasse > 0 && ($classe = $em->getRepository('AppBundle:Classe')->find($idclasse))) {
       // recupera alunni della classe
       $alunni = $em->getRepository('AppBundle:Alunno')->createQueryBuilder('a')
@@ -752,7 +744,7 @@ class AlunniController extends Controller {
         // alunni presenti
         $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
         // crea documento PDF
-        $pdf->configure('Istituto di Istruzione Superiore',
+        $pdf->configure('Istituto di Istruzione Superiore ""',
           'Credenziali di accesso al Registro Elettronico');
         foreach ($alunni as $alu) {
           // recupera genitori (anche più di uno)
@@ -782,12 +774,68 @@ class AlunniController extends Controller {
           $pdf->createFromHtml($html);
         }
         // invia il documento
-        return $pdf->send('credenziali_registro.pdf');
+        $nome = 'CLASSE-'.$classe->getAnno().$classe->getSezione();
+        return $pdf->send('credenziali-registro-'.$nome.'.pdf');
       }
     } else {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+  }
+
+  /**
+   * Modifica i dati di un alunno e dei genitori
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param int $id ID dell'utente
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/alunni/edit/{id}", name="alunni_edit",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   */
+  public function editAction(Request $request, EntityManagerInterface $em, $id) {
+    // controlla alunno
+    $alunno = $em->getRepository('AppBundle:Alunno')->find($id);
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // form di inserimento
+    $form = $this->createForm(AlunnoType::class, $alunno);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // campo telefono
+      $numtel = array();
+      foreach ($form->get('numeriTelefono')->getData() as $tel) {
+        if (trim($tel) != '') {
+          $numtel[] = trim($tel);
+        }
+      }
+      $alunno->setNumeriTelefono($numtel);
+      // genitori
+      $genitori = $em->getRepository('AppBundle:Genitore')->findBy(['alunno' => $alunno]);
+      foreach ($genitori as $gen) {
+        $gen
+          ->setNome($alunno->getNome())
+          ->setCognome($alunno->getCognome())
+          ->setSesso($alunno->getSesso());
+      }
+      // ok
+      $em->flush();
+      // redirezione
+      return $this->redirectToRoute('alunni_modifica');
+    }
+    // mostra la pagina di risposta
+    return $this->render('alunni/alunno_edit.html.twig', array(
+      'pagina_titolo' => 'page.alunno_edit',
+      'form' => $form->createView(),
+      'form_title' => ($id > 0 ? 'title.modifica_alunno' : 'title.nuovo_alunno'),
+    ));
   }
 
 }

@@ -2,13 +2,15 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_genitore/menu_situazione.html.twig' with {'attivo': 'assenze'} %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_assenze'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
+    {% for message in app.flashes('error') %}
+  <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>Situazione globale</strong></caption>
     <tbody>
@@ -60,17 +62,35 @@
           {% if tipo == 'assenza' %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Assenza</strong></td>
-        <td></td>
-        <td>{% if not e.giustificato %}<span class="label label-danger">Da giustificare</span>{% endif %}</td>
+        <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
+        <td>
+            {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
+          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+            {% elseif not e.giustificato and e.permesso and dati.giustifica %}
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': e.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+            {% elseif not e.giustificato %}
+          <span class="label label-danger">Da giustificare</span>
+            {% endif %}
+        </td>
           {% elseif tipo == 'ritardo' %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Ritardo{{ e.breve ? ' breve' }}</strong> ({{ e.ora|date('H:i') }})</td>
         <td>
-          <small>{{ e.note }}
+          <small>
+            {{ e.note }}
             {% if e.valido %}{{ e.note is not empty ? '<br>' }}<em>(Rientra nel conteggio del numero massimo di ritardi)</em>{% endif %}
+            {% if e.motivazione %}{{ e.note is not empty ? '<br>' }}Motivazione ritardo: {{ e.motivazione }}{% endif %}
           </small>
         </td>
-        <td>{% if not e.giustificato %}<span class="label label-danger">Da giustificare</span>{% endif %}</td>
+        <td>
+            {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
+          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+            {% elseif not e.giustificato and e.permesso and dati.giustifica %}
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': e.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+            {% elseif not e.giustificato %}
+          <span class="label label-danger">Da giustificare</span>
+            {% endif %}
+        </td>
           {% else %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Uscita anticipata</strong> ({{ e.ora|date('H:i') }})</td>
@@ -85,6 +105,7 @@
       {% endfor %}
     </tbody>
   </table>
+      {% include 'include/modal-remote.html.twig' %}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti assenze</strong>
@@ -92,4 +113,23 @@
     {% endfor %}
   {% endif %}
 </div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href')+'/'+Math.floor($('html').scrollTop());
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  {% if posizione > 0 %}
+  $('html').scrollTop({{ posizione }});
+  {% endif %}
+});
+</script>
 {% endblock %}

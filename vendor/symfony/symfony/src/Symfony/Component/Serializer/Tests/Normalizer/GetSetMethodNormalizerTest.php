@@ -13,17 +13,17 @@ namespace Symfony\Component\Serializer\Tests\Normalizer;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Tests\Fixtures\CircularReferenceDummy;
+use Symfony\Component\Serializer\Tests\Fixtures\GroupDummy;
 use Symfony\Component\Serializer\Tests\Fixtures\MaxDepthDummy;
 use Symfony\Component\Serializer\Tests\Fixtures\SiblingHolder;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Tests\Fixtures\GroupDummy;
 
 class GetSetMethodNormalizerTest extends TestCase
 {
@@ -379,7 +379,7 @@ class GetSetMethodNormalizerTest extends TestCase
             array(
                 array(
                     'bar' => function ($bars) {
-                        return count($bars);
+                        return \count($bars);
                     },
                 ),
                 array(new GetConstructorDummy('baz', '', false), new GetConstructorDummy('quux', '', false)),
@@ -439,7 +439,7 @@ class GetSetMethodNormalizerTest extends TestCase
         $serializer = new Serializer(array($this->normalizer));
         $this->normalizer->setSerializer($serializer);
         $this->normalizer->setCircularReferenceHandler(function ($obj) {
-            return get_class($obj);
+            return \get_class($obj);
         });
 
         $obj = new CircularReferenceDummy();
@@ -495,6 +495,23 @@ class GetSetMethodNormalizerTest extends TestCase
     {
         $obj = $this->normalizer->denormalize(array('foo' => 'foobar'), __NAMESPACE__.'\ObjectWithPrivateSetterDummy');
         $this->assertEquals('bar', $obj->getFoo());
+    }
+
+    public function testHasGetterDenormalize()
+    {
+        $obj = $this->normalizer->denormalize(array('foo' => true), ObjectWithHasGetterDummy::class);
+        $this->assertTrue($obj->hasFoo());
+    }
+
+    public function testHasGetterNormalize()
+    {
+        $obj = new ObjectWithHasGetterDummy();
+        $obj->setFoo(true);
+
+        $this->assertEquals(
+            array('foo' => true),
+            $this->normalizer->normalize($obj, 'any')
+        );
     }
 
     public function testMaxDepth()
@@ -805,5 +822,20 @@ class ObjectWithJustStaticSetterDummy
     public static function setFoo($foo)
     {
         self::$foo = $foo;
+    }
+}
+
+class ObjectWithHasGetterDummy
+{
+    private $foo;
+
+    public function setFoo($foo)
+    {
+        $this->foo = $foo;
+    }
+
+    public function hasFoo()
+    {
+        return $this->foo;
     }
 }

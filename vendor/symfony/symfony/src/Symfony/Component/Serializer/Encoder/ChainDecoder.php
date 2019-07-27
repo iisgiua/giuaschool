@@ -45,7 +45,7 @@ class ChainDecoder implements DecoderInterface /*, ContextAwareDecoderInterface*
      */
     public function supportsDecoding($format/*, array $context = array()*/)
     {
-        $context = func_num_args() > 1 ? func_get_arg(1) : array();
+        $context = \func_num_args() > 1 ? func_get_arg(1) : array();
 
         try {
             $this->getDecoder($format, $context);
@@ -64,7 +64,7 @@ class ChainDecoder implements DecoderInterface /*, ContextAwareDecoderInterface*
      *
      * @return DecoderInterface
      *
-     * @throws RuntimeException If no decoder is found.
+     * @throws RuntimeException if no decoder is found
      */
     private function getDecoder($format, array $context)
     {

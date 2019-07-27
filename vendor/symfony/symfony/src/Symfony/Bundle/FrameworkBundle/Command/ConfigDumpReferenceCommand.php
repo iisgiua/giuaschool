@@ -11,11 +11,12 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Command;
 
-use Symfony\Component\Config\Definition\Dumper\YamlReferenceDumper;
 use Symfony\Component\Config\Definition\Dumper\XmlReferenceDumper;
+use Symfony\Component\Config\Definition\Dumper\YamlReferenceDumper;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -25,16 +26,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * @author Kevin Bond <kevinbond@gmail.com>
  * @author Wouter J <waldio.webdesign@gmail.com>
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
+ *
+ * @final since version 3.4
  */
 class ConfigDumpReferenceCommand extends AbstractConfigCommand
 {
+    protected static $defaultName = 'config:dump-reference';
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this
-            ->setName('config:dump-reference')
             ->setDefinition(array(
                 new InputArgument('name', InputArgument::OPTIONAL, 'The Bundle name or the extension alias'),
                 new InputArgument('path', InputArgument::OPTIONAL, 'The configuration option path'),
@@ -94,7 +98,7 @@ EOF
         $format = $input->getOption('format');
         $path = $input->getArgument('path');
 
-        if ($path !== null && 'yaml' !== $format) {
+        if (null !== $path && 'yaml' !== $format) {
             $errorIo->error('The "path" option is only available for the "yaml" format.');
 
             return 1;
@@ -106,7 +110,7 @@ EOF
             $message = sprintf('Default configuration for "%s"', $name);
         }
 
-        if ($path !== null) {
+        if (null !== $path) {
             $message .= sprintf(' at path "%s"', $path);
         }
 
@@ -121,7 +125,7 @@ EOF
                 break;
             default:
                 $io->writeln($message);
-                throw new \InvalidArgumentException('Only the yaml and xml formats are supported.');
+                throw new InvalidArgumentException('Only the yaml and xml formats are supported.');
         }
 
         $io->writeln(null === $path ? $dumper->dump($configuration, $extension->getNamespace()) : $dumper->dumpAtPath($configuration, $path));

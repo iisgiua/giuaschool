@@ -27,9 +27,6 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
      */
     private $translator;
 
-    /**
-     * @var array
-     */
     private $messages = array();
 
     /**
@@ -38,7 +35,7 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
     public function __construct(TranslatorInterface $translator)
     {
         if (!$translator instanceof TranslatorBagInterface) {
-            throw new InvalidArgumentException(sprintf('The Translator "%s" must implement TranslatorInterface and TranslatorBagInterface.', get_class($translator)));
+            throw new InvalidArgumentException(sprintf('The Translator "%s" must implement TranslatorInterface and TranslatorBagInterface.', \get_class($translator)));
         }
 
         $this->translator = $translator;
@@ -109,7 +106,7 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
      */
     public function __call($method, $args)
     {
-        return call_user_func_array(array($this->translator, $method), $args);
+        return \call_user_func_array(array($this->translator, $method), $args);
     }
 
     /**

@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 
 /**
  * Checks your services for circular references.
@@ -31,8 +31,6 @@ class CheckCircularReferencesPass implements CompilerPassInterface
 
     /**
      * Checks the ContainerBuilder object for circular references.
-     *
-     * @param ContainerBuilder $container The ContainerBuilder instances
      */
     public function process(ContainerBuilder $container)
     {
@@ -51,7 +49,7 @@ class CheckCircularReferencesPass implements CompilerPassInterface
      *
      * @param ServiceReferenceGraphEdge[] $edges An array of Edges
      *
-     * @throws ServiceCircularReferenceException When a circular reference is found.
+     * @throws ServiceCircularReferenceException when a circular reference is found
      */
     private function checkOutEdges(array $edges)
     {
@@ -61,12 +59,12 @@ class CheckCircularReferencesPass implements CompilerPassInterface
 
             if (empty($this->checkedNodes[$id])) {
                 // Don't check circular references for lazy edges
-                if (!$node->getValue() || !$edge->isLazy()) {
+                if (!$node->getValue() || (!$edge->isLazy() && !$edge->isWeak())) {
                     $searchKey = array_search($id, $this->currentPath);
                     $this->currentPath[] = $id;
 
                     if (false !== $searchKey) {
-                        throw new ServiceCircularReferenceException($id, array_slice($this->currentPath, $searchKey));
+                        throw new ServiceCircularReferenceException($id, \array_slice($this->currentPath, $searchKey));
                     }
 
                     $this->checkOutEdges($node->getOutEdges());

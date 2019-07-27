@@ -14,8 +14,8 @@ namespace Symfony\Component\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
 /**
  * Applies instanceof conditionals to definitions.
@@ -90,9 +90,11 @@ class ResolveInstanceofConditionalsPass implements CompilerPassInterface
         }
 
         if ($parent) {
+            $bindings = $definition->getBindings();
             $abstract = $container->setDefinition('abstract.instanceof.'.$id, $definition);
 
             // cast Definition to ChildDefinition
+            $definition->setBindings(array());
             $definition = serialize($definition);
             $definition = substr_replace($definition, '53', 2, 2);
             $definition = substr_replace($definition, 'Child', 44, 0);
@@ -103,11 +105,11 @@ class ResolveInstanceofConditionalsPass implements CompilerPassInterface
                 $definition->setShared($shared);
             }
 
-            $i = count($instanceofTags);
+            $i = \count($instanceofTags);
             while (0 <= --$i) {
                 foreach ($instanceofTags[$i] as $k => $v) {
                     foreach ($v as $v) {
-                        if ($definition->hasTag($k) && in_array($v, $definition->getTag($k))) {
+                        if ($definition->hasTag($k) && \in_array($v, $definition->getTag($k))) {
                             continue;
                         }
                         $definition->addTag($k, $v);
@@ -115,10 +117,14 @@ class ResolveInstanceofConditionalsPass implements CompilerPassInterface
                 }
             }
 
+            $definition->setBindings($bindings);
+
             // reset fields with "merge" behavior
             $abstract
+                ->setBindings(array())
                 ->setArguments(array())
                 ->setMethodCalls(array())
+                ->setDecoratedService(null)
                 ->setTags(array())
                 ->setAbstract(true);
         }

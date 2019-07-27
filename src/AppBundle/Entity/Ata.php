@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -27,14 +27,21 @@ class Ata extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $tipo Mansioni del dipendente ATA [A=amministrativo, T=tecnico, B=bidello]
+   * @var string $tipo Mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, D=DSGA]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"A","T","B"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","T","C","D"}, strict=true, message="field.choice")
    */
   private $tipo;
+
+  /**
+   * @var boolean $segreteria Indica se il dipendente ATA ha accesso alle funzioni della segreteria
+   *
+   * @ORM\Column(name="segreteria", type="boolean", nullable=false)
+   */
+  private $segreteria;
 
   /**
    * @var Sede $sede La sede di riferimento del dipendente ATA (se definita)
@@ -44,18 +51,11 @@ class Ata extends Utente {
    */
   private $sede;
 
-  /**
-   * @var boolean $rappresentanteIstituto Indica se il dipendente ATA è rappresentante di istituto
-   *
-   * @ORM\Column(name="rappresentante_istituto", type="boolean", nullable=false)
-   */
-  private $rappresentanteIstituto;
-
 
   //==================== METODI SETTER/GETTER ====================
 
   /**
-   * Restituisce le mansioni del dipendente ATA [A=amministrativo, T=tecnico, B=bidello]
+   * Restituisce le mansioni del dipendente ATA [A=amministrativo, T=tecnico, B=bidello, D=DSGA]
    *
    * @return string Mansioni del dipendente ATA
    */
@@ -64,7 +64,7 @@ class Ata extends Utente {
   }
 
   /**
-   * Modifica le mansioni del dipendente ATA [A=amministrativo, T=tecnico, B=bidello]
+   * Modifica le mansioni del dipendente ATA [A=amministrativo, T=tecnico, B=bidello, D=DSGA]
    *
    * @param string $tipo Mansioni del personale ATA
    *
@@ -72,6 +72,27 @@ class Ata extends Utente {
    */
   public function setTipo($tipo) {
     $this->tipo = $tipo;
+    return $this;
+  }
+
+  /**
+   * Indica se il dipendente ATA ha accesso alle funzioni della segreteria
+   *
+   * @return boolean Vero se il dipendente ATA ha accesso alle funzioni della segreteria, falso altrimenti
+   */
+  public function getSegreteria() {
+    return $this->segreteria;
+  }
+
+  /**
+   * Modifica se il dipendente ATA ha accesso alle funzioni della segreteria
+   *
+   * @param boolean $segreteria Vero se il dipendente ATA ha accesso alle funzioni della segreteria, falso altrimenti
+   *
+   * @return Ata Oggetto Ata
+   */
+  public function setSegreteria($segreteria) {
+    $this->segreteria = ($segreteria == true);
     return $this;
   }
 
@@ -96,27 +117,6 @@ class Ata extends Utente {
     return $this;
   }
 
-  /**
-   * Indica se il dipendente ATA è rappresentante di istituto oppure no
-   *
-   * @return boolean Vero se il dipendente ATA è rappresentante di istituto, falso altrimenti
-   */
-  public function getRappresentanteIstituto() {
-    return $this->rappresentanteIstituto;
-  }
-
-  /**
-   * Modifica se il dipendente ATA è rappresentante di istituto oppure no
-   *
-   * @param boolean $rappresentanteIstituto Vero se il dipendente ATA è rappresentante di istituto, falso altrimenti
-   *
-   * @return Ata Oggetto Ata
-   */
-  public function setRappresentanteIstituto($rappresentanteIstituto) {
-    $this->rappresentanteIstituto = ($rappresentanteIstituto == true);
-    return $this;
-  }
-
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -126,7 +126,7 @@ class Ata extends Utente {
   public function __construct() {
     // valori predefiniti
     parent::__construct();
-    $this->rappresentanteIstituto = false;
+    $this->segreteria = false;
   }
 
   /**

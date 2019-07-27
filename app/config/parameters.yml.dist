@@ -4,7 +4,7 @@
 parameters:
   database_host:          127.0.0.1
   database_port:          ~
-  database_name:          symfony
+  database_name:          giuaschool
   database_user:          root
   database_password:      ~
   mailer_transport:       smtp
@@ -16,5 +16,10 @@ parameters:
   secret:                 ThisTokenIsNotSoSecretChangeIt
 
   # path to special dirs
-  doc_path:               '%kernel.project_dir%/upload/doc'
-  photo_path:             '%kernel.project_dir%/upload/photo'
+  dir_scrutini:   '%kernel.project_dir%/FILES/archivio/scrutini'
+  dir_registri:   '%kernel.project_dir%/FILES/archivio/registri'
+  dir_classi:     '%kernel.project_dir%/FILES/archivio/classi'
+  dir_avvisi:     '%kernel.project_dir%/FILES/upload/avvisi'
+  dir_circolari:  '%kernel.project_dir%/FILES/upload/circolari'
+  dir_foto:       '%kernel.project_dir%/FILES/upload/foto'
+  dir_tmp:        '%kernel.project_dir%/FILES/upload/tmp'

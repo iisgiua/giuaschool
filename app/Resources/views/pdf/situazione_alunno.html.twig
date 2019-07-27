@@ -2,9 +2,12 @@
   <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
   <strong><i></i></strong><br>
+  <span style="font-size:11pt">Via <br>
+  TEL. <br>
+  Email: 000@istruzione.it &nbsp;&nbsp;&nbsp;&nbsp; Sito: www.nome.edu.it</span>
 </p>
 <p style="text-align:center; font-size:13pt">
-  <strong>Anno Scolastico 2017/2018</strong><br>
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico')[4:] }}</strong><br>
   <strong>Situazione dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }} {{ alunno.cognome }} {{ alunno.nome }} (nat{{ alunno.sesso == 'M' ? 'o' : 'a' }} il {{ alunno.dataNascita|date('d/m/Y') }})</strong><br>
   <strong>Classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
 </p>
@@ -77,6 +80,113 @@
         {% endif %}
     </tr>
       {% endfor %}
+</table>
+    {% elseif periodo == '1' %}
+<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></div>
+<table border="1" cellpadding="2" style="font-size:10pt">
+  <tr nobr="true">
+    <td width="43%" style="text-align:center">Materia</td>
+    <td width="25%" style="text-align:center">Profitto</td>
+    <td width="16%" style="text-align:center">Debito formativo</td>
+    <td width="16%" style="text-align:center">Ore di assenza</td>
+  </tr>
+      {% for materia,m in v.materie %}
+  <tr nobr="true">
+    <td><strong>{{ m.nome }}</strong></td>
+        {% if m.tipo == 'R' and alunno.religione != 'S' %}
+    <td><strong>--</strong></td>
+    <td></td>
+    <td></td>
+        {% elseif m.tipo == 'C'  %}
+    <td>{{ info.condotta['1'][v.voti[materia].unico] }}</td>
+    <td></td>
+    <td></td>
+        {% else %}
+    <td>{{ info.giudizi['1'][v.voti[materia].unico] }}</td>
+    <td>
+          {% if v.debiti[materia] is defined %}
+      {{ ('label.recupero_'~v.voti[materia].recupero)|trans }}
+          {% endif %}
+    </td>
+    <td>{{ v.voti[materia].assenze }}</td>
+        {% endif %}
+  </tr>
+      {% endfor %}
+</table>
+    {% elseif periodo == 'F' %}
+<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></div>
+      {% if v.noscrutinato is defined and v.noscrutinato == 'A' %}
+<div style="text-align:center"><strong>{{ 'label.no_scrutinabile_assenze'|trans }}</strong></div>
+      {% elseif v.noscrutinato is defined and v.noscrutinato == 'C' %}
+<div style="text-align:center"><strong>{{ 'label.no_scrutinabile_cessata_frequenza'|trans }}</strong></div>
+      {% else %}
+<table border="1" cellpadding="2" style="font-size:10pt">
+  <tr nobr="true">
+    <td width="34%" style="text-align:center">Materia</td>
+    <td width="15%" style="text-align:center">Proposta</td>
+    <td width="35%" style="text-align:center">Voto</td>
+    <td width="16%" style="text-align:center">Ore di assenza</td>
+  </tr>
+        {% for materia,m in v.materie %}
+  <tr nobr="true">
+    <td><strong>{{ m.nome }}</strong></td>
+          {% if m.tipo == 'R' %}
+            {% if alunno.religione != 'S' %}
+    <td><strong>--</strong></td>
+    <td><strong>--</strong></td>
+    <td></td>
+            {% else %}
+    <td>{{ info.giudizi['F']['R'][v.proposte[materia].unico] }}</td>
+    <td>{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</td>
+    <td>{{ v.voti[materia].assenze }}</td>
+            {% endif %}
+          {% elseif m.tipo == 'C' %}
+    <td></td>
+    <td>{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</td>
+    <td></td>
+          {% else %}
+    <td>{{ v.proposte[materia].unico == 0 ? 'NC' : v.proposte[materia].unico }}</td>
+    <td>
+      {{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}
+            {% if v.debiti[materia] is defined %}
+      <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</span>
+      <br><span style="font-size:10pt"><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</span>
+            {% endif %}
+    </td>
+    <td>{{ v.voti[materia].assenze }}</td>
+          {% endif %}
+  </tr>
+        {% endfor %}
+</table>
+      {% endif %}
+    {% elseif periodo == 'I' %}
+<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></div>
+<table border="1" cellpadding="2" style="font-size:10pt">
+  <tr nobr="true">
+    <td width="34%" style="text-align:center">Materia</td>
+    <td width="50%" style="text-align:center">Voto</td>
+    <td width="16%" style="text-align:center">Ore di assenza</td>
+  </tr>
+        {% for materia,m in v.materie %}
+  <tr nobr="true">
+    <td><strong>{{ m.nome }}</strong></td>
+          {% if m.tipo == 'R' %}
+            {% if alunno.religione != 'S' %}
+    <td><strong>--</strong></td>
+    <td></td>
+            {% else %}
+    <td>{{ info.giudizi['F']['R'][v.voti[materia].unico] }}</td>
+    <td>{{ v.voti[materia].assenze }}</td>
+            {% endif %}
+          {% elseif m.tipo == 'C' %}
+    <td>{{ v.voti[materia].unico == 4 ? 'NC' : v.voti[materia].unico }}</td>
+    <td></td>
+          {% else %}
+    <td>{{ v.voti[materia].unico == 0 ? 'NC' : v.voti[materia].unico }}</td>
+    <td>{{ v.voti[materia].assenze }}</td>
+          {% endif %}
+  </tr>
+        {% endfor %}
 </table>
     {% endif %}
   {% else %}

@@ -2,19 +2,18 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -37,8 +36,8 @@ class BachecaController extends Controller {
    *
    * @Route("/bacheca/avvisi/{pagina}", name="bacheca_avvisi",
    *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": "0"})
-   * @Method({"GET"})
+   *    defaults={"pagina": "0"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -77,8 +76,8 @@ class BachecaController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/bacheca/avvisi/dettagli/{id}", name="bacheca_avvisi_dettagli",
-   *    requirements={"id": "\d+"})
-   * @Method("GET")
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -115,8 +114,8 @@ class BachecaController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/bacheca/avvisi/alunni/{classe}", name="bacheca_avvisi_alunni",
-   *    requirements={"classe": "\d+"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -149,8 +148,8 @@ class BachecaController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/bacheca/avvisi/alunni/firma/{classe}/{id}", name="bacheca_avvisi_alunni_firma",
-   *    requirements={"classe": "\d+", "id": "\d+|ALL"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+", "id": "\d+|ALL"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
@@ -179,8 +178,8 @@ class BachecaController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/bacheca/avvisi/coordinatori/firma/{id}", name="bacheca_avvisi_coordinatori_firma",
-   *    requirements={"id": "\d+"})
-   * @Method("GET")
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */

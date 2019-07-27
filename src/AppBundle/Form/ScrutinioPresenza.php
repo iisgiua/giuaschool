@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -35,6 +35,11 @@ class ScrutinioPresenza {
    * @var string $sostituto Sostituto del docente in caso di sua assenza
    */
   private $sostituto;
+
+  /**
+   * @var string $sessoSostituto Sesso del sostituto [M,F]
+   */
+  private $sessoSostituto;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -99,6 +104,27 @@ class ScrutinioPresenza {
    */
   public function setSostituto($sostituto) {
     $this->sostituto = $sostituto;
+    return $this;
+  }
+
+  /**
+   * Restituisce il sesso del sostituto [M,F]
+   *
+   * @return string Sesso del sostituto
+   */
+  public function getSessoSostituto() {
+    return $this->sessoSostituto;
+  }
+
+  /**
+   * Modifica il sesso del sostituto [M,F]
+   *
+   * @var string $sessoSostituto Sesso del sostituto
+   *
+   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   */
+  public function setSessoSostituto($sessoSostituto) {
+    $this->sessoSostituto = $sessoSostituto;
     return $this;
   }
 

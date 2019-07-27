@@ -13,23 +13,28 @@ namespace Symfony\Bundle\FrameworkBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Console\Helper\DescriptorHelper;
 use Symfony\Component\Config\ConfigCache;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\Config\FileLocator;
 
 /**
  * A console command for retrieving information about services.
  *
  * @author Ryan Weaver <ryan@thatsquality.com>
+ *
+ * @internal since version 3.4
  */
 class ContainerDebugCommand extends ContainerAwareCommand
 {
+    protected static $defaultName = 'debug:container';
+
     /**
      * @var ContainerBuilder|null
      */
@@ -41,7 +46,6 @@ class ContainerDebugCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('debug:container')
             ->setDefinition(array(
                 new InputArgument('name', InputArgument::OPTIONAL, 'A service name (foo)'),
                 new InputOption('show-private', null, InputOption::VALUE_NONE, 'Used to show public *and* private services'),
@@ -149,8 +153,6 @@ EOF
     /**
      * Validates input arguments and options.
      *
-     * @param InputInterface $input
-     *
      * @throws \InvalidArgumentException
      */
     protected function validateInput(InputInterface $input)
@@ -166,9 +168,9 @@ EOF
 
         $name = $input->getArgument('name');
         if ((null !== $name) && ($optionsCount > 0)) {
-            throw new \InvalidArgumentException('The options tags, tag, parameters & parameter can not be combined with the service name argument.');
+            throw new InvalidArgumentException('The options tags, tag, parameters & parameter can not be combined with the service name argument.');
         } elseif ((null === $name) && $optionsCount > 1) {
-            throw new \InvalidArgumentException('The options tags, tag, parameters & parameter can not be combined together.');
+            throw new InvalidArgumentException('The options tags, tag, parameters & parameter can not be combined together.');
         }
     }
 
@@ -188,7 +190,7 @@ EOF
         $kernel = $this->getApplication()->getKernel();
 
         if (!$kernel->isDebug() || !(new ConfigCache($kernel->getContainer()->getParameter('debug.container.dump'), true))->isFresh()) {
-            $buildContainer = \Closure::bind(function () { return $this->buildContainer(); }, $kernel, get_class($kernel));
+            $buildContainer = \Closure::bind(function () { return $this->buildContainer(); }, $kernel, \get_class($kernel));
             $container = $buildContainer();
             $container->getCompilerPassConfig()->setRemovingPasses(array());
             $container->compile();
@@ -207,10 +209,10 @@ EOF
 
         $matchingServices = $this->findServiceIdsContaining($builder, $name);
         if (empty($matchingServices)) {
-            throw new \InvalidArgumentException(sprintf('No services found that match "%s".', $name));
+            throw new InvalidArgumentException(sprintf('No services found that match "%s".', $name));
         }
 
-        $default = 1 === count($matchingServices) ? $matchingServices[0] : null;
+        $default = 1 === \count($matchingServices) ? $matchingServices[0] : null;
 
         return $io->choice('Select one of the following services to display its information', $matchingServices, $default);
     }
@@ -219,9 +221,8 @@ EOF
     {
         $serviceIds = $builder->getServiceIds();
         $foundServiceIds = array();
-        $name = strtolower($name);
         foreach ($serviceIds as $serviceId) {
-            if (false === strpos($serviceId, $name)) {
+            if (false === stripos($serviceId, $name)) {
                 continue;
             }
             $foundServiceIds[] = $serviceId;
@@ -240,7 +241,18 @@ EOF
             return false;
         }
 
-        // see if the class exists (only need to trigger autoload once)
-        return class_exists($serviceId) || interface_exists($serviceId, false);
+        // if the id has a \, assume it is a class
+        if (false !== strpos($serviceId, '\\')) {
+            return true;
+        }
+
+        try {
+            new \ReflectionClass($serviceId);
+
+            return true;
+        } catch (\ReflectionException $e) {
+            // the service id is not a valid class/interface
+            return false;
+        }
     }
 }

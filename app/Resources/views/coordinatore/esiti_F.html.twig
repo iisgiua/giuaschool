@@ -47,7 +47,7 @@
       </div>
     </div>
     <div id="gs-scrutinio-giudizio" class="form-group gs-mb-2" style="display:none">
-      <label class="control-label col-sm-2" for="{{ form.giudizio.vars.id }}">Giudizio</label>
+      <label class="control-label col-sm-2" for="{{ form.giudizio.vars.id }}">Motivazione</label>
       <div class="col-sm-10">
         {{ form_widget(form.giudizio, {'attr': {'rows': 4}}) }}
       </div>
@@ -62,6 +62,8 @@
 
 <script>
 $(document).ready(function() {
+  // init
+  var inizio = 1;
   $("#gs-form-collection input.slider").slider({
     min: {{ info.valutazioni.min }},
     max: {{ info.valutazioni.max }},
@@ -80,6 +82,8 @@ $(document).ready(function() {
     var d = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' : 'label-success'));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
+    inizio = 1;
+    $('#esito_esito').change();
   });
   $("#gs-form-collection input.slider-giudizi").slider({
     min: {{ info.giudizi.min }},
@@ -99,6 +103,8 @@ $(document).ready(function() {
     var d = ['NC', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'];
     var c = (e.value.newValue < 22 ? 'label-danger' : 'label-success');
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue-20]);
+    inizio = 1;
+    $('#esito_esito').change();
   });
   $('#gs-scrutinio-unanimita label.radio-inline input[type="radio"]').change(function() {
     var t = $('#gs-scrutinio-contrari select');
@@ -115,14 +121,34 @@ $(document).ready(function() {
   }).change();
   $('#esito_esito').change(function() {
     if ($(this).val() == 'N') {
-      if ($('#esito_giudizio').val() == '') {
+      if ($('#esito_giudizio').val() == '' || !inizio) {
         $('#esito_giudizio').val("{{ 'message.giudizio_non_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a'), '%classe%': (alunno.classe.anno == 5 ? 'l\'Esame di Stato' : 'la classe successiva')})|raw }}");
+      }
+      $('#gs-scrutinio-giudizio').fadeIn();
+    } else if ($(this).val() == 'A' && AmmissioneQuinta())  {
+      if ($('#esito_giudizio').val() == '' || !inizio) {
+        $('#esito_giudizio').val("{{ 'message.motivazione_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')})|raw }}");
       }
       $('#gs-scrutinio-giudizio').fadeIn();
     } else {
       $('#esito_giudizio').val('');
       $('#gs-scrutinio-giudizio').fadeOut();
     }
+    inizio = 0;
   }).change();
 });
+function AmmissioneQuinta() {
+  {% if alunno.classe.anno == 5 %}
+  var ins = 0;
+  $('#gs-form-collection input[name$="[unico]"]').each(function() {
+    if ($(this).val() < 6 || $(this).val() == 20  || $(this).val() == 21) {
+      ins++;
+    }
+  });
+  if (ins) {
+    return true;
+  }
+  {% endif %}
+  return false;
+}
 </script>

@@ -11,29 +11,23 @@
 
 namespace Symfony\Component\Form\Extension\Validator\ViolationMapper;
 
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Exception\ErrorMappingException;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class MappingRule
 {
-    /**
-     * @var FormInterface
-     */
     private $origin;
-
-    /**
-     * @var string
-     */
     private $propertyPath;
-
-    /**
-     * @var string
-     */
     private $targetPath;
 
+    /**
+     * @param FormInterface $origin
+     * @param string        $propertyPath
+     * @param string        $targetPath
+     */
     public function __construct(FormInterface $origin, $propertyPath, $targetPath)
     {
         $this->origin = $origin;
@@ -75,7 +69,7 @@ class MappingRule
      */
     public function isPrefix($propertyPath)
     {
-        $length = strlen($propertyPath);
+        $length = \strlen($propertyPath);
         $prefix = substr($this->propertyPath, 0, $length);
         $next = isset($this->propertyPath[$length]) ? $this->propertyPath[$length] : null;
 

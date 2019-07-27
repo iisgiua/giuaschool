@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
@@ -110,10 +110,6 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
    * @return mixed|null Le credenziali dell'autenticazione o null
    */
   public function getCredentials(Request $request) {
-    if ($request->getPathInfo() != '/login/card/') {
-      // la richiesta non proviene dalla pagina di login, annulla autenticazione
-      return null;
-    }
     // validazione del certificato del client
     $redirect = '';
     if ($request->server->get('SSL_CLIENT_VERIFY') != 'SUCCESS' ||
@@ -201,33 +197,13 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
         ));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    // legge configurazione
-    $time_start_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('ora_blocco_inizio');
-    $time_start = ($time_start_conf === null ? '00:00' : $time_start_conf->getValore());
-    $time_end_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('ora_blocco_fine');
-    $time_end = ($time_end_conf === null ? '00:00' : $time_end_conf->getValore());
-    if ($user instanceof Docente && ($time_start !== '00:00' || $time_end !== '00:00')) {
-      // l'utente è un docente: controllo orario di blocco
-      $now = date('H:i');
-      if ($now >= $time_start && $now <= $time_end &&
-          !$this->em->getRepository('AppBundle:Festivita')->giornoFestivo(new \DateTime())) {
-        // in orario di blocco e in un giorno non festivo, controlla giorni settimana
-        $weekdays_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('giorni_festivi');
-        $weekdays = ($weekdays_conf === null ? array() : explode(',', $weekdays_conf->getValore()));
-        if (!in_array(date('w'), $weekdays)) {
-          // non è giorno settimanale festivo, controlla IP
-          $ip_conf = $this->em->getRepository('AppBundle:Configurazione')->findOneByParametro('ip_scuola');
-          $ip = ($ip_conf === null ? array() : explode(',', $ip_conf->getValore()));
-          if (!in_array($credentials['ip'], $ip)) {
-            // errore, richiesta in orario di blocco non proveniente da scuola
-            $this->logger->error('Docente con IP bloccato nella richiesta di login tramite smartcard.', array(
-              'username' => $user->getUsername(),
-              'ip' => $credentials['ip'],
-              ));
-            throw new CustomUserMessageAuthenticationException('exception.blocked_ip');
-          }
-        }
-      }
+    if (!($user instanceof Docente)) {
+      // errore, solo docenti abilitati all'uso della CNS
+      $this->logger->error('Utente non docente nella richiesta di login tramite smartcard.', array(
+        'username' => $user->getUsername(),
+        'ip' => $credentials['ip'],
+        ));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // validazione corretta
     return true;
@@ -287,6 +263,17 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
   public function supportsRememberMe() {
     // nessun supporto per il cookie ROCORDAMI
     return false;
+  }
+
+  /**
+   * Indica se l'autenticatore supporta o meno la richiesta attuale.
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return bool Vero se supportato, falso altrimenti
+   */
+  public function supports(Request $request) {
+    return ($request->getPathInfo() == '/login/card/');
   }
 
 }

@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_staff/menu_avvisi.html.twig' %}
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.staff_avvisi'|trans }}</h1>
   {% include('include/form-inline.html.twig') %}
   <div class="row gs-mb-1">
@@ -10,7 +9,7 @@
     </div>
     <div class="col-sm-6 text-right">
   {% if dati.azioni.add is defined  %}
-      <a class="btn btn-primary" href="{{ path('staff_avviso_edit', {'id': 0}) }}" role="button" title="Aggiungi un nuovo avviso"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+      <a class="btn btn-primary" href="{{ path('staff_avvisi_edit', {'id': 0}) }}" role="button" title="Aggiungi un nuovo avviso"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
   {% endif %}
     </div>
   </div>
@@ -50,12 +49,12 @@
           </small>
         </td>
         <td>
-          <button class="btn btn-xs btn-primary" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('staff_avviso_dettagli', {'id': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button class="btn btn-xs btn-primary" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('staff_avvisi_dettagli', {'id': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni[k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('staff_avviso_edit', {'id': a.id}) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_avvisi_edit', {'id': a.id}) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('staff_avviso_delete', {'id': a.id, 'tipo': 'C'}) }}" data-text="{{ 'message.cancella_avviso'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('staff_avvisi_delete', {'id': a.id, 'tipo': 'C'}) }}" data-text="{{ 'message.cancella_avviso'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
       {% endif %}
         </td>
       </tr>

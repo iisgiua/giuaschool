@@ -1,26 +1,8 @@
 <?php
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
-
 namespace Doctrine\Bundle\DoctrineCacheBundle\DependencyInjection;
 
 use Doctrine\Common\Inflector\Inflector;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
+use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -47,9 +29,10 @@ class CacheProviderLoader
         if ($config['namespace']) {
             $service->addMethodCall('setNamespace', array($config['namespace']));
         }
+        $service->setPublic(true);
 
         foreach ($config['aliases'] as $alias) {
-            $container->setAlias($alias, $serviceId);
+            $container->setAlias($alias, new Alias($serviceId, true));
         }
 
         if ($this->definitionClassExists($type, $container)) {
@@ -68,17 +51,23 @@ class CacheProviderLoader
         $type = $config['type'];
         $id   = 'doctrine_cache.abstract.' . $type;
 
+        static $childDefinition;
+
+        if (null === $childDefinition) {
+            $childDefinition = class_exists('Symfony\Component\DependencyInjection\ChildDefinition') ? 'Symfony\Component\DependencyInjection\ChildDefinition' : 'Symfony\Component\DependencyInjection\DefinitionDecorator';
+        }
+
         if ($type === 'custom_provider') {
             $type  = $config['custom_provider']['type'];
             $param = $this->getCustomProviderParameter($type);
 
             if ($container->hasParameter($param)) {
-                return new DefinitionDecorator($container->getParameter($param));
+                return new $childDefinition($container->getParameter($param));
             }
         }
 
         if ($container->hasDefinition($id)) {
-            return new DefinitionDecorator($id);
+            return new $childDefinition($id);
         }
 
         throw new \InvalidArgumentException(sprintf('"%s" is an unrecognized Doctrine cache driver.', $type));

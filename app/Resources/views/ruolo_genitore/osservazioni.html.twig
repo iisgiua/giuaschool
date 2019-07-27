@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_genitore/menu_situazione.html.twig' with {'attivo': 'osservazioni'} %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_osservazioni'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">

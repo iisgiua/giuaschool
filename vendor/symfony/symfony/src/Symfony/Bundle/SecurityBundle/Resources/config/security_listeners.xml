@@ -210,6 +210,7 @@
             <argument /> <!-- Simple Authenticator -->
             <argument /> <!-- User Provider -->
             <argument /> <!-- Provider-shared Key -->
+            <argument>null</argument> <!-- UserChecker -->
         </service>
 
         <service id="security.authentication.provider.pre_authenticated" class="Symfony\Component\Security\Core\Authentication\Provider\PreAuthenticatedAuthenticationProvider" abstract="true">
@@ -241,6 +242,7 @@
             <argument>_switch_user</argument>
             <argument>ROLE_ALLOWED_TO_SWITCH</argument>
             <argument type="service" id="event_dispatcher" on-invalid="null"/>
+            <argument>false</argument> <!-- Stateless -->
         </service>
 
         <service id="security.access_listener" class="Symfony\Component\Security\Http\Firewall\AccessListener">

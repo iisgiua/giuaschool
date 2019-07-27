@@ -12,10 +12,11 @@
 namespace Symfony\Bundle\WebServerBundle\Command;
 
 use Symfony\Bundle\WebServerBundle\WebServer;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
@@ -26,13 +27,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class ServerStatusCommand extends ServerCommand
 {
+    protected static $defaultName = 'server:status';
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this
-            ->setName('server:status')
             ->setDefinition(array(
                 new InputOption('pidfile', null, InputOption::VALUE_REQUIRED, 'PID file'),
                 new InputOption('filter', null, InputOption::VALUE_REQUIRED, 'The value to display (one of port, host, or address)'),
@@ -72,7 +74,7 @@ EOF
                 } elseif ('port' === $filter) {
                     $output->write($port);
                 } else {
-                    throw new \InvalidArgumentException(sprintf('"%s" is not a valid filter.', $filter));
+                    throw new InvalidArgumentException(sprintf('"%s" is not a valid filter.', $filter));
                 }
             } else {
                 return 1;

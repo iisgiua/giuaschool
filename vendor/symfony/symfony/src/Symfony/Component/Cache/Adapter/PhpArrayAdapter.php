@@ -15,6 +15,8 @@ use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Cache\Exception\InvalidArgumentException;
+use Symfony\Component\Cache\PruneableInterface;
+use Symfony\Component\Cache\ResettableInterface;
 use Symfony\Component\Cache\Traits\PhpArrayTrait;
 
 /**
@@ -24,7 +26,7 @@ use Symfony\Component\Cache\Traits\PhpArrayTrait;
  * @author Titouan Galopin <galopintitouan@gmail.com>
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class PhpArrayAdapter implements AdapterInterface
+class PhpArrayAdapter implements AdapterInterface, PruneableInterface, ResettableInterface
 {
     use PhpArrayTrait;
 
@@ -37,7 +39,7 @@ class PhpArrayAdapter implements AdapterInterface
     public function __construct($file, AdapterInterface $fallbackPool)
     {
         $this->file = $file;
-        $this->fallbackPool = $fallbackPool;
+        $this->pool = $fallbackPool;
         $this->zendDetectUnicode = ini_get('zend.detect_unicode');
         $this->createCacheItem = \Closure::bind(
             function ($key, $value, $isHit) {
@@ -66,7 +68,7 @@ class PhpArrayAdapter implements AdapterInterface
     public static function create($file, CacheItemPoolInterface $fallbackPool)
     {
         // Shared memory is available in PHP 7.0+ with OPCache enabled and in HHVM
-        if ((\PHP_VERSION_ID >= 70000 && ini_get('opcache.enable')) || defined('HHVM_VERSION')) {
+        if ((\PHP_VERSION_ID >= 70000 && ini_get('opcache.enable')) || \defined('HHVM_VERSION')) {
             if (!$fallbackPool instanceof AdapterInterface) {
                 $fallbackPool = new ProxyAdapter($fallbackPool);
             }
@@ -82,14 +84,14 @@ class PhpArrayAdapter implements AdapterInterface
      */
     public function getItem($key)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', is_object($key) ? get_class($key) : gettype($key)));
+        if (!\is_string($key)) {
+            throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', \is_object($key) ? \get_class($key) : \gettype($key)));
         }
         if (null === $this->values) {
             $this->initialize();
         }
         if (!isset($this->values[$key])) {
-            return $this->fallbackPool->getItem($key);
+            return $this->pool->getItem($key);
         }
 
         $value = $this->values[$key];
@@ -97,7 +99,7 @@ class PhpArrayAdapter implements AdapterInterface
 
         if ('N;' === $value) {
             $value = null;
-        } elseif (is_string($value) && isset($value[2]) && ':' === $value[1]) {
+        } elseif (\is_string($value) && isset($value[2]) && ':' === $value[1]) {
             try {
                 $e = null;
                 $value = unserialize($value);
@@ -121,8 +123,8 @@ class PhpArrayAdapter implements AdapterInterface
     public function getItems(array $keys = array())
     {
         foreach ($keys as $key) {
-            if (!is_string($key)) {
-                throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', is_object($key) ? get_class($key) : gettype($key)));
+            if (!\is_string($key)) {
+                throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', \is_object($key) ? \get_class($key) : \gettype($key)));
             }
         }
         if (null === $this->values) {
@@ -137,14 +139,14 @@ class PhpArrayAdapter implements AdapterInterface
      */
     public function hasItem($key)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', is_object($key) ? get_class($key) : gettype($key)));
+        if (!\is_string($key)) {
+            throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', \is_object($key) ? \get_class($key) : \gettype($key)));
         }
         if (null === $this->values) {
             $this->initialize();
         }
 
-        return isset($this->values[$key]) || $this->fallbackPool->hasItem($key);
+        return isset($this->values[$key]) || $this->pool->hasItem($key);
     }
 
     /**
@@ -152,14 +154,14 @@ class PhpArrayAdapter implements AdapterInterface
      */
     public function deleteItem($key)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', is_object($key) ? get_class($key) : gettype($key)));
+        if (!\is_string($key)) {
+            throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', \is_object($key) ? \get_class($key) : \gettype($key)));
         }
         if (null === $this->values) {
             $this->initialize();
         }
 
-        return !isset($this->values[$key]) && $this->fallbackPool->deleteItem($key);
+        return !isset($this->values[$key]) && $this->pool->deleteItem($key);
     }
 
     /**
@@ -171,8 +173,8 @@ class PhpArrayAdapter implements AdapterInterface
         $fallbackKeys = array();
 
         foreach ($keys as $key) {
-            if (!is_string($key)) {
-                throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', is_object($key) ? get_class($key) : gettype($key)));
+            if (!\is_string($key)) {
+                throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given.', \is_object($key) ? \get_class($key) : \gettype($key)));
             }
 
             if (isset($this->values[$key])) {
@@ -186,7 +188,7 @@ class PhpArrayAdapter implements AdapterInterface
         }
 
         if ($fallbackKeys) {
-            $deleted = $this->fallbackPool->deleteItems($fallbackKeys) && $deleted;
+            $deleted = $this->pool->deleteItems($fallbackKeys) && $deleted;
         }
 
         return $deleted;
@@ -201,7 +203,7 @@ class PhpArrayAdapter implements AdapterInterface
             $this->initialize();
         }
 
-        return !isset($this->values[$item->getKey()]) && $this->fallbackPool->save($item);
+        return !isset($this->values[$item->getKey()]) && $this->pool->save($item);
     }
 
     /**
@@ -213,7 +215,7 @@ class PhpArrayAdapter implements AdapterInterface
             $this->initialize();
         }
 
-        return !isset($this->values[$item->getKey()]) && $this->fallbackPool->saveDeferred($item);
+        return !isset($this->values[$item->getKey()]) && $this->pool->saveDeferred($item);
     }
 
     /**
@@ -221,14 +223,10 @@ class PhpArrayAdapter implements AdapterInterface
      */
     public function commit()
     {
-        return $this->fallbackPool->commit();
+        return $this->pool->commit();
     }
 
     /**
-     * Generator for items.
-     *
-     * @param array $keys
-     *
      * @return \Generator
      */
     private function generateItems(array $keys)
@@ -242,7 +240,7 @@ class PhpArrayAdapter implements AdapterInterface
 
                 if ('N;' === $value) {
                     yield $key => $f($key, null, true);
-                } elseif (is_string($value) && isset($value[2]) && ':' === $value[1]) {
+                } elseif (\is_string($value) && isset($value[2]) && ':' === $value[1]) {
                     try {
                         yield $key => $f($key, unserialize($value), true);
                     } catch (\Error $e) {
@@ -259,7 +257,7 @@ class PhpArrayAdapter implements AdapterInterface
         }
 
         if ($fallbackKeys) {
-            foreach ($this->fallbackPool->getItems($fallbackKeys) as $key => $item) {
+            foreach ($this->pool->getItems($fallbackKeys) as $key => $item) {
                 yield $key => $item;
             }
         }

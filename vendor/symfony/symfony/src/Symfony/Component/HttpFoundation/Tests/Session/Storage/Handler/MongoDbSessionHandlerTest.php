@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\MongoDbSessionHandl
 /**
  * @author Markus Bachmann <markus.bachmann@bachi.biz>
  * @group time-sensitive
+ * @group legacy
  */
 class MongoDbSessionHandlerTest extends TestCase
 {
@@ -31,11 +32,11 @@ class MongoDbSessionHandlerTest extends TestCase
     {
         parent::setUp();
 
-        if (extension_loaded('mongodb')) {
+        if (\extension_loaded('mongodb')) {
             if (!class_exists('MongoDB\Client')) {
                 $this->markTestSkipped('The mongodb/mongodb package is required.');
             }
-        } elseif (!extension_loaded('mongo')) {
+        } elseif (!\extension_loaded('mongo')) {
             $this->markTestSkipped('The Mongo or MongoDB extension is required.');
         }
 
@@ -285,7 +286,7 @@ class MongoDbSessionHandlerTest extends TestCase
             ->with($this->options['database'], $this->options['collection'])
             ->will($this->returnValue($collection));
 
-        $methodName = phpversion('mongodb') ? 'deleteOne' : 'remove';
+        $methodName = phpversion('mongodb') ? 'deleteMany' : 'remove';
 
         $collection->expects($this->once())
             ->method($methodName)

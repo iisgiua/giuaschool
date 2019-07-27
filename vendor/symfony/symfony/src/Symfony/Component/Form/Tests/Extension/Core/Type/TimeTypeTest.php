@@ -315,7 +315,7 @@ class TimeTypeTest extends BaseTypeTest
             'second' => (int) $outputTime->format('s'),
         );
 
-        $this->assertDateTimeEquals($dateTime, $form->getData());
+        $this->assertEquals($dateTime, $form->getData());
         $this->assertEquals($displayedData, $form->getViewData());
     }
 
@@ -536,7 +536,7 @@ class TimeTypeTest extends BaseTypeTest
         ));
 
         $view = $form->createView();
-        $this->assertFalse(isset($view->vars['type']));
+        $this->assertArrayNotHasKey('type', $view->vars);
     }
 
     public function testPassDefaultPlaceholderToViewIfNotRequired()

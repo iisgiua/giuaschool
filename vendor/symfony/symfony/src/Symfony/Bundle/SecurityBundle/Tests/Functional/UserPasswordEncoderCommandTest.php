@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\SecurityBundle\Command\UserPasswordEncoderCommand;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\BCryptPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Core\Encoder\Pbkdf2PasswordEncoder;
@@ -65,6 +66,27 @@ class UserPasswordEncoderCommandTest extends WebTestCase
 
         $encoder = new BCryptPasswordEncoder(17);
         preg_match('# Encoded password\s{1,}([\w+\/$.]+={0,2})\s+#', $output, $matches);
+        $hash = $matches[1];
+        $this->assertTrue($encoder->isPasswordValid($hash, 'password', null));
+    }
+
+    public function testEncodePasswordArgon2i()
+    {
+        if (!Argon2iPasswordEncoder::isSupported()) {
+            $this->markTestSkipped('Argon2i algorithm not available.');
+        }
+        $this->setupArgon2i();
+        $this->passwordEncoderCommandTester->execute(array(
+            'command' => 'security:encode-password',
+            'password' => 'password',
+            'user-class' => 'Custom\Class\Argon2i\User',
+        ), array('interactive' => false));
+
+        $output = $this->passwordEncoderCommandTester->getDisplay();
+        $this->assertContains('Password encoding succeeded', $output);
+
+        $encoder = new Argon2iPasswordEncoder();
+        preg_match('#  Encoded password\s+(\$argon2id?\$[\w,=\$+\/]+={0,2})\s+#', $output, $matches);
         $hash = $matches[1];
         $this->assertTrue($encoder->isPasswordValid($hash, 'password', null));
     }
@@ -120,13 +142,27 @@ class UserPasswordEncoderCommandTest extends WebTestCase
 
     public function testEncodePasswordBcryptOutput()
     {
-        $this->passwordEncoderCommandTester->execute(
-            array(
-                'command' => 'security:encode-password',
-                'password' => 'p@ssw0rd',
-                'user-class' => 'Custom\Class\Bcrypt\User',
-            )
-        );
+        $this->passwordEncoderCommandTester->execute(array(
+            'command' => 'security:encode-password',
+            'password' => 'p@ssw0rd',
+            'user-class' => 'Custom\Class\Bcrypt\User',
+        ), array('interactive' => false));
+
+        $this->assertNotContains(' Generated salt ', $this->passwordEncoderCommandTester->getDisplay());
+    }
+
+    public function testEncodePasswordArgon2iOutput()
+    {
+        if (!Argon2iPasswordEncoder::isSupported()) {
+            $this->markTestSkipped('Argon2i algorithm not available.');
+        }
+
+        $this->setupArgon2i();
+        $this->passwordEncoderCommandTester->execute(array(
+            'command' => 'security:encode-password',
+            'password' => 'p@ssw0rd',
+            'user-class' => 'Custom\Class\Argon2i\User',
+        ), array('interactive' => false));
 
         $this->assertNotContains(' Generated salt ', $this->passwordEncoderCommandTester->getDisplay());
     }
@@ -195,7 +231,7 @@ EOTXT
 
     /**
      * @group legacy
-     * @expectedDeprecation Passing null as the first argument of "Symfony\Bundle\SecurityBundle\Command\UserPasswordEncoderCommand::__construct" is deprecated since version 3.3 and will be removed in 4.0. If the command was registered by convention, make it a service instead.
+     * @expectedDeprecation Passing null as the first argument of "Symfony\Bundle\SecurityBundle\Command\UserPasswordEncoderCommand::__construct()" is deprecated since Symfony 3.3 and support for it will be removed in 4.0. If the command was registered by convention, make it a service instead.
      */
     public function testLegacy()
     {
@@ -217,7 +253,7 @@ EOTXT
 
     protected function setUp()
     {
-        putenv('COLUMNS='.(119 + strlen(PHP_EOL)));
+        putenv('COLUMNS='.(119 + \strlen(PHP_EOL)));
         $kernel = $this->createKernel(array('test_case' => 'PasswordEncode'));
         $kernel->boot();
 
@@ -231,5 +267,18 @@ EOTXT
     protected function tearDown()
     {
         $this->passwordEncoderCommandTester = null;
+    }
+
+    private function setupArgon2i()
+    {
+        putenv('COLUMNS='.(119 + \strlen(PHP_EOL)));
+        $kernel = $this->createKernel(array('test_case' => 'PasswordEncode', 'root_config' => 'argon2i.yml'));
+        $kernel->boot();
+
+        $application = new Application($kernel);
+
+        $passwordEncoderCommand = $application->get('security:encode-password');
+
+        $this->passwordEncoderCommandTester = new CommandTester($passwordEncoderCommand);
     }
 }

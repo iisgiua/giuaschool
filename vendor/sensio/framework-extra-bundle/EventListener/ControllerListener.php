@@ -1,12 +1,12 @@
 <?php
 
 /*
- * This file is part of the Symfony framework.
+ * This file is part of the Symfony package.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
  *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sensio\Bundle\FrameworkExtraBundle\EventListener;
@@ -29,13 +29,8 @@ class ControllerListener implements EventSubscriberInterface
     /**
      * @var Reader
      */
-    protected $reader;
+    private $reader;
 
-    /**
-     * Constructor.
-     *
-     * @param Reader $reader An Reader instance
-     */
     public function __construct(Reader $reader)
     {
         $this->reader = $reader;
@@ -45,15 +40,13 @@ class ControllerListener implements EventSubscriberInterface
      * Modifies the Request object to apply configuration information found in
      * controllers annotations like the template to render or HTTP caching
      * configuration.
-     *
-     * @param FilterControllerEvent $event A FilterControllerEvent instance
      */
     public function onKernelController(FilterControllerEvent $event)
     {
         $controller = $event->getController();
 
         if (!is_array($controller) && method_exists($controller, '__invoke')) {
-            $controller = array($controller, '__invoke');
+            $controller = [$controller, '__invoke'];
         }
 
         if (!is_array($controller)) {
@@ -67,7 +60,7 @@ class ControllerListener implements EventSubscriberInterface
         $classConfigurations = $this->getConfigurations($this->reader->getClassAnnotations($object));
         $methodConfigurations = $this->getConfigurations($this->reader->getMethodAnnotations($method));
 
-        $configurations = array();
+        $configurations = [];
         foreach (array_merge(array_keys($classConfigurations), array_keys($methodConfigurations)) as $key) {
             if (!array_key_exists($key, $classConfigurations)) {
                 $configurations[$key] = $methodConfigurations[$key];
@@ -92,9 +85,9 @@ class ControllerListener implements EventSubscriberInterface
         }
     }
 
-    protected function getConfigurations(array $annotations)
+    private function getConfigurations(array $annotations)
     {
-        $configurations = array();
+        $configurations = [];
         foreach ($annotations as $configuration) {
             if ($configuration instanceof ConfigurationInterface) {
                 if ($configuration->allowArray()) {
@@ -110,10 +103,13 @@ class ControllerListener implements EventSubscriberInterface
         return $configurations;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public static function getSubscribedEvents()
     {
-        return array(
+        return [
             KernelEvents::CONTROLLER => 'onKernelController',
-        );
+        ];
     }
 }

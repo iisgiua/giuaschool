@@ -11,9 +11,9 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating\Helper;
 
-use Symfony\Component\Templating\Helper\Helper;
 use Symfony\Component\Form\FormRendererInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\Templating\Helper\Helper;
 
 /**
  * FormHelper provides helpers to help display forms.
@@ -23,14 +23,8 @@ use Symfony\Component\Form\FormView;
  */
 class FormHelper extends Helper
 {
-    /**
-     * @var FormRendererInterface
-     */
     private $renderer;
 
-    /**
-     * @param FormRendererInterface $renderer
-     */
     public function __construct(FormRendererInterface $renderer)
     {
         $this->renderer = $renderer;
@@ -49,12 +43,13 @@ class FormHelper extends Helper
      *
      * The theme format is "<Bundle>:<Controller>".
      *
-     * @param FormView     $view   A FormView instance
-     * @param string|array $themes A theme or an array of theme
+     * @param FormView     $view             A FormView instance
+     * @param string|array $themes           A theme or an array of theme
+     * @param bool         $useDefaultThemes If true, will use default themes defined in the renderer
      */
-    public function setTheme(FormView $view, $themes)
+    public function setTheme(FormView $view, $themes, $useDefaultThemes = true)
     {
-        $this->renderer->setTheme($view, $themes);
+        $this->renderer->setTheme($view, $themes, $useDefaultThemes);
     }
 
     /**
@@ -177,8 +172,6 @@ class FormHelper extends Helper
     /**
      * Renders the errors of the given view.
      *
-     * @param FormView $view The view to render the errors for
-     *
      * @return string The HTML markup
      */
     public function errors(FormView $view)
@@ -226,7 +219,7 @@ class FormHelper extends Helper
      * Check the token in your action using the same CSRF token id.
      *
      * <code>
-     * $csrfProvider = $this->get('security.csrf.token_generator');
+     * // $csrfProvider being an instance of Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface
      * if (!$csrfProvider->isCsrfTokenValid('rm_user_'.$user->getId(), $token)) {
      *     throw new \RuntimeException('CSRF attack detected.');
      * }
@@ -236,7 +229,7 @@ class FormHelper extends Helper
      *
      * @return string A CSRF token
      *
-     * @throws \BadMethodCallException When no CSRF provider was injected in the constructor.
+     * @throws \BadMethodCallException when no CSRF provider was injected in the constructor
      */
     public function csrfToken($tokenId)
     {
@@ -246,5 +239,21 @@ class FormHelper extends Helper
     public function humanize($text)
     {
         return $this->renderer->humanize($text);
+    }
+
+    /**
+     * @internal
+     */
+    public function formEncodeCurrency($text, $widget = '')
+    {
+        if ('UTF-8' === $charset = $this->getCharset()) {
+            $text = htmlspecialchars($text, ENT_QUOTES | (\defined('ENT_SUBSTITUTE') ? ENT_SUBSTITUTE : 0), 'UTF-8');
+        } else {
+            $text = htmlentities($text, ENT_QUOTES | (\defined('ENT_SUBSTITUTE') ? ENT_SUBSTITUTE : 0), 'UTF-8');
+            $text = iconv('UTF-8', $charset, $text);
+            $widget = iconv('UTF-8', $charset, $widget);
+        }
+
+        return str_replace('{{ widget }}', $widget, $text);
     }
 }

@@ -2,27 +2,28 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017 Antonello Dessì
+ * Copyright (c) 2017-2019 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017
+ * @copyright Antonello Dessì 2017-2019
  */
 
 
 namespace AppBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use AppBundle\Entity\Alunno;
 use AppBundle\Entity\Genitore;
+use AppBundle\Entity\Docente;
 use AppBundle\Entity\Staff;
 use AppBundle\Entity\Preside;
-use AppBundle\Entity\Segreteria;
+use AppBundle\Entity\Ata;
 use AppBundle\Util\PagelleUtil;
 use AppBundle\Util\GenitoriUtil;
 
@@ -45,10 +46,10 @@ class PagelleController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/classe/{classe}/{tipo}/{periodo}", name="pagelle_classe",
-   *    requirements={"classe": "\d+", "tipo": "R|T|F|I|V|C", "periodo": "P|S|F|R|1|2"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+", "tipo": "R|T|F|I|V|C", "periodo": "P|S|F|I|1|2"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_SEGRETERIA')")
+   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_ATA')")
    */
   public function documentoClasseAction(EntityManagerInterface $em, SessionInterface $session, PagelleUtil $pag,
                                          $classe, $tipo, $periodo) {
@@ -61,11 +62,14 @@ class PagelleController extends Controller {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Segreteria)) {
+    if (($this->getUser() instanceOf Ata) && !$this->getUser()->getSegreteria()) {
+      // ATA non abiliatato alla segreteria
+      throw $this->createNotFoundException('exception.invalid_params');
+    } elseif (($this->getUser() instanceOf Docente) && !($this->getUser() instanceOf Staff)) {
       // coordinatore
       $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
-        // errore
+        // docente non abilitato
         throw $this->createNotFoundException('exception.invalid_params');
       }
     }
@@ -80,13 +84,17 @@ class PagelleController extends Controller {
     if ($periodo == 'P') {
       // primo trimestre
       switch ($tipo) {
-        case 'R':
-          // riepilogo voti
-          $nomefile = $pag->riepilogoVoti($classe, $periodo);
+        case 'F':
+          // firme verbale
+          $nomefile = $pag->firmeVerbale($classe, $periodo);
           break;
         case 'I':
           // firme registro voti
           $nomefile = $pag->firmeRegistro($classe, $periodo);
+          break;
+        case 'R':
+          // riepilogo voti
+          $nomefile = $pag->riepilogoVoti($classe, $periodo);
           break;
         case 'V':
           // verbale
@@ -121,8 +129,8 @@ class PagelleController extends Controller {
           $nomefile = $pag->certificazioni($classe, $periodo);
           break;
       }
-    } elseif ($periodo == 'R') {
-      // ripresa scrutinio finale
+    } elseif ($periodo == 'I') {
+      // scrutinio integrativo
       switch ($tipo) {
         case 'V':
           // verbale
@@ -173,10 +181,10 @@ class PagelleController extends Controller {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C", "periodo": "P|S|F|R|1|2"})
-   * @Method("GET")
+   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C", "periodo": "P|S|F|I|1|2"},
+   *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_GENITORE') or has_role('ROLE_SEGRETERIA')")
+   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO') or has_role('ROLE_ATA')")
    */
   public function documentoAlunnoAction(EntityManagerInterface $em, SessionInterface $session, PagelleUtil $pag,
                                          GenitoriUtil $gen, $classe, $alunno, $tipo, $periodo) {
@@ -194,10 +202,16 @@ class PagelleController extends Controller {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controllo genitore
+    // controllo accesso alla funzione
     if (($this->getUser() instanceOf Genitore) && $gen->alunno($this->getUser()) !== $alunno) {
-      // errore
+      // non è genitore di alunno
       throw $this->createNotFoundException('exception.id_notfound');
+    } elseif (($this->getUser() instanceOf Alunno) && $this->getUser() !== $alunno) {
+      // non è pagella di alunno
+      throw $this->createNotFoundException('exception.id_notfound');
+    } elseif (($this->getUser() instanceOf Ata) && !$this->getUser()->getSegreteria()) {
+      // ATA non abilitato alla segreteria
+      throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo periodo (scrutinio deve essere chiuso)
     $scrutinio = $em->getRepository('AppBundle:Scrutinio')->findOneBy(['classe' => $classe,
@@ -242,8 +256,8 @@ class PagelleController extends Controller {
           $nomefile = $pag->pagella($classe, $alunno, $periodo);
           break;
       }
-    } elseif ($periodo == 'R') {
-      // ripresa scrutinio finale
+    } elseif ($periodo == 'I') {
+      // scrutinio integrativo
       switch ($tipo) {
         case 'N':
           // non ammesso

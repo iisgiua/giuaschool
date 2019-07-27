@@ -12,9 +12,9 @@
 namespace Symfony\Component\Form\Extension\Core\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\DataTransformer\MoneyToLocalizedStringTransformer;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -70,7 +70,7 @@ class MoneyType extends AbstractType
     }
 
     /**
-     * Returns the pattern for this locale.
+     * Returns the pattern for this locale in UTF-8.
      *
      * The pattern contains the placeholder "{{ widget }}" where the HTML tag should
      * be inserted

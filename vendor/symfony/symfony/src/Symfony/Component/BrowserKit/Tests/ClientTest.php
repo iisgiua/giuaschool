@@ -13,8 +13,8 @@ namespace Symfony\Component\BrowserKit\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\BrowserKit\Client;
-use Symfony\Component\BrowserKit\History;
 use Symfony\Component\BrowserKit\CookieJar;
+use Symfony\Component\BrowserKit\History;
 use Symfony\Component\BrowserKit\Response;
 
 class SpecialResponse extends Response
@@ -571,6 +571,25 @@ class ClientTest extends TestCase
         $this->assertArrayHasKey('myfile.foo', $client->getRequest()->getFiles(), '->forward() keeps files');
         $this->assertArrayHasKey('X_TEST_FOO', $client->getRequest()->getServer(), '->forward() keeps $_SERVER');
         $this->assertEquals($content, $client->getRequest()->getContent(), '->forward() keeps content');
+    }
+
+    public function testBackAndFrowardWithRedirects()
+    {
+        $client = new TestClient();
+
+        $client->request('GET', 'http://www.example.com/foo');
+        $client->setNextResponse(new Response('', 301, array('Location' => 'http://www.example.com/redirected')));
+        $client->request('GET', 'http://www.example.com/bar');
+
+        $this->assertEquals('http://www.example.com/redirected', $client->getRequest()->getUri(), 'client followed redirect');
+
+        $client->back();
+
+        $this->assertEquals('http://www.example.com/foo', $client->getRequest()->getUri(), '->back() goes back in the history skipping redirects');
+
+        $client->forward();
+
+        $this->assertEquals('http://www.example.com/redirected', $client->getRequest()->getUri(), '->forward() goes forward in the history skipping redirects');
     }
 
     public function testReload()

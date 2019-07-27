@@ -29,20 +29,18 @@ class Groups
     private $groups;
 
     /**
-     * @param array $data
-     *
      * @throws InvalidArgumentException
      */
     public function __construct(array $data)
     {
         if (!isset($data['value']) || !$data['value']) {
-            throw new InvalidArgumentException(sprintf('Parameter of annotation "%s" cannot be empty.', get_class($this)));
+            throw new InvalidArgumentException(sprintf('Parameter of annotation "%s" cannot be empty.', \get_class($this)));
         }
 
         $value = (array) $data['value'];
         foreach ($value as $group) {
-            if (!is_string($group)) {
-                throw new InvalidArgumentException(sprintf('Parameter of annotation "%s" must be a string or an array of strings.', get_class($this)));
+            if (!\is_string($group)) {
+                throw new InvalidArgumentException(sprintf('Parameter of annotation "%s" must be a string or an array of strings.', \get_class($this)));
             }
         }
 

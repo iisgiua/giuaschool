@@ -21,7 +21,7 @@
  * {% block content %}{% endblock %}
  * </pre>
  *
- * @see http://www.twig-project.org/doc/templates.html#horizontal-reuse for details.
+ * @see https://twig.symfony.com/doc/templates.html#horizontal-reuse for details.
  *
  * @final
  */
@@ -57,6 +57,8 @@ class Twig_TokenParser_Use extends Twig_TokenParser
         $stream->expect(Twig_Token::BLOCK_END_TYPE);
 
         $this->parser->addTrait(new Twig_Node(array('template' => $template, 'targets' => new Twig_Node($targets))));
+
+        return new Twig_Node();
     }
 
     public function getTag()

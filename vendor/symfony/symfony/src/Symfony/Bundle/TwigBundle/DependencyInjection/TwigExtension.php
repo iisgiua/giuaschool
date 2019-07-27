@@ -11,15 +11,15 @@
 
 namespace Symfony\Bundle\TwigBundle\DependencyInjection;
 
-use Symfony\Bridge\Twig\Extension\WebLinkExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileExistenceResource;
+use Symfony\Component\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\WebLink\HttpHeaderSerializer;
 use Twig\Extension\ExtensionInterface;
+use Twig\Extension\RuntimeExtensionInterface;
 use Twig\Loader\LoaderInterface;
 
 /**
@@ -30,40 +30,38 @@ use Twig\Loader\LoaderInterface;
  */
 class TwigExtension extends Extension
 {
-    /**
-     * Responds to the twig configuration parameter.
-     *
-     * @param array            $configs
-     * @param ContainerBuilder $container
-     */
     public function load(array $configs, ContainerBuilder $container)
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('twig.xml');
 
+        $container->getDefinition('twig.profile')->setPrivate(true);
+        $container->getDefinition('twig.runtime.httpkernel')->setPrivate(true);
+        $container->getDefinition('twig.translation.extractor')->setPrivate(true);
+        $container->getDefinition('workflow.twig_extension')->setPrivate(true);
+        $container->getDefinition('twig.exception_listener')->setPrivate(true);
+
         if (class_exists('Symfony\Component\Form\Form')) {
             $loader->load('form.xml');
+            $container->getDefinition('twig.form.renderer')->setPrivate(true);
         }
 
         if (interface_exists('Symfony\Component\Templating\EngineInterface')) {
             $loader->load('templating.xml');
         }
 
-        if (!interface_exists('Symfony\Component\Translation\TranslatorInterface')) {
-            $container->removeDefinition('twig.translation.extractor');
+        if (class_exists(Application::class)) {
+            $loader->load('console.xml');
         }
 
-        if (class_exists(HttpHeaderSerializer::class)) {
-            $definition = $container->register('twig.extension.weblink', WebLinkExtension::class);
-            $definition->setPublic(false);
-            $definition->addArgument(new Reference('request_stack'));
-            $definition->addTag('twig.extension');
+        if (!interface_exists('Symfony\Component\Translation\TranslatorInterface')) {
+            $container->removeDefinition('twig.translation.extractor');
         }
 
         foreach ($configs as $key => $config) {
             if (isset($config['globals'])) {
                 foreach ($config['globals'] as $name => $value) {
-                    if (is_array($value) && isset($value['key'])) {
+                    if (\is_array($value) && isset($value['key'])) {
                         $configs[$key]['globals'][$name] = array(
                             'key' => $name,
                             'value' => $value,
@@ -80,6 +78,7 @@ class TwigExtension extends Extension
         $container->setParameter('twig.exception_listener.controller', $config['exception_controller']);
 
         $container->setParameter('twig.form.resources', $config['form_themes']);
+        $container->setParameter('twig.default_path', $config['default_path']);
 
         $envConfiguratorDefinition = $container->getDefinition('twig.configurator.environment');
         $envConfiguratorDefinition->replaceArgument(0, $config['date']['format']);
@@ -100,10 +99,11 @@ class TwigExtension extends Extension
             }
         }
 
+        // paths are modified in ExtensionPass if forms are enabled
         $container->getDefinition('twig.cache_warmer')->replaceArgument(2, $config['paths']);
         $container->getDefinition('twig.template_iterator')->replaceArgument(2, $config['paths']);
 
-        $bundleHierarchy = $this->getBundleHierarchy($container);
+        $bundleHierarchy = $this->getBundleHierarchy($container, $config);
 
         foreach ($bundleHierarchy as $name => $bundle) {
             $namespace = $this->normalizeBundleName($name);
@@ -117,9 +117,21 @@ class TwigExtension extends Extension
             foreach ($bundle['paths'] as $path) {
                 $twigFilesystemLoaderDefinition->addMethodCall('addPath', array($path, $namespace));
             }
+
+            // add exclusive namespace for root bundles only
+            // to override a bundle template that also extends itself
+            if (\count($bundle['paths']) > 0 && 0 === \count($bundle['parents'])) {
+                // the last path must be the bundle views directory
+                $twigFilesystemLoaderDefinition->addMethodCall('addPath', array(end($bundle['paths']), '!'.$namespace));
+            }
         }
 
         if (file_exists($dir = $container->getParameter('kernel.root_dir').'/Resources/views')) {
+            $twigFilesystemLoaderDefinition->addMethodCall('addPath', array($dir));
+        }
+        $container->addResource(new FileExistenceResource($dir));
+
+        if (file_exists($dir = $container->getParameterBag()->resolveValue($config['default_path']))) {
             $twigFilesystemLoaderDefinition->addMethodCall('addPath', array($dir));
         }
         $container->addResource(new FileExistenceResource($dir));
@@ -152,6 +164,7 @@ class TwigExtension extends Extension
         $container->registerForAutoconfiguration(\Twig_LoaderInterface::class)->addTag('twig.loader');
         $container->registerForAutoconfiguration(ExtensionInterface::class)->addTag('twig.extension');
         $container->registerForAutoconfiguration(LoaderInterface::class)->addTag('twig.loader');
+        $container->registerForAutoconfiguration(RuntimeExtensionInterface::class)->addTag('twig.runtime');
 
         if (\PHP_VERSION_ID < 70000) {
             $this->addClassesToCompile(array(
@@ -167,7 +180,7 @@ class TwigExtension extends Extension
         }
     }
 
-    private function getBundleHierarchy(ContainerBuilder $container)
+    private function getBundleHierarchy(ContainerBuilder $container, array $config)
     {
         $bundleHierarchy = array();
 
@@ -185,12 +198,17 @@ class TwigExtension extends Extension
             }
             $container->addResource(new FileExistenceResource($dir));
 
+            if (file_exists($dir = $container->getParameterBag()->resolveValue($config['default_path']).'/bundles/'.$name)) {
+                $bundleHierarchy[$name]['paths'][] = $dir;
+            }
+            $container->addResource(new FileExistenceResource($dir));
+
             if (file_exists($dir = $bundle['path'].'/Resources/views')) {
                 $bundleHierarchy[$name]['paths'][] = $dir;
             }
             $container->addResource(new FileExistenceResource($dir));
 
-            if (null === $bundle['parent']) {
+            if (!isset($bundle['parent']) || null === $bundle['parent']) {
                 continue;
             }
 

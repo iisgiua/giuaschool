@@ -47,8 +47,6 @@ class ConsoleFormatter implements FormatterInterface
     private $dumper;
 
     /**
-     * Constructor.
-     *
      * Available options:
      *   * format: The format of the outputted log string. The following placeholders are supported: %datetime%, %start_tag%, %level_name%, %end_tag%, %channel%, %message%, %context%, %extra%;
      *   * date_format: The format of the outputted date string;
@@ -58,9 +56,9 @@ class ConsoleFormatter implements FormatterInterface
     public function __construct($options = array())
     {
         // BC Layer
-        if (!is_array($options)) {
-            @trigger_error(sprintf('The constructor arguments $format, $dateFormat, $allowInlineLineBreaks, $ignoreEmptyContextAndExtra of "%s" are deprecated since 3.3 and will be removed in 4.0. Use $options instead.', self::class), E_USER_DEPRECATED);
-            $args = func_get_args();
+        if (!\is_array($options)) {
+            @trigger_error(sprintf('The constructor arguments $format, $dateFormat, $allowInlineLineBreaks, $ignoreEmptyContextAndExtra of "%s" are deprecated since Symfony 3.3 and will be removed in 4.0. Use $options instead.', self::class), E_USER_DEPRECATED);
+            $args = \func_get_args();
             $options = array();
             if (isset($args[0])) {
                 $options['format'] = $args[0];
@@ -119,12 +117,20 @@ class ConsoleFormatter implements FormatterInterface
         $levelColor = self::$levelColorMap[$record['level']];
 
         if ($this->options['multiline']) {
-            $context = $extra = "\n";
+            $separator = "\n";
         } else {
-            $context = $extra = ' ';
+            $separator = ' ';
         }
-        $context .= $this->dumpData($record['context']);
-        $extra .= $this->dumpData($record['extra']);
+
+        $context = $this->dumpData($record['context']);
+        if ($context) {
+            $context = $separator.$context;
+        }
+
+        $extra = $this->dumpData($record['extra']);
+        if ($extra) {
+            $extra = $separator.$extra;
+        }
 
         $formatted = strtr($this->options['format'], array(
             '%datetime%' => $record['datetime']->format($this->options['date_format']),

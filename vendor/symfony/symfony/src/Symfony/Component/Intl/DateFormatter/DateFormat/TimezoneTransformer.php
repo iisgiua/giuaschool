@@ -31,7 +31,7 @@ class TimezoneTransformer extends Transformer
     {
         $timeZone = substr($dateTime->getTimezone()->getName(), 0, 3);
 
-        if (!in_array($timeZone, array('Etc', 'UTC', 'GMT'))) {
+        if (!\in_array($timeZone, array('Etc', 'UTC', 'GMT'))) {
             throw new NotImplementedException('Time zone different than GMT or UTC is not supported as a formatting output.');
         }
 
@@ -41,7 +41,7 @@ class TimezoneTransformer extends Transformer
         }
 
         // From ICU >= 59.1 GMT and UTC are no longer unified
-        if (in_array($timeZone, array('UTC', 'UCT', 'Universal', 'Zulu'))) {
+        if (\in_array($timeZone, array('UTC', 'UCT', 'Universal', 'Zulu'))) {
             // offset is not supported with UTC
             return $length > 3 ? 'Coordinated Universal Time' : 'UTC';
         }
@@ -103,7 +103,7 @@ class TimezoneTransformer extends Transformer
         if (preg_match('/GMT(?P<signal>[+-])(?P<hours>\d{2}):?(?P<minutes>\d{2})/', $formattedTimeZone, $matches)) {
             $hours = (int) $matches['hours'];
             $minutes = (int) $matches['minutes'];
-            $signal = $matches['signal'] == '-' ? '+' : '-';
+            $signal = '-' == $matches['signal'] ? '+' : '-';
 
             if (0 < $minutes) {
                 throw new NotImplementedException(sprintf(
@@ -112,7 +112,7 @@ class TimezoneTransformer extends Transformer
                 ));
             }
 
-            return 'Etc/GMT'.($hours !== 0 ? $signal.$hours : '');
+            return 'Etc/GMT'.(0 !== $hours ? $signal.$hours : '');
         }
 
         throw new \InvalidArgumentException(sprintf('The GMT time zone "%s" does not match with the supported formats GMT[+-]HH:MM or GMT[+-]HHMM.', $formattedTimeZone));

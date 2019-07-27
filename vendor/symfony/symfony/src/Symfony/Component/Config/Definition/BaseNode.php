@@ -29,20 +29,19 @@ abstract class BaseNode implements NodeInterface
     protected $finalValidationClosures = array();
     protected $allowOverwrite = true;
     protected $required = false;
+    protected $deprecationMessage = null;
     protected $equivalentValues = array();
     protected $attributes = array();
 
     /**
-     * Constructor.
+     * @param string|null        $name   The name of the node
+     * @param NodeInterface|null $parent The parent of this node
      *
-     * @param string        $name   The name of the node
-     * @param NodeInterface $parent The parent of this node
-     *
-     * @throws \InvalidArgumentException if the name contains a period.
+     * @throws \InvalidArgumentException if the name contains a period
      */
     public function __construct($name, NodeInterface $parent = null)
     {
-        if (false !== strpos($name, '.')) {
+        if (false !== strpos($name = (string) $name, '.')) {
             throw new \InvalidArgumentException('The name must not contain ".".');
         }
 
@@ -142,6 +141,19 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
+     * Sets this node as deprecated.
+     *
+     * You can use %node% and %path% placeholders in your message to display,
+     * respectively, the node name and its complete path.
+     *
+     * @param string|null $message Deprecated message
+     */
+    public function setDeprecated($message)
+    {
+        $this->deprecationMessage = $message;
+    }
+
+    /**
      * Sets if this node can be overridden.
      *
      * @param bool $allow
@@ -172,9 +184,7 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * Checks if this node is required.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isRequired()
     {
@@ -182,9 +192,30 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * Returns the name of this node.
+     * Checks if this node is deprecated.
      *
-     * @return string The Node's name
+     * @return bool
+     */
+    public function isDeprecated()
+    {
+        return null !== $this->deprecationMessage;
+    }
+
+    /**
+     * Returns the deprecated message.
+     *
+     * @param string $node the configuration node name
+     * @param string $path the path of the node
+     *
+     * @return string
+     */
+    public function getDeprecationMessage($node, $path)
+    {
+        return strtr($this->deprecationMessage, array('%node%' => $node, '%path%' => $path));
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -192,9 +223,7 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * Retrieves the path of this node.
-     *
-     * @return string The Node's path
+     * {@inheritdoc}
      */
     public function getPath()
     {
@@ -208,14 +237,7 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * Merges two values together.
-     *
-     * @param mixed $leftSide
-     * @param mixed $rightSide
-     *
-     * @return mixed The merged value
-     *
-     * @throws ForbiddenOverwriteException
+     * {@inheritdoc}
      */
     final public function merge($leftSide, $rightSide)
     {
@@ -235,11 +257,7 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * Normalizes a value, applying all normalization closures.
-     *
-     * @param mixed $value Value to normalize
-     *
-     * @return mixed The normalized value
+     * {@inheritdoc}
      */
     final public function normalize($value)
     {
@@ -287,14 +305,7 @@ abstract class BaseNode implements NodeInterface
     }
 
     /**
-     * Finalizes a value, applying all finalization closures.
-     *
-     * @param mixed $value The value to finalize
-     *
-     * @return mixed The finalized value
-     *
-     * @throws Exception
-     * @throws InvalidConfigurationException
+     * {@inheritdoc}
      */
     final public function finalize($value)
     {

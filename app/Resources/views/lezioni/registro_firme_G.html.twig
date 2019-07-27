@@ -2,7 +2,6 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_lezioni.html.twig' %}
   {% if not cattedra and not classe %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_registro'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
@@ -14,25 +13,32 @@
     {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
-      <strong class="gs-big">Data:</strong>
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_prec|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_succ|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
   </div>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% else %}
-      {% if avvisi > 0 %}
-        {% include 'include/modal-popup.html.twig' with {'modal_popup_msg': 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi})} %}
+      {% if avvisi+circolari > 0 %}
+        {% include 'include/modal-popup.html.twig' with {'modal_popup_msg': 'message.presenti_comunicazioni'|trans } %}
   <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
-    <strong>{{ 'message.presenti_avvisi'|transchoice(avvisi, {'%num%': avvisi}) }}</strong><br>
-    <button class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Visualizza</strong></button>
+    <strong>{{ 'message.presenti_comunicazioni'|trans }}</strong><br>
+        {% if avvisi > 0 %}
+    <button id="gs-leggi-avvisi" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ avvisi }} {{ 'message.num_avvisi'|transchoice(avvisi) }}</strong></button>
+        {% endif %}
+        {% if circolari > 0 %}
+    <button id="gs-leggi-circolari" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto delle circolari" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_classi', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ circolari }} {{ 'message.num_circolari'|transchoice(circolari) }}</strong></button>
+        {% endif %}
   </div>
       {% endif %}
   <div class="row gs-mb-2">
     <div class="col-sm-6">
-      <strong class="gs-big">Data:</strong>
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span>{{ info.data_label }}</button>
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_prec|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_succ|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <strong class="gs-big">Vista:</strong>
@@ -184,8 +190,8 @@
       {% endif %}
     </div>
   </div>
-        {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
-        {% include 'include/modal-remote.html.twig' %}
+      {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
+      {% include 'include/modal-remote.html.twig' %}
     {% endif %}
   {% endif %}
 </div>
@@ -235,20 +241,25 @@ $(document).ready(function() {
     var text = $(event.relatedTarget).data('text');
     $(this).find('#gs-modal-confirm-msg').text(text);
   });
-  $('#gs-modal-remote').on('show.bs.modal', function (event) {
-    var url = $(event.relatedTarget).data('href');
+  $('#gs-modal-remote').on('show.bs.modal', function (e) {
+    var url = $(e.relatedTarget).data('href');
     $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $('#gs-modal-remote').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
   });
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();
-    var url = $(e.currentTarget).data('href');
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
   });
-  {% if avvisi > 0 %}
+  {% if avvisi+circolari > 0 %}
   $("#gs-modal-popup-do").click(function(e) {
     $('#gs-modal-popup').modal('hide');
-
-    $('.gs-button-remote').click();
+    {% if avvisi > 0 %}
+    $('#gs-leggi-avvisi').click();
+    {% else %}
+    $('#gs-leggi-circolari').click();
+    {% endif %}
   });
   // init
   $('#gs-modal-popup').modal('show');

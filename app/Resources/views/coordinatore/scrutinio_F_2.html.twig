@@ -2,38 +2,51 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% include 'ruolo_docente/menu_coordinatore.html.twig' %}
   {% if not classe %}
   <div class="alert alert-warning gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
+    {% set nome_mese=['Marzo', 'Aprile', 'Maggio', 'Giugno'] %}
+    {% set nome_giorno=['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'] %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 2: controllo del limite di assenze degli alunni</h2>
-    {% for messaggio in app.flashes('errore') %}
-      {% if loop.first %}
-  <div class="alert alert-danger gs-mb-3" role="alert">
-      {% endif %}
-    <strong>{{ messaggio|trans }}</strong><br>
-      {% if loop.last %}
-  </div>
-      {% endif %}
-    {% endfor %}
+    {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
   <div class="gs-mt-5">
-    <strong class="text-info gs-big">Alunni che superano il limite del 25% di assenze sul monte ore di {{ dati.monteore }} (pari a {{ dati.maxassenze }} ore):</strong><br>
+    <strong class="text-info gs-big">Alunni che superano il limite del 25% di assenze sul monte ore di {{ dati.monteore }} (pari a {{ dati.maxassenze }} ore):</strong>
   </div>
     {% for alunno,a in form.lista %}
   <div class="alert alert-warning gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
     <div>
       <strong><span class="gs-big">{{ dati.no_scrutinabili.alunni[alunno].cognome }} {{ dati.no_scrutinabili.alunni[alunno].nome }} ({{ dati.no_scrutinabili.alunni[alunno].dataNascita|date('d/m/Y') }})</span>, ore di assenza {{ dati.no_scrutinabili.alunni[alunno].ore }} (pari al {{ dati.no_scrutinabili.alunni[alunno].percentuale|number_format(2,',') }}%):</strong>
     </div>
-      {% if dati.no_scrutinabili.alunni[alunno].giorni_finali < dati.giorni_finali %}
-    {{ form_widget(a.scrutinabile.children[1], {'label_attr': {'class': 'gs-text-normal'}}) }}
-    {{ form_widget(a.scrutinabile.children[2], {'label_attr': {'class': 'gs-text-normal'}}) }}
-      {% else %}
-    {{ form_widget(a.scrutinabile) }}
+      {% if dati.no_scrutinabili.alunni[alunno].giorni_presenza|length > 0 %}
+    <button type="button" class="btn btn-danger" title="Aggiunge le assenze dal 15 marzo" data-toggle="modal" data-target="#gs-frequenza-{{ alunno }}"><strong>Dichiara la cessata frequenza dal 15 Marzo</strong></button>
+    <div class="modal fade in gs-text-normal" id="gs-frequenza-{{ alunno }}" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title"><strong>Dichiara la cessata frequenza dal 15 Marzo</strong></h3>
+            <h4 class="modal-title"><strong>{{ dati.no_scrutinabili.alunni[alunno].cognome }} {{ dati.no_scrutinabili.alunni[alunno].nome }} ({{ dati.no_scrutinabili.alunni[alunno].dataNascita|date('d/m/Y') }})</strong></h4>
+          </div>
+          <div class="modal-body">
+            <p class="gs-big">Verranno aggiunte le assenze per i seguenti giorni:</p>
+            <ul>
+        {% for g in dati.no_scrutinabili.alunni[alunno].giorni_presenza %}
+              <li>{{ nome_giorno[g|date('w')] }} {{ g|date('j') }} {{ nome_mese[g|date('m') - 3] }} {{ g|date('Y') }}</li>
+        {% endfor %}
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <a class="btn btn-primary" href="{{ path('coordinatore_scrutinio_frequenza', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno }) }}" role="button"><strong>{{ 'label.submit'|trans }}</strong></a>
+            <button type="button" class="btn btn-default" data-dismiss="modal"><strong>{{ 'label.cancel'|trans }}</strong></button>
+          </div>
+        </div>
+      </div>
+    </div>
       {% endif %}
+    {{ form_widget(a.scrutinabile) }}
     <div class="gs-ml-5">
       {{ form_widget(a.testo, {'disabled': 'disabled'}) }}
       {{ form_widget(a.motivazione, {'disabled': 'disabled'}) }}
@@ -42,12 +55,26 @@
     {{ form_widget(a.sesso) }}
   </div>
     {% else %}
-  <div class="alert alert-success gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
+  <div class="alert alert-warning gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
     <strong class="gs-big">NESSUNO</strong>
   </div>
     {% endfor %}
   <div class="gs-mt-5">
-    <strong class="text-info gs-big">Alunni ritirati, trasferiti o che frequentano l'anno all'estero:</strong><br>
+    <strong class="text-info gs-big">Alunni che hanno cessato di frequentare dal 15 marzo (senza formalizzare il ritiro):</strong>
+  </div>
+  <div class="alert alert-danger gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
+    {% for alunno,a in dati.cessata_frequenza %}
+    <strong><span class="gs-big">{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</span>: NON SCRUTINABILE</strong>
+      {% if dati.forza_assenze[alunno] is defined and is_granted('ROLE_STAFF') %}
+    <a class="btn btn-danger btn-sm gs-ml-4" href="{{ path('coordinatore_scrutinio_frequenza_annulla', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}" role="button" title="Annulla la dichiarazione di cessata frequenza"><strong>Annulla cessata frequenza</strong></a>
+      {% endif %}
+    <br>
+    {% else %}
+    <strong class="gs-big">NESSUNO</strong>
+    {% endfor %}
+  </div>
+  <div class="gs-mt-5">
+    <strong class="text-info gs-big">Alunni ritirati, trasferiti o che frequentano l'anno all'estero:</strong>
   </div>
   <div class="alert alert-success gs-mb-3 gs-pt-1 gs-pb-1" role="alert">
     {% for alunno,a in dati.ritirati %}
@@ -115,6 +142,17 @@ $(document).ready(function() {
       txt.val(m[$(this).val()]+sex);
     }
   });
+  // init
+  {% for messaggio in app.flashes('errore') %}
+    {% if loop.first %}
+  var m = '';
+    {% endif %}
+  m = m + "{{ messaggio|raw }}<br>";
+    {% if loop.last %}
+  $('#gs-modal-error-text').html(m);
+  $('#gs-modal-error').modal('show');
+    {% endif %}
+  {% endfor %}
 });
 </script>
 {% endblock %}

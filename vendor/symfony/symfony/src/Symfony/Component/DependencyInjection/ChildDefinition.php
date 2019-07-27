@@ -30,6 +30,7 @@ class ChildDefinition extends Definition
     public function __construct($parent)
     {
         $this->parent = $parent;
+        $this->setPrivate(false);
     }
 
     /**
@@ -94,7 +95,7 @@ class ChildDefinition extends Definition
      */
     public function replaceArgument($index, $value)
     {
-        if (is_int($index)) {
+        if (\is_int($index)) {
             $this->arguments['index_'.$index] = $value;
         } elseif (0 === strpos($index, '$')) {
             $this->arguments[$index] = $value;

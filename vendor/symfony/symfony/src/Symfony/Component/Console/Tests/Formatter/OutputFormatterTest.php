@@ -28,6 +28,9 @@ class OutputFormatterTest extends TestCase
         $formatter = new OutputFormatter(true);
 
         $this->assertEquals('foo<bar', $formatter->format('foo\\<bar'));
+        $this->assertEquals('foo << bar', $formatter->format('foo << bar'));
+        $this->assertEquals('foo << bar \\', $formatter->format('foo << bar \\'));
+        $this->assertEquals("foo << \033[32mbar \\ baz\033[39m \\", $formatter->format('foo << <info>bar \\ baz</info> \\'));
         $this->assertEquals('<info>some info</info>', $formatter->format('\\<info>some info\\</info>'));
         $this->assertEquals('\\<info>some info\\</info>', OutputFormatter::escape('<info>some info</info>'));
 
@@ -196,7 +199,7 @@ class OutputFormatterTest extends TestCase
     /**
      * @group legacy
      * @dataProvider provideInlineStyleTagsWithUnknownOptions
-     * @expectedDeprecation Unknown style options are deprecated since version 3.2 and will be removed in 4.0. Exception "Invalid option specified: "%s". Expected one of (bold, underscore, blink, reverse, conceal)".
+     * @expectedDeprecation Unknown style options are deprecated since Symfony 3.2 and will be removed in 4.0. Exception "Invalid option specified: "%s". Expected one of (bold, underscore, blink, reverse, conceal)".
      */
     public function testInlineStyleOptionsUnknownAreDeprecated($tag, $option)
     {
