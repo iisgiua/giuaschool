@@ -1,3 +1,5 @@
 framework:
     router:
         strict_requirements: true
+
+##    	resource: '%kernel.project_dir%/config/dev/routing.yml'

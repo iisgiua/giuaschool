@@ -1,7 +1,22 @@
+
+
 monolog:
+    use_microseconds: false
+    channels: ["command"]
     handlers:
         main:
-            type: stream
-            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            type: rotating_file
+            max_files: 10
+            path: "%kernel.logs_dir%/app_%kernel.environment%.log"
             level: debug
-            channels: ["!event"]
+            channels: ["!command"]
+        command:
+            type: rotating_file
+            max_files: 10
+            path: "%kernel.logs_dir%/command_%kernel.environment%.log"
+            level: debug
+            channels: ["command"]
+        console:
+            type: console
+
+
