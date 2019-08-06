@@ -164,7 +164,8 @@ the life-time of their registered entities.
    database insert operations. Generated primary key values are
    available in the postPersist event.
 -  preUpdate - The preUpdate event occurs before the database
-   update operations to entity data. It is not called for a DQL UPDATE statement.
+   update operations to entity data. It is not called for a DQL UPDATE statement
+   nor when the computed changeset is empty.
 -  postUpdate - The postUpdate event occurs after the database
    update operations to entity data. It is not called for a DQL UPDATE statement.
 -  postLoad - The postLoad event occurs for an entity after the
@@ -178,7 +179,7 @@ the life-time of their registered entities.
    allows providing fallback metadata even when no actual metadata exists
    or could be found. This event is not a lifecycle callback.
 -  preFlush - The preFlush event occurs at the very beginning of a flush
-   operation. This event is not a lifecycle callback.
+   operation.
 -  onFlush - The onFlush event occurs after the change-sets of all
    managed entities are computed. This event is not a lifecycle
    callback.
@@ -322,7 +323,7 @@ XML would look something like this:
     <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                              /Users/robo/dev/php/Doctrine/doctrine-mapping.xsd">
+                              https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
         <entity name="User">
 
@@ -405,8 +406,8 @@ behaviors across different entity classes.
 
 Note that they require much more detailed knowledge about the inner
 workings of the EntityManager and UnitOfWork. Please read the
-*Implementing Event Listeners* section carefully if you are trying
-to write your own listener.
+:ref:`reference-events-implementing-listeners` section carefully if you
+are trying to write your own listener.
 
 For event subscribers, there are no surprises. They declare the
 lifecycle events in their ``getSubscribedEvents`` method and provide
@@ -433,7 +434,7 @@ A lifecycle event listener looks like the following:
         }
     }
 
-A lifecycle event subscriber may looks like this:
+A lifecycle event subscriber may look like this:
 
 .. code-block:: php
 
@@ -652,7 +653,8 @@ preUpdate
 
 PreUpdate is the most restrictive to use event, since it is called
 right before an update statement is called for an entity inside the
-``EntityManager#flush()`` method.
+``EntityManager#flush()`` method. Note that this event is not
+triggered when the computed changeset is empty.
 
 Changes to associations of the updated entity are never allowed in
 this event, since Doctrine cannot guarantee to correctly handle
@@ -738,7 +740,7 @@ The three post events are called inside ``EntityManager#flush()``.
 Changes in here are not relevant to the persistence in the
 database, but you can use these events to alter non-persistable items,
 like non-mapped fields, logging or even associated classes that are
-directly mapped by Doctrine.
+not directly mapped by Doctrine.
 
 postLoad
 ~~~~~~~~
@@ -886,6 +888,9 @@ you need to map the listener method using the event type mapping:
               preRemove: [preRemoveHandler]
           # ....
 
+.. note::
+
+    The order of execution of multiple methods for the same event (e.g. multiple @PrePersist) is not guaranteed.
 
 
 Entity listeners resolver

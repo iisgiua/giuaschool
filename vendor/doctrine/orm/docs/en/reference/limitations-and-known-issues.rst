@@ -63,7 +63,7 @@ Where the ``attribute_name`` column contains the key and
 ``$attributes``.
 
 The feature request for persistence of primitive value arrays
-`is described in the DDC-298 ticket <http://www.doctrine-project.org/jira/browse/DDC-298>`_.
+`is described in the DDC-298 ticket <https://github.com/doctrine/doctrine2/issues/3743>`_.
 
 Cascade Merge with Bi-directional Associations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,8 +71,8 @@ Cascade Merge with Bi-directional Associations
 There are two bugs now that concern the use of cascade merge in combination with bi-directional associations.
 Make sure to study the behavior of cascade merge if you are using it:
 
--  `DDC-875 <http://www.doctrine-project.org/jira/browse/DDC-875>`_ Merge can sometimes add the same entity twice into a collection
--  `DDC-763 <http://www.doctrine-project.org/jira/browse/DDC-763>`_ Cascade merge on associated entities can insert too many rows through "Persistence by Reachability"
+-  `DDC-875 <https://github.com/doctrine/doctrine2/issues/5398>`_ Merge can sometimes add the same entity twice into a collection
+-  `DDC-763 <https://github.com/doctrine/doctrine2/issues/5277>`_ Cascade merge on associated entities can insert too many rows through "Persistence by Reachability"
 
 Custom Persisters
 ~~~~~~~~~~~~~~~~~
@@ -83,10 +83,8 @@ Currently there is no way to overwrite the persister implementation
 for a given entity, however there are several use-cases that can
 benefit from custom persister implementations:
 
-
--  `Add Upsert Support <http://www.doctrine-project.org/jira/browse/DDC-668>`_
--  `Evaluate possible ways in which stored-procedures can be used <http://www.doctrine-project.org/jira/browse/DDC-445>`_
--  The previous Filter Rules Feature Request
+-  `Add Upsert Support <https://github.com/doctrine/doctrine2/issues/5178>`_
+-  `Evaluate possible ways in which stored-procedures can be used <https://github.com/doctrine/doctrine2/issues/4946>`_
 
 Persist Keys of Collections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,7 +94,7 @@ PHP Arrays are ordered hash-maps and so should be the
 evaluate a feature that optionally persists and hydrates the keys
 of a Collection instance.
 
-`Ticket DDC-213 <http://www.doctrine-project.org/jira/browse/DDC-213>`_
+`Ticket DDC-213 <https://github.com/doctrine/doctrine2/issues/2817>`_
 
 Mapping many tables to one entity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,10 +112,10 @@ in the core library. We don't think behaviors add more value than
 they cost pain and debugging hell. Please see the many different
 blog posts we have written on this topics:
 
--  `Doctrine2 "Behaviors" in a Nutshell <http://www.doctrine-project.org/blog/doctrine2-behaviours-nutshell>`_
--  `A re-usable Versionable behavior for Doctrine2 <http://www.doctrine-project.org/blog/doctrine2-versionable>`_
--  `Write your own ORM on top of Doctrine2 <http://www.doctrine-project.org/blog/your-own-orm-doctrine2>`_
--  `Doctrine 2 Behavioral Extensions <http://www.doctrine-project.org/blog/doctrine2-behavioral-extensions>`_
+-  `Doctrine2 "Behaviors" in a Nutshell <http://www.doctrine-project.org/2010/02/17/doctrine2-behaviours-nutshell.html>`_
+-  `A re-usable Versionable behavior for Doctrine2 <http://www.doctrine-project.org/2010/02/24/doctrine2-versionable.html>`_
+-  `Write your own ORM on top of Doctrine2 <http://www.doctrine-project.org/2010/07/19/your-own-orm-doctrine2.html>`_
+-  `Doctrine 2 Behavioral Extensions <http://www.doctrine-project.org/2010/11/18/doctrine2-behavioral-extensions.html>`_
 -  `Doctrator <https://github.com/pablodip/doctrator`>_
 
 Doctrine 2 has enough hooks and extension points so that **you** can
@@ -146,9 +144,8 @@ backwards compatibility issues or where no simple fix exists (yet).
 We don't plan to add every bug in the tracker there, just those
 issues that can potentially cause nightmares or pain of any sort.
 
-See the Open Bugs on Jira for more details on `bugs, improvement and feature
-requests
-<http://www.doctrine-project.org/jira/secure/IssueNavigator.jspa?reset=true&mode=hide&pid=10032&resolution=-1&sorter/field=updated&sorter/order=DESC>`_.
+See bugs, improvement and feature requests on `Github issues
+<https://github.com/doctrine/doctrine2/issues>`_.
 
 Identifier Quoting and Legacy Databases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,3 +179,27 @@ MySQL with MyISAM tables
 Doctrine cannot provide atomic operations when calling ``EntityManager#flush()`` if one
 of the tables involved uses the storage engine MyISAM. You must use InnoDB or
 other storage engines that support transactions if you need integrity.
+
+Entities, Proxies and Reflection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using methods for Reflection on entities can be prone to error, when the entity
+is actually a proxy the following methods will not work correctly:
+
+- ``new ReflectionClass``
+- ``new ReflectionObject``
+- ``get_class()``
+- ``get_parent_class()``
+
+This is why ``Doctrine\Common\Util\ClassUtils`` class exists that has similar
+methods, which resolve the proxy problem beforehand.
+
+.. code-block:: php
+
+    <?php
+    use Doctrine\Common\Util\ClassUtils;
+
+    $bookProxy = $entityManager->getReference('Acme\Book');
+
+    $reflection = ClassUtils::newReflectionClass($bookProxy);
+    $class = ClassUtils::getClass($bookProxy)¸

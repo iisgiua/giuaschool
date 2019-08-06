@@ -11,6 +11,11 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection;
 
+use Monolog\Processor\ProcessorInterface;
+use Monolog\ResettableInterface;
+use Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy;
+use Symfony\Bridge\Monolog\Processor\TokenProcessor;
+use Symfony\Bridge\Monolog\Processor\WebProcessor;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -52,11 +57,6 @@ class MonologExtension extends Extension
             $loader->load('monolog.xml');
 
             $container->setParameter('monolog.use_microseconds', $config['use_microseconds']);
-
-            // always autowire the main logger, require Symfony >= 2.8, < 3.3
-            if (!method_exists('Symfony\Component\DependencyInjection\ContainerBuilder', 'fileExists') && method_exists('Symfony\Component\DependencyInjection\Definition', 'addAutowiringType')) {
-                $container->getDefinition('monolog.logger')->addAutowiringType('Psr\Log\LoggerInterface');
-            }
 
             $handlers = array();
 
@@ -108,6 +108,18 @@ class MonologExtension extends Extension
         }
 
         $container->setParameter('monolog.additional_channels', isset($config['channels']) ? $config['channels'] : array());
+
+        if (method_exists($container, 'registerForAutoconfiguration')) {
+            if (interface_exists(ProcessorInterface::class)) {
+                $container->registerForAutoconfiguration(ProcessorInterface::class)
+                    ->addTag('monolog.processor');
+            } else {
+                $container->registerForAutoconfiguration(WebProcessor::class)
+                    ->addTag('monolog.processor');
+            }
+            $container->registerForAutoconfiguration(TokenProcessor::class)
+                ->addTag('monolog.processor');
+        }
     }
 
     /**
@@ -131,15 +143,24 @@ class MonologExtension extends Extension
         if ('service' === $handler['type']) {
             $container->setAlias($handlerId, $handler['id']);
 
+            if (!empty($handler['nested']) && true === $handler['nested']) {
+                $this->markNestedHandler($handlerId);
+            }
+
             return $handlerId;
         }
 
-        $definition = new Definition($this->getHandlerClassByType($handler['type']));
+        $handlerClass = $this->getHandlerClassByType($handler['type']);
+        $definition = new Definition($handlerClass);
 
         $handler['level'] = $this->levelToMonologConst($handler['level']);
 
         if ($handler['include_stacktraces']) {
             $definition->setConfigurator(array('Symfony\\Bundle\\MonologBundle\\MonologBundle', 'includeStacktraces'));
+        }
+
+        if (null === $handler['process_psr_3_messages']) {
+            $handler['process_psr_3_messages'] = !isset($handler['handler']) && !$handler['members'];
         }
 
         if ($handler['process_psr_3_messages']) {
@@ -160,6 +181,7 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
                 $handler['file_permission'],
+                $handler['use_locking'],
             ));
             break;
 
@@ -168,6 +190,7 @@ class MonologExtension extends Extension
                 null,
                 $handler['bubble'],
                 isset($handler['verbosity_levels']) ? $handler['verbosity_levels'] : array(),
+                $handler['console_formater_options']
             ));
             $definition->addTag('kernel.event_subscriber');
             break;
@@ -283,6 +306,43 @@ class MonologExtension extends Extension
                 $handler['bubble'],
             ));
             break;
+        case 'redis':
+        case 'predis':
+            if (isset($handler['redis']['id'])) {
+                $clientId = $handler['redis']['id'];
+            } elseif ('redis' === $handler['type']) {
+                if (!class_exists(\Redis::class)) {
+                    throw new \RuntimeException('The \Redis class is not available.');
+                }
+
+                $client = new Definition(\Redis::class);
+                $client->addMethodCall('connect', array($handler['redis']['host'], $handler['redis']['port']));
+                $client->addMethodCall('auth', array($handler['redis']['password']));
+                $client->addMethodCall('select', array($handler['redis']['database']));
+                $client->setPublic(false);
+                $clientId = uniqid('monolog.redis.client.', true);
+                $container->setDefinition($clientId, $client);
+            } else {
+                if (!class_exists(\Predis\Client::class)) {
+                    throw new \RuntimeException('The \Predis\Client class is not available.');
+                }
+
+                $client = new Definition(\Predis\Client::class);
+                $client->setArguments(array(
+                    $handler['redis']['host'],
+                ));
+                $client->setPublic(false);
+
+                $clientId = uniqid('monolog.predis.client.', true);
+                $container->setDefinition($clientId, $client);
+            }
+            $definition->setArguments(array(
+                new Reference($clientId),
+                $handler['redis']['key_name'],
+                $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
 
         case 'chromephp':
             $definition->setArguments(array(
@@ -317,6 +377,9 @@ class MonologExtension extends Extension
             if (isset($handler['activation_strategy'])) {
                 $activation = new Reference($handler['activation_strategy']);
             } elseif (!empty($handler['excluded_404s'])) {
+                if (class_exists(HttpCodeActivationStrategy::class)) {
+                    @trigger_error('The "excluded_404s" option is deprecated in MonologBundle since version 3.4.0, you should rely on the "excluded_http_codes" option instead.', E_USER_DEPRECATED);
+                }
                 $activationDef = new Definition('Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy', array(
                     new Reference('request_stack'),
                     $handler['excluded_404s'],
@@ -428,6 +491,9 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            if ($handler['ident']) {
+                $definition->addArgument($handler['ident']);
+            }
             break;
 
         case 'swift_mailer':
@@ -474,6 +540,9 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
+            if (!empty($handler['headers'])) {
+                $definition->addMethodCall('addHeader', [$handler['headers']]);
+            }
             break;
 
         case 'socket':
@@ -605,7 +674,10 @@ class MonologExtension extends Extension
             } else {
                 $client = new Definition('Raven_Client', array(
                     $handler['dsn'],
-                    array('auto_log_stacks' => $handler['auto_log_stacks'])
+                    array(
+                        'auto_log_stacks' => $handler['auto_log_stacks'],
+                        'environment' => $handler['environment']
+                    )
                 ));
                 $client->setPublic(false);
                 $clientId = 'monolog.raven.client.'.sha1($handler['dsn']);
@@ -718,7 +790,12 @@ class MonologExtension extends Extension
             break;
 
         default:
-            throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"', $handler['type'], $name));
+            $nullWarning = '';
+            if ($handler['type'] == '') {
+                $nullWarning = ', if you meant to define a null handler in a yaml config, make sure you quote "null" so it does not get converted to a php null';
+            }
+
+            throw new \InvalidArgumentException(sprintf('Invalid handler type "%s" given for handler "%s"' . $nullWarning, $handler['type'], $name));
         }
 
         if (!empty($handler['nested']) && true === $handler['nested']) {
@@ -728,6 +805,11 @@ class MonologExtension extends Extension
         if (!empty($handler['formatter'])) {
             $definition->addMethodCall('setFormatter', array(new Reference($handler['formatter'])));
         }
+
+        if (!in_array($handlerId, $this->nestedHandlers) && is_subclass_of($handlerClass, ResettableInterface::class)) {
+            $definition->addTag('kernel.reset', array('method' => 'reset'));
+        }
+
         $container->setDefinition($handlerId, $definition);
 
         return $handlerId;
@@ -788,6 +870,8 @@ class MonologExtension extends Extension
             'mongo' => 'Monolog\Handler\MongoDBHandler',
             'elasticsearch' => 'Monolog\Handler\ElasticSearchHandler',
             'server_log' => 'Symfony\Bridge\Monolog\Handler\ServerLogHandler',
+            'redis' => 'Monolog\Handler\RedisHandler',
+            'predis' => 'Monolog\Handler\RedisHandler',
         );
 
         if (!isset($typeToClassMapping[$handlerType])) {

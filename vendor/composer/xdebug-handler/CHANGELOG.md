@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [1.3.3] - 2019-05-27
+  * Fixed: add environment changes to `$_ENV` if it is being used.
+
+## [1.3.2] - 2019-01-28
+  * Fixed: exit call being blocked by uopz extension, resulting in application code running twice.
+
+## [1.3.1] - 2018-11-29
+  * Fixed: fail restart if `passthru` has been disabled in `disable_functions`.
+  * Fixed: fail restart if an ini file cannot be opened, otherwise settings will be missing.
+
+## [1.3.0] - 2018-08-31
+  * Added: `setPersistent` method to use environment variables for the restart.
+  * Fixed: improved debugging by writing output to stderr.
+  * Fixed: no restart when `php_ini_scanned_files` is not functional and is needed.
+
 ## [1.2.1] - 2018-08-23
   * Fixed: fatal error with apc, when using `apc.mmap_file_mask`.
 
@@ -33,7 +48,11 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.2.1...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.3.3...HEAD
+[1.3.3]: https://github.com/composer/xdebug-handler/compare/1.3.2...1.3.3
+[1.3.2]: https://github.com/composer/xdebug-handler/compare/1.3.1...1.3.2
+[1.3.1]: https://github.com/composer/xdebug-handler/compare/1.3.0...1.3.1
+[1.3.0]: https://github.com/composer/xdebug-handler/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/composer/xdebug-handler/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/composer/xdebug-handler/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/composer/xdebug-handler/compare/1.0.0...1.1.0

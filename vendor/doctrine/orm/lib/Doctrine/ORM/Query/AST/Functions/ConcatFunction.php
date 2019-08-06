@@ -35,46 +35,48 @@ use Doctrine\ORM\Query\Lexer;
 class ConcatFunction extends FunctionNode
 {
     public $firstStringPrimary;
-    
+
     public $secondStringPrimary;
-    
-    public $concatExpressions = array();
-    
+
+    public $concatExpressions = [];
+
     /**
      * @override
+     * @inheritdoc
      */
     public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
     {
         $platform = $sqlWalker->getConnection()->getDatabasePlatform();
-        
-        $args = array();
-        
+
+        $args = [];
+
         foreach ($this->concatExpressions as $expression) {
             $args[] = $sqlWalker->walkStringPrimary($expression);
         }
-        
-        return call_user_func_array(array($platform,'getConcatExpression'), $args);
+
+        return call_user_func_array([$platform,'getConcatExpression'], $args);
     }
 
     /**
      * @override
+     * @inheritdoc
      */
     public function parse(\Doctrine\ORM\Query\Parser $parser)
     {
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
-        
+
         $this->firstStringPrimary = $parser->StringPrimary();
         $this->concatExpressions[] = $this->firstStringPrimary;
-        
+
         $parser->match(Lexer::T_COMMA);
-        
+
         $this->secondStringPrimary = $parser->StringPrimary();
         $this->concatExpressions[] = $this->secondStringPrimary;
-        
+
         while ($parser->getLexer()->isNextToken(Lexer::T_COMMA)) {
- 		    $parser->match(Lexer::T_COMMA);
-	        $this->concatExpressions[] = $parser->StringPrimary();
+            $parser->match(Lexer::T_COMMA);
+            $this->concatExpressions[] = $parser->StringPrimary();
         }
 
         $parser->match(Lexer::T_CLOSE_PARENTHESIS);

@@ -1,21 +1,4 @@
 <?php
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
 
 namespace Doctrine\Common\DataFixtures;
 
@@ -33,14 +16,14 @@ class Loader
      *
      * @var array
      */
-    private $fixtures = array();
+    private $fixtures = [];
 
     /**
      * Array of ordered fixture object instances.
      *
      * @var array
      */
-    private $orderedFixtures = array();
+    private $orderedFixtures = [];
 
     /**
      * Determines if we must order fixtures by number
@@ -94,7 +77,7 @@ class Loader
             throw new \InvalidArgumentException(sprintf('"%s" does not exist or is not readable', $fileName));
         }
 
-        $iterator = new \ArrayIterator(array(new \SplFileInfo($fileName)));
+        $iterator = new \ArrayIterator([new \SplFileInfo($fileName)]);
         return $this->loadFromIterator($iterator);
     }
 
@@ -153,7 +136,7 @@ class Loader
                 $this->orderFixturesByDependencies = true;
                 foreach($fixture->getDependencies() as $class) {
                     if (class_exists($class)) {
-                        $this->addFixture(new $class);
+                        $this->addFixture($this->createFixture($class));
                     }
                 }
             }
@@ -167,7 +150,7 @@ class Loader
      */
     public function getFixtures()
     {
-        $this->orderedFixtures = array();
+        $this->orderedFixtures = [];
 
         if ($this->orderFixturesByNumber) {
             $this->orderFixturesByNumber();
@@ -196,7 +179,18 @@ class Loader
         if ($rc->isAbstract()) return true;
 
         $interfaces = class_implements($className);
-        return in_array('Doctrine\Common\DataFixtures\FixtureInterface', $interfaces) ? false : true;
+        return in_array(FixtureInterface::class, $interfaces) ? false : true;
+    }
+
+    /**
+     * Creates the fixture object from the class.
+     *
+     * @param string $class
+     * @return FixtureInterface
+     */
+    protected function createFixture($class)
+    {
+        return new $class();
     }
 
     /**
@@ -231,7 +225,7 @@ class Loader
      */
     private function orderFixturesByDependencies()
     {
-        $sequenceForClasses = array();
+        $sequenceForClasses = [];
 
         // If fixtures were already ordered by number then we need 
         // to remove classes which are not instances of OrderedFixtureInterface
@@ -294,7 +288,7 @@ class Loader
             $lastCount = $count;
         }
 
-        $orderedFixtures = array();
+        $orderedFixtures = [];
         
         // If there're fixtures unsequenced left and they couldn't be sequenced, 
         // it means we have a circular reference
@@ -333,7 +327,7 @@ class Loader
 
     private function getUnsequencedClasses($sequences, $classes = null)
     {
-        $unsequencedClasses = array();
+        $unsequencedClasses = [];
 
         if (is_null($classes)) {
             $classes = array_keys($sequences);
@@ -356,7 +350,7 @@ class Loader
      */
     private function loadFromIterator(\Iterator $iterator)
     {
-        $includedFiles = array();
+        $includedFiles = [];
         foreach ($iterator as $file) {
             if (($fileName = $file->getBasename($this->fileExtension)) == $file->getBasename()) {
                 continue;
@@ -366,7 +360,7 @@ class Loader
             $includedFiles[] = $sourceFile;
         }
 
-        $fixtures = array();
+        $fixtures = [];
         $declared = get_declared_classes();
         // Make the declared classes order deterministic
         sort($declared);
@@ -376,7 +370,7 @@ class Loader
             $sourceFile = $reflClass->getFileName();
 
             if (in_array($sourceFile, $includedFiles) && ! $this->isTransient($className)) {
-                $fixture = new $className;
+                $fixture = $this->createFixture($className);
                 $fixtures[] = $fixture;
                 $this->addFixture($fixture);
             }

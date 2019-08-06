@@ -11,6 +11,7 @@
 
 namespace Sensio\Bundle\FrameworkExtraBundle\Tests\EventListener;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Sensio\Bundle\FrameworkExtraBundle\EventListener\ControllerListener;
 use Sensio\Bundle\FrameworkExtraBundle\Tests\EventListener\Fixture\FooControllerCacheAtClass;
@@ -19,8 +20,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Tests\EventListener\Fixture\FooController
 use Sensio\Bundle\FrameworkExtraBundle\Tests\EventListener\Fixture\FooControllerMultipleCacheAtClass;
 use Sensio\Bundle\FrameworkExtraBundle\Tests\EventListener\Fixture\FooControllerMultipleCacheAtMethod;
 use Sensio\Bundle\FrameworkExtraBundle\Tests\EventListener\Fixture\FooControllerParamConverterAtClassAndMethod;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -117,7 +118,7 @@ class ControllerListenerTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf('Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter', $annotations[1]);
         $this->assertEquals('test2', $annotations[1]->getName());
 
-        $this->assertEquals(2, count($annotations));
+        $this->assertCount(2, $annotations);
     }
 
     private function createRequest(Cache $cache = null)
@@ -131,7 +132,9 @@ class ControllerListenerTest extends \PHPUnit\Framework\TestCase
     {
         $mockKernel = $this->getMockForAbstractClass('Symfony\Component\HttpKernel\Kernel', ['', '']);
 
-        return new FilterControllerEvent($mockKernel, $controller, $request, HttpKernelInterface::MASTER_REQUEST);
+        $eventClass = class_exists(ControllerEvent::class) ? ControllerEvent::class : FilterControllerEvent::class;
+
+        return new $eventClass($mockKernel, $controller, $request, HttpKernelInterface::MASTER_REQUEST);
     }
 
     private function getReadedCache()

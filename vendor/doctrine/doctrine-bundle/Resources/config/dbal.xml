@@ -30,6 +30,7 @@
         </service>
 
         <service id="doctrine.dbal.logger.profiling" class="%doctrine.dbal.logger.profiling.class%" public="false" abstract="true" />
+        <service id="doctrine.dbal.logger.backtrace" class="Doctrine\Bundle\DoctrineBundle\Dbal\Logging\BacktraceLogger" public="false" abstract="true" />
 
         <service id="doctrine.dbal.logger" class="%doctrine.dbal.logger.class%" public="false">
             <tag name="monolog.logger" channel="doctrine" />
@@ -70,12 +71,20 @@
             <tag name="twig.extension" />
         </service>
 
+        <service id="doctrine.dbal.schema_asset_filter_manager" class="Doctrine\Bundle\DoctrineBundle\Dbal\SchemaAssetsFilterManager" public="false" abstract="true">
+            <!-- schema assets filters -->
+        </service>
+
         <!-- commands -->
         <service id="doctrine.database_create_command" class="Doctrine\Bundle\DoctrineBundle\Command\CreateDatabaseDoctrineCommand">
+            <argument type="service" id="doctrine" />
+
             <tag name="console.command" command="doctrine:database:create" />
         </service>
 
         <service id="doctrine.database_drop_command" class="Doctrine\Bundle\DoctrineBundle\Command\DropDatabaseDoctrineCommand">
+            <argument type="service" id="doctrine" />
+
             <tag name="console.command" command="doctrine:database:drop" />
         </service>
 
@@ -83,8 +92,8 @@
             <tag name="console.command" command="doctrine:generate:entities" />
         </service>
 
-        <service id="doctrine.mapping_import_command" class="Doctrine\Bundle\DoctrineBundle\Command\ImportMappingDoctrineCommand">
-            <tag name="console.command" command="doctrine:mapping:import" />
+        <service id="doctrine.query_sql_command" class="Doctrine\Bundle\DoctrineBundle\Command\Proxy\RunSqlDoctrineCommand">
+            <tag name="console.command" command="doctrine:query:sql" />
         </service>
 
     </services>

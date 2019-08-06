@@ -11,6 +11,7 @@
 
 namespace Sensio\Bundle\FrameworkExtraBundle\Tests\Request\ParamConverter;
 
+use Doctrine\DBAL\Types\ConversionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
@@ -56,20 +57,20 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         if (null !== $options) {
             $config->expects($this->once())
                    ->method('getOptions')
-                   ->will($this->returnValue($options));
+                   ->willReturn($options);
         }
         if (null !== $class) {
             $config->expects($this->any())
                    ->method('getClass')
-                   ->will($this->returnValue($class));
+                   ->willReturn($class);
         }
         $config->expects($this->any())
                ->method('getName')
-               ->will($this->returnValue($name));
+               ->willReturn($name);
         if (null !== $isOptional) {
             $config->expects($this->any())
                    ->method('isOptional')
-                   ->will($this->returnValue($isOptional));
+                   ->willReturn($isOptional);
         }
 
         return $config;
@@ -110,7 +111,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $manager->expects($this->once())
             ->method('getClassMetadata')
             ->with('stdClass')
-            ->will($this->returnValue($classMetadata));
+            ->willReturn($classMetadata);
 
         $manager->expects($this->never())
             ->method('getRepository');
@@ -118,12 +119,12 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $this->registry->expects($this->once())
             ->method('getManagerForClass')
             ->with('stdClass')
-            ->will($this->returnValue($manager));
+            ->willReturn($manager);
 
         $classMetadata->expects($this->once())
             ->method('hasField')
             ->with($this->equalTo('arg'))
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->converter->apply($request, $config);
 
@@ -145,22 +146,52 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $this->registry->expects($this->once())
               ->method('getManagerForClass')
               ->with('stdClass')
-              ->will($this->returnValue($manager));
+              ->willReturn($manager);
 
         $manager->expects($this->once())
             ->method('getRepository')
             ->with('stdClass')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         $objectRepository->expects($this->once())
                       ->method('find')
                       ->with($this->equalTo($id))
-                      ->will($this->returnValue($object = new \stdClass()));
+                      ->willReturn($object = new \stdClass());
 
         $ret = $this->converter->apply($request, $config);
 
         $this->assertTrue($ret);
         $this->assertSame($object, $request->attributes->get('arg'));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function testApplyWithConversionFailedException()
+    {
+        $request = new Request();
+        $request->attributes->set('id', 'test');
+
+        $config = $this->createConfiguration('stdClass', ['id' => 'id'], 'arg');
+
+        $manager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')->getMock();
+        $objectRepository = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectRepository')->getMock();
+        $this->registry->expects($this->once())
+              ->method('getManagerForClass')
+              ->with('stdClass')
+              ->willReturn($manager);
+
+        $manager->expects($this->once())
+            ->method('getRepository')
+            ->with('stdClass')
+            ->willReturn($objectRepository);
+
+        $objectRepository->expects($this->once())
+                      ->method('find')
+                      ->with($this->equalTo('test'))
+                      ->will($this->throwException(new ConversionException()));
+
+        $this->converter->apply($request, $config);
     }
 
     public function testUsedProperIdentifier()
@@ -199,13 +230,13 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $manager->expects($this->once())
             ->method('getClassMetadata')
             ->with('stdClass')
-            ->will($this->returnValue($classMetadata));
+            ->willReturn($classMetadata);
 
         $objectRepository = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectRepository')->getMock();
         $this->registry->expects($this->once())
               ->method('getManagerForClass')
               ->with('stdClass')
-              ->will($this->returnValue($manager));
+              ->willReturn($manager);
 
         $manager->expects($this->never())->method('getRepository');
 
@@ -237,26 +268,26 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $this->registry->expects($this->once())
                 ->method('getManagerForClass')
                 ->with('stdClass')
-                ->will($this->returnValue($manager));
+                ->willReturn($manager);
 
         $manager->expects($this->once())
                 ->method('getClassMetadata')
                 ->with('stdClass')
-                ->will($this->returnValue($metadata));
+                ->willReturn($metadata);
         $manager->expects($this->once())
                 ->method('getRepository')
                 ->with('stdClass')
-                ->will($this->returnValue($repository));
+                ->willReturn($repository);
 
         $metadata->expects($this->once())
                  ->method('hasField')
                  ->with($this->equalTo('Foo'))
-                 ->will($this->returnValue(true));
+                 ->willReturn(true);
 
         $repository->expects($this->once())
                       ->method('findOneBy')
                       ->with($this->equalTo(['Foo' => 1]))
-                      ->will($this->returnValue($object = new \stdClass()));
+                      ->willReturn($object = new \stdClass());
 
         $ret = $this->converter->apply($request, $config);
 
@@ -283,14 +314,14 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $manager->expects($this->once())
             ->method('getRepository')
             ->with('stdClass')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
         $this->registry->expects($this->once())
                       ->method('getManagerForClass')
-                      ->will($this->returnValue($manager));
+                      ->willReturn($manager);
 
         $objectRepository->expects($this->once())
                       ->method('getClassName')
-                      ->will($this->returnValue($className = 'ObjectRepository'));
+                      ->willReturn($className = 'ObjectRepository');
 
         $ret = $this->converter->apply($request, $config);
 
@@ -319,28 +350,28 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $objectManager->expects($this->once())
             ->method('getRepository')
             ->with('stdClass')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         $this->registry->expects($this->once())
                     ->method('getManagerForClass')
-                    ->will($this->returnValue($objectManager));
+                    ->willReturn($objectManager);
 
         $metadata->expects($this->once())
                  ->method('hasField')
                  ->with($this->equalTo('Foo'))
-                 ->will($this->returnValue(true));
+                 ->willReturn(true);
 
         $objectManager->expects($this->once())
                       ->method('getClassMetadata')
-                      ->will($this->returnValue($metadata));
+                      ->willReturn($metadata);
         $objectManager->expects($this->once())
             ->method('getRepository')
             ->with('stdClass')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         $objectRepository->expects($this->once())
                       ->method('getClassName')
-                      ->will($this->returnValue($className = 'ObjectRepository'));
+                      ->willReturn($className = 'ObjectRepository');
 
         $ret = $this->converter->apply($request, $config);
 
@@ -374,15 +405,15 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $objectManager->expects($this->once())
             ->method('getRepository')
             ->with('stdClass')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         $this->registry->expects($this->once())
             ->method('getManagerForClass')
-            ->will($this->returnValue($objectManager));
+            ->willReturn($objectManager);
 
         $objectManager->expects($this->once())
             ->method('getClassMetadata')
-            ->will($this->returnValue($metadata));
+            ->willReturn($metadata);
 
         $ret = $this->converter->apply($request, $config);
 
@@ -418,15 +449,15 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $objectManager->expects($this->once())
             ->method('getRepository')
             ->with('stdClass')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         $this->registry->expects($this->once())
             ->method('getManagerForClass')
-            ->will($this->returnValue($objectManager));
+            ->willReturn($objectManager);
 
         $objectManager->expects($this->once())
             ->method('getClassMetadata')
-            ->will($this->returnValue($metadata));
+            ->willReturn($metadata);
 
         $this->converter->apply($request, $config);
     }
@@ -438,21 +469,21 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $metadataFactory->expects($this->once())
                         ->method('isTransient')
                         ->with($this->equalTo('stdClass'))
-                        ->will($this->returnValue(false));
+                        ->willReturn(false);
 
         $objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')->getMock();
         $objectManager->expects($this->once())
                       ->method('getMetadataFactory')
-                      ->will($this->returnValue($metadataFactory));
+                      ->willReturn($metadataFactory);
 
         $this->registry->expects($this->any())
                     ->method('getManagerNames')
-                    ->will($this->returnValue(['default']));
+                    ->willReturn(['default']);
 
         $this->registry->expects($this->once())
                       ->method('getManagerForClass')
                       ->with('stdClass')
-                      ->will($this->returnValue($objectManager));
+                      ->willReturn($objectManager);
 
         $ret = $this->converter->supports($config);
 
@@ -466,21 +497,21 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
         $metadataFactory->expects($this->once())
                         ->method('isTransient')
                         ->with($this->equalTo('stdClass'))
-                        ->will($this->returnValue(false));
+                        ->willReturn(false);
 
         $objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')->getMock();
         $objectManager->expects($this->once())
                       ->method('getMetadataFactory')
-                      ->will($this->returnValue($metadataFactory));
+                      ->willReturn($metadataFactory);
 
         $this->registry->expects($this->once())
                     ->method('getManagerNames')
-                    ->will($this->returnValue(['default']));
+                    ->willReturn(['default']);
 
         $this->registry->expects($this->once())
                       ->method('getManager')
                       ->with('foo')
-                      ->will($this->returnValue($objectManager));
+                      ->willReturn($objectManager);
 
         $ret = $this->converter->supports($config);
 
@@ -497,7 +528,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
 
         $this->registry->expects($this->any())
             ->method('getManagerNames')
-            ->will($this->returnValue(['default']));
+            ->willReturn(['default']);
 
         $this->registry->expects($this->never())
                       ->method('getManager');
@@ -544,7 +575,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
 
         $objectManager->expects($this->once())
             ->method('getRepository')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         // find should not be attempted on this repository as a fallback
         $objectRepository->expects($this->never())
@@ -552,11 +583,11 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
 
         $this->registry->expects($this->once())
             ->method('getManagerForClass')
-            ->will($this->returnValue($objectManager));
+            ->willReturn($objectManager);
 
         $this->language->expects($this->once())
             ->method('evaluate')
-            ->will($this->returnValue(null));
+            ->willReturn(null);
 
         $this->converter->apply($request, $config);
     }
@@ -578,7 +609,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
 
         $objectManager->expects($this->once())
             ->method('getRepository')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         // find should not be attempted on this repository as a fallback
         $objectRepository->expects($this->never())
@@ -586,7 +617,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
 
         $this->registry->expects($this->once())
             ->method('getManagerForClass')
-            ->will($this->returnValue($objectManager));
+            ->willReturn($objectManager);
 
         $this->language->expects($this->once())
             ->method('evaluate')
@@ -594,7 +625,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
                 'repository' => $objectRepository,
                 'id' => 5,
             ])
-            ->will($this->returnValue('new_mapped_value'));
+            ->willReturn('new_mapped_value');
 
         $this->converter->apply($request, $config);
         $this->assertEquals('new_mapped_value', $request->attributes->get('arg1'));
@@ -620,7 +651,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
 
         $objectManager->expects($this->once())
             ->method('getRepository')
-            ->will($this->returnValue($objectRepository));
+            ->willReturn($objectRepository);
 
         // find should not be attempted on this repository as a fallback
         $objectRepository->expects($this->never())
@@ -628,7 +659,7 @@ class DoctrineParamConverterTest extends \PHPUnit\Framework\TestCase
 
         $this->registry->expects($this->once())
             ->method('getManagerForClass')
-            ->will($this->returnValue($objectManager));
+            ->willReturn($objectManager);
 
         $this->language->expects($this->once())
             ->method('evaluate')

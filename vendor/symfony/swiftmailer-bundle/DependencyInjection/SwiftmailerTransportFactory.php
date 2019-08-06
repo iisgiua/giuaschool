@@ -33,19 +33,21 @@ class SwiftmailerTransportFactory
     {
         $options = static::resolveOptions($options);
 
+        self::validateConfig($options);
         if ('smtp' === $options['transport']) {
-            $smtpAuthHandler = new \Swift_Transport_Esmtp_AuthHandler(array(
+            $smtpAuthHandler = new \Swift_Transport_Esmtp_AuthHandler([
                 new \Swift_Transport_Esmtp_Auth_CramMd5Authenticator(),
                 new \Swift_Transport_Esmtp_Auth_LoginAuthenticator(),
                 new \Swift_Transport_Esmtp_Auth_PlainAuthenticator(),
-            ));
+                new \Swift_Transport_Esmtp_Auth_NTLMAuthenticator(),
+            ]);
             $smtpAuthHandler->setUsername($options['username']);
             $smtpAuthHandler->setPassword($options['password']);
             $smtpAuthHandler->setAuthMode($options['auth_mode']);
 
             $transport = new \Swift_Transport_EsmtpTransport(
                 new \Swift_Transport_StreamBuffer(new \Swift_StreamFilters_StringReplacementFilterFactory()),
-                array($smtpAuthHandler),
+                [$smtpAuthHandler],
                 $eventDispatcher
             );
             $transport->setHost($options['host']);
@@ -54,7 +56,7 @@ class SwiftmailerTransportFactory
             $transport->setTimeout($options['timeout']);
             $transport->setSourceIp($options['source_ip']);
 
-            $smtpTransportConfigurator = new SmtpTransportConfigurator(null, $requestContext);
+            $smtpTransportConfigurator = new SmtpTransportConfigurator($options['local_domain'], $requestContext);
             $smtpTransportConfigurator->configure($transport);
         } elseif ('sendmail' === $options['transport']) {
             $transport = new \Swift_Transport_SendmailTransport(
@@ -62,10 +64,10 @@ class SwiftmailerTransportFactory
                 $eventDispatcher
             );
 
-            $smtpTransportConfigurator = new SmtpTransportConfigurator(null, $requestContext);
+            $transport->setCommand($options['command']);
+
+            $smtpTransportConfigurator = new SmtpTransportConfigurator($options['local_domain'], $requestContext);
             $smtpTransportConfigurator->configure($transport);
-        } elseif ('mail' === $options['transport']) {
-            $transport = new \Swift_Transport_MailTransport(new \Swift_Transport_SimpleMailInvoker(), $eventDispatcher);
         } elseif ('null' === $options['transport']) {
             $transport = new \Swift_Transport_NullTransport($eventDispatcher);
         } else {
@@ -82,7 +84,7 @@ class SwiftmailerTransportFactory
      */
     public static function resolveOptions(array $options)
     {
-        $options += array(
+        $options += [
             'transport' => null,
             'username' => null,
             'password' => null,
@@ -93,21 +95,24 @@ class SwiftmailerTransportFactory
             'local_domain' => null,
             'encryption' => null,
             'auth_mode' => null,
-        );
+            'command' => null,
+        ];
 
         if (isset($options['url'])) {
-            $parts = parse_url($options['url']);
+            if (false === $parts = parse_url($options['url'])) {
+                throw new \InvalidArgumentException(sprintf('The Swiftmailer URL "%s" is not valid.', $options['url']));
+            }
             if (isset($parts['scheme'])) {
                 $options['transport'] = $parts['scheme'];
             }
             if (isset($parts['user'])) {
-                $options['username'] = $parts['user'];
+                $options['username'] = rawurldecode($parts['user']);
             }
             if (isset($parts['pass'])) {
-                $options['password'] = $parts['pass'];
+                $options['password'] = rawurldecode($parts['pass']);
             }
             if (isset($parts['host'])) {
-                $options['host'] = $parts['host'];
+                $options['host'] = rawurldecode($parts['host']);
             }
             if (isset($parts['port'])) {
                 $options['port'] = $parts['port'];
@@ -115,7 +120,7 @@ class SwiftmailerTransportFactory
             if (isset($parts['query'])) {
                 parse_str($parts['query'], $query);
                 foreach ($options as $key => $value) {
-                    if (isset($query[$key])) {
+                    if (isset($query[$key]) && '' != $query[$key]) {
                         $options[$key] = $query[$key];
                     }
                 }
@@ -136,5 +141,19 @@ class SwiftmailerTransportFactory
         }
 
         return $options;
+    }
+
+    /**
+     * @throws \InvalidArgumentException if the encryption is not valid
+     */
+    public static function validateConfig($options)
+    {
+        if (!\in_array($options['encryption'], ['tls', 'ssl', null], true)) {
+            throw new \InvalidArgumentException(sprintf('The %s encryption is not supported', $options['encryption']));
+        }
+
+        if (!\in_array($options['auth_mode'], ['plain', 'login', 'cram-md5', 'ntlm', null], true)) {
+            throw new \InvalidArgumentException(sprintf('The %s authentication mode is not supported', $options['auth_mode']));
+        }
     }
 }

@@ -33,25 +33,25 @@ class AttachEntityListenersListener
     /**
      * @var array[]
      */
-    private $entityListeners = array();
+    private $entityListeners = [];
 
     /**
      * Adds a entity listener for a specific entity.
      *
-     * @param string $entityClass           The entity to attach the listener.
-     * @param string $listenerClass         The listener class.
-     * @param string $eventName             The entity lifecycle event.
-     * @param string $listenerCallback|null The listener callback method or NULL to use $eventName.
+     * @param string      $entityClass      The entity to attach the listener.
+     * @param string      $listenerClass    The listener class.
+     * @param string      $eventName        The entity lifecycle event.
+     * @param string|null $listenerCallback The listener callback method or NULL to use $eventName.
      *
      * @return void
      */
     public function addEntityListener($entityClass, $listenerClass, $eventName, $listenerCallback = null)
     {
-        $this->entityListeners[ltrim($entityClass, '\\')][] = array(
+        $this->entityListeners[ltrim($entityClass, '\\')][] = [
             'event'  => $eventName,
             'class'  => $listenerClass,
             'method' => $listenerCallback ?: $eventName
-        );
+        ];
     }
 
     /**

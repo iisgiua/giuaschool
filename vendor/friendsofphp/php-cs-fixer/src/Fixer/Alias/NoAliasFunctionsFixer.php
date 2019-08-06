@@ -19,7 +19,7 @@ use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
 use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
-use PhpCsFixer\Tokenizer\CT;
+use PhpCsFixer\Tokenizer\Analyzer\FunctionsAnalyzer;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 
@@ -38,6 +38,7 @@ final class NoAliasFunctionsFixer extends AbstractFixer implements Configuration
         'close' => 'closedir',
         'doubleval' => 'floatval',
         'fputs' => 'fwrite',
+        'get_required_files' => 'get_included_files',
         'ini_alter' => 'ini_set',
         'is_double' => 'is_float',
         'is_integer' => 'is_int',
@@ -51,6 +52,7 @@ final class NoAliasFunctionsFixer extends AbstractFixer implements Configuration
         'show_source' => 'highlight_file',
         'sizeof' => 'count',
         'strchr' => 'strstr',
+        'user_error' => 'trigger_error',
     ];
 
     /** @var array<string, string> stores alias (key) - master (value) functions mapping */
@@ -79,6 +81,7 @@ final class NoAliasFunctionsFixer extends AbstractFixer implements Configuration
         'mbereg_search_setpos' => 'mb_ereg_search_setpos',
         'mberegi' => 'mb_eregi',
         'mberegi_replace' => 'mb_eregi_replace',
+        'mbregex_encoding' => 'mb_regex_encoding',
         'mbsplit' => 'mb_split',
     ];
 
@@ -114,11 +117,12 @@ final class NoAliasFunctionsFixer extends AbstractFixer implements Configuration
             'Master functions shall be used instead of aliases.',
             [
                 new CodeSample(
-'<?php
+                    '<?php
 $a = chop($b);
 close($b);
 $a = doubleval($b);
 $a = fputs($b, $c);
+$a = get_required_files();
 ini_alter($b, $c);
 $a = is_double($b);
 $a = is_integer($b);
@@ -133,6 +137,7 @@ $a = show_source($filename, true);
 $a = sizeof($b);
 $a = strchr($haystack, $needle);
 $a = imap_header($imap_stream, 1);
+user_error($message);
 mbereg_search_getregs();
 '
                 ),
@@ -170,6 +175,8 @@ mbereg_search_getregs();
      */
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
+        $functionsAnalyzer = new FunctionsAnalyzer();
+
         /** @var \PhpCsFixer\Tokenizer\Token $token */
         foreach ($tokens->findGivenKind(T_STRING) as $index => $token) {
             // check mapping hit
@@ -184,16 +191,7 @@ mbereg_search_getregs();
                 continue;
             }
 
-            // skip expressions which are not function reference
-            $prevTokenIndex = $tokens->getPrevMeaningfulToken($index);
-            $prevToken = $tokens[$prevTokenIndex];
-
-            // handle function reference with namespaces
-            if ($prevToken->isGivenKind(T_NS_SEPARATOR)) {
-                $prevToken = $tokens[$tokens->getPrevMeaningfulToken($prevTokenIndex)];
-            }
-
-            if ($prevToken->isGivenKind([T_DOUBLE_COLON, T_NEW, T_OBJECT_OPERATOR, T_FUNCTION, T_STRING, CT::T_NAMESPACE_OPERATOR, CT::T_RETURN_REF])) {
+            if (!$functionsAnalyzer->isGlobalFunctionCall($tokens, $index)) {
                 continue;
             }
 

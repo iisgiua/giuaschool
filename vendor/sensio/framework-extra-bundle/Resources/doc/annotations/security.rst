@@ -18,7 +18,7 @@ The ``@Security`` and ``@IsGranted`` annotations restrict access on controllers:
          *
          * @Security("is_granted('ROLE_ADMIN') and is_granted('ROLE_FRIENDLY_USER')")
          */
-        public function indexAction()
+        public function index()
         {
             // ...
         }
@@ -34,10 +34,10 @@ on variables passed to the controller::
     /**
      * @Route("/posts/{id}")
      *
-     * @IsGranted("ROLE_ADMIN")
+     * @IsGranted({"ROLE_ADMIN", "ROLE_SYSTEM"})
      * @IsGranted("POST_SHOW", subject="post")
      */
-    public function showAction(Post $post)
+    public function show(Post $post)
     {
     }
 
@@ -59,7 +59,7 @@ You can also control the message and status code::
      *
      * @IsGranted("ROLE_ADMIN", statusCode=404, message="Post not found")
      */
-    public function showAction(Post $post)
+    public function show(Post $post)
     {
     }
 
@@ -72,7 +72,7 @@ allows you to pass an *expression* that can contains custom logic::
     /**
      * @Security("is_granted('ROLE_ADMIN') and is_granted('POST_SHOW', post)")
      */
-    public function showAction(Post $post)
+    public function show(Post $post)
     {
         // ...
     }
@@ -98,7 +98,7 @@ exception instead of
     /**
      * @Security("is_granted('POST_SHOW', post)", statusCode=404)
      */
-    public function showAction(Post $post)
+    public function show(Post $post)
     {
     }
 
@@ -107,7 +107,7 @@ The ``message`` option allows you to customize the exception message::
     /**
      * @Security("is_granted('POST_SHOW', post)", statusCode=404, message="Resource not found.")
      */
-    public function showAction(Post $post)
+    public function show(Post $post)
     {
     }
 

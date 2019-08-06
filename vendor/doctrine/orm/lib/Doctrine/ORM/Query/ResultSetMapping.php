@@ -57,7 +57,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $aliasMap = array();
+    public $aliasMap = [];
 
     /**
      * Maps alias names to related association field names.
@@ -65,7 +65,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $relationMap = array();
+    public $relationMap = [];
 
     /**
      * Maps alias names to parent alias names.
@@ -73,7 +73,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $parentAliasMap = array();
+    public $parentAliasMap = [];
 
     /**
      * Maps column names in the result set to field names for each class.
@@ -81,7 +81,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $fieldMappings = array();
+    public $fieldMappings = [];
 
     /**
      * Maps column names in the result set to the alias/field name to use in the mapped result.
@@ -89,7 +89,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $scalarMappings = array();
+    public $scalarMappings = [];
 
     /**
      * Maps column names in the result set to the alias/field type to use in the mapped result.
@@ -97,7 +97,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $typeMappings = array();
+    public $typeMappings = [];
 
     /**
      * Maps entities in the result set to the alias name to use in the mapped result.
@@ -105,7 +105,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $entityMappings = array();
+    public $entityMappings = [];
 
     /**
      * Maps column names of meta columns (foreign keys, discriminator columns, ...) to field names.
@@ -113,7 +113,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $metaMappings = array();
+    public $metaMappings = [];
 
     /**
      * Maps column names in the result set to the alias they belong to.
@@ -121,7 +121,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $columnOwnerMap = array();
+    public $columnOwnerMap = [];
 
     /**
      * List of columns in the result set that are used as discriminator columns.
@@ -129,7 +129,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $discriminatorColumns = array();
+    public $discriminatorColumns = [];
 
     /**
      * Maps alias names to field names that should be used for indexing.
@@ -137,7 +137,7 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $indexByMap = array();
+    public $indexByMap = [];
 
     /**
      * Map from column names to class names that declare the field the column is mapped to.
@@ -145,34 +145,41 @@ class ResultSetMapping
      * @ignore
      * @var array
      */
-    public $declaringClasses = array();
+    public $declaringClasses = [];
 
     /**
      * This is necessary to hydrate derivate foreign keys correctly.
      *
      * @var array
      */
-    public $isIdentifierColumn = array();
+    public $isIdentifierColumn = [];
 
     /**
      * Maps column names in the result set to field names for each new object expression.
      *
      * @var array
      */
-    public $newObjectMappings = array();
+    public $newObjectMappings = [];
 
     /**
      * Maps metadata parameter names to the metadata attribute.
      *
      * @var array
      */
-    public $metadataParameterMapping = array();
+    public $metadataParameterMapping = [];
+
+    /**
+     * Contains query parameter names to be resolved as discriminator values
+     *
+     * @var array
+     */
+    public $discriminatorParameters = [];
 
     /**
      * Adds an entity result to this ResultSetMapping.
      *
-     * @param string $class            The class name of the entity.
-     * @param string $alias            The alias for the class. The alias must be unique among all entity
+     * @param string      $class       The class name of the entity.
+     * @param string      $alias       The alias for the class. The alias must be unique among all entity
      *                                 results or joined entity results within this ResultSetMapping.
      * @param string|null $resultAlias The result alias with which the entity result should be
      *                                 placed in the result structure.
@@ -389,8 +396,8 @@ class ResultSetMapping
     /**
      * Adds a metadata parameter mappings.
      *
-     * @param mixed $parameter      The parameter name in the SQL result set.
-     * @param string $attribute     The metadata attribute.
+     * @param mixed  $parameter The parameter name in the SQL result set.
+     * @param string $attribute The metadata attribute.
      */
     public function addMetadataParameterMapping($parameter, $attribute)
     {
@@ -451,7 +458,7 @@ class ResultSetMapping
     /**
      * @param string $alias
      *
-     * @return AssociationMapping
+     * @return string
      */
     public function getRelation($alias)
     {
@@ -551,13 +558,15 @@ class ResultSetMapping
     /**
      * Adds a meta column (foreign key or discriminator column) to the result set.
      *
-     * @param string $alias                 The result alias with which the meta result should be placed in the result structure.
-     * @param string $columnName            The name of the column in the SQL result set.
-     * @param string $fieldName             The name of the field on the declaring class.
+     * @param string $alias              The result alias with which the meta result should be placed in the result structure.
+     * @param string $columnName         The name of the column in the SQL result set.
+     * @param string $fieldName          The name of the field on the declaring class.
      * @param bool   $isIdentifierColumn
-     * @param string $type                  The column type
+     * @param string $type               The column type
      *
      * @return ResultSetMapping This ResultSetMapping instance.
+     *
+     * @todo Make all methods of this class require all parameters and not infer anything
      */
     public function addMetaResult($alias, $columnName, $fieldName, $isIdentifierColumn = false, $type = null)
     {

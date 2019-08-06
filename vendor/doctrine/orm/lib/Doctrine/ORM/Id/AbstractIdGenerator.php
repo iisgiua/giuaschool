@@ -26,8 +26,8 @@ abstract class AbstractIdGenerator
     /**
      * Generates an identifier for an entity.
      *
-     * @param EntityManager|EntityManager $em
-     * @param \Doctrine\ORM\Mapping\Entity $entity
+     * @param EntityManager $em
+     * @param object|null $entity
      * @return mixed
      */
     abstract public function generate(EntityManager $em, $entity);

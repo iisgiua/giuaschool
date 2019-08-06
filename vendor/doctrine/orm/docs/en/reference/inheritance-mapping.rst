@@ -125,9 +125,8 @@ Example:
 Things to note:
 
 
--  The @InheritanceType, @DiscriminatorColumn and @DiscriminatorMap
-   must be specified on the topmost class that is part of the mapped
-   entity hierarchy.
+-  The @InheritanceType and @DiscriminatorColumn must be specified 
+   on the topmost class that is part of the mapped entity hierarchy.
 -  The @DiscriminatorMap specifies which values of the
    discriminator column identify a row as being of a certain type. In
    the case above a value of "person" identifies a row as being of
@@ -160,7 +159,7 @@ This strategy is very efficient for querying across all types in
 the hierarchy or for specific types. No table joins are required,
 only a WHERE clause listing the type identifiers. In particular,
 relationships involving types that employ this mapping strategy are
-very performant.
+very performing.
 
 There is a general performance consideration with Single Table
 Inheritance: If the target-entity of a many-to-one or one-to-one 
@@ -455,6 +454,8 @@ Things to note:
 -  This feature is available for all kind of associations. (OneToOne, OneToMany, ManyToOne, ManyToMany)
 -  The association type *CANNOT* be changed.
 -  The override could redefine the joinTables or joinColumns depending on the association type.
+-  The override could redefine inversedBy to reference more than one extended entity.
+-  The override could redefine fetch to modify the fetch strategy of the extended entity.
 
 Attribute Override
 ~~~~~~~~~~~~~~~~~~~~
@@ -492,7 +493,7 @@ Could be used by an entity that extends a mapped superclass to override a field 
          *          column=@Column(
          *              name     = "guest_id",
          *              type     = "integer",
-                        length   = 140
+         *              length   = 140
          *          )
          *      ),
          *      @AttributeOverride(name="name",
@@ -500,7 +501,7 @@ Could be used by an entity that extends a mapped superclass to override a field 
          *              name     = "guest_name",
          *              nullable = false,
          *              unique   = true,
-                        length   = 240
+         *              length   = 240
          *          )
          *      )
          * })

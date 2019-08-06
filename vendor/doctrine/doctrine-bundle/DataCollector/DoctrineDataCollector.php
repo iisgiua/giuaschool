@@ -6,16 +6,15 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\Cache\Logging\CacheLoggerChain;
 use Doctrine\ORM\Cache\Logging\StatisticsCacheLogger;
 use Doctrine\ORM\Configuration;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\SchemaValidator;
-use Doctrine\ORM\Version;
+use Exception;
 use Symfony\Bridge\Doctrine\DataCollector\DoctrineDataCollector as BaseCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * DoctrineDataCollector.
- */
 class DoctrineDataCollector extends BaseCollector
 {
     /** @var ManagerRegistry */
@@ -37,7 +36,7 @@ class DoctrineDataCollector extends BaseCollector
     /**
      * {@inheritdoc}
      */
-    public function collect(Request $request, Response $response, \Exception $exception = null)
+    public function collect(Request $request, Response $response, Exception $exception = null)
     {
         parent::collect($request, $response, $exception);
 
@@ -58,13 +57,14 @@ class DoctrineDataCollector extends BaseCollector
             ],
         ];
 
+        /** @var EntityManager $em */
         foreach ($this->registry->getManagers() as $name => $em) {
             $entities[$name] = [];
             /** @var ClassMetadataFactory $factory */
             $factory   = $em->getMetadataFactory();
             $validator = new SchemaValidator($em);
 
-            /** @var $class \Doctrine\ORM\Mapping\ClassMetadataInfo */
+            /** @var ClassMetadataInfo $class */
             foreach ($factory->getLoadedMetadata() as $class) {
                 if (isset($entities[$name][$class->getName()])) {
                     continue;
@@ -78,10 +78,6 @@ class DoctrineDataCollector extends BaseCollector
                 }
 
                 $errors[$name][$class->getName()] = $classErrors;
-            }
-
-            if (version_compare(Version::VERSION, '2.5.0-DEV') < 0) {
-                continue;
             }
 
             /** @var Configuration $emConfig */
@@ -136,14 +132,11 @@ class DoctrineDataCollector extends BaseCollector
             }
         }
 
-        // HttpKernel < 3.2 compatibility layer
-        if (method_exists($this, 'cloneVar')) {
-            // Might be good idea to replicate this block in doctrine bridge so we can drop this from here after some time.
-            // This code is compatible with such change, because cloneVar is supposed to check if input is already cloned.
-            foreach ($this->data['queries'] as &$queries) {
-                foreach ($queries as &$query) {
-                    $query['params'] = $this->cloneVar($query['params']);
-                }
+        // Might be good idea to replicate this block in doctrine bridge so we can drop this from here after some time.
+        // This code is compatible with such change, because cloneVar is supposed to check if input is already cloned.
+        foreach ($this->data['queries'] as &$queries) {
+            foreach ($queries as &$query) {
+                $query['params'] = $this->cloneVar($query['params']);
             }
         }
 
@@ -224,11 +217,12 @@ class DoctrineDataCollector extends BaseCollector
                 $connectionGroupedQueries[$key]['count']++;
                 $totalExecutionMS += $query['executionMS'];
             }
-            usort($connectionGroupedQueries, function ($a, $b) {
+            usort($connectionGroupedQueries, static function ($a, $b) {
                 if ($a['executionMS'] === $b['executionMS']) {
                     return 0;
                 }
-                return ($a['executionMS'] < $b['executionMS']) ? 1 : -1;
+
+                return $a['executionMS'] < $b['executionMS'] ? 1 : -1;
             });
             $this->groupedQueries[$connection] = $connectionGroupedQueries;
         }
