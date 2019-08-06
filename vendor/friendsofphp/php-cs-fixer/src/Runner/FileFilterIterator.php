@@ -63,7 +63,7 @@ final class FileFilterIterator extends \FilterIterator
             );
         }
 
-        $path = $file->getRealPath();
+        $path = $file->isLink() ? $file->getPathname() : $file->getRealPath();
 
         if (isset($this->visitedElements[$path])) {
             return false;
@@ -75,16 +75,7 @@ final class FileFilterIterator extends \FilterIterator
             return false;
         }
 
-        $content = @FileReader::createSingleton()->read($path);
-        if (false === $content) {
-            $error = error_get_last();
-
-            throw new \RuntimeException(sprintf(
-                'Failed to read content from "%s".%s',
-                $path,
-                $error ? ' '.$error['message'] : ''
-            ));
-        }
+        $content = FileReader::createSingleton()->read($path);
 
         // mark as skipped:
         if (
@@ -114,6 +105,15 @@ final class FileFilterIterator extends \FilterIterator
             return;
         }
 
-        $this->eventDispatcher->dispatch($name, $event);
+        // BC compatibility < Sf 4.3
+        if (
+            !$this->eventDispatcher instanceof \Symfony\Contracts\EventDispatcher\EventDispatcherInterface
+        ) {
+            $this->eventDispatcher->dispatch($name, $event);
+
+            return;
+        }
+
+        $this->eventDispatcher->dispatch($event, $name);
     }
 }

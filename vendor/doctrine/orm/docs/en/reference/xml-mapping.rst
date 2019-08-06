@@ -7,7 +7,7 @@ form of XML documents.
 The XML driver is backed by an XML Schema document that describes
 the structure of a mapping document. The most recent version of the
 XML Schema document is available online at
-`http://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd <http://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd>`_.
+`https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd <https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd>`_.
 In order to point to the latest version of the document of a
 particular stable release branch, just append the release number,
 i.e.: doctrine-mapping-2.0.xsd The most convenient way to work with
@@ -21,7 +21,7 @@ setup for the latest code in trunk.
     <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                       https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+                              https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
         ...
 
@@ -107,7 +107,7 @@ of several common elements:
     <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                              http://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+                              https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
         <entity name="Doctrine\Tests\ORM\Mapping\User" table="cms_users">
 
@@ -321,12 +321,12 @@ Using the simplified definition above Doctrine will use no
 identifier strategy for this entity. That means you have to
 manually set the identifier before calling
 ``EntityManager#persist($entity)``. This is the so called
-``ASSIGNED`` strategy.
+``NONE`` strategy.
 
 If you want to switch the identifier generation strategy you have
 to nest a ``<generator />`` element inside the id-element. This of
 course only works for surrogate keys. For composite keys you always
-have to use the ``ASSIGNED`` strategy.
+have to use the ``NONE`` strategy.
 
 .. code-block:: xml
 
@@ -768,7 +768,7 @@ entity relationship. You can define this in XML with the "association-key" attri
     <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                        http://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+                              https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
          <entity name="Application\Model\ArticleAttribute">
             <id name="article" association-key="true" />

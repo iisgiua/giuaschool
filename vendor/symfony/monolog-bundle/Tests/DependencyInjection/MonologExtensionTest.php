@@ -33,14 +33,14 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.main');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, array('%kernel.logs_dir%/%kernel.environment%.log', \Monolog\Logger::DEBUG, true, null));
+        $this->assertDICConstructorArguments($handler, array('%kernel.logs_dir%/%kernel.environment%.log', \Monolog\Logger::DEBUG, true, null, false));
         $this->assertDICDefinitionMethodCallAt(0, $handler, 'pushProcessor', array(new Reference('monolog.processor.psr_log_message')));
     }
 
     public function testLoadWithCustomValues()
     {
         $container = $this->getContainer(array(array('handlers' => array(
-            'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666')
+            'custom' => array('type' => 'stream', 'path' => '/tmp/symfony.log', 'bubble' => false, 'level' => 'ERROR', 'file_permission' => '0666', 'use_locking' => true)
         ))));
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasDefinition('monolog.handler.custom'));
@@ -51,7 +51,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666));
+        $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, true));
     }
 
     public function testLoadWithNestedHandler()
@@ -71,7 +71,7 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $handler = $container->getDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'Monolog\Handler\StreamHandler');
-        $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666));
+        $this->assertDICConstructorArguments($handler, array('/tmp/symfony.log', \Monolog\Logger::ERROR, false, 0666, false));
     }
 
     public function testLoadWithServiceHandler()
@@ -83,6 +83,31 @@ class MonologExtensionTest extends DependencyInjectionTest
 
         $this->assertTrue($container->hasDefinition('monolog.logger'));
         $this->assertTrue($container->hasAlias('monolog.handler.custom'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        // Custom service handler must be pushed to logger
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
+        $this->assertDICDefinitionMethodCallAt(1, $logger, 'pushHandler', array(new Reference('monolog.handler.custom')));
+
+        $handler = $container->findDefinition('monolog.handler.custom');
+        $this->assertDICDefinitionClass($handler, 'stdClass');
+        $this->assertDICConstructorArguments($handler, array('foo', false));
+    }
+
+    public function testLoadWithNestedServiceHandler()
+    {
+        $container = $this->getContainer(
+            array(array('handlers' => array('custom' => array('type' => 'service', 'id' => 'some.service.id', 'nested' => true)))),
+            array('some.service.id' => new Definition('stdClass', array('foo', false)))
+        );
+
+        $this->assertTrue($container->hasDefinition('monolog.logger'));
+        $this->assertTrue($container->hasAlias('monolog.handler.custom'));
+
+        $logger = $container->getDefinition('monolog.logger');
+        // Nested service handler must not be pushed to logger
+        $this->assertCount(1, $logger->getMethodCalls());
+        $this->assertDICDefinitionMethodCallAt(0, $logger, 'useMicrosecondTimestamps', array('%monolog.use_microseconds%'));
 
         $handler = $container->findDefinition('monolog.handler.custom');
         $this->assertDICDefinitionClass($handler, 'stdClass');
@@ -358,6 +383,7 @@ class MonologExtensionTest extends DependencyInjectionTest
         $this->assertDICDefinitionMethodCallAt(1, $handler, 'setTag', array('foo,bar'));
     }
 
+    /** @group legacy */
     public function testFingersCrossedHandlerWhenExcluded404sAreSpecified()
     {
         $container = $this->getContainer(array(array('handlers' => array(

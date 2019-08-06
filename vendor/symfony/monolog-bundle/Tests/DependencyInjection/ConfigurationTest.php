@@ -324,6 +324,31 @@ class ConfigurationTest extends TestCase
         $this->assertSame(0777, $config['handlers']['bar']['file_permission']);
     }
 
+    public function testWithUseLocking()
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'foo' => array(
+                        'type' => 'stream',
+                        'path' => '/foo',
+                        'use_locking' => false,
+                    ),
+                    'bar' => array(
+                        'type' => 'stream',
+                        'path' => '/bar',
+                        'use_locking' => true,
+                    )
+                )
+            )
+        );
+
+        $config = $this->process($configs);
+
+        $this->assertFalse($config['handlers']['foo']['use_locking']);
+        $this->assertTrue($config['handlers']['bar']['use_locking']);
+    }
+
     public function testWithNestedHandler()
     {
         $configs = array(
@@ -336,6 +361,50 @@ class ConfigurationTest extends TestCase
 
 
         $this->assertTrue($config['handlers']['foobar']['nested']);
+    }
+    public function testWithRedisHandler()
+    {
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'redis' => array(
+                        'type' => 'redis',
+                        'redis' => array(
+                            'host' => '127.0.1.1',
+                            'password' => 'pa$$w0rd',
+                            'port' => 1234,
+                            'database' => 1,
+                            'key_name' => 'monolog_redis_test'
+                        )
+                    )
+                )
+            )
+        );
+        $config = $this->process($configs);
+
+        $this->assertEquals('127.0.1.1', $config['handlers']['redis']['redis']['host']);
+        $this->assertEquals('pa$$w0rd', $config['handlers']['redis']['redis']['password']);
+        $this->assertEquals(1234, $config['handlers']['redis']['redis']['port']);
+        $this->assertEquals(1, $config['handlers']['redis']['redis']['database']);
+        $this->assertEquals('monolog_redis_test', $config['handlers']['redis']['redis']['key_name']);
+
+        $configs = array(
+            array(
+                'handlers' => array(
+                    'redis' => array(
+                        'type' => 'predis',
+                        'redis' => array(
+                            'host' => '127.0.1.1',
+                            'key_name' => 'monolog_redis_test'
+                        )
+                    )
+                )
+            )
+        );
+        $config = $this->process($configs);
+
+        $this->assertEquals('127.0.1.1', $config['handlers']['redis']['redis']['host']);
+        $this->assertEquals('monolog_redis_test', $config['handlers']['redis']['redis']['key_name']);
     }
 
     /**

@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestSuite;
 use PHPUnit\Util\Blacklist;
 use Symfony\Bridge\PhpUnit\ClockMock;
 use Symfony\Bridge\PhpUnit\DnsMock;
+use Symfony\Component\Debug\DebugClassLoader;
 
 /**
  * PHP 5.3 compatible trait-like shared implementation.
@@ -52,15 +53,11 @@ class SymfonyTestsListenerTrait
             Blacklist::$blacklistedClassNames['\Symfony\Bridge\PhpUnit\Legacy\SymfonyTestsListenerTrait'] = 2;
         }
 
-        $warn = false;
+        $enableDebugClassLoader = class_exists('Symfony\Component\Debug\DebugClassLoader');
+
         foreach ($mockedNamespaces as $type => $namespaces) {
             if (!\is_array($namespaces)) {
                 $namespaces = array($namespaces);
-            }
-            if (\is_int($type)) {
-                // @deprecated BC with v2.8 to v3.0
-                $type = 'time-sensitive';
-                $warn = true;
             }
             if ('time-sensitive' === $type) {
                 foreach ($namespaces as $ns) {
@@ -72,15 +69,28 @@ class SymfonyTestsListenerTrait
                     DnsMock::register($ns.'\DummyClass');
                 }
             }
+            if ('debug-class-loader' === $type) {
+                $enableDebugClassLoader = $namespaces && $namespaces[0];
+            }
+        }
+        if ($enableDebugClassLoader) {
+            DebugClassLoader::enable();
         }
         if (self::$globallyEnabled) {
             $this->state = -2;
         } else {
             self::$globallyEnabled = true;
-            if ($warn) {
-                echo "Clock-mocked namespaces for SymfonyTestsListener need to be nested in a \"time-sensitive\" key. This will be enforced in Symfony 4.0.\n";
-            }
         }
+    }
+
+    public function __sleep()
+    {
+        throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
+    }
+
+    public function __wakeup()
+    {
+        throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
     }
 
     public function __destruct()
@@ -274,7 +284,8 @@ class SymfonyTestsListenerTrait
             foreach ($deprecations ? unserialize($deprecations) : array() as $deprecation) {
                 $error = serialize(array('deprecation' => $deprecation[1], 'class' => $className, 'method' => $test->getName(false), 'triggering_file' => isset($deprecation[2]) ? $deprecation[2] : null));
                 if ($deprecation[0]) {
-                    @trigger_error($error, E_USER_DEPRECATED);
+                    // unsilenced on purpose
+                    trigger_error($error, E_USER_DEPRECATED);
                 } else {
                     @trigger_error($error, E_USER_DEPRECATED);
                 }
@@ -309,22 +320,6 @@ class SymfonyTestsListenerTrait
             }
             if (\in_array('dns-sensitive', $groups, true)) {
                 DnsMock::withMockedHosts(array());
-            }
-        }
-
-        if (($test instanceof \PHPUnit\Framework\TestCase || $test instanceof TestCase) && 0 === strpos($test->getName(), 'testLegacy') && !isset($this->testsWithWarnings[$test->getName()]) && !\in_array('legacy', $groups, true)) {
-            $result = $test->getTestResultObject();
-
-            if (method_exists($result, 'addWarning')) {
-                $result->addWarning($test, new $Warning('Using the "testLegacy" prefix to mark tests as legacy is deprecated since version 3.3 and will be removed in 4.0. Use the "@group legacy" notation instead to add the test to the legacy group.'), $time);
-            }
-        }
-
-        if (($test instanceof \PHPUnit\Framework\TestCase || $test instanceof TestCase) && strpos($className, '\Legacy') && !isset($this->testsWithWarnings[$test->getName()]) && !\in_array('legacy', $classGroups, true)) {
-            $result = $test->getTestResultObject();
-
-            if (method_exists($result, 'addWarning')) {
-                $result->addWarning($test, new $Warning('Using the "Legacy" prefix to mark all tests of a class as legacy is deprecated since version 3.3 and will be removed in 4.0. Use the "@group legacy" notation instead to add the test to the legacy group.'), $time);
             }
         }
     }

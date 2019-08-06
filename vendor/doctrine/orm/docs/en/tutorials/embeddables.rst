@@ -1,11 +1,14 @@
 Separating Concerns using Embeddables
 -------------------------------------
 
-Embeddables are classes which are not entities themself, but are embedded
+Embeddables are classes which are not entities themselves, but are embedded
 in entities and can also be queried in DQL. You'll mostly want to use them
 to reduce duplication or separating concerns. Value objects such as date range
-or address are the primary use case for this feature. Embeddables can only
-contain properties with basic ``@Column`` mapping.
+or address are the primary use case for this feature. 
+
+.. note::
+
+    Embeddables can only contain properties with basic ``@Column`` mapping.
 
 For the purposes of this tutorial, we will assume that you have a ``User``
 class in your application and you would like to store an address in
@@ -75,6 +78,20 @@ instead of simply adding the respective columns to the ``User`` class.
 In terms of your database schema, Doctrine will automatically inline all
 columns from the ``Address`` class into the table of the ``User`` class,
 just as if you had declared them directly there.
+
+Initializing embeddables
+------------------------
+
+In case all fields in the embeddable are ``nullable``, you might want
+to initialize the embeddable, to avoid getting a null value instead of
+the embedded object.
+
+.. code-block:: php
+
+    public function __construct()
+    {
+        $this->address = new Address();
+    }
 
 Column Prefixing
 ----------------

@@ -13,7 +13,7 @@ This tutorial shows how the semantics of composite primary keys work and how the
 General Considerations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Every entity with a composite key cannot use an id generator other than "ASSIGNED". That means
+Every entity with a composite key cannot use an id generator other than "NONE". That means
 the ID fields have to have their values set before you call ``EntityManager#persist($entity)``.
 
 Primitive Types only
@@ -38,7 +38,7 @@ and year of production as primary keys:
             /** @Id @Column(type="string") */
             private $name;
             /** @Id @Column(type="integer") */
-            private $year
+            private $year;
 
             public function __construct($name, $year)
             {
@@ -63,7 +63,7 @@ and year of production as primary keys:
         <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                                  http://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+                                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
             <entity name="VehicleCatalogue\Model\Car">
                 <id field="name" type="string" />
@@ -203,7 +203,7 @@ We keep up the example of an Article with arbitrary attributes, the mapping look
         <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                            http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+                                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
              <entity name="Application\Model\ArticleAttribute">
                 <id name="article" association-key="true" />

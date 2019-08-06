@@ -62,7 +62,7 @@
         <parameter key="doctrine.orm.quote_strategy.ansi.class">Doctrine\ORM\Mapping\AnsiQuoteStrategy</parameter>
 
         <!-- entity listener resolver -->
-        <parameter key="doctrine.orm.entity_listener_resolver.class">Doctrine\Bundle\DoctrineBundle\Mapping\ContainerAwareEntityListenerResolver</parameter>
+        <parameter key="doctrine.orm.entity_listener_resolver.class">Doctrine\Bundle\DoctrineBundle\Mapping\ContainerEntityListenerResolver</parameter>
 
         <!-- second level cache -->
         <parameter key="doctrine.orm.second_level_cache.default_cache_factory.class">Doctrine\ORM\Cache\DefaultCacheFactory</parameter>
@@ -103,7 +103,11 @@
         </service>
 
         <service id="doctrine.orm.container_repository_factory" class="Doctrine\Bundle\DoctrineBundle\Repository\ContainerRepositoryFactory" public="false">
-            <argument>null</argument> <!-- repository locator -->
+            <argument type="service">
+                <service class="Symfony\Component\DependencyInjection\ServiceLocator">
+                    <argument type="collection" />
+                </service>
+            </argument>
         </service>
 
         <!-- The configurator cannot be a private service -->
@@ -192,16 +196,25 @@
             <tag name="console.command" command="doctrine:query:dql" />
         </service>
 
-        <service id="doctrine.query_sql_command" class="Doctrine\Bundle\DoctrineBundle\Command\Proxy\RunSqlDoctrineCommand">
-            <tag name="console.command" command="doctrine:query:sql" />
-        </service>
-
         <service id="doctrine.schema_update_command" class="Doctrine\Bundle\DoctrineBundle\Command\Proxy\UpdateSchemaDoctrineCommand">
             <tag name="console.command" command="doctrine:schema:update" />
         </service>
 
         <service id="doctrine.schema_validate_command" class="Doctrine\Bundle\DoctrineBundle\Command\Proxy\ValidateSchemaCommand">
             <tag name="console.command" command="doctrine:schema:validate" />
+        </service>
+
+        <service id="doctrine.mapping_import_command" class="Doctrine\Bundle\DoctrineBundle\Command\ImportMappingDoctrineCommand">
+            <argument type="service" id="doctrine" />
+            <argument>%kernel.bundles%</argument>
+
+            <tag name="console.command" command="doctrine:mapping:import" />
+        </service>
+
+        <service id="doctrine.generate_entities_command" class="Doctrine\Bundle\DoctrineBundle\Command\GenerateEntitiesDoctrineCommand">
+            <argument type="service" id="doctrine" />
+
+            <tag name="console.command" command="doctrine:generate:entities" />
         </service>
 
     </services>

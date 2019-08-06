@@ -9,31 +9,32 @@
         {"name": "Jonathan Wage", "email": "jonwage@gmail.com"}
     ],
     "require": {
-        "php": "^5.6 || ^7.0",
+        "php": "^7.1",
         "doctrine/common": "~2.2"
     },
     "require-dev": {
         "doctrine/orm": "^2.5.4",
         "doctrine/dbal": "^2.5.4",
-        "phpunit/phpunit": "^5.4.6"
-    },
-    "conflict": {
-        "doctrine/orm": "< 2.4"
+        "phpunit/phpunit": "^7.0"
     },
     "suggest": {
         "doctrine/orm": "For loading ORM fixtures",
         "doctrine/mongodb-odm": "For loading MongoDB ODM fixtures",
-        "doctrine/phpcr-odm": "For loading PHPCR ODM fixtures"
+        "doctrine/phpcr-odm": "For loading PHPCR ODM fixtures",
+        "alcaeus/mongo-php-adapter": "For using MongoDB ODM with PHP 7"
     },
     "autoload": {
-        "psr-0": { "Doctrine\\Common\\DataFixtures": "lib/" }
+        "psr-4": { "Doctrine\\Common\\DataFixtures\\": "lib/Doctrine/Common/DataFixtures" }
     },
     "autoload-dev": {
-        "psr-0": { "Doctrine\\Tests": "tests/" }
+        "psr-4": { "Doctrine\\Tests\\": "tests/Doctrine/Tests" }
     },
     "extra": {
         "branch-alias": {
             "dev-master": "1.3.x-dev"
         }
+    },
+    "conflict": {
+        "doctrine/phpcr-odm": "<1.3.0"
     }
 }

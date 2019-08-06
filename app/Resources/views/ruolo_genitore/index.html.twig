@@ -1,9 +1,0 @@
-{% extends 'base.html.twig' %}
-
-{% block pagina_menu %}
-  {% if is_granted('ROLE_GENITORE') %} {#----- GENITORE -----#}
-    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
-  {% else %} {#----- ALUNNO -----#}
-    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
-  {% endif %}
-{% endblock %}

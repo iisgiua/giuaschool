@@ -11,6 +11,7 @@
 
 namespace Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter;
 
+use Doctrine\DBAL\Types\ConversionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
@@ -37,10 +38,29 @@ class DoctrineParamConverter implements ParamConverterInterface
      */
     private $language;
 
-    public function __construct(ManagerRegistry $registry = null, ExpressionLanguage $expressionLanguage = null)
+    /**
+     * @var array
+     */
+    private $defaultOptions;
+
+    public function __construct(ManagerRegistry $registry = null, ExpressionLanguage $expressionLanguage = null, array $options = [])
     {
         $this->registry = $registry;
         $this->language = $expressionLanguage;
+
+        $defaultValues = [
+            'entity_manager' => null,
+            'exclude' => [],
+            'mapping' => [],
+            'strip_null' => false,
+            'expr' => null,
+            'id' => null,
+            'repository_method' => null,
+            'map_method_signature' => false,
+            'evict_cache' => false,
+        ];
+
+        $this->defaultOptions = array_merge($defaultValues, $options);
     }
 
     /**
@@ -122,17 +142,23 @@ class DoctrineParamConverter implements ParamConverterInterface
             return $om->getRepository($class)->$method($id);
         } catch (NoResultException $e) {
             return;
+        } catch (ConversionException $e) {
+            return;
         }
     }
 
     private function getIdentifier(Request $request, $options, $name)
     {
         if (null !== $options['id']) {
-            if (!is_array($options['id'])) {
+            if (!\is_array($options['id'])) {
                 $name = $options['id'];
-            } elseif (is_array($options['id'])) {
+            } elseif (\is_array($options['id'])) {
                 $id = [];
                 foreach ($options['id'] as $field) {
+                    if (false !== strstr($field, '%s')) {
+                        // Convert "%s_uuid" to "foobar_uuid"
+                        $field = sprintf($field, $name);
+                    }
                     $id[$field] = $request->attributes->get($field);
                 }
 
@@ -212,6 +238,8 @@ class DoctrineParamConverter implements ParamConverterInterface
             return $em->getRepository($class)->$repositoryMethod($criteria);
         } catch (NoResultException $e) {
             return;
+        } catch (ConversionException $e) {
+            return;
         }
     }
 
@@ -221,12 +249,12 @@ class DoctrineParamConverter implements ParamConverterInterface
         $repository = $em->getRepository($class);
         $ref = new \ReflectionMethod($repository, $repositoryMethod);
         foreach ($ref->getParameters() as $parameter) {
-            if (array_key_exists($parameter->name, $criteria)) {
+            if (\array_key_exists($parameter->name, $criteria)) {
                 $arguments[] = $criteria[$parameter->name];
             } elseif ($parameter->isDefaultValueAvailable()) {
                 $arguments[] = $parameter->getDefaultValue();
             } else {
-                throw new \InvalidArgumentException(sprintf('Repository method "%s::%s" requires that you provide a value for the "$%s" argument.', get_class($repository), $repositoryMethod, $parameter->name));
+                throw new \InvalidArgumentException(sprintf('Repository method "%s::%s" requires that you provide a value for the "$%s" argument.', \get_class($repository), $repositoryMethod, $parameter->name));
             }
         }
 
@@ -246,6 +274,8 @@ class DoctrineParamConverter implements ParamConverterInterface
             return $this->language->evaluate($expression, $variables);
         } catch (NoResultException $e) {
             return;
+        } catch (ConversionException $e) {
+            return;
         } catch (SyntaxError $e) {
             throw new \LogicException(sprintf('Error parsing expression -- %s -- (%s)', $expression, $e->getMessage()), 0, $e);
         }
@@ -257,7 +287,7 @@ class DoctrineParamConverter implements ParamConverterInterface
     public function supports(ParamConverter $configuration)
     {
         // if there is no manager, this means that only Doctrine DBAL is configured
-        if (null === $this->registry || !count($this->registry->getManagerNames())) {
+        if (null === $this->registry || !\count($this->registry->getManagerNames())) {
             return false;
         }
 
@@ -278,18 +308,6 @@ class DoctrineParamConverter implements ParamConverterInterface
 
     private function getOptions(ParamConverter $configuration, $strict = true)
     {
-        $defaultValues = [
-            'entity_manager' => null,
-            'exclude' => [],
-            'mapping' => [],
-            'strip_null' => false,
-            'expr' => null,
-            'id' => null,
-            'repository_method' => null,
-            'map_method_signature' => false,
-            'evict_cache' => false,
-        ];
-
         $passedOptions = $configuration->getOptions();
 
         if (isset($passedOptions['repository_method'])) {
@@ -300,12 +318,12 @@ class DoctrineParamConverter implements ParamConverterInterface
             @trigger_error('The map_method_signature option of @ParamConverter is deprecated and will be removed in 6.0. Use the expr option or @Entity.', E_USER_DEPRECATED);
         }
 
-        $extraKeys = array_diff(array_keys($passedOptions), array_keys($defaultValues));
+        $extraKeys = array_diff(array_keys($passedOptions), array_keys($this->defaultOptions));
         if ($extraKeys && $strict) {
             throw new \InvalidArgumentException(sprintf('Invalid option(s) passed to @%s: %s', $this->getAnnotationName($configuration), implode(', ', $extraKeys)));
         }
 
-        return array_replace($defaultValues, $passedOptions);
+        return array_replace($this->defaultOptions, $passedOptions);
     }
 
     private function getManager($name, $class)

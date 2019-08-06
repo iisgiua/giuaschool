@@ -37,12 +37,12 @@ class QueryExpressionVisitor extends ExpressionVisitor
     /**
      * @var array
      */
-    private static $operatorMap = array(
+    private static $operatorMap = [
         Comparison::GT => Expr\Comparison::GT,
         Comparison::GTE => Expr\Comparison::GTE,
         Comparison::LT  => Expr\Comparison::LT,
         Comparison::LTE => Expr\Comparison::LTE
-    );
+    ];
 
     /**
      * @var array
@@ -57,7 +57,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
     /**
      * @var array
      */
-    private $parameters = array();
+    private $parameters = [];
 
     /**
      * Constructor
@@ -88,7 +88,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
      */
     public function clearParameters()
     {
-        $this->parameters = array();
+        $this->parameters = [];
     }
 
     /**
@@ -108,7 +108,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
      */
     public function walkCompositeExpression(CompositeExpression $expr)
     {
-        $expressionList = array();
+        $expressionList = [];
 
         foreach ($expr->getExpressionList() as $child) {
             $expressionList[] = $this->dispatch($child);
@@ -147,8 +147,8 @@ class QueryExpressionVisitor extends ExpressionVisitor
 
         $parameterName = str_replace('.', '_', $comparison->getField());
 
-        foreach($this->parameters as $parameter) {
-            if($parameter->getName() === $parameterName) {
+        foreach ($this->parameters as $parameter) {
+            if ($parameter->getName() === $parameterName) {
                 $parameterName .= '_' . count($this->parameters);
                 break;
             }
@@ -160,36 +160,47 @@ class QueryExpressionVisitor extends ExpressionVisitor
         switch ($comparison->getOperator()) {
             case Comparison::IN:
                 $this->parameters[] = $parameter;
-                return $this->expr->in($field, $placeholder);
 
+                return $this->expr->in($field, $placeholder);
             case Comparison::NIN:
                 $this->parameters[] = $parameter;
-                return $this->expr->notIn($field, $placeholder);
 
+                return $this->expr->notIn($field, $placeholder);
             case Comparison::EQ:
             case Comparison::IS:
                 if ($this->walkValue($comparison->getValue()) === null) {
                     return $this->expr->isNull($field);
                 }
                 $this->parameters[] = $parameter;
-                return $this->expr->eq($field, $placeholder);
 
+                return $this->expr->eq($field, $placeholder);
             case Comparison::NEQ:
                 if ($this->walkValue($comparison->getValue()) === null) {
                     return $this->expr->isNotNull($field);
                 }
                 $this->parameters[] = $parameter;
-                return $this->expr->neq($field, $placeholder);
 
+                return $this->expr->neq($field, $placeholder);
             case Comparison::CONTAINS:
                 $parameter->setValue('%' . $parameter->getValue() . '%', $parameter->getType());
                 $this->parameters[] = $parameter;
-                return $this->expr->like($field, $placeholder);
 
+                return $this->expr->like($field, $placeholder);
+            case Comparison::STARTS_WITH:
+                $parameter->setValue($parameter->getValue() . '%', $parameter->getType());
+                $this->parameters[] = $parameter;
+
+                return $this->expr->like($field, $placeholder);
+            case Comparison::ENDS_WITH:
+                $parameter->setValue('%' . $parameter->getValue(), $parameter->getType());
+                $this->parameters[] = $parameter;
+
+                return $this->expr->like($field, $placeholder);
             default:
                 $operator = self::convertComparisonOperator($comparison->getOperator());
                 if ($operator) {
                     $this->parameters[] = $parameter;
+
                     return new Expr\Comparison(
                         $field,
                         $operator,

@@ -37,6 +37,7 @@ class XdebugHandler
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    private $persistent;
     private $script;
     /** @var Status|null */
     private $statusWriter;
@@ -94,7 +95,7 @@ class XdebugHandler
      *
      * @param string $script
      *
-     * @return $this;
+     * @return $this
      */
     public function setMainScript($script)
     {
@@ -103,11 +104,22 @@ class XdebugHandler
     }
 
     /**
+     * Persist the settings to keep xdebug out of sub-processes
+     *
+     * @return $this
+     */
+    public function setPersistent()
+    {
+        $this->persistent = true;
+        return $this;
+    }
+
+    /**
      * Checks if xdebug is loaded and the process needs to be restarted
      *
      * This behaviour can be disabled by setting the MYAPP_ALLOW_XDEBUG
      * environment variable to 1. This variable is used internally so that
-     * restarted process is created only once.
+     * the restarted process is created only once.
      */
     public function check()
     {
@@ -271,15 +283,20 @@ class XdebugHandler
         $error = '';
         $iniFiles = self::getAllIniFiles();
         $scannedInis = count($iniFiles) > 1;
+        $tmpDir = sys_get_temp_dir();
 
         if (!$this->cli) {
             $error = 'Unsupported SAPI: '.PHP_SAPI;
         } elseif (!defined('PHP_BINARY')) {
             $error = 'PHP version is too old: '.PHP_VERSION;
+        } elseif (!$this->checkConfiguration($info)) {
+            $error = $info;
+        } elseif (!$this->checkScanDirConfig()) {
+            $error = 'PHP version does not report scanned inis: '.PHP_VERSION;
         } elseif (!$this->checkMainScript()) {
             $error = 'Unable to access main script: '.$this->script;
-        } elseif (!$this->writeTmpIni($iniFiles)) {
-            $error = 'Unable to create temporary ini file';
+        } elseif (!$this->writeTmpIni($iniFiles, $tmpDir, $error)) {
+            $error = $error ?: 'Unable to create temp ini file at: '.$tmpDir;
         } elseif (!$this->setEnvironment($scannedInis, $iniFiles)) {
             $error = 'Unable to set environment variables';
         }
@@ -295,12 +312,14 @@ class XdebugHandler
      * Returns true if the tmp ini file was written
      *
      * @param array $iniFiles All ini files used in the current process
+     * @param string $tmpDir The system temporary directory
+     * @param string $error Set by method if ini file cannot be read
      *
      * @return bool
      */
-    private function writeTmpIni(array $iniFiles)
+    private function writeTmpIni(array $iniFiles, $tmpDir, &$error)
     {
-        if (!$this->tmpIni = tempnam(sys_get_temp_dir(), '')) {
+        if (!$this->tmpIni = @tempnam($tmpDir, '')) {
             return false;
         }
 
@@ -313,8 +332,12 @@ class XdebugHandler
         $regex = '/^\s*(zend_extension\s*=.*xdebug.*)$/mi';
 
         foreach ($iniFiles as $file) {
-            $data = preg_replace($regex, ';$1', file_get_contents($file));
-            $content .= $data.PHP_EOL;
+            // Check for inaccessible ini files
+            if (!$data = @file_get_contents($file)) {
+                $error = 'Unable to read ini: '.$file;
+                return false;
+            }
+            $content .= preg_replace($regex, ';$1', $data).PHP_EOL;
         }
 
         // Merge loaded settings into our ini content, if it is valid
@@ -336,14 +359,19 @@ class XdebugHandler
      */
     private function getCommand()
     {
+        $php = array(PHP_BINARY);
         $args = array_slice($_SERVER['argv'], 1);
+
+        if (!$this->persistent) {
+            // Use command-line options
+            array_push($php, '-n', '-c', $this->tmpIni);
+        }
 
         if (defined('STDOUT') && Process::supportsColor(STDOUT)) {
             $args = Process::addColorOption($args, $this->colorOption);
         }
 
-        $executable = array(PHP_BINARY, '-n', '-c', $this->tmpIni, $this->script);
-        $args = array_merge($executable, $args);
+        $args = array_merge($php, array($this->script), $args);
 
         $cmd = Process::escape(array_shift($args), true, true);
         foreach ($args as $arg) {
@@ -371,6 +399,13 @@ class XdebugHandler
         // Make original inis available to restarted process
         if (!putenv($this->envOriginalInis.'='.implode(PATH_SEPARATOR, $iniFiles))) {
             return false;
+        }
+
+        if ($this->persistent) {
+            // Use the environment to persist the settings
+            if (!putenv('PHP_INI_SCAN_DIR=') || !putenv('PHPRC='.$this->tmpIni)) {
+                return false;
+            }
         }
 
         // Flag restarted process and save values for it to use
@@ -485,5 +520,46 @@ class XdebugHandler
 
         self::$skipped = $settings['skipped'];
         $this->notify(Status::INFO, 'Process called with existing restart settings');
+    }
+
+    /**
+     * Returns true if there are scanned inis and PHP is able to report them
+     *
+     * php_ini_scanned_files will fail when PHP_CONFIG_FILE_SCAN_DIR is empty.
+     * Fixed in 7.1.13 and 7.2.1
+     *
+     * @return bool
+     */
+    private function checkScanDirConfig()
+    {
+        return !(getenv('PHP_INI_SCAN_DIR')
+            && !PHP_CONFIG_FILE_SCAN_DIR
+            && (PHP_VERSION_ID < 70113
+            || PHP_VERSION_ID === 70200));
+    }
+
+    /**
+     * Returns true if there are no known configuration issues
+     *
+     * @param string $info Set by method
+     */
+    private function checkConfiguration(&$info)
+    {
+        if (false !== strpos(ini_get('disable_functions'), 'passthru')) {
+            $info = 'passthru function is disabled';
+            return false;
+        }
+
+        if (extension_loaded('uopz')) {
+            // uopz works at opcode level and disables exit calls
+            if (function_exists('uopz_allow_exit')) {
+                @uopz_allow_exit(true);
+            } else {
+                $info = 'uopz extension is not compatible';
+                return false;
+            }
+        }
+
+        return true;
     }
 }

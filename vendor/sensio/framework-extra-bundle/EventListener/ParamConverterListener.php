@@ -13,10 +13,10 @@ namespace Sensio\Bundle\FrameworkExtraBundle\EventListener;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterManager;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\KernelEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * The ParamConverterListener handles the ParamConverter annotation.
@@ -50,21 +50,21 @@ class ParamConverterListener implements EventSubscriberInterface
     /**
      * Modifies the ParamConverterManager instance.
      */
-    public function onKernelController(FilterControllerEvent $event)
+    public function onKernelController(KernelEvent $event)
     {
         $controller = $event->getController();
         $request = $event->getRequest();
         $configurations = [];
 
         if ($configuration = $request->attributes->get('_converters')) {
-            foreach (is_array($configuration) ? $configuration : [$configuration] as $configuration) {
+            foreach (\is_array($configuration) ? $configuration : [$configuration] as $configuration) {
                 $configurations[$configuration->getName()] = $configuration;
             }
         }
 
-        if (is_array($controller)) {
+        if (\is_array($controller)) {
             $r = new \ReflectionMethod($controller[0], $controller[1]);
-        } elseif (is_object($controller) && is_callable($controller, '__invoke')) {
+        } elseif (\is_object($controller) && \is_callable([$controller, '__invoke'])) {
             $r = new \ReflectionMethod($controller, '__invoke');
         } else {
             $r = new \ReflectionFunction($controller);

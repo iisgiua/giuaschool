@@ -101,7 +101,7 @@ class ORMException extends Exception
         return new self("Unrecognized field: $field");
     }
 
-     /**
+    /**
      *
      * @param string $class
      * @param string $association
@@ -180,6 +180,21 @@ class ORMException extends Exception
      * @return ORMException
      */
     public static function invalidFindByCall($entityName, $fieldName, $method)
+    {
+        return new self(
+            "Entity '".$entityName."' has no field '".$fieldName."'. ".
+            "You can therefore not call '".$method."' on the entities' repository"
+        );
+    }
+
+    /**
+     * @param string $entityName
+     * @param string $fieldName
+     * @param string $method
+     *
+     * @return ORMException
+     */
+    public static function invalidMagicCall($entityName, $fieldName, $method)
     {
         return new self(
             "Entity '".$entityName."' has no field '".$fieldName."'. ".
@@ -296,7 +311,7 @@ class ORMException extends Exception
 
     /**
      * @param string $className
-     * @param string $fieldName
+     * @param string[] $fieldNames
      *
      * @return ORMException
      */
@@ -306,16 +321,6 @@ class ORMException extends Exception
             "Unrecognized identifier fields: '" . implode("', '", $fieldNames) . "' " .
             "are not present on class '" . $className . "'."
         );
-    }
-
-    /**
-     * @param string $functionName
-     *
-     * @return ORMException
-     */
-    public static function overwriteInternalDQLFunctionNotAllowed($functionName)
-    {
-        return new self("It is not allowed to overwrite internal function '$functionName' in the DQL parser through user-defined functions.");
     }
 
     /**

@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\SwiftmailerBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,22 +23,25 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * @author Clément JOBEILI <clement.jobeili@gmail.com>
  * @author Toni Uebernickel <tuebernickel@gmail.com>
  */
-class SendEmailCommand extends ContainerAwareCommand
+class SendEmailCommand extends AbstractSwiftMailerCommand
 {
+    protected static $defaultName = 'swiftmailer:spool:send';
+
     /** @var SymfonyStyle */
     private $io;
 
     protected function configure()
     {
         $this
-            ->setName('swiftmailer:spool:send')
+            ->setName(static::$defaultName) // BC with 2.7
             ->setDescription('Sends emails from the spool')
             ->addOption('message-limit', null, InputOption::VALUE_REQUIRED, 'The maximum number of messages to send.')
             ->addOption('time-limit', null, InputOption::VALUE_REQUIRED, 'The time limit for sending messages (in seconds).')
             ->addOption('recover-timeout', null, InputOption::VALUE_REQUIRED, 'The timeout for recovering messages that have taken too long to send (in seconds).')
             ->addOption('mailer', null, InputOption::VALUE_REQUIRED, 'The mailer name.')
             ->addOption('transport', null, InputOption::VALUE_REQUIRED, 'The service of the transport to use to send the messages.')
-            ->setHelp(<<<EOF
+            ->setHelp(
+                <<<EOF
 The <info>%command.name%</info> command sends all emails from the spool.
 
 <info>php %command.full_name% --message-limit=10 --time-limit=10 --recover-timeout=900 --mailer=default</info>
@@ -87,13 +89,17 @@ EOF
         }
     }
 
-    private function recoverSpool($name, \Swift_Transport $transport, InputInterface $input, OutputInterface $output)
+    private function recoverSpool($name, \Swift_Transport $transport, InputInterface $input)
     {
         if ($transport instanceof \Swift_Transport_SpoolTransport) {
             $spool = $transport->getSpool();
             if ($spool instanceof \Swift_ConfigurableSpool) {
-                $spool->setMessageLimit($input->getOption('message-limit'));
-                $spool->setTimeLimit($input->getOption('time-limit'));
+                if (null !== $input->getOption('message-limit')) {
+                    $spool->setMessageLimit($input->getOption('message-limit'));
+                }
+                if (null !== $input->getOption('time-limit')) {
+                    $spool->setTimeLimit($input->getOption('time-limit'));
+                }
             }
 
             if ($spool instanceof \Swift_FileSpool) {

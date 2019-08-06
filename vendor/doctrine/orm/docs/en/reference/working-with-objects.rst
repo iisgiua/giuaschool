@@ -25,6 +25,13 @@ Work that have not yet been persisted are lost.
     Not calling ``EntityManager#flush()`` will lead to all changes
     during that request being lost.
 
+.. note::
+
+    Doctrine does NEVER touch the public API of methods in your entity 
+    classes (like getters and setters) nor the constructor method.
+    Instead, it uses reflection to get/set data from/to your entity objects.
+    When Doctrine fetches data from DB and saves it back,
+    any code put in your get/set methods won't be implicitly taken into account.
 
 Entities and the Identity Map
 -----------------------------
@@ -238,7 +245,7 @@ as follows:
    persist operation. However, the persist operation is cascaded to
    entities referenced by X, if the relationships from X to these
    other entities are mapped with cascade=PERSIST or cascade=ALL (see
-   "Transitive Persistence").
+   ":ref:`Transitive Persistence <transitive-persistence>`").
 -  If X is a removed entity, it becomes managed.
 -  If X is a detached entity, an exception will be thrown on
    flush.
@@ -279,12 +286,12 @@ as follows:
 -  If X is a new entity, it is ignored by the remove operation.
    However, the remove operation is cascaded to entities referenced by
    X, if the relationship from X to these other entities is mapped
-   with cascade=REMOVE or cascade=ALL (see "Transitive Persistence").
+   with cascade=REMOVE or cascade=ALL (see ":ref:`Transitive Persistence <transitive-persistence>`").
 -  If X is a managed entity, the remove operation causes it to
    become removed. The remove operation is cascaded to entities
    referenced by X, if the relationships from X to these other
    entities is mapped with cascade=REMOVE or cascade=ALL (see
-   "Transitive Persistence").
+   ":ref:`Transitive Persistence <transitive-persistence>`").
 -  If X is a detached entity, an InvalidArgumentException will be
    thrown.
 -  If X is a removed entity, it is ignored by the remove operation.
@@ -350,14 +357,14 @@ as follows:
    become detached. The detach operation is cascaded to entities
    referenced by X, if the relationships from X to these other
    entities is mapped with cascade=DETACH or cascade=ALL (see
-   "Transitive Persistence"). Entities which previously referenced X
+   ":ref:`Transitive Persistence <transitive-persistence>`"). Entities which previously referenced X
    will continue to reference X.
 -  If X is a new or detached entity, it is ignored by the detach
    operation.
 -  If X is a removed entity, the detach operation is cascaded to
    entities referenced by X, if the relationships from X to these
    other entities is mapped with cascade=DETACH or cascade=ALL (see
-   "Transitive Persistence"). Entities which previously referenced X
+   ":ref:`Transitive Persistence <transitive-persistence>`"). Entities which previously referenced X
    will continue to reference X.
 
 There are several situations in which an entity is detached
@@ -416,8 +423,7 @@ as follows:
 -  If X is a managed entity, it is ignored by the merge operation,
    however, the merge operation is cascaded to entities referenced by
    relationships from X if these relationships have been mapped with
-   the cascade element value MERGE or ALL (see "Transitive
-   Persistence").
+   the cascade element value MERGE or ALL (see ":ref:`Transitive Persistence <transitive-persistence>`").
 -  For all entities Y referenced by relationships from X having the
    cascade element value MERGE or ALL, Y is merged recursively as Y'.
    For all such Y referenced by X, X' is set to reference Y'. (Note
@@ -699,8 +705,6 @@ You can also load by owning side associations through the repository:
     $number = $em->find('MyProject\Domain\Phonenumber', 1234);
     $user = $em->getRepository('MyProject\Domain\User')->findOneBy(array('phone' => $number->getId()));
 
-Be careful that this only works by passing the ID of the associated entity, not yet by passing the associated entity itself.
-
 The ``EntityRepository#findBy()`` method additionally accepts orderings, limit and offset as second to fourth parameters:
 
 .. code-block:: php
@@ -729,6 +733,14 @@ examples are equivalent:
     // A single user by its nickname (__call magic)
     $user = $em->getRepository('MyProject\Domain\User')->findOneByNickname('romanb');
 
+Additionally, you can just count the result of the provided conditions when you don't really need the data:
+
+.. code-block:: php
+
+    <?php
+    // Check there is no user with nickname
+    $availableNickname = 0 === $em->getRepository('MyProject\Domain\User')->count(['nickname' => 'nonexistent']);
+
 By Criteria
 ~~~~~~~~~~~
 
@@ -738,8 +750,7 @@ The Repository implement the ``Doctrine\Common\Collections\Selectable``
 interface. That means you can build ``Doctrine\Common\Collections\Criteria``
 and pass them to the ``matching($criteria)`` method.
 
-See the :ref:`Working with Associations: Filtering collections
-<filtering-collections>`.
+See section `Filtering collections` of chapter :doc:`Working with Associations <working-with-associations>`
 
 By Eager Loading
 ~~~~~~~~~~~~~~~~

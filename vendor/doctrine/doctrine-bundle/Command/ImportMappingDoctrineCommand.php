@@ -2,10 +2,12 @@
 
 namespace Doctrine\Bundle\DoctrineBundle\Command;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\Mapping\Driver\DatabaseDriver;
 use Doctrine\ORM\Tools\Console\MetadataFilter;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\ORM\Tools\Export\ClassMetadataExporter;
+use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -13,9 +15,24 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Import Doctrine ORM metadata mapping information from an existing database.
+ *
+ * @final
  */
 class ImportMappingDoctrineCommand extends DoctrineCommand
 {
+    /** @var string[] */
+    private $bundles;
+
+    /**
+     * @param string[] $bundles
+     */
+    public function __construct(ManagerRegistry $doctrine, array $bundles)
+    {
+        parent::__construct($doctrine);
+
+        $this->bundles = $bundles;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -38,7 +55,7 @@ from an existing database:
 Generate annotation mappings into the src/ directory using App as the namespace:
 <info>php %command.full_name% App\\\Entity annotation --path=src/Entity</info>
 
-Generate annotation mappings into the config/doctrine/ directory using App as the namespace:
+Generate xml mappings into the config/doctrine/ directory using App as the namespace:
 <info>php %command.full_name% App\\\Entity xml --path=config/doctrine</info>
 
 Generate XML mappings into a bundle:
@@ -73,8 +90,7 @@ EOT
         }
 
         $namespaceOrBundle = $input->getArgument('name');
-        $bundles           = $this->getContainer()->getParameter('kernel.bundles');
-        if (isset($bundles[$namespaceOrBundle])) {
+        if (isset($this->bundles[$namespaceOrBundle])) {
             $bundle    = $this->getApplication()->getKernel()->getBundle($namespaceOrBundle);
             $namespace = $bundle->getNamespace() . '\Entity';
 
@@ -89,7 +105,7 @@ EOT
             $namespace = $namespaceOrBundle;
             $destPath  = $input->getOption('path');
             if ($destPath === null) {
-                throw new \InvalidArgumentException('The --path option is required when passing a namespace (e.g. --path=src). If you intended to pass a bundle name, check your spelling.');
+                throw new InvalidArgumentException('The --path option is required when passing a namespace (e.g. --path=src). If you intended to pass a bundle name, check your spelling.');
             }
         }
 

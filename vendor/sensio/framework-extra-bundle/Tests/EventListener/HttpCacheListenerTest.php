@@ -11,12 +11,14 @@
 
 namespace Sensio\Bundle\FrameworkExtraBundle\Tests\EventListener;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Sensio\Bundle\FrameworkExtraBundle\EventListener\HttpCacheListener;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class HttpCacheListenerTest extends \PHPUnit\Framework\TestCase
@@ -153,14 +155,15 @@ class HttpCacheListenerTest extends \PHPUnit\Framework\TestCase
         $request = $this->createRequest(new Cache(['lastModified' => 'test.getDate()']));
         $request->attributes->set('test', new TestEntity());
         $request->headers->add(['If-Modified-Since' => 'Fri, 23 Aug 2013 00:00:00 GMT']);
+        $eventClass = class_exists(ControllerEvent::class) ? ControllerEvent::class : FilterControllerEvent::class;
 
         $listener = new HttpCacheListener();
-        $controllerEvent = new FilterControllerEvent($this->getKernel(), function () {
+        $controllerEvent = new $eventClass($this->getKernel(), function () {
             return new Response(500);
         }, $request, null);
 
         $listener->onKernelController($controllerEvent);
-        $response = call_user_func($controllerEvent->getController());
+        $response = \call_user_func($controllerEvent->getController());
 
         $this->assertEquals(304, $response->getStatusCode());
     }
@@ -170,14 +173,16 @@ class HttpCacheListenerTest extends \PHPUnit\Framework\TestCase
         $request = $this->createRequest(new Cache(['lastModified' => 'test.getDate()']));
         $request->attributes->set('test', new TestEntity());
         $response = new Response();
+        $eventClass = class_exists(ControllerEvent::class) ? ControllerEvent::class : FilterControllerEvent::class;
 
         $listener = new HttpCacheListener();
-        $controllerEvent = new FilterControllerEvent($this->getKernel(), function () {
+        $controllerEvent = new $eventClass($this->getKernel(), function () {
             return new Response();
         }, $request, null);
         $listener->onKernelController($controllerEvent);
+        $eventClass = class_exists(ResponseEvent::class) ? ResponseEvent::class : FilterResponseEvent::class;
 
-        $responseEvent = new FilterResponseEvent($this->getKernel(), $request, HttpKernelInterface::MASTER_REQUEST, call_user_func($controllerEvent->getController()));
+        $responseEvent = new $eventClass($this->getKernel(), $request, HttpKernelInterface::MASTER_REQUEST, \call_user_func($controllerEvent->getController()));
         $listener->onKernelResponse($responseEvent);
 
         $response = $responseEvent->getResponse();
@@ -192,14 +197,15 @@ class HttpCacheListenerTest extends \PHPUnit\Framework\TestCase
         $request = $this->createRequest(new Cache(['etag' => 'test.getId()']));
         $request->attributes->set('test', $entity = new TestEntity());
         $request->headers->add(['If-None-Match' => sprintf('"%s"', hash('sha256', $entity->getId()))]);
+        $eventClass = class_exists(ControllerEvent::class) ? ControllerEvent::class : FilterControllerEvent::class;
 
         $listener = new HttpCacheListener();
-        $controllerEvent = new FilterControllerEvent($this->getKernel(), function () {
+        $controllerEvent = new $eventClass($this->getKernel(), function () {
             return new Response(500);
         }, $request, null);
 
         $listener->onKernelController($controllerEvent);
-        $response = call_user_func($controllerEvent->getController());
+        $response = \call_user_func($controllerEvent->getController());
 
         $this->assertEquals(304, $response->getStatusCode());
     }
@@ -209,14 +215,17 @@ class HttpCacheListenerTest extends \PHPUnit\Framework\TestCase
         $request = $this->createRequest(new Cache(['ETag' => 'test.getId()']));
         $request->attributes->set('test', $entity = new TestEntity());
         $response = new Response();
+        $eventClass = class_exists(ControllerEvent::class) ? ControllerEvent::class : FilterControllerEvent::class;
 
         $listener = new HttpCacheListener();
-        $controllerEvent = new FilterControllerEvent($this->getKernel(), function () {
+        $controllerEvent = new $eventClass($this->getKernel(), function () {
             return new Response();
         }, $request, null);
         $listener->onKernelController($controllerEvent);
 
-        $responseEvent = new FilterResponseEvent($this->getKernel(), $request, HttpKernelInterface::MASTER_REQUEST, call_user_func($controllerEvent->getController()));
+        $eventClass = class_exists(ResponseEvent::class) ? ResponseEvent::class : FilterResponseEvent::class;
+
+        $responseEvent = new $eventClass($this->getKernel(), $request, HttpKernelInterface::MASTER_REQUEST, \call_user_func($controllerEvent->getController()));
         $listener->onKernelResponse($responseEvent);
 
         $response = $responseEvent->getResponse();
@@ -245,8 +254,10 @@ class HttpCacheListenerTest extends \PHPUnit\Framework\TestCase
         $response->setMaxAge(30);
         $response->setVary(['foobaz']);
 
+        $eventClass = class_exists(ResponseEvent::class) ? ResponseEvent::class : FilterResponseEvent::class;
+
         $listener = new HttpCacheListener();
-        $responseEvent = new FilterResponseEvent($this->getKernel(), $request, HttpKernelInterface::MASTER_REQUEST, $response);
+        $responseEvent = new $eventClass($this->getKernel(), $request, HttpKernelInterface::MASTER_REQUEST, $response);
         $listener->onKernelResponse($responseEvent);
 
         $this->assertEquals('"54321"', $response->getEtag());
@@ -266,21 +277,22 @@ class HttpCacheListenerTest extends \PHPUnit\Framework\TestCase
 
     private function createEventMock(Request $request, Response $response)
     {
+        $eventClass = class_exists(ResponseEvent::class) ? ResponseEvent::class : FilterResponseEvent::class;
+
         $event = $this
-            ->getMockBuilder('Symfony\Component\HttpKernel\Event\FilterResponseEvent')
+            ->getMockBuilder($eventClass)
             ->disableOriginalConstructor()
             ->getMock();
+
         $event
             ->expects($this->any())
             ->method('getRequest')
-            ->will($this->returnValue($request))
-        ;
+            ->willReturn($request);
 
         $event
             ->expects($this->any())
             ->method('getResponse')
-            ->will($this->returnValue($response))
-        ;
+            ->willReturn($response);
 
         return $event;
     }

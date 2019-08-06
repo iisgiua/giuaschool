@@ -11,10 +11,10 @@
 
 namespace Sensio\Bundle\FrameworkExtraBundle\Templating;
 
+use Doctrine\Common\Persistence\Proxy;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\Common\Util\ClassUtils;
 
 /**
  * The TemplateGuesser class handles the guessing of template name based on controller.
@@ -56,13 +56,13 @@ class TemplateGuesser
      */
     public function guessTemplateName($controller, Request $request)
     {
-        if (is_object($controller) && method_exists($controller, '__invoke')) {
+        if (\is_object($controller) && method_exists($controller, '__invoke')) {
             $controller = [$controller, '__invoke'];
-        } elseif (!is_array($controller)) {
-            throw new \InvalidArgumentException(sprintf('First argument of %s must be an array callable or an object defining the magic method __invoke. "%s" given.', __METHOD__, gettype($controller)));
+        } elseif (!\is_array($controller)) {
+            throw new \InvalidArgumentException(sprintf('First argument of %s must be an array callable or an object defining the magic method __invoke. "%s" given.', __METHOD__, \gettype($controller)));
         }
 
-        $className = class_exists('Doctrine\Common\Util\ClassUtils') ? ClassUtils::getClass($controller[0]) : get_class($controller[0]);
+        $className = $this->getRealClass(\get_class($controller[0]));
 
         $matchController = null;
         foreach ($this->controllerPatterns as $pattern) {
@@ -72,7 +72,7 @@ class TemplateGuesser
             }
         }
         if (null === $matchController) {
-            throw new \InvalidArgumentException(sprintf('The "%s" class does not look like a controller class (its FQN must match one of the following regexps: "%s")', get_class($controller[0]), implode('", "', $this->controllerPatterns)));
+            throw new \InvalidArgumentException(sprintf('The "%s" class does not look like a controller class (its FQN must match one of the following regexps: "%s")', \get_class($controller[0]), implode('", "', $this->controllerPatterns)));
         }
 
         if ('__invoke' === $controller[1]) {
@@ -112,5 +112,14 @@ class TemplateGuesser
             }
             $reflectionClass = $reflectionClass->getParentClass();
         } while ($reflectionClass);
+    }
+
+    private static function getRealClass(string $class): string
+    {
+        if (false === $pos = strrpos($class, '\\'.Proxy::MARKER.'\\')) {
+            return $class;
+        }
+
+        return substr($class, $pos + Proxy::MARKER_LENGTH + 2);
     }
 }

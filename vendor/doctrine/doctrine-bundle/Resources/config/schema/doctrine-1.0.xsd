@@ -36,6 +36,7 @@
         <xsd:attribute name="schema-filter" type="xsd:string" />
         <xsd:attribute name="logging" type="xsd:string" default="false" />
         <xsd:attribute name="profiling" type="xsd:string" default="false" />
+        <xsd:attribute name="profiling-collect-backtrace" type="xsd:string" default="false" />
         <xsd:attribute name="server-version" type="xsd:string" />
         <xsd:attribute name="use-savepoints" type="xsd:boolean" />
         <xsd:attributeGroup ref="driver-config" />
@@ -59,8 +60,12 @@
         <xsd:attribute name="service" type="xsd:string" />
         <xsd:attribute name="servicename" type="xsd:string" />
         <xsd:attribute name="session-mode" type="xsd:string" />
+        <xsd:attribute name="default_dbname" type="xsd:string" />
         <xsd:attribute name="sslmode" type="xsd:string" />
         <xsd:attribute name="sslrootcert" type="xsd:string" />
+        <xsd:attribute name="sslcert" type="xsd:string" />
+        <xsd:attribute name="sslkey" type="xsd:string" />
+        <xsd:attribute name="sslcrl" type="xsd:string" />
         <xsd:attribute name="pooled" type="xsd:string" />
         <xsd:attribute name="multiple-active-result-sets" type="xsd:string" />
         <xsd:attribute name="connectstring" type="xsd:string" />
@@ -160,6 +165,7 @@
 
         <xsd:attribute name="type" type="xsd:string" />
         <xsd:attribute name="id" type="xsd:string" />
+        <xsd:attribute name="pool" type="xsd:string" />
         <xsd:attribute name="namespace" type="xsd:string" />
     </xsd:complexType>
 

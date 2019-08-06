@@ -2,14 +2,11 @@
 
 namespace Doctrine\Bundle\DoctrineBundle;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
+use Psr\Container\ContainerInterface;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Bridge\Doctrine\RegistryInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * References all Doctrine connections and entity managers in a given Container.
@@ -17,23 +14,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class Registry extends ManagerRegistry implements RegistryInterface
 {
     /**
-     * Construct.
-     *
-     * @param Connection[]             $connections
-     * @param EntityManagerInterface[] $entityManagers
-     * @param string                   $defaultConnection
-     * @param string                   $defaultEntityManager
+     * @param string[] $connections
+     * @param string[] $entityManagers
+     * @param string   $defaultConnection
+     * @param string   $defaultEntityManager
      */
     public function __construct(ContainerInterface $container, array $connections, array $entityManagers, $defaultConnection, $defaultEntityManager)
     {
-        $parentTraits = class_uses(parent::class);
-        if (isset($parentTraits[ContainerAwareTrait::class])) {
-            // this case should be removed when Symfony 3.4 becomes the lowest supported version
-            // and then also, the constructor should type-hint Psr\Container\ContainerInterface
-            $this->setContainer($container);
-        } else {
-            $this->container = $container;
-        }
+        $this->container = $container;
 
         parent::__construct('ORM', $connections, $entityManagers, $defaultConnection, $defaultEntityManager, 'Doctrine\ORM\Proxy\Proxy');
     }
@@ -41,9 +29,9 @@ class Registry extends ManagerRegistry implements RegistryInterface
     /**
      * Gets the default entity manager name.
      *
-     * @return string The default entity manager name
-     *
      * @deprecated
+     *
+     * @return string The default entity manager name
      */
     public function getDefaultEntityManagerName()
     {
@@ -55,11 +43,11 @@ class Registry extends ManagerRegistry implements RegistryInterface
     /**
      * Gets a named entity manager.
      *
+     * @deprecated
+     *
      * @param string $name The entity manager name (null for the default one)
      *
      * @return EntityManager
-     *
-     * @deprecated
      */
     public function getEntityManager($name = null)
     {
@@ -71,9 +59,9 @@ class Registry extends ManagerRegistry implements RegistryInterface
     /**
      * Gets an array of all registered entity managers
      *
-     * @return EntityManager[] an array of all EntityManager instances
-     *
      * @deprecated
+     *
+     * @return EntityManager[] an array of all EntityManager instances
      */
     public function getEntityManagers()
     {
@@ -95,10 +83,9 @@ class Registry extends ManagerRegistry implements RegistryInterface
      * hold an obsolete reference. You can inject the registry instead
      * to avoid this problem.
      *
-     * @param string $name The entity manager name (null for the default one)
-     *
-     *
      * @deprecated
+     *
+     * @param string $name The entity manager name (null for the default one)
      */
     public function resetEntityManager($name = null)
     {
@@ -112,11 +99,11 @@ class Registry extends ManagerRegistry implements RegistryInterface
      *
      * This method looks for the alias in all registered entity managers.
      *
+     * @deprecated
+     *
      * @param string $alias The alias
      *
      * @return string The full namespace
-     *
-     * @deprecated
      */
     public function getEntityNamespace($alias)
     {
@@ -130,11 +117,11 @@ class Registry extends ManagerRegistry implements RegistryInterface
      *
      * This method looks for the alias in all registered entity managers.
      *
+     * @see Configuration::getEntityNamespace
+     *
      * @param string $alias The alias
      *
      * @return string The full namespace
-     *
-     * @see Configuration::getEntityNamespace
      */
     public function getAliasNamespace($alias)
     {
@@ -151,9 +138,9 @@ class Registry extends ManagerRegistry implements RegistryInterface
     /**
      * Gets all connection names.
      *
-     * @return string[] An array of connection names
-     *
      * @deprecated
+     *
+     * @return string[] An array of connection names
      */
     public function getEntityManagerNames()
     {
@@ -165,11 +152,11 @@ class Registry extends ManagerRegistry implements RegistryInterface
     /**
      * Gets the entity manager associated with a given class.
      *
+     * @deprecated
+     *
      * @param string $class A Doctrine Entity class name
      *
      * @return EntityManager|null
-     *
-     * @deprecated
      */
     public function getEntityManagerForClass($class)
     {

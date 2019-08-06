@@ -31,11 +31,14 @@ use Monolog\Logger;
  *   - path: string
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [file_permission]: int|null, defaults to null (0644)
+ *   - [use_locking]: bool, defaults to false
  *
  * - console:
  *   - [verbosity_levels]: level => verbosity configuration
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [console_formater_options]: array
  *
  * - firephp:
  *   - [level]: level name or int value, defaults to DEBUG
@@ -78,12 +81,27 @@ use Monolog\Logger;
  * - elasticsearch:
  *   - elasticsearch:
  *      - id: optional if host is given
- *      - host: elastic search host name
+ *      - host: elastic search host name. Do not prepend with http(s)://
  *      - [port]: defaults to 9200
  *   - [index]: index name, defaults to monolog
  *   - [document_type]: document_type, defaults to logs
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *
+ * - redis:
+ *   - redis:
+ *      - id: optional if host is given
+ *      - host: 127.0.0.1
+ *      - password: null
+ *      - port: 6379
+ *      - database: 0
+ *      - key_name: monolog_redis
+ *
+ * - predis:
+ *   - redis:
+ *      - id: optional if host is given
+ *      - host: tcp://10.0.0.1:6379
+ *      - key_name: monolog_redis
  *
  * - fingers_crossed:
  *   - handler: the wrapped handler's name
@@ -110,7 +128,7 @@ use Monolog\Logger;
  *   - [flush_on_overflow]: bool, defaults to false
  *
  * - deduplication:
- *   - handler: the wrapper handler's name
+ *   - handler: the wrapped handler's name
  *   - [store]: The file/path where the deduplication log should be kept, defaults to %kernel.cache_dir%/monolog_dedup_*
  *   - [deduplication_level]: The minimum logging level for log records to be looked at for deduplication purposes, defaults to ERROR
  *   - [time]: The period (in seconds) during which duplicate entries should be suppressed after a given log is sent through, defaults to 60
@@ -138,6 +156,7 @@ use Monolog\Logger;
  *   - [logopts]: defaults to LOG_PID
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [ident]: string, defaults to
  *
  * - swift_mailer:
  *   - from_email: optional if email_prototype is given
@@ -156,6 +175,7 @@ use Monolog\Logger;
  *   - subject: string
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
+ *   - [headers]: optional array containing additional headers: ['Foo: Bar', '...']
  *
  * - socket:
  *   - connection_string: string
@@ -293,6 +313,8 @@ use Monolog\Logger;
  *   - [level]: level name or int value, defaults to DEBUG
  *   - [bubble]: bool, defaults to true
  *
+ * All handlers can also be marked with `nested: true` to make sure they are never added explicitly to the stack
+ *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Christophe Coevoet <stof@notk.org>
  */
@@ -305,8 +327,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('monolog');
+        $treeBuilder = new TreeBuilder('monolog');
+        $rootNode = method_exists(TreeBuilder::class, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('monolog');
 
         $rootNode
             ->fixXmlConfig('channel')
@@ -326,6 +348,7 @@ class Configuration implements ConfigurationInterface
                         ->fixXmlConfig('excluded_http_code')
                         ->fixXmlConfig('tag')
                         ->fixXmlConfig('accepted_level')
+                        ->fixXmlConfig('header')
                         ->canBeUnset()
                         ->children()
                             ->scalarNode('type')
@@ -342,7 +365,7 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('bubble')->defaultTrue()->end()
                             ->scalarNode('app_name')->defaultNull()->end()
                             ->booleanNode('include_stacktraces')->defaultFalse()->end()
-                            ->booleanNode('process_psr_3_messages')->defaultTrue()->end()
+                            ->booleanNode('process_psr_3_messages')->defaultNull()->end()
                             ->scalarNode('path')->defaultValue('%kernel.logs_dir%/%kernel.environment%.log')->end() // stream and rotating
                             ->scalarNode('file_permission')  // stream and rotating
                                 ->defaultNull()
@@ -357,9 +380,10 @@ class Configuration implements ConfigurationInterface
                                     })
                                 ->end()
                             ->end()
+                            ->booleanNode('use_locking')->defaultFalse()->end() // stream
                             ->scalarNode('filename_format')->defaultValue('{filename}-{date}')->end() //rotating
                             ->scalarNode('date_format')->defaultValue('Y-m-d')->end() //rotating
-                            ->scalarNode('ident')->defaultFalse()->end() // syslog
+                            ->scalarNode('ident')->defaultFalse()->end() // syslog and syslogudp
                             ->scalarNode('logopts')->defaultValue(LOG_PID)->end() // syslog
                             ->scalarNode('facility')->defaultValue('user')->end() // syslog
                             ->scalarNode('max_files')->defaultValue(0)->end() // rotating
@@ -515,6 +539,44 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('index')->defaultValue('monolog')->end() // elasticsearch
                             ->scalarNode('document_type')->defaultValue('logs')->end() // elasticsearch
                             ->scalarNode('ignore_error')->defaultValue(false)->end() // elasticsearch
+                            ->arrayNode('redis')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return array('id' => $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('host')->end()
+                                    ->scalarNode('password')->defaultNull()->end()
+                                    ->scalarNode('port')->defaultValue(6379)->end()
+                                    ->scalarNode('database')->defaultValue(0)->end()
+                                    ->scalarNode('key_name')->defaultValue('monolog_redis')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['id']) && !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is either the host or the service id of the Redis client.')
+                                ->end()
+                            ->end() // redis
+                            ->arrayNode('predis')
+                                ->canBeUnset()
+                                ->beforeNormalization()
+                                    ->ifString()
+                                    ->then(function ($v) { return array('id' => $v); })
+                                ->end()
+                                ->children()
+                                    ->scalarNode('id')->end()
+                                    ->scalarNode('host')->end()
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !isset($v['id']) && !isset($v['host']);
+                                    })
+                                    ->thenInvalid('What must be set is either the host or the service id of the Predis client.')
+                                ->end()
+                            ->end() // predis
                             ->arrayNode('config')
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
@@ -534,6 +596,10 @@ class Configuration implements ConfigurationInterface
                             ->end()
                             ->scalarNode('subject')->end() // swift_mailer and native_mailer
                             ->scalarNode('content_type')->defaultNull()->end() // swift_mailer
+                            ->arrayNode('headers') // native_mailer
+                                ->canBeUnset()
+                                ->scalarPrototype()->end()
+                            ->end()
                             ->scalarNode('mailer')->defaultValue('mailer')->end() // swift_mailer
                             ->arrayNode('email_prototype') // swift_mailer
                                 ->canBeUnset()
@@ -558,6 +624,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('client_id')->defaultNull()->end() // raven_handler
                             ->scalarNode('auto_log_stacks')->defaultFalse()->end() // raven_handler
                             ->scalarNode('release')->defaultNull()->end() // raven_handler
+                            ->scalarNode('environment')->defaultNull()->end() // raven_handler
                             ->scalarNode('message_type')->defaultValue(0)->end() // error_log
                             ->arrayNode('tags') // loggly
                                 ->beforeNormalization()
@@ -569,6 +636,16 @@ class Configuration implements ConfigurationInterface
                                     ->then(function ($v) { return array_filter(array_map('trim', $v)); })
                                 ->end()
                                 ->prototype('scalar')->end()
+                            ->end()
+                             // console
+                            ->variableNode('console_formater_options')
+                                ->defaultValue([])
+                                ->validate()
+                                    ->ifTrue(function ($v) {
+                                        return !is_array($v);
+                                    })
+                                    ->thenInvalid('console_formater_options must an array.')
+                                ->end()
                             ->end()
                             ->arrayNode('verbosity_levels') // console
                                 ->beforeNormalization()
@@ -709,6 +786,10 @@ class Configuration implements ConfigurationInterface
                             ->thenInvalid('You can not use excluded_http_codes together with excluded_404s in a FingersCrossedHandler')
                         ->end()
                         ->validate()
+                            ->ifTrue(function ($v) { return 'fingers_crossed' !== $v['type'] && (!empty($v['excluded_http_codes']) || !empty($v['excluded_404s'])); })
+                            ->thenInvalid('You can only use excluded_http_codes/excluded_404s with a FingersCrossedHandler definition')
+                        ->end()
+                        ->validate()
                             ->ifTrue(function ($v) { return 'filter' === $v['type'] && "DEBUG" !== $v['min_level'] && !empty($v['accepted_levels']); })
                             ->thenInvalid('You can not use min_level together with accepted_levels in a FilterHandler')
                         ->end()
@@ -826,6 +907,14 @@ class Configuration implements ConfigurationInterface
                         ->validate()
                             ->ifTrue(function ($v) { return 'server_log' === $v['type'] && empty($v['host']); })
                             ->thenInvalid('The host has to be specified to use a ServerLogHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'redis' === $v['type'] && empty($v['redis']); })
+                            ->thenInvalid('The host has to be specified to use a RedisLogHandler')
+                        ->end()
+                        ->validate()
+                            ->ifTrue(function ($v) { return 'predis' === $v['type'] && empty($v['redis']); })
+                            ->thenInvalid('The host has to be specified to use a RedisLogHandler')
                         ->end()
                     ->end()
                     ->validate()

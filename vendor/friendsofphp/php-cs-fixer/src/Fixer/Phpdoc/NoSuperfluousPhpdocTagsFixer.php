@@ -15,6 +15,9 @@ namespace PhpCsFixer\Fixer\Phpdoc;
 use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\DocBlock\Annotation;
 use PhpCsFixer\DocBlock\DocBlock;
+use PhpCsFixer\Fixer\ConfigurationDefinitionFixerInterface;
+use PhpCsFixer\FixerConfiguration\FixerConfigurationResolver;
+use PhpCsFixer\FixerConfiguration\FixerOptionBuilder;
 use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\FixerDefinition\VersionSpecification;
@@ -25,7 +28,7 @@ use PhpCsFixer\Tokenizer\CT;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
 
-final class NoSuperfluousPhpdocTagsFixer extends AbstractFixer
+final class NoSuperfluousPhpdocTagsFixer extends AbstractFixer implements ConfigurationDefinitionFixerInterface
 {
     /**
      * {@inheritdoc}
@@ -39,18 +42,29 @@ final class NoSuperfluousPhpdocTagsFixer extends AbstractFixer
 class Foo {
     /**
      * @param Bar $bar
+     * @param mixed $baz
      */
-    public function doFoo(Bar $bar) {}
+    public function doFoo(Bar $bar, $baz) {}
 }
 '),
+                new CodeSample('<?php
+class Foo {
+    /**
+     * @param Bar $bar
+     * @param mixed $baz
+     */
+    public function doFoo(Bar $bar, $baz) {}
+}
+', ['allow_mixed' => true]),
                 new VersionSpecificCodeSample('<?php
 class Foo {
     /**
      * @param Bar $bar
+     * @param mixed $baz
      *
      * @return Baz
      */
-    public function doFoo(Bar $bar): Baz {}
+    public function doFoo(Bar $bar, $baz): Baz {}
 }
 ', new VersionSpecification(70000)),
             ]
@@ -108,7 +122,7 @@ class Foo {
             );
 
             foreach ($docBlock->getAnnotationsOfType('param') as $annotation) {
-                if (0 === Preg::match('/@param\s+(?:\S|\s(?!\$))+\s(\$\S+)/', $annotation->getContent(), $matches)) {
+                if (0 === Preg::match('/@param(?:\s+[^\$]\S+)?\s+(\$\S+)/', $annotation->getContent(), $matches)) {
                     continue;
                 }
 
@@ -132,6 +146,19 @@ class Foo {
 
             $tokens[$index] = new Token([T_DOC_COMMENT, $docBlock->getContent()]);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createConfigurationDefinition()
+    {
+        return new FixerConfigurationResolver([
+            (new FixerOptionBuilder('allow_mixed', 'Whether type `mixed` without description is allowed (`true`) or considered superfluous (`false`)'))
+                ->setAllowedTypes(['bool'])
+                ->setDefault(false)
+                ->getOption(),
+        ]);
     }
 
     private function findDocumentedFunction(Tokens $tokens, $index)
@@ -254,8 +281,12 @@ class Foo {
 
         $annotationTypes = $this->toComparableNames($annotation->getTypes(), $symbolShortNames);
 
+        if (['null'] === $annotationTypes) {
+            return false;
+        }
+
         if (['mixed'] === $annotationTypes && null === $info['type']) {
-            return true;
+            return !$this->configuration['allow_mixed'];
         }
 
         $actualTypes = null === $info['type'] ? [] : [$info['type']];

@@ -27,7 +27,7 @@ use Doctrine\ORM\Query\QueryException;
 /**
  * "DATE_ADD" "(" ArithmeticPrimary "," ArithmeticPrimary "," StringPrimary ")"
  *
- * 
+ *
  * @link    www.doctrine-project.org
  * @since   2.0
  * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
@@ -41,6 +41,7 @@ class DateAddFunction extends FunctionNode
 
     /**
      * @override
+     * @inheritdoc
      */
     public function getSql(SqlWalker $sqlWalker)
     {
@@ -50,7 +51,11 @@ class DateAddFunction extends FunctionNode
                     $this->firstDateExpression->dispatch($sqlWalker),
                     $this->intervalExpression->dispatch($sqlWalker)
                 );
-
+            case 'minute':
+                return $sqlWalker->getConnection()->getDatabasePlatform()->getDateAddMinutesExpression(
+                    $this->firstDateExpression->dispatch($sqlWalker),
+                    $this->intervalExpression->dispatch($sqlWalker)
+                );
             case 'hour':
                 return $sqlWalker->getConnection()->getDatabasePlatform()->getDateAddHourExpression(
                     $this->firstDateExpression->dispatch($sqlWalker),
@@ -61,22 +66,32 @@ class DateAddFunction extends FunctionNode
                     $this->firstDateExpression->dispatch($sqlWalker),
                     $this->intervalExpression->dispatch($sqlWalker)
                 );
-
+            case 'week':
+                return $sqlWalker->getConnection()->getDatabasePlatform()->getDateAddWeeksExpression(
+                    $this->firstDateExpression->dispatch($sqlWalker),
+                    $this->intervalExpression->dispatch($sqlWalker)
+                );
             case 'month':
                 return $sqlWalker->getConnection()->getDatabasePlatform()->getDateAddMonthExpression(
+                    $this->firstDateExpression->dispatch($sqlWalker),
+                    $this->intervalExpression->dispatch($sqlWalker)
+                );
+            case 'year':
+                return $sqlWalker->getConnection()->getDatabasePlatform()->getDateAddYearsExpression(
                     $this->firstDateExpression->dispatch($sqlWalker),
                     $this->intervalExpression->dispatch($sqlWalker)
                 );
 
             default:
                 throw QueryException::semanticalError(
-                    'DATE_ADD() only supports units of type second, hour, day and month.'
+                    'DATE_ADD() only supports units of type second, minute, hour, day, week, month and year.'
                 );
         }
     }
 
     /**
      * @override
+     * @inheritdoc
      */
     public function parse(Parser $parser)
     {

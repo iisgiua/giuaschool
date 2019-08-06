@@ -42,12 +42,12 @@ class ArgumentNameConverter
         foreach ($argumentMetadatas as $index => $argumentMetadata) {
             if ($argumentMetadata->isVariadic()) {
                 // set the rest of the arguments as this arg's value
-                $namedArguments[$argumentMetadata->getName()] = array_slice($controllerArguments, $index);
+                $namedArguments[$argumentMetadata->getName()] = \array_slice($controllerArguments, $index);
 
                 break;
             }
 
-            if (!array_key_exists($index, $controllerArguments)) {
+            if (!\array_key_exists($index, $controllerArguments)) {
                 throw new \LogicException(sprintf('Could not find an argument value for argument %d of the controller.', $index));
             }
 

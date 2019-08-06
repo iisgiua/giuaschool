@@ -22,10 +22,10 @@ namespace Doctrine\ORM\Tools\Console\Command;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Show information about mapped entities.
@@ -41,11 +41,10 @@ final class MappingDescribeCommand extends Command
      */
     protected function configure()
     {
-        $this
-            ->setName('orm:mapping:describe')
-            ->addArgument('entityName', InputArgument::REQUIRED, 'Full or partial name of entity')
-            ->setDescription('Display information about mapped objects')
-            ->setHelp(<<<EOT
+        $this->setName('orm:mapping:describe')
+             ->addArgument('entityName', InputArgument::REQUIRED, 'Full or partial name of entity')
+             ->setDescription('Display information about mapped objects')
+             ->setHelp(<<<EOT
 The %command.full_name% command describes the metadata for the given full or partial entity class name.
 
     <info>%command.full_name%</info> My\Namespace\Entity\MyEntity
@@ -54,7 +53,7 @@ Or:
 
     <info>%command.full_name%</info> MyEntity
 EOT
-            );
+             );
     }
 
     /**
@@ -62,10 +61,12 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $ui = new SymfonyStyle($input, $output);
+
         /* @var $entityManager \Doctrine\ORM\EntityManagerInterface */
         $entityManager = $this->getHelper('em')->getEntityManager();
 
-        $this->displayEntity($input->getArgument('entityName'), $entityManager, $output);
+        $this->displayEntity($input->getArgument('entityName'), $entityManager, $ui);
 
         return 0;
     }
@@ -75,20 +76,16 @@ EOT
      *
      * @param string                 $entityName    Full or partial entity class name
      * @param EntityManagerInterface $entityManager
-     * @param OutputInterface        $output
+     * @param SymfonyStyle           $ui
      */
-    private function displayEntity($entityName, EntityManagerInterface $entityManager, OutputInterface $output)
+    private function displayEntity($entityName, EntityManagerInterface $entityManager, SymfonyStyle $ui)
     {
-        $table = new Table($output);
-
-        $table->setHeaders(array('Field', 'Value'));
-
         $metadata = $this->getClassMetadata($entityName, $entityManager);
 
-        array_map(
-            array($table, 'addRow'),
+        $ui->table(
+            ['Field', 'Value'],
             array_merge(
-                array(
+                [
                     $this->formatField('Name', $metadata->name),
                     $this->formatField('Root entity name', $metadata->rootEntityName),
                     $this->formatField('Custom generator definition', $metadata->customGeneratorDefinition),
@@ -118,15 +115,13 @@ EOT
                     $this->formatField('Read only?', $metadata->isReadOnly),
 
                     $this->formatEntityListeners($metadata->entityListeners),
-                ),
-                array($this->formatField('Association mappings:', '')),
+                ],
+                [$this->formatField('Association mappings:', '')],
                 $this->formatMappings($metadata->associationMappings),
-                array($this->formatField('Field mappings:', '')),
+                [$this->formatField('Field mappings:', '')],
                 $this->formatMappings($metadata->fieldMappings)
             )
         );
-
-        $table->render();
     }
 
     /**
@@ -138,10 +133,9 @@ EOT
      */
     private function getMappedEntities(EntityManagerInterface $entityManager)
     {
-        $entityClassNames = $entityManager
-            ->getConfiguration()
-            ->getMetadataDriverImpl()
-            ->getAllClassNames();
+        $entityClassNames = $entityManager->getConfiguration()
+                                          ->getMetadataDriverImpl()
+                                          ->getAllClassNames();
 
         if ( ! $entityClassNames) {
             throw new \InvalidArgumentException(
@@ -185,7 +179,7 @@ EOT
 
         if (count($matches) > 1) {
             throw new \InvalidArgumentException(sprintf(
-                'Entity name "%s" is ambigous, possible matches: "%s"',
+                'Entity name "%s" is ambiguous, possible matches: "%s"',
                 $entityName, implode(', ', $matches)
             ));
         }
@@ -219,11 +213,7 @@ EOT
         }
 
         if (is_array($value)) {
-            if (defined('JSON_UNESCAPED_UNICODE') && defined('JSON_UNESCAPED_SLASHES')) {
-                return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            }
-
-            return json_encode($value);
+            return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         }
 
         if (is_object($value)) {
@@ -251,19 +241,19 @@ EOT
             $value = '<comment>None</comment>';
         }
 
-        return array(sprintf('<info>%s</info>', $label), $this->formatValue($value));
+        return [sprintf('<info>%s</info>', $label), $this->formatValue($value)];
     }
 
     /**
      * Format the association mappings
      *
-     * @param array
+     * @param array $propertyMappings
      *
      * @return array
      */
     private function formatMappings(array $propertyMappings)
     {
-        $output = array();
+        $output = [];
 
         foreach ($propertyMappings as $propertyName => $mapping) {
             $output[] = $this->formatField(sprintf('  %s', $propertyName), '');
@@ -285,14 +275,6 @@ EOT
      */
     private function formatEntityListeners(array $entityListeners)
     {
-        return $this->formatField(
-            'Entity listeners',
-            array_map(
-                function ($entityListener) {
-                    return get_class($entityListener);
-                },
-                $entityListeners
-            )
-        );
+        return $this->formatField('Entity listeners', array_map('get_class', $entityListeners));
     }
 }

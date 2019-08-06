@@ -1,21 +1,4 @@
 <?php
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
 
 namespace Doctrine\Common\DataFixtures;
 
@@ -37,7 +20,7 @@ class ReferenceRepository
      *
      * @var array
      */
-    private $references = array();
+    private $references = [];
 
     /**
      * List of identifiers stored for references
@@ -46,20 +29,15 @@ class ReferenceRepository
      *
      * @var array
      */
-    private $identities = array();
+    private $identities = [];
 
     /**
      * Currently used object manager
      *
-     * @var Doctrine\Common\Persistence\ObjectManager
+     * @var ObjectManager
      */
     private $manager;
 
-    /**
-     * Initialize the ReferenceRepository
-     *
-     * @param Doctrine\Common\Persistence\ObjectManager $manager
-     */
     public function __construct(ObjectManager $manager)
     {
         $this->manager = $manager;
@@ -85,6 +63,11 @@ class ReferenceRepository
         // Dealing with ORM UnitOfWork
         if (method_exists($uow, 'getEntityIdentifier')) {
             return $uow->getEntityIdentifier($reference);
+        }
+
+        // PHPCR ODM UnitOfWork
+        if ($this->manager instanceof PhpcrDocumentManager) {
+            return $uow->getDocumentId($reference);
         }
 
         // ODM UnitOfWork
@@ -132,7 +115,7 @@ class ReferenceRepository
      *
      * @param string $name
      * @param object $object - managed object
-     * @throws BadMethodCallException - if repository already has
+     * @throws \BadMethodCallException - if repository already has
      *      a reference by $name
      * @return void
      */
@@ -149,7 +132,7 @@ class ReferenceRepository
      * named by $name
      *
      * @param string $name
-     * @throws OutOfBoundsException - if repository does not exist
+     * @throws \OutOfBoundsException - if repository does not exist
      * @return object
      */
     public function getReference($name)
@@ -229,7 +212,7 @@ class ReferenceRepository
     /**
      * Get object manager
      *
-     * @return Doctrine\Common\Persistence\ObjectManager
+     * @return ObjectManager
      */
     public function getManager()
     {
