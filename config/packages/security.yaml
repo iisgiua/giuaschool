@@ -1,13 +1,20 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+
+security:
+    access_denied_url: ~
+
+    encoders:
+      App\Entity\Utente:
+      algorithm: bcrypt
+      cost: 12
+
     providers:
-        in_memory: { memory: null }
-    firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
-        main:
-            anonymous: true
+      db_provider:
+        entity:
+          class: App:Utente
+          property: username
+
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -17,6 +24,31 @@ security:
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
-    access_control:
+#    access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+
+
+
+
+  firewalls:
+    main:
+      provider: db_provider
+      logout_on_user_change: true
+      anonymous: ~
+      switch_user: { role: ROLE_AMMINISTRATORE, parameter: _alias }
+      logout:
+        path: /logout/
+        target: /login/form/
+        invalidate_session: true
+        handlers: [App\Security\LogoutHandler]
+      guard:
+        authenticators:
+          - App\Security\FormAuthenticator
+          - App\Security\TokenAuthenticator
+          - App\Security\CardAuthenticator
+          - App\Security\AppAuthenticator
+          - App\Security\EnrollAuthenticator
+        entry_point: App\Security\FormAuthenticator
+
+
