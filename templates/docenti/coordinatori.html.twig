@@ -1,0 +1,30 @@
+{% extends 'docenti/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <table class="table table-striped table-bordered ">
+    <caption>Lista coordinatori:</caption>
+    <thead>
+      <tr>
+        <th>{{ 'label.sede'|trans }}</th>
+        <th>{{ 'label.classe'|trans }}</th>
+        <th>{{ 'label.coordinatore'|trans }}</th>
+        <th>{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for c in lista %}
+      <tr>
+        <td>{{ c.citta }}</td>
+        <td>{{ c.anno }} {{ c.sezione }}</td>
+        <td>{{ c.cognome }} {{ c.nome }} ({{ c.username }})</td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('docenti_coordinatori_delete', {'id': c.id}) }}" role="button"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>{{ 'label.delete'|trans }}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% include('include/form.html.twig') %}
+</div>
+{% endblock %}

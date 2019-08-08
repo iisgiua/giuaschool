@@ -1,38 +1,18 @@
+# config/packages/prod/monolog.yaml
+
 monolog:
-    use_microseconds: false
-    channels: ["command"]
-    handlers:
-        main:
-            type: rotating_file
-            max_files: 30
-            path: "%kernel.logs_dir%/app_%kernel.environment%.log"
-            level: warning
-            channels: ["!command"]
-        command:
-            type: rotating_file
-            max_files: 30
-            path: "%kernel.logs_dir%/command_%kernel.environment%.log"
-            level: notice
-            channels: ["command"]
-
-
-#        console:
-#            type: console
-#            process_psr_3_messages: false
-#            channels: ["!event", "!doctrine"]
-#        deprecation:
-#            type: stream
-#            path: "%kernel.logs_dir%/%kernel.environment%.deprecations.log"
-#        deprecation_filter:
-#            type: filter
-#            handler: deprecation
-#            max_level: info
-#            channels: ["php"]
-
-
-
-
-
-
-
-
+  use_microseconds: false
+  channels: ['command']
+  handlers:
+    main:
+      type: 'rotating_file'
+      max_files: 30
+      path: '%kernel.logs_dir%/app_%kernel.environment%.log'
+      level: 'warning'
+      channels: ['!command']
+    command:
+      type: 'rotating_file'
+      max_files: 30
+      path: '%kernel.logs_dir%/command_%kernel.environment%.log'
+      level: 'notice'
+      channels: ['command']

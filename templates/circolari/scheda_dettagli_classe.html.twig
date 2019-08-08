@@ -1,0 +1,35 @@
+
+{% for k,c in dati %}
+<div class="modal-header gs-pb-0 gs-noborder">
+  <h3 class="modal-title gs-h3">Circolare n. {{ c.numero }} del {{ c.data|date('d/m/Y') }}</h3>
+  <h4 class="modal-title gs-h4"><em>{{ c.oggetto }}</em></h4>
+</div>
+<div class="modal-body gs-pt-0">
+  <div class="gs-mt-2">
+    <div class="col-sm-2"><strong>Documento:</strong></div>
+    <div class="col-sm-10">
+      <a target="_blank" href="{{ path('circolari_download', {'id': c.id, 'doc': 0}) }}" title="Scarica la circolare"><strong>Circolare n. {{ c.numero }}</strong></a>
+    </div>
+  </div>
+  {% if c.allegati|length > 0 %}
+  <div class="gs-mt-2">
+    <div class="col-sm-2"><strong>Allegati:</strong></div>
+    <div class="col-sm-10">
+    {% for n,a in c.allegati %}
+      <a target="_blank" href="{{ path('circolari_download', {'id': c.id, 'doc': n+1}) }}" title="Scarica l'allegato"><strong>Allegato {{ n+1 }}</strong></a><br>
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <div class="text-center gs-mt-2">
+    <a class="btn btn-success" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'id': c.id}) }}" role="button" title="Conferma la lettura della circolare alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
+  </div>
+</div>
+<hr class="gs-hr gs-mb-0">
+{% endfor %}
+<div class="gs-mt-2 gs-mb-3 text-center">
+{% if dati|length > 1 %}
+  <a class="btn btn-success gs-mr-4" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'id': 0}) }}" role="button" title="Conferma la lettura di tutte le circolari alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
+{% endif %}
+  <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Annulla</strong></button>
+</div>

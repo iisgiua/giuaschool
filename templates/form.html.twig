@@ -1,0 +1,121 @@
+{% extends 'bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block submit_row %}
+{% apply spaceless %}
+  {% if attr.widget is defined and attr.widget == 'gs-button-start' %}
+  <div class="form-group">
+    <div class="{{ block('form_label_class') }}"></div>
+    <div class="{{ block('form_group_class') }}">
+      {{ form_widget(form, {'attr': {'widget': false, 'class': attr.class|default('btn-default') ~ ' gs-mr-3'}}) }}
+  {% elseif attr.widget is defined and attr.widget == 'gs-button-end' %}
+      {{ form_widget(form, {'attr': {'widget': false, 'class': attr.class|default('btn-default')}}) }}
+    </div>
+  </div>
+  {% elseif attr.widget is defined and attr.widget == 'gs-button-inline' %}
+      {{ form_widget(form, {'attr': {'widget': false, 'class': attr.class|default('btn-default') ~ ' gs-mr-3'}}) }}
+  {% else %}
+  <div class="form-group">
+    <div class="{{ block('form_label_class') }}"></div>
+    <div class="{{ block('form_group_class') }}">
+      {{ form_widget(form) }}
+    </div>
+  </div>
+  {% endif %}
+{% endapply %}
+{% endblock submit_row %}
+
+{%- block reset_row -%}
+  {{ block('submit_row') }}
+{%- endblock reset_row -%}
+
+{%- block button_row -%}
+  {{ block('submit_row') }}
+{%- endblock button_row -%}
+
+{%- block date_widget -%}
+{% apply spaceless %}
+  {% if attr.widget is defined and attr.widget == 'gs-picker' %}
+    <div class="input-group date">
+      {{ form_widget(form, {'attr': {'widget': false, 'autocomplete': 'off'}}) }}
+      <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+    </div>
+  {% else %}
+    {{ parent() }}
+  {% endif %}
+{% endapply %}
+{%- endblock date_widget -%}
+
+{%- block time_widget -%}
+{% apply spaceless %}
+  {% if attr.widget is defined and attr.widget == 'gs-picker' %}
+    <div class="input-group time">
+      {{ form_widget(form, {'attr': {'widget': false, 'autocomplete': 'off'}}) }}
+      <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-time"></span></span>
+    </div>
+  {% else %}
+    {{ parent() }}
+  {% endif %}
+{% endapply %}
+{%- endblock time_widget -%}
+
+{%- block choice_widget_expanded -%}
+{% apply spaceless %}
+  {% if 'checkbox-grouped-1' in label_attr.class|default('') %}
+    {% set num_col = 1 %}
+  {% elseif 'checkbox-grouped-2' in label_attr.class|default('') %}
+    {% set num_col = 2 %}
+  {% elseif 'checkbox-grouped-3' in label_attr.class|default('') %}
+    {% set num_col = 3 %}
+  {% elseif 'checkbox-grouped-4' in label_attr.class|default('') %}
+    {% set num_col = 4 %}
+  {% endif %}
+  {% if num_col is defined %}
+    {% set label_attr = label_attr|merge({class: label_attr.class|replace({('checkbox-grouped-'~num_col): 'gs-checkbox-inline col-sm-'~(12/num_col)})|trim}) %}
+    {% for group_label, group in choices %}
+      <div class="gs-big text-center"><strong><em>{{ group_label }}</em></strong></div>
+      <div class="clearfix">
+        {% for key, choice in group %}
+          {{- form_widget(form[key], {
+            parent_label_class: label_attr.class|default(''),
+            translation_domain: choice_translation_domain,
+          }) -}}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% elseif 'checkbox-split-vertical' in label_attr.class|default('') %}
+    {% set label_attr = label_attr|merge({class: label_attr.class|replace({'checkbox-split-vertical': 'gs-checkbox-split gs-checkbox-inline'})|trim}) %}
+    <div class="row">
+      <div class="col-sm-6">
+        {% for child in form %}
+          {% if loop.index <= (((form.children|length)+1)/2) %}
+            {{- form_widget(child, {
+                parent_label_class: label_attr.class|default(''),
+                translation_domain: choice_translation_domain,
+            }) -}}
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="col-sm-6">
+        {% for child in form %}
+          {% if loop.index > (((form.children|length)+1)/2) %}
+            {{- form_widget(child, {
+                parent_label_class: label_attr.class|default(''),
+                translation_domain: choice_translation_domain,
+            }) -}}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% elseif 'checkbox-split' in label_attr.class|default('') %}
+    {% set label_attr = label_attr|merge({class: label_attr.class|replace({'checkbox-split': 'gs-checkbox-inline col-sm-6'})|trim}) %}
+    {% for child in form %}
+      {{- form_widget(child, {
+          parent_label_class: label_attr.class|default(''),
+          translation_domain: choice_translation_domain,
+      }) -}}
+    {% endfor %}
+  {% else %}
+    {{ parent() }}
+  {% endif %}
+{% endapply %}
+{%- endblock choice_widget_expanded -%}

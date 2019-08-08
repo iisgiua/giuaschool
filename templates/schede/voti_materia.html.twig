@@ -1,0 +1,77 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">
+    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    <span class="sr-only">{{ 'label.close'|trans }}</span>
+  </button>
+  <h3 class="modal-title gs-h3">{{ info.alunno }}</h3>
+  <h4 class="modal-title gs-h4"><em>{{ info.materia }}</em></h4>
+</div>
+<div class="modal-body">
+{% if info.bes != 'N' or info.note is not empty %}
+  <p class="bg-info gs-pl-2 gs-pr-2 gs-mt-0">
+    <strong>{{ ('label.bes_'~info.bes)|trans }}</strong>
+    {{ (info.bes != 'N' and info.note is not empty) ? '<br>' }}
+    <strong>{{ info.note }}</strong>
+  </p>
+{% endif %}
+{% for periodo,v in dati.lista %}
+  {% for tipo in ['S','O','P'] %}
+    {% if v[tipo] is defined %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big"><strong>{{ periodo }} - {{ ('label.voti_'~tipo)|trans }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-2">Data</th>
+        <th class="col-sm-7">Argomenti o descrizione della prova</th>
+        <th class="col-sm-3">Valutazione</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for data,v1 in v[tipo] %}
+        {% for e in v1 %}
+      <tr>
+        <td{{ e.docente_id ? ' class="bg-info"' }}><strong>{{ e.data_str }}</strong></td>
+        <td{{ e.docente_id ? ' class="bg-info"' }}>
+          <small>{{ e.argomento }}</small>
+          {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
+        </td>
+        <td{{ e.docente_id ? ' class="bg-info"' }}>
+          {% if e.voto > 0 %}<span class="label label-{{ not e.visibile ? 'default' : (e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success')) }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
+          <small>{{ e.giudizio }}</small>
+          {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
+        </td>
+      </tr>
+        {% endfor %}
+      {% endfor %}
+      {% if dati.media[periodo][tipo] is defined %}
+      <tr>
+        <td colspan="2" class="bg-success text-right gs-big"><strong><em>Media {{ ('label.voti_'~tipo)|trans }}</em></strong></td>
+        <td class="bg-success"><strong class="gs-big"><em>{{ dati.media[periodo][tipo] }}</em></strong></td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+    {% endif %}
+  {% endfor %}
+  <div class="alert alert-warning text-center" role="alert">
+    <strong class="gs-big"><em>{{ periodo }}</em></strong><br>
+    <strong>Ore di lezione: {{ dati.lezioni[periodo].ore }} - Ore di assenza: {{ dati.lezioni[periodo].assenze }} ({{ dati.lezioni[periodo].percentuale }}%)</strong>
+  {% if dati.media[periodo]['totale'] is defined %}
+    <br>
+    <strong class="gs-big"><em>Media Complessiva {{ dati.media[periodo]['totale'] }}</em></strong>
+  {% endif %}
+  </div>
+{% else %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">Non sono presenti valutazioni</strong>
+  </div>
+{% endfor %}
+{% if dati.precedente is defined %}
+  {% for prec in dati.precedente %}
+  <div class="alert alert-info  text-center gs-mt-4" role="alert">
+    <strong class="gs-big"><em>{{ prec.nome }}</em></strong><br>
+    <strong class="gs-big"><em>{{ prec.voto ? prec.voto : 'Non sono presenti valutazioni' }}</em></strong><br>
+  </div>
+  {% endfor %}
+{% endif %}
+</div>

@@ -1,0 +1,6 @@
+<nav class="gs-navbar-submenu">
+  <ul class="nav nav-tabs">
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,18) == 'segreteria_assenze' ? ' class="active"' }}><a href="{{ path('segreteria_assenze') }}" title="Visualizza la frequenza degli alunni">Frequenza</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,19) == 'segreteria_scrutini' ? ' class="active"' }}><a href="{{ path('segreteria_scrutini') }}" title="Visualizza gli scrutini degli alunni">Scrutini</a></li>
+  </ul>
+</nav>

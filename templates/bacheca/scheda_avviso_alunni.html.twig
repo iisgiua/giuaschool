@@ -1,0 +1,31 @@
+
+{% for k,a in dati.lista %}
+<div class="modal-header gs-pb-0 gs-noborder">
+  <h3 class="modal-title gs-h3">{{ a.data|date('d/m/Y') }}</h3>
+  <h4 class="modal-title gs-h4"><em>{{ a.oggetto }}</em></h4>
+</div>
+<div class="modal-body gs-pt-0">
+  <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
+    <div class="gs-text-normal">{{ dati.testo[a.id]|nl2br }}</div>
+    <div class="text-right gs-text-normal"><em>({{ a.docente.nome }} {{ a.docente.cognome }})</em></div>
+  </div>
+  {% if a.allegati|length > 0 %}
+  <div class="gs-mt-2">
+    <strong>Allegati:</strong>
+  {% for al in a.allegati %}
+    <a class="gs-ml-3" target="_blank" href="{{ path('file_avviso', {'avviso': a.id, 'allegato': loop.index}) }}" title="Scarica l'allegato"><strong>Allegato-{{ loop.index }}</strong></a>
+  {% endfor %}
+  </div>
+  {% endif %}
+  <div class="text-center gs-mt-2">
+    <a class="btn btn-success" href="{{ path('bacheca_avvisi_alunni_firma', {'classe': classe.id, 'id': a.id}) }}" role="button" title="Conferma la lettura dell'avviso alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
+  </div>
+</div>
+<hr class="gs-hr gs-mb-0">
+{% endfor %}
+<div class="gs-mt-2 gs-mb-3 text-center">
+{% if dati.lista|length > 1 %}
+  <a class="btn btn-success gs-mr-4" href="{{ path('bacheca_avvisi_alunni_firma', {'classe': classe.id, 'id': 'ALL'}) }}" role="button" title="Conferma la lettura di tutti gli avvisi alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
+{% endif %}
+  <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Annulla</strong></button>
+</div>

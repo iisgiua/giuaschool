@@ -1,0 +1,63 @@
+{% extends 'ruolo_genitore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if classe %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_argomenti'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">Classe non definita</h1>
+  {% endif %}
+  {% if errore %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+  {% else %}
+  <div class="row gs-mb-1">
+    <div class="col-xs-12">
+      <strong class="gs-big">Materia:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare la materia da visualizzare">{{ info.materia }}<span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for k,v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_argomenti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+    {% for periodo,v in dati %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th>Data</th>
+        <th>Argomenti</th>
+        <th>Attività</th>
+      {% if alunno.bes == 'H' %}
+        <th>Sostegno</th>
+      {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for data,v1 in v %}
+        {% for e in v1 %}
+      <tr>
+          {% if loop.first %}
+        <td style="background: #ffffff" rowspan="{{ v1|length }}">
+          <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {'data': data}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
+        </td>
+          {% endif %}
+        <td><small>{{ e.argomento }}</small></td>
+        <td><small>{{ e.attivita }}</small></td>
+          {% if alunno.bes == 'H' %}
+        <td><small>{{ e.argomento_sost }}{{ e.argomento_sost and e.attivita_sost ? '<br>' }}{{ e.attivita_sost }}</small></td>
+          {% endif %}
+      </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

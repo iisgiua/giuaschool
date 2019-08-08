@@ -1,0 +1,27 @@
+<p style="text-align:center; font-family:times; font-size:12pt">
+  <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
+  <strong><i>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong><br>
+  <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
+  TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
+  Email: {{ app.session->get('/CONFIG/SCUOLA/email_istituto') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session->get('/CONFIG/SCUOLA/url_istituto') }}</span>
+</p>
+<p style="text-align:center; font-size:13pt">
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico')[4:] }}</strong><br>
+  <strong>Ore di lezione svolte dal {{ search.inizio|date('d/m/Y') }} al {{ search.fine|date('d/m/Y') }}</strong>
+</p>
+<br>
+<table border="1" cellpadding="2" style="font-size:10pt">
+  <tr nobr="true">
+    <td width="35%" style="text-align:center"><strong>Cognome</strong></td>
+    <td width="35%" style="text-align:center"><strong>Nome</strong></td>
+    <td width="30%" style="text-align:center"><strong>Ore totali</strong></td>
+  </tr>
+{% for d in lista %}
+  <tr nobr="true">
+    <td><strong>{{ d.cognome }}</strong></td>
+    <td><strong>{{ d.nome }}</strong></td>
+    <td><strong>{{ d.ore|number_format(1,',','') }}</strong></td>
+  </tr>
+{% endfor %}
+</table>

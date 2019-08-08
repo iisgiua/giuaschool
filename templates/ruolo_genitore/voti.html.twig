@@ -1,0 +1,89 @@
+{% extends 'ruolo_genitore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_voti'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  {% if errore %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+  {% else %}
+  <div class="row gs-mb-1">
+    <div class="col-xs-12">
+      <strong class="gs-big">Materia:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare la materia da visualizzare">{{ info.materia }}<span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for k,v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_voti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+    {% for periodo,v in dati %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th>Materia</th>
+        <th>Valutazioni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for materia,v1 in v %}
+      <tr>
+        <td><strong>{{ materia }}</strong></td>
+        <td>
+        {% for data,v2 in v1 %}
+          {% for e in v2 %}
+            {% if e.voto > 0 %}
+          <button type="button" class="btn btn-xs btn-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
+            {% else %}
+          <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}"><span class="glyphicon glyphicon-asterisk"></span></button>
+            {% endif %}
+          <div id="voti-{{ e.id }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <p><strong>Data:</strong> {{ e.data }}</p>
+                <p><strong>Tipo:</strong> {{ e.tipo == 'S' ? 'Scritto' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</p>
+              {% if e.argomento is not empty %}
+                <p><strong>Argomenti o descrizione della prova:</strong><br>{{ e.argomento }}</p>
+              {% endif %}
+              {% if e.giudizio is not empty %}
+                <p><strong>Giudizio:</strong><br>{{ e.giudizio }}</p>
+              {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+      {% include 'include/modal-info.html.twig' %}
+    {% else %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">Non sono presenti valutazioni</strong>
+  </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').text(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
+});
+</script>
+{% endblock %}

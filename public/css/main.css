@@ -1,0 +1,39 @@
+/***** MODIFICHE A CLASSI ESISTENTI *****/
+
+#gs-header .it-header-slim-wrapper {
+  background-color: #00264d; /* variante a11 */
+}
+
+#gs-header .breadcrumb-container {
+  font-size: 0.8rem;
+}
+
+#gs-header .breadcrumb-item .separator::after {
+  content: ">";
+}
+
+#gs-header nav button.custom-navbar-toggler {
+  padding: 0.2rem;
+  margin-left: 2px;
+  margin-top: -0.12rem;
+}
+#gs-header.is-sticky nav button.custom-navbar-toggler {
+  margin-top: -0.6rem;
+}
+
+#gs-footer .it-footer-main h2 {
+  font-size: 1.25em;
+  margin-bottom: 0;
+  font-weight: 600;
+  letter-spacing: unset;
+  line-height: 1.1;
+}
+#gs-footer .it-footer-main h3 {
+  font-size: .889em;
+  font-weight: 400;
+  margin-bottom: 0;
+}
+#gs-footer .it-footer-main h4 {
+  text-transform: uppercase;
+  font-size: 16px;
+}

@@ -1,0 +1,12 @@
+<nav class="gs-navbar-submenu">
+  <ul class="nav nav-tabs">
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,19) == 'coordinatore_classe' ? ' class="active"' }}><a href="{{ path('coordinatore_classe') }}" title="Scegli la classe">Classe</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,20) == 'coordinatore_assenze' ? ' class="active"' }}><a href="{{ path('coordinatore_assenze') }}" title="Controllo delle assenze">Assenze</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,17) == 'coordinatore_note' ? ' class="active"' }}><a href="{{ path('coordinatore_note') }}" title="Controllo delle note disciplinari">Note</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,17) == 'coordinatore_voti' ? ' class="active"' }}><a href="{{ path('coordinatore_voti') }}" title="Controllo delle valutazioni">Voti</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,23) == 'coordinatore_situazione' ? ' class="active"' }}><a href="{{ path('coordinatore_situazione') }}" title="Controllo della situazione generale di un alunno">Situazione</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,18) == 'coordinatore_avvis' ? ' class="active"' }}><a href="{{ path('coordinatore_avvisi') }}" title="Gestione degli avvisi per la classe">Avvisi</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,22) == 'coordinatore_scrutinio' ? ' class="active"' }}><a href="{{ path('coordinatore_scrutinio') }}" title="Gestione dello scrutinio">Scrutinio</a></li>
+  </ul>
+</nav>
+

@@ -1,0 +1,16 @@
+<div class="panel panel-primary gs-mt-5" >
+  <div class="panel-heading">
+    <div class="panel-title">{{ form_title|trans }}</div>
+  </div>
+  <div class="panel-body" >
+    {{ form_start(form) }}
+    {% if form_success %}
+      <div class="has-success"><span class="help-block gs-big"><strong><span class="glyphicon glyphicon-ok gs-mr-2" aria-hidden="true"></span>{{ form_success|trans|raw }}</strong></span></div>
+    {% endif %}
+    {% if form_help %}
+      <div class="help-block gs-text-normal"><em>{{ form_help|trans|raw  }}</em></div>
+    {% endif %}
+    {{ form_widget(form) }}
+    {{ form_end(form) }}
+  </div>
+</div>

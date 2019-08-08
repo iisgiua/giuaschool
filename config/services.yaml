@@ -1,78 +1,51 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
+# giuaschool-2019/config/services.yaml
 
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
   locale: it
   locale_date: 'd/m/Y'
   locale_time: 'H:i'
   locale_datetime: 'd/m/Y H:i'
-
-  container.autowiring.strict_mode: true
-  container.dumper.inline_class_loader: true
-
+  dir_classi:     '%kernel.project_dir%/FILES/archivio/classi'
+  dir_registri:   '%kernel.project_dir%/FILES/archivio/registri'
+  dir_scrutini:   '%kernel.project_dir%/FILES/archivio/scrutini'
+  dir_avvisi:     '%kernel.project_dir%/FILES/upload/avvisi'
+  dir_circolari:  '%kernel.project_dir%/FILES/upload/circolari'
+  dir_foto:       '%kernel.project_dir%/FILES/upload/foto'
+  dir_tmp:        '%kernel.project_dir%/FILES/tmp'
 
 services:
-    # default configuration for services in *this* file
-    _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-services:
-  # default configuration for services in *this* file
   _defaults:
-    # automatically injects dependencies in your services
-    autowire: true
-    # automatically registers your services as commands, event subscribers, etc.
-    autoconfigure: true
-    # this means you cannot fetch services directly from the container via $container->get()
-    # if you need to do this, you can override this setting on individual services
-    public: false
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    public: false       # Allows optimizing the container by removing unused services
 
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/*'
+    exclude: '../src/{Command,Entity,Migrations,Tests,Kernel.php}'
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
-    App\:
-        resource: '../src/*'
-        exclude: '../src/{Command,DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
-
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: '../src/Controller'
-        tags: ['controller.service_arguments']
-
+  # controllers are imported separately to make sure services can be injected
+  # as action arguments even if you don't extend any base controller class
+  App\Controller\:
+    resource: '../src/Controller'
+    tags: ['controller.service_arguments']
 
   # explicit commands registration
-  AppBundle\Command\:
+  App\Command\:
     resource: '../src/Command/*'
     tags: ['console.command']
 
-
-
-
-
-
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-
-    # the `white_october.tcpdf` service will be injected when a
-    # `WhiteOctober\TCPDFBundle\Controller\TCPDFController` type-hint is detected
-    WhiteOctober\TCPDFBundle\Controller\TCPDFController: '@white_october.tcpdf'
-
-
-
-
   # ridefinisce sessione per poter usare NamespacedAttributeBag
   session:
-    class: Symfony\Component\HttpFoundation\Session\Session
+    class: 'Symfony\Component\HttpFoundation\Session\Session'
     public: true
     arguments:
       - '@session.storage'
       - '@session.attribute_namespacedbag'
       - '@session.flash_bag'
   session.attribute_namespacedbag:
-    class: Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag
+    class: 'Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag'
 
   # necessario per evitare warning di servizio deprecato
   App\Util\CsvImporter:
@@ -83,6 +56,12 @@ services:
   App\Util\PdfManager:
     arguments:
       $pdfcontroller: '@white_october.tcpdf'
+
+  # necessario per aggiungere un processor a monolog
+  App\Util\LogProcessor:
+    autowire: true
+    tags:
+      - { name: 'monolog.processor', method: 'processRecord' }
 
   # necessario per aggiungere parametro di configurazione
   App\Util\ScrutinioUtil:
@@ -99,8 +78,6 @@ services:
     arguments:
       $root: '%dir_classi%'
 
-
-
   # necessario per aggiungere parametro di configurazione
   App\Util\ArchiviazioneUtil:
     arguments:
@@ -110,12 +87,3 @@ services:
   App\Util\OtpUtil:
     arguments:
       $qrcode_file: '%kernel.project_dir%/vendor/tecnickcom/tcpdf/tcpdf_barcodes_2d.php'
-
-  # necessario per aggiungere un processor a monolog
-  App\Util\LogProcessor:
-    autowire: true
-    tags:
-      - { name: monolog.processor, method: processRecord }
-
-
-

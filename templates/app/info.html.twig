@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="gs-h1 text-center">Applicazioni e servizi disponibili per il Registro Elettronico</h1>
+  <p class="gs-big">In questa pagina sono elencate le applicazioni e i servizi per smartphone disponibili per il Registro Elettronico dell'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}.</p>
+  <p class="gs-big"><em>Attenzione: applicazioni scaricate da altre fonti sono da considerarsi non ufficiali e il oro uso espone al rischio di una violazione della privacy e di una potenziale diffusione non autorizzata dei dati degli utenti.</em></p>
+
+  {% if applist['GiuaReg'] is defined %}
+  <div class="alert alert-info gs-mt-5" role="alert">
+    <div class="row text-center"><strong class="gs-big">GiuaReg</strong></div>
+    <hr class="gs-mt-2 gs-mb-2">
+    <div class="row text-center">
+      <p class="gs-big"><strong>Semplice applicazione che ha il solo scopo di permettere la memorizzazione del nome utente e della password, in modo da evitarne l'inserimento ad ogni accesso.</strong></p>
+    </div>
+    <div class="row gs-text-normal">
+      <div class="col-sm-6">
+        <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso. L'applicazione utilizza un visualizzatore interno, ma in caso di problemi si consiglia di configurarla per l'utilizzo del browser predefinito dello smartphone.</p>
+        <p>Per poter utilizzare questa applicazione è necessario attivare sul proprio smartphone l'opzione per l'<em>installazione da fonti sconosciute</em>.</p>
+      </div>
+      <div class="col-sm-6">
+        <table class="table gs-big ">
+          <tbody>
+            <tr>
+              <td style="width:50%" class="text-right gs-noborder"><strong>Utenti abilitati:</strong></td>
+              <td style="width:50%" class="gs-noborder">Genitori e Alunni</td>
+            </tr>
+            <tr>
+              <td style="vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
+              <td class="gs-noborder">
+                <img src="{{ asset('img/android.png') }}" class="img-thumbnail" alt="Android" title="Android">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="row text-center">
+          <a class="btn btn-primary btn-sm" href="{{ path('app_download', {'id': applist['GiuaReg'].id}) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if applist['NotificaTelegram'] is defined %}
+  <div class="alert alert-success gs-mt-5" role="alert">
+    <div class="row text-center"><strong class="gs-big">Servizio di notifica tramite <em>Telegram</em></strong></div>
+    <hr class="gs-mt-2 gs-mb-2">
+    <div class="row text-center">
+      <p class="gs-big"><strong>Permette di ricevere le notifiche degli eventi del Registro Elettronico su un'apposita chat presente su <em>Telegram</em>.</strong></p>
+    </div>
+    <div class="row gs-text-normal">
+      <div class="col-sm-6">
+        <p><em>Telegram</em> è un'applicazione di messaggistica gratuita, simile al più diffuso <em>Whatsapp</em>, ma rispetto a questo ha un'architettura più aperta che permette di espanderne le funzionalità in modo semplice e veloce.</p>
+        <p>Per attivare le notifiche basta entrare nella chat dell'<em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</em> e seguire le istruzioni che verranno presentate.</p>
+        <p>Questo servizio è stato progettato e realizzato dall'alunno <em>Andrea Siddi</em> (classe 2<sup>a</sup> C).</p>
+      </div>
+      <div class="col-sm-6">
+        <table class="table gs-big ">
+          <tbody>
+            <tr>
+              <td style="width:50%" class="text-right gs-noborder"><strong>Utenti abilitati:</strong></td>
+              <td style="width:50%" class="gs-noborder">Alunni</td>
+            </tr>
+            <tr>
+              <td style="vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
+              <td class="gs-noborder">
+                <img src="{{ asset('img/android.png') }}" class="img-thumbnail" alt="Android" title="Android">
+                <img src="{{ asset('img/ios.png') }}" class="img-thumbnail" alt="IOS" title="IOS">
+                <img src="{{ asset('img/winphone.png') }}" class="img-thumbnail" alt="WinPhone" title="WinPhone">
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align:middle" class="text-right gs-noborder"><strong>App richiesta:</strong></td>
+              <td class="gs-noborder">
+                Telegram
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="row text-center">
+          <a class="btn btn-primary btn-sm" href="http://t.me/GiuaBot" title="Clicca per aprire la chat su Telegram"><strong class="gs-big">Vai alla chat</strong></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+
+</div>
+{% endblock %}

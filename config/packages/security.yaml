@@ -1,54 +1,32 @@
-security:
-    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+# config/packages/security.yaml
 
 security:
-    access_denied_url: ~
-
-    encoders:
-      App\Entity\Utente:
-      algorithm: bcrypt
-      cost: 12
-
-    providers:
-      db_provider:
-        entity:
-          class: App:Utente
-          property: username
-
-
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#firewalls-authentication
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
-#    access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
-
-
-
-
+  access_denied_url: ~
+  encoders:
+    App\Entity\Utente:
+      algorithm: 'auto'
+  providers:
+    db_provider:
+      entity:
+        class: 'App:Utente'
+        property: 'username'
   firewalls:
     main:
-      provider: db_provider
-      logout_on_user_change: true
+      provider: 'db_provider'
       anonymous: ~
-      switch_user: { role: ROLE_AMMINISTRATORE, parameter: _alias }
+      switch_user:
+        role: 'ROLE_AMMINISTRATORE'
+        parameter: '_alias'
       logout:
-        path: /logout/
-        target: /login/form/
+        path: '/logout/'
+        target: '/login/form/'
         invalidate_session: true
-        handlers: [App\Security\LogoutHandler]
+        handlers: ['App\Security\LogoutHandler']
       guard:
         authenticators:
-          - App\Security\FormAuthenticator
-          - App\Security\TokenAuthenticator
-          - App\Security\CardAuthenticator
-          - App\Security\AppAuthenticator
-          - App\Security\EnrollAuthenticator
-        entry_point: App\Security\FormAuthenticator
-
-
+          - 'App\Security\FormAuthenticator'
+          - 'App\Security\TokenAuthenticator'
+          - 'App\Security\CardAuthenticator'
+          - 'App\Security\AppAuthenticator'
+          - 'App\Security\EnrollAuthenticator'
+        entry_point: 'App\Security\FormAuthenticator'

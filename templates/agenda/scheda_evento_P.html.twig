@@ -1,0 +1,38 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">
+    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    <span class="sr-only">{{ 'label.close'|trans }}</span>
+  </button>
+  <h3 class="modal-title gs-h3">{{ data|date('d/m/Y') }}</h3>
+  <h4 class="modal-title gs-h4"><em>Compiti assegnati per casa</em></h4>
+</div>
+<div class="modal-body">
+{% for c in dati.compiti %}
+  <div class="alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2" role="alert">
+    <div class="gs-text-normal">
+      <strong class="gs-big">Classe: {{ c.avviso.cattedra.classe.anno }}ª {{ c.avviso.cattedra.classe.sezione }}</strong>
+    </div>
+    <div class="gs-text-normal">
+      <strong>Materia: {{ c.avviso.cattedra.materia.nome }}</strong>
+    </div>
+    <div class="gs-text-normal">
+      <strong>Destinatari:
+  {% if c.avviso.destinatariIndividuali %}
+    {% for u in c.utenti %}{{ u.cognome }} {{ u.nome }}{{ not loop.last ? ', ' }}{% endfor %}
+  {% else %}
+        tutta la classe
+  {% endif %}
+      </strong>
+    </div>
+    <div class="gs-text-normal gs-pt-3 gs-pb-3">{{ c.testo|nl2br }}</div>
+    <div class="text-right">
+  {% if c.azioni.edit is defined %}
+      <a class="btn btn-primary btn-xs" href="{{ path('agenda_compito_edit', {'id': c.avviso.id}) }}" role="button" title="Modifica i compiti per casa"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
+  {% endif %}
+  {% if c.azioni.delete is defined %}
+      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella i compiti per casa" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('agenda_compito_delete', {'id': c.avviso.id}) }}" data-text="{{ 'message.cancella_compito'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
+  {% endif %}
+    </div>
+  </div>
+{% endfor %}
+</div>

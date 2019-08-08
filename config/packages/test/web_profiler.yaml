@@ -1,11 +1,9 @@
-web_profiler:
-    toolbar: false
-    intercept_redirects: false
+# config/packages/test/web_profiler.yaml
 
 framework:
-    profiler: 
-	collect: false
-	enabled: true
-
-
-
+  profiler:
+    enabled: true
+    collect: false
+web_profiler:
+  toolbar: false
+  intercept_redirects: false

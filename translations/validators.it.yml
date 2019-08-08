@@ -1,0 +1,25 @@
+# app/Resources/translation/validators.it.yml
+
+field.notblank: Devi inserire un valore.
+field.minlength: Il valore inserito è troppo corto, deve avere almeno {{ limit }} caratteri.
+field.maxlength: Il valore inserito è troppo lungo, deve avere al massimo {{ limit }} caratteri.
+field.regex: Il valore inserito non ha un formato valido.
+field.email: Il valore inserito non è un indirizzo email valido.
+field.choice: Il valore indicato non è una scelta valida.
+field.date: La data inserita non è valida.
+field.unique: Il valore inserito è già presente nel sistema.
+field.phone: Il numero di telefono inserito non ha un formato valido.
+field.url: Il valore inserito non è un indirizzo web valido.
+field.time: L'ora inserita non è valida.
+field.datetime: La data o l'ora inserita non è valida.
+
+image.type: Il file caricato non è un formato valido per le immagini.
+image.width: L'immagine caricata ha una larghezza superiore a {{ max_width }} pixel.
+image.height: L'immagine caricata ha una altezza superiore a {{ max_height }} pixel.
+image.notsquare: L'immagine caricata non è quadrata.
+image.corrupted: È impossibile leggere l'immagine caricata.
+
+password.nomatch: Le due password devono essere identiche.
+password.wrong: Il valore non corrisponde alla password memorizzata.
+
+"The CSRF token is invalid. Please try to resubmit the form.": Pagina scaduta. Invia nuovamente le credenziali di accesso.

@@ -1,0 +1,45 @@
+<p style="text-align:center; font-family:times; font-size:12pt">
+  <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
+  <strong><i>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong><br>
+  <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
+  TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
+  Email: {{ app.session->get('/CONFIG/SCUOLA/email_istituto') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session->get('/CONFIG/SCUOLA/url_istituto') }}</span>
+</p>
+<p>&nbsp;</p>
+<p style="text-align:center; font-size:13pt">
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico')[4:] }}</strong><br>
+  <strong>Frequenza di {{ alunno.cognome }} {{ alunno.nome }} (nat{{ sesso }} il {{ alunno.dataNascita|date('d/m/Y') }})</strong><br>
+  <strong>Classe {{ dati.classe }}</strong>
+{% if dati.note is defined %}
+  <br><strong><em>{{ dati.note }}</em></strong>
+{% endif %}
+</p>
+<p>&nbsp;</p>
+{% for mese,v in dati.mese  %}
+<div style="text-align:center"><strong>{{ v.nome }}</strong></div>
+<table border="1">
+  <tr>
+  {% for giorno in v.inizio .. v.fine %}
+    {% if (date(v.anno~'-'~mese~'-'~giorno)|date('w') != 0) and v[giorno] is not defined %}
+    <td style="text-align:center; font-family:arial; font-size:10pt"><strong>{{ giorno }}</strong></td>
+    {% endif %}
+  {% endfor %}
+  </tr>
+  <tr>
+  {% for giorno in v.inizio .. v.fine %}
+    {% if (date(v.anno~'-'~mese~'-'~giorno)|date('w') != 0) and v[giorno] is not defined %}
+      {% if dati.iscritto[mese][giorno] is defined and dati.iscritto[mese][giorno] == 'N' %}
+    <td style="background-color:#AAAAAA">&nbsp;</td>
+      {% else %}
+    <td style="text-align:center; font-family:arial; font-size:10pt"><strong>{% if dati.lista[mese][giorno] is defined %}{{ dati.lista[mese][giorno] }}{% else %}&nbsp;{% endif %}</strong></td>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  </tr>
+</table>
+<br>
+{% endfor %}
+<div style="text-align:center">Legenda: <strong>A</strong> = assenza, <strong>R</strong> = ingresso in ritardo, <strong>U</strong> = uscita anticipata.</div>
+<br>
+<p>Cagliari, {{ date()|date('d/m/Y') }}.</p>

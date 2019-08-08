@@ -1,0 +1,66 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not cattedra and not classe %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_voti_dettagli'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_voti_dettagli'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ alunno ? ' ('~alunno.cognome~' '~alunno.nome~')' }}</em></h2>
+  <div class="row gs-mb-1">
+    <div class="col-sm-8">
+      <strong class="gs-big">Materia:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere la materia">{{ info.materia_scelta }}<span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for k,v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('lezioni_voti_sostegno', {'cattedra': cattedra.id, 'materia': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-sm-4 text-right">
+    </div>
+  </div>
+    {% if idmateria %}
+      {% for periodo,v in dati %}
+        {% for materia,v1 in v %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th>Data</th>
+        <th>Tipo</th>
+        <th>Argomenti o descrizione della prova</th>
+        <th>Valutazione</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for data,v2 in v1 %}
+            {% for e in v2 %}
+      <tr>
+        <td><strong>{{ e.data }}</strong></td>
+        <td>{{ ('label.voti_'~e.tipo)|trans }}</td>
+        <td><small>{{ e.argomento }}</small></td>
+        <td>
+          {% if e.voto > 0 %}<span class="label label-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
+          <small>{{ e.giudizio }}</small>
+        </td>
+      </tr>
+            {% endfor %}
+          {% endfor %}
+    </tbody>
+  </table>
+        {% endfor %}
+      {% else %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">Non sono presenti valutazioni</strong>
+  </div>
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

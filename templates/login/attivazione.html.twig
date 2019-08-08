@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container_fluid gs-mt-0">
+  {% if manutenzione is not empty and 'now'|date('H:i') <= manutenzione[2] %}
+  <div class="col-sm-12 bg-danger gs-mb-4 text-center">
+    <h1 class="gs-h2">ATTENZIONE</h1>
+    <p>
+      <span class="gs-big">A causa di una manutenzione programmata del sistema informatico, il registro elettronico non sarà disponibile
+      <strong>dalle ore {{ manutenzione[1] }} alle ore {{ manutenzione[2] }}</strong>.</span>
+    </p>
+  </div>
+  {% endif %}
+  {% if manutenzione is empty or 'now'|date('H:i') < manutenzione[1] or 'now'|date('H:i') > manutenzione[2] %}
+  <div class="col-sm-8 col-sm-offset-2 gs-mt-4">
+    <div class="panel panel-success" >
+      <div class="panel-heading">
+        <div class="panel-title"><strong>Attivazione dell'utente per gli studenti</strong></div>
+      </div>
+      <div class="panel-body">
+    {% if successo %}
+        <div class="alert alert-success">
+          <span class="gs-text-normal gs-big"><strong>{{ successo|trans|raw }}</strong></span>
+        </div>
+    {% endif %}
+        <div class="help-block">
+          <span class="gs-text-normal gs-big">
+            Inserisci i dati richiesti, assicurandoti che siano corretti. Quindi clicca sul pulsante <strong>Invia</strong>:
+            ti verrà inviata un'email con ulteriori istruzioni.
+          </span>
+        </div>
+        {{ form_start(form) }}
+    {% if errore %}
+        <div class="alert alert-danger">{{ errore|trans }}</div>
+    {% endif %}
+         {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

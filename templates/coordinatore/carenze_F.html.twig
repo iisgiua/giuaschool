@@ -1,0 +1,45 @@
+{{ form_start(form) }}
+  <div class="modal-header">
+    <h3 class="modal-title gs-h3">Scrutinio di <span class="text-info">{{ alunno.cognome }} {{ alunno.nome }}</span> - Classe {{ alunno.classe.anno~'ª '~alunno.classe.sezione }}</h3>
+  </div>
+  <div class="modal-body">
+    <div class="text-center text-info gs-mb-2">
+      <div><strong class="gs-big">Carenze</strong></div>
+      <div><em><strong>Cancellare gli argomenti delle carenze se non si desidera inviare comunicazioni alle famiglie.</strong></em></div>
+    </div>
+    <ul id="gs-form-collection" class="list-group">
+  {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] %}
+  {% for voto in form.lista %}
+      <li class="list-group-item gs-pt-2 gs-pb-2">
+        <div class="form-group gs-mb-0">
+          <div class="row gs-pl-5 gs-pr-5">
+            <strong class="gs-big">{{ voto.vars.value.materia.nome }}</strong>
+          </div>
+          <div class="row gs-mb-2">
+            <div class="col-sm-6 gs-pl-0">
+              <span class="gs-pl-5 gs-mr-3"><strong>Voto proposto</strong></span>
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ dati.proposte[voto.vars.value.materia.id] < 5 ? 'danger' : 'warning' }} gs-big">{{ valutazioni[dati.proposte[voto.vars.value.materia.id]] }}</span>
+            </div>
+            <div class="col-sm-6 gs-pl-0">
+              <span class="gs-pl-5 gs-mr-3"><strong>Voto deliberato</strong></span>
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-success gs-big">{{ valutazioni[voto.vars.value.unico] }}</span>
+            </div>
+          </div>
+          <div>
+            <label class="control-label col-sm-2" for="{{ voto.debito.vars.id }}">Argomenti</label>
+            <div class="col-sm-10">
+              {{ form_widget(voto.debito, {'attr': {'rows': 5}}) }}
+            </div>
+          </div>
+        </div>
+      </li>
+  {% endfor %}
+    </ul>
+  </div>
+  <div class="modal-footer">
+    {{ form_widget(form.submit) }}
+    <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+  </div>
+  {{ form_widget(form._token) }}
+{{ form_end(form, {'render_rest': false}) }}
+

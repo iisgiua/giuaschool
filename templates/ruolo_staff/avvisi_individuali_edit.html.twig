@@ -1,0 +1,88 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid gs-mt-4">
+  <div class="panel panel-primary" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body">
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+      {{ form_row(form.testo) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required" for="avvisi_individuali_edit_destinatari">Destinatari</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.filtroIndividualeClasse) }}
+          <div id="individuale_genitori" style="display:none">
+            <div class="col-sm-6"></div>
+            <div class="col-sm-6"></div>
+            {{ form_widget(form.filtroIndividuale) }}
+          </div>
+        </div>
+      </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+  {% include 'include/modal-waiting.html.twig' %}
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#individuale_genitori').on('change', 'label.gs-checkbox-inline input', function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  });
+  // init
+  var preset=[{% for id in form.filtroIndividuale.vars.data|split(',') %}{{ id }},{% endfor %}];
+  $("#avvisi_individuali_edit_filtroIndividualeClasse").change(function() {
+    var l = $('#individuale_genitori').find('div.col-sm-6:nth-child(1)');
+    var r = $('#individuale_genitori').find('div.col-sm-6:nth-child(2)');
+    l.html('');
+    r.html('');
+    if ($(this).val() == '') {
+      $('#individuale_genitori').hide();
+    } else {
+      $('#gs-modal-waiting').modal('show');
+      $.ajax({
+        url: "{{ path('staff_classe') }}/"+$(this).val(),
+        dataType: "json",
+        external_preset: preset,
+        success: function (data) {
+          var sl='';
+          var sr='';
+          $.each(data, function(idx,item){
+            var s='<label class="gs-pt-0 gs-checkbox-split gs-checkbox-inline">'+
+                '<input type="checkbox" id="avvisi_individuali_edit_filtroIndividuale_'+idx+
+                '" name="avvisi_individuali_edit[filtroIndividuale][]" value="'+item.id+'"> '+item.nome+'</label>';
+            if (idx % 2 === 0) {
+              sl+=s;
+            } else {
+              sr+=s;
+            }
+            });
+          l.html(sl);
+          r.html(sr);
+          for (i in this.external_preset) {
+            $('input[name="avvisi_individuali_edit[filtroIndividuale][]"][value="'+this.external_preset[i]+'"]').prop("checked", true).parent().addClass('active');
+          }
+          $('#individuale_genitori').show();
+          },
+        });
+      $('#gs-modal-waiting').modal('hide');
+    }
+    preset=[];
+  }).change();
+  $('form[name="avvisi_individuali_edit"]').submit(function(ev) {
+    var opt = $('input[name="avvisi_individuali_edit[filtroIndividuale][]"]:checked').map(function(i,el){return el.value;}).get();
+    $('#avvisi_individuali_edit_filtroIndividuale').val(opt);
+  });
+});
+</script>
+{% endblock %}

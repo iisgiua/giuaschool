@@ -1,0 +1,103 @@
+{% extends 'coordinatore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not classe %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_assenze'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <div class="row gs-mb-1">
+    <div class="col-sm-12 text-right">
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_assenze_stampa', {'classe': classe.id}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+    </div>
+  </div>
+  <table class="table table-bordered table-hover table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-5">Alunno</th>
+        <th class="col-sm-1">Assenze</th>
+        <th class="col-sm-1">Ritardi<br>(brevi)</th>
+        <th class="col-sm-1">Conteggio<br>Ritardi</th>
+        <th class="col-sm-1">Uscite</th>
+        <th class="col-sm-1">Conteggio<br>Uscite</th>
+        <th class="col-sm-2">Ore totali<br>e % su {{ dati.monte }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for alunno,a in dati.alunni %}
+      <tr>
+        <td>
+          <strong>{{ a.nome }}</strong>
+        {% if a.bes != 'N' %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+        {% endif %}
+        {% if a.note is not empty %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+        {% endif %}
+        </td>
+        <td>
+      {% if dati.statistiche[alunno].assenze is defined %}
+          <strong>{{ dati.statistiche[alunno].assenze }}</strong>
+        {% if dati.statistiche[alunno]['giustifica-ass'] > 0 %}
+          <span class="label label-danger gs-ml-3" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Assenze da giustificare">{{ dati.statistiche[alunno]['giustifica-ass'] }}</span>
+        {% endif %}
+      {% else %}
+          <strong>0</strong>
+      {% endif %}
+        </td>
+        <td>
+      {% if dati.statistiche[alunno].ritardi is defined %}
+          <strong>{{ dati.statistiche[alunno].ritardi }}</strong> ({{ dati.statistiche[alunno].brevi }})
+        {% if dati.statistiche[alunno]['giustifica-rit'] > 0 %}
+          <span class="label label-danger gs-ml-3" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Ritardi da giustificare">{{ dati.statistiche[alunno]['giustifica-rit'] }}</span>
+        {% endif %}
+      {% else %}
+          <strong>0</strong>
+      {% endif %}
+        </td>
+        <td>
+      {% if dati.statistiche[alunno].ritardi is defined and dati.statistiche[alunno]['conta-ritardi'] > 0 %}
+          <span class="label label-warning gs-ml-3" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Validi per il conteggio del numero massimo di ritardi">{{ dati.statistiche[alunno]['conta-ritardi'] }}</span>
+      {% else %}
+          <strong>0</strong>
+      {% endif %}
+        </td>
+        <td>
+      {% if dati.statistiche[alunno].uscite is defined %}
+          <strong>{{ dati.statistiche[alunno].uscite }}</strong>
+      {% else %}
+          <strong>0</strong>
+      {% endif %}
+        </td>
+        <td>
+      {% if dati.statistiche[alunno].uscite is defined and dati.statistiche[alunno]['conta-uscite'] > 0 %}
+          <span class="label label-warning gs-ml-3" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Valide per il conteggio del numero massimo di uscite anticipate">{{ dati.statistiche[alunno]['conta-uscite'] }}</span>
+      {% else %}
+          <strong>0</strong>
+      {% endif %}
+        </td>
+        <td>
+      {% if dati.statistiche[alunno].ore is defined %}
+          <strong>{{ dati.statistiche[alunno].ore }}</strong>
+          <span class="label label-{{ dati.statistiche[alunno].perc < 20 ? 'default' : (dati.statistiche[alunno].perc < 25 ? 'warning' : 'danger') }} gs-ml-3">{{ dati.statistiche[alunno].perc }}%</span>
+      {% else %}
+          <strong>0</strong>
+      {% endif %}
+        </td>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('[data-toggle="popover"]').popover();
+});
+</script>
+{% endblock %}

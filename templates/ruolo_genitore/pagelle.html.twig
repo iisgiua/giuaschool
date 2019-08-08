@@ -1,0 +1,306 @@
+{% extends 'ruolo_genitore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_pagelle'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  {% if errore %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+  {% else %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-12">
+      <strong class="gs-big">Periodo:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for p in ['P','1','F','I'] %}
+      {% if lista_periodi[p] is defined %}
+          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('genitori_pagelle', {'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
+      {% endif %}
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+    {% if dati.voti is defined %}
+      {% if periodo == 'P' %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-2">
+      <strong>Scrutinio del {{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}</strong>
+      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
+    </caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6">Materia</th>
+        <th class="col-sm-2">Voto</th>
+        <th class="col-sm-4">Ore di assenza</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for materia,m in dati.materie %}
+      <tr>
+        <td><strong>{{ m.nome }}</strong></td>
+          {% if m.tipo == 'R' %}
+            {% if alunno.religione != 'S' %}
+        <td><strong>--</strong></td>
+        <td></td>
+            {% else %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['P']['R'][dati.voti[materia].unico] }}</span></td>
+        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+            {% endif %}
+          {% elseif m.tipo == 'C' %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ dati.voti[materia].unico == 4 ? 'NC' : dati.voti[materia].unico }}</span></td>
+        <td></td>
+          {% else %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 5 ? 'danger' : (dati.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ dati.voti[materia].unico == 0 ? 'NC' : dati.voti[materia].unico }}</span></td>
+        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+          {% endif %}
+      </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+        {% if dati.scrutinio is defined and classe.anno > 3 and dati['nuovicrediti'] > 0 %}
+  <div class="alert alert-info text-center gs-mb-5" role="alert">
+    <strong class="gs-big">
+      Si comunica che il Consiglio di Classe ha provveduto a convertire il credito scolastico conseguito
+      {{ classe.anno == 5 ? 'nelle classi terza e quarta' : 'nella classe terza' }}
+      secondo quanto previsto per il nuovo Esame di Stato (d.lgs. 62/2017 e circolare MIUR 3050.04-10-2018),
+      attribuendo il seguente punteggio:<br><br>
+    </strong>
+    <span class="label label-success gs-big">{{ dati['nuovicrediti'] }}</span>
+  </div>
+        {% endif %}
+        {% if dati.debiti is defined %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-2">
+      <strong>Indicazioni per il recupero</strong>
+      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'D', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con le indicazioni del recupero"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei debiti</strong></a>
+    </caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-4">Materia</th>
+        <th class="col-sm-6">Argomenti da recuperare</th>
+        <th class="col-sm-2">Modalità di recupero</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for materia,d in dati.debiti %}
+      <tr>
+        <td><strong>{{ dati.materie[materia].nome }}</strong></td>
+        <td>{{ d.debito }}</td>
+        <td>{{ ('label.recupero_'~d.recupero)|trans }}</td>
+      </tr>
+          {% endfor %}
+    </tbody>
+  </table>
+        {% endif %}
+      {% elseif periodo == '1' %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-2">
+      <strong>{{ ('label.periodo_'~periodo)|trans }}</strong>
+      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con la valutazione intermedia"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione della valutazione intermedia</strong></a>
+    </caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-5">Materia</th>
+        <th class="col-sm-3">Profitto</th>
+        <th class="col-sm-2">Debito formativo</th>
+        <th class="col-sm-2">Ore di assenza</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for materia,m in dati.materie %}
+      <tr>
+        <td><strong>{{ m.nome }}</strong></td>
+          {% if m.tipo == 'R' and alunno.religione != 'S' %}
+        <td><strong>--</strong></td>
+        <td></td>
+        <td></td>
+          {% elseif m.tipo == 'C'  %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 42 ? 'danger' : (dati.voti[materia].unico < 43 ? 'warning' : 'success') }} gs-big">{{ info.giudizi['1']['C'][dati.voti[materia].unico] }}</span></td>
+        <td></td>
+        <td></td>
+          {% else %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 33 ? 'danger' : (dati.voti[materia].unico < 34 ? 'warning' : 'success') }} gs-big">{{ info.giudizi['1']['N'][dati.voti[materia].unico] }}</span></td>
+        <td>
+            {% if dati.debiti[materia] is defined %}
+          <span class="label label-{{ dati.voti[materia].recupero == 'N' ? 'danger' : 'success' }} gs-big">{{ ('label.recupero_'~dati.voti[materia].recupero)|trans }}</span>
+            {% endif %}
+        </td>
+        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+          {% endif %}
+      </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+      {% elseif periodo == 'F' %}
+        {% if dati.noscrutinato is defined %}
+          {% if dati.noscrutinato == 'C' %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio finale:<br>NON SCRUTINAT{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
+  </div>
+  <div class="text-center">
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dell'esito dello scrutinio</strong></a>
+  </div>
+          {% elseif dati.noscrutinato == 'A' %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio finale:<br>ESCLUS{{ alunno.sesso == 'M' ? 'O' : 'A' }} DALLO SCRUTINIO FINALE E NON AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }} (DPR 122/09 ART. 14 COMMA 7)</strong></div>
+  </div>
+  <div class="text-center">
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dell'esito dello scrutinio</strong></a>
+  </div>
+          {% endif %}
+        {% else %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-2">
+      <strong>Scrutinio finale</strong>
+          {%if dati.esito.esito == 'A' %}
+      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
+          {%endif %}
+    </caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6">Materia</th>
+        <th class="col-sm-2">Voto</th>
+        <th class="col-sm-4">Ore di assenza</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for materia,m in dati.materie %}
+      <tr>
+        <td><strong>{{ m.nome }}</strong></td>
+            {% if m.tipo == 'R' %}
+              {% if alunno.religione != 'S' %}
+        <td><strong>--</strong></td>
+        <td></td>
+              {% else %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][dati.voti[materia].unico] }}</span></td>
+        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+              {% endif %}
+            {% elseif m.tipo == 'C' %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ dati.voti[materia].unico == 4 ? 'NC' : dati.voti[materia].unico }}</span></td>
+        <td></td>
+            {% else %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 5 ? 'danger' : (dati.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ dati.voti[materia].unico == 0 ? 'NC' : dati.voti[materia].unico }}</span></td>
+        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+            {% endif %}
+      </tr>
+          {% endfor %}
+    </tbody>
+  </table>
+          {% if dati.esito.esito == 'A' %}
+  <div class="alert alert-success" role="alert">
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio: AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
+            {% if classe.anno >= 3 %}
+    <strong class="gs-big">Media dei voti: {{ dati.esito.media|number_format(2,',') }}</strong><br>
+    <strong class="gs-big">Credito: {{ dati.esito.credito }}</strong><br>
+            {% endif %}
+            {% if classe.anno > 3 %}
+    <strong class="gs-big">Credito anni precedenti: {{ dati.esito.creditoPrecedente }}</strong><br>
+    <strong class="gs-big">Credito totale: {{ dati.esito.credito + dati.esito.creditoPrecedente }}</strong><br>
+            {% endif %}
+  </div>
+            {% if dati.carenze is defined %}
+  <div class="text-center">
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'C', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione per il recupero autonomo"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione per il recupero autonomo</strong></a>
+  </div>
+            {% endif %}
+          {% elseif dati.esito.esito == 'S' %}
+  <div class="alert alert-warning" role="alert">
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio: GIUDIZIO SOSPESO</strong></div>
+  </div>
+  <div class="text-center">
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'D', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione del debito formativo"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione del debito formativo</strong></a>
+  </div>
+            {% if dati.carenze is defined %}
+  <div class="text-center gs-mt-3">
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'C', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione per il recupero autonomo"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione per il recupero autonomo</strong></a>
+  </div>
+            {% endif %}
+          {% elseif dati.esito.esito == 'N' %}
+  <div class="alert alert-danger" role="alert">
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio: NON AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
+  </div>
+  <div class="text-center">
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
+  </div>
+          {% endif %}
+        {% endif%}
+      {% elseif periodo == 'I' %}
+        {% if dati.esito.esito != 'X' %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-2">
+      <strong>Scrutinio integrativo</strong>
+          {%if dati.esito.esito == 'A' %}
+      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
+          {%endif %}
+    </caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6">Materia</th>
+        <th class="col-sm-2">Voto</th>
+        <th class="col-sm-4">Ore di assenza</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for materia,m in dati.materie %}
+      <tr>
+        <td><strong>{{ m.nome }}</strong></td>
+            {% if m.tipo == 'R' %}
+              {% if alunno.religione != 'S' %}
+        <td><strong>--</strong></td>
+        <td></td>
+              {% else %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][dati.voti[materia].unico] }}</span></td>
+        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+              {% endif %}
+            {% elseif m.tipo == 'C' %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ dati.voti[materia].unico == 4 ? 'NC' : dati.voti[materia].unico }}</span></td>
+        <td></td>
+            {% else %}
+        <td><span class="label label-{{ dati.voti[materia].unico < 5 ? 'danger' : (dati.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ dati.voti[materia].unico == 0 ? 'NC' : dati.voti[materia].unico }}</span></td>
+        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+            {% endif %}
+      </tr>
+          {% endfor %}
+    </tbody>
+  </table>
+        {% endif %}
+        {% if dati.esito.esito == 'A' %}
+  <div class="alert alert-success" role="alert">
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio: AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
+          {% if classe.anno >= 3 %}
+    <strong class="gs-big">Media dei voti: {{ dati.esito.media|number_format(2,',') }}</strong><br>
+    <strong class="gs-big">Credito: {{ dati.esito.credito }}</strong><br>
+          {% endif %}
+          {% if classe.anno > 3 %}
+    <strong class="gs-big">Credito anni precedenti: {{ dati.esito.creditoPrecedente }}</strong><br>
+    <strong class="gs-big">Credito totale: {{ dati.esito.credito + dati.esito.creditoPrecedente }}</strong><br>
+          {% endif %}
+  </div>
+        {% elseif dati.esito.esito == 'N' %}
+  <div class="alert alert-danger" role="alert">
+    <div class="text-center"><strong class="gs-big">Esito dello scrutinio: NON AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
+  </div>
+  <div class="text-center">
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
+  </div>
+        {% elseif dati.esito.esito == 'X' %}
+  <div class="alert alert-info" role="alert">
+    <div class="text-center"><strong class="gs-big">Scrutinio rinviato a data da definirsi</strong></div>
+  </div>
+        {% endif %}
+      {% endif %}
+    {% elseif periodo == 'I' %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">Scrutinio finale non sospeso</strong>
+  </div>
+    {% else %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">Dati non ancora disponibili</strong>
+  </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

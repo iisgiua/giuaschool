@@ -1,0 +1,81 @@
+{{ form_start(form) }}
+  <div class="modal-header">
+    <h3 class="modal-title gs-h3">Valutazione intermedia della classe {{ classe.anno~'ª '~classe.sezione }}</h3>
+    <h4 class="modal-title gs-h4"><em>Condotta</em></h4>
+  </div>
+  <div class="modal-body">
+    <ul id="gs-form-collection" class="list-group">
+  {% set valutazioni = ['NC', 'Scorretta', 'Non sempre adeguata', 'Corretta'] %}
+  {% for voto in form.lista %}
+      <li class="list-group-item">
+        <div class="row gs-pl-2 gs-pr-2"><strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong></div>
+        <div class="form-group gs-mb-2">
+          <label class="control-label col-sm-1" for="{{ voto.unico.vars.id }}">Voto</label>
+          <div class="col-sm-11">
+    {% if voto.unico.vars.value is not empty %}
+            <span style="display:inline-block;width:12em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 42 ? 'danger' : (voto.unico.vars.value < 43 ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value-40] }}</span>
+            <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+            <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
+    {% else %}
+            <span style="display:inline-block;width:12em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
+            <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+            <div style="display:none">{{ form_widget(voto.unico) }}</div>
+    {% endif %}
+          </div>
+        </div>
+        {{ form_widget(voto.alunno) }}
+      </li>
+  {% endfor %}
+    </ul>
+  </div>
+  <div class="modal-footer">
+    {{ form_widget(form.submit) }}
+    <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+  </div>
+  {{ form_widget(form._token) }}
+{{ form_end(form, {'render_rest': false}) }}
+
+<script>
+$(document).ready(function() {
+  $("#gs-form-collection input.slider").slider({
+    min: {{ info.valutazioni.min }},
+    max: {{ info.valutazioni.max }},
+    step: 1,
+    ticks: [{{ info.valutazioni.ticks }}],
+    ticks_labels: [{{ info.valutazioni.labels|raw }}],
+    ticks_snap_bounds: 0,
+    focus: true,
+    formatter: function(val) {
+      var d = ['Non Classificata', 'Scorretta', 'Non sempre adeguata', 'Corretta'];
+      return d[val-40];
+      },
+    natural_arrow_keys: true
+  });
+  $('#gs-form-collection button.gs-button-add').on('click', function(e) {
+    $(this).parent().find('div').attr('style', 'display:inline-block').find('input').addClass('slider')
+      .slider({
+        min: {{ info.valutazioni.min }},
+        max: {{ info.valutazioni.max }},
+        step: 1,
+        ticks: [{{ info.valutazioni.ticks }}],
+        ticks_labels: [{{ info.valutazioni.labels|raw }}],
+        ticks_snap_bounds: 0,
+        focus: true,
+        formatter: function(val) {
+          var d = ['Non Classificata', 'Scorretta', 'Non sempre adeguata', 'Corretta'];
+          return d[val-40];
+          },
+        natural_arrow_keys: true
+      });
+    $(this).hide();
+    $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.start }}', true, true);
+    $(this).siblings('div').find('div').focus();
+    e.preventDefault();
+  });
+  $("#gs-form-collection").on("change", "input.slider", function(e) {
+    var d = ['NC', 'Scorretta', 'Non sempre adeguata', 'Corretta'];
+    var c = (e.value.newValue < 42 ? 'label-danger' : (e.value.newValue < 43 ? 'label-warning' : 'label-success'));
+    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue-40]);
+  });
+});
+</script>
