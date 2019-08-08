@@ -1,0 +1,59 @@
+{% extends 'documenti/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_classi'|trans }}</h1>
+  {% include('include/form-inline.html.twig') %}
+  <table class="table table-bordered table-hover table-striped gs-mt-5">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-2">{{ 'label.tipo_documento'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.classe'|trans }}</th>
+        <th class="col-sm-3">{{ 'label.materia'|trans }}</th>
+        <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for d in dati.lista %}
+      <tr>
+        <td>
+          {{ (d.tipo == 'L' ? 'label.piani' : 'label.doc15')|trans }}
+        </td>
+        <td>
+          <strong>{{ d.classe.anno }}ª {{ d.classe.sezione }}</strong> - {{ d.classe.corso.nomeBreve }} - {{ d.classe.sede.citta }}
+        </td>
+        <td>
+          <strong>{{ d.materia ? d.materia.nomeBreve }}</strong>
+        </td>
+        <td>
+          <a href="{{ path('file_documento', {'tipo': d.tipo, 'id': d.id}) }}" title="Scarica il documento indicato">
+            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.file }}</strong>
+          </a><br>
+          <small>Dimensione: {{ (d.dimensione / 1000)|number_format(0, ',', '.') }} KB</small>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if maxPages > 1 %}
+  <nav aria-label="Navigazione tra le pagine" class="text-center">
+    <ul class="pagination pagination-sm gs-mt-2">
+    {% if page > 1 %}
+      <li><a href="{{ path('documenti_classi', {'pagina': page-1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+    {% else %}
+      <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
+    {% endif %}
+    {% for i in 1..maxPages %}
+      <li {{ page == i ? 'class="active"' }}><a href="{{ path('documenti_classi', {'pagina': i}) }}">{{ i }}</a></li>
+    {% endfor %}
+    {% if page < maxPages %}
+      <li><a href="{{ path('documenti_classi', {'pagina': page+1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+    {% else %}
+      <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
+    {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}
+

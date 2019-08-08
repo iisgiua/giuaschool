@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="giua@school: il registro elettronico dell'Istituto di Istruzione Superiore '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}'">
+    <meta name="keywords" content="scuola,istituto,tecnico,istituto tecnico,istruzione superiore,informatica,chimica,liceo,scientifico,scienze applicate,giua,cagliari,assemini,registro,elettronico">
+    <meta name="author" content="Antonello Dessì">
+    <title>{{ pagina_titolo|trans }}</title>
+    <link href="{{ asset('vendor/bootstrap-italia/css/bootstrap-italia.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/main.css?v='~(filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
+{% block pagina_css %}
+{% endblock %}
+{% if app.session.get('/APP/APP/css') %}
+    <link href="{{ asset('app/'~app.session.get('/APP/APP/css')~'.css?v='~(filedate('css/'~app.session.get('/APP/APP/css')~'.css')|date('U'))) }}" rel="stylesheet">
+{% endif %}
+{% block pagina_js_inizio %}
+{% endblock %}
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('android-icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('favicon-96x96.png') }}">
+    <link rel="icon" type="image/png" sizes="76x76" href="{{ asset('apple-icon-76x76.png') }}">
+    <link rel="icon" type="image/png" sizes="57x57" href="{{ asset('apple-icon-57x57.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('apple-icon-60x60.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('apple-icon-72x72.png') }}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('apple-icon-114x114.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('apple-icon-120x120.png') }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('apple-icon-144x144.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('apple-icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-icon-180x180.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="msapplication-TileColor" content="#0066CC">
+    <meta name="msapplication-TileImage" content="{{ asset('ms-icon-144x144.png') }}">
+    <meta name="theme-color" content="#0066CC">
+    <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
+    <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#0066CC">
+  </head>
+  <body>
+
+    <!-- scorciatoie per tastiera/screen reader -->
+    <div class="skiplinks">
+      <a class="sr-only sr-only-focusable" href="#gs-main">Vai al contenuto</a>
+      <a class="sr-only sr-only-focusable" href="#gs-footer">Vai a fine pagina</a>
+    </div>
+    <!-- fine scorciatoie per tastiera/screen reader -->
+
+    <!-- intestazione pagina -->
+    <header id="gs-header" class="it-header-wrapper it-header-sticky">
+      <div class="it-header-slim-wrapper">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12 pr-0">
+              <div class="it-header-slim-wrapper-content pr-0">
+                <span class="d-none d-md-block navbar-brand"><strong>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong> - A.S. 2018/2019</span>
+                <div class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false">
+                    <span class="font-weight-bold">Aiuto</span>
+                    <svg class="icon d-none d-md-block">
+                      <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-expand"></use>
+                    </svg>
+                  </a>
+                  <div class="dropdown-menu">
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="link-list-wrapper">
+                          <ul class="link-list">
+                            <li>
+                              <a class="list-item" href="#"><span>Guida</span></a>
+                            </li>
+                            <li>
+                              <a class="list-item" href="#"><span>Manuale</span></a>
+                            </li>
+                            <li>
+                              <a class="list-item" href="#"><span>FAQ</span></a>
+                            </li>
+                            <li>
+                              <a class="list-item" href="#"><span>Segnalazioni</span></a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="header-slim-right-zone">
+                  <a href="#" class="btn btn-primary btn-icon rounded-0 border-right">
+                    <span class="rounded-icon">
+                      <svg class="icon icon-primary">
+                        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-user"></use>
+                      </svg>
+                    </span>
+                    <span class="d-none d-lg-block">Antonello Dessì (Docente)</span>
+                  </a>
+                  <a href="#" class="btn btn-primary btn-icon rounded-0">
+                    <span class="rounded-icon">
+                      <svg class="icon icon-primary">
+                        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-arrow-left"></use>
+                      </svg>
+                    </span>
+                    <span class="d-none d-lg-block">ESCI</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="it-nav-wrapper">
+        <div class="it-header-center-wrapper d-none"></div>
+        <div class="it-header-navbar-wrapper">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-12 pl-0">
+                <nav class="navbar navbar-expand-lg pl-0">
+                  <button class="custom-navbar-toggler bg-primary" type="button" aria-controls="gs-mainmenu" aria-expanded="false" aria-label="Toggle navigation" data-target="#gs-mainmenu">
+                    <svg class="icon">
+                      <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-burger"></use>
+                    </svg>
+                  </button>
+                  <div id="gs-mainmenu" class="navbar-collapsable" style="display:none;">
+                    <div class="overlay" style="display:none;"></div>
+                    <div class="close-div sr-only">
+                      <button class="btn close-menu" type="button"><span class="it-close"></span>Chiudi</button>
+                    </div>
+                    <div class="menu-wrapper">
+                      <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link" href="#"><span>Home</span><span class="sr-only">current</span></a></li>
+                        <li class="nav-item active dropdown">
+                          <a class="nav-link dropdown-toggle active" href="#" data-toggle="dropdown" aria-expanded="false">
+                            <span>Lezioni</span>
+                            <svg class="icon icon-xs">
+                              <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-expand"></use>
+                            </svg>
+                          </a>
+                          <div class="dropdown-menu">
+                            <div class="link-list-wrapper">
+                              <ul class="link-list">
+                                <li><a class="list-item" href="#"><span>Classe/Materia</span></a></li>
+                                <li><a class="list-item" href="#"><span>Registro</span></a></li>
+                                <li><a class="list-item" href="#"><span>Assenze</span></a></li>
+                                <li><a class="list-item active" href="#"><span>Note</span></a></li>
+                                <li><a class="list-item" href="#"><span>Voti</span></a></li>
+                                <li><a class="list-item" href="#"><span>Argomenti</span></a></li>
+                                <li><a class="list-item" href="#"><span>Osservazioni</span></a></li>
+                                <li><a class="list-item" href="#"><span>Scrutinio</span></a></li>
+                              </ul>
+                            </div>
+                          </div>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="#"><span>Documenti</span><span class="sr-only">current</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="#"><span>Bacheca</span><span class="sr-only">current</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="#"><span>Colloqui</span><span class="sr-only">current</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="#"><span>Agenda</span><span class="sr-only">current</span></a></li>
+                        <li class="nav-item"><a class="nav-link disabled" href="#"><span>Coordinatore</span><span class="sr-only">current</span></a></li>
+                        <li class="nav-item"><a class="nav-link disabled" href="#"><span>Staff</span><span class="sr-only">current</span></a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+        <nav class="breadcrumb-container" aria-label="breadcrumb">
+          <ol class="breadcrumb dark pl-4">
+            <li class="breadcrumb-item d-none d-md-block"><span class="d-none d-lg-inline">Posizione:</span><a class="ml-3" href="#">Home</a><span class="separator"></span></li>
+            <li class="breadcrumb-item d-none d-md-block"><a href="#">Subsection</a><span class="separator"></span></li>
+            <li class="breadcrumb-item active" aria-current="page"><span class="d-inline d-md-none mr-4"></span><span>Current section</span></li>
+          </ol>
+        </nav>
+      </div>
+    </header>
+    <!-- fine intestazione pagina -->
+
+
+
+
+<!-- contenuto pagina -->
+<main id="gs-header">
+
+  <div>
+  <h1>-- TEMP--</h1>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamc</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamc</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamc</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamc</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamc</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamco laboris nisi utaliquip ex ea commodo consequat. Duis aute irure dolor inreprehenderit in voluptate velit esse cillum dolore eu fugiat nullapariatur. Excepteur sint occaecat cupidatat non proident, sunt inculpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed doeiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enimad minim veniam, quis nostrud exercitation ullamc</p>
+  </div>
+
+</main>
+
+
+
+    <!-- piè di pagina -->
+    <footer id="gs-footer" class="it-footer">
+      <div class="it-footer-main">
+        <div class="container">
+          <section>
+            <div class="row clearfix">
+              <div class="col-sm-12">
+                <div class="it-brand-wrapper">
+                  <div class="it-brand-text">
+                    <h2 class="no_toc">Istituto di Istruzione Superiore <em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</em></h2>
+                    <h3 class="no_toc d-none d-md-block">Cagliari - Assemini</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section>
+            <div class="row">
+              <div class="col-lg-3 col-md-6 pb-2">
+                <h4>Sede centrale</h4>
+                <p>Via Montecassino, 41<br>09134 - CAGLIARI (Pirri)<br>Telefono: 070 500786</p>
+              </div>
+              <div class="col-lg-3 col-md-6 pb-2">
+                <h4>Sede staccata</h4>
+                <p>Via Bacaredda, 27<br>09032 - ASSEMINI<br>Telefono: 070 941763</p>
+              </div>
+              <div class="col-lg-3 col-md-6 pb-2">
+                <h4>Sito web</h4>
+                <div class="link-list-wrapper">
+                  <ul class="footer-list link-list">
+                    <li>
+                      <a class="list-item" href="#" title="Vai al sito web dell'Istituto">
+                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-link"></use></svg>{{ app.session->get('/CONFIG/SCUOLA/url_istituto') }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 pb-2">
+                <h4>Email</h4>
+                <div class="link-list-wrapper">
+                  <ul class="footer-list link-list">
+                    <li>
+                      <a class="list-item" href="#" title="Vai al sito web dell'Istituto">
+                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg>{{ app.session->get('/CONFIG/SCUOLA/email_istituto') }}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="list-item" href="#" title="Vai al sito web dell'Istituto">
+                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg>{{ app.session->get('/CONFIG/SCUOLA/pec_istituto') }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="py-4 border-white border-top">
+            <div class="row pb-0">
+              <div class="col-lg-6 col-md-12 pb-2">
+                <h2><em>giua@school</em></h2>
+                <h3 class="d-none d-md-block">Il registro elettronico <strong>open source</strong> dell'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</h3>
+                <p>Versione {{ app.session.get('/CONFIG/SISTEMA/versione') }}</p>
+              </div>
+              <div class="col-lg-6 col-md-12 pb-2 link-list-wrapper">
+                <ul class="footer-list link-list">
+                  <li>
+                    <a class="list-item" href="#" title="Vai al sito web dell'Istituto">
+                      <svg class="icon icon-sm icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-github"></use></svg>Progetto e codice sorgente
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+
+      <div class="it-footer-small-prints clearfix">
+        <div class="container">
+          <h3 class="sr-only">Sezione Link Utili</h3>
+          <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
+            <li class="list-inline-item"><a href="#" title="Note Legali">Note legali</a></li>
+            <li class="list-inline-item"><a href="#" title="Privacy-Cookies">Privacy</a></li>
+            <li class="list-inline-item"><a href="#" title="Privacy-Cookies">Cookie</a></li>
+            <li class="list-inline-item"><a href="#" title="Privacy-Cookies">Crediti</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+    <!-- fine piè di pagina -->
+
+
+    <!-- link torna su -->
+    <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small">
+      <svg class="icon icon-light"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-arrow-up"></use></svg>
+    </a>
+    <!-- fine link torna su -->
+
+    <script>window.__PUBLIC_PATH__ = "{{ asset('vendor/bootstrap-italia/fonts') }}"</script>
+    <script src="{{ asset('vendor/bootstrap-italia/js/bootstrap-italia.bundle.min.js') }}"></script>
+    <script src="{{ asset('js/script.js?v='~(filedate('js/main.js')|date('U'))) }}"></script>
+{% block pagina_js_fine %}
+{% endblock %}
+  </body>
+</html>

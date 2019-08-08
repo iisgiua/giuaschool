@@ -1,7 +1,12 @@
+# config/packages/twig.yaml
+
 twig:
-    default_path: '%kernel.project_dir%/templates'
-    debug: '%kernel.debug%'
-    strict_variables: '%kernel.debug%'
-    form_themes: ['form.html.twig']
-
-
+  date:
+    format: '%locale_date%'
+  number_format:
+    decimals: 2
+    decimal_point: ','
+    thousands_separator: ''
+  debug: '%kernel.debug%'
+  form_themes: ['form.html.twig']
+  strict_variables: '%kernel.debug%'

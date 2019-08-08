@@ -1,28 +1,31 @@
+# config/packages/framework.yaml
+
 framework:
-    secret: '%env(APP_SECRET)%'
-    csrf_protection: true
-    http_method_override: true
-
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
-    session:
-   	handler_id: session.handler.native_file
-    	save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
-        cookie_secure: auto
-        cookie_samesite: lax
-
-    fragments: ~
-    php_errors:
-        log: true
+  secret: '%env(APP_SECRET)%'
+  http_method_override: true
   ide: ~
+  disallow_search_engine_index: false
   trusted_hosts: ~
   form:
     enabled: true
+  csrf_protection:
+    enabled: true
+  esi: false
+  fragments: ~
+  http_client: ~
+  request: ~
+  session:
+    handler_id: 'session.handler.native_file'
+    cookie_secure: 'auto'
+    cookie_samesite: 'strict'
+    cookie_httponly: true
+    enabled: true
   assets: ~
-  templating:
-    engines: 'twig'
   property_access: ~
+  property_info:
+    enabled: false
   annotations: ~
   serializer: ~
-
-
+  php_errors:
+    log: true
+  cache: ~

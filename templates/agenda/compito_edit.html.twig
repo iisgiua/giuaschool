@@ -1,0 +1,216 @@
+{% extends 'agenda/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="panel panel-primary" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body">
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+      {{ form_row(form.data) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required" for="compito_edit_cattedra">Classe e materia</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.cattedra) }}
+          <div id="materia" style="display:none">
+            <select id="materia_cattedra" style="width:90%;margin-left:5%" class="form-control"></select>
+            {{ form_widget(form.materia) }}
+          </div>
+        </div>
+      </div>
+      {{ form_row(form.testo) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required" for="compito_edit_destinatari">Destinatari</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.filtro) }}
+          <div id="individuale" style="display:none">
+            <div class="col-sm-6"></div>
+            <div class="col-sm-6"></div>
+            {{ form_widget(form.filtroIndividuale) }}
+          </div>
+        </div>
+      </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+  {% include 'include/modal-waiting.html.twig' %}
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ date()|date('d/m/Y') }}",
+    datesDisabled: {{ lista_festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('#individuale').on('change', 'label.gs-checkbox-inline input', function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  });
+  $('#compito_edit_cattedra').change(function(e) {
+    if (cattedre_sost[$(this).val()]) {
+      $('#gs-modal-waiting').modal('show');
+      $.ajax({
+        url: "{{ path('agenda_classe') }}/"+cattedre_classe[$('#compito_edit_cattedra').val()],
+        dataType: "json",
+        success: function (data) {
+          var s='';
+          $.each(data, function(idx,item){
+            s+='<option value="'+item.id+'">'+item.nome+'</option>';
+            });
+          $('#materia_cattedra').html(s);
+          },
+        });
+      $('#materia').show();
+      $('#compito_edit_filtro').val('I').prop('disabled', true);
+      var c='<label class="gs-pt-0 gs-checkbox-split gs-checkbox-inline">'+
+        '<input type="checkbox" id="compito_edit_filtroIndividuale_0" name="compito_edit[filtroIndividuale][]" value="'+
+        cattedre_alu[$(this).val()][0]+'" checked="checked" disabled="disabled"> '+cattedre_alu[$(this).val()][1]+'</label>';
+      $('#individuale').find('div.col-sm-6:nth-child(1)').html(c);
+      $('#individuale').find('div.col-sm-6:nth-child(2)').html('');
+      $('#individuale').show();
+      $('#gs-modal-waiting').modal('hide');
+    } else {
+      $('#materia').hide();
+      $('#compito_edit_filtro').val('T').prop('disabled', false);
+      $('#individuale').hide();
+    }
+  });
+  $('#compito_edit_filtro').change(function() {
+    if ($(this).val() == 'I') {
+      var l = $('#individuale').find('div.col-sm-6:nth-child(1)');
+      var r = $('#individuale').find('div.col-sm-6:nth-child(2)');
+      l.html('');
+      r.html('');
+      $('#gs-modal-waiting').modal('show');
+      $.ajax({
+        url: "{{ path('agenda_cattedra') }}/"+cattedre_id[$('#compito_edit_cattedra').val()],
+        dataType: "json",
+        success: function (data) {
+          var sl='';
+          var sr='';
+          $.each(data, function(idx,item){
+            var s='<label class="gs-pt-0 gs-checkbox-split gs-checkbox-inline">'+
+                '<input type="checkbox" id="compito_edit_filtroIndividuale_'+idx+
+                '" name="compito_edit[filtroIndividuale][]" value="'+item.id+'"> '+item.nome+'</label>';
+            if (idx % 2 === 0) {
+              sl+=s;
+            } else {
+              sr+=s;
+            }
+          });
+          l.html(sl);
+          r.html(sr);
+          for (i in this.external_preset) {
+            $('input[name="compito_edit[filtroIndividuale][]"][value="'+this.external_preset[i]+'"]').prop("checked", true).parent().addClass('active');
+          }
+          $('#individuale').show();
+        },
+      });
+      $('#gs-modal-waiting').modal('hide');
+    } else {
+      $('#individuale').hide();
+    }
+  });
+  $('form[name="compito_edit"]').submit(function() {
+    var opt = $('input[name="compito_edit[filtroIndividuale][]"]:checked').map(function(i,el){return el.value;}).get();
+    $('#compito_edit_filtroIndividuale').val(opt);
+    opt = $('#materia_cattedra').val();
+    $('#compito_edit_materia').val(opt);
+  });
+  // init
+  var filtro_preset=[{% for id in form.filtroIndividuale.vars.data|split(',') %}{{ id }},{% endfor %}];
+  var cattedre_preset={{ form.materia.vars.data ? form.materia.vars.data : 'null' }};
+  var cattedre_id=[{% for c in dati.choice %}{{ c.id }},{% endfor %}];
+  var cattedre_classe=[{% for c in dati.choice %}{{ c.classe.id }},{% endfor %}];
+  var cattedre_sost=[{% for c in dati.choice %}{{ c.alunno ? 1 : 0 }},{% endfor %}];
+  var cattedre_alu=[{% for c in dati.choice %}{{ c.alunno ? ('['~c.alunno.id~',"'~c.alunno.cognome~' '~c.alunno.nome~'"]')|raw : 'null' }},{% endfor %}];
+  var v_cattedra=$('#compito_edit_cattedra').val();
+  if (cattedre_sost[v_cattedra]) {
+    $('#gs-modal-waiting').modal('show');
+    $.ajax({
+      url: "{{ path('agenda_classe') }}/"+cattedre_classe[v_cattedra],
+      dataType: "json",
+      external_preset: cattedre_preset,
+      success: function (data) {
+        var s='';
+        $.each(data, function(idx,item){
+          s+='<option value="'+item.id+'">'+item.nome+'</option>';
+        });
+        $('#materia_cattedra').html(s).find('option[value="'+this.external_preset+'"]').prop('selected', true);
+      },
+    });
+    $('#materia').show();
+    $('#compito_edit_filtro').val('I').prop('disabled', true);
+    var c='<label class="gs-pt-0 gs-checkbox-split gs-checkbox-inline">'+
+      '<input type="checkbox" id="compito_edit_filtroIndividuale_0" name="compito_edit[filtroIndividuale][]" value="'+
+      cattedre_alu[v_cattedra][0]+'" checked="checked" disabled="disabled"> '+cattedre_alu[v_cattedra][1]+'</label>';
+    $('#individuale').find('div.col-sm-6:nth-child(1)').html(c);
+    $('#individuale').find('div.col-sm-6:nth-child(2)').html('');
+    $('#individuale').show();
+    $('#gs-modal-waiting').modal('hide');
+  } else {
+    $('#materia').hide();
+    $('#compito_edit_filtro').prop('disabled', false);
+    if ($('#compito_edit_filtro').val() == 'I') {
+      var l = $('#individuale').find('div.col-sm-6:nth-child(1)');
+      var r = $('#individuale').find('div.col-sm-6:nth-child(2)');
+      l.html('');
+      r.html('');
+      $('#gs-modal-waiting').modal('show');
+      $.ajax({
+        url: "{{ path('agenda_cattedra') }}/"+cattedre_id[v_cattedra],
+        dataType: "json",
+        external_preset: filtro_preset,
+        success: function (data) {
+          var sl='';
+          var sr='';
+          $.each(data, function(idx,item){
+            var s='<label class="gs-pt-0 gs-checkbox-split gs-checkbox-inline">'+
+                '<input type="checkbox" id="compito_edit_filtroIndividuale_'+idx+
+                '" name="compito_edit[filtroIndividuale][]" value="'+item.id+'"> '+item.nome+'</label>';
+            if (idx % 2 === 0) {
+              sl+=s;
+            } else {
+              sr+=s;
+            }
+          });
+          l.html(sl);
+          r.html(sr);
+          for (i in this.external_preset) {
+            $('input[name="compito_edit[filtroIndividuale][]"][value="'+this.external_preset[i]+'"]').prop("checked", true).parent().addClass('active');
+          }
+          $('#individuale').show();
+        },
+      });
+      $('#gs-modal-waiting').modal('hide');
+    } else {
+      $('#individuale').hide();
+    }
+  }
+});
+</script>
+{% endblock %}

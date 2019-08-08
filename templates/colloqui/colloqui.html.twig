@@ -1,0 +1,116 @@
+{% extends 'colloqui/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.docenti_colloqui'|trans }}</h1>
+  {% if errore %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore|trans }}</strong>
+  </div>
+  {% else %}
+    {% if dati.richieste is not empty %}
+  <table class="table table-bordered table-hover">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ 'title.richieste_colloqui'|trans }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th>Data e ora</th>
+        <th>Classe</th>
+        <th>Alunno</th>
+        <th>Stato della richiesta</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in dati.richieste %}
+      <tr{{ r.stato == 'R' ? ' class="bg-warning"' : (r.stato == 'A' or r.stato == 'N' ? ' class="text-danger"') }}>
+        <td><strong>{{ settimana[r.giorno] }} {{ r.data|date('j') }} {{ mesi[r.data|date('n')] }} dalle {{ r.inizio|date('G:i') }} alle {{ r.fine|date('G:i') }}</strong></td>
+        <td><strong>{{ r.anno }}ª {{ r.sezione }}</strong></td>
+        <td><strong>{{ r.cognome }} {{ r.nome }}</strong></td>
+        <td>
+        {% if r.stato == 'R' %}
+          <strong>In attesa di conferma</strong>
+          <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button gs-ml-3" title="Rifiuta la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_edit', {'richiesta': r.id, 'azione': 'N'}) }}" data-text="{{ 'message.rifiuto_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Rifiuta</strong></button>
+          <a class="btn btn-success btn-xs pull-right" href="{{ path('colloqui_edit', {'richiesta': r.id, 'azione': 'C'}) }}" role="button" title="Conferma la richiesta di colloquio"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma</strong></a>
+        {% elseif r.stato == 'C' %}
+          <strong>Appuntamento confermato</strong>
+          {% if r.messaggio %}
+          <br>Messaggio inviato al genitore:<small><br><em>{{ r.messaggio }}</em></small>
+          {% endif %}
+          <a class="btn btn-primary btn-xs pull-right" href="{{ path('colloqui_edit', {'richiesta': r.id, 'azione': 'X'}) }}" role="button" title="Modifica la risposta alla richiesta di colloquio"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
+        {% elseif r.stato == 'A' %}
+          <strong>Appuntamento annullato dal genitore</strong>
+        {% elseif r.stato == 'N' %}
+          <strong>Appuntamento annullato per indisponibilità del docente</strong>
+            {% if r.messaggio %}
+          <br>Messaggio inviato al genitore:<small><br><em>{{ r.messaggio }}</em></small>
+            {% endif %}
+          <a class="btn btn-primary btn-xs pull-right" href="{{ path('colloqui_edit', {'richiesta': r.id, 'azione': 'X'}) }}" role="button" title="Modifica la risposta alla richiesta di colloquio"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
+        {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    {% endif %}
+    {% if dati.ore is not empty %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ 'title.ore_colloqui'|trans }}</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th>{{ 'label.sede'|trans }}</th>
+        <th>{{ 'label.colloquio'|trans }}</th>
+        <th>{{ 'label.note'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in dati.ore %}
+      <tr>
+        <td><strong>{{ o.citta }}</strong></td>
+        <td>
+          <strong>
+        {% if o.frequenza == 'S' %}
+            Ogni
+        {% elseif o.frequenza == '1' %}
+            Primo
+        {% elseif o.frequenza == '2' %}
+            Secondo
+        {% elseif o.frequenza == '3' %}
+            Terzo
+        {% elseif o.frequenza == '4' %}
+            Ultimo
+        {% endif %}
+            {{ settimana[o.giorno] }}
+        {% if o.frequenza != 'S' %}
+            del mese
+        {% endif %}
+            dalle {{ o.inizio|date('G:i') }} alle {{ o.fine|date('G:i') }}
+          </strong>
+        </td>
+        <td>{{ o.note }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    {% else %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">Non risulta presente l'orario per il ricevimento dei genitori.</strong>
+  </div>
+    {% endif %}
+    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.rifiuto_colloquio'} %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+
+});
+</script>
+{% endblock %}

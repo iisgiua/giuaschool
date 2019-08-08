@@ -22,3 +22,13 @@
 ###> symfony/web-server-bundle ###
 /.web-server-pid
 ###< symfony/web-server-bundle ###
+
+###> trinko/giuaschool ###
+/DEV/
+/FILES/
+/public/app/
+/public/**/*.local.*
+
+!**/.gitkeep
+
+###< trinko/giuaschool ###

@@ -1,0 +1,42 @@
+<html>
+<head>
+  <title>Registro Elettronico</title>
+  <style>
+.hidden { border:0; clip:rect(0 0 0 0); height:1px; margin:-1px; overflow:hidden; padding:0; position:absolute; width:1px; }
+.msg { text-align:center; font-size:3em; color:#000099; }
+.error { color: red; font-size: 1.5em; font-weight: bold; text-align: center; }
+.img { text-align:center; margin: auto; }
+.txt { text-align:left; font-size:1.2em; color:#000099; }
+  </style>
+</head>
+<body>
+
+{% if errore %}
+<div class="error">{{ errore.message|trans }}</div>
+{% else %}
+<form class="hidden" name="login_token" method="post">
+  <input class="hidden" type="password" name="t1" value="{{ token1 }}">
+  <input class="hidden" type="password" name="t2" value="{{ token2 }}">
+  <input class="hidden" type="password" name="t3" value="{{ token3 }}">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+  <input class="hidden" type="submit">
+</form>
+{% if token1 %} {# siamo in fase di registrazione #}
+<p class="txt"><strong>1</strong> - Strisciare il dito sul lettore di impronte e attendere che venga visualizzato il seguente menu di scelta;
+quindi cliccare sulla voce <strong>Registra</strong>.</p>
+<div class="img"><img class="img" src="{{ asset('img/registrazione-1.png') }}"></div>
+<p class="txt"><strong>2</strong> - Nella finestra seguente, spuntare l'opzione <strong>Memorizzare la registrazione come viene eseguita</strong>;
+quindi cliccare sul pulsante <strong>Fine</strong>.</p>
+<div class="img"><img class="img" src="{{ asset('img/registrazione-2.png') }}"></div>
+<p class="txt"><strong>3</strong> - A questo punto, la procedura di registrazione è terminata.<br>
+Per entrare nel Registro Elettronico, strisciare il dito sul lettore di impronte e nel menu di scelta che appare,
+cliccare sulla voce <strong>Siti registrati</strong>; quindi cliccare su <strong>Registro Elettronico</strong>.</p>
+<br><br><br><br>
+{% else %}  {# siamo in fase di autenticazione #}
+<h1 class="msg">Attendere...</h1>
+<h1 class="msg">elaborazione in corso...</h1>
+{% endif %}
+{% endif %}
+
+</body>
+</html>

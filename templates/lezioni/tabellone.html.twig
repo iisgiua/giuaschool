@@ -1,0 +1,325 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not cattedra and not classe %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_tabellone'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% elseif not cattedra %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_tabellone'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.voti_supplenza'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_tabellone'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+  <div class="row gs-mb-1">
+    <div class="col-sm-8">
+      <strong class="gs-big">Periodo:</strong>
+      <div style="display:inline-block" class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
+        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% for p in ['P','1','F','I'] %}
+      {% if lista_periodi[p] is defined %}
+          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
+      {% endif %}
+    {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-sm-4 text-right">
+    {% if cattedra.tipo != 'S' and cattedra.materia.tipo != 'S'  %}
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_proposte', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': (periodo ? periodo : 0)}) }}" role="button" title="Visualizza le proposte dei voti"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
+    {% endif %}
+    </div>
+  </div>
+    {% if periodo == 'P' %}
+  <div id="gs-fixed-header">
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+      {% for materia,m in dati.materie %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
+          </th>
+      {% endfor %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Media complessiva dei voti">Media</span></small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for alunno,a in dati.alunni %}
+        <tr>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+          </td>
+        {% for materia,m in dati.materie %}
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          {% if m.tipo == 'R' %}
+            {% if a.religione != 'S' %}
+            <span>NA</span>
+            {% elseif dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% else %}
+            <span class="label label-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ info.giudizi['P']['R'][dati.voti[alunno][materia].unico] }}</span>
+            {% endif %}
+          {% elseif m.tipo == 'C' %}
+            {% if dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% elseif dati.voti[alunno][materia].unico == 4 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+            {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }}">{{ dati.voti[alunno][materia].unico }}</span></span>
+            {% endif %}
+          {% else %}
+            {% if dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% elseif dati.voti[alunno][materia].unico == 0 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+            {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][materia].unico }}</span></span>
+            {% endif %}
+          {% endif %}
+          </td>
+        {% endfor %}
+          <td>
+            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% elseif periodo == '1' %}
+  <div id="gs-fixed-header">
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+    {% for materia,m in dati.materie %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
+          </th>
+    {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+    {% for alunno,a in dati.alunni %}
+        <tr>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+      {% if a.bes != 'N' %}
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+      {% endif %}
+      {% if a.note is not empty %}
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+      {% endif %}
+          </td>
+      {% for materia,m in dati.materie %}
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+        {% if m.tipo == 'C' %}
+          {% if dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+          {% else %}
+            <span class="label label-{{ dati.voti[alunno][materia].unico < 42 ? 'danger' : (dati.voti[alunno][materia].unico < 43 ? 'warning' : 'success') }}">{{ info.condotta['1'][dati.voti[alunno][materia].unico] }}</span>
+          {% endif %}
+        {% else %}
+          {% if m.tipo == 'R' and a.religione != 'S' %}
+              <span>NA</span>
+          {% elseif dati.voti[alunno][materia].unico is not defined %}
+              <span>--</span>
+          {% else %}
+              <span class="label label-{{ dati.voti[alunno][materia].unico < 33 ? 'danger' : (dati.voti[alunno][materia].unico < 34 ? 'warning' : 'success') }}">{{ info.giudizi['1'][dati.voti[alunno][materia].unico] }}</span>
+          {% endif %}
+        {% endif %}
+        {% if m.tipo == 'N' and dati.debiti[alunno][materia] is defined %}
+            <br>
+          {% if dati.voti[alunno][materia].recupero is not defined or dati.voti[alunno][materia].recupero is empty %}
+            <span>--</span>
+          {% else %}
+            <small>{{ ('label.recupero_'~dati.voti[alunno][materia].recupero)|trans }}</small>
+          {% endif %}
+        {% endif %}
+          </td>
+      {% endfor %}
+        </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% elseif periodo == 'F' %}
+  <div id="gs-fixed-header">
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+      {% for materia,m in dati.materie %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
+          </th>
+      {% endfor %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Media complessiva dei voti">Media</span></small>
+          </th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Esito dello scrutinio finale">Esito</span></small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for alunno,a in dati.alunni %}
+        <tr>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+          </td>
+        {% for materia,m in dati.materie %}
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          {% if m.tipo == 'R' %}
+            {% if a.religione != 'S' %}
+            <span>NA</span>
+            {% elseif dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% else %}
+            <span class="label label-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ info.giudizi['F']['R'][dati.voti[alunno][materia].unico] }}</span>
+            {% endif %}
+          {% elseif m.tipo == 'C' %}
+            {% if dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% elseif dati.voti[alunno][materia].unico == 4 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+            {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }}">{{ dati.voti[alunno][materia].unico }}</span></span>
+            {% endif %}
+          {% else %}
+            {% if dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% elseif dati.voti[alunno][materia].unico == 0 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+            {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][materia].unico }}</span></span>
+            {% endif %}
+          {% endif %}
+          </td>
+        {% endfor %}
+          <td>
+            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
+          </td>
+          <td>
+        {% if dati.esiti[alunno].esito == 'A' %}
+            <button type="button" class="btn btn-xs btn-success gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="AMMESSO"><span class="glyphicon glyphicon-ok"></span></button>
+        {% elseif dati.esiti[alunno].esito == 'N' %}
+            <button type="button" class="btn btn-xs btn-danger gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="NON AMMESSO"><span class="glyphicon glyphicon-remove"></span></button>
+        {% elseif dati.esiti[alunno].esito == 'S' %}
+            <button type="button" class="btn btn-xs btn-warning gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="GIUDIZIO SOSPESO"><span class="glyphicon glyphicon-hourglass"></span></button>
+        {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% elseif periodo == 'I' %}
+  <div id="gs-fixed-header">
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+      {% for materia,m in dati.materie %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
+          </th>
+      {% endfor %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Media complessiva dei voti">Media</span></small>
+          </th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Esito dello scrutinio finale">Esito</span></small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for alunno,a in dati.alunni %}
+        <tr>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+          </td>
+        {% for materia,m in dati.materie %}
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          {% if m.tipo == 'R' %}
+            {% if a.religione != 'S' %}
+            <span>NA</span>
+            {% elseif dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% else %}
+            <span class="label label-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ info.giudizi['F']['R'][dati.voti[alunno][materia].unico] }}</span>
+            {% endif %}
+          {% elseif m.tipo == 'C' %}
+            {% if dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% elseif dati.voti[alunno][materia].unico == 4 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+            {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }}">{{ dati.voti[alunno][materia].unico }}</span></span>
+            {% endif %}
+          {% else %}
+            {% if dati.voti[alunno][materia].unico is not defined %}
+            <span>--</span>
+            {% elseif dati.voti[alunno][materia].unico == 0 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+            {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][materia].unico }}</span></span>
+            {% endif %}
+          {% endif %}
+          </td>
+        {% endfor %}
+          <td>
+            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
+          </td>
+          <td>
+        {% if dati.esiti[alunno].esito == 'A' %}
+            <button type="button" class="btn btn-xs btn-success gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="AMMESSO"><span class="glyphicon glyphicon-ok"></span></button>
+        {% elseif dati.esiti[alunno].esito == 'N' %}
+            <button type="button" class="btn btn-xs btn-danger gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="NON AMMESSO"><span class="glyphicon glyphicon-remove"></span></button>
+        {% elseif dati.esiti[alunno].esito == 'X' %}
+            <button type="button" class="btn btn-xs btn-info gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="SCRUTINIO RINVIATO"><span class="glyphicon glyphicon-refresh"></span></button>
+        {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% else %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.no_scrutini_svolti'|trans }}</strong>
+  </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/floatThead/jquery.floatThead.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('[data-toggle="popover"]').popover({container: 'body'});
+  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
+    var c=floatContainer.find('thead');
+    if(isFloated){
+      c.hide();
+      c.removeClass("bg-success").addClass("bg-info");
+      c.fadeIn();
+    } else {
+      c.removeClass("bg-info").addClass("bg-success");
+    }
+  });
+  // init
+  $('#gs-fixed-header table').floatThead({top: 60});
+});
+</script>
+{% endblock %}

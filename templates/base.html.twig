@@ -1,12 +1,163 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
-    </body>
+<!--[if lt IE 7]><html dir="ltr" lang="it" class="lt-ie9 lt-ie8 lt-ie7"><![endif]-->
+<!--[if IE 7]><html dir="ltr" lang="it" class="lt-ie9 lt-ie8"><![endif]-->
+<!--[if IE 8]><html dir="ltr" lang="it" class="lt-ie9"><![endif]-->
+<!--[if gt IE 8]><!-->
+<html dir="ltr" lang="it" class="">
+<!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ pagina_titolo|trans }}</title>
+    <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}">
+    <meta name="keywords" content="scuola,istituto,istruzione,superiore,tecnico,liceo,scientifico,scienze,applicate,giua,cagliari,assemini,registro,elettronico">
+    <meta name="author" content="Antonello Dessì">
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap-theme.min.css') }}" rel="stylesheet">
+    <!--[if IE 10]>
+    <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
+    <![endif]-->
+    <link href="{{ asset('css/tema.css?v='~(filedate('css/tema.css')|date('U'))) }}" rel="stylesheet">
+{% block pagina_css %}
+{% endblock %}
+{% if app.session.get('/APP/APP/css') %}
+    <link href="{{ asset('app/'~app.session.get('/APP/APP/css')~'.css?v='~(filedate('css/'~app.session.get('/APP/APP/css')~'.css')|date('U'))) }}" rel="stylesheet">
+{% endif %}
+    <!--[if lt IE 9]>
+    <script src="{{ asset('vendor/html5shiv.min.js') }}"></script>
+    <script src="{{ asset('vendor/respond.min.js') }}"></script>
+    <![endif]-->
+{% block pagina_js_inizio %}
+{% endblock %}
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('apple-icon-57x57.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('apple-icon-60x60.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('apple-icon-72x72.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('apple-icon-76x76.png') }}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('apple-icon-114x114.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('apple-icon-120x120.png') }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('apple-icon-144x144.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('apple-icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-icon-180x180.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('android-icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('favicon-96x96.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="msapplication-TileColor" content="#00a300">
+    <meta name="msapplication-TileImage" content="{{ asset('ms-icon-144x144.png') }}">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#5bbad5">
+  </head>
+  <body>
+    <p class="gs-mb-0">
+      <a href="#gs-main" class="sr-only sr-only-focusable">Vai al contenuto</a>
+      <a href="#gs-footer" class="sr-only sr-only-focusable">Vai a fine pagina</a>
+    </p>
+
+    <!-- pagina -->
+    <div class="gs-page-container" id="gs-top">
+
+      <!-- intestazione -->
+      <div class="gs-header-container">
+        <header id="gs-header" class="navbar-fixed-top">
+          <div class="container-fluid gs-header-top">
+{{ include('topbar.html.twig') }}
+          </div>
+          <nav class="navbar navbar-default gs-navbar">
+            <div class="navbar-header gs-navbar-header">
+              <button type="button" class="navbar-toggle collapsed gs-navbar-toggle gs-pt-1 gs-pb-1 gs-mt-2 gs-mb-0" data-toggle="collapse" data-target="#gs-navbar-collapse-1" aria-expanded="false">
+                <span class="gs-mr-2">MENU</span>
+                <span class="glyphicon glyphicon-menu-hamburger"></span>
+              </button>
+              <div class="visible-xs-block text-center">
+                <strong>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong>
+                  {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SISTEMA/anno_scolastico') }}{% endif %}
+              </div>
+            </div>
+            <div class="collapse navbar-collapse" id="gs-navbar-collapse-1">
+{% block pagina_menu %}
+{{ include('menubar.html.twig') }}
+{% endblock %}
+            </div>
+          </nav>
+        </header>
+{% block pagina_submenu %}
+{% endblock %}
+      </div><!-- fine intestazione -->
+
+      <!-- contenuto -->
+      <div class="gs-main-container clearfix">
+        <div id="gs-main">
+{% block pagina_contenuto %}
+{% endblock %}
+        </div>
+      </div><!-- fine contenuto -->
+
+      <!-- piè di pagina -->
+      <div class="gs-footer-container clearfix">
+        <footer class="footer" id="gs-footer" tabindex="-1" style="outline:none;">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-sm-6 hidden-xs text-center small">
+                <div class="row">
+                  <strong>Istituto di Istruzione Superiore<br><em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</em></strong>
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <address class="text-center pull-right">
+                      <strong>Sede Centrale</strong><br>Via Montecassino 41<br>09134 - CAGLIARI (Pirri)<br>Telefono: 070 500786
+                    </address>
+                  </div>
+                  <div class="col-sm-6">
+                    <address class="text-center pull-left">
+                      <strong>Sede Staccata</strong><br>Via Bacaredda 27<br>09032 - ASSEMINI<br>Telefono: 070 941763
+                    </address>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-5 col-xs-10 text-center">
+                <p>
+                  <a href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai alla pagina del Progetto giua@school">
+                    <img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em style="color:#337ab7"><strong>giua@school {{ app.session.get('/CONFIG/SISTEMA/versione') }}</strong></em>
+                  </a>
+                  <em class="hidden-xs gs-big"><br>il registro elettronico<br>dell'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</em>
+                </p>
+              </div>
+              <div class="col-sm-1 col-xs-2 text-center">
+                  <a href="#" class="btn btn-primary btn-sm" role="button" title="Vai a inizio pagina" data-toggle="tooltip" data-placement="left"><span class="glyphicon glyphicon-chevron-up"></span></a>
+              </div>
+            </div>
+          </div>
+          <nav class="navbar navbar-inverse gs-navbar-bottom">
+            <div class="container-fluid">
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed btn-sm gs-navbar-toggle-bottom" data-toggle="collapse" data-target="#gs-navbar-collapse-2" aria-expanded="false">
+                  <span class="gs-mr-2">Informazioni</span>
+                  <span class="glyphicon glyphicon-menu-hamburger"></span>
+                </button>
+              </div>
+              <div class="collapse navbar-collapse" id="gs-navbar-collapse-2">
+                <ul class="nav navbar-nav navbar-right">
+                  <li><a href="{{ path('info_notelegali') }}">Note legali</a></li>
+                  <li><a href="{{ path('info_privacy') }}">Privacy</a></li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </footer>
+      </div><!-- fine piè di pagina -->
+
+    </div><!-- fine pagina -->
+
+    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+    <!--[if IE 10]>
+    <script src="{{ asset('vendor/bootstrap/js/ie10-viewport-bug-workaround.js') }}"></script>
+    <![endif]-->
+    <script src="{{ asset('js/script.js?v='~(filedate('js/script.js')|date('U'))) }}"></script>
+{% block pagina_js_fine %}
+{% endblock %}
+  </body>
 </html>

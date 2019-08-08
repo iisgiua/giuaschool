@@ -1,0 +1,19 @@
+{% if maxPagine > 1 %}
+<nav aria-label="Navigazione tra le pagine" class="text-center">
+  <ul class="pagination pagination-sm gs-mt-2">
+  {% if pagina > 1 %}
+    <li><a href="{{ path(url, {'pagina': pagina-1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+  {% else %}
+    <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
+  {% endif %}
+  {% for i in 1..maxPagine %}
+    <li {{ pagina == i ? 'class="active"' }}><a href="{{ path(url, {'pagina': i}) }}">{{ i }}</a></li>
+  {% endfor %}
+  {% if pagina < maxPagine %}
+    <li><a href="{{ path(url, {'pagina': pagina+1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+  {% else %}
+    <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
+  {% endif %}
+  </ul>
+</nav>
+{% endif %}

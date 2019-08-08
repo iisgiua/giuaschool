@@ -1,5 +1,8 @@
+# config/packages/translation.yaml
+
 framework:
-    default_locale: '%locale%'
-    translator:
-        default_path: '%kernel.project_dir%/translations'
-        fallbacks: '%locale%'
+  default_locale: '%locale%'
+  translator:
+    enabled: true
+    fallbacks: '%locale%'
+        

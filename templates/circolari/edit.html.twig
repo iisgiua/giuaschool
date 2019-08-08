@@ -1,0 +1,816 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% form_theme form _self %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid gs-mt-4">
+  <div class="panel panel-primary" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body">
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ 'label.data_numero'|trans }}</label>
+        <div class="col-sm-4">
+          {{ form_widget(form.data) }}
+        </div>
+        <div class="col-sm-4 col-sm-offset-2">
+          {{ form_widget(form.numero) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required" for="circolare_oggetto">{{ 'label.oggetto'|trans }}</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.oggetto) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ 'label.sede'|trans }}</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.sedi) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ 'label.destinatari'|trans }}</label>
+        <div class="col-sm-10">
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ form_widget(form.dsga) }}</div>
+            <div class="col-sm-2">{{ form_widget(form.ata) }}</div>
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ 'label.coordinatori'|trans|upper }}</div>
+            <div class="col-sm-2">{{ form_widget(form.coordinatori) }}</div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteCoordinatori" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-6 text-info"><strong><em id="gs-filtroCoordinatori" style="display:none"></em></strong></div>
+            {{ form_widget(form.filtroCoordinatori) }}
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ 'label.docenti'|trans|upper }}</div>
+            <div class="col-sm-2">{{ form_widget(form.docenti) }}</div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteDocenti" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-6 text-info"><strong><em id="gs-filtroDocenti" style="display:none"></em></strong></div>
+            {{ form_widget(form.filtroDocenti) }}
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ 'label.genitori'|trans|upper }}</div>
+            <div class="col-sm-2">{{ form_widget(form.genitori) }}</div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteGenitori" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-6 text-info"><strong><em id="gs-filtroGenitori" style="display:none"></em></strong></div>
+            {{ form_widget(form.filtroGenitori) }}
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ 'label.alunni'|trans|upper }}</div>
+            <div class="col-sm-2">{{ form_widget(form.alunni) }}</div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteAlunni" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-6 text-info"><strong><em id="gs-filtroAlunni" style="display:none"></em></strong></div>
+            {{ form_widget(form.filtroAlunni) }}
+          </div>
+          <div class="form-group gs-mb-2 gs-vertical-center">
+            <div class="col-sm-2 text-right">{{ 'label.altri'|trans|upper }}</div>
+            <div class="col-sm-10">{{ form_widget(form.altri) }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">{{ 'label.impostazioni'|trans }}</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.firma) }}
+          {{ form_widget(form.notifica) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ 'label.documento'|trans }}</label>
+        <div class="col-sm-10">
+          <div id="gs-dz-documento" class="dropzone">
+            <div class="fallback"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">{{ 'label.allegati'|trans }}</label>
+        <div class="col-sm-10">
+          <div id="gs-dz-allegati" class="dropzone">
+            <div class="fallback"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+          {{ form_widget(form.submit) }}
+          {{ form_widget(form.cancel) }}
+        </div>
+      </div>
+      <div class="modal fade" id="gs-modal-classi" tabindex="-1" role="dialog" aria-labelledby="gs-modal-classi-label" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header gs-pt-2 gs-pb-0">
+              <h3 id="gs-modal-classi-label" class="modal-title text-center gs-h2">{{ 'label.scegli_classi'|trans }}</h3>
+            </div>
+            <div class="modal-body clearfix gs-pt-2 gs-pb-2 gs-pr-4 gs-pl-4">
+              {{ form_widget(form.classi) }}
+            </div>
+            <div class="modal-footer gs-pb-3 gs-pt-3">
+              <div class="text-center">
+                <button type="button" id="gs-modal-classi-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+                <button type="button" id="gs-modal-classi-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="gs-modal-materie" tabindex="-1" role="dialog" aria-labelledby="gs-modal-materie-label" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header gs-pt-2 gs-pb-0">
+              <h3 id="gs-modal-materie-label" class="modal-title text-center gs-h2">{{ 'label.scegli_materie'|trans }}</h3>
+            </div>
+            <div class="modal-body clearfix gs-pt-2 gs-pb-2 gs-pr-4 gs-pl-4">
+              {{ form_widget(form.materie) }}
+            </div>
+            <div class="modal-footer gs-pb-3 gs-pt-3">
+              <div class="text-center">
+                <button type="button" id="gs-modal-materie-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+                <button type="button" id="gs-modal-materie-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="gs-modal-docenti" tabindex="-1" role="dialog" aria-labelledby="gs-modal-docenti-label" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header gs-pt-2 gs-pb-0">
+              <h3 id="gs-modal-docenti-label" class="modal-title text-center gs-h2">{{ 'label.scegli_docenti'|trans }}</h3>
+            </div>
+            <div class="modal-body clearfix gs-pt-2 gs-pb-2 gs-pr-4 gs-pl-4">
+              <div id="gs-modal-docenti-row" class="row bg-info gs-mr-0 gs-ml-0 gs-pt-1 gs-pb-1">
+              </div>
+              <div class="row gs-pr-4 gs-pl-4 gs-pt-2 gs-pb-2">
+                <input type="text" id="gs-modal-docenti-cognome" name="cerca[cognome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.cognome'|trans }}">
+                <input type="text" id="gs-modal-docenti-nome" name="cerca[nome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.nome'|trans }}">
+                <button type="button" id="gs-modal-docenti-search" class="btn btn-default"><strong>{{ 'label.search'|trans }}</strong></button>
+              </div>
+              <div class="row gs-pr-4 gs-pl-4">
+                <div id="gs-modal-docenti-col1" class="col-sm-6"></div>
+                <div id="gs-modal-docenti-col2" class="col-sm-6"></div>
+              </div>
+              <div id="gs-modal-docenti-pag" class="row text-center gs-pr-4 gs-pl-4 gs-pt-3"></div>
+            </div>
+            <div class="modal-footer gs-pb-3 gs-pt-3">
+              <div class="text-center">
+                <button type="button" id="gs-modal-docenti-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+                <button type="button" id="gs-modal-docenti-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="gs-modal-alunni" tabindex="-1" role="dialog" aria-labelledby="gs-modal-alunni-label" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header gs-pt-2 gs-pb-0">
+              <h3 id="gs-modal-alunni-label" class="modal-title text-center gs-h2"></h3>
+            </div>
+            <div class="modal-body clearfix gs-pt-2 gs-pb-2 gs-pr-4 gs-pl-4">
+              <div id="gs-modal-alunni-row" class="row bg-info gs-mr-0 gs-ml-0 gs-pt-1 gs-pb-1">
+              </div>
+              <div class="row gs-pr-4 gs-pl-4 gs-pt-2 gs-pb-2">
+                <input type="text" id="gs-modal-alunni-cognome" name="cerca[cognome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.cognome'|trans }}">
+                <input type="text" id="gs-modal-alunni-nome" name="cerca[nome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.nome'|trans }}">
+                {{ form_widget(form.lista_classi) }}
+                <button type="button" id="gs-modal-alunni-search" class="btn btn-default"><strong>{{ 'label.search'|trans }}</strong></button>
+              </div>
+              <div class="row gs-pr-4 gs-pl-4">
+                <div id="gs-modal-alunni-col1" class="col-sm-6"></div>
+                <div id="gs-modal-alunni-col2" class="col-sm-6"></div>
+              </div>
+              <div id="gs-modal-alunni-pag" class="row text-center gs-pr-4 gs-pl-4 gs-pt-3"></div>
+            </div>
+            <div class="modal-footer gs-pb-3 gs-pt-3">
+              <div class="text-center">
+                <button type="button" id="gs-modal-alunni-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+                <button type="button" id="gs-modal-alunni-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+  {% include 'include/modal-waiting.html.twig' %}
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+<link href="{{ asset('vendor/dropzone/css/dropzone.min.css') }}" rel="stylesheet">
+<link href="{{ asset('css/tema_dropzone.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/dropzone/js/dropzone.min.js') }}"></script>
+<script>
+Dropzone.autoDiscover = false;
+$(document).ready(function() {
+  $("#gs-dz-documento").dropzone({
+    url: "{{ path('file_upload', {'pagina': 'circolari_edit', 'param': 'documento'}) }}",
+    maxFiles: 1,
+    maxFilesize: 50,
+    acceptedFiles: ".pdf",
+    timeout: 0,
+    paramName: "documento",
+    uploadMultiple: true,
+    addRemoveLinks: true,
+    createImageThumbnails: false,
+    clickable: true,
+    dictDefaultMessage: "{{ 'message.upload_dropzone'|trans }}",
+    dictFallbackMessage: "{{ 'exception.upload_no_dropzone'|trans }}",
+    dictInvalidFileType: "{{ 'exception.upload_tipo'|trans }}",
+    dictFileTooBig: "{{ 'exception.upload_dimensione'|trans }}",
+    dictMaxFilesExceeded: "{{ 'exception.upload_numero'|trans }}",
+    dictRemoveFile: "{{ 'label.upload_rimuove_file'|trans }}",
+    dictCancelUpload: "{{ 'label.upload_cancella'|trans }}",
+    dictCancelUploadConfirmation: "{{ 'message.upload_cancella'|trans }}",
+    init: function() {
+      this.on("successmultiple", function(files, response) {
+        $.each(files, function(key,file){
+          file.uploaded = response[key];
+        });
+      });
+      this.on("removedfile", function(file) {
+        if (file.uploaded) {
+          $.post("{{ path('file_remove', {'pagina': 'circolari_edit', 'param': 'documento'}) }}", {"documento": file.uploaded});
+        } else if (file.existent) {
+          $.post("{{ path('file_remove', {'pagina': 'circolari_edit', 'param': 'documento'}) }}", {"documento": file.existent});
+          this.options.maxFiles++;
+        }
+      });
+    {% if documento is not empty %}
+      var DZ = this;
+      var files = [
+      {% for a in documento %}
+          ['{{ a.name }}', '{{ a.temp }}', {{ a.size }}],
+      {% endfor %}
+        ];
+      $.each(files, function(key,file) {
+        var obj = {'type': 'existent', 'name': file[0], 'temp': file[1]};
+        var mockFile = {'name': file[0], 'size': file[2], 'existent': obj};
+        DZ.emit("addedfile", mockFile);
+        DZ.emit("complete", mockFile);
+        DZ.options.maxFiles--;
+      });
+    {% endif %}
+    }
+  });
+  $("#gs-dz-allegati").dropzone({
+    url: "{{ path('file_upload', {'pagina': 'circolari_edit', 'param': 'allegati'}) }}",
+    maxFiles: 10,
+    maxFilesize: 50,
+    acceptedFiles: ".pdf,.zip,.doc,.docx,.rtf,.xls,.xlsx",
+    timeout: 0,
+    paramName: "allegati",
+    uploadMultiple: true,
+    addRemoveLinks: true,
+    createImageThumbnails: false,
+    clickable: true,
+    dictDefaultMessage: "{{ 'message.upload_dropzone'|trans }}",
+    dictFallbackMessage: "{{ 'exception.upload_no_dropzone'|trans }}",
+    dictInvalidFileType: "{{ 'exception.upload_tipo'|trans }}",
+    dictFileTooBig: "{{ 'exception.upload_dimensione'|trans }}",
+    dictMaxFilesExceeded: "{{ 'exception.upload_numero'|trans }}",
+    dictRemoveFile: "{{ 'label.upload_rimuove_file'|trans }}",
+    dictCancelUpload: "{{ 'label.upload_cancella'|trans }}",
+    dictCancelUploadConfirmation: "{{ 'message.upload_cancella'|trans }}",
+    init: function() {
+      this.on("successmultiple", function(files, response) {
+        $.each(files, function(key,file){
+          file.uploaded = response[key];
+        });
+      });
+      this.on("removedfile", function(file) {
+        if (file.uploaded) {
+          $.post("{{ path('file_remove', {'pagina': 'circolari_edit', 'param': 'allegati'}) }}", {"allegati": file.uploaded});
+        } else if (file.existent) {
+          $.post("{{ path('file_remove', {'pagina': 'circolari_edit', 'param': 'allegati'}) }}", {"allegati": file.existent});
+          this.options.maxFiles++;
+        }
+      });
+    {% if allegati is not empty %}
+      var DZ = this;
+      var files = [
+      {% for a in allegati %}
+          ['{{ a.name }}', '{{ a.temp }}', {{ a.size }}],
+      {% endfor %}
+        ];
+      $.each(files, function(key,file) {
+        var obj = {'type': 'existent', 'name': file[0], 'temp': file[1]};
+        var mockFile = {'name': file[0], 'size': file[2], 'existent': obj};
+        DZ.emit("addedfile", mockFile);
+        DZ.emit("complete", mockFile);
+        DZ.options.maxFiles--;
+      });
+    {% endif %}
+    }
+  });
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('label.gs-checkbox-inline input').change(function() {
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  }).change();
+  $("input[name='circolare[sedi][]']").change(function() {
+    $("#circolare_coordinatori").val('N').change();
+    $("#circolare_docenti").val('N').change();
+    $("#circolare_genitori").val('N').change();
+    $("#circolare_alunni").val('N').change();
+  });
+  $("#gs-pulsanteCoordinatori").click(function() {
+    var opt = $('#circolare_filtroCoordinatori').val();
+    var type = ($('#circolare_coordinatori').val() == 'C' ? 'classi' : '');
+    $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+    $('input[name="circolare[sedi][]"]:checked').each(function() {
+      var s=$(this).parent().text().trim();
+      $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
+    });
+    $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+      var s=$(this).parent().text().trim();
+      $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
+    });
+    if (opt != "") {
+      $.each(opt.split(","), function(idx,item){
+        $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+      });
+    }
+    $("#gs-modal-"+type).data('caller', 'Coordinatori').modal('show');
+  });
+  $("#circolare_coordinatori").change(function() {
+    $("#circolare_filtroCoordinatori").val('');
+    if ($(this).val() == 'C') {
+      $("#gs-pulsanteCoordinatori").click();
+    } else {
+      $(this).data('previous', $(this).val());
+      $("#gs-pulsanteCoordinatori").hide();
+      $("#gs-filtroCoordinatori").hide();
+    }
+  });
+  $("#gs-pulsanteDocenti").click(function() {
+    var opt = $('#circolare_filtroDocenti').val();
+    var type = ($('#circolare_docenti').val() == 'C' ? 'classi' : ($('#circolare_docenti').val() == 'M' ? 'materie' : 'docenti'));
+    if (type == 'docenti') {
+      $('#gs-modal-docenti-row').data('id', opt).data('nomi','').html('');
+      $('#gs-modal-docenti-col1').html('');
+      $('#gs-modal-docenti-col2').html('');
+      $('#gs-modal-docenti-pag').html('');
+      $('#gs-modal-docenti-cognome').val('');
+      $('#gs-modal-docenti-nome').val('');
+      if (opt != "") {
+        $('#gs-modal-docenti-row').data('id', opt);
+        $('#gs-modal-docenti-row').data('nomi', $('#circolare_filtroDocenti').data('nomi'));
+        $('#gs-filtroDocenti span').each(function(){
+          var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-docenti-selezionati-'+$(this).attr('id')+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(\'docenti\',this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+$(this).text()+'</strong></div>';
+          $('#gs-modal-docenti-row').append(s);
+        });
+      }
+    } else {
+      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+      if (type == 'classi') {
+        $('input[name="circolare[sedi][]"]:checked').each(function() {
+          var s=$(this).parent().text().trim();
+          $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
+        });
+        $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+          var s=$(this).parent().text().trim();
+          $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
+        });
+      }
+      if (opt != "") {
+        $.each(opt.split(","), function(idx,item){
+          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+        });
+      }
+    }
+    $("#gs-modal-"+type).data('caller', 'Docenti').modal('show');
+  });
+  $("#circolare_docenti").change(function() {
+    $("#circolare_filtroDocenti").val('');
+    if ($(this).val() == 'C' || $(this).val() == 'M' || $(this).val() == 'U') {
+      $("#gs-pulsanteDocenti").click();
+    } else {
+      $(this).data('previous', $(this).val());
+      $("#gs-pulsanteDocenti").hide();
+      $("#gs-filtroDocenti").hide();
+    }
+  });
+  $("#gs-pulsanteGenitori").click(function() {
+    var opt = $('#circolare_filtroGenitori').val();
+    var type = ($('#circolare_genitori').val() == 'C' ? 'classi' : 'alunni');
+    if (type == 'alunni') {
+      $('#gs-modal-alunni-label').text("{{ 'label.scegli_genitori'|trans }}");
+      $('#gs-modal-alunni-row').data('id', opt).data('nomi','').html('');
+      $('#gs-modal-alunni-col1').html('');
+      $('#gs-modal-alunni-col2').html('');
+      $('#gs-modal-alunni-pag').html('');
+      $('#gs-modal-alunni-cognome').val('');
+      $('#gs-modal-alunni-nome').val('');
+      $('#circolare_lista_classi').val('');
+      $('input[name="circolare[sedi][]"]:checked').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',false);
+      });
+      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',true);
+      });
+      if (opt != "") {
+        $('#gs-modal-alunni-row').data('id', opt);
+        $('#gs-modal-alunni-row').data('nomi', $('#circolare_filtroGenitori').data('nomi'));
+        $('#gs-filtroGenitori span').each(function(){
+          var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+$(this).attr('id')+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(\'alunni\',this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+$(this).text()+'</strong></div>';
+          $('#gs-modal-alunni-row').append(s);
+        });
+      }
+    } else {
+      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+      $('input[name="circolare[sedi][]"]:checked').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
+      });
+      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
+      });
+      if (opt != "") {
+        $.each(opt.split(","), function(idx,item){
+          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+        });
+      }
+    }
+    $("#gs-modal-"+type).data('caller', 'Genitori').modal('show');
+  });
+  $("#circolare_genitori").change(function() {
+    $("#circolare_filtroGenitori").val('');
+    if ($(this).val() == 'C' || $(this).val() == 'U') {
+      $("#gs-pulsanteGenitori").click();
+    } else {
+      $(this).data('previous', $(this).val());
+      $("#gs-pulsanteGenitori").hide();
+      $("#gs-filtroGenitori").hide();
+    }
+  });
+  $("#gs-pulsanteAlunni").click(function() {
+    var opt = $('#circolare_filtroAlunni').val();
+    var type = ($('#circolare_alunni').val() == 'C' ? 'classi' : 'alunni');
+    if (type == 'alunni') {
+      $('#gs-modal-alunni-label').text("{{ 'label.scegli_alunni'|trans }}");
+      $('#gs-modal-alunni-row').data('id', opt).data('nomi','').html('');
+      $('#gs-modal-alunni-col1').html('');
+      $('#gs-modal-alunni-col2').html('');
+      $('#gs-modal-alunni-pag').html('');
+      $('#gs-modal-alunni-cognome').val('');
+      $('#gs-modal-alunni-nome').val('');
+      $('#circolare_lista_classi').val('');
+      $('input[name="circolare[sedi][]"]:checked').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',false);
+      });
+      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#circolare_lista_classi optgroup[label="'+s+'"]').prop('disabled',true);
+      });
+      if (opt != "") {
+        $('#gs-modal-alunni-row').data('id', opt);
+        $('#gs-modal-alunni-row').data('nomi', $('#circolare_filtroAlunni').data('nomi'));
+        $('#gs-filtroAlunni span').each(function(){
+          var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+$(this).attr('id')+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(\'alunni\',this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+$(this).text()+'</strong></div>';
+          $('#gs-modal-alunni-row').append(s);
+        });
+      }
+    } else {
+      $('#gs-modal-'+type+' input[type="checkbox"]').prop("checked", false).change();
+      $('input[name="circolare[sedi][]"]:checked').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
+      });
+      $('input[name="circolare[sedi][]"]:not(:checked)').each(function() {
+        var s=$(this).parent().text().trim();
+        $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).parent().addClass('text-muted');
+      });
+      if (opt != "") {
+        $.each(opt.split(","), function(idx,item){
+          $('#gs-modal-'+type+' input[id="circolare_'+type+'_'+item+'"]').prop("checked", true).change();
+        });
+      }
+    }
+    $("#gs-modal-"+type).data('caller', 'Alunni').modal('show');
+  });
+  $("#circolare_alunni").change(function() {
+    $("#circolare_filtroAlunni").val('');
+    if ($(this).val() == 'C' || $(this).val() == 'U') {
+      $("#gs-pulsanteAlunni").click();
+    } else {
+      $(this).data('previous', $(this).val());
+      $("#gs-pulsanteAlunni").hide();
+      $("#gs-filtroAlunni").hide();
+    }
+  });
+  $("#gs-modal-classi-confirm").click(function() {
+    var opt = $('#gs-modal-classi input[type="checkbox"]:checked');
+    var optlst = opt.map(function(){return $(this).val();}).get();
+    if (optlst == '') {
+      alert('ATTENZIONE: Devi selezionare almeno una classe');
+    } else {
+      var txt = opt.map(function(){return $(this).parent().text();}).get().join(', ');
+      var caller = $("#gs-modal-classi").data('caller');
+      $("#gs-modal-classi").modal('hide');
+      $("#circolare_filtro"+caller).val(optlst);
+      $("#circolare_"+caller.toLowerCase()).data('previous', $("#circolare_"+caller.toLowerCase()).val());
+      $("#gs-pulsante"+caller).show();
+      $("#gs-filtro"+caller).text(txt).show();
+    }
+  });
+  $("#gs-modal-classi-cancel").click(function() {
+    var caller = $("#gs-modal-classi").data('caller').toLowerCase();
+    var old = $("#circolare_"+caller).data('previous');
+    $("#circolare_"+caller).val(old);
+    $("#gs-modal-classi").modal('hide');
+  });
+  $("#gs-modal-materie-confirm").click(function() {
+    var opt = $('#gs-modal-materie input[type="checkbox"]:checked');
+    var optlst = opt.map(function(){return $(this).val();}).get();
+    if (optlst == '') {
+      alert('ATTENZIONE: Devi selezionare almeno una materia');
+    } else {
+      var txt = opt.map(function(){return '"'+$(this).parent().text().trim()+'"';}).get().join(', ');
+      var caller = $("#gs-modal-materie").data('caller');
+      $("#gs-modal-materie").modal('hide');
+      $("#circolare_filtro"+caller).val(optlst);
+      $("#circolare_"+caller.toLowerCase()).data('previous', $("#circolare_"+caller.toLowerCase()).val());
+      $("#gs-pulsante"+caller).show();
+      $("#gs-filtro"+caller).text(txt).show();
+    }
+  });
+  $("#gs-modal-materie-cancel").click(function() {
+    var caller = $("#gs-modal-materie").data('caller').toLowerCase();
+    var old = $("#circolare_"+caller).data('previous');
+    $("#circolare_"+caller).val(old);
+    $("#gs-modal-materie").modal('hide');
+  });
+  $("#gs-modal-docenti-search").click(function() {
+    $('#gs-modal-waiting').modal('show');
+    var par1 = "-"+encodeURIComponent($('#gs-modal-docenti-cognome').val());
+    var par2 = "-"+encodeURIComponent($('#gs-modal-docenti-nome').val());
+    var par3 = "-";
+    $('input[name="circolare[sedi][]"]:checked').each(function() {
+      par3 +=$(this).attr('id').substr($(this).attr('id').lastIndexOf('_')+1)+"-";
+    });
+    $('#gs-modal-docenti-pag').data('par1', par1).data('par2', par2).data('par3', par3);
+    docentiSearch(1);
+  });
+  $("#gs-modal-docenti-confirm").click(function() {
+    var id = $('#gs-modal-docenti-row').data('id');
+    var nomi = $('#gs-modal-docenti-row').data('nomi');
+    if (id == null || id == '') {
+      alert('ATTENZIONE: Devi selezionare almeno un docente');
+    } else {
+      var caller = $("#gs-modal-docenti").data('caller');
+      $("#gs-modal-docenti").modal('hide');
+      $("#circolare_filtro"+caller).val(id);
+      $("#circolare_filtro"+caller).data('nomi', nomi);
+      $("#circolare_"+caller.toLowerCase()).data('previous', $("#circolare_"+caller.toLowerCase()).val());
+      $("#gs-pulsante"+caller).show();
+      var lista_id = id.split(',');
+      var lista_nomi = nomi.split(',').map(function(item,index){
+        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item+'</span>';
+      });
+      $("#gs-filtro"+caller).html(lista_nomi.join(', ')).show();
+    }
+  });
+  $("#gs-modal-docenti-cancel").click(function() {
+    var caller = $("#gs-modal-docenti").data('caller').toLowerCase();
+    var old = $("#circolare_"+caller).data('previous');
+    $("#circolare_"+caller).val(old);
+    $("#gs-modal-docenti").modal('hide');
+  });
+  $("#gs-modal-alunni-search").click(function() {
+    $('#gs-modal-waiting').modal('show');
+    var par1 = "-"+encodeURIComponent($('#gs-modal-alunni-cognome').val());
+    var par2 = "-"+encodeURIComponent($('#gs-modal-alunni-nome').val());
+    var par3 = "-"+encodeURIComponent($('#circolare_lista_classi').val() ? $('#circolare_lista_classi').val() : '');
+    var par4 = "-";
+    $('input[name="circolare[sedi][]"]:checked').each(function() {
+      par4 +=$(this).attr('id').substr($(this).attr('id').lastIndexOf('_')+1)+"-";
+    });
+    $('#gs-modal-alunni-pag').data('par1', par1).data('par2', par2).data('par3', par3).data('par4', par4);
+    alunniSearch(1);
+  });
+  $("#gs-modal-alunni-confirm").click(function() {
+    var id = $('#gs-modal-alunni-row').data('id');
+    var nomi = $('#gs-modal-alunni-row').data('nomi');
+    if (id == null || id == '') {
+      alert('ATTENZIONE: Devi selezionare almeno un utente');
+    } else {
+      var caller = $("#gs-modal-alunni").data('caller');
+      $("#gs-modal-alunni").modal('hide');
+      $("#circolare_filtro"+caller).val(id);
+      $("#circolare_filtro"+caller).data('nomi', nomi);
+      $("#circolare_"+caller.toLowerCase()).data('previous', $("#circolare_"+caller.toLowerCase()).val());
+      $("#gs-pulsante"+caller).show();
+      var lista_id = id.split(',');
+      var lista_nomi = nomi.split(',').map(function(item,index){
+        return '<span id="gs-filtro'+caller+'-'+lista_id[index]+'">'+item+'</span>';
+      });
+      $("#gs-filtro"+caller).html(lista_nomi.join(', ')).show();
+    }
+  });
+  $("#gs-modal-alunni-cancel").click(function() {
+    var caller = $("#gs-modal-alunni").data('caller').toLowerCase();
+    var old = $("#circolare_"+caller).data('previous');
+    $("#circolare_"+caller).val(old);
+    $("#gs-modal-alunni").modal('hide');
+  });
+  $(document).on('keypress','.modal', function(e){
+    return event.keyCode != 13;
+  });
+  // init
+  $("select").each(function() {
+    $(this).data('previous', $(this).val());
+  })
+  if ($("#circolare_coordinatori").val() == 'C') {
+    $("#gs-pulsanteCoordinatori").show();
+    $("#gs-filtroCoordinatori").html("{{ dati.coordinatori|raw }}").show();
+  }
+  if ($("#circolare_docenti").val() == 'C' || $("#circolare_docenti").val() == 'M' || $("#circolare_docenti").val() == 'U') {
+    $("#gs-pulsanteDocenti").show();
+    $("#gs-filtroDocenti").html("{{ dati.docenti|raw }}").show();
+    if ($("#circolare_docenti").val() == 'U') {
+      $("#circolare_filtroDocenti").data('nomi', $("{{ dati.docenti|raw }}").text());
+    }
+  }
+  if ($("#circolare_genitori").val() == 'C' || $("#circolare_genitori").val() == 'U') {
+    $("#gs-pulsanteGenitori").show();
+    $("#gs-filtroGenitori").html("{{ dati.genitori|raw }}").show();
+    if ($("#circolare_genitori").val() == 'U') {
+      $("#circolare_filtroGenitori").data('nomi', $("{{ dati.genitori|raw }}").text());
+    }
+  }
+  if ($("#circolare_alunni").val() == 'C' || $("#circolare_alunni").val() == 'U') {
+    $("#gs-pulsanteAlunni").show();
+    $("#gs-filtroAlunni").html("{{ dati.alunni|raw }}").show();
+    if ($("#circolare_alunni").val() == 'U') {
+      $("#circolare_filtroAlunni").data('nomi', $("{{ dati.alunni|raw }}").text());
+    }
+  }
+});
+function addUser(caller, element) {
+  var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
+  var nome = $(element).parent().text();
+  var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-'+caller+'-selezionati-'+id+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(\''+caller+'\',this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+nome+'</strong></div>';
+  var txt = $('#gs-modal-'+caller+'-row').data('nomi');
+  txt = (txt == null || txt == '' ? nome : txt+','+nome);
+  $('#gs-modal-'+caller+'-row').data('nomi', txt);
+  txt = $('#gs-modal-'+caller+'-row').data('id');
+  txt = (txt == null || txt == '' ? id : txt+','+id);
+  $('#gs-modal-'+caller+'-row').data('id', txt);
+  $('#gs-modal-'+caller+'-row').append(s);
+  $(element).hide();
+}
+function removeUser(caller, element) {
+  var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
+  var nome = $(element).parent().text();
+  var txt = ','+$('#gs-modal-'+caller+'-row').data('nomi')+',';
+  txt = txt.replace(','+nome+',',',').slice(1,-1);
+  $('#gs-modal-'+caller+'-row').data('nomi', txt);
+  txt = ','+$('#gs-modal-'+caller+'-row').data('id')+',';
+  txt = txt.replace(','+id+',',',').slice(1,-1);
+  $('#gs-modal-'+caller+'-row').data('id', txt);
+  $(element).parent().remove();
+  $('#gs-modal-'+caller+'-lista-'+id).show();
+}
+function docentiSearch(page) {
+  $('#gs-modal-waiting').modal('show');
+  var par1 = $('#gs-modal-docenti-pag').data('par1');
+  var par2 = $('#gs-modal-docenti-pag').data('par2');
+  var par3 = $('#gs-modal-docenti-pag').data('par3');
+  var url = "{{ path('ajax_docenti') }}/"+par1+"/"+par2+"/"+par3+"/"+page;
+  $.post(url, function (data) {
+      var sl='';
+      var sr='';
+      var s='';
+      $.each(data.lista, function(idx,item){
+        if ((','+$('#gs-modal-docenti-row').data('id')+',').indexOf(','+item.id+',') == -1) {
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-docenti-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(\'docenti\',this)"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+        } else {
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-docenti-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(\'docenti\',this)" style="display:none"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+        }
+        if (idx < 10) {
+          sl+=s;
+        } else {
+          sr+=s;
+        }
+      });
+      $('#gs-modal-docenti-col1').html(sl);
+      $('#gs-modal-docenti-col2').html(sr);
+      $('#gs-modal-docenti-pag').html('');
+      if (data.fine > 1) {
+        s = '<span><strong>Pagina: </strong></span><button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="docentiSearch(1)">Prima</button>';
+        for (i = data.inizio; i<=data.fine; i++) {
+          if (i == data.pagina) {
+            s = s+'<span class="gs-mr-2">'+i+'</span>';
+          } else {
+            s = s+'<button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="docentiSearch('+i+')">'+i+'</button>';
+          }
+        }
+        s = s+'<button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="docentiSearch('+data.max+')">Ultima</button>';
+        $('#gs-modal-docenti-pag').html(s);
+      }
+    }, 'json');
+  $('#gs-modal-waiting').modal('hide');
+}
+function alunniSearch(page) {
+  $('#gs-modal-waiting').modal('show');
+  var par1 = $('#gs-modal-alunni-pag').data('par1');
+  var par2 = $('#gs-modal-alunni-pag').data('par2');
+  var par3 = $('#gs-modal-alunni-pag').data('par3');
+  var par4 = $('#gs-modal-alunni-pag').data('par4');
+  var url = "{{ path('ajax_alunni') }}/"+par1+"/"+par2+"/"+par3+"/"+par4+"/"+page;
+  $.post(url, function (data) {
+      var sl='';
+      var sr='';
+      var s='';
+      $.each(data.lista, function(idx,item){
+        if ((','+$('#gs-modal-alunni-row').data('id')+',').indexOf(','+item.id+',') == -1) {
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(\'alunni\',this)"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+        } else {
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(\'alunni\',this)" style="display:none"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+        }
+        if (idx < 10) {
+          sl+=s;
+        } else {
+          sr+=s;
+        }
+      });
+      $('#gs-modal-alunni-col1').html(sl);
+      $('#gs-modal-alunni-col2').html(sr);
+      $('#gs-modal-alunni-pag').html('');
+      if (data.fine > 1) {
+        s = '<span><strong>Pagina: </strong></span><button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="alunniSearch(1)">Prima</button>';
+        for (i = data.inizio; i<=data.fine; i++) {
+          if (i == data.pagina) {
+            s = s+'<span class="gs-mr-2">'+i+'</span>';
+          } else {
+            s = s+'<button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="alunniSearch('+i+')">'+i+'</button>';
+          }
+        }
+        s = s+'<button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="alunniSearch('+data.max+')">Ultima</button>';
+        $('#gs-modal-alunni-pag').html(s);
+      }
+    }, 'json');
+  $('#gs-modal-waiting').modal('hide');
+}
+</script>
+{% endblock %}
+
+{% block _circolare_classi_widget %}
+  {% set prec = '' %}
+  {% for group_label, group in choices %}
+    {% if group_label[:-2] != prec %}
+      {% if prec != '' %}
+</div>
+      {% endif %}
+      {% set prec = group_label[:-2] %}
+<div class="col-sm-6" data-sede="{{ prec }}">
+  <div><strong><em>{{ prec }}</em></strong></div>
+    {% endif %}
+  <div class="row">
+    {% for key, choice in group %}
+      {{- form_widget(form[key], {
+        parent_label_class: 'gs-checkbox-inline col-sm-2 gs-pt-1',
+        translation_domain: choice_translation_domain,
+      }) -}}
+    {% endfor %}
+  </div>
+  {% endfor %}
+  {% if prec != '' %}
+</div>
+  {% endif %}
+{% endblock %}

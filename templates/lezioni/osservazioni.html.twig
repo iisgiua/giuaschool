@@ -1,0 +1,160 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not cattedra and not classe %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_osservazioni'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+  </div>
+  {% elseif not cattedra %}
+  <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_osservazioni'|trans }}</h1>
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.osservazioni_supplenza'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_osservazioni'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+  <div class="row gs-mb-4">
+    <div class="col-sm-6">
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {'cattedra': cattedra.id, 'classe': classe.id, 'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {'cattedra': cattedra.id, 'classe': classe.id, 'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+    </div>
+    <div class="col-sm-6 text-right">
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali') }}" role="button" title="Visualizza il diario personale in cui inserire le proprie osservazioni"><span class="glyphicon glyphicon-book gs-mr-3"></span><strong>Diario personale</strong></a>
+    </div>
+  </div>
+    {% if errore %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+    {% endif %}
+    {% for periodo,v in dati.lista %}
+  <div class="row gs-mb-1">
+    <div class="col-sm-6 text-info">
+      <strong class="gs-big">{{ periodo }}</strong>
+    </div>
+    <div class="col-sm-6 text-right">
+      {% if dati.add is defined %}
+      <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a>
+      {% endif %}
+    </div>
+  </div>
+  <table class="table table-bordered table-hover table-striped">
+    <thead class="bg-success">
+      <tr>
+        <th>Alunno</th>
+        <th>Osservazioni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for alunno_id,v1 in v %}
+        {% for data,v2 in v1 %}
+          {% if loop.first %}
+      <tr>
+        <td class="col-sm-3">
+          <strong>{{ v2[0].nome }}</strong>
+            {% if v2[0].bes is defined and v2[0].bes != 'N' %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~v2[0].bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            {% endif %}
+            {% if v2[0].note is defined and v2[0].note is not empty %}
+          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v2[0].note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            {% endif %}
+        </td>
+        <td class="col-sm-9">
+          <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione</button>
+          <div class="list-group gs-mb-0" style="display:none">
+          {% endif %}
+          {% for e in v2 %}
+            <div class="list-group-item">
+              <div>
+                <strong>{{ e.data }}</strong> <em>({{ e.materia }})</em>
+            {% if e.delete %}
+                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+            {% endif %}
+            {% if e.edit %}
+                <a class="btn btn-primary btn-xs pull-right gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione sull'alunno"><span class="glyphicon glyphicon-edit"></span></a>
+            {% endif %}
+              </div>
+              <div class="list-group-item-text">
+                <small>{{ e.testo }}</small>
+              </div>
+            </div>
+          {% endfor %}
+        {% endfor %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    {% else %}
+      {% if dati.add is defined %}
+      <div><a class="btn btn-primary btn-xs pull-right" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a></div>
+        {% endif %}
+    {% endfor %}
+    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#gs-button-date').datepicker({
+    format: "yyyy-mm-dd",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    defaultViewDate: "{{ data }}",
+    startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
+    endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
+    datesDisabled: {{ lista_festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+    });
+  $('#gs-button-date').datepicker()
+    .on('show', function(ev){
+      $('#gs-button-date').datepicker('update', '{{ data }}');
+  });
+  $('#gs-button-date').datepicker()
+    .on('changeDate', function(ev){
+      $('#gs-button-date').datepicker('hide');
+      url = "{{ path('lezioni_osservazioni', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': '9999-99-99'}) }}";
+      url = url.replace("9999-99-99", ev.format());
+      window.location.href = url;
+  });
+  $('[data-toggle="popover"]').popover();
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+  $('td button.gs-show-hide').on('click', function (event) {
+    var el = $(this).siblings('div');
+    if (el.is(':visible')) {
+      el.fadeOut();
+      $(this).attr('title', 'Apre la scheda con le osservazioni sull\'alunno');
+      $(this).html('<span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione');
+    } else {
+      el.fadeIn();
+      $(this).attr('title', 'Chiude la scheda con le osservazioni sull\'alunno');
+      $(this).html('<span class="glyphicon glyphicon-resize-small gs-mr-2"></span>Chiudi visualizzazione');
+    }
+  });
+});
+</script>
+{% endblock %}

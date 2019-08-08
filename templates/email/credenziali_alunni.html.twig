@@ -1,0 +1,29 @@
+<p>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE</strong><br>
+  <strong><i>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong>
+</p>
+<p>
+  Tipo di utente: <strong>{{ ruolo }}</strong><br>
+  Alunn{{ sesso }}: <strong>{{ utente.nome }} {{ utente.cognome }}</strong><br>
+  Classe: <strong>{{ utente.classe ? utente.classe.anno~'ª '~utente.classe.sezione }}</strong>
+</p>
+<p>&nbsp;</p>
+<p>Nuove credenziali di accesso al Registro Elettronico:</p>
+<ul>
+  <li>Utente: <strong style="font-family:helvetica; font-size:120%;">{{ username }}</strong></li>
+  <li>Password: <strong style="font-family:helvetica; font-size:120%;">{{ password }}</strong></li>
+</ul>
+<p>Quando si inserisce l'utente e la password nella pagina di accesso, <i>si faccia attenzione ad usare solo caratteri minuscoli, senza aggiungere spazi</i>.</p>
+<p>Il Registro Elettronico è accessibile all'indirizzo internet seguente:</p>
+<ul>
+  <li><strong style="font-family:helvetica; font-size:120%;"><a href="{{ app.session->get('/CONFIG/SCUOLA/url_registro') }}">{{ app.session->get('/CONFIG/SCUOLA/url_registro') }}</a></strong></li>
+</ul>
+<p>&nbsp;</p>
+<hr>
+<p>
+  <em>
+    ATTENZIONE: questo messaggio è stato generato automaticamente a seguito di una richiesta di recupero password.<br>
+    La preghiamo pertanto di non rispondere a questa e-mail perché le eventuali comunicazioni andrebbero perse.
+  </em>
+</p>
+<p>&nbsp;</p>

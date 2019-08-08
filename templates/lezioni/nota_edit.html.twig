@@ -1,0 +1,55 @@
+{% extends 'lezioni/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="panel panel-primary gs-mt-4" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body gs-pt-0">
+      <div class="row bg-success">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Data:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.data }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ label.classe }}</span></div>
+      </div>
+      <div class="row bg-success gs-mb-3">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Docente:</strong></div>
+        <div class="col-sm-10"><span class="gs-big">{{ label.docente }}</span></div>
+      </div>
+      {{ form_start(form) }}
+      {{ form_row(form.tipo) }}
+      {{ form_row(form.alunni) }}
+      {{ form_widget(form) }}
+      {{ form_end(form) }}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  if ($("input[name='nota_edit[tipo]']:checked").val() == 'C') {
+    $('form[name="nota_edit"]>div:nth-child(2)').hide();
+  }
+  $("input[name='nota_edit[tipo]']").change(function() {
+    if ($(this).val() == 'C') {
+      $('form[name="nota_edit"]>div:nth-child(2)').fadeOut();
+    } else {
+      $('form[name="nota_edit"]>div:nth-child(2)').fadeIn();
+    }
+  });
+  $('label.gs-checkbox-inline input').change(function() {
+    if (this.checked) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  }).change();
+});
+</script>
+{% endblock %}
+

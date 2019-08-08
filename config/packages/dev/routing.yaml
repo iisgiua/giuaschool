@@ -1,5 +1,6 @@
-framework:
-    router:
-        strict_requirements: true
+# config/packages/dev/routing.yaml
 
-##    	resource: '%kernel.project_dir%/config/dev/routing.yml'
+framework:
+  router:
+    strict_requirements: true
+    utf8: true

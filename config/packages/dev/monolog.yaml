@@ -1,33 +1,20 @@
+# config/packages/dev/monolog.yaml
+
 monolog:
-    use_microseconds: false
-    channels: ["command"]
-    handlers:
-        main:
-            type: rotating_file
-            max_files: 10
-            path: "%kernel.logs_dir%/app_%kernel.environment%.log"
-            level: debug
-            channels: ["!command"]
-        command:
-            type: rotating_file
-            max_files: 10
-            path: "%kernel.logs_dir%/command_%kernel.environment%.log"
-            level: debug
-            channels: ["command"]
-
-        # uncomment to get logging in your browser
-        # you may have to allow bigger header sizes in your Web server configuration
-        #firephp:
-        #    type: firephp
-        #    level: info
-        #chromephp:
-        #    type: chromephp
-        #    level: info
-        console:
-            type: console
-            process_psr_3_messages: false
-            channels: ["!event", "!doctrine", "!console"]
-
-
-
-
+  use_microseconds: false
+  channels: ['command']
+  handlers:
+    main:
+      type: 'rotating_file'
+      max_files: 10
+      path: '%kernel.logs_dir%/app_%kernel.environment%.log'
+      level: 'debug'
+      channels: ['!command']
+    command:
+      type: 'rotating_file'
+      max_files: 10
+      path: '%kernel.logs_dir%/command_%kernel.environment%.log'
+      level: 'debug'
+      channels: ['command']
+    console:
+      type: 'console'

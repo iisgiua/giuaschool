@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<presenti>
+{% for a in dati %}
+  <alunno ritardo="{{a.entrata}}" uscita="{{ a.uscita }}">
+    <nome>{{ a.nome }}</nome>
+    <cognome>{{ a.cognome }}</cognome>
+    <dataNascita>{{ a.dataNascita }}</dataNascita>
+    <classe>{{ a.classe }}</classe>
+  </alunno>
+{% endfor%}
+</presenti>
