@@ -1,4 +1,4 @@
-# giuaschool-2019/config/services.yaml
+# config/services.yaml
 
 parameters:
   locale: it

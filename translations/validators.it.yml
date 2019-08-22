@@ -1,4 +1,4 @@
-# app/Resources/translation/validators.it.yml
+# translations/validators.it.yml
 
 field.notblank: Devi inserire un valore.
 field.minlength: Il valore inserito è troppo corto, deve avere almeno {{ limit }} caratteri.

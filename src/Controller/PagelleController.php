@@ -46,7 +46,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/classe/{classe}/{tipo}/{periodo}", name="pagelle_classe",
-   *    requirements={"classe": "\d+", "tipo": "R|T|F|I|V|C", "periodo": "P|S|F|I|1|2"},
+   *    requirements={"classe": "\d+", "tipo": "R|T|F|I|V|C", "periodo": "P|S|F|I|1|2|X"},
    *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_ATA')")
@@ -129,7 +129,7 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->certificazioni($classe, $periodo);
           break;
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio integrativo
       switch ($tipo) {
         case 'V':
@@ -181,7 +181,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C", "periodo": "P|S|F|I|1|2"},
+   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C", "periodo": "P|S|F|I|1|2|X"},
    *    methods={"GET"})
    *
    * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO') or has_role('ROLE_ATA')")
@@ -256,7 +256,7 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->pagella($classe, $alunno, $periodo);
           break;
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio integrativo
       switch ($tipo) {
         case 'N':

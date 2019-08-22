@@ -841,6 +841,30 @@ class GenitoriUtil {
       // scrutinato
       $dati['esito'] = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio,
         'alunno' => $alunno]);
+      if ($dati['esito'] && $dati['esito']->getEsito() == 'X') {
+        // scrutinio rinviato
+        $scrutinio_rinviato = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+          'periodo' => 'X', 'stato' => 'C']);
+        if ($scrutinio_rinviato) {
+          // legge voti
+          $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            ->join('vs.scrutinio', 's')
+            ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno AND vs.unico IS NOT NULL')
+            ->setParameters(['classe' => $classe, 'periodo' => 'X', 'alunno' => $alunno])
+            ->getQuery()
+            ->getResult();
+          foreach ($voti as $v) {
+            $dati['voti'][$v->getMateria()->getId()] = array(
+              'unico' => $v->getUnico(),
+              'assenze' => $v->getAssenze());
+          }
+          // inserisce esito
+          $dati['esito'] = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio_rinviato,
+            'alunno' => $alunno]);
+          // segnala esito rinviato
+          $dati['rinviato'] = 1;
+        }
+      }
     }
     // restituisce dati
     return $dati;
@@ -1188,4 +1212,3 @@ class GenitoriUtil {
   }
 
 }
-

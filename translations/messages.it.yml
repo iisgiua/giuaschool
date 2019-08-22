@@ -1,4 +1,4 @@
-# app/Resources/translation/messages.it.yml
+# translations/messages.it.yml
 
 label.abilitato: Abilitato
 label.action: Azione
@@ -180,6 +180,7 @@ label.periodo_F: Scrutinio Finale
 label.periodo_P: Primo Trimestre
 label.periodo_I: Scrutinio Integrativo
 label.periodo_S: ~
+label.periodo_X: Scrutinio Rinviato
 label.precedente: Precedente
 label.presenti: Alunni presenti
 label.privacy_app: "Accetto che i miei dati personali presenti nel Registro Elettronico vengano inviati a servizi esterni e trattati da altri soggetti, liberando l'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} da ogni responsabilità in merito.<br><a href=\"#\" data-toggle=\"modal\" data-target=\"#gs-privacy\">Clicca qui per avere maggiori dettagli.</a>"
