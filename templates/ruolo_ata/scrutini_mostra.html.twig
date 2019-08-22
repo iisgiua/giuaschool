@@ -168,7 +168,7 @@
       {% endif %}
     </tbody>
   </table>
-    {% elseif scrutinio.periodo == 'I' %}
+    {% elseif scrutinio.periodo == 'I' or scrutinio.periodo == 'X' %}
   <table class="table table-bordered table-hover table-striped gs-mt-4">
     <caption class="text-center text-info"><strong class="gs-big">Scrutinio svolto in data {{ scrutinio.data|date('d/m/Y') }}</strong></caption>
     <thead class="bg-success">

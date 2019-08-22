@@ -236,13 +236,13 @@ class PagelleUtil {
       foreach ($esiti as $e) {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio integrativo
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $sospesi = $dati['scrutinio']->getDato('sospesi');
+      $sospesi = ($periodo == 'I' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
         ->where('a.id IN (:lista)')
@@ -366,6 +366,29 @@ class PagelleUtil {
       }
       // nome documento
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-riepilogo-voti.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $dati = $this->riepilogoVotiDati($classe, $periodo);
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaRiepilogoVoti_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
         $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
@@ -637,7 +660,7 @@ class PagelleUtil {
         // dati per la visualizzazione della pagina
         $dati['materie'][$doc['id_materia']][$doc['id']] = $doc;
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio integrativo
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
@@ -729,6 +752,29 @@ class PagelleUtil {
       }
       // nome documento
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-verbale.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $dati = $this->firmeVerbaleDati($classe, $periodo);
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaFirmeVerbale_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
@@ -877,6 +923,29 @@ class PagelleUtil {
       }
       // nome documento
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-registro.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $dati = $this->firmeVerbaleDati($classe, $periodo);
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaFirmeRegistro_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
@@ -1139,7 +1208,7 @@ class PagelleUtil {
       foreach ($debiti as $d) {
         $dati['debiti'][$d['alunno']][] = $d;
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio integrativo
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
@@ -1162,7 +1231,7 @@ class PagelleUtil {
         $dati['docenti'][$doc['id']][] = $doc;
       }
       // legge dati di alunni
-      $sospesi = $dati['scrutinio']->getDato('sospesi');
+      $sospesi = ($periodo == 'I' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
         ->where('a.id IN (:lista)')
@@ -1253,6 +1322,29 @@ class PagelleUtil {
       }
       // nome documento
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-verbale.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Verbale classe '.$nome_classe);
+        $dati = $this->verbaleDati($classe, $periodo);
+        // crea il documento
+        $this->creaVerbale_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1673,7 +1765,7 @@ class PagelleUtil {
         'recupero' => $v->getRecupero(),
         'debito' => $v->getDebito());
     }
-    if ($periodo == 'F' || $periodo == 'I') {
+    if ($periodo == 'F' || $periodo == 'I' || $periodo == 'X') {
       // legge esito
       $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -1784,6 +1876,35 @@ class PagelleUtil {
       }
       // nome documento
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-voti-'.$alunno->getId().'.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+        $dati = $this->pagellaDati($classe, $alunno, $periodo);
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        // controllo alunno
+        if ($dati['esito'] && $dati['esito']->getEsito() == 'A') {
+          // crea il documento
+          $this->creaPagella_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        } else {
+          // errore
+          return null;
+        }
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
@@ -2358,6 +2479,12 @@ class PagelleUtil {
     } elseif ($periodo == 'I') {
       // scrutinio integrativo
       if (in_array($alunno, $scrutinio->getDato('sospesi'))) {
+        // alunno trovato
+        $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
+      }
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      if (in_array($alunno, $scrutinio->getDato('rinviati'))) {
         // alunno trovato
         $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
       }
@@ -3422,6 +3549,29 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-tabellone-voti.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $dati = $this->riepilogoVotiDati($classe, $periodo);
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaTabelloneVoti_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -3885,6 +4035,29 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-certificazioni.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $dati = $this->certificazioniDati($classe, $periodo);
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaCertificazioni_F($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -3918,13 +4091,13 @@ class PagelleUtil {
       foreach ($alunni as $alu) {
         $dati['ammessi'][$alu['id']] = $alu;
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $sospesi = $dati['scrutinio']->getDato('sospesi');
+      $sospesi = ($periodo == 'I' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
       // alunni ammessi
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,e.dati')
@@ -4262,6 +4435,35 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // scrutinio integrativo
+      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-non-ammesso-'.$alunno->getId().'.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+          'Scrutinio Integrativo - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+        $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        // controllo alunno
+        if ($dati['esito'] && $dati['esito']->getEsito() == 'N') {
+          // crea il documento
+          $this->creaNonAmmesso_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        } else {
+          // errore
+          return null;
+        }
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -4340,7 +4542,7 @@ class PagelleUtil {
           'unico' => $v->getUnico(),
           'assenze' => $v->getAssenze());
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio integrativo
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);

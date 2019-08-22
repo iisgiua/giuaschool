@@ -329,7 +329,7 @@ class SegreteriaController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/segreteria/scrutini/mostra/{alunno}/{periodo}/{scrutinio}", name="segreteria_scrutini_mostra",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "scrutinio": "\d+", },
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2|X", "scrutinio": "\d+", },
    *    methods={"GET"})
    *
    * @Security("has_role('ROLE_ATA')")

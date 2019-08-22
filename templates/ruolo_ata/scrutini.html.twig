@@ -31,6 +31,8 @@
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio finale</strong></a>
         {% elseif periodo[0] == 'I' %}
           <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio integrativo</strong></a>
+        {% elseif periodo[0] == 'X' %}
+          <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio rinviato</strong></a>
         {% endif %}
       {% endfor %}
         </td>

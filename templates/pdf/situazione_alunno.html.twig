@@ -114,7 +114,7 @@
       {% endfor %}
 </table>
     {% elseif periodo == 'F' %}
-<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></div>
+<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
       {% if v.noscrutinato is defined and v.noscrutinato == 'A' %}
 <div style="text-align:center"><strong>{{ 'label.no_scrutinabile_assenze'|trans }}</strong></div>
       {% elseif v.noscrutinato is defined and v.noscrutinato == 'C' %}
@@ -160,7 +160,7 @@
 </table>
       {% endif %}
     {% elseif periodo == 'I' %}
-<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }}</strong></div>
+<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
     <td width="34%" style="text-align:center">Materia</td>

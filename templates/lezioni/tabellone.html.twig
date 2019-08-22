@@ -19,8 +19,8 @@
     <div class="col-sm-8">
       <strong class="gs-big">Periodo:</strong>
       <div style="display:inline-block" class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
-        <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo and periodo != 'X' ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
+        <ul style="z-index: 1010" class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
     {% for p in ['P','1','F','I'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
@@ -266,23 +266,33 @@
             <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }}">{{ dati.voti[alunno][materia].unico }}</span></span>
             {% endif %}
           {% else %}
-            {% if dati.voti[alunno][materia].unico is not defined %}
-            <span>--</span>
-            {% elseif dati.voti[alunno][materia].unico == 0 %}
+            {% if dati.esiti[alunno].esito == 'X' and dati.rinviati.voti[alunno][materia] is defined %}
+              {% if dati.rinviati.voti[alunno][materia].unico == 0 %}
             <span class="gs-big"><span class="label label-danger">NC</span></span>
+              {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.rinviati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.rinviati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.rinviati.voti[alunno][materia].unico }}</span></span>
+              {% endif %}
             {% else %}
+              {% if dati.voti[alunno][materia].unico == 0 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+              {% else %}
             <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][materia].unico }}</span></span>
+              {% endif %}
             {% endif %}
           {% endif %}
           </td>
         {% endfor %}
           <td>
+        {% if dati.esiti[alunno].esito == 'X' and dati.rinviati.medie[alunno] is defined %}
+            <span class="gs-big"><span class="label label-{{ dati.rinviati.medie[alunno] < 5 ? 'danger' : (dati.rinviati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.rinviati.medie[alunno] }}</span></span>
+        {% else %}
             <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
+        {% endif %}
           </td>
           <td>
-        {% if dati.esiti[alunno].esito == 'A' %}
+        {% if dati.esiti[alunno].esito == 'A' or (dati.esiti[alunno].esito == 'X' and dati.rinviati.esiti[alunno] is defined and dati.rinviati.esiti[alunno].esito == 'A') %}
             <button type="button" class="btn btn-xs btn-success gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="AMMESSO"><span class="glyphicon glyphicon-ok"></span></button>
-        {% elseif dati.esiti[alunno].esito == 'N' %}
+        {% elseif dati.esiti[alunno].esito == 'N' or (dati.esiti[alunno].esito == 'X' and dati.rinviati.esiti[alunno] is defined and dati.rinviati.esiti[alunno].esito == 'N') %}
             <button type="button" class="btn btn-xs btn-danger gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="NON AMMESSO"><span class="glyphicon glyphicon-remove"></span></button>
         {% elseif dati.esiti[alunno].esito == 'X' %}
             <button type="button" class="btn btn-xs btn-info gs-button-round" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="SCRUTINIO RINVIATO"><span class="glyphicon glyphicon-refresh"></span></button>

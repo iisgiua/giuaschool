@@ -233,7 +233,7 @@
     <caption class="text-info text-center gs-big gs-pb-2">
       <strong>Scrutinio integrativo</strong>
           {%if dati.esito.esito == 'A' %}
-      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
+      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': (periodo == 'I' and dati.rinviato is defined ? 'X' : periodo) }) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
           {%endif %}
     </caption>
     <thead class="bg-success">
@@ -284,7 +284,7 @@
     <div class="text-center"><strong class="gs-big">Esito dello scrutinio: NON AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
   </div>
   <div class="text-center">
-    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': (periodo == 'I' and dati.rinviato is defined ? 'X' : periodo) }) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
   </div>
         {% elseif dati.esito.esito == 'X' %}
   <div class="alert alert-info" role="alert">
