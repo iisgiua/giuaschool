@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\File;
@@ -69,6 +70,7 @@ class DocumentiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -85,7 +87,7 @@ class DocumentiController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function programmaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                       DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
+                                       TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
     // inizializza
     $var_sessione = '/APP/FILE/documenti_programma_edit/files';
     $dir = $this->getParameter('dir_classi').'/';
@@ -185,7 +187,7 @@ class DocumentiController extends AbstractController {
       }
       if ($f_cnt < 1) {
         // errore: nessun file allegati
-        $form->addError(new FormError($this->get('translator')->trans('exception.file_mancante')));
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
       }
       // modifica dati
       if ($form->isValid()) {
@@ -348,6 +350,7 @@ class DocumentiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -364,7 +367,7 @@ class DocumentiController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function relazioneEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                       DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
+                                       TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
     // inizializza
     $var_sessione = '/APP/FILE/documenti_relazione_edit/files';
     $dir = $this->getParameter('dir_classi').'/';
@@ -464,7 +467,7 @@ class DocumentiController extends AbstractController {
       }
       if ($f_cnt < 1) {
         // errore: nessun file allegati
-        $form->addError(new FormError($this->get('translator')->trans('exception.file_mancante')));
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
       }
       // modifica dati
       if ($form->isValid()) {
@@ -560,6 +563,7 @@ class DocumentiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -576,7 +580,7 @@ class DocumentiController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function pianoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                   DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
+                                   TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
     // inizializza
     $var_sessione = '/APP/FILE/documenti_piano_edit/files';
     $dir = $this->getParameter('dir_classi').'/';
@@ -676,7 +680,7 @@ class DocumentiController extends AbstractController {
       }
       if ($f_cnt < 1) {
         // errore: nessun file allegati
-        $form->addError(new FormError($this->get('translator')->trans('exception.file_mancante')));
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
       }
       // modifica dati
       if ($form->isValid()) {
@@ -869,6 +873,7 @@ class DocumentiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -884,7 +889,7 @@ class DocumentiController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function doc15EditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                   DocumentiUtil $doc, LogHandler $dblogger, $classe, $id) {
+                                   TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $id) {
     // inizializza
     $var_sessione = '/APP/FILE/documenti_doc15_edit/files';
     $dir = $this->getParameter('dir_classi').'/';
@@ -976,7 +981,7 @@ class DocumentiController extends AbstractController {
       }
       if ($f_cnt < 1) {
         // errore: nessun file allegato
-        $form->addError(new FormError($this->get('translator')->trans('exception.file_mancante')));
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
       }
       // modifica dati
       if ($form->isValid()) {
@@ -1039,4 +1044,3 @@ class DocumentiController extends AbstractController {
   }
 
 }
-

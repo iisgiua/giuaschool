@@ -168,6 +168,7 @@ class VotiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra
@@ -184,7 +185,7 @@ class VotiController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function votiClasseAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                    RegistroUtil $reg, LogHandler $dblogger, $cattedra, $tipo, $data) {
+                                   TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $tipo, $data) {
     // inizializza
     $label = array();
     $visibile = true;
@@ -254,19 +255,19 @@ class VotiController extends AbstractController {
       $errore = $reg->controlloData($form->get('data')->getData(), null);
       if ($errore) {
         // errore: festivo
-        $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+        $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controlla lezione
       $lezione = $reg->lezioneCattedra($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria());
       if (!$lezione) {
         // lezione non esiste
-        $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.lezione_non_esiste',
+        $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',
           ['%materia%' => $cattedra->getMateria()->getNomeBreve()])));
       }
       // controlla permessi
       if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), null, $classe, $cattedra->getMateria())) {
         // errore: azione non permessa
-        $form->addError(new FormError($this->get('translator')->trans('exception.non_permesso_in_data')));
+        $form->addError(new FormError($trans->trans('exception.non_permesso_in_data')));
       }
       // controllo alunni
       $lista_alunni = $reg->alunniInData($form->get('data')->getData(), $classe);
@@ -275,7 +276,7 @@ class VotiController extends AbstractController {
         if (!in_array($valutazione->getId(), $lista_alunni) &&
             ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
           // errore: alunno non presente in data
-          $form->addError(new FormError($this->get('translator')->trans('exception.alunno_no_classe_in_data',
+          $form->addError(new FormError($trans->trans('exception.alunno_no_classe_in_data',
             ['%alunno%' => $valutazione->getAlunno()])));
         }
       }
@@ -389,6 +390,7 @@ class VotiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra
@@ -406,7 +408,7 @@ class VotiController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function votiAlunnoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                    RegistroUtil $reg, LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
+                                   TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
     // inizializza
     $label = array();
     // controllo cattedra
@@ -506,13 +508,13 @@ class VotiController extends AbstractController {
         $errore = $reg->controlloData($form->get('data')->getData(), null);
         if ($errore) {
           // errore: festivo
-          $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+          $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
         // controlla lezione
         $lezione = $reg->lezioneCattedra($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria());
         if (!$lezione) {
           // lezione non esiste
-          $form->get('data')->addError(new FormError($this->get('translator')->trans('exception.lezione_non_esiste',
+          $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',
             ['%materia%' => $cattedra->getMateria()->getNomeBreve()])));
         } else {
           // inserisce lezione
@@ -521,12 +523,12 @@ class VotiController extends AbstractController {
         // controlla permessi
         if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), $alunno, $classe, $cattedra->getMateria())) {
           // errore: azione non permessa
-          $form->addError(new FormError($this->get('translator')->trans('exception.non_permesso_in_data')));
+          $form->addError(new FormError($trans->trans('exception.non_permesso_in_data')));
         }
         // controlla voto
         if (empty($valutazione->getVoto()) && empty($valutazione->getGiudizio())) {
           // errore di validazione
-          $form->addError(new FormError($this->get('translator')->trans('exception.voto_vuoto')));
+          $form->addError(new FormError($trans->trans('exception.voto_vuoto')));
         }
       }
       if ($form->isValid()) {
@@ -853,7 +855,7 @@ class VotiController extends AbstractController {
     $info['periodo'] = $reg->periodo($data_obj);
     $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
     // crea documento PDF
-    $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
       'Voti della classe '.$classe->getAnno().'ª '.$classe->getSezione().' - '.$info['materia']);
     $html = $this->renderView('pdf/voti_quadro.html.twig', array(
       'classe' => $classe,
@@ -868,4 +870,3 @@ class VotiController extends AbstractController {
   }
 
 }
-

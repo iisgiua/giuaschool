@@ -16,6 +16,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -219,6 +221,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
@@ -234,7 +237,7 @@ class RegistroController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function addAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
+  public function addAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
                              $cattedra, $classe, $data, $ora) {
     // inizializza
     $label = array();
@@ -336,7 +339,7 @@ class RegistroController extends AbstractController {
         }
         $em->persist($lezione);
         // validazione lezione
-        $errore = $this->get('validator')->validate($lezione);
+        $errore = $validator->validate($lezione);
         if (count($errore) > 0) {
           // errore, esce dal ciclo
           $form->addError(new FormError($errore[0]->getMessage()));
@@ -359,7 +362,7 @@ class RegistroController extends AbstractController {
         }
         $em->persist($firma);
         // validazione firma
-        $errore = $this->get('validator')->validate($firma);
+        $errore = $validator->validate($firma);
         if (count($errore) > 0) {
           // errore, esce dal ciclo
           $form->addError(new FormError($errore[0]->getMessage()));
@@ -394,6 +397,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (se nulla è supplenza)
@@ -409,7 +413,7 @@ class RegistroController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function editAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
+  public function editAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
                               $cattedra, $classe, $data, $ora) {
     // inizializza
     $label = array();
@@ -552,13 +556,13 @@ class RegistroController extends AbstractController {
         }
       }
       // validazione lezione
-      $errore = $this->get('validator')->validate($lezione);
+      $errore = $validator->validate($lezione);
       if (count($errore) > 0) {
         // errore
         $form->addError(new FormError($errore[0]->getMessage()));
       } else {
         // validazione firma
-        $errore = $this->get('validator')->validate($firma);
+        $errore = $validator->validate($firma);
         if (count($errore) > 0) {
           // errore
           $form->addError(new FormError($errore[0]->getMessage()));
@@ -742,6 +746,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param LogHandler $dblogger Gestore dei log su database
@@ -758,7 +763,7 @@ class RegistroController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function annotazioneEditAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, BachecaUtil $bac,
+  public function annotazioneEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac,
                                          LogHandler $dblogger, $classe, $data, $id) {
     // inizializza
     $label = array();
@@ -869,20 +874,20 @@ class RegistroController extends AbstractController {
       // controllo errori
       if ($annotazione->getVisibile() && empty($val_filtro_alunni)) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_mancanti')));
       }
       // controllo permessi
       if ($annotazione->getVisibile()) {
         // permessi avviso
         if (!$bac->azioneAvviso('add', $data_obj, $this->getUser(), null)) {
           // errore: azione non permessa
-          $form->addError(new FormError($this->get('translator')->trans('exception.notifica_non_permessa')));
+          $form->addError(new FormError($trans->trans('exception.notifica_non_permessa')));
         }
       }
       if ($annotazione->getAvviso()) {
         if (!$bac->azioneAvviso('delete', $data_obj, $this->getUser(), $annotazione->getAvviso())) {
           // errore: cancellazione non permessa
-          $form->addError(new FormError($this->get('translator')->trans('exception.notifica_non_permessa')));
+          $form->addError(new FormError($trans->trans('exception.notifica_non_permessa')));
         }
       }
       // modifica dati
@@ -910,7 +915,7 @@ class RegistroController extends AbstractController {
             ->setDestinatariAlunni(false)
             ->setDestinatariIndividuali(true)
             ->setData($annotazione->getData())
-            ->setOggetto($this->get('translator')->trans('message.avviso_individuale_oggetto', ['%docente%' => $docente]))
+            ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['%docente%' => $docente]))
             ->setTesto($annotazione->getTesto())
             ->setDocente($this->getUser())
             ->addAnnotazione($annotazione);
@@ -1040,6 +1045,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -1055,7 +1061,7 @@ class RegistroController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function notaEditAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
+  public function notaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger,
                                   $classe, $data, $id) {
     // inizializza
     $label = array();
@@ -1158,7 +1164,7 @@ class RegistroController extends AbstractController {
       // valida tipo
       if ($nota->getTipo() == 'I') {
         if (count($nota->getAlunni()) == 0) {
-          $form->get('alunni')->addError(new FormError($this->get('translator')->trans('field.notblank', [], 'validators')));
+          $form->get('alunni')->addError(new FormError($trans->trans('field.notblank', [], 'validators')));
         }
       } else {
         // nota di classe
@@ -1168,7 +1174,7 @@ class RegistroController extends AbstractController {
         if ($nome) {
           // errore
           $form->get('testo')->addError(
-            new FormError($this->get('translator')->trans('exception.nota_con_nome', ['%nome%' => $nome])));
+            new FormError($trans->trans('exception.nota_con_nome', ['%nome%' => $nome])));
         }
       }
       if ($form->isValid()) {
@@ -1270,4 +1276,3 @@ class RegistroController extends AbstractController {
   }
 
 }
-

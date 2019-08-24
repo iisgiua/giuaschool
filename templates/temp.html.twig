@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="giua@school: il registro elettronico dell'Istituto di Istruzione Superiore '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}'">
+    <meta name="description" content="giua@school: il registro elettronico dell'Istituto di Istruzione Superiore '{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}'">
     <meta name="keywords" content="scuola,istituto,tecnico,istituto tecnico,istruzione superiore,informatica,chimica,liceo,scientifico,scienze applicate,giua,cagliari,assemini,registro,elettronico">
     <meta name="author" content="Antonello Dessì">
     <title>{{ pagina_titolo|trans }}</title>
@@ -54,7 +54,7 @@
           <div class="row">
             <div class="col-12 pr-0">
               <div class="it-header-slim-wrapper-content pr-0">
-                <span class="d-none d-md-block navbar-brand"><strong>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong> - A.S. 2018/2019</span>
+                <span class="d-none d-md-block navbar-brand"><strong>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong> - A.S. 2018/2019</span>
                 <div class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false">
                     <span class="font-weight-bold">Aiuto</span>
@@ -204,7 +204,7 @@
               <div class="col-sm-12">
                 <div class="it-brand-wrapper">
                   <div class="it-brand-text">
-                    <h2 class="no_toc">Istituto di Istruzione Superiore <em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</em></h2>
+                    <h2 class="no_toc">Istituto di Istruzione Superiore <em>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</em></h2>
                     <h3 class="no_toc d-none d-md-block">Cagliari - Assemini</h3>
                   </div>
                 </div>
@@ -227,7 +227,7 @@
                   <ul class="footer-list link-list">
                     <li>
                       <a class="list-item" href="#" title="Vai al sito web dell'Istituto">
-                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-link"></use></svg>{{ app.session->get('/CONFIG/SCUOLA/url_istituto') }}
+                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-link"></use></svg>{{ app.session.get('/CONFIG/SCUOLA/url_istituto') }}
                       </a>
                     </li>
                   </ul>
@@ -239,12 +239,12 @@
                   <ul class="footer-list link-list">
                     <li>
                       <a class="list-item" href="#" title="Vai al sito web dell'Istituto">
-                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg>{{ app.session->get('/CONFIG/SCUOLA/email_istituto') }}
+                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg>{{ app.session.get('/CONFIG/SCUOLA/email_istituto') }}
                       </a>
                     </li>
                     <li>
                       <a class="list-item" href="#" title="Vai al sito web dell'Istituto">
-                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg>{{ app.session->get('/CONFIG/SCUOLA/pec_istituto') }}
+                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg>{{ app.session.get('/CONFIG/SCUOLA/pec_istituto') }}
                       </a>
                     </li>
                   </ul>
@@ -256,7 +256,7 @@
             <div class="row pb-0">
               <div class="col-lg-6 col-md-12 pb-2">
                 <h2><em>giua@school</em></h2>
-                <h3 class="d-none d-md-block">Il registro elettronico <strong>open source</strong> dell'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</h3>
+                <h3 class="d-none d-md-block">Il registro elettronico <strong>open source</strong> dell'{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</h3>
                 <p>Versione {{ app.session.get('/CONFIG/SISTEMA/versione') }}</p>
               </div>
               <div class="col-lg-6 col-md-12 pb-2 link-list-wrapper">

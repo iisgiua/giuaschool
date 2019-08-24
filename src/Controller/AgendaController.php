@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -144,6 +145,7 @@ class AgendaController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
@@ -160,7 +162,7 @@ class AgendaController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function verificaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                      RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
+                                      TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
     $lista_festivi = null;
     $dati = array();
@@ -292,18 +294,18 @@ class AgendaController extends AbstractController {
       // controllo errori
       if ($val_filtro == 'I' && empty($val_filtro_id)) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
       if ($errore) {
         // errore: festivo
-        $form->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+        $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo cattedra
       if (!$avviso->getCattedra()) {
         // errore: cattedra non specificata
-        $form->addError(new FormError($this->get('translator')->trans('exception.cattedra_mancante')));
+        $form->addError(new FormError($trans->trans('exception.cattedra_mancante')));
       }
       // controllo sostegno
       $materia = null;
@@ -313,23 +315,23 @@ class AgendaController extends AbstractController {
           'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
         if (!$materia || $avviso->getCattedra()->getAlunno()->getId() != $val_filtro_id[0]) {
           // errore: dati inconsistenti
-          $form->addError(new FormError($this->get('translator')->trans('exception.cattedra_non_valida')));
+          $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
         }
       }
       // controllo permessi
       if (!$age->azioneEvento(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
-        $form->addError(new FormError($this->get('translator')->trans('exception.avviso_non_permesso')));
+        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
       if (!$reg->azioneAnnotazione('add', $avviso->getData(), $this->getUser(), null, null)) {
         // errore: nuova annotazione non permessa
-        $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+        $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
       }
       if (count($avviso->getAnnotazioni()) > 0) {
         $a = $avviso->getAnnotazioni()[0];
         if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
           // errore: cancellazione annotazione non permessa
-          $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+          $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
         }
       }
       // modifica dati
@@ -346,7 +348,7 @@ class AgendaController extends AbstractController {
           $session->set('/APP/ROUTE/agenda_verifica_edit/conferma', $data_classe);
         } else {
           // oggetto
-          $avviso->setOggetto($this->get('translator')->trans('message.verifica_oggetto',
+          $avviso->setOggetto($trans->trans('message.verifica_oggetto',
             ['%materia%' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
           // destinatari
           $age->modificaFiltriVerificheCompiti($avviso, $dest_filtro, $val_filtro, $val_filtro_id);
@@ -550,6 +552,7 @@ class AgendaController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
    * @param LogHandler $dblogger Gestore dei log su database
@@ -565,7 +568,7 @@ class AgendaController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function compitoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                     RegistroUtil $reg, AgendaUtil $age, LogHandler $dblogger, $id) {
+                                     TranslatorInterface $trans, RegistroUtil $reg, AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
     $lista_festivi = null;
     $docente = $this->getUser();
@@ -693,18 +696,18 @@ class AgendaController extends AbstractController {
       // controllo errori
       if ($val_filtro == 'I' && empty($val_filtro_id)) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
       if ($errore) {
         // errore: festivo
-        $form->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+        $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo cattedra
       if (!$avviso->getCattedra()) {
         // errore: cattedra non specificata
-        $form->addError(new FormError($this->get('translator')->trans('exception.cattedra_mancante')));
+        $form->addError(new FormError($trans->trans('exception.cattedra_mancante')));
       }
       // controllo sostegno
       $materia = null;
@@ -714,13 +717,13 @@ class AgendaController extends AbstractController {
           'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
         if (!$materia || $avviso->getCattedra()->getAlunno()->getId() != $val_filtro_id[0]) {
           // errore: dati inconsistenti
-          $form->addError(new FormError($this->get('translator')->trans('exception.cattedra_non_valida')));
+          $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
         }
       }
       // controllo permessi
       if (!$age->azioneEvento(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
-        $form->addError(new FormError($this->get('translator')->trans('exception.avviso_non_permesso')));
+        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
       // modifica dati
       if ($form->isValid()) {
@@ -729,7 +732,7 @@ class AgendaController extends AbstractController {
           $avviso->setCattedra($materia);
         }
         // oggetto
-        $avviso->setOggetto($this->get('translator')->trans('message.compito_oggetto',
+        $avviso->setOggetto($trans->trans('message.compito_oggetto',
             ['%materia%' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
         // destinatari
         $age->modificaFiltriVerificheCompiti($avviso, $dest_filtro, $val_filtro, $val_filtro_id);
@@ -835,4 +838,3 @@ class AgendaController extends AbstractController {
   }
 
 }
-

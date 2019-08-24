@@ -14,6 +14,8 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -60,6 +62,7 @@ class UtentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -69,7 +72,7 @@ class UtentiController extends AbstractController {
    *
    * @Security("has_role('ROLE_UTENTE')")
    */
-  public function emailAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger) {
+  public function emailAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, LogHandler $dblogger) {
     $success = null;
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_email', FormType::class)
@@ -87,7 +90,7 @@ class UtentiController extends AbstractController {
       // validazione
       $vecchia_email = $this->getUser()->getEmail();
       $this->getUser()->setEmail($form->get('email')->getData());
-      $errors = $this->get('validator')->validate($this->getUser());
+      $errors = $validator->validate($this->getUser());
       if (count($errors) > 0) {
         $form->addError(new FormError($errors[0]->getMessage()));
       } else {
@@ -116,6 +119,8 @@ class UtentiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -127,7 +132,7 @@ class UtentiController extends AbstractController {
    * @Security("has_role('ROLE_UTENTE')")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
-                                  OtpUtil $otp, LogHandler $dblogger) {
+                                  TranslatorInterface $trans, ValidatorInterface $validator, OtpUtil $otp, LogHandler $dblogger) {
     $success = null;
     $errore = null;
     $form = null;
@@ -169,7 +174,7 @@ class UtentiController extends AbstractController {
         if (!$encoder->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
           // vecchia password errata
           $form->get('current_password')->addError(
-            new FormError($this->get('translator')->trans('password.wrong', [], 'validators')));
+            new FormError($trans->trans('password.wrong', [], 'validators')));
         }
         // validazione nuova password
         $psw = $form->get('password')->getData();
@@ -177,24 +182,24 @@ class UtentiController extends AbstractController {
         $maiuscole = preg_match('/[A-Z]+/', $psw);
         $cifre = preg_match('/\d+/', $psw);
         $this->getUser()->setPasswordNonCifrata($psw);
-        $errors = $this->get('validator')->validate($this->getUser());
+        $errors = $validator->validate($this->getUser());
         if (count($errors) > 0) {
           // nuova password non valida
           $form->get('password')['first']->addError(new FormError($errors[0]->getMessage()));
         } elseif (!$minuscole || !$maiuscole || !$cifre) {
           // errore di formato
           $form->get('password')['first']->addError(
-            new FormError($this->get('translator')->trans('exception.formato_password')));
+            new FormError($trans->trans('exception.formato_password')));
         }
         // validazione OTP
         if ($this->getUser() instanceOf Docente) {
           $codice = $form->get('otp')->getData();
           if (!$otp->controllaOtp($this->getUser()->getOtp(), $codice)) {
             // errore codice OTP
-            $form->get('otp')->addError(new FormError($this->get('translator')->trans('exception.otp_errato')));
+            $form->get('otp')->addError(new FormError($trans->trans('exception.otp_errato')));
           } elseif ($this->getUser()->getUltimoOtp() == $codice) {
             // otp riusato (replay attack)
-            $form->get('otp')->addError(new FormError($this->get('translator')->trans('exception.otp_errato')));
+            $form->get('otp')->addError(new FormError($trans->trans('exception.otp_errato')));
           }
         }
         if ($form->isValid()) {
@@ -231,6 +236,7 @@ class UtentiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -242,7 +248,7 @@ class UtentiController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function otpAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                             OtpUtil $otp, LogHandler $dblogger) {
+                             TranslatorInterface $trans, OtpUtil $otp, LogHandler $dblogger) {
     // inizializza
     $docente = $this->getUser();
     $msg = null;
@@ -291,7 +297,7 @@ class UtentiController extends AbstractController {
             ));
         } else {
           // errore
-          $form->addError(new FormError($this->get('translator')->trans('exception.otp_errato')));
+          $form->addError(new FormError($trans->trans('exception.otp_errato')));
         }
       }
     }
@@ -368,4 +374,3 @@ class UtentiController extends AbstractController {
   }
 
 }
-

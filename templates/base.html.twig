@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ pagina_titolo|trans }}</title>
-    <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}">
+    <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}">
     <meta name="keywords" content="scuola,istituto,istruzione,superiore,tecnico,liceo,scientifico,scienze,applicate,giua,cagliari,assemini,registro,elettronico">
     <meta name="author" content="Antonello Dessì">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -72,7 +72,7 @@
                 <span class="glyphicon glyphicon-menu-hamburger"></span>
               </button>
               <div class="visible-xs-block text-center">
-                <strong>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong>
+                <strong>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong>
                   {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SISTEMA/anno_scolastico') }}{% endif %}
               </div>
             </div>
@@ -102,7 +102,7 @@
             <div class="row">
               <div class="col-sm-6 hidden-xs text-center small">
                 <div class="row">
-                  <strong>Istituto di Istruzione Superiore<br><em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</em></strong>
+                  <strong>Istituto di Istruzione Superiore<br><em>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</em></strong>
                 </div>
                 <div class="row">
                   <div class="col-sm-6">
@@ -122,7 +122,7 @@
                   <a href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai alla pagina del Progetto giua@school">
                     <img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em style="color:#337ab7"><strong>giua@school {{ app.session.get('/CONFIG/SISTEMA/versione') }}</strong></em>
                   </a>
-                  <em class="hidden-xs gs-big"><br>il registro elettronico<br>dell'{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</em>
+                  <em class="hidden-xs gs-big"><br>il registro elettronico<br>dell'{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</em>
                 </p>
               </div>
               <div class="col-sm-1 col-xs-2 text-center">

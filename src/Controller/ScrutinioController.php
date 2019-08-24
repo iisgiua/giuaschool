@@ -14,6 +14,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,6 +50,7 @@ class ScrutinioController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
@@ -65,7 +67,7 @@ class ScrutinioController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function proposteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                  ScrutinioUtil $scr, LogHandler $dblogger, $cattedra, $classe, $periodo) {
+                                  TranslatorInterface $trans, ScrutinioUtil $scr, LogHandler $dblogger, $cattedra, $classe, $periodo) {
     // inizializza variabili
     $info = array();
     $lista_periodi = null;
@@ -240,7 +242,7 @@ class ScrutinioController extends AbstractController {
             // segnala errori
             foreach ($errori as $err) {
               // aggiunge errore
-              $form->addError(new FormError($this->get('translator')->trans($err)));
+              $form->addError(new FormError($trans->trans($err)));
             }
           }
         } else {
@@ -563,6 +565,7 @@ class ScrutinioController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -579,7 +582,7 @@ class ScrutinioController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioCondottaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                           ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
+                                           TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
     $info['valutazioni'] = ['min' => 4, 'max' => 10, 'start' => 6, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
@@ -662,7 +665,7 @@ class ScrutinioController extends AbstractController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore', $this->get('translator')->trans($msg));
+        $session->getFlashBag()->add('errore', $trans->trans($msg));
       }
       // ok: memorizza dati (anche errati)
       $em->flush();
@@ -691,6 +694,7 @@ class ScrutinioController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param int $materia Identificativo della materia
@@ -708,7 +712,7 @@ class ScrutinioController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioVotiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                       ScrutinioUtil $scr, $classe, $materia, $periodo, $alunno, $posizione) {
+                                       TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $materia, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -818,7 +822,7 @@ class ScrutinioController extends AbstractController {
       }
       foreach ($errore as $msg=>$v) {
         $session->getFlashBag()->add('errore',
-          $this->get('translator')->trans($msg, ['%materia%' => $materia->getNomeBreve()]));
+          $trans->trans($msg, ['%materia%' => $materia->getNomeBreve()]));
       }
       // memorizza dati (anche se errati)
       $em->flush();
@@ -946,6 +950,7 @@ class ScrutinioController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -962,7 +967,7 @@ class ScrutinioController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioCondottaGiudizioAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                                   ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
+                                                   TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
     $info['valutazioni'] = ['min' => 40, 'max' => 43, 'start' => 43, 'ticks' => '40, 41, 42, 43', 'labels' => '"NC", "Scorretta", "", "Corretta"'];
@@ -1035,7 +1040,7 @@ class ScrutinioController extends AbstractController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore', $this->get('translator')->trans($msg));
+        $session->getFlashBag()->add('errore', $trans->trans($msg));
       }
       // ok: memorizza dati (anche errati)
       $em->flush();
@@ -1064,6 +1069,7 @@ class ScrutinioController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -1079,7 +1085,7 @@ class ScrutinioController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioEsitoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                        ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
+                                        TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -1245,7 +1251,7 @@ class ScrutinioController extends AbstractController {
         $errore['exception.insufficienze_ammissione_quinta'] = true;
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore', $this->get('translator')->trans($msg, [
+        $session->getFlashBag()->add('errore', $trans->trans($msg, [
           '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1391,6 +1397,7 @@ class ScrutinioController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -1406,7 +1413,7 @@ class ScrutinioController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioCertificazioneAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                                 ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
+                                                 TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -1583,7 +1590,7 @@ class ScrutinioController extends AbstractController {
       }
       if ($err_motivazione) {
         // errore: motivazione non inserita
-        $session->getFlashBag()->add('errore', $this->get('translator')->trans('exception.no_motivazione_certificazione', [
+        $session->getFlashBag()->add('errore', $trans->trans('exception.no_motivazione_certificazione', [
           '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1623,6 +1630,7 @@ class ScrutinioController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -1637,7 +1645,7 @@ class ScrutinioController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function scrutinioDebitiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                         ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
+                                         TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $info = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -1690,7 +1698,7 @@ class ScrutinioController extends AbstractController {
       }
       // messaggi di errore
       foreach ($errore as $msg=>$val) {
-        $session->getFlashBag()->add('errore', $this->get('translator')->trans($msg, [
+        $session->getFlashBag()->add('errore', $trans->trans($msg, [
           '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -2070,4 +2078,3 @@ class ScrutinioController extends AbstractController {
   }
 
 }
-

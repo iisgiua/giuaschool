@@ -1,17 +1,17 @@
 <p style="text-align:center; font-family:times; font-size:12pt">
   <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
-  <strong><i>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong><br>
+  <strong><i>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong><br>
   <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
   TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
-  Email: {{ app.session->get('/CONFIG/SCUOLA/email_istituto') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session->get('/CONFIG/SCUOLA/url_istituto') }}</span>
+  Email: {{ app.session.get('/CONFIG/SCUOLA/email_istituto') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/SCUOLA/url_istituto') }}</span>
 </p>
 <p>&nbsp;</p>
 <p style="text-align: right"><span style="font-size:13pt">Gentile Professore{{ docente.sesso == 'F' ? 'ssa' }} <strong>{{ docente.nome }} {{ docente.cognome }}</strong>
 <p>&nbsp;</p>
 <p style="text-align: justify">Il Registro Elettronico è accessibile all'indirizzo internet seguente:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<span style="font-size:13pt"><strong style="font-family:helvetica">{{ app.session->get('/CONFIG/SCUOLA/url_registro') }}</strong></span></p>
+<span style="font-size:13pt"><strong style="font-family:helvetica">{{ app.session.get('/CONFIG/SCUOLA/url_registro') }}</strong></span></p>
 <p style="text-align: justify">Le credenziali di accesso al Registro Elettronico per il corrente Anno Scolastico sono le seguenti:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <span style="font-size:13pt">Utente: &nbsp;&nbsp;<strong style="font-family:helvetica">{{ docente.username }}</strong></span><br>
@@ -30,4 +30,4 @@ L'accesso al Registro Elettronico, effettuato tramite le credenziali, e le opera
 <p>&nbsp;</p>
 <p>Cagliari, {{ 'now'|date('d/m/Y') }}.</p>
 <p style="text-align: right">Il Dirigente Scolastico<br>
-<i>{{ app.session->get('/CONFIG/SCUOLA/firma_preside') }}</i>&nbsp;&nbsp;</p>
+<i>{{ app.session.get('/CONFIG/SCUOLA/firma_preside') }}</i>&nbsp;&nbsp;</p>

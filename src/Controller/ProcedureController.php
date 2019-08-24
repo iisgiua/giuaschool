@@ -15,6 +15,8 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -64,6 +66,8 @@ class ProcedureController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -74,7 +78,7 @@ class ProcedureController extends AbstractController {
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
-                                  LogHandler $dblogger) {
+                                  TranslatorInterface $trans, ValidatorInterface $validator, LogHandler $dblogger) {
     // form
     $success = null;
     $form = $this->container->get('form.factory')->createNamedBuilder('procedure_password', FormType::class)
@@ -95,11 +99,11 @@ class ProcedureController extends AbstractController {
       $user = $em->getRepository('App:Utente')->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
-        $form->addError(new FormError($this->get('translator')->trans('exception.invalid_user')));
+        $form->addError(new FormError($trans->trans('exception.invalid_user')));
       } else {
         // validazione password
         $user->setPasswordNonCifrata($form->get('password')->getData());
-        $errors = $this->get('validator')->validate($user);
+        $errors = $validator->validate($user);
         if (count($errors) > 0) {
           $form->addError(new FormError($errors[0]->getMessage()));
         } else {
@@ -134,6 +138,7 @@ class ProcedureController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -143,7 +148,7 @@ class ProcedureController extends AbstractController {
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function aliasAction(Request $request, EntityManagerInterface $em, SessionInterface $session, LogHandler $dblogger) {
+  public function aliasAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, LogHandler $dblogger) {
     // form per l'input dell'alias
     $form = $this->container->get('form.factory')->createNamedBuilder('procedure_alias', FormType::class)
       ->add('username', TextType::class, array('label' => 'label.username', 'required' => true))
@@ -156,7 +161,7 @@ class ProcedureController extends AbstractController {
       $user = $em->getRepository('App:Utente')->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
-        $form->addError(new FormError($this->get('translator')->trans('exception.invalid_user')));
+        $form->addError(new FormError($trans->trans('exception.invalid_user')));
       } else {
         // memorizza dati in sessione
         $session->set('/APP/UTENTE/tipo_accesso_reale', $session->get('/APP/UTENTE/tipo_accesso'));
@@ -393,6 +398,7 @@ class ProcedureController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ArchiviazioneUtil $arch Funzioni di utilità per l'archiviazione
    *
    * @return Response Pagina di risposta
@@ -402,7 +408,7 @@ class ProcedureController extends AbstractController {
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function archiviazioneAction(Request $request, EntityManagerInterface $em, ArchiviazioneUtil $arch) {
+  public function archiviazioneAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, ArchiviazioneUtil $arch) {
     $lista_docente = $em->getRepository('App:Docente')->createQueryBuilder('d')
       ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id')
       ->join('c.materia', 'm')
@@ -429,7 +435,7 @@ class ProcedureController extends AbstractController {
         'choices' => array_merge(['label.tutti_docenti' => -1], $lista_docente),
         'choice_label' => function ($obj, $val) {
             return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
-              $this->get('translator')->trans('label.tutti_docenti'));
+              $trans->trans('label.tutti_docenti'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj) ? $obj->getId() : $obj);
@@ -445,7 +451,7 @@ class ProcedureController extends AbstractController {
         'choices' => array_merge(['label.tutti_docenti' => -1], $lista_sostegno),
         'choice_label' => function ($obj, $val) {
             return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
-              $this->get('translator')->trans('label.tutti_docenti'));
+              $trans->trans('label.tutti_docenti'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj) ? $obj->getId() : $obj);
@@ -461,7 +467,7 @@ class ProcedureController extends AbstractController {
         'choices' => array_merge(['label.tutte_classi' => -1], $lista_classe),
         'choice_label' => function ($obj, $val) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() :
-              $this->get('translator')->trans('label.tutte_classi'));
+              $trans->trans('label.tutte_classi'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj) ? $obj->getId() : $obj);
@@ -480,7 +486,7 @@ class ProcedureController extends AbstractController {
         'choices' => array_merge(['label.tutte_classi' => -1], $lista_classe),
         'choice_label' => function ($obj, $val) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() :
-              $this->get('translator')->trans('label.tutte_classi'));
+              $trans->trans('label.tutte_classi'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj) ? $obj->getId() : $obj);
@@ -554,4 +560,3 @@ class ProcedureController extends AbstractController {
   }
 
 }
-

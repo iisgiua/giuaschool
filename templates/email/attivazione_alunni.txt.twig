@@ -1,5 +1,5 @@
 ISTITUTO DI ISTRUZIONE SUPERIORE STATALE
-"{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}"
+"{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}"
 
 
 Alunn{{ sesso }}: {{ alunno.nome }} {{ alunno.cognome }}
@@ -9,7 +9,7 @@ Classe: {{ alunno.classe ? alunno.classe.anno~'ª '~alunno.classe.sezione }}
 Per confermare l'attivazione dell'accesso al Registro Elettronico per l'alunn{{ sesso }}
 indicat{{ sesso }}, clicca sul seguente collegamento*:
 
-  {{ app.session->get('/CONFIG/SCUOLA/url_registro') }}/login/conferma/{{ alunno.token }}
+  {{ app.session.get('/CONFIG/SCUOLA/url_registro') }}/login/conferma/{{ alunno.token }}
 
 * Se il collegamento non è cliccabile, copialo e incollalo nel tuo programma di
 navigazione Internet (browser).

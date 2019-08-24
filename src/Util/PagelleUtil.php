@@ -322,7 +322,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Primo Trimestre - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -345,7 +345,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -368,7 +368,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -391,7 +391,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -428,7 +428,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -708,7 +708,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Primo Trimestre - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -731,7 +731,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -754,7 +754,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -777,7 +777,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -879,7 +879,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Primo Trimestre - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -902,7 +902,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -925,7 +925,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -948,7 +948,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -1280,7 +1280,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Primo Trimestre - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1303,7 +1303,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1326,7 +1326,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1349,7 +1349,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1422,7 +1422,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.', dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}</em> di Cagliari, con sede staccata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}</em> di Cagliari, con sede staccata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';
@@ -1801,7 +1801,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-pagella-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Primo Trimestre - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         // crea il documento
@@ -1824,7 +1824,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-valutazione-intermedia-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Valutazione intermedia - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         // crea il documento
@@ -1847,7 +1847,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1878,7 +1878,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1907,7 +1907,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -2278,7 +2278,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Primo Trimestre - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->debitiDati($classe, $alunno, $periodo);
         // crea il documento
@@ -2301,7 +2301,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->debitiDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -2611,7 +2611,7 @@ class PagelleUtil {
     //-- \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
     //-- $phpWord = new \PhpOffice\PhpWord\PhpWord();
     //-- $properties = $phpWord->getDocInfo();
-    //-- $properties->setCreator('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}');
+    //-- $properties->setCreator('{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}');
     //-- $properties->setTitle('Scrutinio Finale - Verbale - '.$classe);
     //-- $properties->setDescription('');
     //-- $properties->setSubject('');
@@ -3238,7 +3238,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -3514,7 +3514,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -3537,7 +3537,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -3560,7 +3560,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -3600,7 +3600,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }} - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -4000,7 +4000,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
           'Scrutinio Finale - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -4023,7 +4023,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
           'Scrutinio Integrativo - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -4046,7 +4046,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
           'Scrutinio Integrativo - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -4388,7 +4388,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
           'Scrutinio Finale - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -4417,7 +4417,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
           'Scrutinio Integrativo - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -4446,7 +4446,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Integrativo - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -4820,7 +4820,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-carenze-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Scrutinio Finale - Comunicazione per il recupero autonomo - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->carenzeDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -5133,7 +5133,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.' dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';
@@ -5548,7 +5548,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -5764,7 +5764,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }} - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -6317,7 +6317,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.' dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';

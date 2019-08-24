@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -57,6 +58,7 @@ class CircolariController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
    * @param LogHandler $dblogger Gestore dei log su database
@@ -72,7 +74,7 @@ class CircolariController extends AbstractController {
    * @Security("has_role('ROLE_STAFF')")
    */
   public function editAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                              RegistroUtil $reg, CircolariUtil $circ, LogHandler $dblogger, $id) {
+                              TranslatorInterface $trans, RegistroUtil $reg, CircolariUtil $circ, LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
     $var_sessione = '/APP/FILE/circolari_edit/';
@@ -186,29 +188,29 @@ class CircolariController extends AbstractController {
       // controllo errori
       if (!$circolare->getData()) {
         // data non presente
-        $form->addError(new FormError($this->get('translator')->trans('exception.data_nulla')));
+        $form->addError(new FormError($trans->trans('exception.data_nulla')));
       }
       if (!$em->getRepository('App:Circolare')->controllaNumero($circolare)) {
         // numero presente
-        $form->addError(new FormError($this->get('translator')->trans('exception.circolare_numero_esiste')));
+        $form->addError(new FormError($trans->trans('exception.circolare_numero_esiste')));
       }
       if (!$circolare->getOggetto()) {
         // oggetto non presente
-        $form->addError(new FormError($this->get('translator')->trans('exception.circolare_oggetto_nullo')));
+        $form->addError(new FormError($trans->trans('exception.circolare_oggetto_nullo')));
       }
       if (count($sedi) == 0) {
         // sedi non definite
-        $form->addError(new FormError($this->get('translator')->trans('exception.circolare_sede_nulla')));
+        $form->addError(new FormError($trans->trans('exception.circolare_sede_nulla')));
       }
       if (!$circolare->getDsga() && !$circolare->getAta() && $circolare->getCoordinatori() == 'N' &&
           $circolare->getDocenti() == 'N' && $circolare->getGenitori() == 'N' && $circolare->getAlunni() == 'N' &&
           empty($circolare->getAltri())) {
         // destinatari non definiti
-        $form->addError(new FormError($this->get('translator')->trans('exception.circolare_destinatari_nulli')));
+        $form->addError(new FormError($trans->trans('exception.circolare_destinatari_nulli')));
       }
       if (count($documento) == 0) {
         // documento non inviato
-        $form->addError(new FormError($this->get('translator')->trans('exception.circolare_documento_nullo')));
+        $form->addError(new FormError($trans->trans('exception.circolare_documento_nullo')));
       }
       // controlla filtro coordinatori
       $lista = array();
@@ -219,7 +221,7 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroCoordinatori')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Coordinatori'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Coordinatori'])));
         }
       }
       $circolare->setFiltroCoordinatori($lista);
@@ -232,14 +234,14 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Docenti'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Docenti'])));
         }
       } elseif ($circolare->getDocenti() == 'M') {
         // controlla materie
         $lista = $em->getRepository('App:Materia')->controllaMaterie($form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // materia non valida
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_materie_invalido')));
+          $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
         }
       } elseif ($circolare->getDocenti() == 'U') {
         // controlla utenti
@@ -247,7 +249,7 @@ class CircolariController extends AbstractController {
           ->controllaDocenti($sedi, $form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // utente non valido
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_utenti_invalido', ['%dest%' => 'dei Docenti'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['%dest%' => 'dei Docenti'])));
         }
       }
       $circolare->setFiltroDocenti($lista);
@@ -260,7 +262,7 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroGenitori')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Genitori'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Genitori'])));
         }
       } elseif ($circolare->getGenitori() == 'U') {
         // controlla utenti
@@ -268,7 +270,7 @@ class CircolariController extends AbstractController {
           ->controllaAlunni($sedi, $form->get('filtroGenitori')->getData(), $errore);
         if ($errore) {
           // utente non valido
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_utenti_invalido', ['%dest%' => 'dei Genitori'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['%dest%' => 'dei Genitori'])));
         }
       }
       $circolare->setFiltroGenitori($lista);
@@ -281,7 +283,7 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroAlunni')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_classi_invalido', ['%dest%' => 'degli Alunni'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'degli Alunni'])));
         }
       } elseif ($circolare->getAlunni() == 'U') {
         // controlla utenti
@@ -289,7 +291,7 @@ class CircolariController extends AbstractController {
           ->controllaAlunni($sedi, $form->get('filtroAlunni')->getData(), $errore);
         if ($errore) {
           // utente non valido
-          $form->addError(new FormError($this->get('translator')->trans('exception.filtro_utenti_invalido', ['%dest%' => 'degli Alunni'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['%dest%' => 'degli Alunni'])));
         }
       }
       $circolare->setFiltroAlunni($lista);
@@ -305,7 +307,7 @@ class CircolariController extends AbstractController {
       }
       if (count($lista_altri) != count($circolare->getAltri())) {
         // lista altri non valida
-        $form->addError(new FormError($this->get('translator')->trans('exception.lista_altri_invalida')));
+        $form->addError(new FormError($trans->trans('exception.lista_altri_invalida')));
       }
       $circolare->setAltri($lista_altri);
       // modifica dati
@@ -1164,6 +1166,7 @@ class CircolariController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe ID della classe
    * @param int $id ID della circolare (0 indica tutte)
@@ -1176,7 +1179,7 @@ class CircolariController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function firmaClasseAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
+  public function firmaClasseAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, LogHandler $dblogger,
                                      $classe, $id) {
     // controllo classe
     $classe = $em->getRepository('App:Classe')->find($classe);
@@ -1190,7 +1193,7 @@ class CircolariController extends AbstractController {
       // lista circolari
       $lista = implode(', ', array_map(function ($c) { return $c->getNumero(); }, $firme));
       // testo annotazione
-      $testo = $this->get('translator')->transChoice('message.registro_lettura_circolare', count($firme),
+      $testo = $trans->transChoice('message.registro_lettura_circolare', count($firme),
         ['%circolari%' => $lista]);
       // crea annotazione
       $a = (new Annotazione())
@@ -1212,4 +1215,3 @@ class CircolariController extends AbstractController {
   }
 
 }
-

@@ -652,7 +652,7 @@ class GenitoriController extends AbstractController {
         ->getArrayResult();
       if (!empty($richiesta)) {
         // esiste già richiesta
-        $form->addError(new FormError($this->get('translator')->trans('exception.colloqui_esiste')));
+        $form->addError(new FormError($trans->trans('exception.colloqui_esiste')));
       } else {
         // nuova richiesta
         $richiesta = (new RichiestaColloquio)
@@ -1045,7 +1045,7 @@ class GenitoriController extends AbstractController {
     if ($form->isSubmitted()) {
       if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
         // errore: motivazione assente
-        $this->addFlash('error', $this->get('translator')->trans('exception.no_motivazione'));
+        $this->addFlash('error', $trans->trans('exception.no_motivazione'));
       } else {
         // dati validi
         if ($form->get('delete')->isClicked()) {
@@ -1169,7 +1169,7 @@ class GenitoriController extends AbstractController {
     if ($form->isSubmitted()) {
       if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
         // errore: motivazione assente
-        $this->addFlash('error', $this->get('translator')->trans('exception.no_motivazione'));
+        $this->addFlash('error', $trans->trans('exception.no_motivazione'));
       } else {
         // dati validi
         if ($form->get('delete')->isClicked()) {

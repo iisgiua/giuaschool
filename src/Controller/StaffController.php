@@ -183,6 +183,7 @@ class StaffController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -198,7 +199,7 @@ class StaffController extends AbstractController {
    * @Security("has_role('ROLE_STAFF')")
    */
   public function avvisiEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                    BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
+                                    TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
     // inizializza
     $var_sessione = '/APP/FILE/staff_avvisi_edit/files';
     $dir = $this->getParameter('dir_avvisi').'/';
@@ -455,39 +456,39 @@ class StaffController extends AbstractController {
       // controllo errori
       if ($val_staff_filtro == 'N' && count($val_destinatari) == 0) {
         // errore: nessun destinatario
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_mancanti')));
       }
       if ($val_staff_filtro == 'S' && count($val_staff_sedi) == 0) {
         // errore: nessun destinatario
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       if (count($val_destinatari) > 0  && $val_filtro != 'T' && count($val_filtro_id) == 0) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       if ($form->get('creaAnnotazione')->getData() && count($val_destinatari) == 0 && $val_staff_filtro != 'N') {
         // errore: annotazione per solo staff
-        $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_solo_staff')));
+        $form->addError(new FormError($trans->trans('exception.annotazione_solo_staff')));
       }
       if ($form->get('creaAnnotazione')->getData() && count($allegati) > 0) {
         // errore: annotazione con allegati
-        $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_con_file')));
+        $form->addError(new FormError($trans->trans('exception.annotazione_con_file')));
       }
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
-        $form->addError(new FormError($this->get('translator')->trans('exception.avviso_non_permesso')));
+        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
       if ($form->get('creaAnnotazione')->getData() &&
           !$reg->azioneAnnotazione('add', $avviso->getData(), $this->getUser(), null, null)) {
         // errore: nuova annotazione non permessa
-        $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+        $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
       }
       if (count($avviso->getAnnotazioni()) > 0) {
         $a = $avviso->getAnnotazioni()[0];
         if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
           // errore: cancellazione annotazione non permessa
-          $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+          $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
         }
       }
       // modifica dati
@@ -832,6 +833,7 @@ class StaffController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -847,7 +849,7 @@ class StaffController extends AbstractController {
    *
    * @Security("has_role('ROLE_STAFF')")
    */
-  public function avvisiOrarioEditAction(Request $request, EntityManagerInterface $em, BachecaUtil $bac,
+  public function avvisiOrarioEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
                                           RegistroUtil $reg, LogHandler $dblogger, $tipo, $id) {
     // controlla azione
     if ($id > 0) {
@@ -870,9 +872,9 @@ class StaffController extends AbstractController {
         ->setDestinatariIndividuali(false)
         ->setData(new \DateTime('tomorrow'))
         ->setOra(\DateTime::createFromFormat('H:i', ($tipo == 'E' ? '09:20' : '12:50')))
-        ->setOggetto($this->get('translator')->trans($tipo == 'E' ? 'message.avviso_entrata_oggetto' :
+        ->setOggetto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_oggetto' :
           'message.avviso_uscita_oggetto'))
-        ->setTesto($this->get('translator')->trans($tipo == 'E' ? 'message.avviso_entrata_testo' :
+        ->setTesto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_testo' :
           'message.avviso_uscita_testo'));
       $em->persist($avviso);
     }
@@ -985,33 +987,33 @@ class StaffController extends AbstractController {
       // controllo errori
       if ($val_filtro != 'T' && count($val_filtro_id) == 0) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
       if ($errore) {
         // errore: festivo
-        $form->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+        $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
       if (strpos($form->get('testo')->getData(), '%DATA%') === false) {
         // errore: testo senza campo data
-        $form->addError(new FormError($this->get('translator')->trans('exception.campo_data_mancante')));
+        $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
-        $form->addError(new FormError($this->get('translator')->trans('exception.avviso_non_permesso')));
+        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
       if (!$reg->azioneAnnotazione('add', $avviso->getData(), $this->getUser(), null, null)) {
         // errore: nuova annotazione non permessa
-        $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+        $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
       }
       if (count($avviso->getAnnotazioni()) > 0) {
         $a = $avviso->getAnnotazioni()[0];
         if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
           // errore: cancellazione annotazione non permessa
-          $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+          $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
         }
       }
       // modifica dati
@@ -1190,6 +1192,7 @@ class StaffController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1203,7 +1206,7 @@ class StaffController extends AbstractController {
    *
    * @Security("has_role('ROLE_STAFF')")
    */
-  public function avvisiAttivitaEditAction(Request $request, EntityManagerInterface $em, BachecaUtil $bac,
+  public function avvisiAttivitaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
                                             RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controlla azione
     if ($id > 0) {
@@ -1227,8 +1230,8 @@ class StaffController extends AbstractController {
         ->setData(new \DateTime('tomorrow'))
         ->setOra(\DateTime::createFromFormat('H:i', '08:20'))
         ->setOraFine(\DateTime::createFromFormat('H:i', '13:50'))
-        ->setOggetto($this->get('translator')->trans('message.avviso_attivita_oggetto'))
-        ->setTesto($this->get('translator')->trans('message.avviso_attivita_testo'));
+        ->setOggetto($trans->trans('message.avviso_attivita_oggetto'))
+        ->setTesto($trans->trans('message.avviso_attivita_testo'));
       $em->persist($avviso);
     }
     // legge destinatari di filtri
@@ -1345,33 +1348,33 @@ class StaffController extends AbstractController {
       // controllo errori
       if ($val_filtro != 'T' && count($val_filtro_id) == 0) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
       if ($errore) {
         // errore: festivo
-        $form->addError(new FormError($this->get('translator')->trans('exception.data_festiva')));
+        $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
       if (strpos($form->get('testo')->getData(), '%DATA%') === false) {
         // errore: testo senza campo data
-        $form->addError(new FormError($this->get('translator')->trans('exception.campo_data_mancante')));
+        $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
-        $form->addError(new FormError($this->get('translator')->trans('exception.avviso_non_permesso')));
+        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
       if (!$reg->azioneAnnotazione('add', $avviso->getData(), $this->getUser(), null, null)) {
         // errore: nuova annotazione non permessa
-        $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+        $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
       }
       if (count($avviso->getAnnotazioni()) > 0) {
         $a = $avviso->getAnnotazioni()[0];
         if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
           // errore: cancellazione annotazione non permessa
-          $form->addError(new FormError($this->get('translator')->trans('exception.annotazione_non_permessa')));
+          $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
         }
       }
       // modifica dati
@@ -1548,6 +1551,7 @@ class StaffController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1562,7 +1566,7 @@ class StaffController extends AbstractController {
    * @Security("has_role('ROLE_STAFF')")
    */
   public function avvisiIndividualiEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                               BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
+                                               TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1584,7 +1588,7 @@ class StaffController extends AbstractController {
         ->setDestinatariGenitori(true)
         ->setDestinatariAlunni(false)
         ->setDestinatariIndividuali(true)
-        ->setOggetto($this->get('translator')->trans('message.avviso_individuale_oggetto', ['%docente%' => $docente]))
+        ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['%docente%' => $docente]))
         ->setData(new \DateTime('today'));
       $em->persist($avviso);
     }
@@ -1663,12 +1667,12 @@ class StaffController extends AbstractController {
       // controllo errori
       if (count($val_filtro_id) == 0) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
-        $form->addError(new FormError($this->get('translator')->trans('exception.avviso_non_permesso')));
+        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
       // modifica dati
       if ($form->isValid()) {
@@ -1956,7 +1960,7 @@ class StaffController extends AbstractController {
       // nuovo
       $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['inizio']);
       $ora->modify('+60 minutes');
-      $nota = $this->get('translator')->trans('message.autorizza_ritardo', [
+      $nota = $trans->trans('message.autorizza_ritardo', [
         '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
         '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]);
       $entrata = (new Entrata())
@@ -2138,7 +2142,7 @@ class StaffController extends AbstractController {
         $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
         $ora->modify('-60 minutes');
       }
-      $nota = $this->get('translator')->trans('message.autorizza_uscita', [
+      $nota = $trans->trans('message.autorizza_uscita', [
         '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
         '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]);
       $uscita = (new Uscita())
@@ -2594,6 +2598,7 @@ class StaffController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $pagina Numero di pagina per la lista visualizzata
@@ -2608,7 +2613,7 @@ class StaffController extends AbstractController {
    * @Security("has_role('ROLE_STAFF')")
    */
   public function docentiStatisticheAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                            StaffUtil $staff, PdfManager $pdf, $pagina) {
+                                            TranslatorInterface $trans, StaffUtil $staff, PdfManager $pdf, $pagina) {
     // recupera criteri dalla sessione
     $creaPdf = false;
     $search = array();
@@ -2641,7 +2646,7 @@ class StaffController extends AbstractController {
         'choices' => array_merge(['label.tutti_docenti' => -1], $docenti),
         'choice_label' => function ($obj, $val) {
             return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
-              $this->get('translator')->trans('label.tutti_docenti'));
+              $trans->trans('label.tutti_docenti'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj) ? $obj->getId() : $obj);
@@ -2694,7 +2699,7 @@ class StaffController extends AbstractController {
     if ($creaPdf) {
       // crea PDF
       $lista = $staff->statisticheStampa($docente, $inizio, $fine);
-      $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+      $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
         'Statistiche sulle ore di lezione dei docenti');
       $pdf->getHandler()->SetAutoPageBreak(true, 15);
       $pdf->getHandler()->SetFooterMargin(15);
@@ -3255,7 +3260,7 @@ class StaffController extends AbstractController {
         // alunni presenti
         $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
         // crea documento PDF
-        $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Credenziali di accesso al Registro Elettronico');
         foreach ($alunni as $alu) {
           // recupera genitori (anche più di uno)
@@ -3322,7 +3327,7 @@ class StaffController extends AbstractController {
         'ID esecutore' => $this->getUser()->getId()
         ));
       // crea documento PDF
-      $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+      $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
         'Credenziali di accesso al Registro Elettronico');
       // contenuto in formato HTML
       $html = $this->renderView('pdf/credenziali_alunni.html.twig', array(
@@ -3704,4 +3709,3 @@ class StaffController extends AbstractController {
   }
 
 }
-

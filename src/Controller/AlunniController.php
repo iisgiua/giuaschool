@@ -15,6 +15,8 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -107,6 +109,7 @@ class AlunniController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $page Numero di pagina per la lista dei alunni
    *
    * @Route("/alunni/modifica/", name="alunni_modifica", defaults={"page": 0},
@@ -116,7 +119,7 @@ class AlunniController extends AbstractController {
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $page) {
+  public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, $page) {
     // recupera criteri dalla sessione
     $search = array();
     $search['nome'] = $session->get('/APP/ROUTE/alunni_modifica/nome', '');
@@ -151,14 +154,14 @@ class AlunniController extends AbstractController {
         'choices' => $classi,
         'choice_label' => function ($obj) {
             return (is_object($obj) ? $obj->getAnno().' '.$obj->getSezione() :
-              $this->get('translator')->trans('label.nessuna_classe'));
+              $trans->trans('label.nessuna_classe'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj)  ? $obj->getId() : $obj);
           },
         'group_by' => function ($obj) {
             return (is_object($obj)  ? $obj->getSede()->getCitta() :
-              $this->get('translator')->trans('label.altro'));
+              $trans->trans('label.altro'));
           },
         'placeholder' => 'label.classe',
         'choice_translation_domain' => false,
@@ -231,6 +234,7 @@ class AlunniController extends AbstractController {
    * Mostra i dati di un alunno e dei genitori
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -240,7 +244,7 @@ class AlunniController extends AbstractController {
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function modificaShowAction(EntityManagerInterface $em, $id) {
+  public function modificaShowAction(EntityManagerInterface $em, TranslatorInterface $trans, $id) {
     $alunno = $em->getRepository('App:Alunno')->find($id);
     if ($alunno) {
       // recupera genitori (anche più di uno)
@@ -260,14 +264,14 @@ class AlunniController extends AbstractController {
           'required' => false))
         ->add('ultimoAccesso', TextType::class, array('label' => 'label.ultimo_accesso',
           'data' => ($alunno->getUltimoAccesso() ? $alunno->getUltimoAccesso()->format('d/m/Y H:i:s') :
-            $this->get('translator')->trans('label.mai')).', '.
+            $trans->trans('label.mai')).', '.
             implode(', ', array_map(function($g) {
               return $g->getUltimoAccesso() ? $g->getUltimoAccesso()->format('d/m/Y H:i:s') :
-                $this->get('translator')->trans('label.mai'); }, $genitori)),
+                $trans->trans('label.mai'); }, $genitori)),
           'disabled' => true,
           'required' => false))
         ->add('abilitato', TextType::class, array('label' => 'label.abilitato',
-          'data' => $this->get('translator')->trans($alunno->getAbilitato() ? 'label.si' : 'label.no'),
+          'data' => $trans->trans($alunno->getAbilitato() ? 'label.si' : 'label.no'),
           'disabled' => true,
           'required' => false))
         // dati anagrafici
@@ -320,7 +324,7 @@ class AlunniController extends AbstractController {
           'disabled' => true,
           'required' => false))
         ->add('frequenzaEstero', TextType::class, array('label' => 'label.frequenza_estero',
-          'data' => $this->get('translator')->trans($alunno->getFrequenzaEstero() ? 'label.si' : 'label.no'),
+          'data' => $trans->trans($alunno->getFrequenzaEstero() ? 'label.si' : 'label.no'),
           'disabled' => true,
           'required' => false))
         ->add('religione', ChoiceType::class, array('label' => 'label.religione',
@@ -362,6 +366,8 @@ class AlunniController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
@@ -371,7 +377,7 @@ class AlunniController extends AbstractController {
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function modificaClasseAction(Request $request, EntityManagerInterface $em, $id) {
+  public function modificaClasseAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, ValidatorInterface $validator, $id) {
     $alunno = $em->getRepository('App:Alunno')->find($id);
     if ($alunno) {
       // form
@@ -419,9 +425,9 @@ class AlunniController extends AbstractController {
         $em->persist($cambio);
         // validazione
         if ($cambio->getInizio() > $cambio->getFine()) {
-          $form->get('inizio')->addError(new FormError($this->get('translator')->trans('exception.date_start_end')));
+          $form->get('inizio')->addError(new FormError($trans->trans('exception.date_start_end')));
         }
-        $errors = $this->get('validator')->validate($cambio);
+        $errors = $validator->validate($cambio);
         if (count($errors) > 0) {
           $form->addError(new FormError($errors[0]->getMessage()));
         } else {
@@ -585,6 +591,7 @@ class AlunniController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $page Numero di pagina per la lista dei alunni
    *
    * @Route("/alunni/password/", name="alunni_password", defaults={"page": 0},
@@ -594,7 +601,7 @@ class AlunniController extends AbstractController {
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $page) {
+  public function passwordAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, $page) {
     // recupera criteri dalla sessione
     $search = array();
     $search['nome'] = $session->get('/APP/ROUTE/alunni_password/nome', '');
@@ -629,14 +636,14 @@ class AlunniController extends AbstractController {
         'choices' => $classi,
         'choice_label' => function ($obj) {
             return (is_object($obj) ? $obj->getAnno().' '.$obj->getSezione() :
-              $this->get('translator')->trans('label.nessuna_classe'));
+              $trans->trans('label.nessuna_classe'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj)  ? $obj->getId() : $obj);
           },
         'group_by' => function ($obj) {
             return (is_object($obj)  ? $obj->getSede()->getCitta() :
-              $this->get('translator')->trans('label.altro'));
+              $trans->trans('label.altro'));
           },
         'placeholder' => 'label.classe',
         'choice_translation_domain' => false,
@@ -713,7 +720,7 @@ class AlunniController extends AbstractController {
         'ID esecutore' => $this->getUser()->getId()
         ));
       // crea documento PDF
-      $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+      $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
         'Credenziali di accesso al Registro Elettronico');
       // contenuto in formato HTML
       $html = $this->renderView('pdf/credenziali_alunni.html.twig', array(
@@ -744,7 +751,7 @@ class AlunniController extends AbstractController {
         // alunni presenti
         $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
         // crea documento PDF
-        $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+        $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
           'Credenziali di accesso al Registro Elettronico');
         foreach ($alunni as $alu) {
           // recupera genitori (anche più di uno)
@@ -839,4 +846,3 @@ class AlunniController extends AbstractController {
   }
 
 }
-

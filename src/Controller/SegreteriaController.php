@@ -199,7 +199,7 @@ class SegreteriaController extends AbstractController {
     // recupera dati
     $dati = $segr->riepilogoAssenze($alunno);
     // crea documento PDF
-    $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
       'Prospetto mensile delle assenze');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/segreteria_assenze.html.twig', array(
@@ -371,4 +371,3 @@ class SegreteriaController extends AbstractController {
   }
 
 }
-
