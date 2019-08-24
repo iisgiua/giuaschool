@@ -7,10 +7,10 @@
 !/bin/.gitkeep
 /public/bundles/
 /var/cache/*
-/var/log/*
-/var/sessions/*
 !var/cache/.gitkeep
+/var/log/*
 !var/log/.gitkeep
+/var/sessions/*
 !var/sessions/.gitkeep
 /vendor/*
 !/vendor/.gitkeep
@@ -33,9 +33,23 @@
 
 ###> trinko/giuaschool ###
 /DEV/
-/FILES/
-/public/app/
+/FILES/archivio/classi/*
+!/FILES/archivio/classi/.gitkeep
+/FILES/archivio/registri/*
+!/FILES/archivio/registri/.gitkeep
+/FILES/archivio/scrutini/*
+!/FILES/archivio/scrutini/.gitkeep
+/FILES/tmp/*
+!/FILES/tmp/.gitkeep
+/FILES/upload/avvisi/*
+!/FILES/upload/avvisi/.gitkeep
+/FILES/upload/circolari/*
+!/FILES/upload/circolari/.gitkeep
+/FILES/upload/foto/*
+!/FILES/upload/foto/.gitkeep
+/public/app/*
+!/public/app/.gitkeep
+/public/img/.local/
 /src/Command/Argo/
 /templates/argo/
-/public/img/.local/
 ###< trinko/giuaschool ###
