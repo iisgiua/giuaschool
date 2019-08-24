@@ -397,8 +397,8 @@ class LoginController extends AbstractController {
           ));
         // crea messaggio
         $message = (new \Swift_Message())
-          ->setSubject("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} - Recupero credenziali del Registro Elettronico")
-          ->setFrom(["{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}" => "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}"])
+          ->setSubject($session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')." - Recupero credenziali del Registro Elettronico")
+          ->setFrom([$session->get('/CONFIG/SCUOLA/email_notifica') => $session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')])
           ->setTo([$email])
           ->setBody($this->renderView($template_html,
             array(
@@ -582,8 +582,8 @@ class LoginController extends AbstractController {
         // crea messaggio
         $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
         $message = (new \Swift_Message())
-          ->setSubject("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} - Attivazione dell\'accesso al Registro Elettronico da parte degli studenti")
-          ->setFrom(["{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}" => "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}"])
+          ->setSubject($session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')." - Attivazione dell\'accesso al Registro Elettronico da parte degli studenti")
+          ->setFrom([$session->get('/CONFIG/SCUOLA/email_notifica') => $session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')])
           ->setTo([$email])
           ->setBody($this->renderView('email/attivazione_alunni.html.twig',
             array(

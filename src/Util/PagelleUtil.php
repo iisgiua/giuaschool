@@ -322,7 +322,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Primo Trimestre - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -345,7 +345,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -368,7 +368,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -391,7 +391,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -428,7 +428,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -708,7 +708,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Primo Trimestre - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -731,7 +731,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -754,7 +754,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -777,7 +777,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -879,7 +879,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Primo Trimestre - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -902,7 +902,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -925,7 +925,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -948,7 +948,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -1280,7 +1280,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Primo Trimestre - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1303,7 +1303,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1326,7 +1326,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1349,7 +1349,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1422,7 +1422,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.', dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}</em> di Cagliari, con sede staccata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto').'</em> di Cagliari, con sede staccata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';
@@ -1801,7 +1801,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-pagella-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Primo Trimestre - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         // crea il documento
@@ -1824,7 +1824,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-valutazione-intermedia-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Valutazione intermedia - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         // crea il documento
@@ -1847,7 +1847,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1878,7 +1878,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1907,7 +1907,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -2278,7 +2278,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Primo Trimestre - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->debitiDati($classe, $alunno, $periodo);
         // crea il documento
@@ -2301,7 +2301,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->debitiDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -2539,682 +2539,6 @@ class PagelleUtil {
     }
   }
 
-  //-- // crea una tabella completa su PHPWord
-  //-- private function wTabella($section, $sizes, $headers, $fields, $fontsizes=array(), $alignments=array()) {
-    //-- $tabellafont_stile = array('name' => 'Arial', 'size' => 10);
-    //-- $tabellapar_stile = array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::START, 'spaceAfter' => 0);
-    //-- $table = $this->wTab($section, $sizes, $headers);
-    //-- foreach ($fields as $row) {
-      //-- $this->wTabRow($table, $sizes, $row, $fontsizes, $alignments);
-    //-- }
-    //-- $section->addTextBreak(1, $tabellafont_stile, $tabellapar_stile);
-  //-- }
-
-  //-- // crea riga di tabella su PHPWord
-  //-- private function wTabRow($table, $sizes, $fields, $fontsizes=array(), $alignments=array()) {
-    //-- $tabellacella_stile = array('valign'=>'center');
-    //-- $tabellafont_stile = array('name' => 'Arial', 'size' => 10);
-    //-- $tabellapar_stile = array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::START, 'spaceAfter' => 0);
-    //-- $table->addRow(null, ['cantSplit' => true]);
-    //-- foreach ($sizes as $k=>$size) {
-      //-- $font = $tabellafont_stile;
-      //-- if (isset($fontsizes[$k])) {
-        //-- $font['size'] = $fontsizes[$k];
-      //-- }
-      //-- $par = $tabellapar_stile;
-      //-- if (isset($alignments[$k])) {
-        //-- $par['alignment'] = $alignments[$k];
-      //-- }
-      //-- $table->addCell($size, $tabellacella_stile)->addText($fields[$k], $font, $par);
-    //-- }
-  //-- }
-
-  //-- // crea tabella su PHPWord
-  //-- private function wTab($section, $sizes, $fields) {
-    //-- $tabella_stile = array(
-      //-- 'borderSize' => 8,
-      //-- 'borderColor' => '000000',
-      //-- 'cellMarginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-      //-- 'width' => 100*50,  // NB: percentuale*50
-      //-- 'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER
-    //-- );
-    //-- $tabellariga_header_stile = array('tblHeader' => true, 'cantSplit' => true);
-    //-- $tabellacella_stile = array('valign'=>'center');
-    //-- $tabellafont_header_stile = array('bold'=> true, 'name' => 'Arial', 'size' => 10);
-    //-- $tabellapar_header_stile = array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0);
-    //-- $table = $section->addTable($tabella_stile);
-    //-- if ($fields != null) {
-      //-- $table->addRow(null, $tabellariga_header_stile);
-      //-- foreach ($sizes as $k=>$size) {
-        //-- $table->addCell($size, $tabellacella_stile)->addText($fields[$k], $tabellafont_header_stile, $tabellapar_header_stile);
-      //-- }
-    //-- }
-    //-- return $table;
-  //-- }
-
-  //-- /**
-   //-- * Crea il verbale come documento Word/LibreOffice
-   //-- *
-   //-- * @param string $classe Nome della classe
-   //-- * @param string $classe_completa Nome della classe con corso e sede
-   //-- * @param array $dati Dati dello scrutinio
-   //-- * @param string $nomefile Nome del file da creare
-   //-- */
-  //-- public function creaVerbale_F($classe, $classe_completa, $dati, $nomefile) {
-    //-- // inizializzazione
-    //-- $nome_mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    //-- // configurazione documento
-    //-- \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
-    //-- $phpWord = new \PhpOffice\PhpWord\PhpWord();
-    //-- $properties = $phpWord->getDocInfo();
-    //-- $properties->setCreator('{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}');
-    //-- $properties->setTitle('Scrutinio Finale - Verbale - '.$classe);
-    //-- $properties->setDescription('');
-    //-- $properties->setSubject('');
-    //-- $properties->setKeywords('');
-    //-- // stili predefiniti
-    //-- $phpWord->setDefaultFontName('Times New Roman');
-    //-- $phpWord->setDefaultFontSize(12);
-    //-- $phpWord->setDefaultParagraphStyle(array(
-      //-- 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH,
-      //-- 'spaceAfter' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.2)));
-    //-- $lista_paragrafo = array('spaceAfter' => 0);
-    //-- $lista_stile = 'multilevel';
-    //-- $phpWord->addNumberingStyle($lista_stile, array(
-      //-- 'type' => 'multilevel',
-      //-- 'levels' => array(
-        //-- array('format' => 'decimal', 'text' => '%1)', 'left' => 720, 'hanging' => 360, 'tabPos' => 720))));
-    //-- // imposta pagina
-    //-- $section = $phpWord->addSection(array(
-      //-- 'orientation' => 'portrait',
-      //-- 'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
-      //-- 'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
-      //-- 'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
-      //-- 'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
-      //-- 'headerHeight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0),
-      //-- 'footerHeight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1.5),
-      //-- 'pageSizeH' =>  \PhpOffice\PhpWord\Shared\Converter::cmToTwip(29.70),
-      //-- 'pageSizeW' =>  \PhpOffice\PhpWord\Shared\Converter::cmToTwip(21)
-      //-- ));
-    //-- $footer = $section->addFooter();
-    //-- $footer->addPreserveText('- Pag. {PAGE}/{NUMPAGES} -',
-      //-- array('name' => 'Arial', 'size' => 9),
-      //-- array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    //-- // intestazione
-    //-- $section->addImage(__DIR__.'/../../../web/img/logo-italia.png', array(
-      //-- 'width' => 55,
-      //-- 'height' => 55,
-      //-- 'positioning' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE,
-      //-- 'posHorizontal' => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_CENTER,
-      //-- 'posHorizontalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_COLUMN,
-      //-- 'posVertical' => \PhpOffice\PhpWord\Style\Image::POSITION_VERTICAL_TOP,
-      //-- 'posVerticalRel' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE_TO_LINE
-      //-- ));
-    //-- $section->addTextBreak(1);
-    //-- $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE STATALE',
-      //-- array('bold' => true),
-      //-- array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    //-- $section->addText('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}',
-      //-- array('bold' => true, 'italic' => true),
-      //-- array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    //-- $section->addText('CAGLIARI - ASSEMINI',
-      //-- array('bold' => true),
-      //-- array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    //-- $section->addTextBreak(2);
-    //-- $section->addText('VERBALE DELLO SCRUTINIO FINALE DI GIUGNO',
-      //-- array('bold' => true),
-      //-- array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    //-- $text = 'CLASSE: '.$classe_completa;
-    //-- $section->addText($text, null, array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
-    //-- $section->addTextBreak(1);
-    //-- // inizio seduta
-    //-- $datascrutinio_giorno = intval($dati['scrutinio']->getData()->format('d'));
-    //-- $datascrutinio_mese = $nome_mesi[intval($dati['scrutinio']->getData()->format('m'))];
-    //-- $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
-    //-- $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
-    //-- $text = "Il giorno $datascrutinio_giorno del mese di $datascrutinio_mese, dell'anno $datascrutinio_anno, alle ore $orascrutinio_inizio, nei locali dell’{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} di Cagliari, con sede associata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe $classe per discutere il seguente ordine del giorno:";
-    //-- $section->addText($text);
-    //-- $section->addListItem('lettura/approvazione del verbale della seduta precedente;', 0,
-      //-- array('bold' => true), $lista_stile, $lista_paragrafo);
-    //-- $section->addListItem('scrutini finali di giugno;', 0,
-      //-- array('bold' => true), $lista_stile, $lista_paragrafo);
-    //-- $section->addListItem('comunicazione alle famiglie sugli esiti degli scrutini: alunni non scrutinati per il superamento del numero di assenze consentito dalla norma, alunni non ammessi alla classe successiva, alunni con giudizio sospeso.', 0,
-      //-- array('bold' => true), $lista_stile);
-    //-- if ($dati['scrutinio']->getDato('presiede_ds')) {
-      //-- $pres_nome = 'il Dirigente Scolastico';
-    //-- } else {
-      //-- $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
-      //-- if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
-        //-- $pres_nome = 'per delega '.($d['sesso'] == 'M' ? 'il Prof.' : 'la Prof.ssa').' '.
-          //-- $d['cognome'].' '.$d['nome'];
-      //-- } else {
-        //-- $pres_nome = 'per delega il Prof. '.$dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto();
-      //-- }
-    //-- }
-    //-- $d = $dati['docenti'][$dati['scrutinio']->getDato('segretario')][0];
-    //-- if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
-      //-- $segr_nome = ($d['sesso'] == 'M' ? 'il Prof.' : 'la Prof.ssa').' '.
-        //-- $d['cognome'].' '.$d['nome'];
-    //-- } else {
-      //-- $segr_nome = 'il Prof. '.$dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto();
-    //-- }
-    //-- $text = "Presiede la riunione $pres_nome, funge da segretario $segr_nome.";
-    //-- $section->addText($text);
-    //-- $text = "Sono presenti i professori:";
-    //-- $section->addText($text);
-    //-- $tab_sizes = [40, 60];
-    //-- $tab_headers = ['Docente', 'Materia'];
-    //-- $tab_fields = array();
-    //-- $assenti = 0;
-    //-- foreach ($dati['scrutinio']->getDato('presenze') as $iddocente=>$doc) {
-      //-- if ($doc->getPresenza()) {
-        //-- $d = $dati['docenti'][$doc->getDocente()][0];
-        //-- $nome = $d['cognome'].' '.$d['nome'];
-        //-- $materie = '';
-        //-- foreach ($dati['docenti'][$doc->getDocente()] as $km=>$vm) {
-          //-- $materie .= ', '.$vm['nome_materia'];
-        //-- }
-        //-- $tab_fields[] = [$nome, substr($materie, 2)];
-      //-- } else {
-        //-- $assenti++;
-      //-- }
-    //-- }
-    //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields);
-    //-- if ($assenti > 0) {
-      //-- $text = 'Sono assenti giustificati i seguenti docenti, surrogati con atto formale del Dirigente Scolastico:';
-      //-- $section->addText($text);
-      //-- foreach ($dati['scrutinio']->getDato('presenze') as $iddocente=>$doc) {
-        //-- if (!$doc->getPresenza()) {
-          //-- $assenti--;
-          //-- $d = $dati['docenti'][$doc->getDocente()][0];
-          //-- $nome = $d['cognome'].' '.$d['nome'];
-          //-- $materie = '';
-          //-- foreach ($dati['docenti'][$doc->getDocente()] as $km=>$vm) {
-            //-- $materie .= ', '.$vm['nome_materia'];
-          //-- }
-          //-- $text = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$nome.' ('.substr($materie,2).'), '.
-            //-- 'sostituit'.($d['sesso'] == 'M' ? 'o' : 'a').' dal Prof. '.
-            //-- $doc->getSostituto();
-          //-- if ($assenti > 0) {
-            //-- // non è ultimo
-            //-- $section->addListItem($text.';', 0, null, null, $lista_paragrafo);
-          //-- } else {
-            //-- // è ultimo
-            //-- $section->addListItem($text.'.', 0);
-          //-- }
-        //-- }
-      //-- }
-    //-- } else {
-      //-- $text = 'Nessuno è assente.';
-      //-- $section->addText($text);
-    //-- }
-    //-- $text = 'Accertata la legalità della seduta, il presidente dà avvio alle operazioni.';
-    //-- $section->addText($text);
-    //-- $section->addTextBreak(1);
-    //-- // punto primo
-    //-- $text = 'Punto primo. Lettura/approvazione del verbale della seduta precedente.';
-    //-- $section->addText($text, array('bold' => true), array('keepLines' => true, 'keepNext' => true));
-    //-- $text = 'Il verbale della seduta precedente viene letto dal Coordinatore di classe. Al termine della lettura viene messo ai voti ed approvato all’unanimità.';
-    //-- $section->addText($text);
-    //-- $section->addTextBreak(1);
-    //-- // punto secondo
-    //-- $text = 'Punto secondo. Scrutini finali di giugno.';
-    //-- $section->addText($text, array('bold' => true), array('keepLines' => true, 'keepNext' => true));
-    //-- $text = 'Prima di dare inizio alle operazioni di scrutinio, in ottemperanza a quanto previsto dalle norme vigenti e in base ai criteri di valutazione stabiliti dal Collegio dei Docenti e inseriti nel PTOF, il presidente ricorda che:';
-    //-- $section->addText($text);
-    //-- $text = 'tutti i presenti sono tenuti all’obbligo della stretta osservanza del segreto d’ufficio e che l’eventuale violazione comporta sanzioni disciplinari;';
-    //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-    //-- $text = 'il voto di condotta è proposto dal Coordinatore di classe ed assegnato dal Consiglio di Classe. Per l\'attribuzione si terrà conto di: interesse e partecipazione attiva e regolare alla vita della scuola, comportamento corretto con i docenti e i compagni, provvedimenti disciplinari;';
-    //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-    //-- $text = 'i voti di profitto sono proposti dagli insegnanti delle rispettive materie ed assegnati dal Consiglio di Classe;';
-    //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-    //-- $text = 'il voto non deve costituire un atto unico, personale e discrezionale del docente di ogni singola materia rispetto all’alunno, ma deve essere il risultato di una sintesi collegiale prevalentemente formulata su una valutazione complessiva della personalità dell’allievo. Nell\'attribuzione si terrà conto dei fattori anche non scolastici, ambientali e socio-culturali che hanno influito sul comportamento intellettuale degli alunni.';
-    //-- $section->addListItem($text, 0);
-    //-- $text = 'In merito alle proposte di voto che vengono formulate, i singoli docenti dichiarano:';
-    //-- $section->addText($text);
-    //-- $text = 'che le proposte di voto ed i giudizi sono stati determinati sulla base delle verifiche sistematiche effettuate nel corso dell’anno scolastico, sulla base dell’impegno allo studio, alla partecipazione, all\'interesse al lavoro scolastico, in relazione alle effettive possibilità ed al progresso rispetto alla situazione di partenza di ciascun alunno;';
-    //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-    //-- $text = 'che i giudizi proposti tengono conto delle attività di sostegno e di recupero proposte alla classe, degli stage, dei crediti scolastici e formativi, delle attività curricolari e di recupero organizzate dalla scuola e delle loro risultanze.';
-    //-- $section->addListItem($text, 0);
-    //-- $classe_coordinatore = $dati['scrutinio']->getClasse()->getCoordinatore()->getId();
-    //-- if ($dati['scrutinio']->getDato('presenze')[$classe_coordinatore]->getPresenza()) {
-      //-- $d = $dati['docenti'][$classe_coordinatore][0];
-      //-- $coord_nome = 'il Coordinatore, '.($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'].',';
-    //-- } else {
-      //-- $coord_nome = 'il docente con maggior numero di ore d\'insegnamento nella classe';
-    //-- }
-    //-- $text = "Al termine dell’intervento, il presidente invita $coord_nome a presentare la situazione della classe in riferimento ai programmi svolti ed ai risultati ottenuti. Il Consiglio di Classe, prima di procedere allo scrutinio per ciascun alunno e per ciascuna disciplina, verifica, preliminarmente, per ciascun alunno la frequenza delle lezioni.";
-    //-- $section->addText($text);
-    //-- // alunni con deroga su assenze
-    //-- $alunni_deroga = array();
-    //-- foreach ($dati['scrutinio']->getDato('alunni') as $idalunno=>$alu) {
-      //-- if (isset($alu['deroga'])) {
-        //-- $alunni_deroga[] = $idalunno;
-      //-- }
-    //-- }
-    //-- // non scrutinabili
-    //-- $alunni_no_scrutinabili = ($dati['scrutinio']->getDato('no_scrutinabili') === null ?
-      //-- array() : $dati['scrutinio']->getDato('no_scrutinabili'));
-    //-- $alunni_no_scrutinati = array();
-    //-- $alunni_cessata_frequenza = array();
-    //-- foreach ($alunni_no_scrutinabili as $idalunno) {
-      //-- if ($dati['scrutinio']->getDato('alunni')[$idalunno]['no_deroga'] == 'C') {
-        //-- $alunni_cessata_frequenza[] = $idalunno;
-      //-- } elseif ($dati['scrutinio']->getDato('alunni')[$idalunno]['no_deroga'] == 'A') {
-        //-- $alunni_no_scrutinati[] = $idalunno;
-      //-- }
-    //-- }
-    //-- // cessata frequenza
-    //-- if (count($alunni_cessata_frequenza) > 0) {
-      //-- $text = 'I seguenti alunni hanno cessato la frequenza delle lezioni entro il 15 marzo:';
-      //-- $section->addText($text);
-      //-- foreach ($alunni_cessata_frequenza as $idalunno) {
-        //-- $nome = $dati['alunni'][$idalunno]['cognome'].' '.$dati['alunni'][$idalunno]['nome'].
-          //-- ' ('.$dati['alunni'][$idalunno]['dataNascita']->format('d/m/Y').')';
-        //-- $section->addListItem($nome, 0, ['name' => 'Arial', 'size' => 10, 'bold' => true], null, ['spaceAfter' => 0]);
-      //-- }
-      //-- $section->addTextBreak(1, ['name' => 'Arial', 'size' => 6], ['spaceAfter' => 0]);
-    //-- }
-    //-- // limite di assenze superato
-    //-- if (count($alunni_no_scrutinati) > 0 || count($alunni_deroga) > 0) {
-      //-- $text = 'Si esaminano gli alunni che presentano un numero di assenze superiore al 25% dell’orario personalizzato:';
-      //-- $section->addText($text);
-      //-- $tab_sizes = [40, 20, 20, 20];
-      //-- $tab_alignments = [\PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER];
-      //-- $tab_headers = ['ALUNNO', 'Monte ore annuo complessivo personalizzato della classe', 'Numero massimo di ore di assenza consentite per la validità dell\'A.S. (25% monte ore)', 'Ore di assenza dell\'alunno'];
-      //-- $tab_fields = array();
-      //-- $assenze_monteore = $dati['scrutinio']->getDato('monteore');
-      //-- $assenze_max = $dati['scrutinio']->getDato('maxassenze');
-      //-- foreach ($dati['alunni'] as $idalunno=>$alu) {
-        //-- if (in_array($idalunno, $alunni_no_scrutinati) || in_array($idalunno, $alunni_deroga)) {
-          //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-          //-- $tab_fields[] = [$nome, $assenze_monteore, $assenze_max,
-            //-- $dati['scrutinio']->getDato('alunni')[$idalunno]['ore']];
-        //-- }
-      //-- }
-      //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields, null, $tab_alignments);
-      //-- // deroghe
-      //-- if (count($alunni_deroga) > 0) {
-        //-- $text = 'Di tali alunni il Consiglio di Classe ammette in deroga allo scrutinio, nonostante le assenze, vista la documentazione prodotta, i seguenti alunni:';
-        //-- $section->addText($text);
-        //-- $tab_sizes = [40, 60];
-        //-- $tab_headers = ['ALUNNO', 'Motivazioni della deroga'];
-        //-- $tab_fields = array();
-        //-- foreach ($dati['alunni'] as $idalunno=>$alu) {
-          //-- if (in_array($idalunno, $alunni_deroga)) {
-            //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-            //-- $tab_fields[] = [$nome, str_replace(array("\r","\n"), ' ',
-              //-- $dati['scrutinio']->getDato('alunni')[$idalunno]['deroga'])];
-          //-- }
-        //-- }
-        //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields);
-      //-- }
-    //-- }
-    //-- // tutti scrutinati
-    //-- if (count($alunni_no_scrutinabili) == 0 && count($alunni_deroga) == 0) {
-      //-- $text = 'Tutti gli alunni rientrano nei limiti di assenze previsti dalla normativa, pari al 25% dell’orario personalizzato.';
-      //-- $section->addText($text);
-    //-- }
-    //-- // alunni ritirati
-    //-- $alunni_ritirati = $dati['scrutinio']->getDato('ritirati');
-    //-- if (count($alunni_ritirati) > 0) {
-      //-- $text = 'Alunni ritirati, trasferiti o che frequentano l\'anno all\'estero:';
-      //-- $section->addText($text);
-      //-- $tab_sizes = [40, 60];
-      //-- $tab_headers = ['ALUNNO', 'Note'];
-      //-- $tab_fields = array();
-      //-- foreach ($dati['ritirati'] as $idalunno=>$alu) {
-        //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-        //-- $tab_fields[] = [$nome, $alu['note']];
-      //-- }
-      //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields);
-    //-- }
-    //-- // riassunto scrutinati
-    //-- $num_ritirati = count($alunni_ritirati);
-    //-- $num_no_scrutinati = count($alunni_no_scrutinati);
-    //-- $num_cessata_frequenza = count($alunni_cessata_frequenza);
-    //-- $num_scrutinati = count($dati['scrutinio']->getDato('scrutinabili'));
-    //-- $num_tot = $num_scrutinati + $num_no_scrutinati + $num_cessata_frequenza + $num_ritirati;
-    //-- $text = "Dall’esposizione risulta quanto segue: ".
-            //-- "di n. $num_tot alunni iscritti alla classe sono da scrutinare n. $num_scrutinati alunni, ".
-            //-- "poiché n. $num_ritirati alunni si sono ritirati o trasferiti o frequentano l'anno all'estero, ".
-            //-- "n. $num_cessata_frequenza alunni hanno cessato la frequenza entro il 15 marzo ".
-            //-- "e n. $num_no_scrutinati alunni non possiedono la frequenza per almeno i tre quarti dell’orario annuale personalizzato senza documentata giustificazione.";
-    //-- $section->addText($text);
-    //-- // condotta
-    //-- $text = 'Il coordinatore propone il voto di condotta, che viene approvato dal Consiglio di Classe secondo quanto segue:';
-    //-- $section->addText($text);
-    //-- $tab_sizes = [40, 6, 38, 16];
-    //-- $tab_fontsizes = [10, 10, 9, 9];
-    //-- $tab_alignments = [\PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::START];
-    //-- $tab_headers = ['ALUNNO', 'Voto', 'Giudizio', 'Votazione'];
-    //-- $tab_fields = array();
-    //-- foreach ($dati['alunni'] as $idalunno=>$alu) {
-      //-- if (in_array($idalunno, $dati['scrutinio']->getDato('scrutinabili'))) {
-        //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-        //-- $condotta_voto = $dati['voti'][$idalunno]->getUnico() == 4 ? 'NC' : $dati['voti'][$idalunno]->getUnico();
-        //-- $condotta_motivazione = str_replace(array("\r", "\n"), ' ',
-          //-- $dati['voti'][$idalunno]->getDato('motivazione'));
-        //-- $condotta_unanimita = $dati['voti'][$idalunno]->getDato('unanimita');
-        //-- $condotta_contrari = $dati['voti'][$idalunno]->getDato('contrari');
-        //-- if ($condotta_unanimita) {
-          //-- $condotta_approvazione = 'UNANIMITÀ';
-        //-- } else {
-          //-- $condotta_approvazione = "MAGGIORANZA\nContrari: $condotta_contrari";
-        //-- }
-        //-- $tab_fields[] = [$nome, $condotta_voto, $condotta_motivazione, $condotta_approvazione];
-      //-- }
-    //-- }
-    //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields, $tab_fontsizes, $tab_alignments);
-    //-- // valutazione
-    //-- $text = 'Si passa, quindi, seguendo l\'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto degli indicatori precedentemente espressi.';
-    //-- $section->addText($text);
-    //-- $text = 'Per ciascuna disciplina il docente competente esprime il proprio giudizio complessivo sull\'alunno. Ciascun giudizio è tradotto coerentemente in un voto, che viene proposto al Consiglio di Classe.';
-    //-- $section->addText($text);
-    //-- $text = 'Il Consiglio di Classe discute esaurientemente le proposte espresse dai docenti e, tenuti ben presenti i parametri di valutazione deliberati, procede alla definizione e all\'approvazione dei voti per ciascun alunno e per ciascuna disciplina.';
-    //-- $section->addText($text);
-    //-- // ammessi
-    //-- $section->addTextBreak(1);
-    //-- $textrun = $section->addTextRun();
-    //-- $text = 'Il Consiglio di Classe dichiara ammessi';
-    //-- $textrun->addText($text, ['underline' => 'single', 'bold' => true]);
-    //-- $text = ($dati['classe']->getAnno() == 5 ? ' all\'Esame di Stato' : ' alla classe successiva').', per avere riportato almeno sei decimi in ciascuna disciplina, i seguenti alunni:';
-    //-- $textrun->addText($text);
-    //-- $tab_sizes = [40, 60];
-    //-- $tab_headers = ['ALUNNO', 'Votazione'];
-    //-- $tab_fields = array();
-    //-- $num_bocciati = 0;
-    //-- $num_sospesi = 0;
-    //-- $num_debiti = [null, 0, 0, 0];
-    //-- foreach ($dati['alunni'] as $idalunno=>$alu) {
-      //-- if (!in_array($idalunno, $dati['scrutinio']->getDato('scrutinabili'))) {
-        //-- continue;
-      //-- }
-      //-- if ($dati['esiti'][$idalunno]->getEsito() == 'N') {
-        //-- $num_bocciati++;
-        //-- continue;
-      //-- } elseif ($dati['esiti'][$idalunno]->getEsito() == 'S') {
-        //-- $num_sospesi++;
-        //-- continue;
-      //-- } elseif ($dati['esiti'][$idalunno]->getEsito() == 'A') {
-        //-- // ammessi
-        //-- $valori = $dati['esiti'][$idalunno]->getDati();
-        //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-        //-- if ($valori['unanimita']) {
-          //-- $esito_approvazione = 'UNANIMITÀ';
-        //-- } else {
-          //-- $esito_approvazione = "MAGGIORANZA\nContrari: ".$valori['contrari'];
-        //-- }
-        //-- $tab_fields[] = [$nome, $esito_approvazione];
-      //-- }
-    //-- }
-    //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields);
-    //-- // solo triennio: crediti
-    //-- if ($dati['classe']->getAnno() >= 3) {
-      //-- $text = 'Contestualmente alla definizione dei voti, il Consiglio di Classe determina per ciascun alunno il relativo credito scolastico, secondo la normativa vigente, D.M. n. 99 del 16 dicembre 2009.';
-      //-- $section->addText($text);
-      //-- $text = 'Tabella Crediti Scolastici - D.M. 99/2009 ';
-      //-- $section->addText($text, ['bold' => true], ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-      //-- $tab_sizes = [25, 25, 25, 25];
-      //-- $tab_alignments = [\PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER];
-      //-- $tab_headers = ['Media dei voti (M)', 'Punti di credito scolastico per la classe terza', 'Punti di credito scolastico per la classe quarta', 'Punti di credito scolastico per la classe quinta'];
-      //-- $tab_fields = array();
-      //-- $tab_fields[] = [ 'M = 6', '3 - 4', '3 - 4', '4 - 5'];
-      //-- $tab_fields[] = [ '6 < M ≤ 7', '4 - 5', '4 - 5', '5 - 6'];
-      //-- $tab_fields[] = [ '7 < M ≤ 8', '5 - 6', '5 - 6', '6 - 7'];
-      //-- $tab_fields[] = [ '8 < M ≤ 9', '6 - 7', '6 - 7', '7 - 8'];
-      //-- $tab_fields[] = [ '9 < M ≤ 10', '7 - 8', '7 - 8', '8 - 9'];
-      //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields, null, $tab_alignments);
-      //-- $text = 'Il Consiglio di Classe attribuisce il seguente credito scolastico agli alunni:';
-      //-- $section->addText($text);
-      //-- if ($dati['classe']->getAnno() == 3) {
-        //-- $tab_sizes = [40, 10, 40, 10];
-        //-- $tab_alignments = [\PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER];
-        //-- $tab_fontsizes = [10, 10, 9, 10];
-        //-- $tab_headers = ['ALUNNO', 'Media voti', 'Criteri', 'Credito'];
-      //-- } else {
-        //-- $tab_sizes = [40, 10, 20, 10, 10, 10];
-        //-- $tab_alignments = [\PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::CENTER];
-        //-- $tab_fontsizes = [10, 10, 9, 10, 10, 10];
-        //-- $tab_headers = ['ALUNNO', 'Media voti', 'Criteri', 'Credito' , 'Credito anni prec.', 'Credito totale'];
-      //-- }
-      //-- $tab_fields = array();
-      //-- foreach ($dati['alunni'] as $idalunno=>$alu) {
-        //-- // solo alunni ammessi
-        //-- if (!in_array($idalunno, $dati['scrutinio']->getDato('scrutinabili'))) {
-          //-- continue;
-        //-- }
-        //-- if ($dati['esiti'][$idalunno]->getEsito() != 'A') {
-          //-- continue;
-        //-- }
-        //-- // dati alunno
-        //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-        //-- $esito = $dati['esiti'][$idalunno];
-        //-- $media = number_format($esito->getMedia(), 2, ',', '');
-        //-- $valori = $esito->getDati();
-        //-- // criteri
-        //-- $criteri = '';
-        //-- foreach ($valori['creditoScolastico'] as $c) {
-          //-- $criteri .= ', '.$this->trans->trans('label.criterio_credito_'.$c);
-        //-- }
-//        foreach ($valori['creditoFormativo'] as $c) {
-//          $criteri .= ', '.$this->trans->trans('label.criterio_credito_'.$c);
-//        }
-        //-- if (strlen($criteri) <= 2) {
-          //-- $criteri = '--';
-        //-- } else {
-          //-- $criteri = substr($criteri, 2);
-        //-- }
-        //-- if ($dati['classe']->getAnno() == 3) {
-          //-- $tab_fields[] = [$nome, $media, $criteri, $esito->getCredito()];
-        //-- } else {
-          //-- $tab_fields[] = [$nome, $media, $criteri, $esito->getCredito(),
-            //-- $esito->getCreditoPrecedente(), $esito->getCredito() + $esito->getCreditoPrecedente()];
-        //-- }
-      //-- }
-      //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields, $tab_fontsizes, $tab_alignments);
-    //-- } elseif ($dati['classe']->getAnno() == 2) {
-      //-- // certificazione competenze
-      //-- $text = 'Contestualmente alla definizione dei voti, il Consiglio di Classe certifica le competenze di base acquisite dagli studenti, secondo la normativa vigente, D.M. n.139 del 22 agosto 2007.';
-      //-- $section->addText($text);
-    //-- }
-    //-- // sospensione giudizio
-    //-- if ($num_sospesi > 0) {
-      //-- // sospesi
-      //-- $section->addTextBreak(1);
-      //-- $textrun = $section->addTextRun();
-      //-- $text = 'Il Consiglio di Classe sospende la formulazione del giudizio finale';
-      //-- $textrun->addText($text, ['underline' => 'single', 'bold' => true]);
-      //-- $text = ', sulla base della normativa vigente, per gli alunni che presentano delle insufficienze. Queste dovranno essere colmate attraverso interventi educativi che verranno organizzati dalla Scuola e attraverso lo studio autonomo, con l\'obbligo di sottoporsi agli appositi accertamenti sul superamento delle carenze riscontrate.';
-      //-- $textrun->addText($text);
-      //-- $text = 'Per detti alunni sarà compilata un’apposita scheda da inviare alle famiglie, attraverso la quale verranno comunicate le decisioni assunte dal Consiglio di Classe, le specifiche carenze ed i voti proposti in sede di scrutinio nelle discipline nelle quali l’alunno non ha raggiunto la sufficienza. Nella stessa scheda saranno comunicati gli interventi didattici finalizzati al recupero dei debiti formativi, che saranno organizzati dall’Istituto. I genitori che non intendono avvalersi dei corsi organizzati dall’Istituto, saranno invitati a darne comunicazione scritta alla Scuola.';
-      //-- $section->addText($text);
-      //-- $text = 'Vengono di seguito riportati gli alunni con giudizio sospeso:';
-      //-- $section->addText($text);
-      //-- $tab_sizes = [40, 7, 40, 13];
-      //-- $tab_headers = ['MATERIA', 'Voto', 'Debito formativo', 'Modalità di recupero'];
-      //-- $tab_fontsizes = [10, 10, 9, 9];
-      //-- $tab_alignments = [\PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER, \PhpOffice\PhpWord\SimpleType\Jc::START, \PhpOffice\PhpWord\SimpleType\Jc::CENTER];
-      //-- foreach ($dati['alunni'] as $idalunno=>$alu) {
-        //-- // solo alunni sospesi
-        //-- if (!in_array($idalunno, $dati['scrutinio']->getDato('scrutinabili'))) {
-          //-- continue;
-        //-- }
-        //-- if ($dati['esiti'][$idalunno]->getEsito() != 'S') {
-          //-- continue;
-        //-- }
-        //-- // dati alunno
-        //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-        //-- $valori = $dati['esiti'][$idalunno]->getDati();
-        //-- if ($valori['unanimita']) {
-          //-- $esito_approvazione = "all'unanimità";
-        //-- } else {
-          //-- $esito_approvazione = 'a maggioranza - contrari '.$valori['contrari'];
-        //-- }
-        //-- $text = $nome."\n".'Votazione '.$esito_approvazione;
-        //-- $section->addListItem($text, 0, ['name' => 'Arial', 'size' => 10, 'bold' => true], null, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::START, 'spaceAfter' => 0, 'keepNext' => true]);
-        //-- $tab_fields = array();
-        //-- foreach ($dati['debiti'][$idalunno] as $deb) {
-          //-- $voto = ($deb['unico'] == 0 ? 'NC' : $deb['unico']);
-          //-- $debito = str_replace(array("\r","\n"), ' ', $deb['debito']);
-          //-- $recupero = $this->trans->trans('label.recupero_'.$deb['recupero']);
-          //-- $tab_fields[] = [$deb['materia'], $voto, $debito, $recupero];
-        //-- }
-        //-- // conta numero debiti per alunno
-        //-- if (count($dati['debiti'][$idalunno]) > 3) {
-          //-- // piu' di 3 debiti
-          //-- $num_debiti[3]++;
-        //-- } else {
-          //-- // da 1 a 3 debiti
-          //-- $num_debiti[count($dati['debiti'][$idalunno])]++;
-        //-- }
-        //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields, $tab_fontsizes, $tab_alignments);
-      //-- }
-    //-- }
-    //-- // non ammessi
-    //-- if ($num_bocciati > 0) {
-      //-- $section->addTextBreak(1);
-      //-- $text = 'Il Consiglio di Classe,';
-      //-- $section->addText($text, ['bold' => true, 'underline' => 'single']);
-      //-- $text = 'tenuto conto degli obiettivi generali e specifici previsti dal Consiglio di Classe;';
-      //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-      //-- $text = 'considerati tutti gli elementi che concorrono alla valutazione finale: interesse, partecipazione, metodo di studio, impegno;';
-      //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-      //-- $text = 'valutati gli obiettivi minimi previsti per le singole discipline: conoscenze degli argomenti, proprietà espressiva, capacità di analisi, applicazione, capacità di giudizio autonomo;';
-      //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-      //-- $text = 'preso atto della gravità delle carenze accertate nelle diverse discipline;';
-      //-- $section->addListItem($text, 0, null, null, $lista_paragrafo);
-      //-- $textrun = $section->addTextRun();
-      //-- $text = 'dichiara non ammessi';
-      //-- $textrun->addText($text, ['underline' => 'single', 'bold' => true]);
-      //-- $text = ($dati['classe']->getAnno() == 5 ? ' all\'Esame di Stato' : ' alla classe successiva').' gli alunni:';
-      //-- $textrun->addText($text);
-      //-- $tab_sizes = [40, 16, 44];
-      //-- $tab_headers = ['ALUNNO', 'Votazione', 'Motivazione della non ammissione'];
-      //-- $tab_fontsizes = [10, 9, 9];
-      //-- $tab_fields = array();
-      //-- foreach ($dati['alunni'] as $idalunno=>$alu) {
-        //-- // solo alunni non ammessi
-        //-- if (!in_array($idalunno, $dati['scrutinio']->getDato('scrutinabili'))) {
-          //-- continue;
-        //-- }
-        //-- if ($dati['esiti'][$idalunno]->getEsito() != 'N') {
-          //-- continue;
-        //-- }
-        //-- // dati alunno
-        //-- $nome = $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')';
-        //-- $valori = $dati['esiti'][$idalunno]->getDati();
-        //-- if ($valori['unanimita']) {
-          //-- $esito_approvazione = 'UNANIMITÀ';
-        //-- } else {
-          //-- $esito_approvazione = "MAGGIORANZA\nContrari: ".$valori['contrari'];
-        //-- }
-        //-- $esito_giudizio = str_replace(array("\r","\n"), ' ', $valori['giudizio']);
-        //-- $tab_fields[] = [$nome, $esito_approvazione, $esito_giudizio];
-      //-- }
-      //-- $this->wTabella($section, $tab_sizes, $tab_headers, $tab_fields, $tab_fontsizes);
-    //-- }
-    //-- $section->addTextBreak(1);
-    //-- // punto terzo
-    //-- $text = 'Punto terzo. Comunicazione alle famiglie sugli esiti degli scrutini: alunni non scrutinati per il superamento del numero di assenze consentito dalla norma, alunni non ammessi alla classe successiva, alunni con giudizio sospeso.';
-    //-- $section->addText($text, array('bold' => true), array('keepLines' => true, 'keepNext' => true));
-    //-- $text = 'Il Dirigente Scolastico fa presente che il Consiglio di Classe, prima della pubblicazione dei risultati, deve dare comunicazione dell’esito negativo alle famiglie mediante fonogramma registrato.';
-    //-- $section->addText($text);
-    //-- if ($dati['scrutinio']->getDato('presenze')[$classe_coordinatore]->getPresenza()) {
-      //-- $d = $dati['docenti'][$classe_coordinatore][0];
-      //-- $coord_nome = 'del Coordinatore '.($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'];
-    //-- } else {
-      //-- $coord_nome = 'del docente con maggior numero di ore d\'insegnamento nella classe';
-    //-- }
-    //-- $text = "Terminata la fase deliberativa, si procede, a cura $coord_nome, alla stampa dei tabelloni e alla firma del Registro Generale.";
-    //-- $section->addText($text);
-    //-- // fine scrutinio
-    //-- $text = "I risultati complessivi dello scrutinio della classe $classe vengono così riassunti:";
-    //-- $section->addText($text, null, ['keepNext' => true]);
-    //-- $tab_fields = array();
-    //-- $tab_fields[] = ['Iscritti:', $num_tot];
-    //-- $tab_fields[] = ['Ritirati, trasferiti, o che frequentano l\'anno all\'estero:', $num_ritirati];
-    //-- $tab_fields[] = ['Non scrutinabili:', ($num_no_scrutinati + $num_cessata_frequenza)];
-    //-- $tab_fields[] = ['Regolarmente scrutinati:', $num_scrutinati];
-    //-- $tab_fields[] = ['Ammessi '.($dati['classe']->getAnno() == 5 ? 'all\'Esame di Stato:' : 'alla classe successiva:'),
-      //-- $num_scrutinati - $num_sospesi - $num_bocciati];
-    //-- if ($dati['classe']->getAnno() != 5) {
-      //-- $tab_fields[] = ['Giudizio sospeso con 1 debito:', $num_debiti[1]];
-      //-- $tab_fields[] = ['Giudizio sospeso con 2 debiti:', $num_debiti[2]];
-      //-- $tab_fields[] = ['Giudizio sospeso con 3 debiti:', $num_debiti[3]];
-    //-- }
-    //-- $tab_fields[] = ['Non ammessi '.($dati['classe']->getAnno() == 5 ? 'all\'Esame di Stato:' : 'alla classe successiva:'),
-      //-- $num_bocciati];
-    //-- $table = $section->addTable([
-      //-- 'cellMarginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-      //-- 'width' => 90*50,  // NB: percentuale*50
-      //-- 'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER]);
-    //-- foreach ($tab_fields as $row) {
-      //-- $table->addRow(null, ['cantSplit' => true]);
-      //-- $table->addCell(70, ['valign'=>'bottom'])->addText($row[0],
-        //-- ['name' => 'Arial', 'size' => 11, 'bold' => true],
-        //-- [ 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::END, 'spaceAfter' => 0]);
-      //-- $table->addCell(30, ['valign'=>'bottom', 'borderBottomSize' => 8])->addText($row[1],
-        //-- ['name' => 'Arial', 'size' => 11, 'bold' => true],
-        //-- ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
-    //-- }
-    //-- $section->addTextBreak(2);
-    //-- $orascrutinio_fine = $dati['scrutinio']->getFine()->format('H:i');
-    //-- $text = "Alle ore $orascrutinio_fine, terminate tutte le operazioni, la seduta è tolta.";
-    //-- $section->addText($text);
-    //-- $section->addTextBreak(2);
-    //-- // firma
-    //-- if ($dati['scrutinio']->getDato('presiede_ds')) {
-      //-- $presidente_nome = $this->session->get('/CONFIG/SCUOLA/firma_preside');
-    //-- } else {
-      //-- $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
-      //-- if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
-        //-- $presidente_nome = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.
-          //-- $d['cognome'].' '.$d['nome'];
-      //-- } else {
-        //-- $presidente_nome = $dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto();
-      //-- }
-    //-- }
-    //-- $d = $dati['docenti'][$dati['scrutinio']->getDato('segretario')][0];
-    //-- if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
-      //-- $segretario_nome = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.
-        //-- $d['cognome'].' '.$d['nome'];
-    //-- } else {
-      //-- $segretario_nome = $dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto();
-    //-- }
-    //-- $table = $section->addTable([
-      //-- 'cellMarginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'cellMarginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.1),
-      //-- 'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-      //-- 'width' => 100*50,  // NB: percentuale*50
-      //-- 'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER]);
-    //-- $table->addRow(null, ['cantSplit' => true, 'tblHeader' => true]);
-    //-- $table->addCell(45, ['valign'=>'bottom'])->addText('Il Segretario', null,
-      //-- [ 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
-    //-- $table->addCell(10)->addText('', null, ['spaceAfter' => 0]);
-    //-- $table->addCell(45, ['valign'=>'bottom'])->addText('Il Presidente', null,
-      //-- ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
-    //-- $table->addRow(null, ['cantSplit' => true]);
-    //-- $table->addCell(45, ['valign'=>'bottom'])->addText($segretario_nome, null,
-      //-- [ 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
-    //-- $table->addCell(10)->addText('', null, ['spaceAfter' => 0]);
-    //-- $table->addCell(45, ['valign'=>'bottom'])->addText($presidente_nome, null,
-      //-- ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0]);
-    //-- // salva documento
-    //-- $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-    //-- $objWriter->save($nomefile);
-  //-- }
-
   /**
    * Crea il riepilogo dei voti come documento PDF
    *
@@ -3238,7 +2562,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -3514,7 +2838,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -3537,7 +2861,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -3560,7 +2884,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -3600,7 +2924,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }} - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto').' - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -4000,7 +3324,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -4023,7 +3347,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -4046,7 +3370,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -4388,7 +3712,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -4417,7 +3741,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -4446,7 +3770,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Integrativo - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -4820,7 +4144,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-carenze-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
           'Scrutinio Finale - Comunicazione per il recupero autonomo - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->carenzeDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -5133,7 +4457,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.' dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto').'</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';
@@ -5548,7 +4872,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }} - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto').' - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -5764,7 +5088,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }} - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto').' - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -6317,7 +5641,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.' dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto\') }}</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto').'</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';

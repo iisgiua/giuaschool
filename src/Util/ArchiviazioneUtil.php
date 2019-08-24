@@ -127,7 +127,7 @@ class ArchiviazioneUtil {
       return;
     }
     // crea documento
-    $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Registro del docente - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -214,7 +214,7 @@ class ArchiviazioneUtil {
       return;
     }
     // crea documento
-    $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Registro di sostegno - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -281,7 +281,7 @@ class ArchiviazioneUtil {
     // nome documento
     $nomefile = 'registro-classe-'.$classe->getAnno().$classe->getSezione().'.pdf';
     // crea documento
-    $this->pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Registro di classe - '.$classe->getAnno().'ª '.$classe->getSezione());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -336,7 +336,7 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i>“{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto_nome\') }}”</i></strong>
+                  <br><strong><i>“'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto_nome').'”</i></strong>
                   <br><span style="font-size:9pt">CAGLIARI - ASSEMINI</span>
                 </td>
               </tr>
@@ -810,7 +810,7 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i>“{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto_nome\') }}”</i></strong>
+                  <br><strong><i>“'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto_nome').'”</i></strong>
                   <br><span style="font-size:9pt">CAGLIARI - ASSEMINI</span>
                 </td>
               </tr>
@@ -1187,7 +1187,7 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i>“{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto_nome\') }}”</i></strong>
+                  <br><strong><i>“'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto_nome').'”</i></strong>
                   <br><span style="font-size:9pt">CAGLIARI - ASSEMINI</span>
                 </td>
               </tr>

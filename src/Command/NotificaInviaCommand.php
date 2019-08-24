@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Notifica;
 use App\Entity\NotificaInvio;
@@ -27,6 +28,7 @@ use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
 use App\Util\BachecaUtil;
+use App\Util\ConfigLoader;
 
 
 /**
@@ -53,6 +55,11 @@ class NotificaInviaCommand extends Command {
   private $trans;
 
   /**
+   * @var SessionInterface $session Gestore delle sessioni
+   */
+  private $session;
+
+  /**
    * @var \Swift_Mailer $mailer Gestore della spedizione delle email
    */
   private $mailer;
@@ -62,6 +69,11 @@ class NotificaInviaCommand extends Command {
    */
   private $bac;
 
+  /**
+   * @var ConfigLoader $config Gestore della configurazione su database
+   */
+  private $config;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -70,16 +82,22 @@ class NotificaInviaCommand extends Command {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param SessionInterface $session Gestore delle sessioni
    * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
+   * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, \Swift_Mailer $mailer,
-                               BachecaUtil $bac) {
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, SessionInterface $session, \Swift_Mailer $mailer,
+                               BachecaUtil $bac, ConfigLoader $config) {
     parent::__construct();
     $this->em = $em;
     $this->trans = $trans;
+    $this->session = $session;
     $this->mailer = $mailer;
     $this->bac = $bac;
+    $this->config = $config;
+    // carica configurazione
+    $this->config->loadAll();
   }
 
   /**
@@ -247,7 +265,7 @@ class NotificaInviaCommand extends Command {
     // crea il messaggio
     $message = (new \Swift_Message())
       ->setSubject($dati['oggetto'])
-      ->setFrom(['{{ app.session->get(\'/CONFIG/SCUOLA/email_notifica\') }}' => '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto_breve\') }}'])
+      ->setFrom([$this->session->get('/CONFIG/SCUOLA/email_notifica') => $this->session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')])
       ->setTo([$dati['email']])
       ->setBody($notifica->getMessaggio(), 'text/html');
     // invia mail
