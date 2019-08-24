@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -39,7 +40,7 @@ class AjaxController extends AbstractController {
    *    defaults={"cognome": "-", "nome": "-", "sede": "-", "pagina": "1"},
    *    methods={"POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function docentiAjaxAction(EntityManagerInterface $em, $cognome, $nome, $sede, $pagina) {
     // inizializza
@@ -93,7 +94,7 @@ class AjaxController extends AbstractController {
    *    defaults={"cognome": "-", "nome": "-", "classe": "-", "sede": "-", "pagina": "1"},
    *    methods={"POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function alunniAjaxAction(EntityManagerInterface $em, $cognome, $nome, $classe, $sede, $pagina) {
     // inizializza
@@ -133,4 +134,3 @@ class AjaxController extends AbstractController {
   }
 
 }
-

@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -53,7 +54,7 @@ class OsservazioniController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioniAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                       RegistroUtil $reg, $cattedra, $classe, $data) {
@@ -180,7 +181,7 @@ class OsservazioniController extends AbstractController {
    *    defaults={"id": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioneEditAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                           LogHandler $dblogger, $cattedra, $data, $id) {
@@ -315,7 +316,7 @@ class OsservazioniController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                             LogHandler $dblogger, $id) {
@@ -366,7 +367,7 @@ class OsservazioniController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazioniPersonaliAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                                RegistroUtil $reg, $cattedra, $classe, $data) {
@@ -482,7 +483,7 @@ class OsservazioniController extends AbstractController {
    *    defaults={"id": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazionePersonaleEditAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                                    LogHandler $dblogger, $cattedra, $data, $id) {
@@ -589,7 +590,7 @@ class OsservazioniController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function osservazionePersonaleDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                             LogHandler $dblogger, $id) {
@@ -623,4 +624,3 @@ class OsservazioniController extends AbstractController {
   }
 
 }
-

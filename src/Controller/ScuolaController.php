@@ -14,6 +14,7 @@ namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
@@ -30,7 +31,7 @@ class ScuolaController extends AbstractController {
    * @Route("/scuola/", name="scuola",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function scuolaAction() {
     return $this->render('scuola/index.html.twig', array(
@@ -39,4 +40,3 @@ class ScuolaController extends AbstractController {
   }
 
 }
-

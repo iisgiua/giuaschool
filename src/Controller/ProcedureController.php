@@ -18,6 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -52,7 +53,7 @@ class ProcedureController extends AbstractController {
    * @Route("/procedure/", name="procedure",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function procedureAction() {
     return $this->render('procedure/index.html.twig', array(
@@ -75,7 +76,7 @@ class ProcedureController extends AbstractController {
    * @Route("/procedure/password/", name="procedure_password",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
                                   TranslatorInterface $trans, ValidatorInterface $validator, LogHandler $dblogger) {
@@ -146,7 +147,7 @@ class ProcedureController extends AbstractController {
    * @Route("/procedure/alias/", name="procedure_alias",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function aliasAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, LogHandler $dblogger) {
     // form per l'input dell'alias
@@ -242,7 +243,7 @@ class ProcedureController extends AbstractController {
    * @Route("/procedure/ricalcola", name="procedure_ricalcola",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function ricalcolaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg) {
     // form
@@ -303,7 +304,7 @@ class ProcedureController extends AbstractController {
    * @Route("/procedure/manutenzione/", name="procedure_manutenzione",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function manutenzioneAction(Request $request, EntityManagerInterface $em) {
     $dati = null;
@@ -406,7 +407,7 @@ class ProcedureController extends AbstractController {
    * @Route("/procedure/archiviazione/", name="procedure_archiviazione",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function archiviazioneAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, ArchiviazioneUtil $arch) {
     $lista_docente = $em->getRepository('App:Docente')->createQueryBuilder('d')

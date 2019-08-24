@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,7 +55,7 @@ class CoordinatoreController extends AbstractController {
    * @Route("/coordinatore", name="coordinatore",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function coordinatoreAction(SessionInterface $session) {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
@@ -87,7 +88,7 @@ class CoordinatoreController extends AbstractController {
    * @Route("/coordinatore/classe/", name="coordinatore_classe",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function classeAction(EntityManagerInterface $em, SessionInterface $session) {
     // lista classi coordinatore
@@ -143,7 +144,7 @@ class CoordinatoreController extends AbstractController {
    *    defaults={"classe": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function noteAction(EntityManagerInterface $em, StaffUtil $staff, SessionInterface $session, $classe) {
     // inizializza variabili
@@ -198,7 +199,7 @@ class CoordinatoreController extends AbstractController {
    *    defaults={"classe": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function assenzeAction(EntityManagerInterface $em, StaffUtil $staff, SessionInterface $session, $classe) {
     // inizializza variabili
@@ -253,7 +254,7 @@ class CoordinatoreController extends AbstractController {
    *    defaults={"classe": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiAction(EntityManagerInterface $em, StaffUtil $staff, SessionInterface $session, $classe) {
     // inizializza variabili
@@ -308,7 +309,7 @@ class CoordinatoreController extends AbstractController {
    *    defaults={"classe": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function situazioneAction(EntityManagerInterface $em, StaffUtil $staff, SessionInterface $session,
                                     $classe) {
@@ -366,7 +367,7 @@ class CoordinatoreController extends AbstractController {
    *    requirements={"alunno": "\d+", "tipo": "V|S|A|N|O|T", "formato": "H|P"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function situazioneAlunnoAction(EntityManagerInterface $em, SessionInterface $session, StaffUtil $staff,
                                           PdfManager $pdf, $alunno, $tipo, $formato) {
@@ -449,7 +450,7 @@ class CoordinatoreController extends AbstractController {
    *    requirements={"classe": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function assenzeStampaAction(EntityManagerInterface $em, SessionInterface $session, StaffUtil $staff,
                                        PdfManager $pdf, $classe) {
@@ -500,7 +501,7 @@ class CoordinatoreController extends AbstractController {
    *    requirements={"classe": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function noteStampaAction(EntityManagerInterface $em, SessionInterface $session, StaffUtil $staff,
                                     PdfManager $pdf, $classe) {
@@ -551,7 +552,7 @@ class CoordinatoreController extends AbstractController {
    *    requirements={"classe": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiStampaAction(EntityManagerInterface $em, SessionInterface $session,
                                     StaffUtil $staff, PdfManager $pdf, $classe) {
@@ -604,7 +605,7 @@ class CoordinatoreController extends AbstractController {
    *    defaults={"classe": 0, "pagina": "0"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisiAction(EntityManagerInterface $em, SessionInterface $session, BachecaUtil $bac,
                                 $classe, $pagina) {
@@ -678,7 +679,7 @@ class CoordinatoreController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                     TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
@@ -895,7 +896,7 @@ class CoordinatoreController extends AbstractController {
    *    requirements={"classe": "\d+", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoDettagliAction(EntityManagerInterface $em, SessionInterface $session,
                                         BachecaUtil $bac, $classe, $id) {
@@ -952,7 +953,7 @@ class CoordinatoreController extends AbstractController {
    *    requirements={"classe": "\d+", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoDeleteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                       LogHandler $dblogger, BachecaUtil $bac, RegistroUtil $reg, $classe, $id) {

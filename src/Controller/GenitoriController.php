@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,7 +59,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"data": "0000-00-00"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function lezioniAction(EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans,
                                  GenitoriUtil $gen, RegistroUtil $reg, $data) {
@@ -159,7 +160,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"idmateria": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function argomentiAction(EntityManagerInterface $em, TranslatorInterface $trans, GenitoriUtil $gen,
                                    RegistroUtil $reg, $idmateria) {
@@ -245,7 +246,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"idmateria": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function votiAction(EntityManagerInterface $em, TranslatorInterface $trans, GenitoriUtil $gen,
                               RegistroUtil $reg, $idmateria) {
@@ -327,7 +328,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function assenzeAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg, $posizione) {
     // inizializza variabili
@@ -378,7 +379,7 @@ class GenitoriController extends AbstractController {
    * @Route("/genitori/note/", name="genitori_note",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function noteAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg) {
     // inizializza variabili
@@ -427,7 +428,7 @@ class GenitoriController extends AbstractController {
    * @Route("/genitori/osservazioni/", name="genitori_osservazioni",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @IsGranted("ROLE_GENITORE")
    */
   public function osservazioniAction(TranslatorInterface $trans, GenitoriUtil $gen, RegistroUtil $reg) {
     // inizializza variabili
@@ -472,7 +473,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"periodo": "0"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function pagelleAction(TranslatorInterface $trans, GenitoriUtil $gen,
                                  $periodo) {
@@ -551,7 +552,7 @@ class GenitoriController extends AbstractController {
    * @Route("/genitori/colloqui", name="genitori_colloqui",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @IsGranted("ROLE_GENITORE")
    */
   public function colloquiAction(TranslatorInterface $trans, GenitoriUtil $gen) {
     // inizializza variabili
@@ -597,7 +598,7 @@ class GenitoriController extends AbstractController {
    *    requirements={"colloquio": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @IsGranted("ROLE_GENITORE")
    */
   public function colloquiPrenotaAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
                                          $colloquio) {
@@ -689,7 +690,7 @@ class GenitoriController extends AbstractController {
    *    requirements={"richiesta": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @IsGranted("ROLE_GENITORE")
    */
   public function colloquiDisdettaAction(EntityManagerInterface $em, GenitoriUtil $gen, $richiesta) {
     // legge l'alunno
@@ -735,7 +736,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function avvisiAction(SessionInterface $session, GenitoriUtil $gen, BachecaUtil $bac, $pagina) {
     // inizializza variabili
@@ -790,7 +791,7 @@ class GenitoriController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function avvisiDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
     // inizializza
@@ -828,7 +829,7 @@ class GenitoriController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE')")
+   * @IsGranted("ROLE_GENITORE")
    */
   public function avvisiFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
     $letto = null;
@@ -868,7 +869,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"mese": "0000-00"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function eventiAction(EntityManagerInterface $em, SessionInterface $session, GenitoriUtil $gen,
                                 AgendaUtil $age, $mese) {
@@ -942,7 +943,7 @@ class GenitoriController extends AbstractController {
    *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "tipo": "C|A|V|P"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function eventoDettagliAction(AgendaUtil $age, $data, $tipo) {
     // inizializza
@@ -981,7 +982,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function giustificaAssenzaAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
                                            LogHandler $dblogger, Assenza $assenza, $posizione) {
@@ -1103,7 +1104,7 @@ class GenitoriController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function giustificaRitardoAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
                                            LogHandler $dblogger, Entrata $entrata, $posizione) {
@@ -1211,4 +1212,3 @@ class GenitoriController extends AbstractController {
   }
 
 }
-

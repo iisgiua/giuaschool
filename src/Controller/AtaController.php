@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -47,7 +48,7 @@ class AtaController extends AbstractController {
    * @Route("/ata/importa/", name="ata_importa",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function importaAction(Request $request, CsvImporter $importer) {
     $lista = null;
@@ -91,7 +92,7 @@ class AtaController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // recupera criteri dalla sessione
@@ -159,7 +160,7 @@ class AtaController extends AbstractController {
    *    requirements={"id": "\d+", "abilita": "0|1"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function abilitaAction(EntityManagerInterface $em, $id, $abilita) {
     // controlla ata
@@ -188,7 +189,7 @@ class AtaController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function editAction(Request $request, EntityManagerInterface $em, $id) {
     // controlla ata
@@ -235,7 +236,7 @@ class AtaController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, SessionInterface $session,
                                   PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger, LogHandler $dblogger,

@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -49,7 +50,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/", name="docenti",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function docentiAction() {
     return $this->render('docenti/index.html.twig', array(
@@ -68,7 +69,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/importa/", name="docenti_importa",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function importaAction(Request $request, CsvImporter $importer) {
     $lista = null;
@@ -128,7 +129,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/modifica/{page}", name="docenti_modifica-param", requirements={"page": "\d+"},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $page) {
     // recupera criteri dalla sessione
@@ -197,7 +198,7 @@ class DocentiController extends AbstractController {
    *    requirements={"id": "\d+", "enable": "true|false"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function modificaEnableAction(EntityManagerInterface $em, $id, $enable) {
     $docente = $em->getRepository('App:Docente')->find($id);
@@ -226,7 +227,7 @@ class DocentiController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function modificaEditAction(Request $request, EntityManagerInterface $em, $id) {
     // edit
@@ -288,7 +289,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/cattedre/{page}", name="docenti_cattedre-param", requirements={"page": "\d+"},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function cattedreAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $page) {
     // recupera criteri dalla sessione
@@ -387,7 +388,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/cattedre/add/", name="docenti_cattedre_add",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function cattedreAddAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans) {
     // form di inserimento
@@ -510,7 +511,7 @@ class DocentiController extends AbstractController {
    *    requirements={"id": "\d+", "enable": "true|false"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function cattedreEnableAction(EntityManagerInterface $em, $id, $enable) {
     $cattedra = $em->getRepository('App:Cattedra')->find($id);
@@ -537,7 +538,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/colloqui/", name="docenti_colloqui",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function colloquiAction(Request $request, CsvImporter $importer) {
     $lista = null;
@@ -578,7 +579,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/staff/", name="docenti_staff",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function staffAction(Request $request, EntityManagerInterface $em) {
     // form
@@ -639,7 +640,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/staff/delete/{id}", name="docenti_staff_delete", requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function staffDeleteAction($id, EntityManagerInterface $em) {
     $user = $em->getRepository('App:Staff')->find($id);
@@ -667,7 +668,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/coordinatore/", name="docenti_coordinatori",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function coordinatoriAction(Request $request, EntityManagerInterface $em) {
     // form
@@ -738,7 +739,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/coordinatori/delete/{id}", name="docenti_coordinatori_delete", requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function coordinatoriDeleteAction($id, EntityManagerInterface $em) {
     $classe = $em->getRepository('App:Classe')->find($id);
@@ -765,7 +766,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/segretari/", name="docenti_segretari",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function segretariAction(Request $request, EntityManagerInterface $em) {
     // form
@@ -836,7 +837,7 @@ class DocentiController extends AbstractController {
    * @Route("/docenti/segretari/delete/{id}", name="docenti_segretari_delete", requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function segretarioDeleteAction($id, EntityManagerInterface $em) {
     $classe = $em->getRepository('App:Classe')->find($id);
@@ -869,7 +870,7 @@ class DocentiController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
                                         SessionInterface $session, LogHandler $dblogger, PdfManager $pdf, $id) {
@@ -924,7 +925,7 @@ class DocentiController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_AMMINISTRATORE')")
+   * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function modificaOtpAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger, $id) {
     $docente = $em->getRepository('App:Docente')->find($id);

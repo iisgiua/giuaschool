@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -60,7 +61,7 @@ class VotiController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "periodo": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiAction(Request $request, EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
                               $cattedra, $classe, $periodo) {
@@ -182,7 +183,7 @@ class VotiController extends AbstractController {
    *    defaults={"data": "0000-00-00"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiClasseAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                    TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $tipo, $data) {
@@ -405,7 +406,7 @@ class VotiController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiAlunnoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                    TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
@@ -607,7 +608,7 @@ class VotiController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "alunno": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiDettagliAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
                                       SessionInterface $session, RegistroUtil $reg, $cattedra, $classe, $alunno) {
@@ -712,7 +713,7 @@ class VotiController extends AbstractController {
    *    defaults={"cattedra": 0, "materia": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiSostegnoAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
                                       SessionInterface $session, RegistroUtil $reg, GenitoriUtil $gen,
@@ -802,7 +803,7 @@ class VotiController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiStampaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
                                     PdfManager $pdf, $cattedra, $classe, $data) {

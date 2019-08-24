@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -48,7 +49,7 @@ class UtentiController extends AbstractController {
    * @Route("/utenti/profilo/", name="utenti_profilo",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function profiloAction() {
     // mostra la pagina di risposta
@@ -70,7 +71,7 @@ class UtentiController extends AbstractController {
    * @Route("/utenti/email/", name="utenti_email",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function emailAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, LogHandler $dblogger) {
     $success = null;
@@ -129,7 +130,7 @@ class UtentiController extends AbstractController {
    * @Route("/utenti/password/", name="utenti_password",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
                                   TranslatorInterface $trans, ValidatorInterface $validator, OtpUtil $otp, LogHandler $dblogger) {
@@ -245,7 +246,7 @@ class UtentiController extends AbstractController {
    * @Route("/utenti/otp/", name="utenti_otp",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function otpAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                              TranslatorInterface $trans, OtpUtil $otp, LogHandler $dblogger) {
@@ -324,7 +325,7 @@ class UtentiController extends AbstractController {
    * @Route("/utenti/notifiche/", name="utenti_notifiche",
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_ATA')")
+   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
   public function notificheAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger) {
     $msg = null;

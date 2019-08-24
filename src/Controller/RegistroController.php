@@ -19,6 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -67,7 +68,7 @@ class RegistroController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function firmeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
@@ -235,7 +236,7 @@ class RegistroController extends AbstractController {
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function addAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
                              $cattedra, $classe, $data, $ora) {
@@ -411,7 +412,7 @@ class RegistroController extends AbstractController {
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function editAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
                               $cattedra, $classe, $data, $ora) {
@@ -607,7 +608,7 @@ class RegistroController extends AbstractController {
    *    requirements={"classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "ora": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function deleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
                                 $classe, $data, $ora) {
@@ -761,7 +762,7 @@ class RegistroController extends AbstractController {
    *    defaults={"id": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function annotazioneEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac,
                                          LogHandler $dblogger, $classe, $data, $id) {
@@ -987,7 +988,7 @@ class RegistroController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function annotazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, BachecaUtil $bac,
                                            LogHandler $dblogger, $id) {
@@ -1059,7 +1060,7 @@ class RegistroController extends AbstractController {
    *    defaults={"id": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function notaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger,
                                   $classe, $data, $id) {
@@ -1234,7 +1235,7 @@ class RegistroController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function notaDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
                                     $id) {

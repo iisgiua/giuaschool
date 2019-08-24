@@ -18,6 +18,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -60,7 +61,7 @@ class AgendaController extends AbstractController {
    *    defaults={"mese": "0000-00"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function eventiAction(EntityManagerInterface $em, SessionInterface $session, AgendaUtil $age, $mese) {
     $dati = null;
@@ -123,7 +124,7 @@ class AgendaController extends AbstractController {
    *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "tipo": "C|A|V|P"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function eventoDettagliAction(AgendaUtil $age, $data, $tipo) {
     // inizializza
@@ -159,7 +160,7 @@ class AgendaController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function verificaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                       TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
@@ -429,7 +430,7 @@ class AgendaController extends AbstractController {
    *    defaults={"id": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function cattedraAjaxAction(EntityManagerInterface $em, $id) {
     $alunni = $em->getRepository('App:Alunno')->createQueryBuilder('a')
@@ -457,7 +458,7 @@ class AgendaController extends AbstractController {
    *    defaults={"id": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function classeAjaxAction(EntityManagerInterface $em, $id) {
     // solo cattedre attive e normali, no supplenza, no sostegno
@@ -490,7 +491,7 @@ class AgendaController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function verificaDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                         RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, $id) {
@@ -565,7 +566,7 @@ class AgendaController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function compitoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                      TranslatorInterface $trans, RegistroUtil $reg, AgendaUtil $age, LogHandler $dblogger, $id) {
@@ -794,7 +795,7 @@ class AgendaController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function compitoDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                        AgendaUtil $age, $id) {
