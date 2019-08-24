@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -50,7 +51,7 @@ class DocumentiController extends AbstractController {
    * @Route("/documenti/programmi", name="documenti_programmi",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function programmiAction(DocumentiUtil $doc) {
     // inizializza variabili
@@ -84,7 +85,7 @@ class DocumentiController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function programmaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                        TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
@@ -269,7 +270,7 @@ class DocumentiController extends AbstractController {
    *    requirements={"tipo": "L|P|R|M", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function documentoDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                          DocumentiUtil $doc, $tipo, $id) {
@@ -330,7 +331,7 @@ class DocumentiController extends AbstractController {
    * @Route("/documenti/relazioni", name="documenti_relazioni",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function relazioniAction(DocumentiUtil $doc) {
     // inizializza variabili
@@ -364,7 +365,7 @@ class DocumentiController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function relazioneEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                        TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
@@ -543,7 +544,7 @@ class DocumentiController extends AbstractController {
    * @Route("/documenti/piani", name="documenti_piani",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function pianiAction(DocumentiUtil $doc) {
     // inizializza variabili
@@ -577,7 +578,7 @@ class DocumentiController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function pianoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                    TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
@@ -762,7 +763,7 @@ class DocumentiController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function classiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                 DocumentiUtil $doc, $pagina) {
@@ -853,7 +854,7 @@ class DocumentiController extends AbstractController {
    * @Route("/documenti/doc15", name="documenti_doc15",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function doc15Action(DocumentiUtil $doc) {
     // inizializza variabili
@@ -886,7 +887,7 @@ class DocumentiController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function doc15EditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                    TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $id) {

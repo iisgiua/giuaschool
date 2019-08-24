@@ -18,6 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -71,7 +72,7 @@ class CircolariController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function editAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                               TranslatorInterface $trans, RegistroUtil $reg, CircolariUtil $circ, LogHandler $dblogger, $id) {
@@ -401,7 +402,7 @@ class CircolariController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function deleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                 CircolariUtil $circ, $id) {
@@ -476,7 +477,7 @@ class CircolariController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function gestioneAction(Request $request, SessionInterface $session, CircolariUtil $circ, $pagina) {
     // inizializza variabili
@@ -572,7 +573,7 @@ class CircolariController extends AbstractController {
    *    requirements={"pubblica": "0|1", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function publishAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                  CircolariUtil $circ, $pubblica, $id) {
@@ -656,7 +657,7 @@ class CircolariController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function dettagliGestioneAction(EntityManagerInterface $em, CircolariUtil $circ, $id) {
     // inizializza
@@ -692,7 +693,7 @@ class CircolariController extends AbstractController {
    *    requirements={"id": "\d+", "doc": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function downloadAction(EntityManagerInterface $em, CircolariUtil $circ, $id, $doc) {
     $dir = $this->getParameter('dir_circolari').'/';
@@ -753,7 +754,7 @@ class CircolariController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO')")
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function genitoriAction(EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // inizializza
@@ -797,7 +798,7 @@ class CircolariController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function dettagliDestinatariAction(EntityManagerInterface $em, CircolariUtil $circ, $id) {
     // inizializza
@@ -833,7 +834,7 @@ class CircolariController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function dettagliStaffAction(EntityManagerInterface $em, CircolariUtil $circ, $id) {
     // inizializza
@@ -872,7 +873,7 @@ class CircolariController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function firmaAction(EntityManagerInterface $em, CircolariUtil $circ, $id) {
     // controllo circolare
@@ -911,7 +912,7 @@ class CircolariController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function docentiAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // inizializza
@@ -1028,7 +1029,7 @@ class CircolariController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_ATA')")
+   * @IsGranted("ROLE_ATA")
    */
   public function ataAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // inizializza
@@ -1141,7 +1142,7 @@ class CircolariController extends AbstractController {
    *    requirements={"classe": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function classiAction(EntityManagerInterface $em, $classe) {
     // inizializza
@@ -1177,7 +1178,7 @@ class CircolariController extends AbstractController {
    *    requirements={"classe": "\d+", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function firmaClasseAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, LogHandler $dblogger,
                                      $classe, $id) {

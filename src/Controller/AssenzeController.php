@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -65,7 +66,7 @@ class AssenzeController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00", "vista": "G"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function quadroAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                 RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
@@ -225,7 +226,7 @@ class AssenzeController extends AbstractController {
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function assenzaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
                                  $cattedra, $classe, $data, $alunno, $id) {
@@ -372,7 +373,7 @@ class AssenzeController extends AbstractController {
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function entrataAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, RegistroUtil $reg,
                                  LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
@@ -590,7 +591,7 @@ class AssenzeController extends AbstractController {
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function uscitaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, RegistroUtil $reg,
                                 LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
@@ -784,7 +785,7 @@ class AssenzeController extends AbstractController {
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d", "alunno": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function giustificaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                     LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
@@ -958,7 +959,7 @@ class AssenzeController extends AbstractController {
    *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function appelloAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, RegistroUtil $reg,
                                  LogHandler $dblogger, $cattedra, $classe, $data) {

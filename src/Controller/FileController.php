@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,7 +48,7 @@ class FileController extends AbstractController {
    *    requirements={"pagina": "\w+", "param": "\w+"},
    *    methods={"POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function uploadAction(Request $request, SessionInterface $session, $pagina, $param) {
     $risposta = array();
@@ -92,7 +93,7 @@ class FileController extends AbstractController {
    *    requirements={"pagina": "\w+", "param": "\w+"},
    *    methods={"POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function removeAction(Request $request, SessionInterface $session, $pagina, $param) {
     // legge file
@@ -141,7 +142,7 @@ class FileController extends AbstractController {
    *    requirements={"avviso": "\d+", "allegato": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function avvisoAction(EntityManagerInterface $em, BachecaUtil $bac,
                                 $avviso, $allegato) {
@@ -183,7 +184,7 @@ class FileController extends AbstractController {
    *    requirements={"tipo": "L|P|R|M", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function documentoAction(EntityManagerInterface $em, $tipo, $id) {
     // controllo documento
@@ -202,4 +203,3 @@ class FileController extends AbstractController {
   }
 
 }
-

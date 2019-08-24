@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -37,7 +38,7 @@ class LezioniController extends AbstractController {
    * @Route("/lezioni/", name="lezioni",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function lezioniAction(SessionInterface $session) {
     if (!$session->get('/APP/DOCENTE/cattedra_lezione') && !$session->get('/APP/DOCENTE/classe_lezione')) {
@@ -64,7 +65,7 @@ class LezioniController extends AbstractController {
    * @Route("/lezioni/classe/", name="lezioni_classe",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function classeAction(Request $request, EntityManagerInterface $em) {
     // lista cattedre
@@ -116,7 +117,7 @@ class LezioniController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function argomentiAction(Request $request, EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
                                    $cattedra, $classe) {
@@ -198,7 +199,7 @@ class LezioniController extends AbstractController {
    *    defaults={"data": "0000-00-00"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function argomentiRiepilogoAction(EntityManagerInterface $em, SessionInterface $session,
                                             RegistroUtil $reg, $cattedra, $data) {
@@ -277,7 +278,7 @@ class LezioniController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function noteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                               StaffUtil $staff, $cattedra, $classe) {
@@ -355,7 +356,7 @@ class LezioniController extends AbstractController {
    *    requirements={"cattedra": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function argomentiProgrammaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
                                             $cattedra) {

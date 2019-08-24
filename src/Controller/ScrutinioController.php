@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -64,7 +65,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function proposteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                   TranslatorInterface $trans, ScrutinioUtil $scr, LogHandler $dblogger, $cattedra, $classe, $periodo) {
@@ -287,7 +288,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"classe": 0, "stato": 0, "posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                    ScrutinioUtil $scr, $classe, $stato, $posizione) {
@@ -409,7 +410,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioProposteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                            ScrutinioUtil $scr, LogHandler $dblogger, $classe, $materia, $periodo,
@@ -579,7 +580,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioCondottaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                            TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
@@ -709,7 +710,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioVotiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                        TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $materia, $periodo, $alunno, $posizione) {
@@ -863,7 +864,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
    *    methods="GET")
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioSvoltoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                          ScrutinioUtil $scr, $cattedra, $classe, $periodo) {
@@ -964,7 +965,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioCondottaGiudizioAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                                    TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
@@ -1082,7 +1083,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioEsitoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                         TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
@@ -1302,7 +1303,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioCreditoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                           ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
@@ -1410,7 +1411,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioCertificazioneAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                                  TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
@@ -1642,7 +1643,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioDebitiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                          TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
@@ -1751,7 +1752,7 @@ class ScrutinioController extends AbstractController {
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioCarenzeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                           ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
@@ -1846,7 +1847,7 @@ class ScrutinioController extends AbstractController {
    *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "step": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function verbaleAction(Request $request, EntityManagerInterface $em, SessionInterface $session, ScrutinioUtil $scr,
                                  $classe, $periodo, $step) {
@@ -1931,7 +1932,7 @@ class ScrutinioController extends AbstractController {
    *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function scrutinioFrequenzaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                             RegistroUtil $reg, ScrutinioUtil $scr, LogHandler $dblogger,
@@ -2023,7 +2024,7 @@ class ScrutinioController extends AbstractController {
    *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function scrutinioFrequenzaAnnullaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                                    ScrutinioUtil $scr, LogHandler $dblogger,

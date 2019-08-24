@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -46,7 +47,7 @@ class SegreteriaController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_ATA')")
+   * @IsGranted("ROLE_ATA")
    */
   public function assenzeAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // recupera criteri dalla sessione
@@ -144,7 +145,7 @@ class SegreteriaController extends AbstractController {
    *    requirements={"alunno": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_ATA')")
+   * @IsGranted("ROLE_ATA")
    */
   public function assenzeMostraAction(EntityManagerInterface $em, SegreteriaUtil $segr, $alunno) {
     // controlla alunno
@@ -183,7 +184,7 @@ class SegreteriaController extends AbstractController {
    *    requirements={"alunno": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_ATA')")
+   * @IsGranted("ROLE_ATA")
    */
   public function assenzeStampaAction(EntityManagerInterface $em, SessionInterface $session, SegreteriaUtil $segr, PdfManager $pdf, $alunno) {
     // controlla alunno
@@ -230,7 +231,7 @@ class SegreteriaController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_ATA')")
+   * @IsGranted("ROLE_ATA")
    */
   public function scrutiniAction(Request $request, EntityManagerInterface $em, SegreteriaUtil $segr,
                                   SessionInterface $session, $pagina) {
@@ -333,7 +334,7 @@ class SegreteriaController extends AbstractController {
    *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2|X", "scrutinio": "\d+", },
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_ATA')")
+   * @IsGranted("ROLE_ATA")
    */
   public function scrutiniMostraAction(EntityManagerInterface $em, SegreteriaUtil $segr,
                                         $alunno, $periodo, $scrutinio) {

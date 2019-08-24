@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Util\BachecaUtil;
@@ -39,7 +40,7 @@ class BachecaController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisiAction(SessionInterface $session, BachecaUtil $bac, $pagina) {
     // inizializza variabili
@@ -79,7 +80,7 @@ class BachecaController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
     // inizializza
@@ -117,7 +118,7 @@ class BachecaController extends AbstractController {
    *    requirements={"classe": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisiAlunniAction(EntityManagerInterface $em, BachecaUtil $bac, $classe) {
     // inizializza
@@ -151,7 +152,7 @@ class BachecaController extends AbstractController {
    *    requirements={"classe": "\d+", "id": "\d+|ALL"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisiAlunniFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $classe, $id) {
     // controllo classe
@@ -181,7 +182,7 @@ class BachecaController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisiCoordinatoriFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
     $letto = null;
@@ -206,4 +207,3 @@ class BachecaController extends AbstractController {
   }
 
 }
-

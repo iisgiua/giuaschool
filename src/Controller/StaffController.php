@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -76,7 +77,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                 BachecaUtil $bac, $pagina) {
@@ -196,7 +197,7 @@ class StaffController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                     TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
@@ -601,7 +602,7 @@ class StaffController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
     // inizializza
@@ -637,7 +638,7 @@ class StaffController extends AbstractController {
    *    requirements={"tipo": "U|E|V|A|I|C", "id": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger, BachecaUtil $bac,
                                       RegistroUtil $reg, $tipo, $id) {
@@ -740,7 +741,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiOrarioAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                       BachecaUtil $bac, $tipo, $pagina) {
@@ -847,7 +848,7 @@ class StaffController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiOrarioEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
                                           RegistroUtil $reg, LogHandler $dblogger, $tipo, $id) {
@@ -1100,7 +1101,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiAttivitaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                         BachecaUtil $bac, $pagina) {
@@ -1204,7 +1205,7 @@ class StaffController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiAttivitaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
                                             RegistroUtil $reg, LogHandler $dblogger, $id) {
@@ -1457,7 +1458,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiIndividualiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                            BachecaUtil $bac, $pagina) {
@@ -1563,7 +1564,7 @@ class StaffController extends AbstractController {
    *    defaults={"id": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function avvisiIndividualiEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                                TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
@@ -1729,7 +1730,7 @@ class StaffController extends AbstractController {
    *    defaults={"id": 0},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function classeAjaxAction(EntityManagerInterface $em, $id) {
     $alunni = $em->getRepository('App:Alunno')->createQueryBuilder('a')
@@ -1761,7 +1762,7 @@ class StaffController extends AbstractController {
    *    defaults={"data": "0000-00-00", "pagina": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiAutorizzaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                            RegistroUtil $reg, StaffUtil $staff, $data, $pagina) {
@@ -1917,7 +1918,7 @@ class StaffController extends AbstractController {
    *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "classe": "\d+", "alunno": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiAutorizzaEntrataAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                                   RegistroUtil $reg, TranslatorInterface $trans, LogHandler $dblogger,
@@ -2099,7 +2100,7 @@ class StaffController extends AbstractController {
    *    requirements={"data": "\d\d\d\d-\d\d-\d\d", "classe": "\d+", "alunno": "\d+"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiAutorizzaUscitaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                                  RegistroUtil $reg, TranslatorInterface $trans, LogHandler $dblogger,
@@ -2262,7 +2263,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiDerogheAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // recupera criteri dalla sessione
@@ -2359,7 +2360,7 @@ class StaffController extends AbstractController {
    *    requirements={"alunno": "\d+"},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiDerogheEditAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger, $alunno) {
     // inizializza
@@ -2435,7 +2436,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiSituazioneAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // recupera criteri dalla sessione
@@ -2533,7 +2534,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function docentiColloquiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                          $pagina) {
@@ -2610,7 +2611,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function docentiStatisticheAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                             TranslatorInterface $trans, StaffUtil $staff, PdfManager $pdf, $pagina) {
@@ -2743,7 +2744,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function documentiProgrammiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                             StaffUtil $staff, $pagina) {
@@ -2847,7 +2848,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function documentiRelazioniAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                             StaffUtil $staff, $pagina) {
@@ -2951,7 +2952,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function documentiPianiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                         StaffUtil $staff, $pagina) {
@@ -3054,7 +3055,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function documentiDoc15Action(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                         StaffUtil $staff, $pagina) {
@@ -3134,7 +3135,7 @@ class StaffController extends AbstractController {
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
     // recupera criteri dalla sessione
@@ -3235,7 +3236,7 @@ class StaffController extends AbstractController {
    *    requirements={"alunno": "\d+", "classe": "\d+"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em,
                                         UserPasswordEncoderInterface $encoder, SessionInterface $session, LogHandler $dblogger,
@@ -3366,7 +3367,7 @@ class StaffController extends AbstractController {
    *    defaults={"data": "0000-00-00", "classe": "0"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiAssenzeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                          RegistroUtil $reg, LogHandler $dblogger, $data, $classe) {
@@ -3593,7 +3594,7 @@ class StaffController extends AbstractController {
    *    defaults={"data": "0000-00-00"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_STAFF')")
+   * @IsGranted("ROLE_STAFF")
    */
   public function studentiStatisticheAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                              RegistroUtil $reg, StaffUtil $staff, $data) {

@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -42,7 +43,7 @@ class ColloquiController extends AbstractController {
    * @Route("/colloqui", name="colloqui",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function colloquiAction(EntityManagerInterface $em, SessionInterface $session) {
     // inizializza variabili
@@ -86,7 +87,7 @@ class ColloquiController extends AbstractController {
    *    requirements={"richiesta": "\d+", "azione": "C|N|X"},
    *    methods={"GET","POST"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function colloquiEditAction(Request $request, EntityManagerInterface $em, RichiestaColloquio $richiesta, $azione) {
     // inizializza variabili
@@ -165,4 +166,3 @@ class ColloquiController extends AbstractController {
   }
 
 }
-

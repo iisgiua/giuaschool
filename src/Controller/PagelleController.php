@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -49,7 +50,7 @@ class PagelleController extends AbstractController {
    *    requirements={"classe": "\d+", "tipo": "R|T|F|I|V|C", "periodo": "P|S|F|I|1|2|X"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_ATA')")
+   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
   public function documentoClasseAction(EntityManagerInterface $em, SessionInterface $session, PagelleUtil $pag,
                                          $classe, $tipo, $periodo) {
@@ -184,7 +185,7 @@ class PagelleController extends AbstractController {
    *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C", "periodo": "P|S|F|I|1|2|X"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE') or has_role('ROLE_GENITORE') or has_role('ROLE_ALUNNO') or has_role('ROLE_ATA')")
+   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
    */
   public function documentoAlunnoAction(EntityManagerInterface $em, SessionInterface $session, PagelleUtil $pag,
                                          GenitoriUtil $gen, $classe, $alunno, $tipo, $periodo) {
@@ -279,4 +280,3 @@ class PagelleController extends AbstractController {
   }
 
 }
-

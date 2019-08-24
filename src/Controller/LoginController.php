@@ -18,6 +18,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -234,7 +235,7 @@ class LoginController extends AbstractController {
    * @Route("/", name="home",
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_UTENTE')")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function homeAction(NotificheUtil $notifiche) {
     // imposta info utente

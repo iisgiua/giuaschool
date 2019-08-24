@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Util\RegistroUtil;
 
@@ -38,7 +39,7 @@ class SchedaController extends AbstractController {
    *    requirements={"cattedra": "\d+", "alunno": "\d+", "periodo": "P|S|F|I|1|2|0"},
    *    methods={"GET"})
    *
-   * @Security("has_role('ROLE_DOCENTE')")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function votiMateriaAction(EntityManagerInterface $em, RegistroUtil $reg, $cattedra, $alunno, $periodo) {
     // inizializza variabili
@@ -150,4 +151,3 @@ class SchedaController extends AbstractController {
   }
 
 }
-
