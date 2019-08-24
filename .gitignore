@@ -3,7 +3,8 @@
 /.env.local
 /.env.local.php
 /.env.*.local
-/bin/
+/bin/*
+!/bin/.gitkeep
 /public/bundles/
 /var/
 /vendor/
@@ -31,5 +32,5 @@
 /src/Command/Argo/
 /templates/argo/
 /public/img/.local/
-!**/.gitkeep
+#!**/.gitkeep
 ###< trinko/giuaschool ###
