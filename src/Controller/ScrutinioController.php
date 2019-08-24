@@ -440,7 +440,7 @@ class ScrutinioController extends AbstractController {
     }
     // controllo materia
     $materia = $em->getRepository('App:Materia')->createQueryBuilder('m')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('m.id=:materia AND c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
       ->setParameters(['materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipo' => 'N'])
       ->setMaxResults(1)
@@ -745,7 +745,7 @@ class ScrutinioController extends AbstractController {
     }
     // controllo materia
     $materia = $em->getRepository('App:Materia')->createQueryBuilder('m')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('m.id=:materia AND c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
       ->setParameters(['materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipo' => 'N'])
       ->setMaxResults(1)

@@ -803,7 +803,7 @@ class DocumentiController extends AbstractController {
         'placeholder' => 'label.qualsiasi_classe',
         'query_builder' => function (EntityRepository $er) use ($docente) {
             return $er->createQueryBuilder('c')
-              ->join('App:Cattedra', 'ca', 'WHERE', 'ca.classe=c.id')
+              ->join('App:Cattedra', 'ca', 'WITH', 'ca.classe=c.id')
               ->where('ca.docente=:docente')
               ->orderBy('c.anno,c.sezione', 'ASC')
               ->setParameters(['docente' => $docente]);

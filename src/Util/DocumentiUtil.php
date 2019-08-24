@@ -87,7 +87,7 @@ class DocumentiUtil {
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
       ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno AND cl.anno!=:quinta')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
@@ -229,7 +229,7 @@ class DocumentiUtil {
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
       ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno AND cl.anno!=:quinta')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
@@ -279,7 +279,7 @@ class DocumentiUtil {
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
       ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
@@ -327,7 +327,7 @@ class DocumentiUtil {
     $param = ['tipi' => ['L', 'M'], 'attiva' => 1, 'docente' => $docente];
     $documenti = $this->em->getRepository('App:Documento')->createQueryBuilder('d')
       ->join('d.classe', 'cl')
-      ->join('App:Cattedra', 'ca', 'WHERE', 'ca.classe=cl.id')
+      ->join('App:Cattedra', 'ca', 'WITH', 'ca.classe=cl.id')
       ->leftJoin('d.materia', 'm')
       ->where('d.tipo IN (:tipi) AND ca.attiva=:attiva AND ca.docente=:docente');
     if ($search['classe']) {
@@ -371,7 +371,7 @@ class DocumentiUtil {
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
       ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND cl.anno=:quinta AND cl.coordinatore=:docente')
       ->orderBy('cl.anno,cl.sezione', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'quinta' => 5, 'documento' => 'M'])

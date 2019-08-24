@@ -28,7 +28,7 @@ class StaffRepository extends UtenteRepository {
   public function getIdStaff($filtro) {
     $staff = $this->createQueryBuilder('s')
       ->select('DISTINCT s.id')
-      ->leftJoin('App:Cattedra', 'c', 'WHERE', 'c.docente=s.id AND c.attiva=:attiva')
+      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.docente=s.id AND c.attiva=:attiva')
       ->where('s.abilitato=:abilitato AND c.id IS NULL AND NOT s INSTANCE OF App:Preside')
       ->andWhere('s.id IN (:utenti)')
       ->setParameters(['attiva' => 1, 'abilitato' => 1, 'utenti' => $filtro])

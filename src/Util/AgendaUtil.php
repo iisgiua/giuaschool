@@ -94,9 +94,9 @@ class AgendaUtil {
     }
     // attivita
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->join('avc.classe', 'cl')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.classe=cl.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.classe=cl.id')
       ->where('a.destinatariDocenti=:destinatario AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c.docente=:docente AND c.attiva=:attiva')
       ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'mese' => $mese->format('n'),
         'docente' => $docente, 'attiva' => 1])
@@ -113,8 +113,8 @@ class AgendaUtil {
       ->getResult();
     $verifiche2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->join('App:Cattedra', 'c2', 'WHERE', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
       ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
       ->setParameters(['docente' => $docente, 'tipo' => 'V', 'mese' => $mese->format('n'), 'attiva' => 1,
@@ -132,8 +132,8 @@ class AgendaUtil {
       ->getResult();
     $compiti2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->join('App:Cattedra', 'c2', 'WHERE', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
       ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
       ->setParameters(['docente' => $docente, 'tipo' => 'P', 'mese' => $mese->format('n'), 'attiva' => 1,
@@ -181,7 +181,7 @@ class AgendaUtil {
         ->join('a.classe', 'cl')
         ->join('rc.colloquio', 'c')
         ->join('c.orario', 'o')
-        ->join('App:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+        ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
         ->where('rc.data=:data AND rc.stato=:stato AND c.docente=:docente')
         ->orderBy('c.ora,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
         ->setParameters(['data' => $data->format('Y-m-d'), 'stato' => 'C', 'docente' => $docente])
@@ -190,9 +190,9 @@ class AgendaUtil {
     } elseif ($tipo == 'A') {
       // attività
       $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+        ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
         ->join('avc.classe', 'cl')
-        ->join('App:Cattedra', 'c', 'WHERE', 'c.classe=cl.id')
+        ->join('App:Cattedra', 'c', 'WITH', 'c.classe=cl.id')
         ->where('a.destinatariDocenti=:destinatario AND a.tipo=:tipo AND a.data=:data AND c.docente=:docente AND c.attiva=:attiva')
         ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'data' => $data->format('Y-m-d'),
           'docente' => $docente, 'attiva' => 1])
@@ -210,8 +210,8 @@ class AgendaUtil {
         ->getResult();
       $verifiche2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->join('App:Cattedra', 'c2', 'WHERE', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
+        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
         ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
         ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
         ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $data->format('Y-m-d'), 'attiva' => 1,
@@ -240,8 +240,8 @@ class AgendaUtil {
         ->getResult();
       $compiti2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->join('App:Cattedra', 'c2', 'WHERE', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
+        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
         ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
         ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
         ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d'), 'attiva' => 1,
@@ -405,7 +405,7 @@ class AgendaUtil {
     }
     // attivita
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->join('avc.classe', 'cl')
       ->where('a.destinatariGenitori=:destinatario AND a.tipo=:tipo AND MONTH(a.data)=:mese AND cl.id=:classe')
       ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'mese' => $mese->format('n'),
@@ -418,7 +418,7 @@ class AgendaUtil {
     // verifiche
     $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->leftJoin('avi.alunno', 'al')
       ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
       ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
@@ -432,7 +432,7 @@ class AgendaUtil {
     // compiti
     $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->leftJoin('avi.alunno', 'al')
       ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
       ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
@@ -475,7 +475,7 @@ class AgendaUtil {
         ->join('rc.colloquio', 'c')
         ->join('c.docente', 'd')
         ->join('c.orario', 'o')
-        ->join('App:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+        ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
         ->where('rc.data=:data AND rc.stato=:stato AND rc.alunno=:alunno')
         ->orderBy('c.ora', 'ASC')
         ->setParameters(['data' => $data->format('Y-m-d'), 'stato' => 'C', 'alunno' => $alunno])
@@ -484,7 +484,7 @@ class AgendaUtil {
     } elseif ($tipo == 'A') {
       // attività
       $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+        ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
         ->join('avc.classe', 'cl')
         ->where('a.destinatariGenitori=:destinatario AND a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
         ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'data' => $data->format('Y-m-d'),
@@ -498,7 +498,7 @@ class AgendaUtil {
       // verifiche
       $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
         ->leftJoin('avi.alunno', 'al')
         ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
         ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
@@ -513,7 +513,7 @@ class AgendaUtil {
       // compiti
       $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
         ->leftJoin('avi.alunno', 'al')
         ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
         ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
@@ -541,7 +541,7 @@ class AgendaUtil {
     $dati = null;
     // attivita
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->join('avc.classe', 'cl')
       ->where('a.destinatariAlunni=:destinatario AND a.tipo=:tipo AND MONTH(a.data)=:mese AND cl.id=:classe')
       ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'mese' => $mese->format('n'),
@@ -554,7 +554,7 @@ class AgendaUtil {
     // verifiche
     $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->leftJoin('avi.alunno', 'al')
       ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
       ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
@@ -568,7 +568,7 @@ class AgendaUtil {
     // compiti
     $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->leftJoin('avi.alunno', 'al')
       ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
       ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
@@ -607,7 +607,7 @@ class AgendaUtil {
     if ($tipo == 'A') {
       // attività
       $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+        ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
         ->join('avc.classe', 'cl')
         ->where('a.destinatariAlunni=:destinatario AND a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
         ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'data' => $data->format('Y-m-d'),
@@ -621,7 +621,7 @@ class AgendaUtil {
       // verifiche
       $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
         ->leftJoin('avi.alunno', 'al')
         ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
         ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
@@ -636,7 +636,7 @@ class AgendaUtil {
       // compiti
       $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
         ->leftJoin('avi.alunno', 'al')
         ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
         ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')

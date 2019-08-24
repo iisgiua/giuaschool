@@ -178,7 +178,7 @@ class RegistroUtil {
         if (!$lezione) {
           // nuova lezione
           $altra_lezione = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
-            ->join('App:Firma', 'f', 'WHERE', 'l.id=f.lezione')
+            ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
             ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente')
             ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente])
             ->setMaxResults(1)
@@ -225,7 +225,7 @@ class RegistroUtil {
             // sono presenti voti
             $num_lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
               ->select('COUNT(l.id)')
-              ->join('App:Firma', 'f', 'WHERE', 'l.id=f.lezione')
+              ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
               ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
               ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'materia' => $materia,
                 'docente' => $docente])
@@ -535,7 +535,7 @@ class RegistroUtil {
       if ($ann['avviso']) {
         // legge alunno destinatario
         $ann['alunni'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-          ->join('App:AvvisoIndividuale', 'avi', 'WHERE', 'a.id=avi.alunno')
+          ->join('App:AvvisoIndividuale', 'avi', 'WITH', 'a.id=avi.alunno')
           ->where('avi.avviso=:avviso')
           ->setParameters(['avviso' => $a->getAvviso()->getId()])
           ->getQuery()
@@ -693,9 +693,9 @@ class RegistroUtil {
       // dati alunni/assenze/ritardi/uscite
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,a.bes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
-        ->leftJoin('App:Assenza', 'ass', 'WHERE', 'a.id=ass.alunno AND ass.data=:data')
-        ->leftJoin('App:Entrata', 'e', 'WHERE', 'a.id=e.alunno AND e.data=:data')
-        ->leftJoin('App:Uscita', 'u', 'WHERE', 'a.id=u.alunno AND u.data=:data')
+        ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+        ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+        ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['lista' => $lista, 'data' => $data_str])
@@ -791,9 +791,9 @@ class RegistroUtil {
         // dati assenze/ritardi/uscite
         $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
           ->select('a.id AS id_alunno,ass.id AS id_assenza,ass.giustificato AS assenza_giust,(ass.docenteGiustifica) AS assenza_doc,e.id AS id_entrata,e.ora AS ora_entrata,e.ritardoBreve,e.note AS note_entrata,e.giustificato AS entrata_giust,(e.docenteGiustifica) AS entrata_doc,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
-          ->leftJoin('App:Assenza', 'ass', 'WHERE', 'a.id=ass.alunno AND ass.data=:data')
-          ->leftJoin('App:Entrata', 'e', 'WHERE', 'a.id=e.alunno AND e.data=:data')
-          ->leftJoin('App:Uscita', 'u', 'WHERE', 'a.id=u.alunno AND u.data=:data')
+          ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+          ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+          ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
           ->where('a.id IN (:lista)')
           ->setParameters(['lista' => $lista, 'data' => $data_str])
           ->getQuery()
@@ -869,7 +869,7 @@ class RegistroUtil {
       // aggiunge altri alunni con cambiamento nella classe in quella data
       $alunni2 = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App:CambioClasse', 'cc', 'WHERE', 'a.id=cc.alunno')
+        ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
         ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe AND a.abilitato=:abilitato')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'abilitato' => 1])
         ->getQuery()
@@ -1005,8 +1005,8 @@ class RegistroUtil {
     // legge la lista degli alunni
     $lista = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,ass.id AS assenza,e.id AS entrata,e.ora')
-      ->leftJoin('App:Assenza', 'ass', 'WHERE', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin('App:Entrata', 'e', 'WHERE', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->where('a.id IN (:id)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['id' => $alunni, 'data' => $data->format('Y-m-d')])
@@ -1097,7 +1097,7 @@ class RegistroUtil {
    */
   public function lezioneCattedra(\DateTime $data, Docente $docente, Classe $classe, Materia $materia) {
     $lezione = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
-      ->join('App:Firma', 'f', 'WHERE', 'l.id=f.lezione')
+      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
       ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
       ->setParameters(['data' => $data->format('Y-m-d'), 'docente' => $docente, 'classe' => $classe,
         'materia' => $materia])
@@ -1131,8 +1131,8 @@ class RegistroUtil {
     // legge i voti degli degli alunni
     $voti = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione,v.id,v.argomento,v.visibile,v.voto,v.giudizio')
-      ->leftJoin('App:Lezione', 'l', 'WHERE', 'l.materia=:materia AND l.classe=:classe AND l.data=:data')
-      ->leftJoin('App:Valutazione', 'v', 'WHERE', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo')
+      ->leftJoin('App:Lezione', 'l', 'WITH', 'l.materia=:materia AND l.classe=:classe AND l.data=:data')
+      ->leftJoin('App:Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo')
       ->where('a.id IN (:alunni)')
       ->setParameters(['alunni' => $lista_alunni, 'docente' => $docente, 'tipo' => $tipo,
         'materia' => $materia, 'classe' => $classe, 'data' => $data->format('Y-m-d')])
@@ -1383,7 +1383,7 @@ class RegistroUtil {
     // lezioni del giorno
     $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
       ->select('l.id,s.ora,s.inizio,s.fine,s.durata')
-      ->join('App:ScansioneOraria', 's', 'WHERE', 'l.ora=s.ora AND s.giorno=:giorno')
+      ->join('App:ScansioneOraria', 's', 'WITH', 'l.ora=s.ora AND s.giorno=:giorno')
       ->join('s.orario', 'o')
       ->where('l.data=:data AND l.classe=:classe AND :data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
       ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
@@ -1458,9 +1458,9 @@ class RegistroUtil {
     // dati alunni/assenze/ritardi/uscite
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id AS id_alunno,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita')
-      ->leftJoin('App:Assenza', 'ass', 'WHERE', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin('App:Entrata', 'e', 'WHERE', 'a.id=e.alunno AND e.data=:data')
-      ->leftJoin('App:Uscita', 'u', 'WHERE', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->where('a.id IN (:lista)')
       ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
       ->getQuery()
@@ -1517,7 +1517,7 @@ class RegistroUtil {
     // cattedra non di sostegno
     $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
       ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
-      ->leftJoin('App:Firma', 'f', 'WHERE', 'l.id=f.lezione AND f.docente=:docente')
+      ->leftJoin('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
       ->leftJoin('f.docente', 'd')
       ->where('l.classe=:classe AND l.materia=:materia')
       ->orderBy('l.data', 'DESC')
@@ -1611,7 +1611,7 @@ class RegistroUtil {
     $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost,m.nomeBreve')
       ->join('l.materia', 'm')
-      ->join('App:FirmaSostegno', 'fs', 'WHERE', 'l.id=fs.lezione')
+      ->join('App:FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione')
       ->where('l.classe=:classe AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('m.nomeBreve,l.ora', 'ASC')
@@ -1692,9 +1692,9 @@ class RegistroUtil {
     // dati alunni/assenze/ritardi/uscite
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita')
-      ->leftJoin('App:Assenza', 'ass', 'WHERE', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin('App:Entrata', 'e', 'WHERE', 'a.id=e.alunno AND e.data=:data')
-      ->leftJoin('App:Uscita', 'u', 'WHERE', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
@@ -1734,8 +1734,8 @@ class RegistroUtil {
     // legge lezioni
     $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
       ->select('l.id,l.data,l.ora,so.durata')
-      ->join('App:Firma', 'f', 'WHERE', 'l.id=f.lezione AND f.docente=:docente')
-      ->join('App:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
       ->where('l.classe=:classe AND l.materia=:materia AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
       ->orderBy('l.data,l.ora', 'ASC')
@@ -1825,8 +1825,8 @@ class RegistroUtil {
     // legge lezioni
     $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
       ->select('l.id,l.data,l.ora,so.durata')
-      ->join('App:FirmaSostegno', 'fs', 'WHERE', 'l.id=fs.lezione AND fs.docente=:docente AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
-      ->join('App:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('App:FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
       ->where('l.classe=:classe AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
       ->orderBy('l.data,l.ora', 'ASC')
@@ -2255,7 +2255,7 @@ class RegistroUtil {
         // lezioni del periodo
         $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
           ->select('SUM(so.durata)')
-          ->join('App:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+          ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
           ->join('so.orario', 'o')
           ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
           ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
@@ -2410,7 +2410,7 @@ class RegistroUtil {
       // aggiunge altri alunni con cambiamento nella classe nel periodo
       $alunni2 = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App:CambioClasse', 'cc', 'WHERE', 'a.id=cc.alunno')
+        ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
         ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND a.abilitato=:abilitato AND (a.classe IS NULL OR a.classe!=:classe)')
         ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
           'classe' => $classe, 'abilitato' => 1])

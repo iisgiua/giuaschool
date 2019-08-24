@@ -410,7 +410,7 @@ class ProcedureController extends AbstractController {
    */
   public function archiviazioneAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, ArchiviazioneUtil $arch) {
     $lista_docente = $em->getRepository('App:Docente')->createQueryBuilder('d')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
       ->orderBy('d.cognome,d.nome', 'ASC')
@@ -418,7 +418,7 @@ class ProcedureController extends AbstractController {
       ->getQuery()
       ->getResult();
     $lista_sostegno = $em->getRepository('App:Docente')->createQueryBuilder('d')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo=:tipo')
       ->orderBy('d.cognome,d.nome', 'ASC')

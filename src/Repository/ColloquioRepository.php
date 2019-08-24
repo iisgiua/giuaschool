@@ -38,7 +38,7 @@ class ColloquioRepository extends EntityRepository {
       ->join('c.docente', 'd')
       ->join('c.orario', 'o')
       ->join('o.sede', 's')
-      ->join('App:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
       ->where('d.abilitato=:abilitato')
       ->orderBy('s.id,d.cognome,d.nome', 'ASC')
       ->setParameter('abilitato', 1);
@@ -78,7 +78,7 @@ class ColloquioRepository extends EntityRepository {
       ->select('c.frequenza,c.giorno,c.note,s.citta,so.inizio,so.fine')
       ->join('c.orario', 'o')
       ->join('o.sede', 's')
-      ->join('App:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
       ->where('c.docente=:docente')
       ->orderBy('s.id', 'ASC')
       ->setParameters(['docente' => $docente])

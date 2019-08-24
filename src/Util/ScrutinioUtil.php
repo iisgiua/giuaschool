@@ -121,7 +121,7 @@ class ScrutinioUtil {
     // legge definizione scrutini
     $periodi = $this->em->getRepository('App:DefinizioneScrutinio')->createQueryBuilder('d')
       ->select('d.periodo,s.stato')
-      ->leftJoin('App:Scrutinio', 's', 'WHERE', 's.periodo=d.periodo AND s.classe=:classe')
+      ->leftJoin('App:Scrutinio', 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where('d.dataProposte<=:data')
       ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'classe' => $classe])
       ->orderBy('d.data', 'ASC')
@@ -227,7 +227,7 @@ class ScrutinioUtil {
     // legge definizione scrutini
     $periodi = $this->em->getRepository('App:DefinizioneScrutinio')->createQueryBuilder('d')
       ->select('d.periodo,s.stato')
-      ->leftJoin('App:Scrutinio', 's', 'WHERE', 's.periodo=d.periodo AND s.classe=:classe')
+      ->leftJoin('App:Scrutinio', 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where('d.data<=:data')
       ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'classe' => $classe])
       ->orderBy('d.data', 'DESC')
@@ -619,7 +619,7 @@ class ScrutinioUtil {
     // legge materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -749,7 +749,7 @@ class ScrutinioUtil {
           $ore = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
-            ->leftJoin('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+            ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
             ->where('al.alunno=:alunno AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND (l.classe=:classe OR l.classe=cc.classe)')
             ->setParameters(['alunno' => $alunno, 'materia' => $materia,
               'inizio' => $this->session->get('/CONFIG/SCUOLA/anno_inizio'),
@@ -1103,7 +1103,7 @@ class ScrutinioUtil {
     // legge materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -1716,7 +1716,7 @@ class ScrutinioUtil {
       // legge i non ammessi/non scrutinabili per assenze/non scrutinati
       $non_ammessi = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App:Esito', 'e', 'WHERE', 'e.alunno=a.id')
+        ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
         ->where('a.id IN (:lista) AND e.esito=:esito AND s.classe=:classe AND s.periodo=:periodo')
         ->setParameters(['lista' => $lista, 'esito' => 'N', 'classe' => $classe, 'periodo' => $periodo])
@@ -1745,7 +1745,7 @@ class ScrutinioUtil {
       // legge i debiti
       $dati['debiti']  = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
-        ->join('App:Esito', 'e', 'WHERE', 'e.alunno=a.id')
+        ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
         ->where('a.id in (:lista) AND e.esito=:sospeso AND s.classe=:classe AND s.periodo=:periodo')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1755,7 +1755,7 @@ class ScrutinioUtil {
       // legge le carenze
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,e.dati')
-        ->join('App:Esito', 'e', 'WHERE', 'e.alunno=a.id')
+        ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
         ->where('a.id IN (:lista) AND e.esito IN (:esiti) AND s.classe=:classe AND s.periodo=:periodo')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1786,7 +1786,7 @@ class ScrutinioUtil {
       // legge i non ammessi
       $dati['non_ammessi'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
-        ->join('App:Esito', 'e', 'WHERE', 'e.alunno=a.id')
+        ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
         ->where('a.id IN (:lista) AND e.esito=:esito AND s.classe=:classe AND s.periodo=:periodo')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -2266,7 +2266,7 @@ class ScrutinioUtil {
           $ore = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
-            ->leftJoin('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+            ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
             ->where('al.alunno=:alunno AND l.materia=:materia AND l.data>:inizio AND l.data<=:fine AND (l.classe=:classe OR l.classe=cc.classe)')
             ->setParameters(['alunno' => $alunno, 'materia' => $materia,
               'inizio' => $this->session->get('/CONFIG/SCUOLA/periodo1_fine'),
@@ -2499,9 +2499,9 @@ class ScrutinioUtil {
     // calcola ore totali assenza alunni (compresi cambi classe in primo trimestre)
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.sesso,a.dataNascita,SUM(vs.assenze) AS ore')
-      ->join('App:VotoScrutinio', 'vs', 'WHERE', 'vs.alunno=a.id')
+      ->join('App:VotoScrutinio', 'vs', 'WITH', 'vs.alunno=a.id')
       ->join('vs.scrutinio', 's')
-      ->leftJoin('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=a.id')
+      ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.id IN (:alunni) AND (s.id IN (:scrutini) OR (s.classe=cc.classe AND s.periodo=:periodo))')
       ->groupBy('a.id')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -2552,7 +2552,7 @@ class ScrutinioUtil {
     // alunni ritirati/trasferiti/all'estero
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.sesso,a.dataNascita,a.bes,a.frequenzaEstero,cc.note')
-      ->join('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=a.id')
+      ->join('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.classe IS NULL AND a.abilitato=:abilitato AND cc.classe=:classe')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['abilitato' => 1, 'classe' => $classe])
@@ -2973,7 +2973,7 @@ class ScrutinioUtil {
     // legge materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $alunno->getClasse(), 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -3189,7 +3189,7 @@ class ScrutinioUtil {
     $lista = $this->alunniInScrutinio($classe, $periodo);
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,a.credito3,a.credito4,e.id AS esito')
-      ->join('App:Esito', 'e', 'WHERE', 'a.id=e.alunno')
+      ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
       ->where('a.id in (:lista) AND e.esito=:ammesso AND s.classe=:classe AND s.periodo=:periodo')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -3236,7 +3236,7 @@ class ScrutinioUtil {
     $lista = $this->alunniInScrutinio($classe, $periodo);
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,e.id AS esito')
-      ->join('App:Esito', 'e', 'WHERE', 'a.id=e.alunno')
+      ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
       ->where('a.id in (:lista) AND e.esito=:ammesso AND s.classe=:classe AND s.periodo=:periodo')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -3360,9 +3360,9 @@ class ScrutinioUtil {
     // debiti
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito,m.id AS materia_id,m.nomeBreve AS materia')
-      ->join('App:Esito', 'e', 'WHERE', 'a.id=e.alunno')
+      ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
-      ->join('App:VotoScrutinio', 'vs', 'WHERE', 'vs.scrutinio=s.id AND vs.alunno=a.id')
+      ->join('App:VotoScrutinio', 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
       ->join('vs.materia', 'm')
       ->where('a.id in (:lista) AND e.esito=:sospeso AND s.classe=:classe AND s.periodo=:periodo AND vs.unico<:suff AND m.tipo=:tipo')
       ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
@@ -3377,10 +3377,10 @@ class ScrutinioUtil {
     // carenze
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito,m.id AS materia_id,m.nomeBreve AS materia')
-      ->join('App:Esito', 'e', 'WHERE', 'a.id=e.alunno')
+      ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
-      ->join('App:VotoScrutinio', 'vs', 'WHERE', 'vs.scrutinio=s.id AND vs.alunno=a.id')
-      ->join('App:PropostaVoto', 'pv', 'WHERE', 'pv.classe=s.classe AND pv.periodo=s.periodo AND pv.alunno=a.id')
+      ->join('App:VotoScrutinio', 'vs', 'WITH', 'vs.scrutinio=s.id AND vs.alunno=a.id')
+      ->join('App:PropostaVoto', 'pv', 'WITH', 'pv.classe=s.classe AND pv.periodo=s.periodo AND pv.alunno=a.id')
       ->join('vs.materia', 'm')
       ->where('a.id in (:lista) AND e.esito IN (:esiti) AND s.classe=:classe AND s.periodo=:periodo AND vs.materia=pv.materia AND pv.unico<:suff AND vs.unico>=:suff AND m.tipo=:tipo')
       ->orderBy('a.cognome,a.nome,a.dataNascita,m.ordinamento', 'ASC')
@@ -3462,7 +3462,7 @@ class ScrutinioUtil {
     $dati['debiti'] = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->join('vs.materia', 'm')
-      ->join('App:Esito', 'e', 'WHERE', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
+      ->join('App:Esito', 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
       ->where('vs.alunno=:alunno AND vs.unico<:suff AND s.classe=:classe AND s.periodo=:periodo AND m.tipo=:tipo AND e.esito=:sospeso')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['alunno' => $alunno, 'suff' => 6, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
@@ -3494,8 +3494,8 @@ class ScrutinioUtil {
     $dati['carenze'] = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->join('vs.materia', 'm')
-      ->join('App:Esito', 'e', 'WHERE', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
-      ->join('App:PropostaVoto', 'pv', 'WHERE', 'pv.alunno=vs.alunno AND pv.classe=s.classe AND pv.periodo=s.periodo')
+      ->join('App:Esito', 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
+      ->join('App:PropostaVoto', 'pv', 'WITH', 'pv.alunno=vs.alunno AND pv.classe=s.classe AND pv.periodo=s.periodo')
       ->where('vs.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo AND m.tipo=:tipo AND e.esito IN (:esiti) AND vs.materia=pv.materia AND pv.unico<:suff AND vs.unico>=:suff')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
@@ -3752,7 +3752,7 @@ class ScrutinioUtil {
     // legge materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -4055,7 +4055,7 @@ class ScrutinioUtil {
     // legge materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $alunno->getClasse(), 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -4073,8 +4073,8 @@ class ScrutinioUtil {
     // legge solo i voti con debito
     $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
       ->join('vs.materia', 'm')
-      ->join('App:Scrutinio', 's', 'WHERE', 's.classe=:classe AND s.periodo=:periodo')
-      ->join('App:VotoScrutinio', 'vsf', 'WHERE', 'vsf.scrutinio=s.id AND vsf.materia=m.id AND vsf.alunno=:alunno')
+      ->join('App:Scrutinio', 's', 'WITH', 's.classe=:classe AND s.periodo=:periodo')
+      ->join('App:VotoScrutinio', 'vsf', 'WITH', 'vsf.scrutinio=s.id AND vsf.materia=m.id AND vsf.alunno=:alunno')
       ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vsf.unico<:suff')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno,
@@ -4807,7 +4807,7 @@ class ScrutinioUtil {
     // legge materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
