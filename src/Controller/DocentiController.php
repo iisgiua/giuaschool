@@ -858,6 +858,7 @@ class DocentiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param SessionInterface $session Gestore delle sessioni
    * @param LogHandler $dblogger Gestore dei log su database
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $id ID del docente
@@ -871,7 +872,7 @@ class DocentiController extends AbstractController {
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
-                                        LogHandler $dblogger, PdfManager $pdf, $id) {
+                                        SessionInterface $session, LogHandler $dblogger, PdfManager $pdf, $id) {
     // controlla docente
     $docente = $em->getRepository('App:Docente')->find($id);
     if (!$docente) {
@@ -893,7 +894,7 @@ class DocentiController extends AbstractController {
       'ID esecutore' => $this->getUser()->getId()
       ));
     // crea documento PDF
-    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_docenti.html.twig', array(

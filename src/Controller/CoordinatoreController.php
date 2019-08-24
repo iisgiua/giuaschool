@@ -408,7 +408,7 @@ class CoordinatoreController extends AbstractController {
     // controllo formato
     if ($formato == 'P') {
       // crea documento PDF
-      $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+      $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
         'Situazione alunn'.($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
       $html = $this->renderView('pdf/situazione_alunno.html.twig', array(
         'classe' => $classe,
@@ -473,7 +473,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->assenze($classe);
     // crea documento PDF
-    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Assenze della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/assenze_classe.html.twig', array(
       'classe' => $classe,
@@ -524,7 +524,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->note($classe);
     // crea documento PDF
-    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Note disciplinari della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/note_classe.html.twig', array(
       'classe' => $classe,
@@ -575,7 +575,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->voti($classe);
     // crea documento PDF
-    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Medie dei voti della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $pdf->getHandler()->setPageOrientation('L', true, 20);
     $html = $this->renderView('pdf/voti_classe.html.twig', array(

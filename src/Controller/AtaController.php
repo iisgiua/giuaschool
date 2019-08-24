@@ -222,6 +222,7 @@ class AtaController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param SessionInterface $session Gestore delle sessioni
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
@@ -236,7 +237,7 @@ class AtaController extends AbstractController {
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
+  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, SessionInterface $session,
                                   PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger, LogHandler $dblogger,
                                   $id) {
     // controlla ata
@@ -260,7 +261,7 @@ class AtaController extends AbstractController {
       'ID esecutore' => $this->getUser()->getId()
       ));
     // crea documento PDF
-    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_ata.html.twig', array(
@@ -275,8 +276,8 @@ class AtaController extends AbstractController {
     $doc = $pdf->getHandler()->Output('', 'S');
     // crea il messaggio
     $message = (new \Swift_Message())
-      ->setSubject("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} - Credenziali di accesso al Registro Elettronico")
-      ->setFrom(["{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}" => "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}"])
+      ->setSubject($session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')." - Credenziali di accesso al Registro Elettronico")
+      ->setFrom([$session->get('/CONFIG/SCUOLA/email_notifica') => $session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')])
       ->setTo([$ata->getEmail()])
       ->setBody($this->renderView('email/credenziali_ata.html.twig'), 'text/html')
       ->addPart($this->renderView('email/credenziali_ata.txt.twig'), 'text/plain')

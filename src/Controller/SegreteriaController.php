@@ -172,6 +172,7 @@ class SegreteriaController extends AbstractController {
    * Stampa il riepilogo delle assenze
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
    * @param SegreteriaUtil $segr Funzioni di utilità per la segreteria
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $alunno Identificativo dell'alunno
@@ -184,7 +185,7 @@ class SegreteriaController extends AbstractController {
    *
    * @Security("has_role('ROLE_ATA')")
    */
-  public function assenzeStampaAction(EntityManagerInterface $em, SegreteriaUtil $segr, PdfManager $pdf, $alunno) {
+  public function assenzeStampaAction(EntityManagerInterface $em, SessionInterface $session, SegreteriaUtil $segr, PdfManager $pdf, $alunno) {
     // controlla alunno
     $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -199,7 +200,7 @@ class SegreteriaController extends AbstractController {
     // recupera dati
     $dati = $segr->riepilogoAssenze($alunno);
     // crea documento PDF
-    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
+    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
       'Prospetto mensile delle assenze');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/segreteria_assenze.html.twig', array(
