@@ -1,6 +1,6 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %} {# top bar mostrata quando un utente è connesso #}
 <div class="row">
-  <div class="col-sm-5 hidden-xs"><strong>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong> - {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}</div>
+  <div class="col-sm-5 hidden-xs"><strong>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong> - {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}</div>
   <div class="col-sm-5 col-xs-8 text-right">
     <a href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}"><span class="glyphicon glyphicon-user gs-mr-2"></span>{{ app.user.nome }} {{ app.user.cognome }}{{ is_granted('ROLE_GENITORE') ? ' (Genitore)' : (is_granted('ROLE_ALUNNO') ? ' (Studente)') }}</a>
   </div>
@@ -14,7 +14,7 @@
 </div>
 {% else %} {# top bar mostrata quando nessun utente è connesso #}
 <div class="row hidden-xs">
-  <div class="col-sm-6"><strong>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong> - {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}</div>
+  <div class="col-sm-6"><strong>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}</strong> - {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}</div>
   <div class="col-sm-6 text-right">
     <em>giua@school</em> - Registro Elettronico
   </div>

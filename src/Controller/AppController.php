@@ -15,6 +15,7 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -32,6 +33,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use App\Entity\App;
 use App\Entity\Utente;
 use App\Entity\Alunno;
@@ -52,6 +54,7 @@ class AppController extends AbstractController {
    * Login dell'utente tramite l'app
    *
    * @param SessionInterface $session Gestore delle sessioni
+   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param string $codice Codifica delle credenziali in BASE64
    * @param int $lusr Lunghezza della username
@@ -65,7 +68,7 @@ class AppController extends AbstractController {
    *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
    *    methods={"GET"})
    */
-  public function loginAction(SessionInterface $session, ConfigLoader $config, $codice, $lusr, $lpsw, $lapp) {
+  public function loginAction(SessionInterface $session,  AuthenticationUtils $auth, ConfigLoader $config, $codice, $lusr, $lpsw, $lapp) {
     $errore = null;
     $manutenzione = null;
     $modo_manutenzione = false;
@@ -87,8 +90,6 @@ class AppController extends AbstractController {
       }
     }
     if (!$modo_manutenzione) {
-      // esegue autenticazione
-      $auth = $this->get('security.authentication_utils');
       // conserva ultimo errore del login, se presente
       $errore = $auth->getLastAuthenticationError();
     }
@@ -198,6 +199,7 @@ class AppController extends AbstractController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
@@ -210,7 +212,7 @@ class AppController extends AbstractController {
    *    methods={"GET", "POST"})
    */
   public function telegramAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                  UserPasswordEncoderInterface $encoder, ConfigLoader $config, LoggerInterface $logger,
+                                  UserPasswordEncoderInterface $encoder, TranslatorInterface $trans, ConfigLoader $config, LoggerInterface $logger,
                                   LogHandler $dblogger, $token, $chat) {
     $successo = null;
     $manutenzione = null;
@@ -270,7 +272,7 @@ class AppController extends AbstractController {
             'token' => $token,
             'chat' => $chat,
             'ip' => $request->getClientIp()));
-          $form->addError(new FormError($this->get('translator')->trans('exception.invalid_user')));
+          $form->addError(new FormError($trans->trans('exception.invalid_user')));
         } elseif (!$encoder->isPasswordValid($utente, $password)) {
           // password errata
           $logger->error('Password errata nella richiesta di registrazione Telegram.', array(
@@ -278,7 +280,7 @@ class AppController extends AbstractController {
             'token' => $token,
             'chat' => $chat,
             'ip' => $request->getClientIp()));
-          $form->addError(new FormError($this->get('translator')->trans('exception.invalid_user')));
+          $form->addError(new FormError($trans->trans('exception.invalid_user')));
         } elseif (!$app) {
           // app non valida
           $logger->error('App non valida nella richiesta di registrazione Telegram.', array(
@@ -286,7 +288,7 @@ class AppController extends AbstractController {
             'token' => $token,
             'chat' => $chat,
             'ip' => $request->getClientIp()));
-          $form->addError(new FormError($this->get('translator')->trans('exception.invalid_app')));
+          $form->addError(new FormError($trans->trans('exception.invalid_app')));
         } elseif (!$tipo || strpos($app->getAbilitati(), $tipo) === false) {
           // tipo utente non valido
           $logger->error('Tipo utente non valido nella richiesta di registrazione Telegram.', array(
@@ -294,7 +296,7 @@ class AppController extends AbstractController {
             'token' => $token,
             'chat' => $chat,
             'ip' => $request->getClientIp()));
-          $form->addError(new FormError($this->get('translator')->trans('exception.invalid_user_type')));
+          $form->addError(new FormError($trans->trans('exception.invalid_user_type')));
           // redirect esterno: pagina errore
           $url = 'http://www.andreasiddi.cloud/wp-content/1427538690/bot/GiuaBot/redirect-registro-utente-non-ammesso.php';
           return new RedirectResponse($url);
@@ -305,7 +307,7 @@ class AppController extends AbstractController {
             'token' => $token,
             'chat' => $chat,
             'ip' => $request->getClientIp()));
-          $form->addError(new FormError($this->get('translator')->trans('exception.no_privacy')));
+          $form->addError(new FormError($trans->trans('exception.no_privacy')));
         } elseif (!$this->registraTelegram($app, $utente, $chat, $em)) {
           // registrazione fallita
           $logger->error('Errore sulla chiamata al servizio esterno di registrazione Telegram.', array(
@@ -313,7 +315,7 @@ class AppController extends AbstractController {
             'token' => $token,
             'chat' => $chat,
             'ip' => $request->getClientIp()));
-          $form->addError(new FormError($this->get('translator')->trans('exception.error_registration_service')));
+          $form->addError(new FormError($trans->trans('exception.error_registration_service')));
         } else {
           // ok: crea notifica benvenuto
           if (isset($app->getDati()['benvenuto']) && $app->getDati()['benvenuto']) {

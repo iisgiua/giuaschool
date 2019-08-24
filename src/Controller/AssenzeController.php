@@ -14,6 +14,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -357,6 +358,7 @@ class AssenzeController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
@@ -372,7 +374,7 @@ class AssenzeController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function entrataAction(Request $request, EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+  public function entrataAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, RegistroUtil $reg,
                                  LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
     // inizializza
     $label = array();
@@ -483,7 +485,7 @@ class AssenzeController extends AbstractController {
       } elseif ($form->get('ora')->getData()->format('H:i:00') <= $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
-        $form->get('ora')->addError(new FormError($this->get('translator')->trans('field.time', [], 'validators')));
+        $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
       } elseif ($form->isValid()) {
         if (isset($entrata_old) && $form->get('delete')->isClicked()) {
           // cancella ritardo esistente
@@ -574,6 +576,7 @@ class AssenzeController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
@@ -589,7 +592,7 @@ class AssenzeController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function uscitaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+  public function uscitaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, RegistroUtil $reg,
                                 LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
     // inizializza
     $label = array();
@@ -693,7 +696,7 @@ class AssenzeController extends AbstractController {
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') >= $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
-        $form->get('ora')->addError(new FormError($this->get('translator')->trans('field.time', [], 'validators')));
+        $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
       } elseif ($form->isValid()) {
         if (isset($uscita_old) && $form->get('delete')->isClicked()) {
           // cancella ritardo esistente
@@ -942,6 +945,7 @@ class AssenzeController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
@@ -956,7 +960,7 @@ class AssenzeController extends AbstractController {
    *
    * @Security("has_role('ROLE_DOCENTE')")
    */
-  public function appelloAction(Request $request, EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+  public function appelloAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, RegistroUtil $reg,
                                  LogHandler $dblogger, $cattedra, $classe, $data) {
     // inizializza
     $label = array();
@@ -1084,7 +1088,7 @@ class AssenzeController extends AbstractController {
             if ($appello->getOra()->format('H:i:00') <= $orario[0]['inizio'] ||
                 $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
               // errore su orario
-              $form->get('lista')[$key]->get('ora')->addError(new FormError($this->get('translator')->trans('field.time', [], 'validators')));
+              $form->get('lista')[$key]->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
               continue;
             }
             // controlla esistenza ritardo
@@ -1202,4 +1206,3 @@ class AssenzeController extends AbstractController {
   }
 
 }
-

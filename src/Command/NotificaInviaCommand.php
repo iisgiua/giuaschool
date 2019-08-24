@@ -247,7 +247,7 @@ class NotificaInviaCommand extends Command {
     // crea il messaggio
     $message = (new \Swift_Message())
       ->setSubject($dati['oggetto'])
-      ->setFrom(['{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}' => '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}'])
+      ->setFrom(['{{ app.session->get(\'/CONFIG/SCUOLA/email_notifica\') }}' => '{{ app.session->get(\'/CONFIG/SCUOLA/intestazione_istituto_breve\') }}'])
       ->setTo([$dati['email']])
       ->setBody($notifica->getMessaggio(), 'text/html');
     // invia mail

@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -407,7 +408,7 @@ class CoordinatoreController extends AbstractController {
     // controllo formato
     if ($formato == 'P') {
       // crea documento PDF
-      $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+      $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
         'Situazione alunn'.($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
       $html = $this->renderView('pdf/situazione_alunno.html.twig', array(
         'classe' => $classe,
@@ -472,7 +473,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->assenze($classe);
     // crea documento PDF
-    $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
       'Assenze della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/assenze_classe.html.twig', array(
       'classe' => $classe,
@@ -523,7 +524,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->note($classe);
     // crea documento PDF
-    $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
       'Note disciplinari della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $html = $this->renderView('pdf/note_classe.html.twig', array(
       'classe' => $classe,
@@ -574,7 +575,7 @@ class CoordinatoreController extends AbstractController {
     // legge dati
     $dati = $staff->voti($classe);
     // crea documento PDF
-    $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
       'Medie dei voti della classe '.$classe->getAnno().'ª '.$classe->getSezione());
     $pdf->getHandler()->setPageOrientation('L', true, 20);
     $html = $this->renderView('pdf/voti_classe.html.twig', array(
@@ -663,6 +664,7 @@ class CoordinatoreController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -679,7 +681,7 @@ class CoordinatoreController extends AbstractController {
    * @Security("has_role('ROLE_DOCENTE')")
    */
   public function avvisoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                    BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
+                                    TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
     // controllo classe
     $classe = $em->getRepository('App:Classe')->find($classe);
     if (!$classe) {
@@ -714,7 +716,7 @@ class CoordinatoreController extends AbstractController {
         ->setDestinatariGenitori(false)
         ->setDestinatariAlunni(false)
         ->setDestinatariIndividuali(false)
-        ->setOggetto($this->get('translator')->trans('message.avviso_coordinatore_oggetto',
+        ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto',
           ['%classe%' => $classe->getAnno().'ª '.$classe->getSezione()]))
         ->setData(new \DateTime('today'));
       $em->persist($avviso);
@@ -818,16 +820,16 @@ class CoordinatoreController extends AbstractController {
       // controllo errori
       if (empty($val_destinatari) || $val_filtro == 'N') {
         // errore: nessun destinatario
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_mancanti')));
       }
       if ($val_destinatari == 'G' && $val_filtro == 'I' && count($val_filtro_id) == 0) {
         // errore: filtro vuoto
-        $form->addError(new FormError($this->get('translator')->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
       }
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
-        $form->addError(new FormError($this->get('translator')->trans('exception.avviso_non_permesso')));
+        $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
       // modifica dati
       if ($form->isValid()) {
@@ -1006,4 +1008,3 @@ class CoordinatoreController extends AbstractController {
   }
 
 }
-

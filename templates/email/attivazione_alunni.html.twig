@@ -1,6 +1,6 @@
 <p>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
-  <strong><i>{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong>
+  <strong><i>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong>
 </p>
 <p>
   Alunn{{ sesso }}: <strong>{{ alunno.nome }} {{ alunno.cognome }}</strong><br>
@@ -9,7 +9,7 @@
 <p>&nbsp;</p>
 <p>Per confermare l'attivazione dell'accesso al Registro Elettronico per l'alunn{{ sesso }} indicat{{ sesso }}, clicca sul seguente collegamento:</p>
 <ul>
-  <li><strong style="font-family:helvetica; font-size:120%;"><a href="{{ app.session->get('/CONFIG/SCUOLA/url_registro') }}/login/conferma/{{ alunno.token }}">{{ app.session->get('/CONFIG/SCUOLA/url_registro') }}/login/conferma/{{ alunno.token }}</a></strong></li>
+  <li><strong style="font-family:helvetica; font-size:120%;"><a href="{{ app.session.get('/CONFIG/SCUOLA/url_registro') }}/login/conferma/{{ alunno.token }}">{{ app.session.get('/CONFIG/SCUOLA/url_registro') }}/login/conferma/{{ alunno.token }}</a></strong></li>
 </ul>
 <p><em>Se il collegamento non è cliccabile, copialo e incollalo nel tuo programma di navigazione Internet (browser).</em></p>
 <p>&nbsp;</p>

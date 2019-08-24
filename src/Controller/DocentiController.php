@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -381,13 +382,14 @@ class DocentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @Route("/docenti/cattedre/add/", name="docenti_cattedre_add",
    *    methods={"GET", "POST"})
    *
    * @Security("has_role('ROLE_AMMINISTRATORE')")
    */
-  public function cattedreAddAction(Request $request, EntityManagerInterface $em) {
+  public function cattedreAddAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans) {
     // form di inserimento
     $cattedra = new Cattedra();
     $form = $this->container->get('form.factory')->createNamedBuilder('docenti_cattedre_add', FormType::class, $cattedra)
@@ -458,14 +460,14 @@ class DocentiController extends AbstractController {
         //-- $cattedra->setTipo('S');
         if ($cattedra->getAlunno() && $cattedra->getAlunno()->getClasse() != $cattedra->getClasse()) {
           // classe diversa da quella di alunno
-          $form->get('classe')->addError(new FormError($this->get('translator')->trans('exception.classe_errata')));
+          $form->get('classe')->addError(new FormError($trans->trans('exception.classe_errata')));
         }
       } else {
         // materia non è sostegno, nessun alunno deve essere presente
         $cattedra->setAlunno(null);
         if ($cattedra->getTipo() == 'S') {
           // tipo sostegno su materia non di sostegno
-          $form->get('tipo')->addError(new FormError($this->get('translator')->trans('exception.tipo_sostegno')));
+          $form->get('tipo')->addError(new FormError($trans->trans('exception.tipo_sostegno')));
         }
       }
       // controlla esistenza di cattedra
@@ -476,7 +478,7 @@ class DocentiController extends AbstractController {
         'alunno' => $cattedra->getAlunno()));
       if (count($lista) > 0) {
         // cattedra esiste già
-        $form->addError(new FormError($this->get('translator')->trans('exception.cattedra_esiste')));
+        $form->addError(new FormError($trans->trans('exception.cattedra_esiste')));
       }
       if ($form->isValid()) {
         // memorizza dati
@@ -891,7 +893,7 @@ class DocentiController extends AbstractController {
       'ID esecutore' => $this->getUser()->getId()
       ));
     // crea documento PDF
-    $pdf->configure('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}',
+    $pdf->configure("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}",
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_docenti.html.twig', array(
@@ -944,4 +946,3 @@ class DocentiController extends AbstractController {
   }
 
 }
-

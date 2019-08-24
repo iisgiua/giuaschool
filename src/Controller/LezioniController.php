@@ -393,7 +393,7 @@ class LezioniController extends AbstractController {
     \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
     $properties = $phpWord->getDocInfo();
-    $properties->setCreator('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}');
+    $properties->setCreator("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto') }}");
     $properties->setTitle('Programma svolto - '.$info['classe'].' - '.$info['materia']);
     $properties->setDescription('');
     $properties->setSubject('');
@@ -440,7 +440,7 @@ class LezioniController extends AbstractController {
     $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE',
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}',
+    $section->addText("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}",
       array('bold' => true, 'italic' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addText('CAGLIARI - ASSEMINI',
@@ -477,4 +477,3 @@ class LezioniController extends AbstractController {
   }
 
 }
-

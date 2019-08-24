@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -50,7 +51,7 @@ class LoginController extends AbstractController {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
-   * @param AuthenticationUtils auth Gestore delle procedure di autenticazione
+   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
@@ -100,6 +101,7 @@ class LoginController extends AbstractController {
    * Registra docente per l'uso dei token (tramite lettore di impronte)
    *
    * @param SessionInterface $session Gestore delle sessioni
+   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
@@ -107,7 +109,7 @@ class LoginController extends AbstractController {
    * @Route("/login/registrazione/", name="login_registrazione",
    *    methods={"GET", "POST"})
    */
-  public function registrazioneAction(SessionInterface $session, ConfigLoader $config) {
+  public function registrazioneAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
     $config->load('SISTEMA');
     // manutenzione
@@ -121,8 +123,6 @@ class LoginController extends AbstractController {
         $manutenzione = $dati;
       }
     }
-    // esegue autenticazione (primo passo della registrazione)
-    $auth = $this->get('security.authentication_utils');
     // conserva ultimo errore del login, se presente
     $errore = $auth->getLastAuthenticationError();
     // conserva ultimo username inserito
@@ -140,20 +140,21 @@ class LoginController extends AbstractController {
    * Login dell'utente tramite token (inviato dal lettore di impronte).
    *
    * @param SessionInterface $session Gestore delle sessioni
+   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    *
    * @return Response Pagina di risposta
    *
    * @Route("/login/token/", name="login_token",
    *    methods={"GET", "POST"})
    */
-  public function tokenAction(SessionInterface $session) {
+  public function tokenAction(SessionInterface $session, AuthenticationUtils $auth) {
     // legge sessione
     $token1 = $session->get('/APP/UTENTE/token1');
     $token2 = $session->get('/APP/UTENTE/token2');
     $token3 = $session->get('/APP/UTENTE/token3');
     if (!$token1 || !$token2 || !$token3) {
       // esegue autenticazione
-      $errore = $this->get('security.authentication_utils')->getLastAuthenticationError();
+      $errore = $auth->getLastAuthenticationError();
       // mostra la pagina di risposta
       return $this->render('login/token.html.twig', array(
         'errore' => $errore,
@@ -191,6 +192,7 @@ class LoginController extends AbstractController {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
@@ -198,7 +200,7 @@ class LoginController extends AbstractController {
    * @Route("/login/card/errore/", name="login_card_errore",
    *    methods={"GET"})
    */
-  public function cardErroreAction(EntityManagerInterface $em, SessionInterface $session, ConfigLoader $config) {
+  public function cardErroreAction(EntityManagerInterface $em, SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
     $config->load('SISTEMA');
     // manutenzione
@@ -213,7 +215,7 @@ class LoginController extends AbstractController {
       }
     }
     // legge ultimo errore del login
-    $errore = $this->get('security.authentication_utils')->getLastAuthenticationError();
+    $errore = $auth->getLastAuthenticationError();
     // mostra la pagina di risposta
     return $this->render('login/card.html.twig', array(
       'pagina_titolo' => 'page.login',
@@ -395,8 +397,8 @@ class LoginController extends AbstractController {
           ));
         // crea messaggio
         $message = (new \Swift_Message())
-          ->setSubject('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} - Recupero credenziali del Registro Elettronico')
-          ->setFrom(['{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}' => '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}'])
+          ->setSubject("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} - Recupero credenziali del Registro Elettronico")
+          ->setFrom(["{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}" => "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}"])
           ->setTo([$email])
           ->setBody($this->renderView($template_html,
             array(
@@ -580,8 +582,8 @@ class LoginController extends AbstractController {
         // crea messaggio
         $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
         $message = (new \Swift_Message())
-          ->setSubject('{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} - Attivazione dell\'accesso al Registro Elettronico da parte degli studenti')
-          ->setFrom(['{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}' => '{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}'])
+          ->setSubject("{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} - Attivazione dell\'accesso al Registro Elettronico da parte degli studenti")
+          ->setFrom(["{{ app.session->get('/CONFIG/SCUOLA/email_notifica') }}" => "{{ app.session->get('/CONFIG/SCUOLA/intestazione_istituto_breve') }}"])
           ->setTo([$email])
           ->setBody($this->renderView('email/attivazione_alunni.html.twig',
             array(
@@ -626,6 +628,7 @@ class LoginController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param LogHandler $dblogger Gestore dei log su database
@@ -637,7 +640,7 @@ class LoginController extends AbstractController {
    *    methods={"GET"})
    */
   public function confermaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                  ConfigLoader $config, UserPasswordEncoderInterface $encoder, LogHandler $dblogger,
+                                  TranslatorInterface $trans, ConfigLoader $config, UserPasswordEncoderInterface $encoder, LogHandler $dblogger,
                                   $token) {
     // carica configurazione di sistema
     $config->load('SISTEMA');
@@ -676,9 +679,9 @@ class LoginController extends AbstractController {
       $preside = $em->getRepository('App:Preside')->findOneBy(['abilitato' => 1]);
       $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $nome = $alunno->getNome().' '.$alunno->getCognome();
-      $oggetto = $this->get('translator')->trans('message.attivazione_alunno_oggetto',
+      $oggetto = $trans->trans('message.attivazione_alunno_oggetto',
         ['%sex%' => $sesso, '%alunno%' => $nome]);
-      $testo = $this->get('translator')->trans('message.attivazione_alunno_testo',
+      $testo = $trans->trans('message.attivazione_alunno_testo',
         ['%sex%' => $sesso, '%alunno%' => $nome, '%username%' => $alunno->getUsername(), '%password%' => $password]);
       $avviso = (new Avviso())
         ->setTipo('I')
