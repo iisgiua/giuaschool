@@ -434,7 +434,7 @@ class AgendaController extends AbstractController {
   public function cattedraAjaxAction(EntityManagerInterface $em, $id) {
     $alunni = $em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.classe=a.classe')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.classe=a.classe')
       ->where('a.abilitato=:abilitato AND c.id=:cattedra AND c.attiva=:attiva')
       ->setParameters(['abilitato' => 1, 'cattedra' => $id, 'attiva' => 1])
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')

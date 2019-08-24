@@ -188,7 +188,7 @@ class AssenzeEsportaCommand extends Command {
     // alunni che hanno frequentato nella classe per un periodo (esclusi alunni all'estero)
     $alunni2 = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,cc.inizio,cc.fine')
-      ->join('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=a.id')
+      ->join('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('cc.classe=:classe AND a.abilitato=:abilitato AND a.frequenzaEstero=:no_estero')
       ->setParameters(['classe' => $classe, 'abilitato' => 1, 'no_estero' => 0])
       ->getQuery()

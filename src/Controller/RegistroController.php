@@ -658,7 +658,7 @@ class RegistroController extends AbstractController {
     if (count($voti) > 0) {
       // altra lezione
       $altra_lezione = $em->getRepository('App:Lezione')->createQueryBuilder('l')
-        ->join('App:Firma', 'f', 'WHERE', 'l.id=f.lezione')
+        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
         ->where('l.id!=:id AND l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
         ->setParameters(['id' => $lezione, 'data' => $data, 'classe' => $classe,
           'materia' => $lezione->getMateria(), 'docente' => $this->getUser()])

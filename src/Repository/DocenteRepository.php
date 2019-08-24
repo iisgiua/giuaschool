@@ -74,7 +74,7 @@ class DocenteRepository extends UtenteRepository {
     // legge docenti validi
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->leftJoin('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id AND c.attiva=:attiva')
+      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.id IN (:lista) AND d.abilitato=:abilitato')
       ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App:Staff)')
@@ -120,7 +120,7 @@ class DocenteRepository extends UtenteRepository {
   public function getIdCoordinatore($sedi, $filtro) {
     $coordinatori = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->join('App:Classe', 'c', 'WHERE', 'd.id=c.coordinatore')
+      ->join('App:Classe', 'c', 'WITH', 'd.id=c.coordinatore')
       ->where('d.abilitato=:abilitato AND c.sede IN (:sedi)')
       ->setParameters(['abilitato' => 1, 'sedi' => $sedi]);
     if ($filtro) {
@@ -146,7 +146,7 @@ class DocenteRepository extends UtenteRepository {
   public function getIdDocente($sedi, $tipo, $filtro) {
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id AND c.attiva=:attiva')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->join('c.classe', 'cl')
       ->where('d.abilitato=:abilitato AND cl.sede IN (:sedi)')
       ->setParameters(['attiva' => 1, 'abilitato' => 1, 'sedi' => $sedi]);
@@ -182,7 +182,7 @@ class DocenteRepository extends UtenteRepository {
   public function cercaSede($cerca, $pagina, $limite) {
     // crea query
     $query = $this->createQueryBuilder('d')
-      ->leftJoin('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id AND c.attiva=:attiva')
+      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App:Preside) AND d.abilitato=:abilitato')
       ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App:Staff)')

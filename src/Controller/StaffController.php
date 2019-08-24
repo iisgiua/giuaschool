@@ -3451,7 +3451,7 @@ class StaffController extends AbstractController {
         $elenco = $reg->alunniInData($data_obj, $classe);
         // elenco assenze
         $assenti = $em->getRepository('App:Alunno')->createQueryBuilder('a')
-          ->join('App:Assenza', 'ass', 'WHERE', 'a.id=ass.alunno AND ass.data=:data')
+          ->join('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
           ->where('a.id IN (:elenco)')
           ->setParameters(['elenco' => $elenco, 'data' => $data_obj->format('Y-m-d')])
           ->getQuery()

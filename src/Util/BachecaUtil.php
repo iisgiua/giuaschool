@@ -413,13 +413,13 @@ class BachecaUtil {
     }
     if (isset($ricerca['classe']) && $ricerca['classe']) {
       $avvisi = $avvisi
-        ->join('App:AvvisoClasse', 'ac', 'WHERE', 'a.id=ac.avviso')
+        ->join('App:AvvisoClasse', 'ac', 'WITH', 'a.id=ac.avviso')
         ->andWhere('ac.classe=:classe')
         ->setParameter('classe', $ricerca['classe']);
     }
     if (isset($ricerca['classe_individuale']) && $ricerca['classe_individuale']) {
       $avvisi = $avvisi
-        ->join('App:AvvisoIndividuale', 'ai', 'WHERE', 'a.id=ai.avviso')
+        ->join('App:AvvisoIndividuale', 'ai', 'WITH', 'a.id=ai.avviso')
         ->join('ai.alunno', 'al')
         ->andWhere('al.classe=:classe')
         ->setParameter('classe', $ricerca['classe_individuale']);
@@ -561,8 +561,8 @@ class BachecaUtil {
         // filtro classe
         $avc = $this->em->getRepository('App:AvvisoClasse')->createQueryBuilder('avc')
           ->join('avc.classe', 'c')
-          ->join('App:Alunno', 'a', 'WHERE', 'c.id=a.classe')
-          ->join('App:Genitore', 'g', 'WHERE', 'a.id=g.alunno')
+          ->join('App:Alunno', 'a', 'WITH', 'c.id=a.classe')
+          ->join('App:Genitore', 'g', 'WITH', 'a.id=g.alunno')
           ->where('avc.avviso=:avviso AND g.id=:utente')
           ->setParameters(['avviso' => $avviso, 'utente' => $utente])
           ->getQuery()
@@ -575,7 +575,7 @@ class BachecaUtil {
         // filtro docenti
         $avc = $this->em->getRepository('App:AvvisoClasse')->createQueryBuilder('avc')
           ->join('avc.classe', 'cl')
-          ->join('App:Cattedra', 'c', 'WHERE', 'cl.id=c.classe')
+          ->join('App:Cattedra', 'c', 'WITH', 'cl.id=c.classe')
           ->where('avc.avviso=:avviso AND c.docente=:utente AND c.attiva=:attiva')
           ->setParameters(['avviso' => $avviso, 'utente' => $utente, 'attiva' => 1])
           ->setMaxResults(1)
@@ -609,7 +609,7 @@ class BachecaUtil {
         }
         $avs = $this->em->getRepository('App:AvvisoSede')->createQueryBuilder('avs')
           ->join('avs.sede', 's')
-          ->join('App:Staff', 'st', 'WHERE', 's.id=st.sede')
+          ->join('App:Staff', 'st', 'WITH', 's.id=st.sede')
           ->where('avs.avviso=:avviso AND st.id=:utente')
           ->setParameters(['avviso' => $avviso, 'utente' => $utente])
           ->getQuery()
@@ -623,7 +623,7 @@ class BachecaUtil {
       // alunno
       $avc = $this->em->getRepository('App:AvvisoClasse')->createQueryBuilder('avc')
         ->join('avc.classe', 'c')
-        ->join('App:Alunno', 'a', 'WHERE', 'c.id=a.classe')
+        ->join('App:Alunno', 'a', 'WITH', 'c.id=a.classe')
         ->where('avc.avviso=:avviso AND a.id=:utente')
         ->setParameters(['avviso' => $avviso, 'utente' => $utente])
         ->getQuery()
@@ -700,11 +700,11 @@ class BachecaUtil {
   public function bachecaAvvisi($pagina, $limite, Docente $docente, \DateTime $ultimo_accesso) {
     // lista nuovi avvisi (successivi ultimo accesso)
     $nuovi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->leftJoin('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->leftJoin('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->leftJoin('avc.classe', 'cl')
-      ->leftJoin('App:Cattedra', 'c', 'WHERE', 'c.classe=cl.id AND c.docente=:docente AND c.attiva=:attiva')
-      //-- ->leftJoin('App:Staff', 'st', 'WHERE', 'st.id=:docente')
-      //-- ->leftJoin('App:AvvisoSede', 'avs', 'WHERE', 'avs.avviso=a.id')
+      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.classe=cl.id AND c.docente=:docente AND c.attiva=:attiva')
+      //-- ->leftJoin('App:Staff', 'st', 'WITH', 'st.id=:docente')
+      //-- ->leftJoin('App:AvvisoSede', 'avs', 'WITH', 'avs.avviso=a.id')
       ->where('(a.destinatariDocenti=:destinatario AND c.id IS NOT NULL AND a.modificato>=:ultimo_accesso) OR '.
         '(a.destinatariCoordinatori=:destinatario AND cl.coordinatore=:docente AND avc.lettoCoordinatore IS NULL)')
         //-- '(a.destinatariStaff=:destinatario AND st.id IS NOT NULL AND a.modificato>=:ultimo_accesso AND (st.sede IS NULL OR st.sede=avs.sede))')
@@ -731,11 +731,11 @@ class BachecaUtil {
     }
     // lista avvisi (precedenti ultimo accesso)
     $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->leftJoin('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->leftJoin('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->leftJoin('avc.classe', 'cl')
-      ->leftJoin('App:Cattedra', 'c', 'WHERE', 'c.classe=cl.id AND c.docente=:docente AND c.attiva=:attiva')
-      //-- ->leftJoin('App:Staff', 'st', 'WHERE', 'st.id=:docente')
-      //-- ->leftJoin('App:AvvisoSede', 'avs', 'WHERE', 'avs.avviso=a.id')
+      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.classe=cl.id AND c.docente=:docente AND c.attiva=:attiva')
+      //-- ->leftJoin('App:Staff', 'st', 'WITH', 'st.id=:docente')
+      //-- ->leftJoin('App:AvvisoSede', 'avs', 'WITH', 'avs.avviso=a.id')
       ->where('(a.destinatariDocenti=:destinatario AND c.id IS NOT NULL AND a.modificato<:ultimo_accesso) OR '.
         '(a.destinatariCoordinatori=:destinatario AND cl.coordinatore=:docente AND avc.lettoCoordinatore IS NOT NULL)')
         //-- '(a.destinatariStaff=:destinatario AND st.id IS NOT NULL AND a.modificato<:ultimo_accesso AND (st.sede IS NULL OR st.sede=avs.sede))')
@@ -779,7 +779,7 @@ class BachecaUtil {
     // lista avvisi non letti
     $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->select('COUNT(a)')
-      ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->join('avc.classe', 'cl')
       ->where('a.destinatariAlunni=:destinatario AND cl.id=:classe AND avc.lettoAlunni IS NULL')
       ->setParameters(['destinatario' => 1, 'classe' => $classe])
@@ -799,7 +799,7 @@ class BachecaUtil {
   public function bachecaAvvisiAlunni(Classe $classe) {
     // lista avvisi non letti
     $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->join('avc.classe', 'cl')
       ->where('a.destinatariAlunni=:destinatario AND cl.id=:classe AND avc.lettoAlunni IS NULL')
       ->orderBy('a.data', 'ASC')
@@ -862,9 +862,9 @@ class BachecaUtil {
   public function bachecaAvvisiGenitori($pagina, $limite, Genitore $genitore, Alunno $alunno, \DateTime $ultimo_accesso) {
     // lista nuovi avvisi (successivi ultimo accesso o non letti)
     $nuovi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->leftJoin('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->leftJoin('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->leftJoin('avc.classe', 'cl')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->leftJoin('avi.genitore', 'g')
       ->leftJoin('avi.alunno', 'al')
       ->where('(a.destinatariGenitori=:destinatario AND a.modificato>=:ultimo_accesso AND cl.id IS NOT NULL AND cl.id=:classe) OR '.
@@ -877,9 +877,9 @@ class BachecaUtil {
     $dati['nuovi'] = $nuovi;
     // lista avvisi (precedenti ultimo accesso o letti)
     $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->leftJoin('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->leftJoin('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->leftJoin('avc.classe', 'cl')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WHERE', 'avi.avviso=a.id')
+      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
       ->leftJoin('avi.genitore', 'g')
       ->leftJoin('avi.alunno', 'al')
       ->where('(a.destinatariGenitori=:destinatario AND a.modificato<:ultimo_accesso AND cl.id IS NOT NULL AND cl.id=:classe) OR '.
@@ -952,8 +952,8 @@ class BachecaUtil {
     $dati = array();
     // legge avvisi
     $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->leftJoin('App:AvvisoClasse', 'ac', 'WHERE', 'a.id=ac.avviso')
-      ->leftJoin('App:AvvisoIndividuale', 'ai', 'WHERE', 'a.id=ai.avviso')
+      ->leftJoin('App:AvvisoClasse', 'ac', 'WITH', 'a.id=ac.avviso')
+      ->leftJoin('App:AvvisoIndividuale', 'ai', 'WITH', 'a.id=ai.avviso')
       ->leftJoin('ai.alunno', 'al')
       ->where('a.tipo=:tipo')
       ->andWhere('(a.destinatariIndividuali=:no_indiv AND ac.classe=:classe) OR (a.destinatariIndividuali=:indiv AND al.classe=:classe)')
@@ -1012,7 +1012,7 @@ class BachecaUtil {
   public function bachecaAvvisiGenitoriAlunni($pagina, $limite, Alunno $alunno, \DateTime $ultimo_accesso) {
     // lista nuovi avvisi (successivi ultimo accesso o non letti)
     $nuovi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->join('avc.classe', 'cl')
       ->where('a.destinatariAlunni=:destinatario AND a.modificato>=:ultimo_accesso AND cl.id=:classe')
       ->orderBy('a.data', 'DESC')
@@ -1023,7 +1023,7 @@ class BachecaUtil {
     $dati['nuovi'] = $nuovi;
     // lista avvisi (precedenti ultimo accesso o letti)
     $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WHERE', 'avc.avviso=a.id')
+      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->join('avc.classe', 'cl')
       ->where('a.destinatariAlunni=:destinatario AND a.modificato<:ultimo_accesso AND cl.id=:classe')
       ->orderBy('a.data', 'DESC')

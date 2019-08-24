@@ -193,7 +193,7 @@ class SegreteriaUtil {
       // scrutini di classe corrente o altre di cambio classe
       $scrutini = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
         ->leftJoin('s.classe', 'c')
-        ->leftJoin('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=:alunno')
+        ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
         ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso')
         ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(),
           'stato' => 'C', 'adesso' => $adesso])

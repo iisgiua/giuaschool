@@ -113,7 +113,7 @@ class CircolareRepository extends EntityRepository {
   public function listaNuove(Utente $utente) {
     // legge circolari
     $circolari = $this->createQueryBuilder('c')
-      ->join('App:CircolareUtente', 'cu', 'WHERE', 'cu.circolare=c.id AND cu.utente=:utente')
+      ->join('App:CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
       ->where('c.pubblicata=:pubblicata AND cu.letta IS NULL')
       ->orderBy('c.data', 'DESC')
       ->addOrderBy('c.numero', 'DESC')
@@ -138,7 +138,7 @@ class CircolareRepository extends EntityRepository {
   public function listaLette($cerca, $pagina, $limite, Utente $utente) {
     // legge circolari
     $query = $this->createQueryBuilder('c')
-      ->join('App:CircolareUtente', 'cu', 'WHERE', 'cu.circolare=c.id AND cu.utente=:utente')
+      ->join('App:CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
       ->where('c.pubblicata=:pubblicata AND cu.letta IS NOT NULL')
       ->setParameters(['pubblicata' => 1, 'utente' => $utente]);
     if (isset($cerca['inizio']) && isset($cerca['fine'])) {
@@ -169,7 +169,7 @@ class CircolareRepository extends EntityRepository {
   public function listaTutte($cerca, $pagina, $limite, Utente $utente) {
     // legge circolari
     $query = $this->createQueryBuilder('c')
-      ->leftJoin('App:CircolareUtente', 'cu', 'WHERE', 'cu.circolare=c.id AND cu.utente=:utente')
+      ->leftJoin('App:CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
       ->where('c.pubblicata=:pubblicata AND c.data BETWEEN :inizio AND :fine AND c.oggetto LIKE :oggetto')
       ->andWhere('cu.id IS NULL OR cu.letta IS NOT NULL')
       ->orderBy('c.data', 'DESC')
@@ -208,7 +208,7 @@ class CircolareRepository extends EntityRepository {
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
-      ->join('App:CircolareClasse', 'cc', 'WHERE', 'cc.circolare=c.id AND cc.classe=:classe')
+      ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
       ->where('c.pubblicata=:pubblicata AND cc.letta IS NULL')
       ->setParameters(['pubblicata' => 1, 'classe' => $classe])
       ->getQuery()
@@ -228,7 +228,7 @@ class CircolareRepository extends EntityRepository {
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
-      ->join('App:CircolareUtente', 'cu', 'WHERE', 'cu.circolare=c.id AND cu.utente=:utente')
+      ->join('App:CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
       ->where('c.pubblicata=:pubblicata AND cu.letta IS NULL')
       ->setParameters(['pubblicata' => 1, 'utente' => $utente])
       ->getQuery()
@@ -247,7 +247,7 @@ class CircolareRepository extends EntityRepository {
   public function circolariClasse(Classe $classe) {
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
-      ->join('App:CircolareClasse', 'cc', 'WHERE', 'cc.circolare=c.id AND cc.classe=:classe')
+      ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
       ->where('c.pubblicata=:pubblicata AND cc.letta IS NULL')
       ->setParameters(['pubblicata' => 1, 'classe' => $classe])
       ->getQuery()
@@ -388,7 +388,7 @@ class CircolareRepository extends EntityRepository {
       // lista classi in cui va letta
       $classi = $this->createQueryBuilder('c')
         ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome")
-        ->join('App:CircolareClasse', 'cc', 'WHERE', 'cc.circolare=c.id')
+        ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id')
         ->join('cc.classe', 'cl')
         ->where('c.id=:id AND cc.letta IS NULL')
         ->setParameters(['id' => $circolare->getId()])

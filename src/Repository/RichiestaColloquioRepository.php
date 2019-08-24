@@ -43,7 +43,7 @@ class RichiestaColloquioRepository extends EntityRepository {
       ->join('a.classe', 'cl')
       ->join('rc.colloquio', 'c')
       ->join('c.orario', 'o')
-      ->join('App:ScansioneOraria', 'so', 'WHERE', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
       ->where('c.docente=:docente AND rc.data>=:data')
       ->orderBy('rc.data,c.ora,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d')]);
@@ -57,4 +57,3 @@ class RichiestaColloquioRepository extends EntityRepository {
   }
 
 }
-

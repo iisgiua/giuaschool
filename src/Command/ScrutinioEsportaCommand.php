@@ -302,7 +302,7 @@ class ScrutinioEsportaCommand extends Command {
       // alunni all'estero
       $alu_estero = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=a.id')
+        ->join('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
         ->where('a.id IN (:lista) AND cc.classe=:classe AND a.frequenzaEstero=:estero')
         ->setParameters(['lista' => ($scrutinio->getDato('ritirati') == null ? [] : $scrutinio->getDato('ritirati')),
           'classe' => $classe, 'estero' => 1])
@@ -361,7 +361,7 @@ class ScrutinioEsportaCommand extends Command {
     // legge materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.tipo')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])

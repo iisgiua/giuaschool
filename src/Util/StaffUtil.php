@@ -280,7 +280,7 @@ class StaffUtil {
       ->select('(al.alunno) AS id,SUM(al.ore) AS ore')
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
-      ->leftJoin('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where('al.alunno IN (:lista) AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
       ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'tipo' => 'N'])
@@ -292,7 +292,7 @@ class StaffUtil {
       ->join('al.lezione', 'l')
       ->join('al.alunno', 'a')
       ->join('l.materia', 'm')
-      ->leftJoin('App:CambioClasse', 'cc', 'WHERE', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where('al.alunno IN (:lista) AND a.religione=:religione AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
       ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'religione' => 'S', 'tipo' => 'R'])
@@ -348,7 +348,7 @@ class StaffUtil {
     // lista materie
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.materia=m.id')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND m.valutazione=:valutazione AND m.media=:media')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'valutazione' => 'N', 'media' => 1])
@@ -474,7 +474,7 @@ class StaffUtil {
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.note,a.religione,g.ultimoAccesso')
-      ->join('App:Genitore', 'g', 'WHERE', 'g.alunno=a.id')
+      ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista_alunni])
@@ -554,10 +554,10 @@ class StaffUtil {
       // statistiche di singolo docente
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
         ->select('d AS docente,SUM(so.durata/60) AS ore')
-        ->join('App:Firma', 'f', 'WHERE', 'd.id=f.docente')
+        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->andWhere('f.docente=:docente')
@@ -570,10 +570,10 @@ class StaffUtil {
       // statistiche di tutti i docenti
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
         ->select('d AS docente,SUM(so.durata/60) AS ore')
-        ->join('App:Firma', 'f', 'WHERE', 'd.id=f.docente')
+        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -637,7 +637,7 @@ class StaffUtil {
     foreach ($paginator as $k=>$c) {
       // legge docenti
       $dati['docenti'][$k] = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id AND c.attiva=:attiva AND c.tipo!=:potenziamento')
+        ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva AND c.tipo!=:potenziamento')
         ->where('d.abilitato=:abilitato AND c.materia=:materia AND c.classe=:classe')
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'abilitato' => 1,
@@ -696,7 +696,7 @@ class StaffUtil {
     foreach ($paginator as $k=>$c) {
       // legge docenti
       $dati['docenti'][$k] = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id AND c.attiva=:attiva AND c.tipo!=:potenziamento')
+        ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva AND c.tipo!=:potenziamento')
         ->where('d.abilitato=:abilitato AND c.materia=:materia AND c.classe=:classe')
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'abilitato' => 1,
@@ -755,7 +755,7 @@ class StaffUtil {
     foreach ($paginator as $k=>$c) {
       // legge docenti
       $dati['docenti'][$k] = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=d.id AND c.attiva=:attiva AND c.tipo!=:potenziamento')
+        ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva AND c.tipo!=:potenziamento')
         ->where('d.abilitato=:abilitato AND c.materia=:materia AND c.classe=:classe')
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'abilitato' => 1,
@@ -789,7 +789,7 @@ class StaffUtil {
       ->addSelect('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,d.id AS documento_id,d.file,d.dimensione')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WHERE', 'd.tipo=:documento AND d.classe=cl.id')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
       ->where('cl.anno=:quinta');
     if ($search['classe']) {
       $cattedre = $cattedre
@@ -880,10 +880,10 @@ class StaffUtil {
       // statistiche di singolo docente
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
         ->select('d.cognome,d.nome,SUM(so.durata/60) AS ore')
-        ->join('App:Firma', 'f', 'WHERE', 'd.id=f.docente')
+        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->andWhere('f.docente=:docente')
@@ -896,10 +896,10 @@ class StaffUtil {
       // statistiche di tutti i docenti
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
         ->select('d.cognome,d.nome,SUM(so.durata/60) AS ore')
-        ->join('App:Firma', 'f', 'WHERE', 'd.id=f.docente')
+        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WHERE', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->orderBy('d.cognome,d.nome', 'ASC')

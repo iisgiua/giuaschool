@@ -78,7 +78,7 @@ class ScansioneOrariaRepository extends EntityRepository {
     $ora = $this->createQueryBuilder('s')
       ->select('s.fine')
       ->join('s.orario', 'o')
-      ->join('App:Cattedra', 'c', 'WHERE', 'c.docente=:docente')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=:docente')
       ->join('c.classe', 'cl')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede AND s.giorno=:giorno')
       ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d'), 'giorno' => $data->format('w')])
