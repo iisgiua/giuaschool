@@ -65,7 +65,7 @@ class FileController extends AbstractController {
         $risposta[$k]['temp'] = $nomefile;
         $risposta[$k]['name'] = $file->getClientOriginalName();
         $risposta[$k]['ext'] = $file->getClientOriginalExtension();
-        $risposta[$k]['size'] = $file->getClientSize();
+        $risposta[$k]['size'] = $file->getSize();
       } else {
         // errore
         $res = new Response('Errore nel caricamento del file', 500);
