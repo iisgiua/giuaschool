@@ -1090,7 +1090,7 @@ class AssenzeController extends AbstractController {
                 $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
               // errore su orario
               $form->get('lista')[$key]->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
-              continue;
+              continue 2;
             }
             // controlla esistenza ritardo
             $entrata = $em->getRepository('App:Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);

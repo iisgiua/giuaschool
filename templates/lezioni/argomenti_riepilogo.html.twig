@@ -44,9 +44,11 @@
           {% if v[a.id]['classe'] is defined %}
         <td class="gs-pr-0 gs-pl-0 gs-pt-1 gs-pb-1">
             {% if v[a.id]['assenze'] is defined %}
-              {% for ore in 1 .. (v[a.id]['assenze']|round(0,'floor')) if v[a.id]['assenze'] >= 1 %}
+              {% if v[a.id]['assenze'] >= 1 %}
+                {% for ore in 1 .. (v[a.id]['assenze']|round(0,'floor')) %}
           <span class="label label-default gs-pr-1 gs-pl-1" title="Assenza di un'ora">A</span>
-              {% endfor %}
+                {% endfor %}
+              {% endif %}
               {% if v[a.id]['assenze'] > (v[a.id]['assenze']|round(0,'floor')) %}
           <span class="label label-default gs-pr-1 gs-pl-1" title="Assenza di mezz'ora">a</span>
               {% endif %}

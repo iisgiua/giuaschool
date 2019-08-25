@@ -22,8 +22,10 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ periodo ? lista_periodi[periodo].nome : 'Scegli' }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p,d in lista_periodi if d.nome %}
+    {% for p,d in lista_periodi %}
+      {% if d.nome %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_voti_quadro', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ d.nome }}</a></li>
+      {% endif %}
     {% endfor %}
         </ul>
       </div>
