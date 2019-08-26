@@ -12,6 +12,7 @@
 
 namespace App\Command;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,11 +33,6 @@ class AssenzeEsportaCommand extends Command {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private $logger;
-
-  /**
    * @var EntityManagerInterface $em Gestore delle entità
    */
   private $em;
@@ -46,6 +42,11 @@ class AssenzeEsportaCommand extends Command {
    */
   private $tpl;
 
+  /**
+  * @var LoggerInterface $logger Gestore dei log su file
+  */
+  private $logger;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -54,12 +55,14 @@ class AssenzeEsportaCommand extends Command {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param \Twig\Environment $tpl Gestione template
+   * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, \Twig\Environment $tpl) {
+  public function __construct(EntityManagerInterface $em, \Twig\Environment $tpl, LoggerInterface $logger) {
     parent::__construct();
     $this->em = $em;
     $this->tpl = $tpl;
-  }
+    $this->logger = $logger;
+}
 
   /**
    * Configura la sintassi del comando
@@ -83,7 +86,6 @@ class AssenzeEsportaCommand extends Command {
    * @param OutputInterface $output Oggetto che gestisce l'output
    */
   protected function initialize(InputInterface $input, OutputInterface $output) {
-    $this->logger = $this->getContainer()->get('monolog.logger.command');
   }
 
   /**

@@ -374,7 +374,7 @@ class BachecaUtil {
     $data = $avviso->getData()->format('d/m/Y');
     $ora1 = ($avviso->getOra() ? $avviso->getOra()->format('G:i') : '');
     $ora2 = ($avviso->getOraFine() ? $avviso->getOraFine()->format('G:i') : '');
-    $testo = str_replace(['%DATA%', '%ORA%', '%INIZIO%', '%FINE%'], [$data, $ora1, $ora1, $ora2], $testo);
+    $testo = str_replace(['{DATA}', '{ORA}', '{INIZIO}', '{FINE}'], [$data, $ora1, $ora1, $ora2], $testo);
     // restituisce il testo
     return $testo;
   }
@@ -1041,4 +1041,3 @@ class BachecaUtil {
   }
 
 }
-

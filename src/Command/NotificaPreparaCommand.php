@@ -12,12 +12,14 @@
 
 namespace App\Command;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Notifica;
 use App\Entity\NotificaInvio;
@@ -27,6 +29,7 @@ use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
 use App\Util\BachecaUtil;
+use App\Util\ConfigLoader;
 
 
 /**
@@ -36,11 +39,6 @@ class NotificaPreparaCommand extends Command {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private $logger;
 
   /**
    * @var EntityManagerInterface $em Gestore delle entità
@@ -53,6 +51,11 @@ class NotificaPreparaCommand extends Command {
   private $trans;
 
   /**
+   * @var SessionInterface $session Gestore delle sessioni
+   */
+  private $session;
+
+  /**
    * @var \Twig\Environment $tpl Gestione template
    */
   private $tpl;
@@ -62,6 +65,16 @@ class NotificaPreparaCommand extends Command {
    */
   private $bac;
 
+  /**
+   * @var ConfigLoader $config Gestore della configurazione su database
+   */
+  private $config;
+
+  /**
+   * @var LoggerInterface $logger Gestore dei log su file
+   */
+  private $logger;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -70,16 +83,24 @@ class NotificaPreparaCommand extends Command {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param SessionInterface $session Gestore delle sessioni
    * @param \Twig\Environment $tpl Gestione template
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
+   * @param ConfigLoader $config Gestore della configurazione su database
+   * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,  \Twig\Environment $tpl,
-                               BachecaUtil $bac) {
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,  SessionInterface $session,
+                              \Twig\Environment $tpl, BachecaUtil $bac, ConfigLoader $config, LoggerInterface $logger) {
     parent::__construct();
     $this->em = $em;
     $this->trans = $trans;
+    $this->session = $session;
     $this->tpl = $tpl;
     $this->bac = $bac;
+    $this->config = $config;
+    $this->logger = $logger;
+    // carica configurazione
+    $this->config->loadAll();
   }
 
   /**
@@ -104,7 +125,6 @@ class NotificaPreparaCommand extends Command {
    * @param OutputInterface $output Oggetto che gestisce l'output
    */
   protected function initialize(InputInterface $input, OutputInterface $output) {
-    $this->logger = $this->getContainer()->get('monolog.logger.command');
   }
 
   /**
@@ -255,15 +275,19 @@ class NotificaPreparaCommand extends Command {
             if ($app->getNotifica() == 'E') {
               // notifica via email
               $testo = $this->tpl->render('email/notifica_circolari.html.twig', array(
-                'circolari' => $circ));
+                'circolari' => $circ,
+                'intestazione_istituto_breve' => $this->session->get('/CONFIG/SCUOLA/intestazione_istituto_breve'),
+                'url_registro' => $this->session->get('/CONFIG/SCUOLA/url_registro'),
+                'email_amministratore' => $this->session->get('/CONFIG/SCUOLA/email_amministratore')));
               // aggiunge dati
-              $dati_notifica['oggetto'] = $this->trans->trans('message.notifica_circolare_oggetto');
+              $dati_notifica['oggetto'] = $this->trans->trans('message.notifica_circolare_oggetto', [
+                'intestazione_istituto_breve' => $this->session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')]);
               $dati_notifica['email'] = $utente->getEmail();
               // imposta la precedenza su altri messaggi
               $stato = 'P';
             } else {
               // notifica tramite messaggio
-              $testo = $this->trans->transChoice('message.presenti_nuove_circolari', count($circ), ['%num%' => count($circ)]);
+              $testo = $this->trans->trans('message.presenti_nuove_circolari', ['num' => count($circ)]);
               $testo = htmlspecialchars(str_replace(["\r", "\n\n"], ["\n", "\n"], $testo));
             }
             // crea notifica per l'invio
@@ -326,8 +350,8 @@ class NotificaPreparaCommand extends Command {
         switch ($avviso->getTipo()) {
           case 'C':   // generico
             $testo = $this->trans->trans('message.notifica_generica', [
-              '%data%' => $avviso->getData()->format('d/m/Y'),
-              '%testo%' => $avviso->getTesto()
+              'data' => $avviso->getData()->format('d/m/Y'),
+              'testo' => $avviso->getTesto()
               ]);
             break;
           case 'E':   // entrata posticipata
@@ -335,24 +359,24 @@ class NotificaPreparaCommand extends Command {
             $data = $avviso->getData()->format('d/m/Y');
             $ora = ($avviso->getOra() ? $avviso->getOra()->format('G:i') : '');
             $ora2 = ($avviso->getOraFine() ? $avviso->getOraFine()->format('G:i') : '');
-            $testo = str_replace(['%DATA%', '%ORA%'], [$data, $ora], $avviso->getTesto());
+            $testo = str_replace(['{DATA}', '{ORA}'], [$data, $ora], $avviso->getTesto());
             break;
           case 'A':   // attività
             $data = $avviso->getData()->format('d/m/Y');
             $ora = ($avviso->getOra() ? $avviso->getOra()->format('G:i') : '');
             $ora2 = ($avviso->getOraFine() ? $avviso->getOraFine()->format('G:i') : '');
-            $testo = str_replace(['%DATA%', '%INIZIO%', '%FINE%'], [$data, $ora, $ora2], $avviso->getTesto());
+            $testo = str_replace(['{DATA}', '{INIZIO}', '{FINE}'], [$data, $ora, $ora2], $avviso->getTesto());
             break;
           case 'V':   // verifiche
             $testo = $this->trans->trans('message.notifica_verifica', [
-              '%materia%' => $avviso->getCattedra()->getMateria()->getNomeBreve(),
-              '%data%' => $avviso->getData()->format('d/m/Y')
+              'materia' => $avviso->getCattedra()->getMateria()->getNomeBreve(),
+              'data' => $avviso->getData()->format('d/m/Y')
               ]);
             break;
           case 'P':   // compiti
             $testo = $this->trans->trans('message.notifica_compito', [
-              '%materia%' => $avviso->getCattedra()->getMateria()->getNomeBreve(),
-              '%data%' => $avviso->getData()->format('d/m/Y')
+              'materia' => $avviso->getCattedra()->getMateria()->getNomeBreve(),
+              'data' => $avviso->getData()->format('d/m/Y')
               ]);
             break;
           default:    // ALTRO
@@ -400,11 +424,11 @@ class NotificaPreparaCommand extends Command {
               $voto = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
             }
             $testo = $this->trans->trans('message.notifica_valutazione', [
-              '%tipo%' => $this->trans->trans('label.valutazione_'.$valutazione->getTipo()),
-              '%materia%' => $valutazione->getLezione()->getMateria()->getNomeBreve(),
-              '%data%' => $valutazione->getLezione()->getData()->format('d/m/Y'),
-              '%voto%' => $voto,
-              '%giudizio%' => $valutazione->getGiudizio()
+              'tipo' => $this->trans->trans('label.valutazione_'.$valutazione->getTipo()),
+              'materia' => $valutazione->getLezione()->getMateria()->getNomeBreve(),
+              'data' => $valutazione->getLezione()->getData()->format('d/m/Y'),
+              'voto' => $voto,
+              'giudizio' => $valutazione->getGiudizio()
               ]);
             $num += $this->creaNotificaInvio($testo, $dest);
           }

@@ -997,7 +997,7 @@ class StaffController extends AbstractController {
         $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
-      if (strpos($form->get('testo')->getData(), '%DATA%') === false) {
+      if (strpos($form->get('testo')->getData(), '{DATA}') === false) {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
@@ -1358,7 +1358,7 @@ class StaffController extends AbstractController {
         $form->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controllo testo
-      if (strpos($form->get('testo')->getData(), '%DATA%') === false) {
+      if (strpos($form->get('testo')->getData(), '{DATA}') === false) {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
@@ -1589,7 +1589,7 @@ class StaffController extends AbstractController {
         ->setDestinatariGenitori(true)
         ->setDestinatariAlunni(false)
         ->setDestinatariIndividuali(true)
-        ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['%docente%' => $docente]))
+        ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
         ->setData(new \DateTime('today'));
       $em->persist($avviso);
     }
@@ -1962,8 +1962,8 @@ class StaffController extends AbstractController {
       $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['inizio']);
       $ora->modify('+60 minutes');
       $nota = $trans->trans('message.autorizza_ritardo', [
-        '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
-        '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]);
+        'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+        'alunno' => $alunno->getCognome().' '.$alunno->getNome()]);
       $entrata = (new Entrata())
         ->setData($data_obj)
         ->setOra($ora)
@@ -2144,8 +2144,8 @@ class StaffController extends AbstractController {
         $ora->modify('-60 minutes');
       }
       $nota = $trans->trans('message.autorizza_uscita', [
-        '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
-        '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]);
+        'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+        'alunno' => $alunno->getCognome().' '.$alunno->getNome()]);
       $uscita = (new Uscita())
         ->setData($data_obj)
         ->setOra($ora)

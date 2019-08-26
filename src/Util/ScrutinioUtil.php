@@ -694,22 +694,22 @@ class ScrutinioUtil {
           case 1:
             // mancano valutazioni
             $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.no_voto_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
           case 2:
             // mancano recuperi
             $this->session->getFlashBag()->add('avviso', $this->trans->trans('exception.no_recupero_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
           case 3:
             // mancano debiti
             $this->session->getFlashBag()->add('avviso', $this->trans->trans('exception.no_debito_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
           case 4:
             // mancano indicazione recupero debito
             $this->session->getFlashBag()->add('avviso', $this->trans->trans('exception.no_recupero_debito_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
         }
       }
@@ -1412,17 +1412,17 @@ class ScrutinioUtil {
           case 1:
             // mancano valutazioni
             $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.no_voto_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
           case 2:
             // mancano recuperi
             $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.no_recupero_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
           case 3:
             // mancano debiti
             $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.no_debito_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
         }
       }
@@ -2087,12 +2087,12 @@ class ScrutinioUtil {
           case 1:
             // mancano valutazioni
             $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.no_voto_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
           case 2:
             // mancano recuperi
             $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.no_recupero_debito_scrutinio',
-              ['%materia%' => $mat['nomeBreve']]));
+              ['materia' => $mat['nomeBreve']]));
             break;
         }
       }
@@ -3073,50 +3073,50 @@ class ScrutinioUtil {
       }
       if ($no_voto > 0) {
         // voti non presenti
-        $errore[] = $this->trans->trans('exception.no_voto_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.no_voto_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() === null) {
         // manca esito
-        $errore[] = $this->trans->trans('exception.manca_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.manca_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getDati()['unanimita'] === null) {
         // manca delibera
-        $errore[] = $this->trans->trans('exception.delibera_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.delibera_esito', ['sex' => $sesso, 'alunno' => $nome]);
       } elseif ($dati['esito']->getDati()['unanimita'] === false && !$dati['esito']->getDati()['contrari']) {
         // mancano contrari
-        $errore[] = $this->trans->trans('exception.contrari_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.contrari_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'N' && !$dati['esito']->getDati()['giudizio']) {
         // manca giudizio
-        $errore[] = $this->trans->trans('exception.giudizio_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.giudizio_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'A' && $insuff_cont > 0 && $alunno->getClasse()->getAnno() != 5) {
         // insufficienze con ammissione (escluse quinte)
-        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'N' && $insuff_cont == 0) {
         // solo sufficienze con non ammissione
-        $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'S' && $insuff_cont == 0) {
         // solo sufficienze con sospensione
-        $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() != 'N' && $insuff_religione && $alunno->getClasse()->getAnno() != 5) {
         // insuff. religione incoerente con esito (escluse quinte)
-        $errore[] = $this->trans->trans('exception.voto_religione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.voto_religione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() != 'N' && $insuff_condotta) {
         // insuff. condotta incoerente con esito
-        $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'S' && $alunno->getClasse()->getAnno() == 5) {
         // sospensione in quinta
-        $errore[] = $this->trans->trans('exception.quinta_sospeso_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.quinta_sospeso_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'A' && $alunno->getClasse()->getAnno() == 5 && $insuff_cont > 1) {
         // ammissione in quinta con più insufficienze
-        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_quinta', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_quinta', ['sex' => $sesso, 'alunno' => $nome]);
       }
     }
     if (empty($errore)) {
@@ -3299,7 +3299,7 @@ class ScrutinioUtil {
         if (!isset($c['dati']['certificazione']) || !$c['dati']['certificazione']) {
           $nome = $c['cognome'].' '.$c['nome'];
           $sesso = ($c['sesso'] == 'M' ? 'o' : 'a');
-          $errore[] = $this->trans->trans('exception.no_certificazione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+          $errore[] = $this->trans->trans('exception.no_certificazione_esito', ['sex' => $sesso, 'alunno' => $nome]);
         }
       }
     } elseif ($classe->getAnno() != 1) {
@@ -3315,7 +3315,7 @@ class ScrutinioUtil {
       foreach ($crediti as $c) {
         $nome = $c['cognome'].' '.$c['nome'];
         $sesso = ($c['sesso'] == 'M' ? 'o' : 'a');
-        $errore[] = $this->trans->trans('exception.no_credito_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.no_credito_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
     }
     if (empty($errore)) {
@@ -3545,7 +3545,7 @@ class ScrutinioUtil {
           foreach ($d as $mat=>$v) {
             $nome = $v['cognome'].' '.$v['nome'];
             $sesso = ($v['sesso'] == 'M' ? 'o' : 'a');
-            $errore[] = $this->trans->trans('exception.no_comunicazione_debiti', ['%sex%' => $sesso, '%alunno%' => $nome]);
+            $errore[] = $this->trans->trans('exception.no_comunicazione_debiti', ['sex' => $sesso, 'alunno' => $nome]);
             break;
           }
         }
@@ -3557,7 +3557,7 @@ class ScrutinioUtil {
           foreach ($d as $mat=>$v) {
             $nome = $v['cognome'].' '.$v['nome'];
             $sesso = ($v['sesso'] == 'M' ? 'o' : 'a');
-            $errore[] = $this->trans->trans('exception.no_comunicazione_carenze', ['%sex%' => $sesso, '%alunno%' => $nome]);
+            $errore[] = $this->trans->trans('exception.no_comunicazione_carenze', ['sex' => $sesso, 'alunno' => $nome]);
             break;
           }
         }
@@ -4158,50 +4158,50 @@ class ScrutinioUtil {
       }
       if ($no_voto > 0) {
         // voti non presenti
-        $errore[] = $this->trans->trans('exception.no_voto_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.no_voto_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() === null) {
         // manca esito
-        $errore[] = $this->trans->trans('exception.manca_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.manca_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getDati()['unanimita'] === null && $dati['esito']->getEsito() != 'X') {
         // manca delibera
-        $errore[] = $this->trans->trans('exception.delibera_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.delibera_esito', ['sex' => $sesso, 'alunno' => $nome]);
       } elseif ($dati['esito']->getDati()['unanimita'] === false && !$dati['esito']->getDati()['contrari'] && $dati['esito']->getEsito() != 'X') {
         // mancano contrari
-        $errore[] = $this->trans->trans('exception.contrari_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.contrari_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'N' && !$dati['esito']->getDati()['giudizio']) {
         // manca giudizio
-        $errore[] = $this->trans->trans('exception.giudizio_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.giudizio_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'X' && !$dati['esito']->getDati()['giudizio']) {
         // manca giudizio
-        $errore[] = $this->trans->trans('exception.motivo_scrutinio_rinviato', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.motivo_scrutinio_rinviato', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'A' && $insuff_cont > 0) {
         // insufficienze con ammissione
-        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'N' && $insuff_cont == 0) {
         // solo sufficienze con non ammissione
-        $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'S' && $insuff_cont == 0) {
         // solo sufficienze con sospensione
-        $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() != 'N' && $insuff_religione) {
         // insuff. religione incoerente con esito
-        $errore[] = $this->trans->trans('exception.voto_religione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.voto_religione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() != 'N' && $insuff_condotta) {
         // insuff. condotta incoerente con esito
-        $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'S' && $alunno->getClasse()->getAnno() == 5) {
         // sospensione in quinta
-        $errore[] = $this->trans->trans('exception.exception.quinta_sospeso_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.exception.quinta_sospeso_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
     }
     if (empty($errore)) {
@@ -4292,7 +4292,7 @@ class ScrutinioUtil {
         if (!isset($c['dati']['certificazione']) || !$c['dati']['certificazione']) {
           $nome = $c['cognome'].' '.$c['nome'];
           $sesso = ($c['sesso'] == 'M' ? 'o' : 'a');
-          $errore[] = $this->trans->trans('exception.no_certificazione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+          $errore[] = $this->trans->trans('exception.no_certificazione_esito', ['sex' => $sesso, 'alunno' => $nome]);
         }
       }
     } elseif ($classe->getAnno() != 1) {
@@ -4308,7 +4308,7 @@ class ScrutinioUtil {
       foreach ($crediti as $c) {
         $nome = $c['cognome'].' '.$c['nome'];
         $sesso = ($c['sesso'] == 'M' ? 'o' : 'a');
-        $errore[] = $this->trans->trans('exception.no_credito_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.no_credito_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
     }
     if (empty($errore)) {
@@ -4734,13 +4734,13 @@ class ScrutinioUtil {
                 ($scrutinio->getClasse()->getAnno() == 5 && $scrutinio_dati['nuovicrediti'][$alu->getId()][0] < $minimo)) {
               // errore: credito sotto minimo
               $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.nuovo_credito_minimo',
-                ['%credito%' => $scrutinio_dati['nuovicrediti'][$alu->getId()][0]]));
+                ['credito' => $scrutinio_dati['nuovicrediti'][$alu->getId()][0]]));
               $validato = false;
             }
             if ($scrutinio_dati['nuovicrediti'][$alu->getId()][0] > $massimo) {
               // errore: credito sopra massimo
               $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.nuovo_credito_massimo',
-                ['%credito%' => $scrutinio_dati['nuovicrediti'][$alu->getId()][0]]));
+                ['credito' => $scrutinio_dati['nuovicrediti'][$alu->getId()][0]]));
               $validato = false;
             }
             if (strlen($scrutinio_dati['nuovicrediti'][$alu->getId()][1]) == 0) {
@@ -5135,50 +5135,50 @@ class ScrutinioUtil {
       }
       if ($no_voto > 0) {
         // voti non presenti
-        $errore[] = $this->trans->trans('exception.no_voto_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.no_voto_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() === null) {
         // manca esito
-        $errore[] = $this->trans->trans('exception.manca_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.manca_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getDati()['unanimita'] === null && $dati['esito']->getEsito() != 'X') {
         // manca delibera
-        $errore[] = $this->trans->trans('exception.delibera_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.delibera_esito', ['sex' => $sesso, 'alunno' => $nome]);
       } elseif ($dati['esito']->getDati()['unanimita'] === false && !$dati['esito']->getDati()['contrari'] && $dati['esito']->getEsito() != 'X') {
         // mancano contrari
-        $errore[] = $this->trans->trans('exception.contrari_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.contrari_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'N' && !$dati['esito']->getDati()['giudizio']) {
         // manca giudizio
-        $errore[] = $this->trans->trans('exception.giudizio_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.giudizio_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'X' && !$dati['esito']->getDati()['giudizio']) {
         // manca giudizio
-        $errore[] = $this->trans->trans('exception.motivo_scrutinio_rinviato', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.motivo_scrutinio_rinviato', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'A' && $insuff_cont > 0) {
         // insufficienze con ammissione
-        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.insufficienze_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'N' && $insuff_cont == 0) {
         // solo sufficienze con non ammissione
-        $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'S' && $insuff_cont == 0) {
         // solo sufficienze con sospensione
-        $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() != 'N' && $insuff_religione) {
         // insuff. religione incoerente con esito
-        $errore[] = $this->trans->trans('exception.voto_religione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.voto_religione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() != 'N' && $insuff_condotta) {
         // insuff. condotta incoerente con esito
-        $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
       if ($dati['esito']->getEsito() == 'S' && $alunno->getClasse()->getAnno() == 5) {
         // sospensione in quinta
-        $errore[] = $this->trans->trans('exception.exception.quinta_sospeso_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.exception.quinta_sospeso_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
     }
     if (empty($errore)) {
@@ -5269,7 +5269,7 @@ class ScrutinioUtil {
         if (!isset($c['dati']['certificazione']) || !$c['dati']['certificazione']) {
           $nome = $c['cognome'].' '.$c['nome'];
           $sesso = ($c['sesso'] == 'M' ? 'o' : 'a');
-          $errore[] = $this->trans->trans('exception.no_certificazione_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+          $errore[] = $this->trans->trans('exception.no_certificazione_esito', ['sex' => $sesso, 'alunno' => $nome]);
         }
       }
     } elseif ($classe->getAnno() != 1) {
@@ -5285,7 +5285,7 @@ class ScrutinioUtil {
       foreach ($crediti as $c) {
         $nome = $c['cognome'].' '.$c['nome'];
         $sesso = ($c['sesso'] == 'M' ? 'o' : 'a');
-        $errore[] = $this->trans->trans('exception.no_credito_esito', ['%sex%' => $sesso, '%alunno%' => $nome]);
+        $errore[] = $this->trans->trans('exception.no_credito_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
     }
     if (empty($errore)) {

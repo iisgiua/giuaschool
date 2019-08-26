@@ -27,10 +27,10 @@
   <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
     <strong>{{ 'message.presenti_comunicazioni'|trans }}</strong><br>
         {% if avvisi > 0 %}
-    <button id="gs-leggi-avvisi" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ avvisi }} {{ 'message.num_avvisi'|transchoice(avvisi) }}</strong></button>
+    <button id="gs-leggi-avvisi" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ avvisi }} {{ 'message.num_avvisi'|trans({'num': avvisi}) }}</strong></button>
         {% endif %}
         {% if circolari > 0 %}
-    <button id="gs-leggi-circolari" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto delle circolari" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_classi', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ circolari }} {{ 'message.num_circolari'|transchoice(circolari) }}</strong></button>
+    <button id="gs-leggi-circolari" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto delle circolari" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_classi', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ circolari }} {{ 'message.num_circolari'|trans({'num': circolari}) }}</strong></button>
         {% endif %}
   </div>
       {% endif %}

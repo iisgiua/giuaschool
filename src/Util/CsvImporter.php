@@ -125,7 +125,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -147,7 +147,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       if (empty($fields['username'])) {
@@ -185,7 +185,7 @@ class CsvImporter {
             // errore: non modifica utente con username generata automaticamente
             fclose($this->fh);
             $this->fh = null;
-            $form->addError(new FormError($this->trans->trans('exception.file_duplicated', ['%num%' => $count])));
+            $form->addError(new FormError($this->trans->trans('exception.file_duplicated', ['num' => $count])));
             return $imported;
           }
           $error = $this->modificaDocente($docente, $fields, $empty_fields);
@@ -252,7 +252,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -279,7 +279,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       // controlla esistenza di docente
@@ -294,13 +294,13 @@ class CsvImporter {
         // errore: docente non esiste
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_docente_mancante', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_docente_mancante', ['num' => $count])));
         return $imported;
       } elseif (count($lista) > 1) {
         // errore: docente non esiste
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_docente_duplicato', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_docente_duplicato', ['num' => $count])));
         return $imported;
       }
       $docente = $lista[0];
@@ -312,7 +312,7 @@ class CsvImporter {
         // errore: classe
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_classe', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
         return $imported;
       }
       $classe = $lista[0];
@@ -322,7 +322,7 @@ class CsvImporter {
         // errore: materia
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_materia', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_materia', ['num' => $count])));
         return $imported;
       }
       $materia = $lista[0];
@@ -344,13 +344,13 @@ class CsvImporter {
         // errore: alunno non esiste
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_alunno_mancante', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_alunno_mancante', ['num' => $count])));
         return $imported;
       } elseif ($lista !== null && count($lista) > 1) {
         // errore: alunno duplicato
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_alunno_duplicato', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_alunno_duplicato', ['num' => $count])));
         return $imported;
       } elseif ($lista !== null) {
         $alunno = $lista[0];
@@ -368,7 +368,7 @@ class CsvImporter {
           // classe diversa da quella di alunno
           fclose($this->fh);
           $this->fh = null;
-          $form->addError(new FormError($this->trans->trans('exception.file_classe', ['%num%' => $count])));
+          $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
           return $imported;
         }
       } else {
@@ -380,7 +380,7 @@ class CsvImporter {
           // tipo sostegno su materia non di sostegno
           fclose($this->fh);
           $this->fh = null;
-          $form->addError(new FormError($this->trans->trans('exception.file_tipo', ['%num%' => $count])));
+          $form->addError(new FormError($this->trans->trans('exception.file_tipo', ['num' => $count])));
           return $imported;
         }
       }
@@ -449,7 +449,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -468,7 +468,7 @@ class CsvImporter {
         fclose($this->fh);
         $this->fh = null;
         $form->addError(new FormError($this->trans->trans('exception.file_date', array(
-          '%date%' => $fields['dataNascita'], '%num%' => $count))));
+          'date' => $fields['dataNascita'], 'num' => $count))));
         return $imported;
       } else {
         $fields['dataNascita'] = $date;
@@ -497,7 +497,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       // controlla campi opzionali
@@ -561,7 +561,7 @@ class CsvImporter {
             // errore: classe
             fclose($this->fh);
             $this->fh = null;
-            $form->addError(new FormError($this->trans->trans('exception.file_classe', ['%num%' => $count])));
+            $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
             return $imported;
           }
           $fields['classe'] = $lista[0];
@@ -685,7 +685,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -711,7 +711,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       // controlla esistenza di docente
@@ -726,13 +726,13 @@ class CsvImporter {
         // errore: docente non esiste
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_docente_mancante', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_docente_mancante', ['num' => $count])));
         return $imported;
       } elseif (count($lista) > 1) {
         // errore: docente duplicato
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_docente_duplicato', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_docente_duplicato', ['num' => $count])));
         return $imported;
       }
       $docente = $lista[0];
@@ -742,7 +742,7 @@ class CsvImporter {
         // errore: sede
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_sede', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_sede', ['num' => $count])));
         return $imported;
       }
       $sede = $lista[0];
@@ -757,7 +757,7 @@ class CsvImporter {
         // errore: orario
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_orario', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_orario', ['num' => $count])));
         return $imported;
       }
       $ore = array();
@@ -772,7 +772,7 @@ class CsvImporter {
         // errore: giorno
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_giorno', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_giorno', ['num' => $count])));
         return $imported;
       }
       // controlla ora
@@ -781,7 +781,7 @@ class CsvImporter {
         // errore: ora
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_ora', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_ora', ['num' => $count])));
         return $imported;
       }
       // controlla frequenza
@@ -791,7 +791,7 @@ class CsvImporter {
         // errore: frequenza
         fclose($this->fh);
         $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_frequenza', ['%num%' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_frequenza', ['num' => $count])));
         return $imported;
       }
       // controlla esistenza di colloquio
@@ -871,7 +871,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -894,7 +894,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['%num%' => $count])));
+        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       if (empty($fields['username'])) {
@@ -937,7 +937,7 @@ class CsvImporter {
             // errore: non modifica utente con username generata automaticamente
             fclose($this->fh);
             $this->fh = null;
-            $form->addError(new FormError($this->trans->trans('exception.file_duplicated', ['%num%' => $count])));
+            $form->addError(new FormError($this->trans->trans('exception.file_duplicated', ['num' => $count])));
             return $imported;
           }
           $error = $this->modificaAta($ata, $fields, $empty_fields);
@@ -1444,4 +1444,3 @@ class CsvImporter {
   }
 
 }
-

@@ -222,7 +222,7 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroCoordinatori')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Coordinatori'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => 'dei Coordinatori'])));
         }
       }
       $circolare->setFiltroCoordinatori($lista);
@@ -235,7 +235,7 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Docenti'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => 'dei Docenti'])));
         }
       } elseif ($circolare->getDocenti() == 'M') {
         // controlla materie
@@ -250,7 +250,7 @@ class CircolariController extends AbstractController {
           ->controllaDocenti($sedi, $form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // utente non valido
-          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['%dest%' => 'dei Docenti'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => 'dei Docenti'])));
         }
       }
       $circolare->setFiltroDocenti($lista);
@@ -263,7 +263,7 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroGenitori')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'dei Genitori'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => 'dei Genitori'])));
         }
       } elseif ($circolare->getGenitori() == 'U') {
         // controlla utenti
@@ -271,7 +271,7 @@ class CircolariController extends AbstractController {
           ->controllaAlunni($sedi, $form->get('filtroGenitori')->getData(), $errore);
         if ($errore) {
           // utente non valido
-          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['%dest%' => 'dei Genitori'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => 'dei Genitori'])));
         }
       }
       $circolare->setFiltroGenitori($lista);
@@ -284,7 +284,7 @@ class CircolariController extends AbstractController {
           ->controllaClassi($sedi, $form->get('filtroAlunni')->getData(), $errore);
         if ($errore) {
           // classe non valida
-          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['%dest%' => 'degli Alunni'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => 'degli Alunni'])));
         }
       } elseif ($circolare->getAlunni() == 'U') {
         // controlla utenti
@@ -292,7 +292,7 @@ class CircolariController extends AbstractController {
           ->controllaAlunni($sedi, $form->get('filtroAlunni')->getData(), $errore);
         if ($errore) {
           // utente non valido
-          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['%dest%' => 'degli Alunni'])));
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => 'degli Alunni'])));
         }
       }
       $circolare->setFiltroAlunni($lista);
@@ -1194,8 +1194,8 @@ class CircolariController extends AbstractController {
       // lista circolari
       $lista = implode(', ', array_map(function ($c) { return $c->getNumero(); }, $firme));
       // testo annotazione
-      $testo = $trans->transChoice('message.registro_lettura_circolare', count($firme),
-        ['%circolari%' => $lista]);
+      $testo = $trans->trans('message.registro_lettura_circolare',
+        ['num' => count($firme), 'circolari' => $lista]);
       // crea annotazione
       $a = (new Annotazione())
         ->setData(new \DateTime('today'))

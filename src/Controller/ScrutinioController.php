@@ -823,7 +823,7 @@ class ScrutinioController extends AbstractController {
       }
       foreach ($errore as $msg=>$v) {
         $session->getFlashBag()->add('errore',
-          $trans->trans($msg, ['%materia%' => $materia->getNomeBreve()]));
+          $trans->trans($msg, ['materia' => $materia->getNomeBreve()]));
       }
       // memorizza dati (anche se errati)
       $em->flush();
@@ -1253,8 +1253,8 @@ class ScrutinioController extends AbstractController {
       }
       foreach ($errore as $msg=>$v) {
         $session->getFlashBag()->add('errore', $trans->trans($msg, [
-          '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
-          '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]));
+          'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+          'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
       // legge valori
       $valori = $dati['esito']->getDati();
@@ -1592,8 +1592,8 @@ class ScrutinioController extends AbstractController {
       if ($err_motivazione) {
         // errore: motivazione non inserita
         $session->getFlashBag()->add('errore', $trans->trans('exception.no_motivazione_certificazione', [
-          '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
-          '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]));
+          'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+          'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
       // modifica dati (anche se errati)
       $valori['certificazione'] = (!$err_motivazione);
@@ -1700,8 +1700,8 @@ class ScrutinioController extends AbstractController {
       // messaggi di errore
       foreach ($errore as $msg=>$val) {
         $session->getFlashBag()->add('errore', $trans->trans($msg, [
-          '%sex%' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
-          '%alunno%' => $alunno->getCognome().' '.$alunno->getNome()]));
+          'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+          'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
       // recupera esito
       $esito = $em->getRepository('App:Esito')->createQueryBuilder('e')
