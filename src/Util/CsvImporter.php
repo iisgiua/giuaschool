@@ -18,7 +18,8 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Component\Validator\ValidatorBuilderInterface;
+use Symfony\Component\Validator\ValidatorBuilder;
+use Symfony\Component\Validator\ValidatorInterface;
 use App\Entity\Cattedra;
 use App\Entity\Docente;
 use App\Entity\Ata;
@@ -77,10 +78,10 @@ class CsvImporter {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
-   * @param ValidatorInterface $validator Gestore della validazione dei dati
+   * @param ValidatorBuilder $valbuilder Costruttore per il gestore della validazione dei dati
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, UserPasswordEncoderInterface $encoder,
-                               ValidatorBuilderInterface $valbuilder) {
+                               ValidatorBuilder $valbuilder) {
     $this->em = $em;
     $this->trans = $trans;
     $this->encoder = $encoder;

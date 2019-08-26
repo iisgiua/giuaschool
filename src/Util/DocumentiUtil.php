@@ -199,7 +199,8 @@ class DocumentiUtil {
     if ($ext != 'pdf') {
       // conversione
       $nomefile = $file->getRealPath();
-      $proc = new Process('/usr/bin/unoconv -f pdf -d document "'.$nomefile.'"', $file->getPath());
+      $proc = new Process(['/usr/bin/unoconv',  '-f', 'pdf', '-d', 'document', $nomefile],
+        $file->getPath());
       $proc->run();
       if ($proc->isSuccessful() && file_exists($nomefile.'.pdf')) {
         // conversione ok
@@ -404,4 +405,3 @@ class DocumentiUtil {
   }
 
 }
-
