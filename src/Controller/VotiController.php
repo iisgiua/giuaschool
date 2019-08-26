@@ -263,7 +263,7 @@ class VotiController extends AbstractController {
       if (!$lezione) {
         // lezione non esiste
         $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',
-          ['%materia%' => $cattedra->getMateria()->getNomeBreve()])));
+          ['materia' => $cattedra->getMateria()->getNomeBreve()])));
       }
       // controlla permessi
       if (!$reg->azioneVoti($form->get('data')->getData(), $this->getUser(), null, $classe, $cattedra->getMateria())) {
@@ -278,7 +278,7 @@ class VotiController extends AbstractController {
             ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
           // errore: alunno non presente in data
           $form->addError(new FormError($trans->trans('exception.alunno_no_classe_in_data',
-            ['%alunno%' => $valutazione->getAlunno()])));
+            ['alunno' => $valutazione->getAlunno()])));
         }
       }
       if ($form->isValid()) {
@@ -516,7 +516,7 @@ class VotiController extends AbstractController {
         if (!$lezione) {
           // lezione non esiste
           $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',
-            ['%materia%' => $cattedra->getMateria()->getNomeBreve()])));
+            ['materia' => $cattedra->getMateria()->getNomeBreve()])));
         } else {
           // inserisce lezione
           $valutazione->setLezione($lezione);

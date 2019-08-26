@@ -124,7 +124,7 @@ class GenitoriController extends AbstractController {
       }
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla_data', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla_data', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
       $lista_festivi = '[]';
     }
     // visualizza pagina
@@ -215,7 +215,7 @@ class GenitoriController extends AbstractController {
       }
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
     return $this->render($template, array(
@@ -298,7 +298,7 @@ class GenitoriController extends AbstractController {
       $dati = $gen->voti($classe, $materia, $alunno);
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
     return $this->render($template, array(
@@ -354,7 +354,7 @@ class GenitoriController extends AbstractController {
       $dati['giustifica'] = $gen->giusticazioneOnline($this->getUser());
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
     return $this->render('ruolo_genitore/assenze.html.twig', array(
@@ -404,7 +404,7 @@ class GenitoriController extends AbstractController {
       $dati = $gen->note($classe, $alunno);
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
     return $this->render('ruolo_genitore/note.html.twig', array(
@@ -447,7 +447,7 @@ class GenitoriController extends AbstractController {
       $dati = $gen->osservazioni($alunno);
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
     return $this->render('ruolo_genitore/osservazioni.html.twig', array(
@@ -526,7 +526,7 @@ class GenitoriController extends AbstractController {
       }
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
     return $this->render('ruolo_genitore/pagelle.html.twig', array(
@@ -572,7 +572,7 @@ class GenitoriController extends AbstractController {
       $dati = $gen->colloqui($classe, $alunno);
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['%sex%' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina
     return $this->render('ruolo_genitore/colloqui.html.twig', array(

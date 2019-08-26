@@ -12,6 +12,7 @@
 
 namespace App\Command;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,11 +39,6 @@ class NotificaInviaCommand extends Command {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * @var LoggerInterface $logger Gestore dei log su file
-   */
-  private $logger;
 
   /**
    * @var EntityManagerInterface $em Gestore delle entità
@@ -74,6 +70,11 @@ class NotificaInviaCommand extends Command {
    */
   private $config;
 
+  /**
+  * @var LoggerInterface $logger Gestore dei log su file
+  */
+  private $logger;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -86,9 +87,10 @@ class NotificaInviaCommand extends Command {
    * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
    * @param ConfigLoader $config Gestore della configurazione su database
+   * @param LoggerInterface $logger Gestore dei log su file
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, SessionInterface $session, \Swift_Mailer $mailer,
-                               BachecaUtil $bac, ConfigLoader $config) {
+                               BachecaUtil $bac, ConfigLoader $config, LoggerInterface $logger) {
     parent::__construct();
     $this->em = $em;
     $this->trans = $trans;
@@ -96,6 +98,7 @@ class NotificaInviaCommand extends Command {
     $this->mailer = $mailer;
     $this->bac = $bac;
     $this->config = $config;
+    $this->logger = $logger;
     // carica configurazione
     $this->config->loadAll();
   }
@@ -122,7 +125,6 @@ class NotificaInviaCommand extends Command {
    * @param OutputInterface $output Oggetto che gestisce l'output
    */
   protected function initialize(InputInterface $input, OutputInterface $output) {
-    $this->logger = $this->getContainer()->get('monolog.logger.command');
   }
 
   /**

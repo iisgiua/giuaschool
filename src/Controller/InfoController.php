@@ -17,6 +17,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use Symfony\Component\Intl\Intl;
 
 /**
  * InfoController - pagine informative
@@ -59,6 +60,7 @@ class InfoController extends AbstractController {
    *    methods={"GET"})
    */
   public function tempAction() {
+
     return $this->render('temp.html.twig', array(
       'pagina_titolo' => 'page.privacy',
     ));

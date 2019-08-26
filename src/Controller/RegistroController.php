@@ -916,7 +916,7 @@ class RegistroController extends AbstractController {
             ->setDestinatariAlunni(false)
             ->setDestinatariIndividuali(true)
             ->setData($annotazione->getData())
-            ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['%docente%' => $docente]))
+            ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
             ->setTesto($annotazione->getTesto())
             ->setDocente($this->getUser())
             ->addAnnotazione($annotazione);
@@ -1175,7 +1175,7 @@ class RegistroController extends AbstractController {
         if ($nome) {
           // errore
           $form->get('testo')->addError(
-            new FormError($trans->trans('exception.nota_con_nome', ['%nome%' => $nome])));
+            new FormError($trans->trans('exception.nota_con_nome', ['nome' => $nome])));
         }
       }
       if ($form->isValid()) {

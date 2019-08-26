@@ -718,7 +718,7 @@ class CoordinatoreController extends AbstractController {
         ->setDestinatariAlunni(false)
         ->setDestinatariIndividuali(false)
         ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto',
-          ['%classe%' => $classe->getAnno().'ª '.$classe->getSezione()]))
+          ['classe' => $classe->getAnno().'ª '.$classe->getSezione()]))
         ->setData(new \DateTime('today'));
       $em->persist($avviso);
     }

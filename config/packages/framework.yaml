@@ -11,15 +11,16 @@ framework:
   csrf_protection:
     enabled: true
   esi: false
-  fragments: ~
+  fragments: false
   http_client: ~
   request: ~
   session:
-    handler_id: 'session.handler.native_file'
+    enabled: true
     cookie_secure: 'auto'
     cookie_samesite: 'lax'
     cookie_httponly: true
-    enabled: true
+    handler_id: 'session.handler.native_file'
+    save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
   assets: ~
   property_access: ~
   property_info:

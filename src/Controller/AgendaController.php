@@ -350,7 +350,7 @@ class AgendaController extends AbstractController {
         } else {
           // oggetto
           $avviso->setOggetto($trans->trans('message.verifica_oggetto',
-            ['%materia%' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
+            ['materia' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
           // destinatari
           $age->modificaFiltriVerificheCompiti($avviso, $dest_filtro, $val_filtro, $val_filtro_id);
           // annotazione
@@ -734,7 +734,7 @@ class AgendaController extends AbstractController {
         }
         // oggetto
         $avviso->setOggetto($trans->trans('message.compito_oggetto',
-            ['%materia%' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
+            ['materia' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
         // destinatari
         $age->modificaFiltriVerificheCompiti($avviso, $dest_filtro, $val_filtro, $val_filtro_id);
         // ok: memorizza dati

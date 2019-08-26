@@ -1,4 +1,4 @@
-# translations/messages.it.yml
+# translations/messages+intl-icu.it.yml
 
 label.abilitato: Abilitato
 label.action: Azione
@@ -183,7 +183,7 @@ label.periodo_S: ~
 label.periodo_X: Scrutinio Rinviato
 label.precedente: Precedente
 label.presenti: Alunni presenti
-label.privacy_app: "Accetto che i miei dati personali presenti nel Registro Elettronico vengano inviati a servizi esterni e trattati da altri soggetti, liberando l' %intestazione_istituto_breve% da ogni responsabilità in merito.<br><a href=\"#\" data-toggle=\"modal\" data-target=\"#gs-privacy\">Clicca qui per avere maggiori dettagli.</a>"
+label.privacy_app: "Accetto che i miei dati personali presenti nel Registro Elettronico vengano inviati a servizi esterni e trattati da altri soggetti, liberando l' {intestazione_istituto_breve} da ogni responsabilità in merito.<br><a href=\"#\" data-toggle=\"modal\" data-target=\"#gs-privacy\">Clicca qui per avere maggiori dettagli.</a>"
 label.provvedimenti_disciplinari: Provvedimenti disciplinari
 label.provvedimento: Provvedimento disciplinare
 label.qualsiasi_classe: Tutte le classi
@@ -447,7 +447,7 @@ title.coordinatore_avvisi: Gestione degli avvisi per la classe
 title.coordinatore_classe: Scegli la classe
 title.coordinatore_note: Note della classe
 title.coordinatore_scrutinio: Scrutinio della classe
-title.coordinatore_situazione_alunno: Situazione dell'alunn%sex%
+title.coordinatore_situazione_alunno: Situazione dell'alunn{sex}
 title.coordinatore_situazione: Situazione degli alunni della classe
 title.coordinatore_valutazione_intermedia: Valutazione intermedia della classe
 title.coordinatore_voti: Medie dei voti della classe
@@ -460,15 +460,15 @@ title.documenti_programmi: Inserimento dei programmi svolti
 title.documenti_relazioni: Inserimento delle relazioni finali
 title.genera_password: Genera credenziali per i genitori
 title.genitori_argomenti: Argomenti e attività della classe
-title.genitori_assenze: Assenze dell'alunn%sex%
+title.genitori_assenze: Assenze dell'alunn{sex}
 title.genitori_avvisi: Avvisi indirizzati ai genitori
 title.genitori_colloqui: Colloqui individuali con i docenti
 title.genitori_eventi: Agenda degli eventi per il genitore
 title.genitori_lezioni: Lezioni della classe
-title.genitori_note: Note dell'alunn%sex%
-title.genitori_osservazioni: Osservazioni sull'alunn%sex%
-title.genitori_pagelle: Pagelle dell'alunn%sex%
-title.genitori_voti: Valutazioni dell'alunn%sex%
+title.genitori_note: Note dell'alunn{sex}
+title.genitori_osservazioni: Osservazioni sull'alunn{sex}
+title.genitori_pagelle: Pagelle dell'alunn{sex}
+title.genitori_voti: Valutazioni dell'alunn{sex}
 title.giustifica: Giustifica le assenze e i ritardi o convalida le giustificazioni online
 title.importa_alunni: Importa gli alunni da file
 title.importa_cattedre: Importa le cattedre dei docenti da file
@@ -635,26 +635,26 @@ message.single_upload_dropzone: Clicca o trascina qui il file per caricarlo
 message.upload_cancella: Sei sicuro di voler annullare il caricamento in corso?
 message.cancella_avviso: Verrà cancellato l'avviso e le annotazioni sul registro collegate. Vuoi continuare?
 message.cancella_avviso_coordinatore: Verrà cancellato l'avviso. Vuoi continuare?
-message.orario_edit: Il testo dell'avviso utilizza i campi <strong>%DATA%</strong> e <strong>%ORA%</strong> che verranno sostituiti automaticamente con la data e l'ora indicata.
+message.orario_edit: Il testo dell'avviso utilizza i campi <strong>{DATA}</strong> e <strong>{ORA}</strong> che verranno sostituiti automaticamente con la data e l'ora indicata.
 message.avviso_entrata_oggetto: Modifica orario di ingresso della classe
-message.avviso_entrata_testo: Si comunica che il giorno %DATA% la classe entrerà alle ore %ORA%.
+message.avviso_entrata_testo: Si comunica che il giorno {DATA} la classe entrerà alle ore {ORA}.
 message.avviso_uscita_oggetto: Modifica orario di uscita della classe
-message.avviso_uscita_testo: Si comunica che il giorno %DATA% la classe uscirà alle ore %ORA%.
+message.avviso_uscita_testo: Si comunica che il giorno {DATA} la classe uscirà alle ore {ORA}.
 message.avviso_attivita_oggetto: Prevista attività per la classe
-message.avviso_attivita_testo: "Si comunica che il giorno %DATA%, dalle ore %INIZIO% alle ore %FINE%, si svolgerà la seguente attività: "
-message.attivita_edit: Il testo dell'avviso utilizza i campi <strong>%DATA%</strong>, <strong>%INIZIO%</strong> e <strong>%FINE%</strong> che verranno sostituiti automaticamente con la data e l'ora di inizio e fine dell'attività indicata.
-message.presenti_avvisi: "È presente %num% avviso da leggere alla classe|Sono presenti %num% avvisi da leggere alla classe"
-message.presenti_nuovi_avvisi: "È presente %num% nuovo avviso da leggere|Sono presenti %num% nuovi avvisi da leggere"
-message.avviso_coordinatore_oggetto: Messaggio dal coordinatore della classe %classe%
-message.avviso_individuale_oggetto: "Messaggio dal%docente%"
+message.avviso_attivita_testo: "Si comunica che il giorno {DATA}, dalle ore {INIZIO} alle ore {FINE}, si svolgerà la seguente attività: "
+message.attivita_edit: Il testo dell'avviso utilizza i campi <strong>{DATA}</strong>, <strong>{INIZIO}</strong> e <strong>{FINE}</strong> che verranno sostituiti automaticamente con la data e l'ora di inizio e fine dell'attività indicata.
+message.presenti_avvisi: "{num, plural, one {È presente un avviso da leggere alla classe} other {Sono presenti # avvisi da leggere alla classe}}"
+message.presenti_nuovi_avvisi: "{num, plural, one {È presente un nuovo avviso da leggere} other {Sono presenti # nuovi avvisi da leggere}}"
+message.avviso_coordinatore_oggetto: Messaggio dal coordinatore della classe {classe}
+message.avviso_individuale_oggetto: "Messaggio dal{docente}"
 message.info_avviso_con_annotazione: All'avviso sarà associata una annotazione sul registro, inserita nella data e nelle classi indicate.
-message.verifica_oggetto: "Verifica per la materia %materia%"
+message.verifica_oggetto: "Verifica per la materia {materia}"
 message.verifiche_presenti: "ATTENZIONE: sono previste altre verifiche per la data e la classe indicate.<br>Puoi scegliere se modificare la verifica inserita o confermarla senza effettuare cambiamenti."
-message.compito_oggetto: "Compiti per casa per la materia %materia%"
+message.compito_oggetto: "Compiti per casa per la materia {materia}"
 message.cancella_verifica: Verrà cancellata la verifica e l'annotazione sul registro collegata. Vuoi continuare?
 message.cancella_compito: Verranno cancellati i compiti assegnati per casa. Vuoi continuare?
-message.presenti_verifiche_oggi: "È prevista %num% verifica per oggi|Sono previste %num% verifiche per oggi"
-message.presenti_verifiche_prossime: "È prevista %num% verifica per i prossimi giorni|Sono previste %num% verifiche per i prossimi giorni"
+message.presenti_verifiche_oggi: "{num, plural, one {È prevista una verifica per oggi} other {Sono previste # verifiche per oggi}}"
+message.presenti_verifiche_prossime: "{num, plural, one {È prevista una verifica per i prossimi giorni} other {Sono previste # verifiche per i prossimi giorni}}"
 message.inserimento_programmi: "Inserire il programma svolto creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire il programma svolto assieme a quello del docente di teoria, in un unico documento."
 message.cancella_programma: Verrà cancellato il documento del programma svolto. Vuoi continuare?
 message.no_cattedra_programmi: Non è previsto il caricamento dei programmi svolti per questa cattedra.
@@ -666,44 +666,44 @@ message.motivazione_deroga_S: Vista la situazione di salute, adeguatamente docum
 message.motivazione_deroga_F: Vista la grave situazione famigliare, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.motivazione_deroga_P: Vista la partecipazione ad attività sportive, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.motivazione_deroga_R: Vista l'adesione a una confessione religiosa che considera il sabato come giorno di riposo, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
-message.giudizio_non_ammissione: Esaminati tutti gli elementi valutativi, tenuto conto delle gravi carenze di base nella maggior parte delle discipline, considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrato nel corso dell’anno scolastico, il Consiglio di Classe ritiene che l’alunn%sex% non possieda le competenze e le conoscenze adeguate per affrontare %classe%.
-message.giudizio_non_ammissione_sospeso: Esaminati tutti gli elementi valutativi, tenuto conto che persistono le gravi carenze segnalate nello scrutinio finale di giugno, il Consiglio di Classe ritiene che l’alunn%sex% non possieda le competenze e le conoscenze adeguate per affrontare la classe successiva.
-message.giudizio_scrutinio_rinviato: Poiché l’alunn%sex% è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi.
-message.motivazione_ammissione: "Nonostante permangano alcune carenze in una disciplina, considerato che l'alunn%sex% dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di Classe ritiene che l’alunn%sex% possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
+message.giudizio_non_ammissione: Esaminati tutti gli elementi valutativi, tenuto conto delle gravi carenze di base nella maggior parte delle discipline, considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrato nel corso dell’anno scolastico, il Consiglio di Classe ritiene che l’alunn{sex} non possieda le competenze e le conoscenze adeguate per affrontare {classe}.
+message.giudizio_non_ammissione_sospeso: Esaminati tutti gli elementi valutativi, tenuto conto che persistono le gravi carenze segnalate nello scrutinio finale di giugno, il Consiglio di Classe ritiene che l’alunn{sex} non possieda le competenze e le conoscenze adeguate per affrontare la classe successiva.
+message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi.
+message.motivazione_ammissione: "Nonostante permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di Classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
 message.otp_abilitato: Codice OTP abilitato.
 message.modifica_email: Inserisci il tuo indirizzo di posta elettronica. Ricorda che è importante che sia un indirizzo valido, in caso contrario non sarà possibile utilizzare la funzione di recupero password.
 message.modifica_password: "La password ha una lunghezza minima di 8 caratteri e deve contenere: almeno una lettera maiuscola, almeno una lettera minuscola, almeno una cifra.<br>Si consiglia di utilizzare anche gli altri caratteri presenti sulla tastiera (ad esempio +-#@$&!?.,;:)."
 message.no_cattedra_piani: Non è previsto il caricamento dei piani di lavoro per questa cattedra.
 message.cancella_piano: Verrà cancellato il documento del piano di lavoro. Vuoi continuare?
 message.inserimento_piani: "Inserire il piano di lavoro creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire il piano di lavoro assieme a quello del docente di teoria, in un unico documento."
-message.autorizza_ritardo: "L'alunn%sex% %alunno% è autorizzat%sex% ad entrare alla seconda ora"
-message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn%sex% %alunno%, accompagnat%sex% da un genitore"
+message.autorizza_ritardo: "L'alunn{sex} {alunno} è autorizzat{sex} ad entrare alla seconda ora"
+message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore"
 message.conferma_supplenza: "Confermando la scelta entrerai come SUPPLENTE in una tua classe. Vuoi continuare?"
-message.presenti_compiti_domani: "È presente %num% compito assegnato per domani|Sono presenti %num% compiti assegnati per domani"
+message.presenti_compiti_domani: "{num, plural, one {È presente un compito assegnato per domani} other {Sono presenti # compiti assegnati per domani}}"
 message.attivazione_ok: "Procedura eseguita senza errori.<br>Riceverai un'email all'indirizzo indicato con ulteriori istruzioni."
 message.attivazione_confermata: "Il tuo utente è stato attivato.<br><br>È stato inserito un avviso sul Registro Elettronico, leggibile dalla tua famiglia, con indicato il tuo nome utente e la tua password di accesso."
 message.conferma_utente_attivo: "Attenzione:<br>L'utente risulta già attivo."
-message.attivazione_alunno_oggetto: "Attivazione dell'accesso al registro elettronico per l'alunn%sex% %alunno%"
-message.attivazione_alunno_testo: "Si comunica che è stato attivato l'accesso al Registro Elettronico come studente per %alunno%.\nL'alunn%sex% potrà accedere al registro con un proprio utente con funzionalità limitate.\n\nLe seguenti sono le credenziali di accesso per l'alunn%sex%:\n * NOME UTENTE: %username%\n * PASSWORD: %password%"
-message.notifica_valutazione: "Valutazione %tipo% in %materia% del %data%: %voto% %giudizio%"
-message.notifica_verifica: "Verifica di %materia% fissata il giorno %data%"
-message.notifica_compito: "Compiti di %materia% assegnati per il giorno %data%"
-message.notifica_generica: "Avviso per il giorno %data%.\n%testo%"
-message.notifica_registrazione: "Benvenuto nel servizio di notifiche via Telegram del Registro Elettronico dell' %intestazione_istituto_breve%."
+message.attivazione_alunno_oggetto: "Attivazione dell'accesso al registro elettronico per l'alunn{sex} {alunno}"
+message.attivazione_alunno_testo: "Si comunica che è stato attivato l'accesso al Registro Elettronico come studente per {alunno}.\nL'alunn{sex} potrà accedere al registro con un proprio utente con funzionalità limitate.\n\nLe seguenti sono le credenziali di accesso per l'alunn{sex}:\n * NOME UTENTE: {username}\n * PASSWORD: {password}"
+message.notifica_valutazione: "Valutazione {tipo} in {materia} del {DATA}: {voto} {giudizio}"
+message.notifica_verifica: "Verifica di {materia} fissata il giorno {DATA}"
+message.notifica_compito: "Compiti di {materia} assegnati per il giorno {DATA}"
+message.notifica_generica: "Avviso per il giorno {DATA}.\n{testo}"
+message.notifica_registrazione: "Benvenuto nel servizio di notifiche via Telegram del Registro Elettronico dell' {intestazione_istituto_breve}."
 message.registrazione_telegram_ok_benvenuto: "La registrazione del servizio di notifiche via <em>Telegram</em> è avvenuta con successo.<br>Riceverai in seguito una notifica di benvenuto."
 message.registrazione_telegram_ok: "La registrazione del servizio di notifiche via <em>Telegram</em> è avvenuta con successo."
 message.cancella_circolare: Verrà cancellata la circolare indicata. Vuoi continuare?
 message.presenti_comunicazioni: Sono presenti comunicazioni da leggere alla classe
-message.num_avvisi: "Avviso|Avvisi"
-message.num_circolari: "Circolare|Circolari"
-message.registro_lettura_circolare: "Letta la circolare n. %circolari%|Lette le circolari n. %circolari%"
-message.presenti_nuove_circolari: "È presente %num% nuova circolare da leggere|Sono presenti %num% nuove circolari da leggere"
+message.num_avvisi: "{num, plural, one {Avviso} other {Avvisi}}"
+message.num_circolari: "{num, plural, one {Circolare} other {Circolari}}"
+message.registro_lettura_circolare: "{num, plural, one {Letta la circolare n. {circolari}} other {Lette le circolari n. {circolari}}}"
+message.presenti_nuove_circolari: "{num, plural, one {È presente una nuova circolare da leggere} other {Sono presenti # nuove circolari da leggere}}"
 message.importa_ata: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
   \"Cognome, Nome, Sesso, Username, Password, Email, Sede, Tipo\".
   Se si attiva il controllo SOLO NUOVI verranno inseriti solo gli utenti che non risultano già presenti;
   in caso contrario, verranno modificati anche i dati degli utenti esistenti."
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.
-message.notifica_circolare_oggetto: "%intestazione_istituto_breve% - Nuove circolari da leggere"
+message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
 message.gestione_notifiche: "La ricezione via email della notifica delle nuove circolari può essere abilitata o disabilitata da questa pagina. Scegli l'opzione che preferisci e premi il pulsante di conferma."
 message.dato_memorizzato: La modifica è stata memorizzata correttamente.
 message.no_cattedra_doc15: Non è previsto il caricamento del documento del 15 maggio per questa cattedra.
@@ -721,7 +721,7 @@ exception.auth_required: Devi autenticarti per accedere alla pagina richiesta.
 exception.avviso_non_permesso: Spiacente non puoi creare o modificare l'avviso.
 exception.blocked_ip: Accesso da una postazione non autorizzata.
 exception.blocked_time: Accesso in orario non autorizzato (dalle 8 alle 14).
-exception.campo_data_mancante: Il campo %DATA% non è presente nel testo.
+exception.campo_data_mancante: Il campo {DATA} non è presente nel testo.
 exception.cattedra_esiste: La cattedra è già presente.
 exception.cattedra_mancante: Devi indicare la classe e la materia
 exception.cattedra_non_valida: I dati indicati per la cattedra non sono validi
@@ -733,11 +733,11 @@ exception.colloqui_sospesi: Il ricevimento dei genitori è sospeso negli ultimi 
 exception.conferma_invalida: "Procedura terminata con errore:<br>&nbsp;&nbsp;Utente sconosciuto"
 exception.conferma_scaduta: "Procedura terminata con errore:<br>&nbsp;&nbsp;La richiesta di attivazione è stata inviata più di 48 ore fa.<br><br>Effettua una nuova richiesta di attivazione e confermala entro 48 ore."
 exception.contrari_condotta: Non è stato indicato il numero di docenti contrari per una o più delibere a maggioranza.
-exception.contrari_esito: Non è stato indicato il numero di docenti contrari all'esito dell'alunn%sex% %alunno%.
+exception.contrari_esito: Non è stato indicato il numero di docenti contrari all'esito dell'alunn{sex} {alunno}.
 exception.data_festiva: La data risulta un giorno festivo.
 exception.date_start_end: La data iniziale è successiva a quella finale.
 exception.delibera_condotta: Non è stata indicata la delibera per uno o più voti di condotta.
-exception.delibera_esito: Non è stata indicata la delibera per l'esito dell'alunn%sex% %alunno%.
+exception.delibera_esito: Non è stata indicata la delibera per l'esito dell'alunn{sex} {alunno}.
 exception.destinatari_filtro_mancanti: Devi indicare almeno un destinatario nel filtro indicato.
 exception.destinatari_mancanti: Devi indicare almeno un destinatario.
 exception.docente_cambio_password: Il cambio password è permesso solo ai docenti che hanno abilitato l'utilizzo del codice OTP.
@@ -747,36 +747,36 @@ exception.error_recovery: "Impossibile spedire l'email all'indirizzo indicato. P
 exception.error_registration_service: La registrazione sul servizio esterno è fallita. Riprova più tardi.
 exception.expired_card: Certificato scaduto.
 exception.festivo_per_classi: La data risulta festiva per la sede di alcune classi
-exception.file_alunno_duplicato: L'alunno indicato nel record %num% è presente più volte nel sistema.
-exception.file_alunno_mancante: L'alunno indicato nel record %num% non è presente nel sistema.
-exception.file_cattedra: La cattedra indicata nel record %num% è già presente nel sistema.
-exception.file_classe: La classe non è corretta nel record %num%.
-exception.file_data: I campi del file non corrispondono a quanto previsto nel record %num%.
-exception.file_date: La data '%date%' non è valida nel record %num%.
-exception.file_docente_duplicato: Il docente indicato nel record %num% è presente più volte nel sistema.
-exception.file_docente_mancante: Il docente indicato nel record %num% non è presente nel sistema.
-exception.file_duplicated: Username generata automaticamente già esistente nel record %num%.
+exception.file_alunno_duplicato: L'alunno indicato nel record {num} è presente più volte nel sistema.
+exception.file_alunno_mancante: L'alunno indicato nel record {num} non è presente nel sistema.
+exception.file_cattedra: La cattedra indicata nel record {num} è già presente nel sistema.
+exception.file_classe: La classe non è corretta nel record {num}.
+exception.file_data: I campi del file non corrispondono a quanto previsto nel record {num}.
+exception.file_date: La data '{date}' non è valida nel record {num}.
+exception.file_docente_duplicato: Il docente indicato nel record {num} è presente più volte nel sistema.
+exception.file_docente_mancante: Il docente indicato nel record {num} non è presente nel sistema.
+exception.file_duplicated: Username generata automaticamente già esistente nel record {num}.
 exception.file_field: I campi di intestazione del file non corrispondono a quanto previsto.
 exception.file_format: Formato del file non valido.
-exception.file_frequenza: La frequenza non è valida nel record %num%.
-exception.file_giorno: Il giorno non è valido nel record %num%.
+exception.file_frequenza: La frequenza non è valida nel record {num}.
+exception.file_giorno: Il giorno non è valido nel record {num}.
 exception.file_mancante: Non hai caricato nessun documento.
-exception.file_materia: La materia non è corretta nel record %num%.
-exception.file_ora: L'ora non è valida nel record %num%.
-exception.file_orario: Impossibile trovare l'orario attuale della sede presente nel record %num%.
+exception.file_materia: La materia non è corretta nel record {num}.
+exception.file_ora: L'ora non è valida nel record {num}.
+exception.file_orario: Impossibile trovare l'orario attuale della sede presente nel record {num}.
 exception.file_read: Impossibile aprire il file.
-exception.file_required: Valore obbligatorio mancante nel record %num%.
-exception.file_sede: La sede non è corretta nel record %num%.
-exception.file_tipo: Il tipo indicato nel record %num% è incongruente con gli altri dati.
+exception.file_required: Valore obbligatorio mancante nel record {num}.
+exception.file_sede: La sede non è corretta nel record {num}.
+exception.file_tipo: Il tipo indicato nel record {num} è incongruente con gli altri dati.
 exception.file_upload: Errore di caricamento del file.
 exception.formato_password: "La password inserita non rispetta le regole previste: deve contenere almeno una lettera maiuscola, almeno una lettera minuscola e almeno una cifra."
-exception.genitori_classe_nulla_data: Nella data indicata l'alunn%sex% non risulta iscritt%sex%
-exception.genitori_classe_nulla: L'alunn%sex% non risulta iscritt%sex%
+exception.genitori_classe_nulla_data: Nella data indicata l'alunn{sex} non risulta iscritt{sex}
+exception.genitori_classe_nulla: L'alunn{sex} non risulta iscritt{sex}
 exception.giorno_riposo_settimanale: Giorno di riposo settimanale.
-exception.giudizio_esito: Non è stato inserito il giudizio di non ammissione dell'alunn%sex% %alunno%.
+exception.giudizio_esito: Non è stato inserito il giudizio di non ammissione dell'alunn{sex} {alunno}.
 exception.id_notfound: Oggetto non trovato.
-exception.insufficienze_ammissione_esito: Sono presenti insufficienze con un esito di ammissione per l'alunn%sex% %alunno%.
-exception.insufficienze_ammissione_quinta: E' presente più di una insufficienza con un esito di ammissione per l'alunn%sex% %alunno%.
+exception.insufficienze_ammissione_esito: Sono presenti insufficienze con un esito di ammissione per l'alunn{sex} {alunno}.
+exception.insufficienze_ammissione_quinta: E' presente più di una insufficienza con un esito di ammissione per l'alunn{sex} {alunno}.
 exception.invalid_app: Applicazione non riconosciuta.
 exception.invalid_card: Certificato non valido.
 exception.invalid_credentials: Le credenziali di accesso non sono valide.
@@ -787,32 +787,32 @@ exception.invalid_recovery_email: L'indirizzo email indicato non è presente nel
 exception.invalid_recovery_type: Utente non abilitato all'utilizzo della procedura di recupero password.
 exception.invalid_user_type: Tipo di utente non ammesso.
 exception.invalid_user: Utente sconosciuto.
-exception.manca_esito: Non è stato indicato l'esito dell'alunn%sex% %alunno%.
+exception.manca_esito: Non è stato indicato l'esito dell'alunn{sex} {alunno}.
 exception.missing_otp_credentials: Non hai inserito il codice OTP.
 exception.motivazione_condotta: Manca la motivazione per uno o più voti di condotta.
-exception.no_certificazione_esito: Non è stata compilata la certificazione delle competenze per l'alunn%sex% %alunno%.
-exception.no_comunicazione_carenze: Non è stata confermata la comunicazione delle carenze per l'alunn%sex% %alunno%.
-exception.no_comunicazione_debiti: Non è stata compilata la comunicazione dei debiti formativi per l'alunn%sex% %alunno%.
-exception.no_credito_esito: Non è stato inserito il credito per l'alunn%sex% %alunno%.
-exception.no_debito_esito: Mancano gli argomenti da recuperare di una o più materie per l'alunn%sex% %alunno%.
+exception.no_certificazione_esito: Non è stata compilata la certificazione delle competenze per l'alunn{sex} {alunno}.
+exception.no_comunicazione_carenze: Non è stata confermata la comunicazione delle carenze per l'alunn{sex} {alunno}.
+exception.no_comunicazione_debiti: Non è stata compilata la comunicazione dei debiti formativi per l'alunn{sex} {alunno}.
+exception.no_credito_esito: Non è stato inserito il credito per l'alunn{sex} {alunno}.
+exception.no_debito_esito: Mancano gli argomenti da recuperare di una o più materie per l'alunn{sex} {alunno}.
 exception.no_debito: Mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente.
-exception.no_debito_scrutinio: "<strong>%materia%</strong>: mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente."
-exception.no_motivazione_certificazione: "Non è stata inserita la motivazione di almeno un <em>Livello base non raggiunto</em> per l'alunn%sex% %alunno%."
+exception.no_debito_scrutinio: "<strong>{materia}</strong>: mancano gli argomenti da recuperare per uno o più alunni con voto insufficiente."
+exception.no_motivazione_certificazione: "Non è stata inserita la motivazione di almeno un <em>Livello base non raggiunto</em> per l'alunn{sex} {alunno}."
 exception.no_motivazione: Devi inserire la motivazione
 exception.no_privacy: "Devi accettare la clausola sulla privacy per poter utilizzare il servizio"
-exception.no_recupero_debito_scrutinio: "<strong>%materia%</strong>: manca l'indicazione sul recupero di uno o più alunni con debito formativo."
+exception.no_recupero_debito_scrutinio: "<strong>{materia}</strong>: manca l'indicazione sul recupero di uno o più alunni con debito formativo."
 exception.no_recupero_eseguito: Manca l'indicazione sul recupero per uno o più alunni con debito formativo.
-exception.no_recupero_esito: Manca la modalità del recupero di una o più materie per l'alunn%sex% %alunno%.
+exception.no_recupero_esito: Manca la modalità del recupero di una o più materie per l'alunn{sex} {alunno}.
 exception.no_recupero: Manca la modalità del recupero per uno o più alunni con voto insufficiente.
-exception.no_recupero_scrutinio: "<strong>%materia%</strong>: manca la modalità del recupero per uno o più alunni con voto insufficiente."
-exception.nota_con_nome: Il testo della nota non può contenere i nomi degli alunni (%nome%)
+exception.no_recupero_scrutinio: "<strong>{materia}</strong>: manca la modalità del recupero per uno o più alunni con voto insufficiente."
+exception.nota_con_nome: Il testo della nota non può contenere i nomi degli alunni ({nome})
 exception.not_allowed: Azione richiesta non permessa.
 exception.notifica_non_permessa: Spiacente non puoi aggiungere o modificare una notifica al genitore.
-exception.no_voto_esito: Mancano uno o più voti per l'esito dell'alunn%sex% %alunno%.
+exception.no_voto_esito: Mancano uno o più voti per l'esito dell'alunn{sex} {alunno}.
 exception.no_voto: Manca il voto per uno o più alunni.
-exception.no_voto_scrutinio: "<strong>%materia%</strong>: manca il voto per uno o più alunni."
-exception.nuovo_credito_massimo: "Il valore '%credito%' è al di sopra del massimo credito possibile."
-exception.nuovo_credito_minimo: "Il valore '%credito%' è al di sotto del minimo credito possibile."
+exception.no_voto_scrutinio: "<strong>{materia}</strong>: manca il voto per uno o più alunni."
+exception.nuovo_credito_massimo: "Il valore '{credito}' è al di sopra del massimo credito possibile."
+exception.nuovo_credito_minimo: "Il valore '{credito}' è al di sotto del minimo credito possibile."
 exception.nuovo_credito_motivazione: Non si è inserita la motivazione per il credito assegnato.
 exception.otp_associato: Hai già associato un dispositivo per l'accesso tramite codice OTP.
 exception.otp_errato: Il codice OTP inserito non è valido.
@@ -828,8 +828,8 @@ exception.scrutinio_presenza: Non hai inserito la presenza o il sostituto di uno
 exception.scrutinio_presidente: Non hai inserito chi presiede lo scrutinio.
 exception.scrutinio_segretario: Non hai inserito il segretario dello scrutinio.
 exception.scrutinio_tipo_scrutinabile: Non hai indicato se uno o più alunni sono scrutinabili o no.
-exception.sufficienze_non_ammissione_esito: Sono presenti solo voti sufficienti con un esito di non ammissione per l'alunn%sex% %alunno%.
-exception.sufficienze_sospensione_esito: Sono presenti solo voti sufficienti con un giudizio sospeso per l'alunn%sex% %alunno%.
+exception.sufficienze_non_ammissione_esito: Sono presenti solo voti sufficienti con un esito di non ammissione per l'alunn{sex} {alunno}.
+exception.sufficienze_sospensione_esito: Sono presenti solo voti sufficienti con un giudizio sospeso per l'alunn{sex} {alunno}.
 exception.tipo_sostegno: La cattedra non può essere di sostegno.
 exception.upload_dimensione: La dimensione di questo file è superiore ai limiti previsti!
 exception.upload_no_dropzone: Il programma di navigazione usato non permette di inviare i file! Probabilmente va aggiornato ad una versione recente.
@@ -838,25 +838,25 @@ exception.upload_tipo: Questo tipo di file non è permesso!
 exception.user_card: Utente non abilitato all'uso di questa modalità di accesso.
 exception.utente_cambio_password: Il cambio password è permesso solo agli utenti che hanno inserito la propria email.<br>In questo modo sarà possibile utilizzare la funzione di recupero password.
 exception.verbale_argomento_vuoto: Non si può lasciare l'argomento vuoto.
-exception.voto_condotta_esito: Il voto insufficiente della condotta non è coerente con l'esito dell'alunn%sex% %alunno%.
+exception.voto_condotta_esito: Il voto insufficiente della condotta non è coerente con l'esito dell'alunn{sex} {alunno}.
 exception.voto_condotta: Manca il voto di condotta per uno o più alunni.
 exception.voto_errato: Sono presenti uno o più voti con valori non ammessi.
-exception.voto_religione_esito: Il voto insufficiente di religione non è coerente con l'esito dell'alunn%sex% %alunno%.
+exception.voto_religione_esito: Il voto insufficiente di religione non è coerente con l'esito dell'alunn{sex} {alunno}.
 exception.voto_vuoto: Hai lasciato in bianco sia il voto che il giudizio.
 exception.data_nulla: Non hai indicato la data.
 exception.circolare_numero_esiste: Il numero assegnato alla circolare risulta essere già esistente.
 exception.circolare_oggetto_nullo: Non ha inserito l'oggetto della circolare.
 exception.circolare_sede_nulla: Non hai indicato la sede a cui è destinata la circolare.
 exception.circolare_destinatari_nulli: Non hai indicato nessun destinatario della circolare.
-exception.filtro_classi_invalido: Hai indicato una o più classi non valide nel filtro %dest%.
+exception.filtro_classi_invalido: Hai indicato una o più classi non valide nel filtro {dest}.
 exception.filtro_materie_invalido: Hai indicato una o più materie non valide nel filtro dei Docenti.
-exception.filtro_utenti_invalido: Hai indicato uno o più utenti non validi nel filtro %dest%.
+exception.filtro_utenti_invalido: Hai indicato uno o più utenti non validi nel filtro {dest}.
 exception.lista_altri_invalida: La lista degli Altri destinatari non è in un formato valido.
 exception.circolare_documento_nullo: Non hai caricato il documento della circolare.
 exception.circolare_documento_numero: Hai caricato più di un documento della circolare.
 exception.file_ata_sede: La sede indicata per l'utente ATA non esiste.
 exception.errore_invio_credenziali: Non è stato possibile inviare le credenziali all'utente.
-exception.lezione_non_esiste: "Non esiste una lezione firmata per la materia '%materia%' nella data indicata."
+exception.lezione_non_esiste: "Non esiste una lezione firmata per la materia '{materia}' nella data indicata."
 exception.non_permesso_in_data: Azione richiesta non permessa nella data indicata.
-exception.alunno_no_classe_in_data: "%alunno% non risulta nell'elenco della classe nella data indicata."
-exception.motivo_scrutinio_rinviato: Non è stato inserita la motivazione per il rinvio dello scrutinio dell'alunn%sex% %alunno%.
+exception.alunno_no_classe_in_data: "{alunno} non risulta nell'elenco della classe nella data indicata."
+exception.motivo_scrutinio_rinviato: Non è stato inserita la motivazione per il rinvio dello scrutinio dell'alunn{sex} {alunno}.

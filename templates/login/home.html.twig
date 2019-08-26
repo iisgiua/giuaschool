@@ -20,16 +20,16 @@
       {% endfor %}
     {% endif %}
     {% if dati.avvisi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|transchoice(dati.avvisi, {'%num%': dati.avvisi}) }}: <a href="{{ path('bacheca_avvisi') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|trans{'num': dati.avvisi}) }}: <a href="{{ path('bacheca_avvisi') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
     {% endif %}
     {% if dati.circolari > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|transchoice(dati.circolari, {'%num%': dati.circolari}) }}: <a href="{{ path('circolari_docenti') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({'num': dati.circolari}) }}: <a href="{{ path('circolari_docenti') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
     {% if dati.verifiche.oggi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|transchoice(dati.verifiche.oggi, {'%num%': dati.verifiche.oggi}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|trans({'num': dati.verifiche.oggi}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
     {% if dati.verifiche.prossime > 0 %}
-      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|transchoice(dati.verifiche.prossime, {'%num%': dati.verifiche.prossime}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|trans({'num': dati.verifiche.prossime}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
   {% elseif is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') %}
     {% if dati.colloqui is defined and dati.colloqui %}
@@ -43,23 +43,23 @@
       {% endfor %}
     {% endif %}
     {% if dati.avvisi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|transchoice(dati.avvisi, {'%num%': dati.avvisi}) }}: <a href="{{ path('genitori_avvisi') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|trans({'num': dati.avvisi}) }}: <a href="{{ path('genitori_avvisi') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
     {% endif %}
     {% if dati.circolari > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|transchoice(dati.circolari, {'%num%': dati.circolari}) }}: <a href="{{ path('circolari_genitori') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({'num': dati.circolari}) }}: <a href="{{ path('circolari_genitori') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
     {% if dati.verifiche.oggi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|transchoice(dati.verifiche.oggi, {'%num%': dati.verifiche.oggi}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|trans({'num': dati.verifiche.oggi}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
     {% if dati.verifiche.prossime > 0 %}
-      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|transchoice(dati.verifiche.prossime, {'%num%': dati.verifiche.prossime}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|trans({'num': dati.verifiche.prossime}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
     {% if dati.compiti.domani > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|transchoice(dati.compiti.domani, {'%num%': dati.compiti.domani}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({'num': dati.compiti.domani}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
     {% endif %}
   {% elseif is_granted('ROLE_ATA') %}
     {% if dati.circolari > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|transchoice(dati.circolari, {'%num%': dati.circolari}) }}: <a href="{{ path('circolari_ata') }}">vai alla pagina delle Circolari per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({'num': dati.circolari}) }}: <a href="{{ path('circolari_ata') }}">vai alla pagina delle Circolari per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
   {% endif %}
     </div>

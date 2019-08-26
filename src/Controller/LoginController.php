@@ -681,9 +681,9 @@ class LoginController extends AbstractController {
       $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $nome = $alunno->getNome().' '.$alunno->getCognome();
       $oggetto = $trans->trans('message.attivazione_alunno_oggetto',
-        ['%sex%' => $sesso, '%alunno%' => $nome]);
+        ['sex' => $sesso, 'alunno' => $nome]);
       $testo = $trans->trans('message.attivazione_alunno_testo',
-        ['%sex%' => $sesso, '%alunno%' => $nome, '%username%' => $alunno->getUsername(), '%password%' => $password]);
+        ['sex' => $sesso, 'alunno' => $nome, 'username' => $alunno->getUsername(), 'password' => $password]);
       $avviso = (new Avviso())
         ->setTipo('I')
         ->setData(new \DateTime('today'))
