@@ -12,19 +12,24 @@
 
 namespace App\Twig;
 
+use Twig\Extension\AbstractExtension;
+use Twig\TwigTest;
+
 
 /**
  * InstanceofExtension - funzione TWIG INSTANCEOF: instanceOf(file)
  */
-class InstanceofExtension extends \Twig\Extension\AbstractExtension {
+class InstanceofExtension extends AbstractExtension {
 
   /**
    * Aggiunge il nuovo test al gestore TWIG
+   *
+   * @return array Lista di test come istanze di TwigTest
    */
   public function getTests() {
-    return array(
-      new \Twig_SimpleTest('instanceof', array($this, 'isInstanceOf')),
-    );
+    return [
+      new TwigTest('instanceof', [$this, 'isInstanceOf']),
+    ];
   }
 
   /**
@@ -33,20 +38,11 @@ class InstanceofExtension extends \Twig\Extension\AbstractExtension {
    * @param mixed $object Istanza dell'oggetto da testare
    * @param mixed $class Classe da testare
    *
-   * @return \DateTime Data dell'ultima modifica del file indicato
+   * @return bool Risultato del test effettuato
    */
   public function isInstanceOf($object, $class) {
     $reflectionClass = new \ReflectionClass($class);
     return $reflectionClass->isInstance($object);
-  }
-
-  /**
-   * Restituisce il nome dell'estensione
-   *
-   * @return string Nome dell'estensione
-   */
-  public function getName() {
-    return 'instanceof';
   }
 
 }
