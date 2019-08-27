@@ -12,24 +12,24 @@
 
 namespace App\Twig;
 
-use Doctrine\ORM\Query\Lexer;
-use Doctrine\ORM\Query\AST\Functions\FunctionNode;
-use Doctrine\ORM\Query\Parser;
-use Doctrine\ORM\Query\SqlWalker;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
 
 /**
  * FiledateExtension - funzione TWIG FILEDATE: filedate(file)
  */
-class FiledateExtension extends \Twig\Extension\AbstractExtension {
+class FiledateExtension extends AbstractExtension {
 
   /**
    * Aggiunge la nuova funzione al gestore TWIG
+   *
+   * @return array Lista di funzioni come istanze di TwigFunction
    */
   public function getFunctions() {
-    return array(
-      new \Twig_SimpleFunction('filedate', array($this, 'getFileDate')),
-    );
+    return [
+      new TwigFunction('filedate', [$this, 'getFileDate']),
+    ];
   }
 
   /**
@@ -37,7 +37,7 @@ class FiledateExtension extends \Twig\Extension\AbstractExtension {
    *
    * @param string $nomefile File di cui restituire la data di modifica
    *
-   * @return \DateTime Data dell'ultima modifica del file indicato
+   * @return null|DateTime Data dell'ultima modifica del file indicato
    */
   public function getFileDate($nomefile) {
     if (file_exists($nomefile)) {
@@ -46,15 +46,6 @@ class FiledateExtension extends \Twig\Extension\AbstractExtension {
     }
     // errore
     return null;
-  }
-
-  /**
-   * Restituisce il nome dell'estensione
-   *
-   * @return string Nome dell'estensione
-   */
-  public function getName() {
-    return 'filedate';
   }
 
 }
