@@ -83,8 +83,7 @@ class BachecaUtil {
       ->join('avs.sede', 's')
       ->where('avs.avviso=:avviso')
       ->setParameters(['avviso' => $avviso->getId()])
-      ->orderBy('s.principale', 'DESC')
-      ->addOrderBy('s.citta', 'ASC')
+      ->orderBy('s.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();
     // legge classi
@@ -453,8 +452,7 @@ class BachecaUtil {
           ->select('s.citta')
           ->join('avs.sede', 's')
           ->where('avs.avviso=:avviso')
-          ->orderBy('s.principale', 'DESC')
-          ->addOrderBy('s.citta', 'ASC')
+          ->orderBy('s.ordinamento', 'ASC')
           ->setParameter('avviso', $a->getId())
           ->getQuery()
           ->getArrayResult();
@@ -651,8 +649,7 @@ class BachecaUtil {
       ->join('avs.sede', 's')
       ->where('avs.avviso=:avviso')
       ->setParameters(['avviso' => $avviso->getId()])
-      ->orderBy('s.principale', 'DESC')
-      ->addOrderBy('s.citta', 'ASC')
+      ->orderBy('s.ordinamento', 'ASC')
       ->getQuery()
       ->getResult();
     foreach ($sedi as $s) {
@@ -722,8 +719,7 @@ class BachecaUtil {
           ->select('s.citta')
           ->join('avs.sede', 's')
           ->where('avs.avviso=:avviso')
-          ->orderBy('s.principale', 'DESC')
-          ->addOrderBy('s.citta', 'ASC')
+          ->orderBy('s.ordinamento', 'ASC')
           ->setParameter('avviso', $a->getId())
           ->getQuery()
           ->getArrayResult();
@@ -757,8 +753,7 @@ class BachecaUtil {
           ->select('s.citta')
           ->join('avs.sede', 's')
           ->where('avs.avviso=:avviso')
-          ->orderBy('s.principale', 'DESC')
-          ->addOrderBy('s.citta', 'ASC')
+          ->orderBy('s.ordinamento', 'ASC')
           ->setParameter('avviso', $a->getId())
           ->getQuery()
           ->getArrayResult();

@@ -1,6 +1,6 @@
 <p>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE</strong><br>
-  <strong><i>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong>
+  <strong><i>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</i></strong>
 </p>
 <p>
   Tipo di utente: <strong>{{ ruolo }}</strong><br>
@@ -16,7 +16,7 @@
 <p>Quando si inserisce l'utente e la password nella pagina di accesso, <i>si faccia attenzione ad usare solo caratteri minuscoli, senza aggiungere spazi</i>.</p>
 <p>Il Registro Elettronico è accessibile all'indirizzo internet seguente:</p>
 <ul>
-  <li><strong style="font-family:helvetica; font-size:120%;"><a href="{{ app.session.get('/CONFIG/SCUOLA/url_registro') }}">{{ app.session.get('/CONFIG/SCUOLA/url_registro') }}</a></strong></li>
+  <li><strong style="font-family:helvetica; font-size:120%;"><a href="{{ app.session.get('/CONFIG/ISTITUTO/url_registro') }}">{{ app.session.get('/CONFIG/ISTITUTO/url_registro') }}</a></strong></li>
 </ul>
 <p>&nbsp;</p>
 <hr>

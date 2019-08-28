@@ -856,7 +856,7 @@ class VotiController extends AbstractController {
     $info['periodo'] = $reg->periodo($data_obj);
     $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
     // crea documento PDF
-    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+    $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Voti della classe '.$classe->getAnno().'ª '.$classe->getSezione().' - '.$info['materia']);
     $html = $this->renderView('pdf/voti_quadro.html.twig', array(
       'classe' => $classe,

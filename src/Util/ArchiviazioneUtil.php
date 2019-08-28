@@ -127,7 +127,7 @@ class ArchiviazioneUtil {
       return;
     }
     // crea documento
-    $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+    $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
       'Registro del docente - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -214,7 +214,7 @@ class ArchiviazioneUtil {
       return;
     }
     // crea documento
-    $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+    $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
       'Registro di sostegno - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -281,7 +281,7 @@ class ArchiviazioneUtil {
     // nome documento
     $nomefile = 'registro-classe-'.$classe->getAnno().$classe->getSezione().'.pdf';
     // crea documento
-    $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+    $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
       'Registro di classe - '.$classe->getAnno().'ª '.$classe->getSezione());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -336,7 +336,7 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i>“'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto_nome').'”</i></strong>
+                  <br><strong><i>“'.$this->session->get('/CONFIG/ISTITUTO/nome').'”</i></strong>
                   <br><span style="font-size:9pt">CAGLIARI - ASSEMINI</span>
                 </td>
               </tr>
@@ -347,7 +347,7 @@ class ArchiviazioneUtil {
       </table>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
-    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
@@ -378,7 +378,7 @@ class ArchiviazioneUtil {
     $materia_s = $cattedra->getMateria()->getNome();
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
@@ -810,7 +810,7 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i>“'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto_nome').'”</i></strong>
+                  <br><strong><i>“'.$this->session->get('/CONFIG/ISTITUTO/nome').'”</i></strong>
                   <br><span style="font-size:9pt">CAGLIARI - ASSEMINI</span>
                 </td>
               </tr>
@@ -821,7 +821,7 @@ class ArchiviazioneUtil {
       </table>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
-    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
@@ -854,7 +854,7 @@ class ArchiviazioneUtil {
       ' ('.$cattedra->getAlunno()->getDataNascita()->format('d/m/Y').')';
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
@@ -1187,7 +1187,7 @@ class ArchiviazioneUtil {
               <tr>
                 <td align="left" style="width:20%"><img src="/img/logo-italia-colore.jpg" width="60"></td>
                 <td align="center" style="width:80%"><strong>Istituto di Istruzione Superiore</strong>
-                  <br><strong><i>“'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto_nome').'”</i></strong>
+                  <br><strong><i>“'.$this->session->get('/CONFIG/ISTITUTO/nome').'”</i></strong>
                   <br><span style="font-size:9pt">CAGLIARI - ASSEMINI</span>
                 </td>
               </tr>
@@ -1200,7 +1200,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
     $corso_s = $classe->getCorso()->getNome();
@@ -1224,7 +1224,7 @@ class ArchiviazioneUtil {
     // inizializza dati
     $dati_periodi = $this->regUtil->infoPeriodi();
     $periodo_s = $dati_periodi[$periodo]['nome'];
-    $annoscolastico = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5).
+    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
     $corso_s = $classe->getCorso()->getNome().' - Sede di '.$classe->getSede()->getCitta();

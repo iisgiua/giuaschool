@@ -72,7 +72,7 @@ class AtaType extends AbstractType {
         'placeholder' => 'label.nessuna_sede',
         'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('s')
-              ->orderBy('s.principale', 'DESC');
+              ->orderBy('s.ordinamento', 'ASC');
           },
         'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
@@ -94,4 +94,3 @@ class AtaType extends AbstractType {
   }
 
 }
-

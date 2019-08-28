@@ -64,12 +64,10 @@ class CircolareType extends AbstractType {
               return $er->createQueryBuilder('s')
                 ->where('s.id=:sede')
                 ->setParameter(':sede', $options['setSede'])
-                ->orderBy('s.principale', 'DESC')
-                ->addOrderBy('s.citta', 'ASC');
+                ->orderBy('s.ordinamento', 'ASC');
             } else {
               return $er->createQueryBuilder('s')
-                ->orderBy('s.principale', 'DESC')
-                ->addOrderBy('s.citta', 'ASC');
+                ->orderBy('s.ordinamento', 'ASC');
             }
           },
         'expanded' => true,
@@ -255,4 +253,3 @@ class CircolareType extends AbstractType {
   }
 
 }
-

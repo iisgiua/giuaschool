@@ -101,41 +101,11 @@ class Sede {
   private $telefono;
 
   /**
-   * @var string $email Indirizzo email della sede scolastica
+   * @var integer $ordinamento Numero d'ordine per la visualizzazione delle sedi
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
-   *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
-   * @Assert\Email(message="field.email")
+   * @ORM\Column(type="smallint", nullable=false)
    */
-  private $email;
-
-  /**
-   * @var string $pec Indirizzo PEC della sede scolastica
-   *
-   * @ORM\Column(type="string", length=255, nullable=true)
-   *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
-   * @Assert\Email(message="field.email")
-   */
-  private $pec;
-
-  /**
-   * @var string $web Indirizzo del sito web della sede
-   *
-   * @ORM\Column(type="string", length=255, nullable=true)
-   *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
-   * @Assert\Url(message="field.url")
-   */
-  private $web;
-
-  /**
-   * @var boolean $principale Indica se la sede è quella principale della scuola o no
-   *
-   * @ORM\Column(type="boolean", nullable=false)
-   */
-  private $principale;
+  private $ordinamento;
 
 
   //==================== EVENTI ORM ====================
@@ -278,99 +248,28 @@ class Sede {
   }
 
   /**
-   * Restituisce l'indirizzo email della sede scolastica
+   * Restituisce il numero d'ordine per la visualizzazione delle sedi
    *
-   * @return string Indirizzo email della sede scolastica
+   * @return integer Numero d'ordine per la visualizzazione delle sedi
    */
-  public function getEmail() {
-    return $this->email;
+  public function getOrdinamento() {
+    return $this->ordinamento;
   }
 
   /**
-   * Modifica l'indirizzo email della sede scolastica
+   * Modifica il numero d'ordine per la visualizzazione delle sedi
    *
-   * @param string $email Indirizzo email della sede scolastica
+   * @param integer $ordinamento Numero d'ordine per la visualizzazione delle sedi
    *
    * @return Sede Oggetto Sede
    */
-  public function setEmail($email) {
-    $this->email = $email;
-    return $this;
-  }
-
-  /**
-   * Restituisce l'indirizzo PEC della sede scolastica
-   *
-   * @return string Indirizzo PEC della sede scolastica
-   */
-  public function getPec() {
-    return $this->pec;
-  }
-
-  /**
-   * Modifica l'indirizzo PEC della sede scolastica
-   *
-   * @param string $pec Indirizzo PEC della sede scolastica
-   *
-   * @return Sede Oggetto Sede
-   */
-  public function setPEC($pec) {
-    $this->pec = $pec;
-    return $this;
-  }
-
-  /**
-   * Restituisce l'indirizzo web della sede scolastica
-   *
-   * @return string Indirizzo web della sede scolastica
-   */
-  public function getWeb() {
-    return $this->web;
-  }
-
-  /**
-   * Modifica l'indirizzo web della sede scolastica
-   *
-   * @param string $web Indirizzo web della sede scolastica
-   *
-   * @return Sede Oggetto Sede
-   */
-  public function setWeb($web) {
-    $this->web = $web;
-    return $this;
-  }
-
-  /**
-   * Indica se la sede è quella principale della scuola o no
-   *
-   * @return boolean Vero se la sede è quella principale della scuola, falso altrimenti
-   */
-  public function getPrincipale() {
-    return $this->principale;
-  }
-
-  /**
-   * Modifica se la sede è quella principale della scuola o no
-   *
-   * @param boolean $principale Vero se la sede è quella principale della scuola, falso altrimenti
-   *
-   * @return Sede Oggetto Sede
-   */
-  public function setPrincipale($principale) {
-    $this->principale = ($principale == true);
+  public function setOrdinamento($ordinamento) {
+    $this->ordinamento = $ordinamento;
     return $this;
   }
 
 
   //==================== METODI DELLA CLASSE ====================
-
-  /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->principale = false;
-  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo
@@ -382,4 +281,3 @@ class Sede {
   }
 
 }
-

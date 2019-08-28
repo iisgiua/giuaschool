@@ -1,5 +1,5 @@
 ISTITUTO DI ISTRUZIONE SUPERIORE
-"{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}"
+"{{ app.session.get('/CONFIG/ISTITUTO/nome') }}"
 
 Docente: {{ sesso }} {{ utente.nome }} {{ utente.cognome }}
 
@@ -12,7 +12,7 @@ Quando si inserisce l'utente e la password nella pagina di accesso, si faccia
 attenzione ad usare solo caratteri minuscoli, senza aggiungere spazi.
 
 Il Registro Elettronico è accessibile all'indirizzo internet seguente:
-  {{ app.session.get('/CONFIG/SCUOLA/url_registro') }}
+  {{ app.session.get('/CONFIG/ISTITUTO/url_registro') }}
 
 
 --------------------

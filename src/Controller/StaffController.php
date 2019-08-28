@@ -365,8 +365,7 @@ class StaffController extends AbstractController {
           },
         'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('s')
-              ->orderBy('s.principale', 'DESC')
-              ->addOrderBy('s.citta', 'ASC');
+              ->orderBy('s.ordinamento', 'ASC');
           },
         'expanded' => true,
         'multiple' => true,
@@ -930,8 +929,7 @@ class StaffController extends AbstractController {
           },
         'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('s')
-              ->orderBy('s.principale', 'DESC')
-              ->addOrderBy('s.citta', 'ASC');
+              ->orderBy('s.ordinamento', 'ASC');
           },
         'expanded' => true,
         'multiple' => true,
@@ -1291,8 +1289,7 @@ class StaffController extends AbstractController {
           },
         'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('s')
-              ->orderBy('s.principale', 'DESC')
-              ->addOrderBy('s.citta', 'ASC');
+              ->orderBy('s.ordinamento', 'ASC');
           },
         'expanded' => true,
         'multiple' => true,
@@ -2700,7 +2697,7 @@ class StaffController extends AbstractController {
     if ($creaPdf) {
       // crea PDF
       $lista = $staff->statisticheStampa($docente, $inizio, $fine);
-      $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+      $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
         'Statistiche sulle ore di lezione dei docenti');
       $pdf->getHandler()->SetAutoPageBreak(true, 15);
       $pdf->getHandler()->SetFooterMargin(15);
@@ -3262,7 +3259,7 @@ class StaffController extends AbstractController {
         // alunni presenti
         $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
         // crea documento PDF
-        $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
           'Credenziali di accesso al Registro Elettronico');
         foreach ($alunni as $alu) {
           // recupera genitori (anche più di uno)
@@ -3329,7 +3326,7 @@ class StaffController extends AbstractController {
         'ID esecutore' => $this->getUser()->getId()
         ));
       // crea documento PDF
-      $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+      $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
         'Credenziali di accesso al Registro Elettronico');
       // contenuto in formato HTML
       $html = $this->renderView('pdf/credenziali_alunni.html.twig', array(
@@ -3648,7 +3645,7 @@ class StaffController extends AbstractController {
       $classi = $em->getRepository('App:Classe')->findBy(['sede' => $sede_staff], ['anno' =>'ASC', 'sezione' =>'ASC']);
     } else {
       // tutte le classi
-      $sedi = $em->getRepository('App:Sede')->findBy([], ['principale' =>'DESC']);
+      $sedi = $em->getRepository('App:Sede')->findBy([], ['ordinamento' =>'ASC']);
       $classi = $em->getRepository('App:Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     }
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_studenti_statistiche', FormType::class)

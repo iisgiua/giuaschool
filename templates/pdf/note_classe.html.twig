@@ -1,13 +1,13 @@
 <p style="text-align:center; font-family:times; font-size:12pt">
   <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
-  <strong><i>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong><br>
+  <strong><i>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</i></strong><br>
   <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
   TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
-  Email: {{ app.session.get('/CONFIG/SCUOLA/email_istituto') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/SCUOLA/url_istituto') }}</span>
+  Email: {{ app.session.get('/CONFIG/ISTITUTO/email') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
 </p>
 <p style="text-align:center; font-size:13pt">
-  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SISTEMA/anno_scolastico')[4:] }}</strong><br>
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico')[4:] }}</strong><br>
   <strong>Note disciplinari della classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
 </p>
 {% for periodo,v in dati %}

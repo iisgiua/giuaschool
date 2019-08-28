@@ -262,7 +262,7 @@ class AtaController extends AbstractController {
       'ID esecutore' => $this->getUser()->getId()
       ));
     // crea documento PDF
-    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+    $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_ata.html.twig', array(
@@ -277,8 +277,8 @@ class AtaController extends AbstractController {
     $doc = $pdf->getHandler()->Output('', 'S');
     // crea il messaggio
     $message = (new \Swift_Message())
-      ->setSubject($session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')." - Credenziali di accesso al Registro Elettronico")
-      ->setFrom([$session->get('/CONFIG/SCUOLA/email_notifica') => $session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')])
+      ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+      ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
       ->setTo([$ata->getEmail()])
       ->setBody($this->renderView('email/credenziali_ata.html.twig'), 'text/html')
       ->addPart($this->renderView('email/credenziali_ata.txt.twig'), 'text/plain')
