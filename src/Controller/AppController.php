@@ -146,13 +146,14 @@ class AppController extends AbstractController {
    * Mostra la pagina informativa sulle app ufficiali
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param ConfigLoader $config Gestore della configurazione su database
    *
    * @return Response Pagina di risposta
    *
    * @Route("/app/info/", name="app_info",
    *    methods={"GET"})
    */
-  public function infoAction(EntityManagerInterface $em) {
+  public function infoAction(EntityManagerInterface $em, ConfigLoader $config) {
     $applist = array();
     // carica configurazione di sistema
     $config->loadAll();
@@ -172,6 +173,7 @@ class AppController extends AbstractController {
    * Esegue il download dell'app indicata.
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param ConfigLoader $config Gestore della configurazione su database
    * @param int $id ID dell'app da scaricare
    *
    * @return Response File inviato in risposta
@@ -180,7 +182,7 @@ class AppController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    */
-  public function downloadAction(EntityManagerInterface $em, $id) {
+  public function downloadAction(EntityManagerInterface $em, ConfigLoader $config, $id) {
     // carica configurazione di sistema
     $config->loadAll();
     // controllo app

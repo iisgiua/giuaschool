@@ -52,8 +52,8 @@ class LoginController extends AbstractController {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
-   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
+   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    *
    * @return Response Pagina di risposta
    *

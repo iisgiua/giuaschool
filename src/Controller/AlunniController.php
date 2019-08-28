@@ -153,14 +153,14 @@ class AlunniController extends AbstractController {
       ->add('classe', ChoiceType::class, array('label' => 'label.classe',
         'data' => $classe,
         'choices' => $classi,
-        'choice_label' => function ($obj) {
+        'choice_label' => function ($obj) use ($trans) {
             return (is_object($obj) ? $obj->getAnno().' '.$obj->getSezione() :
               $trans->trans('label.nessuna_classe'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj)  ? $obj->getId() : $obj);
           },
-        'group_by' => function ($obj) {
+        'group_by' => function ($obj) use ($trans) {
             return (is_object($obj)  ? $obj->getSede()->getCitta() :
               $trans->trans('label.altro'));
           },
@@ -266,7 +266,7 @@ class AlunniController extends AbstractController {
         ->add('ultimoAccesso', TextType::class, array('label' => 'label.ultimo_accesso',
           'data' => ($alunno->getUltimoAccesso() ? $alunno->getUltimoAccesso()->format('d/m/Y H:i:s') :
             $trans->trans('label.mai')).', '.
-            implode(', ', array_map(function($g) {
+            implode(', ', array_map(function($g) use ($trans) {
               return $g->getUltimoAccesso() ? $g->getUltimoAccesso()->format('d/m/Y H:i:s') :
                 $trans->trans('label.mai'); }, $genitori)),
           'disabled' => true,
@@ -635,14 +635,14 @@ class AlunniController extends AbstractController {
       ->add('classe', ChoiceType::class, array('label' => 'label.classe',
         'data' => $classe,
         'choices' => $classi,
-        'choice_label' => function ($obj) {
+        'choice_label' => function ($obj) use ($trans) {
             return (is_object($obj) ? $obj->getAnno().' '.$obj->getSezione() :
               $trans->trans('label.nessuna_classe'));
           },
         'choice_value' => function ($obj) {
             return (is_object($obj)  ? $obj->getId() : $obj);
           },
-        'group_by' => function ($obj) {
+        'group_by' => function ($obj) use ($trans) {
             return (is_object($obj)  ? $obj->getSede()->getCitta() :
               $trans->trans('label.altro'));
           },

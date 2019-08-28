@@ -434,7 +434,7 @@ class ProcedureController extends AbstractController {
     $form = $this->container->get('form.factory')->createNamedBuilder('procedure_archiviazione', FormType::class)
       ->add('docente', ChoiceType::class, array('label' => 'label.registro_docente',
         'choices' => array_merge(['label.tutti_docenti' => -1], $lista_docente),
-        'choice_label' => function ($obj, $val) {
+        'choice_label' => function ($obj, $val) use ($trans) {
             return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
               $trans->trans('label.tutti_docenti'));
           },
@@ -450,7 +450,7 @@ class ProcedureController extends AbstractController {
         'required' => false))
       ->add('sostegno', ChoiceType::class, array('label' => 'label.registro_sostegno',
         'choices' => array_merge(['label.tutti_docenti' => -1], $lista_sostegno),
-        'choice_label' => function ($obj, $val) {
+        'choice_label' => function ($obj, $val) use ($trans) {
             return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
               $trans->trans('label.tutti_docenti'));
           },
@@ -466,7 +466,7 @@ class ProcedureController extends AbstractController {
         'required' => false))
       ->add('classe', ChoiceType::class, array('label' => 'label.registro_classe',
         'choices' => array_merge(['label.tutte_classi' => -1], $lista_classe),
-        'choice_label' => function ($obj, $val) {
+        'choice_label' => function ($obj, $val) use ($trans) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() :
               $trans->trans('label.tutte_classi'));
           },
@@ -485,7 +485,7 @@ class ProcedureController extends AbstractController {
         'required' => false))
       ->add('scrutinio', ChoiceType::class, array('label' => 'label.documenti_scrutinio',
         'choices' => array_merge(['label.tutte_classi' => -1], $lista_classe),
-        'choice_label' => function ($obj, $val) {
+        'choice_label' => function ($obj, $val) use ($trans) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() :
               $trans->trans('label.tutte_classi'));
           },

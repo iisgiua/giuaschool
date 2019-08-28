@@ -2642,7 +2642,7 @@ class StaffController extends AbstractController {
       ->add('docente', ChoiceType::class, array('label' => 'label.docente',
         'data' => $docente,
         'choices' => array_merge(['label.tutti_docenti' => -1], $docenti),
-        'choice_label' => function ($obj, $val) {
+        'choice_label' => function ($obj, $val) use ($trans) {
             return (is_object($obj) ? $obj->getCognome().' '.$obj->getNome() :
               $trans->trans('label.tutti_docenti'));
           },

@@ -8,7 +8,7 @@
 </p>
 <p>&nbsp;</p>
 <p style="text-align:center; font-size:13pt">
-  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico')[4:] }}</strong><br>
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong><br>
   <strong>Frequenza di {{ alunno.cognome }} {{ alunno.nome }} (nat{{ sesso }} il {{ alunno.dataNascita|date('d/m/Y') }})</strong><br>
   <strong>Classe {{ dati.classe }}</strong>
 {% if dati.note is defined %}

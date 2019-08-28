@@ -7,7 +7,7 @@
   Email: {{ app.session.get('/CONFIG/ISTITUTO/email') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
 </p>
 <p style="text-align:center; font-size:13pt">
-  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico')[4:] }}</strong><br>
+  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong><br>
   <strong>Valutazioni della classe {{ classe.anno }}ª {{ classe.sezione }}</strong><br>
   <strong>{{ info.materia }} - {{ info.periodo.nome }}</strong>
 </p>

@@ -16,8 +16,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Util\ConfigLoader;
 
-use Symfony\Component\Intl\Intl;
 
 /**
  * InfoController - pagine informative
@@ -27,12 +27,14 @@ class InfoController extends AbstractController {
   /**
    * Note legali
    *
+   * @param ConfigLoader $config Gestore della configurazione su database
+   *
    * @return Response Pagina di risposta
    *
    * @Route("/info/note-legali/", name="info_notelegali",
    *    methods={"GET"})
    */
-  public function noteLegaliAction() {
+  public function noteLegaliAction(ConfigLoader $config) {
     // carica configurazione di sistema
     $config->loadAll();
     return $this->render('info/notelegali.html.twig', array(
@@ -43,12 +45,14 @@ class InfoController extends AbstractController {
   /**
    * Privacy
    *
+   * @param ConfigLoader $config Gestore della configurazione su database
+   *
    * @return Response Pagina di risposta
    *
    * @Route("/info/privacy/", name="info_privacy",
    *    methods={"GET"})
    */
-  public function privacyAction() {
+  public function privacyAction(ConfigLoader $config) {
     // carica configurazione di sistema
     $config->loadAll();
     return $this->render('info/privacy.html.twig', array(
@@ -63,7 +67,7 @@ class InfoController extends AbstractController {
    * @Route("/temp/", name="temp",
    *    methods={"GET"})
    */
-  public function tempAction() {
+  public function tempAction(ConfigLoader $config) {
     // carica configurazione di sistema
     $config->loadAll();
 
