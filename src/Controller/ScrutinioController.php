@@ -922,7 +922,7 @@ class ScrutinioController extends AbstractController {
       if ($periodo == 'I' || $periodo == 'X') {
         // voti
         $dati = $scr->quadroVoti($this->getUser(), $classe, 'I');
-        if ($lista_periodi['X'] == 'C') {
+        if (isset($lista_periodi['X']) && $lista_periodi['X'] == 'C') {
           $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'X');
         }
       } elseif ($periodo) {
