@@ -63,7 +63,7 @@ class LoginController extends AbstractController {
   public function formAction(EntityManagerInterface $em, SessionInterface $session, AuthenticationUtils $auth,
                              ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // manutenzione
     $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if ($manutenzione) {
@@ -112,7 +112,7 @@ class LoginController extends AbstractController {
    */
   public function registrazioneAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // manutenzione
     $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if ($manutenzione) {
@@ -203,7 +203,7 @@ class LoginController extends AbstractController {
    */
   public function cardErroreAction(EntityManagerInterface $em, SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // manutenzione
     $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if ($manutenzione) {
@@ -271,7 +271,7 @@ class LoginController extends AbstractController {
                                   ConfigLoader $config, UserPasswordEncoderInterface $encoder, OtpUtil $otp,
                                   \Swift_Mailer $mailer, LoggerInterface $logger, LogHandler $dblogger) {
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // manutenzione
     $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if ($manutenzione) {
@@ -398,8 +398,8 @@ class LoginController extends AbstractController {
           ));
         // crea messaggio
         $message = (new \Swift_Message())
-          ->setSubject($session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')." - Recupero credenziali del Registro Elettronico")
-          ->setFrom([$session->get('/CONFIG/SCUOLA/email_notifica') => $session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')])
+          ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
+          ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
           ->setTo([$email])
           ->setBody($this->renderView($template_html,
             array(
@@ -464,7 +464,7 @@ class LoginController extends AbstractController {
                                      ConfigLoader $config, \Swift_Mailer $mailer, LoggerInterface $logger,
                                      LogHandler $dblogger) {
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // manutenzione
     $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if ($manutenzione) {
@@ -583,8 +583,8 @@ class LoginController extends AbstractController {
         // crea messaggio
         $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
         $message = (new \Swift_Message())
-          ->setSubject($session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')." - Attivazione dell\'accesso al Registro Elettronico da parte degli studenti")
-          ->setFrom([$session->get('/CONFIG/SCUOLA/email_notifica') => $session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')])
+          ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Attivazione dell\'accesso al Registro Elettronico da parte degli studenti")
+          ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
           ->setTo([$email])
           ->setBody($this->renderView('email/attivazione_alunni.html.twig',
             array(
@@ -644,7 +644,7 @@ class LoginController extends AbstractController {
                                   TranslatorInterface $trans, ConfigLoader $config, UserPasswordEncoderInterface $encoder, LogHandler $dblogger,
                                   $token) {
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // manutenzione
     $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if ($manutenzione) {

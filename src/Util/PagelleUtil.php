@@ -322,7 +322,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Primo Trimestre - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -345,7 +345,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -368,7 +368,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -391,7 +391,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -428,7 +428,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -441,7 +441,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', '', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'PRIMO TRIMESTRE', 0, 'R', 'B');
@@ -582,7 +582,7 @@ class PagelleUtil {
     $this->cella($pdf, 30, 15, 0, 0, 'Data', 0, 'R', 'B');
     $this->cella($pdf, 30, 15, 0, 0, $dati['scrutinio']['data'], 'B', 'C', 'B');
     $pdf->SetXY(-80, $pdf->GetY());
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $text = '(Il Dirigente Scolastico)'."\n".$preside;
     $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
   }
@@ -708,7 +708,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Primo Trimestre - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -731,7 +731,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -754,7 +754,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -777,7 +777,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Foglio firme Verbale - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -816,7 +816,7 @@ class PagelleUtil {
     // intestazione pagina
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME VERBALE', 0, 'L', 'T');
-    $as = $this->session->get('/CONFIG/SISTEMA/anno_scolastico');
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 0, 4, 0, 0, $classe.' - '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
@@ -879,7 +879,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Primo Trimestre - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -902,7 +902,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -925,7 +925,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -948,7 +948,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->firmeVerbaleDati($classe, $periodo);
         // crea il documento
@@ -987,7 +987,7 @@ class PagelleUtil {
     // intestazione pagina
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME REGISTRO', 0, 'L', 'T');
-    $as = $this->session->get('/CONFIG/SISTEMA/anno_scolastico');
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 0, 4, 0, 0, $classe.' - '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
@@ -1280,7 +1280,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Primo Trimestre - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1303,7 +1303,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1326,7 +1326,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1349,7 +1349,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Verbale classe '.$nome_classe);
         $dati = $this->verbaleDati($classe, $periodo);
         // crea il documento
@@ -1422,7 +1422,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.', dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto').'</em> di Cagliari, con sede staccata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/ISTITUTO/intestazione').'</em> di Cagliari, con sede staccata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';
@@ -1689,7 +1689,7 @@ class PagelleUtil {
     $pdf->Ln(10);
     // firma
     if ($dati['scrutinio']->getDato('presiede_ds')) {
-      $presidente_nome = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+      $presidente_nome = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     } else {
       $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
       if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
@@ -1801,7 +1801,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-pagella-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Primo Trimestre - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         // crea il documento
@@ -1824,7 +1824,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-valutazione-intermedia-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Valutazione intermedia - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         // crea il documento
@@ -1847,7 +1847,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1878,7 +1878,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1907,7 +1907,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Comunicazione dei voti - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1972,7 +1972,7 @@ class PagelleUtil {
     $pdf->Ln(15);
     // oggetto
     $pdf->SetFont('times', 'B', 12);
-    $as = $this->session->get('/CONFIG/SISTEMA/anno_scolastico');
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'OGGETTO: Scrutinio del primo trimestre '.$as.' - Comunicazione dei voti';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
@@ -2071,7 +2071,7 @@ class PagelleUtil {
     $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
     $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><em>'.$preside.'</em>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -2121,7 +2121,7 @@ class PagelleUtil {
     $pdf->Ln(15);
     // oggetto
     $pdf->SetFont('times', 'B', 12);
-    $as = $this->session->get('/CONFIG/SISTEMA/anno_scolastico');
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'OGGETTO: Comunicazione della VALUTAZIONE INTERMEDIA - '.$as;
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
@@ -2278,7 +2278,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Primo Trimestre - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->debitiDati($classe, $alunno, $periodo);
         // crea il documento
@@ -2301,7 +2301,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->debitiDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -2368,7 +2368,7 @@ class PagelleUtil {
     $pdf->Ln(15);
     // oggetto
     $pdf->SetFont('times', 'B', 12);
-    $as = $this->session->get('/CONFIG/SISTEMA/anno_scolastico');
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'OGGETTO: Scrutinio del primo trimestre '.$as.' - Indicazioni per il recupero';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(15);
@@ -2417,7 +2417,7 @@ class PagelleUtil {
     $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
     $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><em>'.$preside.'</em>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -2562,7 +2562,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -2575,7 +2575,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', '', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'SCRUTINIO FINALE', 0, 'R', 'B');
@@ -2811,7 +2811,7 @@ class PagelleUtil {
     $this->cella($pdf, 30, 15, 0, 0, 'Data', 0, 'R', 'B');
     $this->cella($pdf, 30, 15, 0, 0, $datascrutinio, 'B', 'C', 'B');
     $pdf->SetXY(-80, $pdf->GetY());
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $text = '(Il Dirigente Scolastico)'."\n".$preside;
     $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
   }
@@ -2838,7 +2838,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -2861,7 +2861,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -2884,7 +2884,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-tabellone-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -2924,7 +2924,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto').' - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione').' - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -2937,7 +2937,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', '', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'SCRUTINIO FINALE', 0, 'R', 'B');
@@ -3167,7 +3167,7 @@ class PagelleUtil {
     $this->cella($pdf, 30, 15, 0, 0, 'Data', 0, 'R', 'B');
     $this->cella($pdf, 30, 15, 0, 0, $datascrutinio, 'B', 'C', 'B');
     $pdf->SetXY(-80, $pdf->GetY());
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $text = '(Il Dirigente Scolastico)'."\n".$preside;
     $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
   }
@@ -3195,7 +3195,7 @@ class PagelleUtil {
     $coordinatore = $dati['classe']->getCoordinatore()->getCognome().' '.$dati['classe']->getCoordinatore()->getNome();
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME VERBALE', 0, 'L', 'T');
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 0, 4, 0, 0, $classe.' - A.S. '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
@@ -3259,7 +3259,7 @@ class PagelleUtil {
     // intestazione pagina
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME REGISTRO', 0, 'L', 'T');
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 0, 4, 0, 0, $classe.' - A.S. '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
@@ -3324,7 +3324,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -3347,7 +3347,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -3370,7 +3370,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // crea il documento
@@ -3477,7 +3477,7 @@ class PagelleUtil {
       $pdf->writeHTML($html, true, false, false, false, 'C');
       $pdf->Ln(3);
       $pdf->SetFont('times', 'B', 12);
-      $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+      $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
       $html = '<p><span style="font-size:14">CERTIFICATO delle COMPETENZE DI BASE</span><br>'.
               '<span style="font-size:11">acquisite nell\'assolvimento dell\' OBBLIGO DI ISTRUZIONE</span></p>'.
               '<p>Anno Scolastico '.$as.'</p>'.
@@ -3517,7 +3517,7 @@ class PagelleUtil {
       $this->cella($pdf, 67, 8, 0, 0, $alu_citta, 'B', 'L', 'B');
       $this->acapo($pdf, 8);
       // sezione
-      $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+      $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
       $text = ($alu_sesso == 'M' ? 'iscritto' : 'iscritta').
               ' nell\'anno scolastico '.$as.' presso questo Istituto nella classe II sezione';
       $pdf->SetFont('times', '', 11);
@@ -3683,7 +3683,7 @@ class PagelleUtil {
       $this->cella($pdf, 30, 14, 0, 0, 'Cagliari,', 0, 'R', 'B');
       $this->cella($pdf, 30, 14, 0, 0, $datascrutinio, 'B', 'C', 'B');
       $pdf->SetXY(-80, $pdf->GetY());
-      $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+      $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
       $text = '(Il Dirigente Scolastico)'."\n".$preside;
       $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
     }
@@ -3712,7 +3712,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -3741,7 +3741,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -3770,7 +3770,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Integrativo - Comunicazione di non ammissione - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -3958,14 +3958,13 @@ class PagelleUtil {
     $pdf->Ln(15);
     // oggetto
     $pdf->SetFont('times', 'B', 12);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'OGGETTO: Comunicazione esito dello scrutinio finale - Anno Scolastico '.$as.'.';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
     $pdf->SetFont('times', '', 12);
     if ($dati['tipo'] == 'C') {
       // non scrutinato per cessata frequenza
-      $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 10);
       $html = '<p align="justify">Si comunica che il Consiglio di Classe, nella fase preliminare delle operazioni dello scrutinio del '.$datascrutinio.','.
               ' avendo constatato che l’alunn'.$sex.' '.$alunno_nome.' ha cessato di frequentare entro il 15 marzo,'.
               ' l'.$sex.' ha dichiarat'.$sex.', ai sensi del R.D. 653/25, ritirat'.$sex.' d\'ufficio e di conseguenza <b>non ha proceduto al suo scrutinio</b>.'.
@@ -3974,7 +3973,6 @@ class PagelleUtil {
       $pdf->Ln(20);
     } elseif ($dati['tipo'] == 'A') {
       // non scrutinabile per assenze
-      $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 10);
       $html = '<p align="justify">Si comunica che il Consiglio di Classe, nella fase preliminare delle operazioni dello scrutinio del '.$datascrutinio.','.
               ' avendo constatato che l’alunn'.$sex.' '.$alunno_nome.
               ' ha superato il numero massimo di assenze previsto dalla normativa in vigore,'.
@@ -3986,7 +3984,6 @@ class PagelleUtil {
       $pdf->Ln(20);
     } elseif ($dati['tipo'] == 'N')  {
       // non ammesso per scrutinio
-      $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
       $html = '<p align="justify">Si comunica che il Consiglio di Classe, nello scrutinio del '.$datascrutinio.','.
               ' ha deliberato la <b>NON AMMISSIONE '.($dati['classe']->getAnno() == 5 ? 'all\'Esame di Stato' : 'alla classe successiva').'</b>'.
               ' dell\'alunn'.$sex.' '.$alunno_nome.', con la seguente motivazione:</p>';
@@ -4032,7 +4029,7 @@ class PagelleUtil {
     $pdf->SetFont('times', '', 12);
     $html = 'Cagliari, '.$datascrutinio.'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><i>'.$preside.'</i>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -4080,7 +4077,7 @@ class PagelleUtil {
     $pdf->SetFont('times', 'B', 12);
     $text = 'OGGETTO:';
     $this->cella($pdf, 26, 0, 0, 0, $text, 0, 'L', 'T');
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'Comunicazione debito formativo allo scrutinio finale - Anno Scolastico '.$as.'.';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
@@ -4116,7 +4113,7 @@ class PagelleUtil {
     $pdf->SetFont('times', '', 12);
     $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><i>'.$preside.'</i>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -4144,7 +4141,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-carenze-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione per il recupero autonomo - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->carenzeDati($classe, $alunno, $periodo);
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -4268,7 +4265,7 @@ class PagelleUtil {
     $pdf->SetFont('times', 'B', 12);
     $text = 'OGGETTO:';
     $this->cella($pdf, 26, 0, 0, 0, $text, 0, 'L', 'T');
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'Comunicazione per il recupero autonomo - Anno Scolastico '.$as.'.';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(15);
@@ -4303,7 +4300,7 @@ class PagelleUtil {
     $pdf->SetFont('times', '', 12);
     $html = 'Cagliari, '.$datascrutinio.'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><i>'.$preside.'</i>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -4350,7 +4347,7 @@ class PagelleUtil {
     $pdf->Ln(15);
     // oggetto
     $pdf->SetFont('times', 'B', 12);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'OGGETTO: Comunicazione dei voti dello scrutinio finale - Anno Scolastico '.$as.'.';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
@@ -4394,7 +4391,7 @@ class PagelleUtil {
     $pdf->SetFont('times', '', 12);
     $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><i>'.$preside.'</i>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -4457,7 +4454,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.' dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto').'</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/ISTITUTO/intestazione').'</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';
@@ -4823,7 +4820,7 @@ class PagelleUtil {
     $pdf->Ln(10);
     // firma
     if ($dati['scrutinio']->getDato('presiede_ds')) {
-      $presidente_nome = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+      $presidente_nome = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     } else {
       $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
       if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
@@ -4872,7 +4869,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto').' - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione').' - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -4885,7 +4882,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', '', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'SCRUTINIO INTEGRATIVO', 0, 'R', 'B');
@@ -5060,7 +5057,7 @@ class PagelleUtil {
     $this->cella($pdf, 30, 15, 0, 0, 'Data', 0, 'R', 'B');
     $this->cella($pdf, 30, 15, 0, 0, $datascrutinio, 'B', 'C', 'B');
     $pdf->SetXY(-80, $pdf->GetY());
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $text = '(Il Dirigente Scolastico)'."\n".$preside;
     $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
   }
@@ -5088,7 +5085,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/SCUOLA/intestazione_istituto').' - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione').' - CAGLIARI - ASSEMINI     ***     TABELLONE VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -5101,7 +5098,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', '', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'SCRUTINIO INTEGRATIVO', 0, 'R', 'B');
@@ -5259,7 +5256,7 @@ class PagelleUtil {
     $this->cella($pdf, 30, 15, 0, 0, 'Data', 0, 'R', 'B');
     $this->cella($pdf, 30, 15, 0, 0, $datascrutinio, 'B', 'C', 'B');
     $pdf->SetXY(-80, $pdf->GetY());
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $text = '(Il Dirigente Scolastico)'."\n".$preside;
     $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
   }
@@ -5287,7 +5284,7 @@ class PagelleUtil {
     $coordinatore = $dati['classe']->getCoordinatore()->getCognome().' '.$dati['classe']->getCoordinatore()->getNome();
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME VERBALE', 0, 'L', 'T');
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 0, 4, 0, 0, $classe.' - A.S '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
@@ -5351,7 +5348,7 @@ class PagelleUtil {
     // intestazione pagina
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME REGISTRO', 0, 'L', 'T');
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 0, 4, 0, 0, $classe.' - A.S '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
@@ -5436,7 +5433,7 @@ class PagelleUtil {
     $pdf->Ln(15);
     // oggetto
     $pdf->SetFont('times', 'B', 12);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'OGGETTO: Comunicazione esito dello scrutinio integrativo - Anno Scolastico '.$as.'.';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
@@ -5487,7 +5484,7 @@ class PagelleUtil {
     $pdf->SetFont('times', '', 12);
     $html = 'Cagliari, '.$datascrutinio.'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><i>'.$preside.'</i>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -5534,7 +5531,7 @@ class PagelleUtil {
     $pdf->Ln(15);
     // oggetto
     $pdf->SetFont('times', 'B', 12);
-    $as = substr($this->session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $text = 'OGGETTO: Comunicazione dei voti dello scrutinio integrativo - Anno Scolastico '.$as.'.';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
@@ -5578,7 +5575,7 @@ class PagelleUtil {
     $pdf->SetFont('times', '', 12);
     $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $html = 'Il Dirigente Scolastico<br><i>'.$preside.'</i>';
     $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
@@ -5641,7 +5638,7 @@ class PagelleUtil {
     $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
     $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
     $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.' dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/SCUOLA/intestazione_istituto').'</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
+      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/ISTITUTO/intestazione').'</em> di Cagliari, con sede associata in Assemini, si riunisce, a seguito di regolare convocazione, il Consiglio della Classe '.
       $classe.' per discutere il seguente ordine del giorno:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $html = '<ol>';
@@ -6290,7 +6287,7 @@ class PagelleUtil {
     $pdf->Ln(10);
     // firma
     if ($dati['scrutinio']->getDato('presiede_ds')) {
-      $presidente_nome = $this->session->get('/CONFIG/SCUOLA/firma_preside');
+      $presidente_nome = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     } else {
       $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
       if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {

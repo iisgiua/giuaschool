@@ -33,6 +33,8 @@ class InfoController extends AbstractController {
    *    methods={"GET"})
    */
   public function noteLegaliAction() {
+    // carica configurazione di sistema
+    $config->loadAll();
     return $this->render('info/notelegali.html.twig', array(
       'pagina_titolo' => 'page.notelegali',
     ));
@@ -47,6 +49,8 @@ class InfoController extends AbstractController {
    *    methods={"GET"})
    */
   public function privacyAction() {
+    // carica configurazione di sistema
+    $config->loadAll();
     return $this->render('info/privacy.html.twig', array(
       'pagina_titolo' => 'page.privacy',
     ));
@@ -60,6 +64,8 @@ class InfoController extends AbstractController {
    *    methods={"GET"})
    */
   public function tempAction() {
+    // carica configurazione di sistema
+    $config->loadAll();
 
     return $this->render('temp.html.twig', array(
       'pagina_titolo' => 'page.privacy',

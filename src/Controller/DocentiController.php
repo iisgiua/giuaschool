@@ -895,7 +895,7 @@ class DocentiController extends AbstractController {
       'ID esecutore' => $this->getUser()->getId()
       ));
     // crea documento PDF
-    $pdf->configure($session->get('/CONFIG/SCUOLA/intestazione_istituto'),
+    $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_docenti.html.twig', array(

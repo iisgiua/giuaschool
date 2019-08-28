@@ -394,7 +394,7 @@ class LezioniController extends AbstractController {
     \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
     $properties = $phpWord->getDocInfo();
-    $properties->setCreator($session->get('/CONFIG/SCUOLA/intestazione_istituto'));
+    $properties->setCreator($session->get('/CONFIG/ISTITUTO/intestazione'));
     $properties->setTitle('Programma svolto - '.$info['classe'].' - '.$info['materia']);
     $properties->setDescription('');
     $properties->setSubject('');
@@ -428,7 +428,7 @@ class LezioniController extends AbstractController {
       array('name' => 'Arial', 'size' => 9),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     // intestazione
-    $section->addImage($this->getParameter('kernel.project_dir').'/web/img/logo-italia.png', array(
+    $section->addImage($this->getParameter('kernel.project_dir').'/public/img/logo-italia.png', array(
       'width' => 35,
       'height' => 35,
       'positioning' => \PhpOffice\PhpWord\Style\Image::POSITION_RELATIVE,
@@ -441,14 +441,14 @@ class LezioniController extends AbstractController {
     $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE',
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText($session->get('/CONFIG/SCUOLA/intestazione_istituto_nome'),
+    $section->addText($session->get('/CONFIG/ISTITUTO/nome'),
       array('bold' => true, 'italic' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addText('CAGLIARI - ASSEMINI',
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addTextBreak(1);
-    $as = substr($session->get('/CONFIG/SISTEMA/anno_scolastico'), 5);
+    $as = $session->get('/CONFIG/SCUOLA/anno_scolastico');
     $section->addText('ANNO SCOLASTICO '.$as,
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));

@@ -74,7 +74,7 @@ class AppController extends AbstractController {
     $manutenzione = null;
     $modo_manutenzione = false;
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // controlla manutenzione programmata
     $dati_manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if (!empty($dati_manutenzione)) {
@@ -154,6 +154,8 @@ class AppController extends AbstractController {
    */
   public function infoAction(EntityManagerInterface $em) {
     $applist = array();
+    // carica configurazione di sistema
+    $config->loadAll();
     // legge app abilitate
     $apps = $em->getRepository('App:App')->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
@@ -179,6 +181,8 @@ class AppController extends AbstractController {
    *    methods={"GET"})
    */
   public function downloadAction(EntityManagerInterface $em, $id) {
+    // carica configurazione di sistema
+    $config->loadAll();
     // controllo app
     $app = $em->getRepository('App:App')->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
@@ -186,7 +190,7 @@ class AppController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // file
-    $file = new File($this->getParameter('kernel.project_dir').'/web/app/app-'.$app->getToken().$app->getDownload());
+    $file = new File($this->getParameter('kernel.project_dir').'/public/app/app-'.$app->getToken().$app->getDownload());
     // nome da visualizzare
     $nome = $app->getNome().$app->getDownload();
     // invia il documento
@@ -219,7 +223,7 @@ class AppController extends AbstractController {
     $manutenzione = null;
     $modo_manutenzione = false;
     // carica configurazione di sistema
-    $config->load('SISTEMA');
+    $config->loadAll();
     // controlla manutenzione programmata
     $dati_manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
     if (!empty($dati_manutenzione)) {

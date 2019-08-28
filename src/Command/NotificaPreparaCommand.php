@@ -276,12 +276,12 @@ class NotificaPreparaCommand extends Command {
               // notifica via email
               $testo = $this->tpl->render('email/notifica_circolari.html.twig', array(
                 'circolari' => $circ,
-                'intestazione_istituto_breve' => $this->session->get('/CONFIG/SCUOLA/intestazione_istituto_breve'),
-                'url_registro' => $this->session->get('/CONFIG/SCUOLA/url_registro'),
-                'email_amministratore' => $this->session->get('/CONFIG/SCUOLA/email_amministratore')));
+                'intestazione_istituto_breve' => $this->session->get('/CONFIG/ISTITUTO/intestazione_breve'),
+                'url_registro' => $this->session->get('/CONFIG/ISTITUTO/url_registro'),
+                'email_amministratore' => $this->session->get('/CONFIG/ISTITUTO/email_amministratore')));
               // aggiunge dati
               $dati_notifica['oggetto'] = $this->trans->trans('message.notifica_circolare_oggetto', [
-                'intestazione_istituto_breve' => $this->session->get('/CONFIG/SCUOLA/intestazione_istituto_breve')]);
+                'intestazione_istituto_breve' => $this->session->get('/CONFIG/ISTITUTO/intestazione_breve')]);
               $dati_notifica['email'] = $utente->getEmail();
               // imposta la precedenza su altri messaggi
               $stato = 'P';

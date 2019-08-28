@@ -1,10 +1,10 @@
 <p style="text-align:center; font-family:times; font-size:12pt">
   <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
   <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
-  <strong><i>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_nome') }}</i></strong><br>
+  <strong><i>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</i></strong><br>
   <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
   TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
-  Email: {{ app.session.get('/CONFIG/SCUOLA/email_istituto') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/SCUOLA/url_istituto') }}</span>
+  Email: {{ app.session.get('/CONFIG/ISTITUTO/email') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
 </p>
 <p>&nbsp;</p>
 <p style="text-align: center"><strong>Registro Elettronico - Informativa sulla privacy per il personale ATA</strong></p>
@@ -39,7 +39,7 @@ potranno essere utilizzate esclusivamente per le seguenti finalità:</p>
   <li>per ragioni tecniche, con lo scopo di individuare le cause di malfunzionamenti dell'applicativo;</li>
   <li>per ragioni di sicurezza, con lo scopo di individuare accessi non autorizzati o indagare su tentativi di intrusione nel sistema.</li>
 </ul>
-<p style="text-align:justify;font-size:10pt">Il Titolare del trattamento dei dati personali è: <strong>{{ app.session.get('/CONFIG/SCUOLA/intestazione_istituto_breve') }} via Montecassino - Cagliari (09134) - Telefono 070
+<p style="text-align:justify;font-size:10pt">Il Titolare del trattamento dei dati personali è: <strong>{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }} via Montecassino - Cagliari (09134) - Telefono 070
 500786, rappresentato dal Dirigente Scolastico</strong>.</p>
 <p style="text-align:justify;font-size:10pt">I soggetti cui si riferiscono i dati personali hanno il diritto di ottenere, in qualunque momento,
 la conferma dell'esistenza o meno dei medesimi dati, di conoscerne il contenuto e l'origine, verificarne l'esattezza, chiederne
@@ -47,4 +47,4 @@ l'integrazione, l'aggiornamento, la rettifica, la cancellazione, la trasformazio
 in violazione di legge, nonché di opporsi al loro trattamento (art. 7 del Decreto Legislativo 196/2003).
 <br></p>
 <p style="text-align: right;font-size:11pt">Il Dirigente Scolastico<br>
-<i>{{ app.session.get('/CONFIG/SCUOLA/firma_preside') }}</i>&nbsp;&nbsp;</p>
+<i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>&nbsp;&nbsp;</p>
