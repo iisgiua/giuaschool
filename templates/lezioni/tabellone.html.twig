@@ -21,7 +21,7 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo and periodo != 'X' ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul style="z-index: 1010" class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['P','1','F','I'] %}
+    {% for p in ['A','P','1','F','I'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
       {% endif %}
@@ -31,7 +31,7 @@
     </div>
     <div class="col-sm-4 text-right">
     {% if cattedra.tipo != 'S' and cattedra.materia.tipo != 'S'  %}
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_proposte', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': (periodo ? periodo : 0)}) }}" role="button" title="Visualizza le proposte dei voti"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_proposte', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': 0}) }}" role="button" title="Visualizza le proposte dei voti"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
     {% endif %}
     </div>
   </div>
@@ -303,6 +303,80 @@
       </tbody>
     </table>
   </div>
+    {% elseif periodo == 'A' %}
+  <div id="gs-fixed-header">
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Classe</small></th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Media</small></th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Esito</small></th>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Azioni</small></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for alunno,a in dati.alunni %}
+        <tr>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+          </td>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.classe }}</strong>
+          </td>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <span class="gs-big"><span class="label label-{{ a.media < 6 ? 'danger' : 'success' }}">{{ a.media|number_format(2,',') }}</span></span>
+          </td>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+        {% if a.esito == 'A' and a.periodo == 'F' %}
+            <span class="gs-big"><span class="label label-success">AMMESSO</span></span>
+        {% elseif a.esito == 'A' and a.periodo != 'F' %}
+            <span class="gs-big"><span class="label label-success">AMMESSO (SCRUTINIO INTEGRATIVO)</span></span>
+        {% elseif a.esito == 'N' and a.periodo == 'F' %}
+            <span class="gs-big"><span class="label label-danger">NON AMMESSO</span></span>
+        {% elseif a.esito == 'N' and a.periodo != 'F' %}
+            <span class="gs-big"><span class="label label-danger">NON AMMESSO (SCRUTINIO INTEGRATIVO)</span></span>
+        {% elseif a.esito == 'R' %}
+            <span class="gs-big"><span class="label label-danger">NON SCRUTINATO</span></span>
+        {% elseif a.esito == 'L' %}
+            <span class="gs-big"><span class="label label-danger">NON AMMESSO (SUPERAMENTO LIMITE ASSENZE)</span></span>
+        {% elseif a.esito == 'E' %}
+            <span class="gs-big"><span class="label label-warning">ANNO ALL'ESTERO</span></span>
+        {% endif %}
+          </td>
+          <td>
+        {% if dati.voti[alunno][info.materia_id].voto is defined %}
+            <button type="button" class="btn btn-xs btn-primary" title="Visualizza dettagli sulla disciplina" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ (a.cognome~' '~a.nome~'<br><small>'~info.materia~'</small>')|raw }}" data-body="info-{{ alunno }}"><span class="glyphicon glyphicon-search"></span></button>
+            <div id="info-{{ alunno }}" style="display:none">
+              <div class="list-group-item">
+                <div class="list-group-item-text">
+                  <strong>Voto finale:</strong>
+          {% if info.materia_tipo == 'R' %}
+                  <span class="gs-big"><span class="label label-{{ dati.voti[alunno][info.materia_id].voto < 22 ? 'danger' : 'success' }}">{{ info.giudizi['F']['R'][dati.voti[alunno][info.materia_id].voto] }}</span></span>
+          {% elseif dati.voti[alunno][info.materia_id].voto == 0 %}
+                  <span class="gs-big"><span class="label label-danger">NC</span></span>
+          {% else %}
+                  <span class="gs-big"><span class="label label-{{ dati.voti[alunno][info.materia_id].voto < 5 ? 'danger' : (dati.voti[alunno][info.materia_id].voto < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][info.materia_id].voto }}</span></span>
+          {% endif %}
+                  <br><br>
+                  <strong>Carenze segnalate:</strong>
+                  <br>
+          {% if dati.voti[alunno][info.materia_id].carenze %}
+                  <small><em>{{ dati.voti[alunno][info.materia_id].carenze|nl2br }}</em></small>
+          {% else %}
+                  <small>NESSUNA</small>
+          {% endif %}
+                </div>
+              </div>
+            </div>
+        {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+      {% include 'include/modal-info.html.twig' %}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.no_scrutini_svolti'|trans }}</strong>
@@ -318,6 +392,13 @@
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover({container: 'body'});
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').html(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
   $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
     var c=floatContainer.find('thead');
     if(isFloated){

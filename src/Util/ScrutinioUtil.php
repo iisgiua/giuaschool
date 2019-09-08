@@ -5447,4 +5447,49 @@ class ScrutinioUtil {
     return true;
   }
 
+  /**
+   * Restituisce la situazione del precedente anno scolastico
+   *
+   * @param Docente $docente Docente che inserisce i dati dello scrutinio
+   * @param Classe $classe Classe relativa alle proposte di voto
+   * @param string $periodo Periodo relativo allo scrutinio
+   *
+   * @return array Dati formattati come un array associativo
+   */
+  public function quadroVotiPrecedente(Docente $docente, Classe $classe) {
+    $dati = array();
+    // legge alunni
+    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,se.classe,se.esito,se.media,se.periodo,se.dati')
+      ->join('App:StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
+      ->where('a.classe=:classe')
+      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->setParameters(['classe' => $classe->getId()])
+      ->getQuery()
+      ->getResult();
+    foreach ($alunni as $alu) {
+      if ($alu['esito'] == 'R' && !in_array($alu['id'], $alu['dati']['cessata_frequenza'])) {
+        // non ammesso per limite assenze
+        $alu['esito'] = 'L';
+      }
+      $dati['alunni'][$alu['id']] = $alu;
+    }
+    // legge i voti
+    $voti = $this->em->getRepository('App:StoricoVoto')->createQueryBuilder('sv')
+      ->select('sv.voto,sv.carenze,a.id AS alunno_id,m.id AS materia_id')
+      ->join('sv.materia', 'm')
+      ->join('sv.storicoEsito', 'se')
+      ->join('se.alunno', 'a')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=sv.materia AND c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe')
+      ->where('a.classe=:classe')
+      ->setParameters(['attiva' => 1, 'docente' => $docente->getId(), 'classe' => $classe->getId()])
+      ->getQuery()
+      ->getResult();
+    foreach ($voti as $v) {
+      $dati['voti'][$v['alunno_id']][$v['materia_id']] = $v;
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }
