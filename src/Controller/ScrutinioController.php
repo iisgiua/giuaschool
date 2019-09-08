@@ -876,6 +876,7 @@ class ScrutinioController extends AbstractController {
     $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insuff.', 33 => 'Mediocre', 34 => 'Suff.', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
     $info['giudizi']['I']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
+    $info['giudizi']['A']['R'] = $info['giudizi']['F']['R'];
     $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
@@ -899,6 +900,8 @@ class ScrutinioController extends AbstractController {
       // informazioni necessarie
       $classe = $cattedra->getClasse();
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
+      $info['materia_id'] = $cattedra->getMateria()->getId();
+      $info['materia_tipo'] = $cattedra->getMateria()->getTipo();
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
@@ -911,6 +914,8 @@ class ScrutinioController extends AbstractController {
     if ($cattedra) {
       // legge lista periodi
       $lista_periodi = $scr->periodi($classe);
+      // aggiunde periodo per A.S. precedente
+      $lista_periodi['A'] = 'C';
       if ($periodo == '0') {
         // cerca scrutinio chiuso
         $scrutinio = $scr->scrutinioChiuso($classe);
@@ -925,6 +930,9 @@ class ScrutinioController extends AbstractController {
         if (isset($lista_periodi['X']) && $lista_periodi['X'] == 'C') {
           $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'X');
         }
+      } elseif ($periodo == 'A') {
+        // situazione precedente A.S.
+        $dati = $scr->quadroVotiPrecedente($this->getUser(), $classe);
       } elseif ($periodo) {
         // voti
         $dati = $scr->quadroVoti($this->getUser(), $classe, $periodo);
