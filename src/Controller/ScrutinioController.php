@@ -860,7 +860,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/scrutinio/svolto/{cattedra}/{classe}/{periodo}", name="lezioni_scrutinio_svolto",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|I|1|2|0|X"},
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|I|1|2|A|X"},
    *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
    *    methods="GET")
    *

@@ -20,7 +20,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * StoricoEsito - entità
  *
- * @ORM\Entity(repositoryClass="AppBundle\Repository\StoricoEsitoRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\StoricoEsitoRepository")
  * @ORM\Table(name="gs_storico_esito")
  * @ORM\HasLifecycleCallbacks
  *
