@@ -144,6 +144,7 @@ class DocenteRepository extends UtenteRepository {
    * @return array Lista di ID degli utenti docenti
    */
   public function getIdDocente($sedi, $tipo, $filtro) {
+    // docenti con cattedra
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
       ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
@@ -166,8 +167,23 @@ class DocenteRepository extends UtenteRepository {
     $docenti = $docenti
       ->getQuery()
       ->getArrayResult();
+    $docenti_id = array_column($docenti, 'id');
+    if ($tipo == 'T') {
+      // aggiunge docenti senza cattedra
+      $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+        ->select('c.id')
+        ->where('c.docente=d.id AND c.attiva=:attiva')
+        ->getDQL();
+      $docenti = $this->createQueryBuilder('d')
+        ->select('DISTINCT d.id')
+        ->where('d.abilitato=:abilitato AND NOT EXISTS ('.$cattedre.')')
+        ->setParameters(['attiva' => 1, 'abilitato' => 1 ])
+        ->getQuery()
+        ->getArrayResult();
+      $docenti_id = array_merge($docenti_id, array_column($docenti, 'id'));
+    }
     // restituisce la lista degli ID
-    return array_column($docenti, 'id');
+    return $docenti_id;
   }
 
   /**
@@ -195,4 +211,3 @@ class DocenteRepository extends UtenteRepository {
   }
 
 }
-
