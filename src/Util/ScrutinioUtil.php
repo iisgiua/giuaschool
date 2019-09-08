@@ -5458,6 +5458,7 @@ class ScrutinioUtil {
    */
   public function quadroVotiPrecedente(Docente $docente, Classe $classe) {
     $dati = array();
+    $dati['alunni'] = array();
     // legge alunni
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,se.classe,se.esito,se.media,se.periodo,se.dati')
