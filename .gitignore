@@ -32,6 +32,7 @@
 ###< symfony/web-server-bundle ###
 
 ###> trinko/giuaschool ###
+/last_deploy.date
 /DEV/
 /FILES/archivio/classi/*
 !/FILES/archivio/classi/.gitkeep
