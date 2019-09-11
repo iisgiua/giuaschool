@@ -2,9 +2,13 @@
 
 doctrine:
   dbal:
-    driver: 'pdo_mysql'
     server_version: '%env(DATABASE_VERSION)%'
-    url: '%env(DATABASE_URL)%'
+    host: '%env(DATABASE_HOST)%'
+    port: '%env(DATABASE_PORT)%'
+    user: '%env(DATABASE_USER)%'
+    password: '%env(DATABASE_PASSWORD)%'
+    dbname: '%env(DATABASE_NAME)%'
+    driver: 'pdo_mysql'
     charset: 'utf8'
     default_table_options:
       charset: 'utf8'
