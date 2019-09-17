@@ -56,7 +56,7 @@ class NotificaInviaCommand extends Command {
   private $session;
 
   /**
-   * @var \Swift_Mailer $mailer Gestore della spedizione delle email
+   * @var Swift_Mailer $mailer Gestore della spedizione delle email
    */
   private $mailer;
 
@@ -222,11 +222,11 @@ class NotificaInviaCommand extends Command {
       'chat_id' => $notifica->getDati()['chat'],
       'text' => $notifica->getMessaggio(),
       'parse_mode' => 'HTML'), null, '&');
-    $cu = curl_init();
-    $errore = !curl_setopt_array($cu, $telegram_opts);
+    $cu = \curl_init();
+    $errore = !\curl_setopt_array($cu, $telegram_opts);
     if (!$errore) {
       // esegue chiamata per invio
-      $risposta = json_decode(curl_exec($cu), true);
+      $risposta = json_decode(\curl_exec($cu), true);
       $errore = (!isset($risposta['ok']) || !$risposta['ok']);
       if ($errore) {
         // setta errore telegram
@@ -236,7 +236,7 @@ class NotificaInviaCommand extends Command {
       // setta errore CURL
       $errore_desc = 'CURL';
     }
-    curl_close($cu);
+    \curl_close($cu);
     // cambia stato
     if ($errore) {
       // segnala errore
