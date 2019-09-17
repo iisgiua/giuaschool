@@ -451,14 +451,14 @@ $dati_app['ip'] = $request->getClientIp();
       CURLOPT_CONNECTTIMEOUT => 10,
       CURLOPT_TIMEOUT => 10);
     // invia tramite curl
-    $cu = curl_init();
-    if (!curl_setopt_array($cu, $telegram_opts)) {
+    $cu = \curl_init();
+    if (!\curl_setopt_array($cu, $telegram_opts)) {
       // errore invio parametri
-      curl_close($cu);
+      \curl_close($cu);
       return false;
     }
-    $risposta = curl_exec($cu);
-    curl_close($cu);
+    $risposta = \curl_exec($cu);
+    \curl_close($cu);
     if (!$risposta) {
       // errore registrazione
       return false;
