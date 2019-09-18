@@ -282,7 +282,7 @@ class AtaController extends AbstractController {
       ->setTo([$ata->getEmail()])
       ->setBody($this->renderView('email/credenziali_ata.html.twig'), 'text/html')
       ->addPart($this->renderView('email/credenziali_ata.txt.twig'), 'text/plain')
-      ->attach(\Swift_Attachment::newInstance($doc, 'credenziali_registro.pdf', 'application/pdf'));
+      ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
     // invia mail
     if (!$mailer->send($message)) {
       // errore di spedizione
