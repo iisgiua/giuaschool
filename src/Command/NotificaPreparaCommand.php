@@ -518,7 +518,10 @@ class NotificaPreparaCommand extends Command {
     $dati = $utente->getNotifica();
     $tipo = ($utente instanceof Alunno ? 'A' : ($utente instanceof Genitore ? 'G' :
       ($utente instanceof Docente ? 'D' : ($utente instanceof Ata ? 'T' : ''))));
-    $app = $this->em->getRepository('App:App')->findOneBy(['id' => $dati['app'], 'attiva' => 1]);
+    $app = null;
+    if (isset($dati['app'])) {
+      $app = $this->em->getRepository('App:App')->findOneBy(['id' => $dati['app'], 'attiva' => 1]);
+    }
     if ($app && $app->getNotifica() != 'N' && $tipo && strpos($app->getAbilitati(), $tipo) !== false) {
       // crea notifica per l'invio
       if (!isset($dati['priority'])) {
