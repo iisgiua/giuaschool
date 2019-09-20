@@ -380,10 +380,6 @@ class AppController extends AbstractController {
     $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if ($app) {
       $dati_app = $app->getDati();
-/*
- * FIXME: eliminare riga seguente
- */
-$dati_app['ip'] = $request->getClientIp();
       if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
         // controlla ora
         $adesso = new \DateTime();
@@ -394,8 +390,8 @@ $dati_app['ip'] = $request->getClientIp();
           $dql = "SELECT CONCAT(c.anno,c.sezione) AS classe,a.nome,a.cognome,DATE_FORMAT(a.dataNascita,'%d/%m/%Y') AS dataNascita,DATE_FORMAT(e.ora,'%H:%i') AS entrata,DATE_FORMAT(u.ora,'%H:%i') AS uscita
                   FROM App\Entity\Alunno a
                   INNER JOIN a.classe c
-                  LEFT JOIN App:Entrata e WHERE e.alunno=a.id AND e.data=:oggi
-                  LEFT JOIN App:Uscita u WHERE u.alunno=a.id AND u.data=:oggi
+                  LEFT JOIN App:Entrata e WITH e.alunno=a.id AND e.data=:oggi
+                  LEFT JOIN App:Uscita u WITH u.alunno=a.id AND u.data=:oggi
                   WHERE a.abilitato=1
                   AND (NOT EXISTS (SELECT ass FROM App\Entity\Assenza ass WHERE ass.alunno=a.id AND ass.data=:oggi))
                   ORDER BY classe,a.cognome,a.nome,a.dataNascita ASC";
