@@ -94,7 +94,7 @@ class Genitore extends Utente {
   public function __construct() {
     // valori predefiniti
     parent::__construct();
-    $this->giustificaOnline = false;
+    $this->giustificaOnline = true;
   }
 
   /**
@@ -107,4 +107,3 @@ class Genitore extends Utente {
   }
 
 }
-

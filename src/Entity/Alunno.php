@@ -375,7 +375,7 @@ class Alunno extends Utente {
     $this->bes = 'N';
     $this->frequenzaEstero = false;
     $this->religione = 'S';
-    $this->giustificaOnline = false;
+    $this->giustificaOnline = true;
   }
 
   /**
@@ -397,4 +397,3 @@ class Alunno extends Utente {
   }
 
 }
-
