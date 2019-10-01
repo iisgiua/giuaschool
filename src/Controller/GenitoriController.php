@@ -1211,4 +1211,40 @@ class GenitoriController extends AbstractController {
     ));
   }
 
+  /**
+   * Mostra le deroghe autorizzate per l'alunno.
+   *
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/deroghe/", name="genitori_deroghe",
+   *    methods={"GET"})
+   *
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
+   */
+  public function derogheAction(GenitoriUtil $gen, RegistroUtil $reg) {
+    // legge l'alunno
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // legge la classe (può essere null)
+    $classe = $reg->classeInData(new \DateTime(), $alunno);
+    // visualizza pagina
+    return $this->render('ruolo_genitore/deroghe.html.twig', array(
+      'pagina_titolo' => 'page.genitori_deroghe',
+      'alunno' => $alunno,
+      'classe' => $classe,
+    ));
+  }
+
 }
