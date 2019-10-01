@@ -14,6 +14,7 @@
       <li role="presentation"{{ app.request.attributes.get('_route') == 'genitori_assenze' ? ' class="active"' }}><a href="{{ path('genitori_assenze') }}" title="Mostra le assenze, i ritardi e le uscite anticipate">Assenze</a></li>
       <li role="presentation"{{ app.request.attributes.get('_route') == 'genitori_note' ? ' class="active"' }}><a href="{{ path('genitori_note') }}" title="Mostra le note disciplinari">Note</a></li>
       <li role="presentation"{{ app.request.attributes.get('_route') == 'genitori_osservazioni' ? ' class="active"' }}><a href="{{ path('genitori_osservazioni') }}" title="Mostra le osservazioni dei docenti">Osservazioni</a></li>
+      <li role="presentation"{{ app.request.attributes.get('_route') == 'genitori_deroghe' ? ' class="active"' }}><a href="{{ path('genitori_deroghe') }}" title="Mostra le autorizzazioni in deroga agli orari di ingresso o di uscita">Autorizzazioni</a></li>
     </ul>
   </li>
   <li{{ app.request.attributes.get('_route') == 'genitori_pagelle' ? ' class="active"' }}><a href="{{ path('genitori_pagelle') }}" title="Pagelle e comunicazioni sugli scrutini"><span class="glyphicon glyphicon-file gs-mr-2" aria-hidden="true"></span>Pagelle</a></li>
