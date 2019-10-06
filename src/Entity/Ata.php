@@ -27,12 +27,12 @@ class Ata extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $tipo Mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, D=DSGA]
+   * @var string $tipo Mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, U=autista, D=DSGA]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"A","T","C","D"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","T","C","U","D"}, strict=true, message="field.choice")
    */
   private $tipo;
 
@@ -139,4 +139,3 @@ class Ata extends Utente {
   }
 
 }
-

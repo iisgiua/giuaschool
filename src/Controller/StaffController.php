@@ -725,12 +725,51 @@ class StaffController extends AbstractController {
   }
 
   /**
+   * Gestione degli avvisi sugli orari di ingresso
+   *
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/staff/avvisi/entrata/{pagina}", name="staff_avvisi_entrata",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": "0"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function avvisiEntrataAction($pagina) {
+    // redirect
+    return $this->redirectToRoute('staff_avvisi_orario', ['tipo' => 'E', 'pagina' => $pagina]);
+  }
+
+  /**
+   * Gestione degli avvisi sugli orari di uscita
+   *
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/staff/avvisi/uscita/{pagina}", name="staff_avvisi_uscita",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": "0"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function avvisiUscitaAction($pagina) {
+    // redirect
+    return $this->redirectToRoute('staff_avvisi_orario', ['tipo' => 'U', 'pagina' => $pagina]);
+  }
+
+  /**
    * Gestione degli avvisi sugli orari di ingresso o uscita
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
+   * @param string $tipo Tipo di avviso [E=orario entrata, U=orario uscita]
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
    * @return Response Pagina di risposta
