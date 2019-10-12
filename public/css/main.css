@@ -1,39 +1,66 @@
 /***** MODIFICHE A CLASSI ESISTENTI *****/
 
+/*** slim header ***/
 #gs-header .it-header-slim-wrapper {
   background-color: #00264d; /* variante a11 */
 }
 
+/*** menu principale ***/
+#gs-header nav {
+  margin-top: -1px;
+}
+#gs-header nav button.custom-navbar-toggler {
+  padding: 0.2rem;
+  margin-left: 2px;
+  margin-top: 0;
+}
+#gs-header.is-sticky nav button.custom-navbar-toggler {
+  margin-top: -0.54rem;
+}
+#gs-header nav.navbar ul.navbar-nav li.nav-item a.nav-link.active {
+  background-color: #FFFFFF;
+  color: #0066CC;
+  border-bottom: 2px solid #435A70;
+  border-top: 1px solid #435A70;
+}
+#gs-header nav.navbar ul.navbar-nav li.nav-item a.nav-link.active:hover {
+  color: #0066CC;
+  text-decoration: underline;
+}
+#gs-header nav.navbar .expanded ul.navbar-nav li.nav-item a.nav-link.active {
+  border-top: 0;
+  border-bottom: 0;
+}
+#gs-header .link-list-wrapper ul li a, #gs-header .navbar ul li a {
+  font-weight: 600;
+}
+
+/*** breadcrumb ***/
 #gs-header .breadcrumb-container {
   font-size: 0.8rem;
 }
-
 #gs-header .breadcrumb-item .separator::after {
   content: ">";
 }
 
-#gs-header nav button.custom-navbar-toggler {
-  padding: 0.2rem;
-  margin-left: 2px;
-  margin-top: -0.12rem;
-}
-#gs-header.is-sticky nav button.custom-navbar-toggler {
-  margin-top: -0.6rem;
-}
-
+/*** footer ***/
 #gs-footer .it-footer-main h2 {
   font-size: 1.25em;
-  margin-bottom: 0;
   font-weight: 600;
   letter-spacing: unset;
   line-height: 1.1;
 }
 #gs-footer .it-footer-main h3 {
-  font-size: .889em;
+  font-size: 0.889em;
   font-weight: 400;
-  margin-bottom: 0;
 }
 #gs-footer .it-footer-main h4 {
   text-transform: uppercase;
-  font-size: 16px;
+  font-size: 1em;
+}
+#gs-footer .it-footer-main p {
+  font-size: 0.9em;
+}
+#gs-footer .it-footer-small-prints a:hover {
+  text-decoration: underline;
 }
