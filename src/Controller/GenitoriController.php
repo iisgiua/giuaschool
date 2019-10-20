@@ -590,6 +590,7 @@ class GenitoriController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    *
    * @return Response Pagina di risposta
@@ -600,8 +601,8 @@ class GenitoriController extends AbstractController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function colloquiPrenotaAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
-                                         $colloquio) {
+  public function colloquiPrenotaAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+                                        GenitoriUtil $gen, $colloquio) {
     // inizializza variabili
     $dati['errore'] = null;
     $dati['lista'] = array();
@@ -1092,6 +1093,7 @@ class GenitoriController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Entrata $entrata Ritardo da giustificare
@@ -1106,8 +1108,9 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function giustificaRitardoAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
-                                           LogHandler $dblogger, Entrata $entrata, $posizione) {
+  public function giustificaRitardoAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+                                          GenitoriUtil $gen, LogHandler $dblogger, Entrata $entrata,
+                                          $posizione) {
     // inizializza
     $info = array();
     $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
