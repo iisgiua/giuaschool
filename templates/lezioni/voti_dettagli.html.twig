@@ -14,15 +14,15 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_voti_dettagli'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{{ info.alunno ? ' ('~info.alunno.cognome~' '~info.alunno.nome~')' }}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
   <div class="row gs-mb-1">
     <div class="col-sm-8">
       <strong class="gs-big">Alunno:</strong>
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere l'alunno">{{ info.alunno_scelto }}<span class="caret gs-ml-3"></span></button>
-    {% if idalunno and info.bes != 'N' %}
-        <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~info.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-    {% endif %}
+    {#-- {% if idalunno and info.bes != 'N' %} #}
+        {#-- <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~info.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button> #}
+    {#-- {% endif %} #}
     {% if idalunno and info.note is not empty %}
         <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
     {% endif %}
