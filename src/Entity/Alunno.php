@@ -46,6 +46,13 @@ class Alunno extends Utente {
   private $bes;
 
   /**
+   * @var string $noteBes Note sull'alunno BES
+   *
+   * @ORM\Column(name="note_bes", type="text", nullable=true)
+   */
+  private $noteBes;
+
+  /**
    * @var string $autorizzaEntrata Autorizzazione all'entrata in ritardo
    *
    * @ORM\Column(name="autorizza_entrata", type="string", length=255, nullable=true)
@@ -64,7 +71,7 @@ class Alunno extends Utente {
   private $autorizzaUscita;
 
   /**
-   * @var string $note Note sull'alunno
+   * @var string $note Note sulle autorizzazioni
    *
    * @ORM\Column(type="text", nullable=true)
    */
@@ -150,6 +157,27 @@ class Alunno extends Utente {
    */
   public function setBes($bes) {
     $this->bes = $bes;
+    return $this;
+  }
+
+  /**
+   * Restituisce le note sull'alunno BES
+   *
+   * @return string Note sull'alunno BES
+   */
+  public function getNoteBes() {
+    return $this->noteBes;
+  }
+
+  /**
+   * Modifica le note sull'alunno BES
+   *
+   * @param string $noteBes Note sull'alunno BES
+   *
+   * @return Alunno Oggetto Alunno
+   */
+  public function setNoteBes($noteBes) {
+    $this->noteBes = $noteBes;
     return $this;
   }
 
