@@ -20,12 +20,6 @@
       <strong class="gs-big">Alunno:</strong>
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere l'alunno">{{ info.alunno_scelto }}<span class="caret gs-ml-3"></span></button>
-    {#-- {% if idalunno and info.bes != 'N' %} #}
-        {#-- <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~info.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button> #}
-    {#-- {% endif %} #}
-    {% if idalunno and info.note is not empty %}
-        <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-    {% endif %}
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
     {% for k,v in alunni %}
       {% if cattedra.materia.tipo != 'R' or v.religione == 'S' %}

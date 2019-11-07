@@ -1914,6 +1914,12 @@ class StaffController extends AbstractController {
       $max_pagine = ceil($lista->count() / $limite);
       $dati['lista'] = $staff->entrateUscite($info['periodo']['inizio'], $info['periodo']['fine'], $lista);
       $dati['azioni'] = $reg->azioneAssenze($data_obj, $this->getUser(), null, null, null);
+      // dati genitori
+      $lista_id = array();
+      foreach ($lista as $l) {
+        $lista_id[] = $l->getId();
+      }
+      $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitori($lista_id);
     }
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_autorizza.html.twig', array(
@@ -2302,6 +2308,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function studentiDerogheAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
+    $dati = array();
     // recupera criteri dalla sessione
     $search = array();
     $search['nome'] = $session->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
@@ -2370,6 +2377,12 @@ class StaffController extends AbstractController {
     }
     // lista alunni
     $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    // dati genitori
+    $lista_id = array();
+    foreach ($lista as $l) {
+      $lista_id[] = $l->getId();
+    }
+    $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitori($lista_id);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_deroghe.html.twig', array(
       'pagina_titolo' => 'page.staff_deroghe',
@@ -2377,6 +2390,7 @@ class StaffController extends AbstractController {
       'form_help' => null,
       'form_success' => null,
       'lista' => $lista,
+      'dati' => $dati,
       'page' => $pagina,
       'maxPages' => ceil($lista->count() / $limite),
     ));
@@ -2475,6 +2489,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function studentiSituazioneAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
+    $dati = array();
     // recupera criteri dalla sessione
     $search = array();
     $search['nome'] = $session->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
@@ -2543,6 +2558,12 @@ class StaffController extends AbstractController {
     }
     // lista alunni
     $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    // dati genitori
+    $lista_id = array();
+    foreach ($lista as $l) {
+      $lista_id[] = $l->getId();
+    }
+    $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitori($lista_id);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_situazione.html.twig', array(
       'pagina_titolo' => 'page.staff_situazione',
@@ -2550,6 +2571,7 @@ class StaffController extends AbstractController {
       'form_help' => null,
       'form_success' => null,
       'lista' => $lista,
+      'dati' => $dati,
       'page' => $pagina,
       'maxPages' => ceil($lista->count() / $limite),
     ));

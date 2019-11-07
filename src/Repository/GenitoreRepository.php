@@ -12,6 +12,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Alunno;
+
 
 /**
  * Genitore - repository
@@ -50,5 +52,30 @@ class GenitoreRepository extends UtenteRepository {
     return array_column($genitori, 'id');
   }
 
-}
+  /**
+   * Restituisce i dati dei genitori degli alunni indicati
+   *
+   * @param array $alunni Alunni (lista ID di Alunno)
+   *
+   * @return array Lista associativa con i dati dei genitori
+   */
+  public function datiGenitori(array $alunni) {
+    // legge dati
+    $genitori = $this->createQueryBuilder('g')
+      ->select('a.id,g.username,g.ultimoAccesso')
+      ->join('g.alunno', 'a')
+      ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND a.id IN (:alunni)')
+      ->setParameters(['abilitato' => 1, 'alunni' => $alunni])
+      ->orderBy('g.ultimoAccesso', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    // imposta array associativo
+    $dati = array();
+    foreach ($genitori as $g) {
+      $dati[$g['id']] = $g;
+    }
+    // restituisce valore
+    return $dati;
+  }
 
+}

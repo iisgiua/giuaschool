@@ -11,9 +11,6 @@
         <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4">
           <span class="gs-big">{{ label.alunno }}</span>
-    {% if label.bes != 'N' %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~label.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-    {% endif %}
         </div>
         <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.classe }}</span></div>

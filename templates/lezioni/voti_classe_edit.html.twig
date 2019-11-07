@@ -30,9 +30,6 @@
           <div class="row">
             <div class="col-sm-3">
               <strong>{{ alu.alunno.vars.value }}</strong>
-        {% if alu.bes.vars.value != 'N' %}
-              <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~alu.bes.vars.value)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-        {% endif %}
             </div>
             {{ form_widget(alu) }}
           </div>

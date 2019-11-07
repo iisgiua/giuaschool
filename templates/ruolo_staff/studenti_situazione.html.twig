@@ -15,7 +15,36 @@
     <tbody>
     {% for u in lista %}
       <tr>
-        <td>{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})</td>
+        <td>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <span>{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})</span>
+          <div id="alunno-{{ loop.index }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Autorizzazioni e deroghe</h3>
+                <p>Ingresso: {{ u.autorizzaEntrata ? u.autorizzaEntrata : 'NESSUNA' }}</p>
+                <p>Uscita: {{ u.autorizzaUscita ? u.autorizzaUscita : 'NESSUNA' }}</p>
+                {% if u.note %}<p>Note:<br><em>{{ u.note }}</em></p>{% endif %}
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
+                <p>Profilo <strong>GENITORE</strong>: {{ dati.genitori[u.id].username }}<br>(ultimo accesso: {{ dati.genitori[u.id].ultimoAccesso ? dati.genitori[u.id].ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+                <p>Profilo <strong>STUDENTE</strong>: {{ u.username }}<br>(ultimo accesso: {{ u.ultimoAccesso ? u.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+              </div>
+            </div>
+            {% if u.bes != 'N' %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
+                <p>Tipologia: {{ ('label.bes_'~u.bes)|trans }}</p>
+                {% if u.noteBes %}<p>Descrizione:<br><em>{{ u.noteBes|raw }}</em></p>{% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </td>
         <td>{{ u.classe.anno }}ª {{ u.classe.sezione }}</td>
         <td>
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.id, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
@@ -29,6 +58,7 @@
     {% endfor %}
     </tbody>
   </table>
+  {% include 'include/modal-info.html.twig' %}
   {% if maxPages > 1 %}
   <nav aria-label="Navigazione tra le pagine" class="text-center">
     <ul class="pagination pagination-sm gs-mt-2">
@@ -49,4 +79,19 @@
   </nav>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').text(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
+});
+</script>
 {% endblock %}

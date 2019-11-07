@@ -56,12 +56,6 @@
       <tr>
         <td class="col-sm-3">
           <strong>{{ v1[0].nome }}</strong>
-              {% if v1[0].bes is defined and v1[0].bes != 'N' %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~v1[0].bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-              {% endif %}
-              {% if v1[0].note is defined and v1[0].note is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v1[0].note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-              {% endif %}
         </td>
         <td class="col-sm-9">
           <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione</button>
