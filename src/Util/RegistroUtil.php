@@ -690,9 +690,11 @@ class RegistroUtil {
       $dati[$data_str]['data'] = clone $data_inizio;
       // legge alunni di classe
       $lista = $this->alunniInData($data_inizio, $classe);
+      // dati GENITORI
+      $genitori = $this->em->getRepository('App:Genitore')->datiGenitori($lista);
       // dati alunni/assenze/ritardi/uscite
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-        ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,a.bes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
+        ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
         ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
         ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
         ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
@@ -773,6 +775,7 @@ class RegistroUtil {
       }
       // imposta vettore associativo
       $dati[$data_str]['lista'] = $alunni;
+      $dati[$data_str]['genitori'] = $genitori;
     } else {
       // vista settimanale/mensile
       $lista_alunni = array();
@@ -1260,9 +1263,11 @@ class RegistroUtil {
     $dati['classe']['P'] = array();
     // alunni della classe
     $lista_alunni = $this->alunniInPeriodo($data_inizio, $data_fine, $cattedra->getClasse());
+    // dati GENITORI
+    $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
     // legge i dati degli degli alunni
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.note,a.religione,(a.classe) AS classe_id')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,(a.classe) AS classe_id')
       ->where('a.id IN (:alunni)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['alunni' => $lista_alunni])
@@ -2423,4 +2428,3 @@ class RegistroUtil {
   }
 
 }
-

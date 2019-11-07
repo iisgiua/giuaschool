@@ -11,25 +11,42 @@
   <table class="table table-bordered table-hover table-striped">
     <thead class="bg-success">
       <tr>
-        <th class="col-sm-5">Alunno</th>
-        <th class="col-sm-2">Ultimo accesso</th>
-        <th class="col-sm-5">Azioni</th>
+        <th class="col-sm-6">Alunno</th>
+        <th class="col-sm-6">Azioni</th>
       </tr>
     </thead>
     <tbody>
     {% for alunno,a in dati.alunni %}
       <tr>
         <td>
-          <strong>{{ a.nome }}</strong> ({{ a.nascita }})
-        {% if a.bes != 'N' %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-        {% endif %}
-        {% if a.note is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-        {% endif %}
-        </td>
-        <td>
-          {{ a.accesso ? a.accesso|date('d/m/Y h:i') }}
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <strong>{{ a.cognome }} {{ a.nome }}</strong> ({{ a.dataNascita|date('d/m/Y') }})
+          <div id="alunno-{{ loop.index }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Autorizzazioni e deroghe</h3>
+                <p>Ingresso: {{ a.autorizzaEntrata ? a.autorizzaEntrata : 'NESSUNA' }}</p>
+                <p>Uscita: {{ a.autorizzaUscita ? a.autorizzaUscita : 'NESSUNA' }}</p>
+                {% if a.note %}<p>Note:<br><em>{{ a.note }}</em></p>{% endif %}
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
+                <p>Profilo <strong>GENITORE</strong>: {{ dati.genitori[a.id].username }}<br>(ultimo accesso: {{ dati.genitori[a.id].ultimoAccesso ? dati.genitori[a.id].ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+                <p>Profilo <strong>STUDENTE</strong>: {{ a.username }}<br>(ultimo accesso: {{ a.ultimoAccesso ? a.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+              </div>
+            </div>
+            {% if a.bes != 'N' %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
+                <p>Tipologia: {{ ('label.bes_'~a.bes)|trans }}</p>
+                {% if a.noteBes %}<p>Descrizione:<br><em>{{ a.noteBes|raw }}</em></p>{% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
         </td>
         <td>
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
@@ -43,6 +60,7 @@
     {% endfor %}
     </tbody>
   </table>
+    {% include 'include/modal-info.html.twig' %}
   {% endif %}
 </div>
 {% endblock %}
@@ -52,6 +70,13 @@
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+      var title = $(event.relatedTarget).data('title');
+      var id = $(event.relatedTarget).data('body');
+      var html = $('#'+id).html();
+      $(this).find('#gs-modal-info-label').text(title);
+      $(this).find('#gs-modal-info-body').html(html);
+    });
 });
 </script>
 {% endblock %}

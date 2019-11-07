@@ -73,19 +73,34 @@
       <tr>
         <td>{{ loop.index }}</td>
         <td>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
           <strong>{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})</strong>
-              {#-- {% if v.bes != 'N' %} #}
-          {#-- <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~v.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button> #}
-              {#-- {% endif %} #}
-              {% if v.note is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-              {% endif %}
-              {% if v.autorizzaEntrata is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.autorizzaEntrata }}"><span class="glyphicon glyphicon-time"></span></button>
-              {% endif %}
-              {% if v.autorizzaUscita is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
-              {% endif %}
+          <div id="alunno-{{ loop.index }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Autorizzazioni e deroghe</h3>
+                <p>Ingresso: {{ v.autorizzaEntrata ? v.autorizzaEntrata : 'NESSUNA' }}</p>
+                <p>Uscita: {{ v.autorizzaUscita ? v.autorizzaUscita : 'NESSUNA' }}</p>
+                {% if v.note %}<p>Note:<br><em>{{ v.note }}</em></p>{% endif %}
+              </div>
+            </div>
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
+                <p>Profilo <strong>GENITORE</strong>: {{ dati[data].genitori[v.id_alunno].username }}<br>(ultimo accesso: {{ dati[data].genitori[v.id_alunno].ultimoAccesso ? dati[data].genitori[v.id_alunno].ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+                <p>Profilo <strong>STUDENTE</strong>: {{ v.username }}<br>(ultimo accesso: {{ v.ultimoAccesso ? v.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+              </div>
+            </div>
+            {% if v.bes != 'N' %}
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
+                <p>Tipologia: {{ ('label.bes_'~v.bes)|trans }}</p>
+                {% if v.noteBes and cattedra %}<p>Descrizione:<br><em>{{ v.noteBes|raw }}</em></p>{% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
         </td>
         <td>
           {{ v.id_assenza ? '<span class="label label-danger">Assente</span>' }}
@@ -136,6 +151,7 @@
         {% endif %}
       {% endfor %}
       {% include 'include/modal-remote.html.twig' %}
+      {% include 'include/modal-info.html.twig' %}
     {% endif %}
   {% endif %}
 </div>
@@ -179,6 +195,13 @@ $(document).ready(function() {
       window.location.href = url;
   });
   $('[data-toggle="popover"]').popover();
+  $('#gs-modal-info').on('show.bs.modal', function (event) {
+    var title = $(event.relatedTarget).data('title');
+    var id = $(event.relatedTarget).data('body');
+    var html = $('#'+id).html();
+    $(this).find('#gs-modal-info-label').text(title);
+    $(this).find('#gs-modal-info-body').html(html);
+  });
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
     var url = $(event.relatedTarget).data('href');
     $(this).find('#gs-modal-remote-content').load(url);

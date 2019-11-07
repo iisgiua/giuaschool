@@ -103,6 +103,13 @@ class StaffUtil {
       $alunno['nome'] = $a->getCognome().' '.$a->getNome().' ('.$a->getDataNascita()->format('d/m/Y').')';
       $alunno['classe_id'] = $a->getClasse()->getId();
       $alunno['classe'] = $a->getClasse()->getAnno().'ª '.$a->getClasse()->getSezione();
+      $alunno['autorizzaEntrata'] = $a->getAutorizzaEntrata();
+      $alunno['autorizzaUscita'] = $a->getAutorizzaUscita();
+      $alunno['note'] = $a->getNote();
+      $alunno['noteBes'] = $a->getNoteBes();
+      $alunno['bes'] = $a->getBes();
+      $alunno['username'] = $a->getUsername();
+      $alunno['ultimoAccesso'] = $a->getUltimoAccesso();
       // dati ritardi
       $entrate = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
         ->select('e.data,e.ora,e.note')
@@ -213,6 +220,8 @@ class StaffUtil {
     $dati = array();
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
+    // dati GENITORI
+    $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
     // legge assenze
     $assenze = $this->em->getRepository('App:Assenza')->createQueryBuilder('a')
       ->select('(a.alunno) AS id,a.giustificato')
@@ -318,7 +327,7 @@ class StaffUtil {
     }
     // dati alunni
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.note')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista_alunni])
@@ -326,9 +335,7 @@ class StaffUtil {
       ->getArrayResult();
     // imposta array associativo per gli alunni
     foreach ($alunni as $a) {
-      $dati['alunni'][$a['id']]['nome'] = $a['cognome'].' '.$a['nome'].' ('.$a['dataNascita']->format('d/m/Y').')';
-      $dati['alunni'][$a['id']]['bes'] = $a['bes'];
-      $dati['alunni'][$a['id']]['note'] = $a['note'];
+      $dati['alunni'][$a['id']] = $a;
     }
     // restituisce dati come array associativo
     return $dati;
@@ -360,6 +367,8 @@ class StaffUtil {
     }
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
+    // dati GENITORI
+    $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
     // legge medie
     $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
       ->select('(v.alunno) AS alunno,(l.materia) AS materia,v.tipo,AVG(v.voto) AS media')
@@ -396,7 +405,7 @@ class StaffUtil {
     }
     // dati alunni
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.note')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista_alunni])
@@ -404,10 +413,7 @@ class StaffUtil {
       ->getArrayResult();
     // imposta array associativo per gli alunni
     foreach ($alunni as $a) {
-      $dati['alunni'][$a['id']]['nome'] = $a['cognome'].' '.$a['nome'];
-      $dati['alunni'][$a['id']]['nascita'] = $a['dataNascita']->format('d/m/Y');
-      $dati['alunni'][$a['id']]['bes'] = $a['bes'];
-      $dati['alunni'][$a['id']]['note'] = $a['note'];
+      $dati['alunni'][$a['id']] = $a;
     }
     // restituisce dati come array associativo
     return $dati;
@@ -473,8 +479,7 @@ class StaffUtil {
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.note,a.religione,g.ultimoAccesso')
-      ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista_alunni])
@@ -482,13 +487,10 @@ class StaffUtil {
       ->getArrayResult();
     // imposta array associativo per gli alunni
     foreach ($alunni as $a) {
-      $dati['alunni'][$a['id']]['nome'] = $a['cognome'].' '.$a['nome'];
-      $dati['alunni'][$a['id']]['nascita'] = $a['dataNascita']->format('d/m/Y');
-      $dati['alunni'][$a['id']]['bes'] = $a['bes'];
-      $dati['alunni'][$a['id']]['note'] = $a['note'];
-      $dati['alunni'][$a['id']]['religione'] = $a['religione'];
-      $dati['alunni'][$a['id']]['accesso'] = $a['ultimoAccesso'];
+      $dati['alunni'][$a['id']] = $a;
     }
+    // dati GENITORI
+    $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
     // restituisce dati come array associativo
     return $dati;
   }
@@ -920,4 +922,3 @@ class StaffUtil {
   }
 
 }
-
