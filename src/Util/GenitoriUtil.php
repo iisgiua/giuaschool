@@ -181,9 +181,9 @@ class GenitoriUtil {
     $materie = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.id,m.nomeBreve')
       ->join('c.materia', 'm')
-      ->where('c.classe=:classe AND c.tipo=:tipo AND c.attiva=:attiva')
+      ->where('c.classe=:classe AND c.tipo=:tipo AND c.attiva=:attiva AND m.tipo!=:sostegno')
       ->orderBy('m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'tipo' => 'N', 'attiva' => 1])
+      ->setParameters(['classe' => $classe, 'tipo' => 'N', 'attiva' => 1, 'sostegno' => 'S'])
       ->getQuery()
       ->getArrayResult();
     if ($sostegno) {
