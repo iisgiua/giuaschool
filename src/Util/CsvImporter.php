@@ -422,7 +422,7 @@ class CsvImporter {
    */
   public function importaAlunni(UploadedFile $file, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
-      'citta', 'indirizzo', 'numeriTelefono', 'bes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
+      'citta', 'indirizzo', 'numeriTelefono', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
       'classe', 'email');
     // controllo file
     $error = $this->checkFile($file, $header);
@@ -486,6 +486,7 @@ class CsvImporter {
       }
       $fields['numeriTelefono'] = $telefono;
       $fields['bes'] = strtoupper(trim($fields['bes']));
+      $fields['noteBes'] = trim(str_replace(["\t","\r","\n",'  '], ['','','',' ',],$fields['noteBes']));
       $fields['frequenzaEstero'] = trim($fields['frequenzaEstero']);
       $fields['religione'] = strtoupper(trim($fields['religione']));
       $fields['credito3'] = trim($fields['credito3']);
@@ -518,6 +519,11 @@ class CsvImporter {
         // bes default
         $empty_fields['bes'] = true;
         $fields['bes'] = 'N';
+      }
+      if (empty($fields['noteBes'])) {
+        // bes default
+        $empty_fields['noteBes'] = true;
+        $fields['noteBes'] = '';
       }
       if (empty($fields['frequenzaEstero'])) {
         // frequenzaEstero default
@@ -1158,6 +1164,7 @@ class CsvImporter {
       ->setIndirizzo($fields['indirizzo'])
       ->setNumeriTelefono($fields['numeriTelefono'])
       ->setBes($fields['bes'])
+      ->setNoteBes($fields['noteBes'])
       ->setFrequenzaEstero($fields['frequenzaEstero'])
       ->setReligione($fields['religione'])
       ->setCredito3($fields['credito3'])
@@ -1242,6 +1249,9 @@ class CsvImporter {
     }
     if (!isset($empty_fields['bes'])) {
       $alunno->setBes($fields['bes']);
+    }
+    if (!isset($empty_fields['noteBes'])) {
+      $alunno->setNoteBes($fields['noteBes']);
     }
     if (!isset($empty_fields['frequenzaEstero'])) {
       $alunno->setFrequenzaEstero($fields['frequenzaEstero']);
