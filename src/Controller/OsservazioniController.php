@@ -123,7 +123,7 @@ class OsservazioniController extends AbstractController {
     }
     if ($cattedra) {
       // recupera dati
-      if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
+      if ($cattedra->getMateria()->getTipo() == 'S') {
         $dati = $reg->osservazioniSostegno($data_obj, $this->getUser(), $cattedra);
         $info['sostegno'] = true;
         $template = 'lezioni/osservazioni_sostegno.html.twig';
