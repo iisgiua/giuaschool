@@ -2080,7 +2080,7 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge osservazioni
     $osservazioni = $this->em->getRepository('App:OsservazioneClasse')->createQueryBuilder('o')
-      ->where('o.cattedra=:cattedra AND o INSTANCE OF App:OsservazioneClasse')
+      ->where('o.cattedra=:cattedra AND o NOT INSTANCE OF App:OsservazioneAlunno')
       ->orderBy('o.data', 'DESC')
       ->setParameters(['cattedra' => $cattedra])
       ->getQuery()
