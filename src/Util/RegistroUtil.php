@@ -197,13 +197,27 @@ class RegistroUtil {
       // azione di modifica
       if ($lezione && $firme && count($firme) > 0) {
         // esiste lezione e firme
-        if ($materia->getId() == $lezione->getMateria()->getId()) {
-          // stessa materia di lezione esistente: ok
-          return true;
-        }
-        if ($materia->getTipo() == 'S' || $lezione->getMateria()->getTipo() == 'S') {
-          // materia di sostegno o lezione di sostegno: ok
-          return true;
+        $altra_lezione = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+          ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
+          ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente AND l.id!=:lezione')
+          ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente,
+            'lezione' => $lezione->getId()])
+          ->setMaxResults(1)
+          ->getQuery()
+          ->getOneOrNullResult();
+        if ($altra_lezione) {
+          // esiste altra lezione in sovrapposizione
+          return null;
+        } else {
+          // non esiste lezione in sovrapposizione
+          if ($materia->getId() == $lezione->getMateria()->getId()) {
+            // stessa materia di lezione esistente: ok
+            return true;
+          }
+          if ($materia->getTipo() == 'S' || $lezione->getMateria()->getTipo() == 'S') {
+            // materia di sostegno o lezione di sostegno: ok
+            return true;
+          }
         }
       }
     } elseif ($azione == 'delete') {
