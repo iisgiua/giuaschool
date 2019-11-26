@@ -303,6 +303,7 @@ class CircolareRepository extends EntityRepository {
       $circolari->andWhere('c.id=:id')->setParameter('id', $id);
     }
     $circolari = $circolari
+      ->orderBy('c.numero', 'ASC')
       ->getQuery()
       ->getResult();
     // firma circolare
@@ -421,5 +422,76 @@ class CircolareRepository extends EntityRepository {
     return array_column($destinatari, 'utente');
   }
 
-}
+  /**
+   * Restituisce la lista delle circolari rispondenti alle condizioni di ricerca.
+   *
+   * @param array $cerca Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   * @param int $limite Numero di elementi per pagina
+   * @param Utente $utente Destinatario delle circolari
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function lista($cerca, $pagina, $limite, Utente $utente) {
+    $dati = array();
+    // legge circolari
+    $query = $this->createQueryBuilder('c')
+      ->where('c.pubblicata=:pubblicata')
+      ->setParameter('pubblicata', 1)
+      ->orderBy('c.numero', 'DESC');
+    if ($cerca['visualizza'] != 'T') {
+      // solo circolari destinate all'utente
+      $query
+        ->join('App:CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
+        ->setParameter('utente', $utente);
+      if ($cerca['visualizza'] == 'D') {
+        // solo quelle da leggere
+        $query
+          ->andWhere('cu.letta IS NULL');
+      }
+    }
+    if ($cerca['mese']) {
+      // filtra per data
+      $data = explode('-', $cerca['mese']);
+      $query
+        ->andWhere('YEAR(c.data)=:anno AND MONTH(c.data)=:mese')
+        ->setParameter('anno', intval($data[0]))
+        ->setParameter('mese', intval($data[1]));
+    }
+    if ($cerca['oggetto']) {
+      // filtra per oggetto
+      $query
+        ->andWhere('c.oggetto LIKE :oggetto')
+        ->setParameter('oggetto', '%'.$cerca['oggetto'].'%');
+    }
+    $dati['lista'] = $this->paginate($query->getQuery(), $pagina, $limite);
+    // aggiunge dati di lettura
+    foreach ($dati['lista'] as $c) {
+      $dati['stato'][$c->getId()] = $this->_em->getRepository('App:CircolareUtente')->findOneBy([
+        'circolare' => $c, 'utente' => $utente]);
+    }
+    // restituisce dati
+    return $dati;
+  }
 
+  /**
+   * Restituisce le circolari non lette e destinate agli alunni della classe indicata
+   *
+   * @param Classe $classe Classe a cui sono indirizzate le circolari
+   *
+   * @return array Lista di circolari da leggere
+   */
+  public function listaCircolariClasse(Classe $classe) {
+    // lista circolari
+    $circolari = $this->createQueryBuilder('c')
+      ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
+      ->where('c.pubblicata=:pubblicata AND cc.letta IS NULL')
+      ->setParameters(['pubblicata' => 1, 'classe' => $classe])
+      ->orderBy('c.numero', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce dati
+    return $circolari;
+  }
+
+}

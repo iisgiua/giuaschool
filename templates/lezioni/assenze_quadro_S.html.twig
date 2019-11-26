@@ -22,15 +22,52 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% else %}
-      {% if avvisi+circolari > 0 %}
+      {% if avvisi+(circolari|length) > 0 %}
         {% include 'include/modal-popup.html.twig' with {'modal_popup_msg': 'message.presenti_comunicazioni'|trans } %}
   <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
     <strong>{{ 'message.presenti_comunicazioni'|trans }}</strong><br>
         {% if avvisi > 0 %}
     <button id="gs-leggi-avvisi" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('bacheca_avvisi_alunni', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ avvisi }} {{ 'message.num_avvisi'|trans({'num': avvisi}) }}</strong></button>
         {% endif %}
-        {% if circolari > 0 %}
-    <button id="gs-leggi-circolari" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto delle circolari" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_classi', {'classe': classe.id}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ circolari }} {{ 'message.num_circolari'|trans({'num': circolari}) }}</strong></button>
+        {% if circolari|length > 0 %}
+    <button id="gs-leggi-circolari" class="btn btn-xs btn-primary gs-ml-3" type="button" title="Visualizza il contenuto delle circolari" data-toggle="modal" data-target="#gs-modal-info" data-title="Circolari da leggere" data-body="circolare-lista"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>{{ circolari|length }} {{ 'message.num_circolari'|trans({'num': circolari|length}) }}</strong></button>
+    <div id="circolare-lista" style="display:none">
+          {% for c in circolari %}
+      <div class="list-group-item">
+        <div class="list-group-item-text">
+          <h3 class="modal-title gs-h3">Circolare n. {{ c.numero }} del {{ c.data|date('d/m/Y') }}</h3>
+          <h4 class="modal-title gs-h4"><em>{{ c.oggetto }}</em></h4>
+          <div class="gs-mt-2">
+            <strong>Documento:</strong>
+            <a class="btn btn-xs btn-primary gs-ml-3" target="_blank" href="{{ path('circolari_download', {'id': c.id, 'doc': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+            <a class="btn btn-xs btn-primary gs-ml-3" href="{{ path('circolari_download', {'id': c.id, 'doc': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
+          </div>
+            {% if c.allegati|length > 0 %}
+              {% for n,d in c.allegati %}
+          <div class="gs-mt-2">
+            <strong>Allegato{{ c.allegati|length > 1 ? ' '~loop.index }}:</strong>
+            <a class="btn btn-xs btn-primary gs-ml-3" target="_blank" href="{{ path('circolari_download', {'id': c.id, 'doc': loop.index, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+            <a class="btn btn-xs btn-primary gs-ml-3" href="{{ path('circolari_download', {'id': c.id, 'doc': loop.index, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+          </div>
+              {% endfor %}
+            {% endif %}
+          <div class="text-center gs-mt-4">
+            <a class="btn btn-success" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'id': c.id}) }}" role="button" title="Conferma la lettura della circolare alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
+          </div>
+        </div>
+      </div>
+          {% endfor %}
+      <div class="list-group-item">
+        <div class="list-group-item-text">
+          <div class="text-center gs-mt-3 gs-mb-3">
+          {% if circolari|length > 1 %}
+            <a class="btn btn-success gs-mr-4" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'id': 0}) }}" role="button" title="Conferma la lettura di tutte le circolari alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
+          {% endif %}
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Annulla</strong></button>
+          </div>
+        </div>
+      </div>
+    </div>
         {% endif %}
   </div>
       {% endif %}
@@ -98,6 +135,7 @@
     </tbody>
   </table>
       {% include 'include/modal-remote.html.twig' %}
+      {% include 'include/modal-info.html.twig' %}
     {% endif %}
   {% endif %}
 </div>
@@ -153,7 +191,16 @@ $(document).ready(function() {
     var url = $(e.currentTarget).data('href');
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
   });
-  {% if avvisi+circolari > 0 %}
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('title');
+    var body = $('#'+$(e.relatedTarget).data('body')).html();
+    $(this).find('#gs-modal-info-label').html(title);
+    $(this).find('#gs-modal-info-body').html(body);
+  });
+  $('#gs-modal-info').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
+  });
+  {% if avvisi+(circolari|length) > 0 %}
   $("#gs-modal-popup-do").click(function(e) {
     $('#gs-modal-popup').modal('hide');
     {% if avvisi > 0 %}

@@ -123,6 +123,7 @@ label.filtro_materia: Filtra per materia
 label.filtro_nessuno: Nessuno
 label.filtro_sede: Filtra per sede
 label.filtro_tutti: Tutti
+label.filtro_mese: Filtra per data
 label.frequenza_estero: Anno all'estero
 label.genitori_classe: Genitori della classe
 label.genitori: Genitori
@@ -306,7 +307,10 @@ label.stato_circolare_pubblicata: Pubblicata
 label.stato_circolare_tutti: Qualsiasi stato
 label.circolari_tutte: Tutte
 label.circolari_proprie: Destinate a me
-label.circolari_filtro_destinatario: Filtro per destinatario
+label.circolari_da_leggere: Da leggere
+label.circolari_lette: Lette
+label.circolari_filtro_visualizza: Filtra per tipo di visualizzazione
+label.circolari_filtro_oggetto: Filtra per oggetto
 label.nessuna_sede: Nessuna sede
 label.ata_tipo: Mansioni
 label.ata_segreteria: Gestione Segreteria
@@ -321,6 +325,7 @@ label.prof_F: "Prof.ssa"
 label.motivazione_obbligatoria: Motivazione obbligatoria
 label.motivazione_facoltativa: Motivazione facoltativa
 label.documenti_scrutinio: Documenti dello scrutinio
+label.stato: Stato
 
 
 page.agenda_compito: Agenda Compiti
