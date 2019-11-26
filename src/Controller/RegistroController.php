@@ -71,14 +71,14 @@ class RegistroController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function firmeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                               RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
+                              RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;
     $dati = null;
     $annotazioni = null;
     $num_avvisi = 0;
-    $num_circolari = 0;
+    $lista_circolari = array();
     $note = null;
     $assenti = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
@@ -182,7 +182,7 @@ class RegistroController extends AbstractController {
             $adesso <= $em->getRepository('App:ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
           // avvisi alla classe
           $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
-          $num_circolari = $em->getRepository('App:Circolare')->numeroCircolariClasse($classe);
+          $lista_circolari = $em->getRepository('App:Circolare')->listaCircolariClasse($classe);
         }
         // recupera dati
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
@@ -213,7 +213,7 @@ class RegistroController extends AbstractController {
       'dati' => $dati,
       'assenti' => $assenti,
       'avvisi' => $num_avvisi,
-      'circolari' => $num_circolari,
+      'circolari' => $lista_circolari,
     ));
   }
 

@@ -75,7 +75,7 @@ class AssenzeController extends AbstractController {
     $errore = null;
     $dati = null;
     $num_avvisi = 0;
-    $num_circolari = 0;
+    $lista_circolari = array();
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $data_succ = null;
@@ -177,7 +177,7 @@ class AssenzeController extends AbstractController {
             $adesso <= $em->getRepository('App:ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
           // avvisi alla classe
           $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
-          $num_circolari = $em->getRepository('App:Circolare')->numeroCircolariClasse($classe);
+          $lista_circolari = $em->getRepository('App:Circolare')->listaCircolariClasse($classe);
         }
         // recupera dati
         $dati = $reg->quadroAssenzeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
@@ -203,7 +203,7 @@ class AssenzeController extends AbstractController {
       'info' => $info,
       'dati' => $dati,
       'avvisi' => $num_avvisi,
-      'circolari' => $num_circolari,
+      'circolari' => $lista_circolari,
     ));
   }
 

@@ -276,6 +276,9 @@
 .gs-big {
   font-size: 120%;
 }
+.gs-small {
+  font-size: 90%;
+}
 
 .gs-h1 {
   font-size: 1.8em;
@@ -503,4 +506,3 @@ body {
 .radio-inline.active {
   font-weight: bold;
 }
-
