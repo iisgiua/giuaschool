@@ -87,9 +87,7 @@ class RichiestaColloquio {
   /**
    * @var string $messaggio Messaggio da comunicare relativamente allo stato della richiesta
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
-   *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
+   * @ORM\Column(type="text", nullable=true)
    */
   private $messaggio;
 
@@ -246,4 +244,3 @@ class RichiestaColloquio {
   }
 
 }
-
