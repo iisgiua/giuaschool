@@ -13,6 +13,7 @@
 namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Utente;
 
 
@@ -26,10 +27,11 @@ class MenuOpzioneRepository extends EntityRepository {
      *
      * @param string $url Pagina da cercare
      * @param Utente $utente Utente per il quale restituire il menu
+     * @param SessionInterface $session Gestore delle sessioni
      *
      * @return array Array associativo con la struttura del menu
      */
-    public function breadcrumb($url, Utente $utente=null) {
+    public function breadcrumb($url, Utente $utente=null, SessionInterface $session) {
       $dati = array();
       // imposta ruolo e funzione
       $ruolo = $utente ? $utente->getRoles()[0] : 'NESSUNO';

@@ -130,7 +130,7 @@ class ConfigLoader {
     // legge menu esistenti
     $lista_menu = $this->em->getRepository('App:Menu')->listaMenu();
     foreach ($lista_menu as $m) {
-      $menu = $this->em->getRepository('App:Menu')->menu($m['selettore'], $utente);
+      $menu = $this->em->getRepository('App:Menu')->menu($m['selettore'], $utente, $this->session);
       $this->session->set('/CONFIG/MENU/'.$m['selettore'], $menu);
     }
   }
