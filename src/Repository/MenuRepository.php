@@ -35,7 +35,7 @@ class MenuRepository extends EntityRepository {
     $dati = array();
     // imposta ruolo e funzione
     $ruolo = $utente ? $utente->getRoles()[0] : 'NESSUNO';
-    if ($ruolo == 'ROLE_ATA' && $this->getUser()->getSegreteria()) {
+    if ($ruolo == 'ROLE_ATA' && $utente->getSegreteria()) {
       // abilita funzioni di segreteria per gli ATA
       $funzione = array('SEGRETERIA', 'NESSUNA');
     } elseif ($ruolo == 'ROLE_DOCENTE' && $session->get('/APP/DOCENTE/coordinatore')) {
