@@ -1007,6 +1007,9 @@ class GenitoriUtil {
       $dati['errore'] = 'exception.colloqui_sospesi';
       return $dati;
     }
+    // mesi colloqui generali
+    $mesi_colloqui = explode(',',
+      $this->em->getRepository('App:Configurazione')->findOneByParametro('mesi_colloqui')->getValore());
     // lista date possibili
     $lista = array();
     $lista_mesi = array();
@@ -1014,45 +1017,47 @@ class GenitoriUtil {
     $ora_str = ' (dalle '.$ora[0]->getInizio()->format('G:i').' alle '.$ora[0]->getFine()->format('G:i').')';
     $giorno = new \DateTime('today');
     while ($giorno <= $fine) {
-      // prima settimana
-      $giorno->modify('first'.$freq);
-      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
-        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
-          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-        $lista[1][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
-        $lista_mesi[intval($giorno->format('m'))] = true;
-      }
-      // seconda settimana
-      $giorno->modify('second'.$freq);
-      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
-        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
-          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-        $lista[2][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
-        $lista_mesi[intval($giorno->format('m'))] = true;
-      }
-      // terza settimana
-      $giorno->modify('third'.$freq);
-      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
-        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
-          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-        $lista[3][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
-        $lista_mesi[intval($giorno->format('m'))] = true;
-      }
-      // ultima settimana
-      $giorno->modify('last'.$freq);
-      if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
-        $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
-          $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-        $lista[5][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
-        $lista_mesi[intval($giorno->format('m'))] = true;
-      }
-      // quarta settimana (può coincidere con ultima)
-      if ($giorno->format('Y-m-d') != $giorno->modify('fourth'.$freq)->format('Y-m-d')) {
+      if (!in_array($giorno->format('n'), $mesi_colloqui)) {
+        // prima settimana
+        $giorno->modify('first'.$freq);
         if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
           $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
             $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-          $lista[4][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista[1][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
           $lista_mesi[intval($giorno->format('m'))] = true;
+        }
+        // seconda settimana
+        $giorno->modify('second'.$freq);
+        if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+          $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+            $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+          $lista[2][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista_mesi[intval($giorno->format('m'))] = true;
+        }
+        // terza settimana
+        $giorno->modify('third'.$freq);
+        if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+          $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+            $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+          $lista[3][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista_mesi[intval($giorno->format('m'))] = true;
+        }
+        // ultima settimana
+        $giorno->modify('last'.$freq);
+        if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+          $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+            $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+          $lista[5][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista_mesi[intval($giorno->format('m'))] = true;
+        }
+        // quarta settimana (può coincidere con ultima)
+        if ($giorno->format('Y-m-d') != $giorno->modify('fourth'.$freq)->format('Y-m-d')) {
+          if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
+            $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
+              $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
+            $lista[4][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+            $lista_mesi[intval($giorno->format('m'))] = true;
+          }
         }
       }
       // mese successivo
