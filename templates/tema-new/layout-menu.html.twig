@@ -1,0 +1,131 @@
+{### menu ###}
+{% set page_route = app.request.attributes.get('_route') %}
+
+{% macro opzione(opt,route) %}
+  <li class="nav-item" role="none">
+    <a class="nav-link{{ opt.disabilitato ? ' disabled' }}{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}"{{ opt.disabilitato ? '  aria-disabled="true"' }}>
+  {% if opt.icona %}
+      <svg class="icon icon-sm icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-2">
+        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#{{ opt.icona }}"></use>
+      </svg>
+  {% endif %}
+      <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
+    </a>
+  </li>
+{% endmacro %}
+
+{% macro subopzione(opt,route) %}
+  <li role="none">
+    <a class="list-item{{ opt.disabilitato ? ' disabled' }}{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}"{{ opt.disabilitato ? '  aria-disabled="true"' }}>
+      <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
+    </a>
+  </li>
+{% endmacro %}
+
+{% macro menu(opt,route) %}
+  <li class="nav-item dropdown" role="none">
+    <a class="nav-link dropdown-toggle px-3{{ opt.disabilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ opt.disabilitato ? '  aria-disabled="true"' }}>
+      <span>{{ opt.nome|raw }}</span>
+      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }}">
+        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-expand"></use>
+      </svg>{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
+    </a>
+    <div class="dropdown-menu">
+      <div class="link-list-wrapper">
+        <ul class="link-list" role="menu" aria-label="{{ opt.descrizione|raw }}">
+  {% for subopt in opt.sottomenu %}
+    {% if subopt.sottomenu %}
+      {{ _self.menu(subopt,route) }}
+    {% else %}
+      {{ _self.subopzione(subopt,route)  }}
+    {% endif %}
+  {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </li>
+{% endmacro %}
+
+{% macro megamenu(opt,route) %}
+  <li class="nav-item dropdown megamenu" role="none">
+    <a class="nav-link dropdown-toggle{{ opt.disabilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ opt.disabilitato ? '  aria-disabled="true"' }}>
+      <span>{{ opt.nome|raw }}</span>
+      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }}">
+        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-expand"></use>
+      </svg>{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
+    </a>
+    <div class="dropdown-menu">
+      <div class="row">
+  {% set num = 12 // (opt.sottomenu|length) %}
+  {% for submenu in opt.sottomenu %}
+        <div class="col-12 col-lg-{{ num }}">
+          <div class="link-list-wrapper">
+            <ul class="link-list" role="menu" aria-label="{{ submenu.descrizione|raw }}">
+              <li role="none"><h3 class="no_toc">{{ submenu.nome|raw }}</h3></li>
+    {% for subopt in submenu.sottomenu %}
+      {{ _self.subopzione(subopt,route)  }}
+    {% endfor %}
+            </ul>
+          </div>
+        </div>
+  {% endfor %}
+      </div>
+    </div>
+  </li>
+{% endmacro %}
+
+<div class="it-nav-wrapper">
+  <div style="height:0;padding-top:1px;" class="it-header-center-wrapper"></div>
+  <div class="it-header-navbar-wrapper">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 pl-0 pr-0">
+          <nav class="navbar navbar-expand-lg{{ app.session.get('/CONFIG/MENU/main').megamenu ? ' has-megamenu' }} pl-0" aria-label="{{ app.session.get('/CONFIG/MENU/main').nome }}">
+            <button class="custom-navbar-toggler bg-primary" type="button" aria-controls="gs-mainmenu" aria-expanded="false" aria-label="{{ app.session.get('/CONFIG/MENU/main').descrizione }}" data-target="#gs-mainmenu">
+              <svg class="icon">
+                <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-burger"></use>
+              </svg>
+            </button>
+            <div id="gs-mainmenu" class="navbar-collapsable" style="display:none;">
+              <div class="overlay" style="display:none;"></div>
+              <div class="close-div sr-only">
+                <button class="btn close-menu" type="button"><span class="it-close"></span>Chiudi</button>
+              </div>
+              <div class="menu-wrapper">
+                <ul class="navbar-nav" role="menubar" aria-label="{{ app.session.get('/CONFIG/MENU/main').nome }}">
+  {% for opt in app.session.get('/CONFIG/MENU/main').opzioni %}
+    {% if opt.megamenu and opt.sottomenu %}
+                  {{ _self.megamenu(opt,page_route)  }}
+    {% elseif opt.sottomenu %}
+                  {{ _self.menu(opt,page_route)  }}
+    {% else %}
+                  {{ _self.opzione(opt,page_route)  }}
+    {% endif %}
+  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="breadcrumb-container" aria-label="breadcrumb">
+    <ol class="breadcrumb dark pl-4">
+      <li class="breadcrumb-item d-none d-md-block"><span class="d-none d-lg-inline">Posizione:</span></li>
+  {% if is_granted('IS_AUTHENTICATED_FULLY') and page_route != 'home' %}
+      <li class="breadcrumb-item d-none d-md-block"><a class="ml-3" href="{{ path('home') }}" title="Pagina principale">Home</a><span class="separator"></span></li>
+  {% else %}
+      <li class="breadcrumb-item d-none d-md-block"><span class="ml-3"></span></li>
+  {% endif %}
+  {% if breadcrumb.nome3 is not null %}
+      <li class="breadcrumb-item d-none d-md-block"><a href="{{ breadcrumb.url3 ? path(breadcrumb.url3) : '#' }}" title="{{ breadcrumb.descrizione3 }}">{{ breadcrumb.nome3|raw }}</a><span class="separator"></span></li>
+  {% endif %}
+  {% if breadcrumb.nome2 is not null %}
+      <li class="breadcrumb-item d-none d-md-block"><a href="{{ breadcrumb.url2 ? path(breadcrumb.url2) : '#' }}" title="{{ breadcrumb.descrizione2 }}">{{ breadcrumb.nome2|raw }}</a><span class="separator"></span></li>
+  {% endif %}
+      <li class="breadcrumb-item active"><span class="d-inline d-md-none mr-4"></span><a href="{{ path(breadcrumb.url) }}" title="{{ breadcrumb.descrizione }}" aria-current="page">{{ breadcrumb.nome|raw }}</a></li>
+    </ol>
+  </nav>
+</div>
+{### FINE menu ###}
