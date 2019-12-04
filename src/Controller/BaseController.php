@@ -53,10 +53,12 @@ class BaseController extends AbstractController {
    * @return Response Pagina di risposta
    */
   protected function renderHtml(string $categoria, string $azione, array $dati=[], array $info=[]): Response {
+    $session = $this->get('session');
     // legge breadcrumb
-    $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione, $this->getUser());
+    $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione,
+      $this->getUser(), $session);
     // restituisce vista
-    $tema = $this->get('session')->get('/APP/APP/tema', '');
+    $tema = $session->get('/APP/APP/tema', '');
     return $this->render($tema.'/'.$categoria.'/'.$azione.'.html.twig', array(
       'pagina_titolo' => 'page.'.$categoria.'.'.$azione,
       'breadcrumb' => $breadcrumb,
