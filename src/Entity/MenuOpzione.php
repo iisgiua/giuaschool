@@ -56,6 +56,16 @@ class MenuOpzione {
   private $ruolo;
 
   /**
+   * @var string $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   *
+   * @ORM\Column(type="string", length=32, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Choice(choices={"NESSUNA","SEGRETERIA","COORDINATORE"}, strict=true, message="field.choice")
+   */
+  private $funzione;
+
+  /**
    * @var string $nome Nome dell'opzione
    *
    * @ORM\Column(type="string", length=64, nullable=false)
@@ -116,7 +126,7 @@ class MenuOpzione {
   /**
    * @var Menu $sottoMenu Eventuale sottomenu collegato all'opzione
    *
-   * @ORM\OneToOne(targetEntity="Menu")
+   * @ORM\ManyToOne(targetEntity="Menu")
    * @ORM\JoinColumn(nullable=true, name="sotto_menu_id")
    */
   private $sottoMenu;
@@ -174,6 +184,27 @@ class MenuOpzione {
    */
   public function setRuolo($ruolo) {
     $this->ruolo = $ruolo;
+    return $this;
+  }
+
+  /**
+   * Restituisce la funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   *
+   * @return string Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   */
+  public function getFunzione() {
+    return $this->funzione;
+  }
+
+  /**
+   * Modifica la funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   *
+   * @param string $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   *
+   * @return MenuOpzione Oggetto MenuOpzione
+   */
+  public function setFunzione($funzione) {
+    $this->funzione = $funzione;
     return $this;
   }
 
@@ -353,6 +384,8 @@ class MenuOpzione {
    */
   public function __construct() {
     // valori predefiniti
+    $this->ruolo = 'NESSUNO';
+    $this->funzione = 'NESSUNA';
     $this->disabilitato = false;
   }
 

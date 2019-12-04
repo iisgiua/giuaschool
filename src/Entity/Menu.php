@@ -22,10 +22,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * Menu - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\MenuRepository")
- * @ORM\Table(name="gs_menu", uniqueConstraints={@ORM\UniqueConstraint(columns={"ruolo","selettore"})})
+ * @ORM\Table(name="gs_menu", uniqueConstraints={@ORM\UniqueConstraint(columns={"selettore"})})
  * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"ruolo","selettore"}, message="field.unique")
+ * @UniqueEntity(fields={"selettore"}, message="field.unique")
  */
 class Menu {
 
@@ -49,49 +49,30 @@ class Menu {
   private $modificato;
 
   /**
-   * @var string $ruolo Ruolo dell'utente che può visualizzare il menu
-   *
-   * @ORM\Column(type="string", length=32, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"NESSUNO","ROLE_UTENTE","ROLE_ALUNNO","ROLE_GENITORE","ROLE_ATA","ROLE_DOCENTE","ROLE_STAFF","ROLE_PRESIDE","ROLE_AMMINISTRATORE"}, strict=true, message="field.choice")
-   */
-  private $ruolo;
-
-  /**
    * @var string $selettore Nome identificativo usato per selezionare il menu
    *
-   * @ORM\Column(type="string", length=16, nullable=false)
+   * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
   private $selettore;
 
   /**
-   * @var string $nome Nome del menu
+   * @var string $nome Nome del menu (nullo se sottomenu)
    *
    * @ORM\Column(type="string", length=64, nullable=true)
    */
   private $nome;
 
   /**
-   * @var string $descrizione Descrizione del menu
+   * @var string $descrizione Descrizione del menu (nulla se sottomenu)
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    */
    private $descrizione;
 
   /**
-   * @var boolean $disabilitato Indica se il menu è disabilitato o meno
-   *
-   * @ORM\Column(type="boolean", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   */
-   private $disabilitato;
-
-  /**
-   * @var string $icona Nome dell'eventuale icona del menu
+   * @var string $icona Nome dell'eventuale icona del menu (nulla se sottomenu)
    *
    * @ORM\Column(type="string", length=64, nullable=true)
    */
@@ -149,27 +130,6 @@ class Menu {
   }
 
   /**
-   * Restituisce il ruolo dell'utente che può visualizzare il menu
-   *
-   * @return string Ruolo dell'utente che può visualizzare il menu
-   */
-  public function getRuolo() {
-    return $this->ruolo;
-  }
-
-  /**
-   * Modifica il ruolo dell'utente che può visualizzare il menu
-   *
-   * @param string $ruolo Ruolo dell'utente che può visualizzare il menu
-   *
-   * @return Menu Oggetto Menu
-   */
-  public function setRuolo($ruolo) {
-    $this->ruolo = $ruolo;
-    return $this;
-  }
-
-  /**
    * Restituisce il nome identificativo usato per selezionare il menu
    *
    * @return string Nome identificativo usato per selezionare il menu
@@ -191,7 +151,7 @@ class Menu {
   }
 
   /**
-   * Restituisce il nome del menu
+   * Restituisce il nome del menu (nullo se sottomenu)
    *
    * @return string Nome del menu
    */
@@ -212,7 +172,7 @@ class Menu {
   }
 
   /**
-   * Restituisce la descrizione del menu
+   * Restituisce la descrizione del menu (nulla se sottomenu)
    *
    * @return string Descrizione del menu
    */
@@ -233,28 +193,7 @@ class Menu {
   }
 
   /**
-   * Restituisce se il menu è disabilitato o meno
-   *
-   * @return boolean Indica se il menu è disabilitato
-   */
-  public function getDisabilitato() {
-    return $this->disabilitato;
-  }
-
-  /**
-   * Modifica se il menu è disabilitato o meno
-   *
-   * @param boolean $disabilitato Indica se il menu è disabilitato
-   *
-   * @return Menu Oggetto Menu
-   */
-  public function setDisabilitato($disabilitato) {
-    $this->disabilitato = ($disabilitato == true);
-    return $this;
-  }
-
-  /**
-   * Restituisce il nome dell'eventuale icona del menu
+   * Restituisce il nome dell'eventuale icona del menu (nulla se sottomenu)
    *
    * @return string Nome dell'icona del menu
    */
@@ -352,7 +291,6 @@ class Menu {
    */
   public function __construct() {
     // valori predefiniti
-    $this->disabilitato = false;
     $this->mega = false;
     $this->opzioni = new ArrayCollection();
   }
@@ -363,7 +301,7 @@ class Menu {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return $this->nome;
+    return $this->selettore;
   }
 
 }

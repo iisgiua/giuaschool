@@ -14,7 +14,8 @@ namespace App\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-Use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
+use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
+use Symfony\Component\Security\Core\Security;
 use App\Entity\Configurazione;
 use App\Entity\Istituto;
 
@@ -37,6 +38,11 @@ class ConfigLoader {
    */
   private $session;
 
+  /**
+   * @var Security $security Gestore dell'autenticazione degli utenti
+   */
+  private $security;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -45,10 +51,13 @@ class ConfigLoader {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param Security $security Gestore dell'autenticazione degli utenti
    */
-  public function __construct(EntityManagerInterface $em, SessionInterface $session) {
+  public function __construct(EntityManagerInterface $em, SessionInterface $session,
+                              Security $security) {
     $this->em = $em;
     $this->session = $session;
+    $this->security = $security;
   }
 
   /**
@@ -84,7 +93,11 @@ class ConfigLoader {
     }
     // carica dati dall'entità Istituto
     $this->caricaIstituto();
-  }
+    // carica i menu
+    $this->caricaMenu();
+    // carica il tema
+    $this->caricaTema();
+}
 
   /**
    * Carica la configurazione dall'entità Istituto
@@ -106,6 +119,35 @@ class ConfigLoader {
       $this->session->set('/CONFIG/ISTITUTO/email_amministratore', $istituto[0]->getEmailAmministratore());
       $this->session->set('/CONFIG/ISTITUTO/email_notifiche', $istituto[0]->getEmailNotifiche());
     }
+  }
+
+  /**
+   * Carica la struttura dei menu visibili dall'utente collegato
+   */
+  private function caricaMenu() {
+    // legge utente connesso (null se utente non autenticato)
+    $utente = $this->security->getUser();
+    // legge menu esistenti
+    $lista_menu = $this->em->getRepository('App:Menu')->listaMenu();
+    foreach ($lista_menu as $m) {
+      $menu = $this->em->getRepository('App:Menu')->menu($m['selettore'], $utente);
+      $this->session->set('/CONFIG/MENU/'.$m['selettore'], $menu);
+    }
+  }
+
+  /**
+   * Carica il tema CSS per l'utente collegato
+   */
+  private function caricaTema() {
+    $tema = '';
+    // legge impostazione tema dell'utente connesso
+    $utente = $this->security->getUser();
+    if ($utente && isset($utente->getNotifica()['tema']) && $utente->getNotifica()['tema'] == 'new') {
+      // imposta il nuovo $tema
+      $tema = 'tema-new';
+    }
+    // imposta tema
+    $this->session->set('/APP/APP/tema', $tema);
   }
 
 }
