@@ -148,6 +148,8 @@
           <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}<span class="glyphicon glyphicon-asterisk"></span>{% endif %}</button>
             {% elseif v.voto > 0 and not v.visibile %}
           <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ v.voto_str }}</button>
+            {% elseif v.voto > 0 and not v.media %}
+          <button type="button" class="btn btn-xs gs-btn-secondary" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ v.voto_str }}</button>
             {% elseif v.voto > 0 %}
           <button type="button" class="btn btn-xs btn-{{ v.voto < 5 ? 'danger' : (v.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ v.voto_str }}</button>
             {% else %}
@@ -163,7 +165,7 @@
                   <strong>Data:</strong> {{ v.data|date('d/m/Y') }}
                 </p>
                 <p><strong>Docente:</strong> {{ v.nome }} {{ v.cognome }}</p>
-                <p><strong>Valutazione:</strong> {{ ('label.voti_'~v.tipo)|trans }}</p>
+                <p><strong>Valutazione:</strong> {{ ('label.voti_'~v.tipo)|trans }} <em>{{ not v.media ? '(non utilizzata nel calcolo della media)' }}</em></p>
                 <p><strong>Alunno:</strong> {{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</p>
             {% if v.argomento is not empty %}
                 <p><strong>Argomenti o descrizione della prova:</strong><br>{{ v.argomento }}</p>

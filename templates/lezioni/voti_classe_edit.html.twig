@@ -114,10 +114,25 @@ $(document).ready(function() {
     var c = (e.value.newValue >= 6 ? 'label-success' : (e.value.newValue < 5 ? 'label-danger' : 'label-warning'));
     $(this).parent().siblings('span').removeClass('label-success label-danger label-warning').addClass(c).text(s);
   });
+  $('input:radio[name="voti_classe[visibile]"]').change(function() {
+    if ($(this).val() == 1) {
+      $('input[name^="voti_classe[lista]"][name$="[media]"][value=1]').prop('checked', true);
+      $('input[name^="voti_classe[lista]"][name$="[media]"]').prop('disabled', false);
+    } else {
+      $('input[name^="voti_classe[lista]"][name$="[media]"][value=0]').prop('checked', true);
+      $('input[name^="voti_classe[lista]"][name$="[media]"]').prop('disabled', true);
+    }
+  });
   // init
+  if ($('input[name="voti_classe[visibile]"]:checked').val() == 0) {
+    $('input[name^="voti_classe[lista]"][name$="[media]"][value=0]').prop('checked', true);
+    $('input[name^="voti_classe[lista]"][name$="[media]"]').prop('disabled', true);
+  }
   {% for k,f in form.lista %}
     {% if f.voto.vars.value > 0 %}
-  $("input#voti_classe_lista_{{ k }}_voto").parent().siblings('span').text(formatter({{ f.voto.vars.value }}))
+  $("input#voti_classe_lista_{{ k }}_voto").parent().siblings('span').text(formatter({{ f.voto.vars.value }}));
+    {% elseif not f.giudizio.vars.value and form.visibile.vars.value == 1 %}
+  $("input#voti_classe_lista_{{ k }}_media_0").prop('checked', true);
     {% endif %}
   {% endfor %}
 });
@@ -152,6 +167,12 @@ function formatter(val) {
       <label class="control-label col-sm-2" for="{{ form.giudizio.vars.id }}">Giudizio</label>
       <div class="col-sm-10">
           {{ form_widget(form.giudizio) }}
+      </div>
+    </div>
+    <div class="row ">
+      <label class="control-label col-sm-2" for="{{ form.media.vars.id }}">{{ 'label.voto_in_media'|trans }}</label>
+      <div class="col-sm-10">
+          {{ form_widget(form.media) }}
       </div>
     </div>
   </div>

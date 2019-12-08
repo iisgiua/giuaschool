@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 
 /**
@@ -38,6 +39,12 @@ class VotoClasseType extends AbstractType {
       ->add('bes', HiddenType::class)
       ->add('voto', HiddenType::class)
       ->add('votoTesto', HiddenType::class)
+      ->add('media', ChoiceType::class, array('label' => false,
+        'choices' => ['label.si' => true, 'label.no' => false],
+        'expanded' => true,
+        'multiple' => false,
+        'label_attr' => ['class' => 'radio-inline'],
+        'required' => true))
       ->add('giudizio', TextType::class, array('label' => false,
         'trim' => true,
         'required' => false));
@@ -53,4 +60,3 @@ class VotoClasseType extends AbstractType {
   }
 
 }
-

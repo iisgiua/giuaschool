@@ -16,7 +16,7 @@
 <br>
   {% endif %}
   {% for tipo in ['S','O','P'] %}
-    {% if dati.voti[alunno][tipo] is defined %}
+    {% if dati.voti[alunno][tipo] is defined and dati.voti[alunno][tipo]|length > 0 %}
 <div style="text-align:center"><strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }}) - {{ tipo == 'S' ? 'Scritto' : (tipo == 'O' ? 'Orale' : 'Pratico') }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">

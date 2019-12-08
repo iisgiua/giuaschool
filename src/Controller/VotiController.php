@@ -302,7 +302,7 @@ class VotiController extends AbstractController {
             $voto = (new Valutazione())
               ->setTipo($tipo)
               ->setVisibile($form->get('visibile')->getData())
-              ->setMedia($form->get('visibile')->getData())
+              ->setMedia($valutazione->getMedia())
               ->setArgomento($form->get('argomento')->getData())
               ->setDocente($this->getUser())
               ->setLezione($lezione)
@@ -318,13 +318,13 @@ class VotiController extends AbstractController {
           } elseif ($voto && ($elenco_precedente[$key]->getVoto() != $valutazione->getVoto() ||
                     $elenco_precedente[$key]->getGiudizio() != $valutazione->getGiudizio() ||
                     $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData() ||
-                    $voto->getLezione()->getId() != $lezione->getId())) {
+                    $voto->getLezione()->getId() != $lezione->getId() || $elenco_precedente[$key]->getMedia() != $valutazione->getMedia())) {
             // valutazione modificata
             $log['edit'][] = array($voto->getId(), $voto->getVisibile(), $voto->getArgomento(),
-              $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio());
+              $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio(), $voto->getMedia());
             $voto
               ->setVisibile($form->get('visibile')->getData())
-              ->setMedia($form->get('visibile')->getData())
+              ->setMedia($valutazione->getMedia())
               ->setLezione($lezione)
               ->setArgomento($form->get('argomento')->getData())
               ->setVoto($valutazione->getVoto())
@@ -361,12 +361,13 @@ class VotiController extends AbstractController {
               return $e->getId();
             }, $log['create'])),
           'Voti modificati' => implode(', ', array_map(function ($e) {
-              return '[Id: '.$e[0].', Visibile: '.$e[1].', Argomento: "'.$e[2].'"'.
+              return '[Id: '.$e[0].', Visibile: '.$e[1].', Media: '.$e[6].', Argomento: "'.$e[2].'"'.
                 ', Lezione: '.$e[3].
                 ', Voto: '.$e[4].', Giudizio: "'.$e[5].'"'.']';
             }, $log['edit'])),
           'Voti cancellati' => implode(', ', array_map(function ($e) {
               return '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
+                ', Media: '.$e[1]->getMedia().
                 ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
                 ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
                 ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']';
@@ -433,7 +434,8 @@ class VotiController extends AbstractController {
         'docente' => $this->getUser(), 'tipo' => $tipo]);
       if ($valutazione) {
         $valutazione_precedente = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
-          $valutazione->getVoto(), $valutazione->getGiudizio(), $valutazione->getLezione()->getId());
+          $valutazione->getVoto(), $valutazione->getGiudizio(), $valutazione->getLezione()->getId(),
+          $valutazione->getmedia());
         $data = $valutazione->getLezione()->getData();
       }
     }
@@ -443,7 +445,8 @@ class VotiController extends AbstractController {
         ->setTipo($tipo)
         ->setDocente($this->getUser())
         ->setAlunno($alunno)
-        ->setVisibile(true);
+        ->setVisibile(true)
+        ->setMedia(true);
       $em->persist($valutazione);
       $valutazione_precedente = null;
       $data = new \DateTime();
@@ -468,6 +471,12 @@ class VotiController extends AbstractController {
         'mapped' => false,
         'required' => true))
       ->add('visibile', ChoiceType::class, array('label' => 'label.visibile_genitori',
+        'choices' => ['label.si' => true, 'label.no' => false],
+        'expanded' => true,
+        'multiple' => false,
+        'label_attr' => ['class' => 'radio-inline'],
+        'required' => true))
+      ->add('media', ChoiceType::class, array('label' => 'label.voto_in_media',
         'choices' => ['label.si' => true, 'label.no' => false],
         'expanded' => true,
         'multiple' => false,
@@ -534,7 +543,10 @@ class VotiController extends AbstractController {
       }
       if ($form->isValid()) {
         // crea o modifica voto
-        $valutazione->setMedia($valutazione->getVisibile());
+        if (!$valutazione->getVisibile()) {
+          // media non utilizzata se voto non visibile
+          $valutazione->setMedia(false);
+        }
         // ok: memorizza dati
         $em->flush();
         // log azione e notifica
@@ -548,6 +560,7 @@ class VotiController extends AbstractController {
             'Id' => $valutazione_precedente[0],
             'Tipo' => $tipo,
             'Visibile' => $valutazione_precedente[1],
+            'Media' => $valutazione_precedente[6],
             'Argomento' => $valutazione_precedente[2],
             'Voto' => $valutazione_precedente[3],
             'Giudizio' => $valutazione_precedente[4],
@@ -558,12 +571,14 @@ class VotiController extends AbstractController {
         } elseif ($valutazione_precedente && ($valutazione_precedente[3] != $valutazione->getVoto() ||
                   $valutazione_precedente[4] != $valutazione->getGiudizio() ||
                   $valutazione_precedente[2] != $valutazione->getArgomento() ||
-                  $valutazione_precedente[1] != $valutazione->getVisibile())) {
+                  $valutazione_precedente[1] != $valutazione->getVisibile() ||
+                  $valutazione_precedente[6] != $valutazione->getMedia())) {
           // modifica
           $notifica->setAzione('E')->setOggettoId($valutazione->getId());
           $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Modifica voto', __METHOD__, array(
             'Id' => $valutazione_precedente[0],
             'Visibile' => $valutazione_precedente[1],
+            'Media' => $valutazione_precedente[6],
             'Argomento' => $valutazione_precedente[2],
             'Voto' => $valutazione_precedente[3],
             'Giudizio' => $valutazione_precedente[4],
