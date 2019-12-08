@@ -1147,7 +1147,7 @@ class RegistroUtil {
     $lista_alunni = $this->alunniInData($data, $classe);
     // legge i voti degli degli alunni
     $voti = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione,v.id,v.argomento,v.visibile,v.voto,v.giudizio')
+      ->select('a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
       ->leftJoin('App:Lezione', 'l', 'WITH', 'l.materia=:materia AND l.classe=:classe AND l.data=:data')
       ->leftJoin('App:Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo')
       ->where('a.id IN (:alunni)')
@@ -1173,6 +1173,7 @@ class RegistroUtil {
             ->setId($v['alunno_id'])
             ->setAlunno($v['cognome'].' '.$v['nome'].' ('.$v['dataNascita']->format('d/m/Y').')')
             ->setBes($v['bes'])
+            ->setMedia($v['media'])
             ->setVoto($v['voto'])
             ->setVotoTesto($voto_str)
             ->setGiudizio($v['giudizio'])
@@ -1295,7 +1296,7 @@ class RegistroUtil {
     }
     // legge i voti degli degli alunni
     $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
-      ->select('a.id AS alunno_id,v.id,v.tipo,v.argomento,v.visibile,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
+      ->select('a.id AS alunno_id,v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.alunno', 'a')
       ->join('v.lezione', 'l')
       ->join('v.docente', 'd')
@@ -2195,7 +2196,7 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge i voti degli degli alunni
     $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
-      ->select('v.id,v.tipo,v.argomento,v.visibile,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
+      ->select('v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.docente', 'd')
       ->join('v.lezione', 'l')
       ->where('v.alunno=:alunno AND l.materia=:materia AND l.classe=:classe')
@@ -2214,8 +2215,8 @@ class RegistroUtil {
         $voto_int = intval($v['voto'] + 0.25);
         $voto_dec = $v['voto'] - intval($v['voto']);
         $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
-        if ($v['visibile']) {
-          // considera voti visibili per la media
+        if ($v['media']) {
+          // considera voti per la media
           if (isset($media[$periodo][$v['tipo']])) {
             $media[$periodo][$v['tipo']]['numero']++;
             $media[$periodo][$v['tipo']]['somma'] += $v['voto'];
@@ -2234,14 +2235,19 @@ class RegistroUtil {
     }
     // calcola medie
     foreach ($media as $periodo=>$mp) {
-      $somma = 0;
-      $numero = 0;
+      $somma_sop = 0;
+      $numero_sop = 0;
+      $somma_tot = 0;
+      $numero_tot = 0;
       foreach ($mp as $tipo=>$m) {
         $media_periodo[$periodo][$tipo] = number_format($m['somma'] / $m['numero'], 2, ',', null);
-        $somma += $m['somma'] / $m['numero'];
-        $numero++;
+        $somma_sop += $m['somma'] / $m['numero'];
+        $numero_sop++;
+        $somma_tot += $m['somma'];
+        $numero_tot += $m['numero'];
       }
-      $media_periodo[$periodo]['totale'] = number_format($somma / $numero, 2, ',', null);
+      $media_periodo[$periodo]['sop'] = number_format($somma_sop / $numero_sop, 2, ',', null);
+      $media_periodo[$periodo]['tot'] = number_format($somma_tot / $numero_tot, 2, ',', null);
     }
     // riordina periodi
     for ($k = 3; $k >= 1; $k--) {

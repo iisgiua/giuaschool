@@ -326,6 +326,7 @@ label.motivazione_obbligatoria: Motivazione obbligatoria
 label.motivazione_facoltativa: Motivazione facoltativa
 label.documenti_scrutinio: Documenti dello scrutinio
 label.stato: Stato
+label.voto_in_media: Utilizza nel calcolo delle medie?
 
 
 page.agenda_compito: Agenda Compiti
@@ -866,7 +867,7 @@ exception.circolare_documento_nullo: Non hai caricato il documento della circola
 exception.circolare_documento_numero: Hai caricato più di un documento della circolare.
 exception.file_ata_sede: La sede indicata per l'utente ATA non esiste.
 exception.errore_invio_credenziali: Non è stato possibile inviare le credenziali all'utente.
-exception.lezione_non_esiste: "Non esiste una lezione firmata per la materia '{materia}' nella data indicata."
+exception.lezione_non_esiste: Non esiste una lezione firmata per la materia {materia} nella data indicata.
 exception.non_permesso_in_data: Azione richiesta non permessa nella data indicata.
 exception.alunno_no_classe_in_data: "{alunno} non risulta nell'elenco della classe nella data indicata."
 exception.motivo_scrutinio_rinviato: Non è stato inserita la motivazione per il rinvio dello scrutinio dell'alunn{sex} {alunno}.

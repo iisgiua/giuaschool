@@ -56,7 +56,7 @@
           {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
         </td>
         <td{{ e.docente_id ? ' class="bg-info"' }}>
-          {% if e.voto > 0 %}<span class="label label-{{ not e.visibile ? 'default' : (e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success')) }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
+          {% if e.voto > 0 %}<span class="label {{ not e.visibile ? 'gs-label-secondary' : 'label-'~(not e.media ? 'default' : (e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success'))) }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
           <small>{{ e.giudizio }}</small>
           {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
         </td>
@@ -73,9 +73,21 @@
   </table>
           {% endif %}
         {% endfor %}
-        {% if dati.media[periodo]['totale'] is defined %}
-  <div class="alert alert-warning text-center" role="alert">
-    <strong class="gs-big"><em>{{ periodo }} - Media Complessiva {{ dati.media[periodo]['totale'] }}</em></strong>
+        {% if dati.media[periodo]['tot'] is defined or dati.media[periodo]['sop'] is defined %}
+  <div class="alert alert-warning _row" role="alert">
+    <div class="text-center"><strong class="gs-big">{{ periodo }}</strong></div>
+          {% if dati.media[periodo]['tot'] is defined %}
+    <div class="row">
+      <div class="col-sm-9 text-right"><strong class="gs-big"><em>Media di tutti i voti:</em></strong></div>
+      <div class="col-sm-3"><strong class="gs-big">{{ dati.media[periodo]['tot'] }}</strong></div>
+    </div>
+          {% endif %}
+          {% if dati.media[periodo]['sop'] is defined %}
+    <div class="row">
+      <div class="col-sm-9 text-right"><strong class="gs-big"><em>Media delle medie Scritto/Orale/Pratico:</em></strong></div>
+      <div class="col-sm-3"><strong class="gs-big">{{ dati.media[periodo]['sop'] }}</strong></div>
+    </div>
+          {% endif %}
   </div>
         {% endif %}
       {% else %}

@@ -25,6 +25,7 @@
       {{ form_errors(form) }}
       {{ form_row(form.data) }}
       {{ form_row(form.visibile) }}
+      {{ form_row(form.media) }}
       {{ form_row(form.argomento) }}
       <div class="form-group" id="gs-form-collection">
         <label class="control-label col-sm-2" for="{{ form.voto.vars.id }}">Voto</label>
@@ -120,6 +121,20 @@ $(document).ready(function() {
     var c = (e.value.newValue >= 6 ? 'label-success' : (e.value.newValue < 5 ? 'label-danger' : 'label-warning'));
     $(this).parent().siblings('span').removeClass('label-success label-danger label-warning').addClass(c).text(s);
   });
+  $('input:radio[name="voti_alunno[visibile]"]').change(function() {
+    if ($(this).val() == 1) {
+      $('input[name="voti_alunno[media]"][value=1]').prop('checked', true);
+      $('input[name="voti_alunno[media]"]').prop('disabled', false);
+  } else {
+      $('input[name="voti_alunno[media]"][value=0]').prop('checked', true);
+      $('input[name="voti_alunno[media]"]').prop('disabled', true);
+    }
+  });
+  // init
+  if ($('input[name="voti_alunno[visibile]"]:checked').val() == 0) {
+    $('input[name="voti_alunno[media]"][value=0]').prop('checked', true);
+    $('input[name="voti_alunno[media]"]').prop('disabled', true);
+  }
   {% if form.voto.vars.value > 0 %}
   $("#gs-form-collection input.slider").parent().siblings('span').text(formatter({{ form.voto.vars.value }}));
   {% endif %}

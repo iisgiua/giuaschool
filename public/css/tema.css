@@ -425,6 +425,20 @@
   border-radius: 50%;
 }
 
+.gs-btn-secondary {
+  color: #ffffff;
+  background-color: #777;
+  border-color: #555;
+}
+.gs-btn-secondary:hover, .gs-btn-secondary:focus, .gs-btn-secondary:active, .gs-btn-secondary.active,
+.open .dropdown-toggle.gs-btn-secondary {
+  color: #ffffff;
+  background-color: #888;
+  border-color: #444;
+}
+.gs-label-secondary {
+  background-color: #b8b8b8;
+}
 
 /***** MODIFICHE A CLASSI ESISTENTI *****/
 

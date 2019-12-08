@@ -37,6 +37,11 @@ class VotoClasse {
   private $bes;
 
   /**
+   * @var boolean $media Indica se il voto è utilizzato nelle medie
+   */
+  private $media;
+
+  /**
    * @var float $voto Voto numerico della valutazione [1, 1.25, 1.50, 1.75, 2, ...]
    */
   private $voto;
@@ -119,6 +124,27 @@ class VotoClasse {
    */
   public function setBes($bes) {
     $this->bes = $bes;
+    return $this;
+  }
+
+  /**
+   * Restituisce se il voto è utilizzato nelle medie
+   *
+   * @return boolean Indica se il voto è utilizzato nelle medie
+   */
+  public function getMedia() {
+    return $this->media;
+  }
+
+  /**
+   * Modifica se il voto è utilizzato nelle medie
+   *
+   * @param boolean $media Indica se il voto è utilizzato nelle medie
+   *
+   * @return Valutazione Oggetto Valutazione
+   */
+  public function setMedia($media) {
+    $this->media = $media;
     return $this;
   }
 
@@ -219,4 +245,3 @@ class VotoClasse {
   }
 
 }
-
