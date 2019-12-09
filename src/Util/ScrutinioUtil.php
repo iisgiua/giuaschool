@@ -172,7 +172,7 @@ class ScrutinioUtil {
       ->getQuery()
       ->getResult();
     foreach ($alunni as $alu) {
-      $elenco['alunni'][$alu->getId()] = [$alu->getCognome(), $alu->getNome(), $alu->getDataNascita(), $alu->getBes(), $alu->getNote()];
+      $elenco['alunni'][$alu->getId()] = [$alu->getCognome(), $alu->getNome(), $alu->getDataNascita(), $alu->getBes(), $alu->getNoteBes()];
       $elenco['proposte'][$alu->getId()] = null;
     }
     // legge le proposte di voto
