@@ -7,13 +7,6 @@
   <h4 class="modal-title gs-h4"><em>{{ info.materia }}</em></h4>
 </div>
 <div class="modal-body">
-{% if info.bes != 'N' or info.note is not empty %}
-  <p class="bg-info gs-pl-2 gs-pr-2 gs-mt-0">
-    <strong>{{ ('label.bes_'~info.bes)|trans }}</strong>
-    {{ (info.bes != 'N' and info.note is not empty) ? '<br>' }}
-    <strong>{{ info.note }}</strong>
-  </p>
-{% endif %}
 {% for periodo,v in dati.lista %}
   {% for tipo in ['S','O','P'] %}
     {% if v[tipo] is defined %}
@@ -36,7 +29,7 @@
           {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
         </td>
         <td{{ e.docente_id ? ' class="bg-info"' }}>
-          {% if e.voto > 0 %}<span class="label label-{{ not e.visibile ? 'default' : (e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success')) }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
+          {% if e.voto > 0 %}<span class="label {{ not e.visibile ? 'gs-label-secondary' : 'label-'~(not e.media ? 'default' : (e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success'))) }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
           <small>{{ e.giudizio }}</small>
           {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
         </td>
@@ -53,12 +46,20 @@
   </table>
     {% endif %}
   {% endfor %}
-  <div class="alert alert-warning text-center" role="alert">
+  <div class="alert alert-warning text-center gs-text-normal" role="alert">
     <strong class="gs-big"><em>{{ periodo }}</em></strong><br>
     <strong>Ore di lezione: {{ dati.lezioni[periodo].ore }} - Ore di assenza: {{ dati.lezioni[periodo].assenze }} ({{ dati.lezioni[periodo].percentuale }}%)</strong>
-  {% if dati.media[periodo]['totale'] is defined %}
-    <br>
-    <strong class="gs-big"><em>Media Complessiva {{ dati.media[periodo]['totale'] }}</em></strong>
+  {% if dati.media[periodo]['tot'] is defined %}
+    <div class="row">
+      <div class="col-sm-9 text-right"><strong class="gs-big"><em>Media di tutti i voti:</em></strong></div>
+      <div class="col-sm-3"><strong class="gs-big">{{ dati.media[periodo]['tot'] }}</strong></div>
+    </div>
+  {% endif %}
+  {% if dati.media[periodo]['sop'] is defined %}
+    <div class="row">
+      <div class="col-sm-9 text-right"><strong class="gs-big"><em>Media delle medie Scritto/Orale/Pratico:</em></strong></div>
+      <div class="col-sm-3"><strong class="gs-big">{{ dati.media[periodo]['sop'] }}</strong></div>
+    </div>
   {% endif %}
   </div>
 {% else %}

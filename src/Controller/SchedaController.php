@@ -66,8 +66,6 @@ class SchedaController extends AbstractController {
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.
         $alunno->getDataNascita()->format('d/m/Y').')';
     $info['sesso'] = $alunno->getSesso();
-    $info['bes'] = $alunno->getBes();
-    $info['note'] = $alunno->getNote();
     // recupera dati
     $dati = $reg->dettagliVoti($this->getUser(), $cattedra, $alunno);
     $dati['lezioni'] = $reg->assenzeMateria($cattedra, $alunno);
