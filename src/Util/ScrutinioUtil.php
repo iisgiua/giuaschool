@@ -606,13 +606,20 @@ class ScrutinioUtil {
   public function quadroProposte(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
     // legge alunni
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note')
-      ->where('a.classe=:classe AND a.abilitato=:abilitato')
-      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['classe' => $classe, 'abilitato' => 1])
-      ->getQuery()
-      ->getResult();
+    if ($periodo == 'P') {
+      // alunni in classe alla data di fine periodo
+      $data = \DateTime::createFromFormat('Y-m-d', $this->session->get('/CONFIG/SCUOLA/periodo1_fine'));
+      $alunni = $this->em->getRepository('App:Alunno')->alunniInData($data, $classe);
+    } else {
+      // alunni in classe alla data odierna
+      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
+        ->where('a.classe=:classe AND a.abilitato=:abilitato')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['classe' => $classe, 'abilitato' => 1])
+        ->getQuery()
+        ->getResult();
+    }
     foreach ($alunni as $alu) {
       $dati['alunni'][$alu['id']] = $alu;
     }
@@ -836,33 +843,7 @@ class ScrutinioUtil {
   public function presenzeDocenti(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
     // legge docenti del CdC (esclusi potenziamento)
-    $docenti = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->select('DISTINCT d.id,d.cognome,d.nome,m.nomeBreve,m.id AS materia_id,c.tipo,c.supplenza')
-      ->join('c.materia', 'm')
-      ->join('c.docente', 'd')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
-      ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P'])
-      ->getQuery()
-      ->getArrayResult();
-    // elimina docente titolare se esiste supplente
-    //-- $mat = array();
-    //-- foreach ($docenti as $k=>$doc) {
-      //-- if (!isset($mat[$doc['materia_id']][$doc['tipo']])) {
-        //-- // memorizza docente di materia
-        //-- $mat[$doc['materia_id']][$doc['tipo']] = $k;
-      //-- } else {
-        //-- // elimina titolare di cattedra
-        //-- if ($doc['supplenza']) {
-          //-- // cancella titolare e memorizza docente supplente
-          //-- unset($docenti[$mat[$doc['materia_id']][$doc['tipo']]]);
-          //-- $mat[$doc['materia_id']][$doc['tipo']] = $k;
-        //-- } else {
-          //-- // cancella titolare
-          //-- unset($docenti[$k]);
-        //-- }
-      //-- }
-    //-- }
+    $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
     foreach ($docenti as $doc) {
       // dati per la visualizzazione della pagina
       $dati['docenti'][$doc['id']][] = $doc;
@@ -1017,12 +998,18 @@ class ScrutinioUtil {
       // se niente errori cambia stato
       if (!$this->session->getFlashBag()->has('errore')) {
         // imposta dati
+        $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+        $dati_docenti = array();
+        foreach ($docenti as $doc) {
+          $dati_docenti[$doc['id']][$doc['materia_id']] = $doc['tipo'];
+        }
         $scrutinio->setData($form->get('data')->getData());
         $scrutinio->setInizio($form->get('inizio')->getData());
         $scrutinio->addDato('presenze', $form->get('lista')->getData());
         $scrutinio->addDato('presiede_ds', $form->get('presiede_ds')->getData());
         $scrutinio->addDato('presiede_docente', $form->get('presiede_docente')->getData());
         $scrutinio->addDato('segretario', $form->get('segretario')->getData());
+        $scrutinio->addDato('docenti', $dati_docenti);
         // aggiorna stato
         $scrutinio->setStato('2');
         $this->em->flush();
@@ -1091,12 +1078,12 @@ class ScrutinioUtil {
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, $periodo);
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note')
+      ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
       ->where('a.id in (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista])
       ->getQuery()
-      ->getResult();
+      ->getArrayResult();
     foreach ($alunni as $alu) {
       $dati['alunni'][$alu['id']] = $alu;
     }

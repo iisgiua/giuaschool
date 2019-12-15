@@ -21,38 +21,36 @@
       {{ form_widget(form.inizio) }}
     </div>
   </div>
-  <div id="gs-fixed-header">
-    <table class="table table-bordered table-hover table-striped">
-      <caption class="text-center text-info"><strong class="gs-big">Presenze dei docenti</strong></caption>
-      <thead class="bg-success">
-        <tr>
-          <th class="col-sm-3">Docente</th>
-          <th class="col-sm-4">Materia</th>
-          <th class="col-sm-5">Presenza</th>
-        </tr>
-      </thead>
-      <tbody>
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-center text-info"><strong class="gs-big">Presenze dei docenti</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-3">Docente</th>
+        <th class="col-sm-4">Materia</th>
+        <th class="col-sm-5">Presenza</th>
+      </tr>
+    </thead>
+    <tbody>
     {% for docente,d in form.lista %}
-        <tr>
-          <td><strong>{{ dati.docenti[docente][0].cognome }} {{ dati.docenti[docente][0].nome }}</strong></td>
-          <td>
+      <tr>
+        <td><strong>{{ dati.docenti[docente][0].cognome }} {{ dati.docenti[docente][0].nome }}</strong></td>
+        <td>
       {% for mat in dati.docenti[docente] %}
-            {{ mat.tipo=='I' ? 'Lab. ' }}{{ mat.nomeBreve }}{{ not loop.last ? ', '}}
+          {{ mat.tipo=='I' ? 'Lab. ' }}{{ mat.nomeBreve }}{{ not loop.last ? ', '}}
       {% endfor %}
-          </td>
-          <td>
-            <div class="gs-mt-0">{{ form_widget(d.presenza) }}</div>
-            <div style="display:flex">
-              {{ form_widget(d.sessoSostituto, {attr: {style: 'width:auto'}}) }}
-              {{ form_widget(d.sostituto) }}
-            </div>
-            {{ form_widget(d.docente) }}
-          </td>
-        </tr>
+        </td>
+        <td>
+          <div class="gs-mt-0">{{ form_widget(d.presenza) }}</div>
+          <div style="display:flex">
+            {{ form_widget(d.sessoSostituto, {attr: {style: 'width:auto'}}) }}
+            {{ form_widget(d.sostituto) }}
+          </div>
+          {{ form_widget(d.docente) }}
+        </td>
+      </tr>
     {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    </tbody>
+  </table>
   <div class="form-group gs-mt-5">
     <label class="col-sm-4 control-label gs-big">Presiede lo scrutinio</label>
     <div class="col-sm-8">
@@ -94,7 +92,6 @@
 <script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
 <script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
-<script src="{{ asset('vendor/floatThead/jquery.floatThead.min.js') }}"></script>
 <script>
 $(document).ready(function() {
   $('.input-group.date').datepicker({
@@ -164,18 +161,7 @@ $(document).ready(function() {
     $('#gs-modal-waiting').modal('show');
     return true;
   });
-  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
-    var c=floatContainer.find('thead');
-    if(isFloated){
-      c.hide();
-      c.removeClass("bg-success").addClass("bg-info");
-      c.fadeIn();
-    } else {
-      c.removeClass("bg-info").addClass("bg-success");
-    }
-  });
   // init
-  $('#gs-fixed-header table').floatThead({top: 60});
   {% for messaggio in app.flashes('errore') %}
     {% if loop.first %}
   var m = '';
