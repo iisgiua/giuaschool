@@ -13,6 +13,7 @@
 namespace App\Repository;
 
 use App\Entity\Sede;
+use App\Entity\Classe;
 
 
 /**
@@ -225,5 +226,55 @@ class AlunnoRepository extends UtenteRepository {
     return array_column($alunni, 'id');
   }
 
-}
+  /**
+   * Restituisce la lista degli alunni della classe indicata alla data indicata.
+   *
+   * @param \DateTime $data Giorno in cui si desidera effettuare il controllo
+   * @param Classe $classe Classe scolastica
+   *
+   * @return array Vettore con i dati degli alunni
+   */
+  public function alunniInData(\DateTime $data, Classe $classe) {
+    if ($data->format('Y-m-d') >= date('Y-m-d')) {
+      // data è quella odierna o successiva, legge classe attuale
+      $alunni = $this->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
+        ->where('a.classe=:classe AND a.abilitato=:abilitato')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['classe' => $classe, 'abilitato' => 1])
+        ->getQuery()
+        ->getArrayResult();
+    } else {
+      // aggiunge alunni attuali che non hanno fatto cambiamenti di classe in quella data
+      $cambio = $this->_em->getRepository('App:CambioClasse')->createQueryBuilder('cc')
+        ->where('cc.alunno=a.id AND :data BETWEEN cc.inizio AND cc.fine')
+        ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
+      $alunni_id1 = $this->createQueryBuilder('a')
+        ->select('a.id')
+        ->where('a.classe=:classe AND a.abilitato=:abilitato AND NOT EXISTS ('.$cambio->getDQL().')')
+        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'abilitato' => 1])
+        ->getQuery()
+        ->getArrayResult();
+      // aggiunge altri alunni con cambiamento nella classe in quella data
+      $alunni_id2 = $this->createQueryBuilder('a')
+        ->select('a.id')
+        ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
+        ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe AND a.abilitato=:abilitato')
+        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'abilitato' => 1])
+        ->getQuery()
+        ->getArrayResult();
+      $alunni_id = array_column(array_merge($alunni_id1, $alunni_id2), 'id');
+      // legge dati alunni
+      $alunni = $this->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
+        ->where('a.id IN (:lista)')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['lista' => $alunni_id])
+        ->getQuery()
+        ->getArrayResult();
+    }
+    // restituisce dati
+    return $alunni;
+  }
 
+}

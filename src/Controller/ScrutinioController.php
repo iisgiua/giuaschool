@@ -643,9 +643,8 @@ class ScrutinioController extends AbstractController {
       $errore = array();
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $voto->getAlunno()->getId(),
-          'classe' => $classe->getId(), 'abilitato' => 1]);
-        if (!$alunno) {
+        $alunno = $em->getRepository('App:Alunno')->find($voto->getAlunno()->getId());
+        if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $em->detach($voto);
           continue;
@@ -798,9 +797,8 @@ class ScrutinioController extends AbstractController {
       $errore = array();
       foreach ($form->get('lista')->getData() as $key=>$voto) {
         // controllo alunno
-        $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $voto->getAlunno()->getId(),
-          'classe' => $classe->getId(), 'abilitato' => 1]);
-        if (!$alunno) {
+        $alunno = $em->getRepository('App:Alunno')->find($voto->getAlunno()->getId());
+        if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
           // alunno non esiste, salta
           $em->detach($voto);
           continue;

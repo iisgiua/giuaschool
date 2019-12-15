@@ -428,7 +428,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -443,7 +443,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', '', 10);
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
-    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'PRIMO TRIMESTRE', 0, 'R', 'B');
     $this->acapo($pdf, 5);
     // intestazione tabella
@@ -598,45 +598,40 @@ class PagelleUtil {
   public function firmeVerbaleDati(Classe $classe, $periodo) {
     $dati = array();
     if ($periodo == 'P') {
-      // legge docenti del CdC (esclusi potenziamento)
-      $docenti = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-        ->select('DISTINCT m.id,d.id AS docente_id,d.cognome,d.nome,m.nome AS nome_materia,c.tipo,c.supplenza')
-        ->join('c.materia', 'm')
-        ->join('c.docente', 'd')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
-        ->orderBy('m.ordinamento,m.nome', 'ASC')
-        ->addOrderBy('c.tipo', 'DESC')
-        ->addOrderBy('d.cognome,d.nome', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P'])
-        ->getQuery()
-        ->getArrayResult();
-      //-- // elimina docente titolare se esiste supplente
-      //-- $mat = array();
-      //-- foreach ($docenti as $k=>$doc) {
-        //-- if (!isset($mat[$doc['id']][$doc['tipo']])) {
-          //-- // memorizza docente di materia
-          //-- $mat[$doc['id']][$doc['tipo']] = $k;
-        //-- } else {
-          //-- // elimina titolare di cattedra
-          //-- if ($doc['supplenza']) {
-            //-- // cancella titolare e memorizza docente supplente
-            //-- unset($docenti[$mat[$doc['id']][$doc['tipo']]]);
-            //-- $mat[$doc['id']][$doc['tipo']] = $k;
-          //-- } else {
-            //-- // cancella titolare
-            //-- unset($docenti[$k]);
-          //-- }
-        //-- }
-      //-- }
-      foreach ($docenti as $doc) {
-        // dati per la visualizzazione della pagina
-        $dati['materie'][$doc['id']][$doc['docente_id']] = $doc;
-      }
-      // coordinatore
-      $dati['coordinatore'] = $classe->getCoordinatore()->getCognome().' '.$classe->getCoordinatore()->getNome();
       // dati scrutinio
       $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
+      // legge materie
+      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+        ->select('m.id,m.nome')
+        ->where('m.tipo NOT IN (:tipi)')
+        ->setParameter('tipi', ['U', 'C'])
+        ->orderBy('m.ordinamento,m.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      // legge docenti del CdC
+      $docenti = $scrutinio->getDato('docenti');
+      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+        ->select('d.id,d.cognome,d.nome')
+        ->where('d.id IN (:lista)')
+        ->orderBy('d.cognome,d.nome', 'ASC')
+        ->setParameter('lista', array_keys($docenti))
+        ->getQuery()
+        ->getArrayResult();
+      // dati per la visualizzazione della pagina
+      foreach ($dati_materie as $mat) {
+        foreach ($dati_docenti as $doc) {
+          if (isset($docenti[$doc['id']][$mat['id']])) {
+            $dati['materie'][$mat['id']][$doc['id']] = array(
+              'cognome' => $doc['cognome'],
+              'nome' => $doc['nome'],
+              'nome_materia' => $mat['nome'],
+            );
+          }
+        }
+      }
+      // coordinatore
+      $dati['coordinatore'] = $classe->getCoordinatore()->getCognome().' '.$classe->getCoordinatore()->getNome();
       $dati['scrutinio']['data'] = $scrutinio->getData()->format('d/m/Y');
       $dati['scrutinio']['presenze'] = $scrutinio->getDato('presenze');
     } elseif ($periodo == 'F') {
@@ -817,16 +812,12 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME VERBALE', 0, 'L', 'T');
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $this->cella($pdf, 0, 4, 0, 0, $classe.' - '.$as, 0, 'R', 'T');
+    $this->cella($pdf, 0, 4, 0, 0, 'CLASSE '.$classe.' - A.S. '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
     $this->cella($pdf, 70, 10, 0, 0, 'CONSIGLIO DI CLASSE:', 0, 'L', 'B');
     $this->cella($pdf, 0, 10, 0, 0, $classe_completa, 0, 'L', 'B');
-    $this->acapo($pdf, 10);
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 40, 6, 0, 0, 'Docente Coordinatore:', 0, 'L', 'T');
-    $this->cella($pdf, 0, 6, 0, 0, $dati['coordinatore'], 0, 'L', 'T');
-    $this->acapo($pdf, 6);
+    $this->acapo($pdf, 11);
     // intestazione tabella
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 90, 5, 0, 0, 'MATERIA', 1, 'C', 'B');
@@ -988,7 +979,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME REGISTRO', 0, 'L', 'T');
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $this->cella($pdf, 0, 4, 0, 0, $classe.' - '.$as, 0, 'R', 'T');
+    $this->cella($pdf, 0, 4, 0, 0, 'CLASSE '.$classe.' - A.S. '.$as, 0, 'R', 'T');
     $this->acapo($pdf, 5);
     $pdf->SetFont('helvetica', 'B', 16);
     $this->cella($pdf, 70, 10, 0, 0, 'CONSIGLIO DI CLASSE:', 0, 'L', 'B');
@@ -1049,37 +1040,35 @@ class PagelleUtil {
       $dati['definizione'] = $def;
       // legge classe
       $dati['classe'] = $classe;
-      // legge docenti del CdC (esclusi potenziamento)
-      $docenti = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-        ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nome AS nome_materia,m.tipo,m.id AS materia_id,c.supplenza,c.tipo AS doc_tipo')
-        ->join('c.materia', 'm')
-        ->join('c.docente', 'd')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
-        ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P'])
+      // legge materie
+      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+        ->select('m.id,m.nome')
+        ->where('m.tipo NOT IN (:tipi)')
+        ->setParameter('tipi', ['U', 'C'])
+        ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
-      //-- // elimina docente titolare se esiste supplente
-      //-- $mat = array();
-      //-- foreach ($docenti as $k=>$doc) {
-        //-- if (!isset($mat[$doc['materia_id']][$doc['doc_tipo']])) {
-          //-- // memorizza docente di materia
-          //-- $mat[$doc['materia_id']][$doc['doc_tipo']] = $k;
-        //-- } else {
-          //-- // elimina titolare di cattedra
-          //-- if ($doc['supplenza']) {
-            //-- // cancella titolare e memorizza docente supplente
-            //-- unset($docenti[$mat[$doc['materia_id']][$doc['doc_tipo']]]);
-            //-- $mat[$doc['materia_id']][$doc['doc_tipo']] = $k;
-          //-- } else {
-            //-- // cancella titolare
-            //-- unset($docenti[$k]);
-          //-- }
-        //-- }
-      //-- }
-      foreach ($docenti as $doc) {
-        // dati per la visualizzazione della pagina
-        $dati['docenti'][$doc['id']][] = $doc;
+      // legge docenti del CdC
+      $docenti = $scrutinio->getDato('docenti');
+      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+        ->select('d.id,d.cognome,d.nome,d.sesso')
+        ->where('d.id IN (:lista)')
+        ->orderBy('d.cognome,d.nome', 'ASC')
+        ->setParameter('lista', array_keys($docenti))
+        ->getQuery()
+        ->getArrayResult();
+      // dati per la visualizzazione della pagina
+      foreach ($dati_materie as $mat) {
+        foreach ($dati_docenti as $doc) {
+          if (isset($docenti[$doc['id']][$mat['id']])) {
+            $dati['docenti'][$doc['id']]['cognome'] = $doc['cognome'];
+            $dati['docenti'][$doc['id']]['nome'] = $doc['nome'];
+            $dati['docenti'][$doc['id']]['sesso'] = $doc['sesso'];
+            $dati['docenti'][$doc['id']]['materie'][$mat['id']] = array(
+              'nome_materia' => $mat['nome'],
+              'tipo_cattedra' => $docenti[$doc['id']][$mat['id']]);
+          }
+        }
       }
       // legge alunni
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
@@ -1387,7 +1376,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(true);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="540">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // struttura
     foreach ($dati['definizione']->getStruttura() as $step=>$args) {
@@ -1435,20 +1424,25 @@ class PagelleUtil {
     if ($dati['scrutinio']->getDato('presiede_ds')) {
       $pres_nome = 'il Dirigente Scolastico';
     } else {
-      $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
-      if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
+      $d_id = $dati['scrutinio']->getDato('presiede_docente');
+      if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
+        $d = $dati['docenti'][$d_id];
         $pres_nome = 'per delega '.($d['sesso'] == 'M' ? 'il Prof.' : 'la Prof.ssa').' '.
           $d['cognome'].' '.$d['nome'];
       } else {
-        $pres_nome = 'per delega il Prof. '.ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto()));
+        $pres_nome = 'per delega '.
+          ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'il Prof.' : 'la Prof.ssa').
+          ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
       }
     }
-    $d = $dati['docenti'][$dati['scrutinio']->getDato('segretario')][0];
-    if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
+    $d_id = $dati['scrutinio']->getDato('segretario');
+    $d = $dati['docenti'][$d_id];
+    if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
       $segr_nome = ($d['sesso'] == 'M' ? 'il Prof.' : 'la Prof.ssa').' '.
         $d['cognome'].' '.$d['nome'];
     } else {
-      $segr_nome = 'il Prof. '.ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto()));
+      $segr_nome = ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'il Prof.' : 'la Prof.ssa').
+        ' '.ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
     }
     $html = '<p align="justify">Presiede la riunione '.$pres_nome.', funge da segretario verbalizzante '.$segr_nome.'.</p>';
     $pdf->writeHTML($html, true, false, false, true);
@@ -1462,11 +1456,11 @@ class PagelleUtil {
     $assenti = 0;
     foreach ($dati['scrutinio']->getDato('presenze') as $iddocente=>$doc) {
       if ($doc->getPresenza()) {
-        $d = $dati['docenti'][$doc->getDocente()][0];
+        $d = $dati['docenti'][$iddocente];
         $nome = $d['cognome'].' '.$d['nome'];
         $materie = '';
-        foreach ($dati['docenti'][$doc->getDocente()] as $km=>$vm) {
-          $materie .= '<br>&bull; '.($vm['doc_tipo'] == 'I' ? 'Lab. ' : '').$vm['nome_materia'];
+        foreach ($dati['docenti'][$iddocente]['materie'] as $km=>$vm) {
+          $materie .= '<br>&bull; '.($vm['tipo_cattedra'] == 'I' ? 'Lab. ' : '').$vm['nome_materia'];
         }
         $html .= '<tr><td>'.$nome.'</td><td>'.substr($materie, 4).'</td></tr>';
       } else {
@@ -1484,15 +1478,16 @@ class PagelleUtil {
       foreach ($dati['scrutinio']->getDato('presenze') as $iddocente=>$doc) {
         if (!$doc->getPresenza()) {
           $assenti--;
-          $d = $dati['docenti'][$doc->getDocente()][0];
+          $d = $dati['docenti'][$iddocente];
           $nome = $d['cognome'].' '.$d['nome'];
           $materie = '';
-              foreach ($dati['docenti'][$doc->getDocente()] as $km=>$vm) {
-                $materie .= ', '.$vm['nome_materia'];
-              }
+          foreach ($dati['docenti'][$iddocente]['materie'] as $km=>$vm) {
+            $materie .= '; '.($vm['tipo_cattedra'] == 'I' ? 'Lab. ' : '').$vm['nome_materia'];
+          }
           $text = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$nome.' ('.substr($materie,2).'), '.
-            'sostituit'.($d['sesso'] == 'M' ? 'o' : 'a').' dal Prof. '.
-            ucwords(strtolower($doc->getSostituto()));
+            'sostituit'.($d['sesso'] == 'M' ? 'o' : 'a').' dal'.
+            ($doc->getSessoSostituto() == 'M' ? ' Prof.' : 'la Prof.ssa').
+            ' '.ucwords(strtolower($doc->getSostituto()));
           $html .= '<li align="justify">'.$text.($assenti > 0 ? ';' : '.').'</li>';
         }
       }
@@ -1691,20 +1686,24 @@ class PagelleUtil {
     if ($dati['scrutinio']->getDato('presiede_ds')) {
       $presidente_nome = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     } else {
-      $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
-      if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
+      $d_id = $dati['scrutinio']->getDato('presiede_docente');
+      if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
+        $d = $dati['docenti'][$d_id];
         $presidente_nome = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.
           $d['cognome'].' '.$d['nome'];
       } else {
-        $presidente_nome = ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto()));
+        $presidente_nome = ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').
+          ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
       }
     }
-    $d = $dati['docenti'][$dati['scrutinio']->getDato('segretario')][0];
-    if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
+    $d_id = $dati['scrutinio']->getDato('segretario');
+    $d = $dati['docenti'][$d_id];
+    if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
       $segretario_nome = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.
         $d['cognome'].' '.$d['nome'];
     } else {
-      $segretario_nome = ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d['id']]->getSostituto()));
+      $segretario_nome = ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').
+        ' '.ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
     }
     $html = '<table border="0" cellpadding="3" nobr="true">
       <tr nobr="true"><td width="45%" align="center">Il Segretario</td><td width="10%">&nbsp;</td><td width="45%" align="center">Il Presidente</td></tr>
@@ -1953,7 +1952,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(true);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="540">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // intestazione
     $alunno = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
@@ -1973,13 +1972,13 @@ class PagelleUtil {
     // oggetto
     $pdf->SetFont('times', 'B', 12);
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $text = 'OGGETTO: Scrutinio del primo trimestre '.$as.' - Comunicazione dei voti';
+    $text = 'OGGETTO: Scrutinio del primo trimestre A.S. '.$as.' - Comunicazione dei voti';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
     // contenuto
     $pdf->SetFont('times', '', 12);
     $sex = ($alunno_sesso == 'M' ? 'o' : 'a');
-    $html = '<p align="justify">Il Consiglio di Classe, nella seduta dello scrutinio del primo trimestre dell’anno scolastico '.substr($as, 5).
+    $html = '<p align="justify">Il Consiglio di Classe, nella seduta dello scrutinio del primo trimestre dell’anno scolastico '.$as.
             ', tenutasi il giorno '.$dati['scrutinio']->getData()->format('d/m/Y').', ha attribuito all\'alunn'.$sex.' '.
             'le valutazioni che vengono riportate di seguito:</p>';
     $pdf->writeHTML($html, true, false, false, true);
@@ -2028,43 +2027,6 @@ class PagelleUtil {
     $html .= '</table><br>';
     $pdf->SetFont('helvetica', '', 10);
     $pdf->writeHTML($html, true, false, false, true, 'C');
-    // nuovi crediti
-    if ($dati['classe']->getAnno() > 3) {
-      $nuovicrediti = $dati['scrutinio']->getDato('nuovicrediti')[$dati['alunno']->getId()];
-      if ($dati['alunno']->getCredito3() == 0 || ($dati['classe']->getAnno() == 5 && $dati['alunno']->getCredito4() == 0)) {
-        // dati incompleti con motivazione
-        $pdf->SetFont('times', '', 12);
-        if ($nuovicrediti[0] > 0) {
-          $html = '<p align="justify">Si comunica che il Consiglio di Classe ha provveduto a convertire il credito scolastico conseguito '.
-            ($dati['classe']->getAnno() == 5 ? 'nelle classi terza e quarta' : 'nella classe terza').' secondo quanto previsto per il nuovo Esame di Stato'.
-            ' (d.lgs. 62/2017 e circolare MIUR 3050.04-10-2018), assegnando il punteggio di <strong>'.$nuovicrediti[0].'</strong> con la seguente motivazione:</p>';
-        } else {
-          $html = '<p align="justify">Si comunica che il Consiglio di Classe non ha potuto effettuare la conversione del credito scolastico conseguito '.
-            ($dati['classe']->getAnno() == 5 ? 'nelle classi terza e quarta' : 'nella classe terza').' secondo quanto previsto per il nuovo Esame di Stato'.
-            ' (d.lgs. 62/2017 e circolare MIUR 3050.04-10-2018) per la seguente motivazione:</p>';
-        }
-        $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
-        $html = '<p align="justify"><em>'.nl2br(htmlentities($nuovicrediti[1])) .'</em></p>';
-        $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
-      } else {
-        // dati completi
-        $pdf->SetFont('times', '', 12);
-        $html = '<p align="justify">Si comunica che il Consiglio di Classe ha provveduto a convertire il credito scolastico conseguito '.
-          ($dati['classe']->getAnno() == 5 ? 'nelle classi terza e quarta' : 'nella classe terza').' secondo quanto previsto per il nuovo Esame di Stato'.
-          ' (d.lgs. 62/2017 e circolare MIUR 3050.04-10-2018):</p>';
-        $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
-        $html = '<table border="1" cellpadding="3">'.
-          '<tr><td><strong>Credito terza</strong></td>'.
-          ($dati['classe']->getAnno() == 5 ? '<td><strong>Credito quarta</strong></td>' : '').
-          '<td><strong>NUOVO CREDITO</strong></td></tr>'.
-          '<tr><td><strong>'.$dati['alunno']->getCredito3().'</strong></td>'.
-          ($dati['classe']->getAnno() == 5 ? '<td><strong>'.$dati['alunno']->getCredito4().'</strong></td>' : '').
-          '<td><strong>'.$nuovicrediti.'</strong></td></tr></table>';
-        $pdf->SetFont('helvetica', '', 10);
-        $pdf->writeHTML($html, true, false, false, true, 'C');
-      }
-      $pdf->Ln(10);
-    }
     // firma
     $pdf->SetFont('times', '', 12);
     $html = '<p>Distinti Saluti.<br></p>';
@@ -2349,7 +2311,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(true);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="540">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // intestazione
     $alunno = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
@@ -2369,16 +2331,17 @@ class PagelleUtil {
     // oggetto
     $pdf->SetFont('times', 'B', 12);
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $text = 'OGGETTO: Scrutinio del primo trimestre '.$as.' - Indicazioni per il recupero';
+    $text = 'OGGETTO: Scrutinio del primo trimestre A.S. '.$as.' - Indicazioni per il recupero';
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(15);
     // contenuto
     $pdf->SetFont('times', '', 12);
     $sex = ($alunno_sesso == 'M' ? 'o' : 'a');
-    $html = '<p align="justify">Il Consiglio di Classe, nella seduta dello scrutinio del primo trimestre dell’anno scolastico '.substr($as, 5).
+    $html = '<p align="justify">Il Consiglio di Classe, nella seduta dello scrutinio del primo trimestre dell’anno scolastico '.$as.
             ', tenutasi il giorno '.$dati['scrutinio']->getData()->format('d/m/Y').
             ', ha rilevato la presenza di una o più insufficienze. La tabella seguente illustra le modalità e gli argomenti per il recupero:</p>';
-    $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0 ,1);
+    $pdf->writeHTML($html, true, false, false, true);
+    $pdf->Ln(2);
     $html = '<table border="1" cellpadding="3">';
     $html .= '<tr><td width="30%"><strong>MATERIA</strong></td><td width="7%"><strong>VOTO</strong></td><td width="50%"><strong>Argomenti da recuperare</strong></td><td width="13%"><strong>Modalità di recupero</strong></td></tr>';
     foreach ($dati['materie'] as $idmateria=>$mat) {
@@ -2409,7 +2372,7 @@ class PagelleUtil {
     $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
     $html = '<p align="justify">In ogni caso gli studenti saranno chiamati a sottoporsi alle prove di verifica del superamento del debito formativo per quanto si riferisce a quelli comunicati con la presente nota.</p>';
     $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY()+2, $html, 0, 1);
-    $html = '<p align="justify">Si ribadisce che, ai sensi della normativa vigente, al termine del corrente anno scolastico non sarà consentita l\'ammissione alla classe successiva, persistendo il debito formativo sopra evidenziato.<br></p>';
+    $html = '<p align="justify">Si ribadisce che, ai sensi della normativa vigente, al termine del corrente anno scolastico non sarà consentita l\'ammissione alla classe successiva nel caso persista il debito formativo sopra evidenziato.<br></p>';
     $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY()+2, $html, 0, 1);
     // firma
     $pdf->SetFont('times', '', 12);

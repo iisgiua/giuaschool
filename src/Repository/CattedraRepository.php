@@ -116,5 +116,44 @@ class CattedraRepository extends EntityRepository {
     return $dati;
   }
 
-}
+  /**
+   * Legge la lista dei docenti per lo scrutinio della classe indicata
+   *
+   * @param Classe $classe Classe dello scrutinio
+   *
+   * @return array Dati formattati come un array associativo
+   */
+  public function docentiScrutinio(Classe $classe) {
+    // legge docenti del CdC (esclusi potenziamento)
+    $docenti = $this->createQueryBuilder('c')
+      ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nomeBreve,m.id AS materia_id,c.tipo,c.supplenza')
+      ->join('c.materia', 'm')
+      ->join('c.docente', 'd')
+      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
+      ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
+      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P'])
+      ->getQuery()
+      ->getArrayResult();
+    // elimina docente titolare se esiste supplente
+    $mat = array();
+    foreach ($docenti as $k=>$doc) {
+      if (!isset($mat[$doc['materia_id']][$doc['tipo']])) {
+        // memorizza docente di materia
+        $mat[$doc['materia_id']][$doc['tipo']] = $k;
+      } else {
+        // elimina titolare di cattedra
+        if ($doc['supplenza']) {
+          // cancella titolare e memorizza docente supplente
+          unset($docenti[$mat[$doc['materia_id']][$doc['tipo']]]);
+          $mat[$doc['materia_id']][$doc['tipo']] = $k;
+        } else {
+          // cancella titolare
+          unset($docenti[$k]);
+        }
+      }
+    }
+    // restituisce dati
+    return $docenti;
+  }
 
+}

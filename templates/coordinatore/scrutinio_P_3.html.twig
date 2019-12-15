@@ -42,19 +42,16 @@
       {% if a.bes != 'N' %}
             <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
-      {% if a.note is not empty %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-      {% endif %}
           </td>
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'R' %}
           {% if a.religione != 'S' %}
-          <span>NA</span>
+            <span>NA</span>
           {% elseif dati.voti[alunno][materia].unico is not defined %}
-          <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci la valutazione della Religione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'P', 'alunno': alunno}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci la valutazione della Religione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'P', 'alunno': alunno}) }}"><span class="glyphicon glyphicon-edit"></span></button>
           {% else %}
-          <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }} gs-button-remote" title="Modifica la valutazione della Religione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'P', 'alunno': alunno}) }}">{{ info.giudizi['P']['R'][dati.voti[alunno][materia].unico] }}</button>
+            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }} gs-button-remote" title="Modifica la valutazione della Religione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'P', 'alunno': alunno}) }}">{{ info.giudizi['P']['R'][dati.voti[alunno][materia].unico] }}</button>
           {% endif %}
         {% elseif m.tipo == 'C' %}
           {% if dati.voti[alunno][materia].unico is not defined %}
@@ -114,6 +111,9 @@ $(document).ready(function() {
     var url = $(event.relatedTarget).data('href')+'/'+Math.floor($('html').scrollTop());
     $(this).find('#gs-modal-remote-content').load(url);
   });
+  $('#gs-modal-remote').on('shown.bs.modal', function (event) {
+    window.dispatchEvent(new Event('resize'));
+  });  
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');

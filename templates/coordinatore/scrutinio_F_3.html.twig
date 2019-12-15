@@ -39,9 +39,6 @@
       {% if a.bes != 'N' %}
             <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
-      {% if a.note is not empty %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-      {% endif %}
           </td>
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
