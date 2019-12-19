@@ -2299,7 +2299,7 @@ class RegistroUtil {
           ->getQuery()
           ->getSingleScalarResult();
         $dati_periodo[$k]['assenze'] = number_format($assenze, 1, ',', null);
-        $dati_periodo[$k]['percentuale'] = number_format($assenze / $ore * 100, 2, ',', null);
+        $dati_periodo[$k]['percentuale'] = number_format(($ore > 0 ? $assenze / $ore : 0) * 100, 2, ',', null);
       }
     }
     // riordina periodi
