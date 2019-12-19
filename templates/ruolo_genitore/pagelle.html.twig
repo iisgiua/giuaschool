@@ -60,17 +60,17 @@
         {% endfor %}
     </tbody>
   </table>
-        {% if dati.scrutinio is defined and classe.anno > 3 and dati['nuovicrediti'] > 0 %}
-  <div class="alert alert-info text-center gs-mb-5" role="alert">
-    <strong class="gs-big">
-      Si comunica che il Consiglio di Classe ha provveduto a convertire il credito scolastico conseguito
-      {{ classe.anno == 5 ? 'nelle classi terza e quarta' : 'nella classe terza' }}
-      secondo quanto previsto per il nuovo Esame di Stato (d.lgs. 62/2017 e circolare MIUR 3050.04-10-2018),
-      attribuendo il seguente punteggio:<br><br>
-    </strong>
-    <span class="label label-success gs-big">{{ dati['nuovicrediti'] }}</span>
-  </div>
-        {% endif %}
+        {#-- {% if dati.scrutinio is defined and classe.anno > 3 and dati['nuovicrediti'] > 0 %} #}
+  {#-- <div class="alert alert-info text-center gs-mb-5" role="alert"> #}
+    {#-- <strong class="gs-big"> #}
+      {#-- Si comunica che il Consiglio di Classe ha provveduto a convertire il credito scolastico conseguito #}
+      {#-- {{ classe.anno == 5 ? 'nelle classi terza e quarta' : 'nella classe terza' }} #}
+      {#-- secondo quanto previsto per il nuovo Esame di Stato (d.lgs. 62/2017 e circolare MIUR 3050.04-10-2018), #}
+      {#-- attribuendo il seguente punteggio:<br><br> #}
+    {#-- </strong> #}
+    {#-- <span class="label label-success gs-big">{{ dati['nuovicrediti'] }}</span> #}
+  {#-- </div> #}
+        {#-- {% endif %} #}
         {% if dati.debiti is defined %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-2">

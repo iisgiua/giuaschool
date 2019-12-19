@@ -22,7 +22,7 @@
   </tr>
 {% for alunno,a in dati.alunni %}
   <tr nobr="true">
-    <td><strong>{{ a.nome }}</strong><br><span style="font-size:8pt">({{ a.nascita }})</span></td>
+    <td><strong>{{ a.cognome }} {{ a.nome }}</strong><br><span style="font-size:8pt">({{ a.dataNascita|date('d/m/Y') }})</span></td>
   {% for materia,m in dati.materie %}
     <td>
     {% if dati.medie[alunno][materia] is defined %}

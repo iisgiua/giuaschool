@@ -23,7 +23,7 @@
   </tr>
 {% for alunno,a in dati.alunni %}
   <tr nobr="true">
-    <td><strong>{{ a.nome }}</strong></td>
+    <td><strong>{{ a.cognome }} {{ a.nome }}</strong></td>
     <td>
   {% if dati.statistiche[alunno].assenze is defined %}
       <strong>{{ dati.statistiche[alunno].assenze }}</strong>
