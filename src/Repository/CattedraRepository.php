@@ -139,14 +139,15 @@ class CattedraRepository extends EntityRepository {
     foreach ($docenti as $k=>$doc) {
       if (!isset($mat[$doc['materia_id']][$doc['tipo']])) {
         // memorizza docente di materia
-        $mat[$doc['materia_id']][$doc['tipo']] = $doc['supplenza'];
+        $mat[$doc['materia_id']][$doc['tipo']]['id'] = $k;
+        $mat[$doc['materia_id']][$doc['tipo']]['supplenza'] = $doc['supplenza'];
       } else {
         // elimina titolare di cattedra
         if ($doc['supplenza']) {
-          // cancella titolare e lascia docente supplente
-          unset($docenti[$mat[$doc['materia_id']][$doc['tipo']]]);
-          $mat[$doc['materia_id']][$doc['tipo']] = $doc['supplenza'];
-        } elseif ($mat[$doc['materia_id']][$doc['tipo']])  {
+          // cancella titolare e lascia supplente
+          unset($docenti[$mat[$doc['materia_id']][$doc['tipo']]['id']]);
+          $mat[$doc['materia_id']][$doc['tipo']]['supplenza'] = $doc['supplenza'];
+        } elseif ($mat[$doc['materia_id']][$doc['tipo']]['supplenza'])  {
           // cancella titolare e lascia supplente
           unset($docenti[$k]);
         }
