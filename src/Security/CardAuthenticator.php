@@ -220,7 +220,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
    */
   public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
     // homepage
-    $url = $this->router->generate('home');
+    $url = $this->router->generate('login_home');
     // ultimo accesso dell'utente
     $last_login = $token->getUser()->getUltimoAccesso();
     $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($last_login ? $last_login->format('d/m/Y H:i:s') : null));
@@ -277,4 +277,3 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
   }
 
 }
-

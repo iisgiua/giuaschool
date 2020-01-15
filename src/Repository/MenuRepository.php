@@ -54,13 +54,17 @@ class MenuRepository extends EntityRepository {
       ->orderBy('o.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();
-    // dati menu
-    $dati['nome'] = $menu[0]['nome_menu'];
-    $dati['descrizione'] = $menu[0]['descrizione_menu'];
-    $dati['icona'] = $menu[0]['icona_menu'];
-    $dati['megamenu'] = false;
     // legge opzioni
+    $primo = true;
     foreach ($menu as $k => $o) {
+      if ($primo) {
+        // impostazioni menu
+        $dati['nome'] = $o['nome_menu'];
+        $dati['descrizione'] = $o['descrizione_menu'];
+        $dati['icona'] = $o['icona_menu'];
+        $dati['megamenu'] = false;
+        $primo = false;
+      }
       // dati opzioni
       $dati['opzioni'][$k] = array(
         'nome' => $o['nome'],

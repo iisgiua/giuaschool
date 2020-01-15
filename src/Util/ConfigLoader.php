@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\Security\Core\Security;
 use App\Entity\Configurazione;
 use App\Entity\Istituto;
+use App\Entity\Docente;
+use App\Entity\Amministratore;
 
 
 /**
@@ -91,6 +93,8 @@ class ConfigLoader {
     foreach ($list as $item) {
       $this->session->set('/CONFIG/'.$item->getCategoria().'/'.$item->getParametro(), $item->getValore());
     }
+    // carica dati dell'utente
+    $this->caricaUtente();
     // carica dati dall'entità Istituto
     $this->caricaIstituto();
     // carica i menu
@@ -142,12 +146,33 @@ class ConfigLoader {
     $tema = '';
     // legge impostazione tema dell'utente connesso
     $utente = $this->security->getUser();
-    if ($utente && isset($utente->getNotifica()['tema']) && $utente->getNotifica()['tema'] == 'new') {
-      // imposta il nuovo $tema
+    //-- if ($utente && ($utente instanceOf Amministratore ||
+        //-- (isset($utente->getNotifica()['tema']) && $utente->getNotifica()['tema'] == 'new'))) {
+    if ($utente && ($utente instanceOf Amministratore)) {
+      // imposta il nuovo tema
       $tema = 'tema-new';
     }
     // imposta tema
     $this->session->set('/APP/APP/tema', $tema);
+  }
+
+  /**
+   * Carica nella sessione alcune informazioni sull'utente
+   */
+  private function caricaUtente() {
+    // legge utente connesso
+    $utente = $this->security->getUser();
+    if ($utente instanceOf Docente) {
+      // dati coordinatore
+      $classi = $this->em->getRepository('App:Classe')->createQueryBuilder('c')
+        ->select('c.id')
+        ->where('c.coordinatore=:docente')
+        ->setParameters(['docente' => $utente])
+        ->getQuery()
+        ->getArrayResult();
+      $lista = implode(',', array_column($classi, 'id'));
+      $this->session->set('/APP/DOCENTE/coordinatore', $lista);
+    }
   }
 
 }

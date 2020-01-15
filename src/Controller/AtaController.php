@@ -35,7 +35,7 @@ use App\Form\AtaType;
 /**
  * AtaController - gestione ata
  */
-class AtaController extends AbstractController {
+class AtaController extends BaseController {
 
   /**
    * Importa ATA da file
@@ -69,14 +69,8 @@ class AtaController extends AbstractController {
       $lista = $importer->importaAta($file, $form);
     }
     // visualizza pagina
-    return $this->render('ata/importa.html.twig', array(
-      'pagina_titolo' => 'page.importa_docenti',
-      'lista' => $lista,
-      'form' => $form->createView(),
-      'form_title' => 'title.importa_ata',
-      'form_help' => 'message.importa_ata',
-      'form_success' => null,
-    ));
+    return $this->renderHtml('ata', 'importa', $lista ? $lista : [], ['titolo' => 'title.importa_ata'],
+      [$form->createView(),  'message.importa_ata']);
   }
 
   /**

@@ -45,7 +45,7 @@ use App\Entity\AvvisoIndividuale;
 /**
  * LoginController - gestione del login degli utenti
  */
-class LoginController extends AbstractController {
+class LoginController extends BaseController {
 
   /**
    * Login dell'utente attraverso username e password
@@ -228,25 +228,26 @@ class LoginController extends AbstractController {
   /**
    * Home page
    *
+   * @param Request $request Pagina richiesta
+   * @param ConfigLoader $config Gestore della configurazione su database
    * @param NotificheUtil $notifiche Classe di utilità per la gestione delle notifiche
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/", name="home",
+   * @Route("/", name="login_home",
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function homeAction(NotificheUtil $notifiche) {
-    // imposta info utente
-    $notifiche->infoUtente($this->getUser());
+  public function homeAction(Request $request, ConfigLoader $config, NotificheUtil $notifiche) {
+    if ($request->query->get('reload') == 'yes') {
+      // ricarica configurazione di sistema
+      $config->loadAll();
+    }
     // legge dati
     $dati = $notifiche->notificheHome($this->getUser());
     // visualizza pagina
-    return $this->render('login/home.html.twig', array(
-      'pagina_titolo' => 'page.home',
-      'dati' => $dati,
-    ));
+    return $this->renderHtml('login', 'home', $dati);
   }
 
   /**

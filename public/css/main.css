@@ -2,7 +2,10 @@
 
 /*** slim header ***/
 #gs-header .it-header-slim-wrapper {
-  background-color: #00264d; /* variante a11 */
+  background-color: #00264d; /* colore primario, variante a11 */
+}
+#gs-header .header-slim-right-zone a.btn-default:hover {
+  background-color: #435a70; /* colore secondario */
 }
 
 /*** menu principale ***/
@@ -33,6 +36,20 @@
 }
 #gs-header .link-list-wrapper ul li a, #gs-header .navbar ul li a {
   font-weight: 600;
+}
+#gs-header .dropdown-menu {
+  border: 1px solid #b1b1b3!important;
+  border-top: 0!important;
+}
+#gs-mainmenu .menu-wrapper .navbar-nav ul li span.disabled {
+    line-height: 2.3em;
+    font-size: .889em;
+    font-weight: 600;
+    display: block;
+    padding: 0 24px;
+    position: relative;
+    cursor: not-allowed;
+    opacity: .5;
 }
 
 /*** breadcrumb ***/

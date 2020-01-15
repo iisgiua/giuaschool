@@ -11,7 +11,7 @@
     {% include 'ruolo_amministratore/menu.html.twig' %}
   {% else %} {#----- UTENTE NON RICONOSCIUTO -----#}
 <ul class="nav navbar-nav gs-navbar-nav">
-  <li class="active"><a href="{{ path('home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
+  <li class="active"><a href="{{ path('login_home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
 </ul>
   {% endif %}
 {% else %} {#----- menubar mostrata quando nessun utente è connesso -----#}

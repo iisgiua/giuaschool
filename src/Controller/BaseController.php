@@ -47,12 +47,14 @@ class BaseController extends AbstractController {
    *
    * @param string $categoria Categoria a cui appartiene la pagina
    * @param string $azione Azione svolta dalla pagina
-   * @param array $dati Lista di dati da passare alla vista
-   * @param array $info Lista di informazioni da passare alla vista
+   * @param array $dati Lista di dati tabellari da passare alla vista
+   * @param array $info Lista di informazioni singole da passare alla vista
+   * @param array $form Oggetto form e messaggi da passare alla vista
    *
    * @return Response Pagina di risposta
    */
-  protected function renderHtml(string $categoria, string $azione, array $dati=[], array $info=[]): Response {
+  protected function renderHtml(string $categoria, string $azione, array $dati=[],
+                                array $info=[], array $form=[]): Response {
     $session = $this->get('session');
     // legge breadcrumb
     $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione,
@@ -64,6 +66,7 @@ class BaseController extends AbstractController {
       'breadcrumb' => $breadcrumb,
       'dati' => $dati,
       'info' => $info,
+      'form' => $form,
     ));
   }
 

@@ -329,6 +329,14 @@ label.stato: Stato
 label.voto_in_media: Utilizza nel calcolo delle medie?
 
 
+##### PAGINE NUOVO TEMA #####
+page.info.noteLegali: Note legali
+page.info.privacy: Informativa sulla privacy
+page.info.cookie: Informativa sui cookie
+page.info.credits: Credits
+page.login.home: Pagina Principale
+page.ata.importa: Importa ATA
+
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
 page.agenda_verifica: Agenda Verifiche
@@ -576,7 +584,7 @@ title.circolari_genitori: Circolari indirizzate ai genitori
 title.circolari_alunni: Circolari indirizzate agli studenti
 title.circolari_docenti: Lista delle circolari
 title.circolari_ata: Lista delle circolari
-title.importa_ata: Importa i dati del personale ATA da file
+title.importa_ata: Importa i dati del personale ATA
 title.modifica_ata: Modifica i dati del personale ATA
 title.gestione_notifiche: Abilita o disabila la notifica delle circolari
 title.documenti_doc15: Inserimento dei documenti del 15 Maggio
@@ -710,7 +718,7 @@ message.num_circolari: "{num, plural, one {Circolare} other {Circolari}}"
 message.registro_lettura_circolare: "{num, plural, one {Letta la circolare n. {circolari}} other {Lette le circolari n. {circolari}}}"
 message.presenti_nuove_circolari: "{num, plural, one {È presente una nuova circolare da leggere} other {Sono presenti # nuove circolari da leggere}}"
 message.importa_ata: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
-  \"Cognome, Nome, Sesso, Username, Password, Email, Sede, Tipo\".
+  \"Cognome, Nome, Sesso, Username, Password, Email, Sede, Tipo\".<br>
   Se si attiva il controllo SOLO NUOVI verranno inseriti solo gli utenti che non risultano già presenti;
   in caso contrario, verranno modificati anche i dati degli utenti esistenti."
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.

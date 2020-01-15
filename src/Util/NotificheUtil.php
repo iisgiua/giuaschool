@@ -79,7 +79,7 @@ class NotificheUtil {
    * @return array Dati restituiti come array associativo
    */
   public function notificheHome(Utente $utente) {
-    $dati = null;
+    $dati = array();
     $oggi = new \DateTime('today');
     $ora = new \DateTime('now');
     if ($utente instanceof Genitore) {
@@ -135,25 +135,6 @@ class NotificheUtil {
       $dati['circolari'] = $this->em->getRepository('App:Circolare')->numeroCircolariUtente($utente);
     }
     return $dati;
-  }
-
-  /**
-   * Ricava alcune informazioni sull'utente e le memorizza nella sessione
-   *
-   * @param Utente $utente Utente selezionato
-   */
-  public function infoUtente(Utente $utente) {
-    if ($utente instanceof Docente) {
-      // coordinatore
-      $classi = $this->em->getRepository('App:Classe')->createQueryBuilder('c')
-        ->select('c.id')
-        ->where('c.coordinatore=:docente')
-        ->setParameters(['docente' => $utente])
-        ->getQuery()
-        ->getArrayResult();
-      $lista = implode(',', array_column($classi, 'id'));
-      $this->session->set('/APP/DOCENTE/coordinatore', $lista);
-    }
   }
 
   /**
