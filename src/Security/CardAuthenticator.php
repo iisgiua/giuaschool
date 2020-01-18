@@ -252,7 +252,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
     // messaggio di errore
     $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('login_card_errore'));
+    return new RedirectResponse($this->router->generate('login_cardErrore'));
   }
 
   /**

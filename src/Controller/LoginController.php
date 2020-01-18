@@ -60,7 +60,6 @@ class LoginController extends BaseController {
    *
    * @Route("/login/form/", name="login_form",
    *    methods={"GET", "POST"})
-   * @Cache(maxage=0,mustrevalidate=true)
    */
   public function formAction(EntityManagerInterface $em, SessionInterface $session, AuthenticationUtils $auth,
                              ConfigLoader $config) {
@@ -111,7 +110,6 @@ class LoginController extends BaseController {
    *
    * @Route("/login/registrazione/", name="login_registrazione",
    *    methods={"GET", "POST"})
-   * @Cache(maxage=0,mustrevalidate=true)
    */
   public function registrazioneAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
@@ -150,7 +148,6 @@ class LoginController extends BaseController {
    *
    * @Route("/login/token/", name="login_token",
    *    methods={"GET", "POST"})
-   * @Cache(maxage=0,mustrevalidate=true)
    */
   public function tokenAction(SessionInterface $session, AuthenticationUtils $auth) {
     // legge sessione
@@ -202,7 +199,7 @@ class LoginController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/login/card/errore/", name="login_card_errore",
+   * @Route("/login/card-errore/", name="login_cardErrore",
    *    methods={"GET"})
    */
   public function cardErroreAction(EntityManagerInterface $em, SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
@@ -271,7 +268,6 @@ class LoginController extends BaseController {
    *
    * @Route("/login/recovery/", name="login_recovery",
    *    methods={"GET", "POST"})
-   * @Cache(maxage=0,mustrevalidate=true)
    */
   public function recoveryAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                   ConfigLoader $config, UserPasswordEncoderInterface $encoder, OtpUtil $otp,
@@ -465,7 +461,6 @@ class LoginController extends BaseController {
    *
    * @Route("/login/attivazione/", name="login_attivazione",
    *    methods={"GET", "POST"})
-   * @Cache(maxage=0,mustrevalidate=true)
    */
   public function attivazioneAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                      ConfigLoader $config, \Swift_Mailer $mailer, LoggerInterface $logger,
