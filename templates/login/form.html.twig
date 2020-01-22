@@ -45,11 +45,22 @@
           <div class="form-group text-center">
             <button type="submit" class="btn btn-primary" id="login" name="login">{{ 'label.login'|trans }}</button>
           </div>
-          <input type="hidden" id="login__csrf_token" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+          <input type="hidden" id="login__csrf_token" name="_csrf_token" value="authenticate">
         </form>
       </div>
     </div>
   </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  // init
+  $.get("{{ path('ajax_token', {'id': 'authenticate'}) }}", function(dati) {
+    $('#login__csrf_token').val(dati.authenticate);
+  }, 'json');
+});
+</script>
 {% endblock %}
