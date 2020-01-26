@@ -125,6 +125,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
         // errore, certificato non valido
         $this->logger->error('Certificato non valido nella richiesta di login tramite smartcard.', array(
           'ip' => $request->getClientIp(),
+          'SERVER' => $request->server->all(),
           ));
         throw new CustomUserMessageAuthenticationException('exception.invalid_card');
       }
