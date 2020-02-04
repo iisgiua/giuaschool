@@ -996,7 +996,7 @@ class RegistroController extends AbstractController {
     $annotazione = $em->getRepository('App:Annotazione')->find($id);
     if (!$annotazione) {
       // annotazione non esiste, niente da fare
-      return $this->redirectToRoute($redirect);
+      return $this->redirectToRoute('lezioni_registro_firme');
     }
     // controlla permessi
     if (!$reg->azioneAnnotazione('delete', $annotazione->getData(), $this->getUser(), $annotazione->getClasse(), $annotazione)) {
