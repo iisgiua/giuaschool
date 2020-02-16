@@ -48,7 +48,7 @@ class FileController extends AbstractController {
    *    requirements={"pagina": "\w+", "param": "\w+"},
    *    methods={"POST"})
    *
-   * @IsGranted("ROLE_DOCENTE")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function uploadAction(Request $request, SessionInterface $session, $pagina, $param) {
     $risposta = array();
@@ -58,7 +58,7 @@ class FileController extends AbstractController {
     $dir = $this->getParameter('dir_tmp');
     // controlla upload
     foreach ($files as $k=>$file) {
-      $nomefile = md5(uniqid()).'-'.rand(1,1000);
+      $nomefile = md5(uniqid()).'-'.rand(1,1000).'.'.$file->getClientOriginalExtension();
       if ($file->isValid() && $file->move($dir, $nomefile)) {
         // file caricato senza errori
         $risposta[$k]['type'] = 'uploaded';
@@ -94,7 +94,7 @@ class FileController extends AbstractController {
    *    requirements={"pagina": "\w+", "param": "\w+"},
    *    methods={"POST"})
    *
-   * @IsGranted("ROLE_DOCENTE")
+   * @IsGranted("ROLE_UTENTE")
    */
   public function removeAction(Request $request, SessionInterface $session, $pagina, $param) {
     // legge file
@@ -107,18 +107,15 @@ class FileController extends AbstractController {
       $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
       $vs = $session->get($var_sessione, []);
       foreach ($vs as $k=>$f) {
-        if ($f['name'] == $file['name']) {
+        if ($f['type'] == 'uploaded' && $f['temp'] == $file['temp']) {
           // trovato: cancella
-          if ($f['type'] == 'uploaded') {
-            // cancella file
-            $fs->remove($dir.'/'.$f['temp']);
-            unset($vs[$k]);
-          } elseif ($f['type'] == 'existent') {
-            // segna per cancellarlo in seguito
-            $f['type'] = 'removed';
-            $vs[$k] = $f;
-          }
-          // esce dal ciclo
+          $fs->remove($dir.'/'.$f['temp']);
+          unset($vs[$k]);
+          break;
+        } elseif ($f['type'] == 'existent' && $f['name'] == $file['name']) {
+          // segna per cancellarlo in seguito
+          $f['type'] = 'removed';
+          $vs[$k] = $f;
           break;
         }
       }

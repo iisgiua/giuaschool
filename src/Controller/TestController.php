@@ -63,9 +63,8 @@ class TestController extends AbstractController {
     //-- $em->flush();
     //-- print("<pre>");print_r($def);die;
 
-
     //----
-    return $this->render('info/notelegali.html.twig', array(
+    return $this->render('info/noteLegali.html.twig', array(
       'pagina_titolo' => 'page.test',
     ));
   }

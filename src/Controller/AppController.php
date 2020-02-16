@@ -380,7 +380,7 @@ class AppController extends AbstractController {
     $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if ($app) {
       $dati_app = $app->getDati();
-      if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
+    if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
         // controlla ora
         $adesso = new \DateTime();
         $oggi = $adesso->format('Y-m-d');

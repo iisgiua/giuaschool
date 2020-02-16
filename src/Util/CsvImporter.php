@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\ValidatorBuilder;
@@ -845,13 +846,14 @@ class CsvImporter {
   /**
    * Importa i dati del personale ATA da file CSV
    *
-   * @param UploadedFile $file File da importare
+   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
    * @return array Lista degli ATA importati
    */
-  public function importaAta(UploadedFile $file, Form $form) {
+  public function importaAta(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'username', 'password', 'email', 'sede', 'tipo');
+    $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
     if ($error) {
@@ -860,7 +862,7 @@ class CsvImporter {
         fclose($this->fh);
         $this->fh = null;
       }
-      $form->get('file')->addError(new FormError($this->trans->trans($error)));
+      $form->addError(new FormError($this->trans->trans($error)));
       return null;
     }
     // lettura dati
@@ -878,7 +880,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -901,7 +903,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       if (empty($fields['username'])) {
@@ -935,10 +937,7 @@ class CsvImporter {
       $ata = $this->em->getRepository('App:Ata')->findOneByUsername($fields['username']);
       if ($ata) {
         // utente esiste
-        if ($form->get('onlynew')->getData()) {
-          // nessuna modifica
-          $imported['NONE'][$count] = $fields;
-        } else {
+        if ($filtro == 'T' || $filtro == 'E') {
           // modifica utente
           if (isset($empty_fields['username'])) {
             // errore: non modifica utente con username generata automaticamente
@@ -956,18 +955,27 @@ class CsvImporter {
             return $imported;
           }
           $imported['EDIT'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONE'][$count] = $fields;
         }
       } else {
-        // crea nuovo
-        $error = $this->nuovoAta($fields);
-        if ($error) {
-          // errore
-          fclose($this->fh);
-          $this->fh = null;
-          $form->addError(new FormError('# '.$count.': '.$error));
-          return $imported;
+        // utente non esiste
+        if ($filtro == 'T' || $filtro == 'N') {
+          // crea nuovo
+          $error = $this->nuovoAta($fields);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['NEW'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONEW'][$count] = $fields;
         }
-        $imported['NEW'][$count] = $fields;
       }
     }
     // ok
@@ -982,22 +990,22 @@ class CsvImporter {
   /**
    * Controlla il file caricato
    *
-   * @param UploadedFile $file File da importare
+   * @param File $file File da importare
    * @param array $header Lista dei campi da importare
    *
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
-  private function checkFile(UploadedFile $file, $header) {
+  private function checkFile(File $file=null, $header) {
     $this->fh = null;
     $this->header = array();
-    if (!$file->isValid()) {
-      // errore di upload
-      return 'exception.file_upload';
+    if (!$file) {
+      // errore file mancante
+      return 'exception.file_mancante';
     }
-    if (strtolower($file->getClientOriginalExtension()) != 'csv') {
-      // errore di formato
-      return 'exception.file_format';
-    }
+    //-- if (strtolower($file->getExtension()) != 'csv') {
+      //-- // errore di formato
+      //-- return 'exception.file_format';
+    //-- }
     // apre file
     $this->fh = fopen($file->getPathname(), 'r');
     if (!$this->fh) {

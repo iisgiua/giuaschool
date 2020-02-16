@@ -124,6 +124,9 @@ label.filtro_nessuno: Nessuno
 label.filtro_sede: Filtra per sede
 label.filtro_tutti: Tutti
 label.filtro_mese: Filtra per data
+label.filtro_nuovi: Solo nuovi
+label.filtro_esistenti: Solo già esistenti
+label.filtro_importazione: Dati da importare
 label.frequenza_estero: Anno all'estero
 label.genitori_classe: Genitori della classe
 label.genitori: Genitori
@@ -717,10 +720,11 @@ message.num_avvisi: "{num, plural, one {Avviso} other {Avvisi}}"
 message.num_circolari: "{num, plural, one {Circolare} other {Circolari}}"
 message.registro_lettura_circolare: "{num, plural, one {Letta la circolare n. {circolari}} other {Lette le circolari n. {circolari}}}"
 message.presenti_nuove_circolari: "{num, plural, one {È presente una nuova circolare da leggere} other {Sono presenti # nuove circolari da leggere}}"
-message.importa_ata: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
-  \"Cognome, Nome, Sesso, Username, Password, Email, Sede, Tipo\".<br>
-  Se si attiva il controllo SOLO NUOVI verranno inseriti solo gli utenti che non risultano già presenti;
-  in caso contrario, verranno modificati anche i dati degli utenti esistenti."
+message.importa_ata: "Il file CSV da importare deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, Username, Password, Email, Sede, Tipo\"</span><br>
+  <span class=\"ml-5\">* campi obbligatori</span><br>
+  <span class=\"ml-5\">sesso: M=maschio, F=femmina</span><br>
+  <span class=\"ml-5\">tipo: A=amministrativo, C=collaboratore scolastico, D=DSGA, T=tecnico, U=autista</span>"
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.
 message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
 message.gestione_notifiche: "La ricezione via email della notifica delle nuove circolari può essere abilitata o disabilitata da questa pagina. Scegli l'opzione che preferisci e premi il pulsante di conferma."

@@ -18,6 +18,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -25,11 +27,13 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Form\AtaType;
+use App\Form\ImportaCsvType;
 
 
 /**
@@ -41,6 +45,7 @@ class AtaController extends BaseController {
    * Importa ATA da file
    *
    * @param Request $request Pagina richiesta
+   * @param SessionInterface $session Gestore delle sessioni
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
@@ -50,23 +55,33 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, CsvImporter $importer) {
+  public function importaAction(Request $request, SessionInterface $session, CsvImporter $importer) {
     $lista = null;
+    $var_sessione = '/APP/FILE/ata_importa';
+    $fs = new FileSystem();
+    if (!$request->isMethod('POST')) {
+      // cancella dati sessione
+      $session->remove($var_sessione);
+      // elimina file temporanei
+      $finder = new Finder();
+      $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
+      foreach ($finder as $f) {
+        $fs->remove($f);
+      }
+    }
     // form
-    $form = $this->container->get('form.factory')->createNamedBuilder('ata_importa', FormType::class)
-      ->add('file', FileType::class, array('label' => 'label.csv_file',
-        'required' => true
-        ))
-      ->add('onlynew', CheckboxType::class, array('label' => 'label.solo_nuovi',
-        'required' => false
-        ))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
-      ->getForm();
+    $form = $this->createForm(ImportaCsvType::class, null, []);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // trova file caricato
+      $file = null;
+      foreach ($session->get($var_sessione.'/file', []) as $f) {
+        $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
+      }
       // importa file
-      $file = $form->get('file')->getData();
       $lista = $importer->importaAta($file, $form);
+      // cancella dati sessione
+      $session->remove($var_sessione);
     }
     // visualizza pagina
     return $this->renderHtml('ata', 'importa', $lista ? $lista : [], ['titolo' => 'title.importa_ata'],

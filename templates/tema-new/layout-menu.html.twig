@@ -9,7 +9,7 @@
     <a class="nav-link px-3{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
   {% endif %}
   {% if opt.icona %}
-      <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1">
+      <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
       </svg>
   {% endif %}
@@ -42,12 +42,12 @@
   <li class="nav-item dropdown" role="none">
     <a class="nav-link dropdown-toggle px-3{{ opt.disabilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ opt.disabilitato ? ' aria-disabled="true"' }}>
   {% if opt.icona %}
-      <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1">
+      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
       </svg>
   {% endif %}
       <span>{{ opt.nome|raw }}</span>
-      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-xl-block">
+      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-xl-block" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
       </svg>{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
     </a>
@@ -71,12 +71,12 @@
   <li class="nav-item dropdown megamenu" role="none">
     <a class="nav-link dropdown-toggle px-3{{ opt.disabilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ opt.disabilitato ? ' aria-disabled="true"' }}>
   {% if opt.icona %}
-      <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1">
+      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
       </svg>
   {% endif %}
       <span>{{ opt.nome|raw }}</span>
-      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-xl-block">
+      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-xl-block" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
       </svg>{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
     </a>
@@ -108,7 +108,7 @@
         <div class="col-12 px-0">
           <nav class="navbar navbar-expand-lg{{ app.session.get('/CONFIG/MENU/main').megamenu ? ' has-megamenu' }} pl-0" aria-label="{{ app.session.get('/CONFIG/MENU/main').nome|raw }}">
             <button class="custom-navbar-toggler bg-primary" type="button" aria-controls="gs-mainmenu" aria-expanded="false" aria-label="{{ app.session.get('/CONFIG/MENU/main').descrizione|raw }}" data-target="#gs-mainmenu">
-              <svg class="icon">
+              <svg class="icon" aria-hidden="true">
                 <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#bars"></use>
               </svg>
             </button>
