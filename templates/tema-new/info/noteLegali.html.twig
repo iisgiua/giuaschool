@@ -2,8 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container">
-
-  <h1 class="text-center">Note Legali</h1>
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
 
   <h2>Dichiarazione di esclusione di responsabilità</h2>
   <p>L'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }} si impegna costantemente per assicurare la qualità delle informazioni pubblicate su questo sito, nonché la loro integrità, aggiornamento, completezza, tempestività, semplicità di consultazione e accessibilità.

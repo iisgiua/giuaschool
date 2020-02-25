@@ -46,7 +46,7 @@
   {%- if expanded -%}
     {{- block('choice_widget_expanded') -}}
   {%- else -%}
-    {#-- {{- block('choice_widget_collapsed') -}} #}
+    {{- block('choice_widget_collapsed') -}}
   {%- endif -%}
 {%- endblock choice_widget -%}
 
@@ -62,39 +62,31 @@
   </div>
 {%- endblock choice_widget_expanded %}
 
-{#-- {%- block choice_widget_collapsed -%} #}
-    {#-- {%- set attr = attr|merge({class: (attr.class|default('') ~ ' form-control')|trim}) -%} #}
-    {#-- {%- if required and placeholder is none and not placeholder_in_choices and not multiple and (attr.size is not defined or attr.size <= 1) -%} #}
-        {#-- {% set required = false %} #}
-    {#-- {%- endif -%} #}
-    {#-- <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}> #}
-        {#-- {%- if placeholder is not none -%} #}
-            {#-- <option value=""{% if required and value is empty %} selected="selected"{% endif %}>{{ placeholder != '' ? (translation_domain is same as(false) ? placeholder : placeholder|trans({}, translation_domain)) }}</option> #}
-        {#-- {%- endif -%} #}
-        {#-- {%- if preferred_choices|length > 0 -%} #}
-            {#-- {% set options = preferred_choices %} #}
-            {#-- {{- block('choice_widget_options') -}} #}
-            {#-- {%- if choices|length > 0 and separator is not none -%} #}
-                {#-- <option disabled="disabled">{{ separator }}</option> #}
-            {#-- {%- endif -%} #}
-        {#-- {%- endif -%} #}
-        {#-- {%- set options = choices -%} #}
-        {#-- {{- block('choice_widget_options') -}} #}
-    {#-- </select> #}
-{#-- {%- endblock choice_widget_collapsed -%} #}
+{%- block choice_widget_collapsed -%}
+  {%- if required and placeholder is none and not placeholder_in_choices and not multiple and (attr.size is not defined or attr.size <= 1) -%}
+    {% set required = false %}
+  {%- endif -%}
+  <select {{ block('widget_attributes') }} {% if multiple %} multiple="multiple"{% endif %}>
+    {%- if placeholder is not none -%}
+      <option value=""{% if required and value is empty %} selected="selected"{% endif %}>{{ placeholder != '' ? (translation_domain is same as(false) ? placeholder : placeholder|trans({}, translation_domain)) }}</option>
+    {%- endif -%}
+    {%- set options = choices -%}
+    {{- block('choice_widget_options') -}}
+  </select>
+{%- endblock choice_widget_collapsed -%}
 
-{#-- {%- block choice_widget_options -%} #}
-    {#-- {% for group_label, choice in options %} #}
-        {#-- {%- if choice is iterable -%} #}
-            {#-- <optgroup label="{{ choice_translation_domain is same as(false) ? group_label : group_label|trans({}, choice_translation_domain) }}"> #}
-                {#-- {% set options = choice %} #}
-                {#-- {{- block('choice_widget_options') -}} #}
-            {#-- </optgroup> #}
-        {#-- {%- else -%} #}
-            {#-- <option value="{{ choice.value }}"{% if choice.attr %}{% with { attr: choice.attr } %}{{ block('attributes') }}{% endwith %}{% endif %}{% if choice is selectedchoice(value) %} selected="selected"{% endif %}>{{ choice_translation_domain is same as(false) ? choice.label : choice.label|trans({}, choice_translation_domain) }}</option> #}
-        {#-- {%- endif -%} #}
-    {#-- {% endfor %} #}
-{#-- {%- endblock choice_widget_options -%} #}
+{%- block choice_widget_options -%}
+  {% for group_label, choice in options %}
+    {%- if choice is iterable -%}
+      <optgroup label="{{ choice_translation_domain is same as(false) ? group_label : group_label|trans({}, choice_translation_domain) }}">
+        {% set options = choice %}
+        {{- block('choice_widget_options') -}}
+      </optgroup>
+    {%- else -%}
+      <option value="{{ choice.value }}"{% if choice.attr %}{% with { attr: choice.attr } %}{{ block('attributes') }}{% endwith %}{% endif %}{% if choice is selectedchoice(value) %} selected="selected"{% endif %}>{{ choice_translation_domain is same as(false) ? choice.label : choice.label|trans({}, choice_translation_domain) }}</option>
+    {%- endif -%}
+  {% endfor %}
+{%- endblock choice_widget_options -%}
 
 {#-- {%- block checkbox_widget_simple -%} #}
     {#-- <input type="checkbox" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} /> #}
@@ -361,7 +353,11 @@
 {%- endblock button_widget -%}
 
 {%- block submit_widget -%}
-  {%- set attr = attr|merge({class: (attr.class|default('btn-primary'))|trim}) -%}
+  {% if inline is defined and inline %}
+    {%- set attr = attr|merge({class: (attr.class|default('btn-secondary btn-sm'))|trim}) -%}
+  {% else %}
+    {%- set attr = attr|merge({class: (attr.class|default('btn-primary'))|trim}) -%}
+  {% endif %}
   {%- set type = type|default('submit') -%}
   {{ block('button_widget') }}
 {%- endblock submit_widget -%}
@@ -502,17 +498,36 @@
 {#-- {%- endblock repeated_row -%} #}
 
 {% block form_row -%}
+  {%- if attr.widget is defined and attr.widget == 'gs-row-start' -%}
+    {%- set inline = true -%}
+    <div class="form-row">
+  {%- elseif attr.widget is defined and attr.widget in ['gs-row-inline', 'gs-row-end'] -%}
+    {%- set inline = true -%}
+  {% endif %}
   {%- if expanded is defined and expanded -%}
     {{ block('fieldset_form_row') }}
+  {%- elseif inline is defined and inline -%}
+    <div class="form-group col{% if (not compound or force_error|default(false)) and not valid %} is-invalid{% endif %}">
+      {%- set widget_attr = {} -%}
+      {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
+      {%- endif -%}
+      {{- form_label(form) -}}
+      {{- form_widget(form, widget_attr) -}}
+      {{- form_help(form) -}}
+    </div>
   {%- else -%}
     {%- set widget_attr = {} -%}
     {%- if help is not empty -%}
       {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
     {%- endif -%}
-  <div class="form-group form-row{% if (not compound or force_error|default(false)) and not valid %} is-invalid{% endif %}">
+    <div class="form-row form-group{% if (not compound or force_error|default(false)) and not valid %} is-invalid{% endif %}">
       {{- form_label(form) -}}
       {{- form_widget(form, widget_attr) -}}
       {{- form_help(form) -}}
+    </div>
+  {%- endif -%}
+  {%- if attr.widget is defined and attr.widget == 'gs-row-end' -%}
     </div>
   {%- endif -%}
 {%- endblock form_row %}
@@ -520,14 +535,14 @@
 {% block button_row -%}
   {%- if attr.widget is defined and attr.widget == 'gs-button-start' -%}
     <div class="form-group col text-center">
-    {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-secondary') ~ ' mr-3')|trim})}) }}
+    {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-primary') ~ ' mr-3')|trim})}) }}
   {%- elseif attr.widget is defined and attr.widget == 'gs-button-end' -%}
-    {{ form_widget(form, {attr: attr|merge({widget: false})}) }}
+    {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-secondary'))|trim})}) }}
     </div>
   {%- elseif attr.widget is defined and attr.widget == 'gs-button-inline' -%}
     {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-secondary') ~ ' mr-3')|trim})}) }}
   {%- else -%}
-    <div class="form-group col text-center">
+    <div class="form-group col{% if inline is not defined or not inline %} text-center{% endif %}">
     {{- form_widget(form) -}}
     </div>
   {% endif %}
@@ -538,8 +553,31 @@
 {%- endblock hidden_row -%}
 
 {% block choice_row -%}
-  {%- set force_error = true -%}
-  {{- block('form_row') -}}
+  {%- set widget_attr = {} -%}
+  {%- if help is not empty -%}
+    {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
+  {%- endif -%}
+
+  {%- if attr.widget is defined and attr.widget == 'gs-row-start' -%}
+    {%- set inline = true -%}
+    <div class="form-row">
+  {%- elseif attr.widget is defined and attr.widget in ['gs-row-inline', 'gs-row-end'] -%}
+    {%- set inline = true -%}
+  {% endif %}
+  <div class="form-group{% if inline is defined and inline %} col{% else %} form-row{% endif %}{% if not valid %} is-invalid{% endif %}">
+  {%- if not expanded -%}
+    <div class="bootstrap-select-wrapper">
+  {%- endif -%}
+    {{- form_label(form) -}}
+    {{- form_widget(form, widget_attr) -}}
+    {{- form_help(form) -}}
+  {%- if not expanded -%}
+    </div>
+  {%- endif -%}
+  </div>
+  {%- if attr.widget is defined and attr.widget == 'gs-row-end' -%}
+    </div>
+  {%- endif -%}
 {%- endblock choice_row %}
 
 {#-- {% block date_row -%} #}

@@ -134,8 +134,11 @@
           <section>
             <div class="row clearfix pt-4">
               <div class="col-sm-12">
-                <h2>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}
-                  <br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em>
+                <h2>
+                  <a class="text-white text-decoration-none" href="{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}" target="_blank" title="Vai al sito web dell'Istituto">
+                    {{ app.session.get('/CONFIG/ISTITUTO/tipo') }}
+                    <br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em>
+                  </a>
                 </h2>
                 <h3 class="d-none d-md-block">Cagliari - Assemini</h3>
               </div>
@@ -191,11 +194,15 @@
           <section class="py-4 border-white border-top">
             <div class="row">
               <div class="col-lg-6 col-md-12">
-                <h2><em>giua@school</em></h2>
+                <h2>
+                  <a class="text-white text-decoration-none" href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai al progetto su GitHub">
+                    <em>giua@school</em>
+                  </a>
+                </h2>
                 <h3 class="d-none d-md-block">Il registro elettronico <strong>open source</strong> dell'<em>{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</em></h3>
-                <p>Versione {{ app.session.get('/CONFIG/SISTEMA/versione') }}</p>
+                <p class="d-none d-md-block">Versione {{ app.session.get('/CONFIG/SISTEMA/versione') }}</p>
               </div>
-              <div class="col-lg-6 col-md-12 link-list-wrapper">
+              <div class="col-lg-6 col-md-12 d-none d-md-block link-list-wrapper">
                 <ul class="footer-list link-list">
                   <li>
                     <a class="list-item" href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai al progetto su GitHub">
@@ -215,7 +222,7 @@
           <h3 id="gs-infomenu" class="sr-only">{{ app.session.get('/CONFIG/MENU/info').descrizione }}</h3>
           <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row" role="menu" aria-labelledby="gs-helpmenu-button">
   {% for o in app.session.get('/CONFIG/MENU/info').opzioni %}
-            <li class="list-inline-item" role="none">
+            <li class="list-inline-item pb-0" role="none">
               <a href="{{ o.url ? path(o.url) : '#' }}" role="menuitem" title="{{ o.descrizione|raw }}"><span>{{ o.nome|raw }}</span></a>
             </li>
   {% endfor %}

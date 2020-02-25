@@ -18,13 +18,16 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\File\File;
@@ -34,6 +37,8 @@ use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Form\AtaType;
 use App\Form\ImportaCsvType;
+use App\Entity\Ata;
+use App\Entity\Sede;
 
 
 /**
@@ -84,7 +89,7 @@ class AtaController extends BaseController {
       $session->remove($var_sessione);
     }
     // visualizza pagina
-    return $this->renderHtml('ata', 'importa', $lista ? $lista : [], ['titolo' => 'title.importa_ata'],
+    return $this->renderHtml('ata', 'importa', $lista ? $lista : [], [],
       [$form->createView(),  'message.importa_ata']);
   }
 
@@ -94,6 +99,7 @@ class AtaController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista degli utenti
    *
    * @Route("/ata/modifica/{pagina}", name="ata_modifica",
@@ -103,57 +109,66 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
+  public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                 TranslatorInterface $trans, $pagina) {
     // recupera criteri dalla sessione
-    $search = array();
-    $search['nome'] = $session->get('/APP/ROUTE/ata_modifica/nome', '');
-    $search['cognome'] = $session->get('/APP/ROUTE/ata_modifica/cognome', '');
+    $criteri = array();
+    $criteri['nome'] = $session->get('/APP/ROUTE/ata_modifica/nome', '');
+    $criteri['cognome'] = $session->get('/APP/ROUTE/ata_modifica/cognome', '');
+    $criteri['sede'] = $session->get('/APP/ROUTE/ata_modifica/sede', 0);
+    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App:Sede')->find($criteri['sede']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/ata_modifica/page', 1);
+      $pagina = $session->get('/APP/ROUTE/ata_modifica/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/ata_modifica/page', $pagina);
+      $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 10;
+    $sedi = $em->getRepository('App:Sede')->findBy([], ['ordinamento' =>'ASC']);
+    $sedi[] = -1;
     $form = $this->container->get('form.factory')->createNamedBuilder('ata_modifica', FormType::class)
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
-        'data' => $search['cognome'],
-        'attr' => ['placeholder' => 'label.cognome'],
-        'label_attr' => ['class' => 'sr-only'],
+        'data' => $criteri['cognome'],
         'required' => false
         ))
       ->add('nome', TextType::class, array('label' => 'label.nome',
-        'data' => $search['nome'],
-        'attr' => ['placeholder' => 'label.nome'],
-        'label_attr' => ['class' => 'sr-only'],
+        'data' => $criteri['nome'],
         'required' => false
         ))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
+        'data' => $sede,
+        'choices' => $sedi,
+        'choice_label' => function ($obj) use ($trans) {
+            return (is_object($obj) ? $obj->getCitta() :
+              $trans->trans('label.nessuna_sede'));
+          },
+        'choice_value' => function ($obj) {
+            return (is_object($obj)  ? $obj->getId() : $obj);
+          },
+        'placeholder' => 'label.qualsiasi_sede',
+        'choice_translation_domain' => false,
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.filtra'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $search['nome'] = trim($form->get('nome')->getData());
-      $search['cognome'] = trim($form->get('cognome')->getData());
+      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim($form->get('cognome')->getData());
+      $criteri['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() :
+        intval($form->get('sede')->getData()));
       $pagina = 1;
-      $session->set('/APP/ROUTE/ata_modifica/nome', $search['nome']);
-      $session->set('/APP/ROUTE/ata_modifica/cognome', $search['cognome']);
+      $session->set('/APP/ROUTE/ata_modifica/nome', $criteri['nome']);
+      $session->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
+      $session->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
       $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
-    // lista
-    $dati = $em->getRepository('App:ATA')->findAll($search, $pagina, $limite);
+    // recupera dati
+    $dati = $em->getRepository('App:ATA')->cerca($criteri, $pagina);
+    $info['pagina'] = $pagina;
     // mostra la pagina di risposta
-    return $this->render('ata/modifica.html.twig', array(
-      'pagina_titolo' => 'page.modifica_ata',
-      'form' => $form->createView(),
-      'form_help' => null,
-      'form_success' => null,
-      'lista' => $dati,
-      'page' => $pagina,
-      'maxPages' => ceil($dati->count() / $limite),
-    ));
+    return $this->renderHtml('ata', 'modifica', $dati, $info, [$form->createView()]);
   }
 
   /**
@@ -165,13 +180,13 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/abilita/{id}/{abilita}", name="ata_abilita",
+   * @Route("/ata/modifica/abilita/{id}/{abilita}", name="ata_modifica_abilita",
    *    requirements={"id": "\d+", "abilita": "0|1"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function abilitaAction(EntityManagerInterface $em, $id, $abilita) {
+  public function modificaAbilitaAction(EntityManagerInterface $em, $id, $abilita) {
     // controlla ata
     $ata = $em->getRepository('App:Ata')->find($id);
     if (!$ata) {
@@ -181,6 +196,8 @@ class AtaController extends BaseController {
     // abilita o disabilita
     $ata->setAbilitato($abilita == 1);
     $em->flush();
+    // messaggio
+    $this->addFlash('success', 'message.update_ok');
     // redirezione
     return $this->redirectToRoute('ata_modifica');
   }
@@ -194,18 +211,28 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/edit/{id}", name="ata_edit",
+   * @Route("/ata/modifica/edit/{id}", name="ata_modifica_edit",
    *    requirements={"id": "\d+"},
+   *    defaults={"id": "0"},
    *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function editAction(Request $request, EntityManagerInterface $em, $id) {
-    // controlla ata
-    $ata = $em->getRepository('App:Ata')->find($id);
-    if (!$ata) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
+  public function modificaEditAction(Request $request, EntityManagerInterface $em, $id) {
+    // controlla azione
+    if ($id > 0) {
+      // azione edit
+      $ata = $em->getRepository('App:Ata')->find($id);
+      if (!$ata) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+    } else {
+      // azione add
+      $ata = (new Ata())
+        ->setAbilitato(true)
+        ->setPassword('NOPASSWORD');
+      $em->persist($ata);
     }
     // form
     $form = $this->createForm(AtaType::class, $ata, ['returnUrl' => $this->generateUrl('ata_modifica')]);
@@ -213,17 +240,13 @@ class AtaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza modifiche
       $em->flush();
+      // messaggio
+      $this->addFlash('success', 'message.update_ok');
       // redirect
       return $this->redirectToRoute('ata_modifica');
     }
     // mostra la pagina di risposta
-    return $this->render('ata/edit.html.twig', array(
-      'pagina_titolo' => 'page.modifica_ata',
-      'form' => $form->createView(),
-      'form_title' => 'title.modifica_ata',
-      'form_help' => 'message.required_fields',
-      'form_success' => null,
-    ));
+    return $this->renderHtml('ata', 'modifica_edit', [], [], [$form->createView(), 'message.required_fields']);
    }
 
   /**
@@ -241,15 +264,16 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/password/{id}", name="ata_password",
+   * @Route("/ata/modifica/password/{id}", name="ata_modifica_password",
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                  PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger, LogHandler $dblogger,
-                                  $id) {
+  public function modificaPasswordAction(Request $request, EntityManagerInterface $em,
+                                         UserPasswordEncoderInterface $encoder, SessionInterface $session,
+                                         PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                         LogHandler $dblogger, $id) {
     // controlla ata
     $ata = $em->getRepository('App:Ata')->find($id);
     if (!$ata) {

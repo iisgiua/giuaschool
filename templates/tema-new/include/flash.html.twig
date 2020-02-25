@@ -1,0 +1,7 @@
+{### flash: alert box per i messaggi temporanei impostati tramite la sessione ###}
+{###    parametri: - ###}
+{% for tipo,messaggi in app.flashes %}
+  {% for msg in messaggi %}
+<div class="alert alert-{{ tipo }}">{{ msg|trans|raw }}</div>
+  {% endfor %}
+{% endfor %}

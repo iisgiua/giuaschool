@@ -1,0 +1,105 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% include 'tema-new/include/flash.html.twig' %}
+  {% include 'tema-new/include/filtro.html.twig' with {form: form[0]} %}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm">
+      <thead class="thead-light">
+        <tr>
+          <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.cognome'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.nome'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.username'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.sede'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.mansioni'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for u in dati.lista %}
+        <tr{% if not u.abilitato %} class="table-danger"{% endif %}>
+          <td>
+    {% if u.abilitato %}
+            <span title="{{ 'label.utente_attivo'|trans }}">
+              <svg class="icon icon-xs icon-success" aria-hidden="true">
+                <use xlink:href="/vendor/fontawesome/sprites/solid.svg#check"></use>
+              </svg>
+            </span>
+    {% else %}
+            <span title="{{ 'label.utente_disabilitato'|trans }}">
+              <svg class="icon icon-sm icon-danger" aria-hidden="true">
+                <use xlink:href="/vendor/fontawesome/sprites/solid.svg#ban"></use>
+              </svg>
+            </span>
+    {% endif %}
+          </td>
+          <td><small>{{ u.cognome }}</small></td>
+          <td><small>{{ u.nome }}</small></td>
+          <td><small>{{ u.username }}</small></td>
+          <td><small>{{ u.sede ? u.sede.citta  }}</small></td>
+          <td><small>{{ ('label.ata_tipo_'~u.tipo)|trans }}</small></td>
+          <td class="pb-0">
+            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ u.cognome }} {{ u.nome }}" data-cont-id="info-utente-{{ u.id }}">{{ 'label.show'|trans }}</button>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_modifica_edit', {'id': u.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_modifica_password', {'id': u.id}) }}" role="button" title="Genera una nuova password e la invia all'utente">{{ 'label.password'|trans }}</a>
+    {% if u.abilitato %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('ata_modifica_abilita', {'id': u.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
+    {% else %}
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('ata_modifica_abilita', {'id': u.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
+    {% endif %}
+            <div class="d-none" id="info-utente-{{ u.id }}">
+              <dl class="row">
+                 <dt class="col-sm-3">{{ 'label.cognome'|trans }}</dt>
+                 <dd class="col-sm-9">{{ u.cognome }}</dd>
+                 <dt class="col-sm-3">{{ 'label.nome'|trans }}</dt>
+                 <dd class="col-sm-9">{{ u.nome }}</dd>
+                 <dt class="col-sm-3">{{ 'label.sesso'|trans }}</dt>
+                 <dd class="col-sm-9">{{ (u.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
+                 <dt class="col-sm-3">{{ 'label.username'|trans }}</dt>
+                 <dd class="col-sm-9">{{ u.username }}</dd>
+                 <dt class="col-sm-3">{{ 'label.email'|trans }}</dt>
+                 <dd class="col-sm-9">{{ u.email }}</dd>
+                 <dt class="col-sm-3">{{ 'label.ata_tipo'|trans }}</dt>
+                 <dd class="col-sm-9">{{ ('label.ata_tipo_'~u.tipo)|trans }}</dd>
+                 <dt class="col-sm-3">{{ 'label.ata_segreteria'|trans }}</dt>
+                 <dd class="col-sm-9">{{ (u.segreteria ? 'label.si' : 'label.no')|trans }}</dd>
+                 <dt class="col-sm-3">{{ 'label.sede'|trans }}</dt>
+                 <dd class="col-sm-9">{{ u.sede }}</dd>
+                 <dt class="col-sm-3">{{ 'label.ultimo_accesso'|trans }}</dt>
+                 <dd class="col-sm-9">{{ u.ultimoAccesso ? (u.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+              </dl>
+            </div>
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col mb-5">
+    <a class="btn btn-primary btn-sm" href="{{ path('ata_modifica_edit') }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
+  </div>
+  {% include 'tema-new/include/paginazione.html.twig' with {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'ata_modifica'} %}
+  {% include 'tema-new/include/modal-info.html.twig' %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  $("#gs_paginazione").on("submit", function() {
+    var p = $("#jumpToPage").val();
+    window.location.href = "{{ path('ata_modifica') }}/"+p;
+    return false;
+  });
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $('#'+$(e.relatedTarget).data('cont-id')).html();
+    $(this).find('#gs-modal-info-titolo').html(titolo);
+    $(this).find('#gs-modal-info-contenuto').html(contenuto);
+  });
+});
+</script>
+{% endblock %}

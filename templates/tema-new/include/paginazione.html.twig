@@ -1,0 +1,88 @@
+{### paginazione: gestione paginazione dei risultati di ricerca ###}
+{###    parametri: maxPagine, pagina, url  ###}
+{% if maxPagine > 4 %}
+  <nav class="pagination-wrapper justify-content-center" aria-label="Pagine dei risultati di ricerca">
+    <ul class="pagination" aria-label="Pagina {{ pagina }} di {{ maxPagine }}">
+  {% if pagina > 1 %}
+      <li class="page-item">
+        <a class="page-link" href="{{ path(url, {'pagina': pagina-1}) }}" title="{{ 'label.pagina_precedente'|trans }}">
+          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+        </a>
+      </li>
+  {% else %}
+      <li class="page-item disabled">
+        <span class="page-link" title="{{ 'label.pagina_precedente'|trans }}">
+          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+        </span>
+      </li>
+  {% endif %}
+      <li class="page-item"><span class="page-link">{{ pagina }}</span></li>
+      <li class="page-item"><span class="page-link">/</span></li>
+      <li class="page-item"><span class="page-link">{{ maxPagine }}</span></li>
+      <li class="page-item sr-only">
+        <a class="page-link" href="#" aria-current="page">Pagina {{ pagina }} di {{ maxPagine }}</a>
+      </li>
+  {% if pagina < maxPagine %}
+      <li class="page-item">
+        <a class="page-link" href="{{ path(url, {'pagina': pagina+1}) }}" title="{{ 'label.pagina_successiva'|trans }}">
+          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+        </a>
+      </li>
+  {% else %}
+      <li class="page-item disabled">
+        <span class="page-link" title="{{ 'label.pagina_successiva'|trans }}">
+          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+        </span>
+      </li>
+  {% endif %}
+    </ul>
+    <form id="gs_paginazione" method="get">
+      <div class="form-group">
+        <input type="text" class="form-control" id="jumpToPage" name="pagina" maxlength="3">
+        <label for="jumpToPage"><span aria-hidden="true">Vai a ...</span><span class="sr-only">Indica la pagina desiderata</span></label>
+      </div>
+    </form>
+  </nav>
+{% elseif maxPagine > 1 %}
+  <nav class="pagination-wrapper justify-content-center" aria-label="Pagine dei risultati di ricerca">
+    <ul class="pagination">
+  {% if pagina > 1 %}
+      <li class="page-item">
+        <a class="page-link" href="{{ path(url, {'pagina': pagina-1}) }}" title="{{ 'label.pagina_precedente'|trans }}">
+          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+        </a>
+      </li>
+  {% else %}
+      <li class="page-item disabled">
+        <span class="page-link" title="{{ 'label.pagina_precedente'|trans }}">
+          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+        </span>
+      </li>
+  {% endif %}
+  {% for i in 1..maxPagine %}
+      <li class="page-item">
+    {% if pagina == i %}
+        <a class="page-link" href="{{ path(url, {'pagina': i}) }}" aria-current="page">
+          <span class="d-sm-inline-block d-none mr-2">Pagina</span>{{ i }}
+        </a>
+    {% else %}
+        <a class="page-link" href="{{ path(url, {'pagina': i}) }}" title="Vai alla pagina {{ i }}">{{ i }}</a>
+    {% endif %}
+      </li>
+  {% endfor %}
+  {% if pagina < maxPagine %}
+      <li class="page-item">
+        <a class="page-link" href="{{ path(url, {'pagina': pagina+1}) }}" title="{{ 'label.pagina_successiva'|trans }}">
+          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+        </a>
+      </li>
+  {% else %}
+      <li class="page-item disabled">
+        <span class="page-link" title="{{ 'label.pagina_successiva'|trans }}">
+          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+        </span>
+      </li>
+  {% endif %}
+    </ul>
+  </nav>
+{% endif %}
