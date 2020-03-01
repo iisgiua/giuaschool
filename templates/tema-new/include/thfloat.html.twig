@@ -1,0 +1,29 @@
+{### thfloat: gestione header tabella fisso ###}
+{###    parametri: -- ###}
+<script src="{{ asset('vendor/floatThead-2.1.4/jquery.floatThead.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('table.gs-sticky-header').on("floatThead", function(e, isFloated, floatContainer) {
+    var c=floatContainer.find('thead');
+    if(isFloated){
+      c.hide();
+      c.removeClass("thead-light").addClass("thead-dark");
+      c.fadeIn();
+    } else {
+      c.removeClass("thead-dark").addClass("thead-light");
+    }
+  });
+  // init
+  $('table.gs-sticky-header').floatThead({
+    top: function(){
+      if (window.innerWidth < 992) {
+        return Math.trunc($('#gs-header .breadcrumb-container').height());
+      } else {
+        return Math.trunc($('#gs-header .it-header-navbar-wrapper').height());
+      } },
+    zIndex: 5,
+    responsiveContainer: function(table){
+      return table.closest('.table-responsive'); }
+  });
+});
+</script>

@@ -6,9 +6,9 @@
   {% include 'tema-new/include/flash.html.twig' %}
   {% include 'tema-new/include/filtro.html.twig' with {form: form[0]} %}
   <div class="table-responsive">
-    <table class="table table-bordered table-hover table-striped table-sm">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header">
       <thead class="thead-light">
-        <tr>
+        <tr class=" sticky-top">
           <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.cognome'|trans }}</th>
           <th class="col-auto" scope="col">{{ 'label.nome'|trans }}</th>
@@ -87,6 +87,7 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
+{% include 'tema-new/include/thfloat.html.twig' %}
 <script>
 $(document).ready(function() {
   $("#gs_paginazione").on("submit", function() {
