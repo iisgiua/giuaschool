@@ -284,7 +284,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     $url = $request->getSession()->get('_security.'.$providerKey.'.target_path');
     if (!$url) {
       // se non presente, usa l'homepage
-      $url = $this->router->generate('home');
+      $url = $this->router->generate('login_home');
     }
     // tipo di login
     $tipo_accesso = (($token->getUser() instanceof Docente) && $token->getUser()->getOtp()) ? 'form/OTP' : 'form';
@@ -347,4 +347,3 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
   }
 
 }
-

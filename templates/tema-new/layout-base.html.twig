@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html dir="ltr" lang="it">
   <head>
     <meta charset="utf-8">
@@ -17,15 +17,15 @@
 {% endif %}
 {% block pagina_js_inizio %}
 {% endblock %}
-    <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('apple-icon-57x57.png') }}">
-    <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('apple-icon-60x60.png') }}">
-    <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('apple-icon-72x72.png') }}">
-    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('apple-icon-76x76.png') }}">
-    <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('apple-icon-114x114.png') }}">
-    <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('apple-icon-120x120.png') }}">
-    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('apple-icon-144x144.png') }}">
-    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('apple-icon-152x152.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-icon-180x180.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('apple-icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('apple-icon-144x144.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('apple-icon-120x120.png') }}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('apple-icon-114x114.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('apple-icon-76x76.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('apple-icon-72x72.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('apple-icon-60x60.png') }}">
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('apple-icon-57x57.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('android-icon-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('favicon-96x96.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
@@ -54,11 +54,11 @@
               <div class="it-header-slim-wrapper-content pr-0">
                 <span class="d-none d-md-block navbar-brand"><strong>{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</strong> - A.S. {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</span>
 {% if is_granted('IS_AUTHENTICATED_FULLY') %} {# mostrato quando un utente è connesso #}
-                <div class="nav-item dropdown mx-auto">
-                  <a id="gs-helpmenu-button" class="nav-link dropdown-toggle btn btn-info btn-xs pt-1 pb-1 pl-2 pr-1" role="button" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Mostra le opzioni di supporto all'utente">
-                    <span class="font-weight-bold mr-1">Aiuto</span>
-                    <svg class="icon d-none d-md-block ml-0">
-                      <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-expand"></use>
+                <div class="nav-item dropdown mx-3">
+                  <a id="gs-helpmenu-button" class="nav-link dropdown-toggle btn btn-xs btn-secondary py-1 px-2" role="button" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{ app.session.get('/CONFIG/MENU/help').descrizione }}">
+                    <span class="font-weight-bold">{{ app.session.get('/CONFIG/MENU/help').nome }}</span>
+                    <svg class="icon icon-xs d-none d-xl-block ml-0" aria-hidden="true">
+                      <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
                     </svg>
                   </a>
                   <div class="dropdown-menu">
@@ -66,18 +66,11 @@
                       <div class="col-12">
                         <div class="link-list-wrapper">
                           <ul class="link-list" role="menu" aria-labelledby="gs-helpmenu-button">
+  {% for o in app.session.get('/CONFIG/MENU/help').opzioni %}
                             <li role="none">
-                              <a class="list-item" href="#" role="menuitem" title="Mostra la guida per le funzioni presenti nella pagina"><span>Guida</span></a>
+                              <a class="list-item" href="{{ o.url ? path(o.url) : '#' }}" role="menuitem" title="{{ o.descrizione|raw }}"><span>{{ o.nome|raw }}</span></a>
                             </li>
-                            <li role="none">
-                              <a class="list-item" href="#" role="menuitem" title="Scarica il manuale d'uso dell'applicazione"><span>Manuale</span></a>
-                            </li>
-                            <li role="none">
-                              <a class="list-item" href="#" role="menuitem" title="Vai alla pagina delle domande frequenti"><span>FAQ</span></a>
-                            </li>
-                            <li role="none">
-                              <a class="list-item" href="#" role="menuitem" title="Vai alla pagina delle segnalazioni"><span>Segnalazioni</span></a>
-                            </li>
+  {% endfor %}
                           </ul>
                         </div>
                       </div>
@@ -85,28 +78,28 @@
                   </div>
                 </div>
                 <div class="header-slim-right-zone">
-                  <a class="btn btn-primary btn-icon rounded-0" href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}">
+                  <a class="btn btn-default btn-icon rounded-0 border-right border-left" href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}">
                     <span class="rounded-icon">
-                      <svg class="icon icon-primary">
-                        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-user"></use>
+                      <svg class="icon icon-xs icon-secondary" aria-hidden="true">
+                        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#user"></use>
                       </svg>
                     </span>
-                    <span class="d-none d-lg-block">{{ app.user.nome }} {{ app.user.cognome }} ({{ ('label.'~app.user.roles[0])|trans }})</span>
+                    <span class="d-none d-lg-block">{{ app.user.nome }} {{ app.user.cognome }} <small>({{ ('label.'~app.user.roles[0])|trans }})</small></span>
                   </a>
   {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
-                  <a class="btn btn-secondary btn-icon rounded-0" href="{{ path('procedure_alias_exit') }}" title="{{ 'title.alias_exit'|trans }}">
+                  <a class="btn btn-default btn-icon rounded-0" href="{{ path('procedure_alias_exit') }}" title="{{ 'title.alias_exit'|trans }}">
                     <span class="rounded-icon">
-                      <svg class="icon icon-primary">
-                        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-arrow-left"></use>
+                      <svg class="icon icon-secondary" aria-hidden="true">
+                        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#sign-out-alt"></use>
                       </svg>
                     </span>
                     <span class="d-none d-lg-block">{{ 'label.alias'|trans|upper }}</span>
                   </a>
   {% else %}
-                  <a class="btn btn-secondary btn-icon rounded-0" href="{{ path('logout') }}" title="{{ 'title.logout'|trans }}">
+                  <a class="btn btn-default btn-icon rounded-0" href="{{ path('logout') }}" title="{{ 'title.logout'|trans }}">
                     <span class="rounded-icon">
-                      <svg class="icon icon-primary">
-                        <use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-close-big"></use>
+                      <svg class="icon icon-secondary" aria-hidden="true">
+                        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#sign-out-alt"></use>
                       </svg>
                     </span>
                     <span class="d-none d-lg-block">{{ 'label.logout'|trans|upper }}</span>
@@ -129,20 +122,23 @@
     </header>
 {### FINE intestazione pagina ###}
 {### contenuto pagina ###}
-    <main id="gs-header" class="clearfix">
+    <main id="gs-main" class="clearfix pb-5">
 {% block pagina_contenuto %}
 {% endblock %}
     </main>
 {### FINE contenuto pagina ###}
 {### piè di pagina ###}
-    <footer id="gs-footer" class="it-footer">
+    <footer id="gs-footer" class="it-footer clearfix">
       <div class="it-footer-main">
         <div class="container">
           <section>
             <div class="row clearfix pt-4">
               <div class="col-sm-12">
-                <h2>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}
-                  <br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em>
+                <h2>
+                  <a class="text-white text-decoration-none" href="{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}" target="_blank" title="Vai al sito web dell'Istituto">
+                    {{ app.session.get('/CONFIG/ISTITUTO/tipo') }}
+                    <br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em>
+                  </a>
                 </h2>
                 <h3 class="d-none d-md-block">Cagliari - Assemini</h3>
               </div>
@@ -163,8 +159,10 @@
                 <div class="link-list-wrapper">
                   <ul class="footer-list link-list">
                     <li>
-                      <a class="list-item" href="{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}" title="Vai al sito web dell'Istituto">
-                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-link"></use></svg><span class="text-white">{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
+                      <a class="list-item" href="{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}" target="_blank" title="Vai al sito web dell'Istituto">
+                        <svg class="icon icon-xs icon-light mr-2" aria-hidden="true">
+                          <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#link"></use>
+                        </svg><span class="text-white">{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
                       </a>
                     </li>
                   </ul>
@@ -176,12 +174,16 @@
                   <ul class="footer-list link-list">
                     <li>
                       <a class="list-item" href="mailto:{{ app.session.get('/CONFIG/ISTITUTO/email') }}" title="Indirizzo email dell'Istituto">
-                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg><span class="text-white">{{ app.session.get('/CONFIG/ISTITUTO/email') }}</span>
+                        <svg class="icon icon-xs icon-light mr-2" aria-hidden="true">
+                          <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#envelope"></use>
+                        </svg><span class="text-white">{{ app.session.get('/CONFIG/ISTITUTO/email') }}</span>
                       </a>
                     </li>
                     <li>
                       <a class="list-item" href="mailto:{{ app.session.get('/CONFIG/ISTITUTO/pec') }}" title="Indirizzo PEC dell'Istituto">
-                        <svg class="icon icon-xs icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-mail"></use></svg><span class="text-white">{{ app.session.get('/CONFIG/ISTITUTO/pec') }}</span>
+                        <svg class="icon icon-xs icon-light mr-2" aria-hidden="true">
+                          <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#envelope"></use>
+                        </svg><span class="text-white">{{ app.session.get('/CONFIG/ISTITUTO/pec') }}</span>
                       </a>
                     </li>
                   </ul>
@@ -192,15 +194,21 @@
           <section class="py-4 border-white border-top">
             <div class="row">
               <div class="col-lg-6 col-md-12">
-                <h2><em>giua@school</em></h2>
+                <h2>
+                  <a class="text-white text-decoration-none" href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai al progetto su GitHub">
+                    <em>giua@school</em>
+                  </a>
+                </h2>
                 <h3 class="d-none d-md-block">Il registro elettronico <strong>open source</strong> dell'<em>{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</em></h3>
-                <p>Versione {{ app.session.get('/CONFIG/SISTEMA/versione') }}</p>
+                <p class="d-none d-md-block">Versione {{ app.session.get('/CONFIG/SISTEMA/versione') }}</p>
               </div>
-              <div class="col-lg-6 col-md-12 link-list-wrapper">
+              <div class="col-lg-6 col-md-12 d-none d-md-block link-list-wrapper">
                 <ul class="footer-list link-list">
                   <li>
-                    <a class="list-item" href="https://github.com/trinko/giuaschool#giuaschool" title="Vai al progetto su GitHub">
-                      <svg class="icon icon-sm icon-light mr-1"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-github"></use></svg><span class="text-white">Progetto e codice sorgente</span>
+                    <a class="list-item" href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai al progetto su GitHub">
+                      <svg style="color:#e9e6f2!important;" class="icon icon-sm icon-light mr-2" aria-hidden="true" role="img" focusable="false" data-prefix="fab" data-icon="github" data-license="https://fontawesome.com/license/free" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512">
+                        <path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path>
+                      </svg><span class="text-white">Progetto e codice sorgente</span>
                     </a>
                   </li>
                 </ul>
@@ -211,22 +219,23 @@
       </div>
       <div class="it-footer-small-prints clearfix">
         <div class="container">
-          <h3 class="sr-only">Sezione Link Utili</h3>
-          <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
-            <li class="list-inline-item">
-              <a href="{{ path('info_notelegali') }}" title="Vai alla pagina sulle Note Legali"><span>Note legali</span></a>
+          <h3 id="gs-infomenu" class="sr-only">{{ app.session.get('/CONFIG/MENU/info').descrizione }}</h3>
+          <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row" role="menu" aria-labelledby="gs-helpmenu-button">
+  {% for o in app.session.get('/CONFIG/MENU/info').opzioni %}
+            <li class="list-inline-item pb-0" role="none">
+              <a href="{{ o.url ? path(o.url) : '#' }}" role="menuitem" title="{{ o.descrizione|raw }}"><span>{{ o.nome|raw }}</span></a>
             </li>
-            <li class="list-inline-item">
-              <a href="{{ path('info_privacy') }}" title="Vai alla pagina sulla Privacy"><span>Privacy</span></a>
-            </li>
+  {% endfor %}
           </ul>
         </div>
       </div>
     </footer>
 {### FINE piè di pagina ###}
 {### link TornaSu ###}
-    <a class="back-to-top back-to-top-small" href="#" aria-hidden="true" data-attribute="back-to-top" title="Vai a inizio pagina">
-      <svg class="icon icon-light"><use xlink:href="{{ asset('vendor/bootstrap-italia/svg/sprite.svg') }}#it-arrow-up"></use></svg>
+    <a class="back-to-top back-to-top-small shadow" href="#" aria-hidden="true" data-attribute="back-to-top" title="Vai a inizio pagina">
+      <svg class="icon icon-light" aria-hidden="true">
+        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#arrow-up"></use>
+      </svg>
     </a>
 {### FINE link TornaSu ###}
 {### caricamento javascript ###}

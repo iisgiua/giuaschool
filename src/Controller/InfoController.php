@@ -31,17 +31,13 @@ class InfoController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/info/note-legali/", name="info_notelegali",
+   * @Route("/info/note-legali/", name="info_noteLegali",
    *    methods={"GET"})
    */
   public function noteLegaliAction(ConfigLoader $config) {
     // carica configurazione di sistema
     $config->loadAll();
-    //-- return $this->render('info/notelegali.html.twig', array(
-      //-- 'pagina_titolo' => 'page.notelegali',
-      //-- 'breadcrumb' =>$dati,
-    //-- ));
-    return $this->renderHtml('info', 'notelegali');
+    return $this->renderHtml('info', 'noteLegali');
   }
 
   /**
@@ -57,9 +53,39 @@ class InfoController extends BaseController {
   public function privacyAction(ConfigLoader $config) {
     // carica configurazione di sistema
     $config->loadAll();
-    return $this->render('info/privacy.html.twig', array(
-      'pagina_titolo' => 'page.privacy',
-    ));
+    return $this->renderHtml('info', 'privacy');
+  }
+
+  /**
+   * Cookie
+   *
+   * @param ConfigLoader $config Gestore della configurazione su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/info/cookie/", name="info_cookie",
+   *    methods={"GET"})
+   */
+  public function cookieAction(ConfigLoader $config) {
+    // carica configurazione di sistema
+    $config->loadAll();
+    return $this->renderHtml('info', 'cookie');
+  }
+
+  /**
+   * Credits
+   *
+   * @param ConfigLoader $config Gestore della configurazione su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/info/credits/", name="info_credits",
+   *    methods={"GET"})
+   */
+  public function creditsAction(ConfigLoader $config) {
+    // carica configurazione di sistema
+    $config->loadAll();
+    return $this->renderHtml('info', 'credits');
   }
 
 }

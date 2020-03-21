@@ -47,23 +47,28 @@ class BaseController extends AbstractController {
    *
    * @param string $categoria Categoria a cui appartiene la pagina
    * @param string $azione Azione svolta dalla pagina
-   * @param array $dati Lista di dati da passare alla vista
-   * @param array $info Lista di informazioni da passare alla vista
+   * @param array $dati Lista di dati tabellari da passare alla vista
+   * @param array $info Lista di informazioni singole da passare alla vista
+   * @param array $form Oggetto form e messaggi da passare alla vista
    *
    * @return Response Pagina di risposta
    */
-  protected function renderHtml(string $categoria, string $azione, array $dati=[], array $info=[]): Response {
+  protected function renderHtml(string $categoria, string $azione, array $dati=[],
+                                array $info=[], array $form=[]): Response {
     $session = $this->get('session');
+    list($azione_principale) = explode('_', $azione);
     // legge breadcrumb
-    $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione,
+    $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
       $this->getUser(), $session);
     // restituisce vista
     $tema = $session->get('/APP/APP/tema', '');
     return $this->render($tema.'/'.$categoria.'/'.$azione.'.html.twig', array(
-      'pagina_titolo' => 'page.'.$categoria.'.'.$azione,
+      'pagina_titolo' => 'page.'.$categoria.'.'.$azione_principale,
+      'titolo' => 'title.'.$categoria.'.'.$azione,
       'breadcrumb' => $breadcrumb,
       'dati' => $dati,
       'info' => $info,
+      'form' => $form,
     ));
   }
 

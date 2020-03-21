@@ -1,0 +1,12 @@
+{### filtro: form inline per filtro sui dati di ricerca ###}
+{###    parametri: form ###}
+{% form_theme form with 'tema-new/layout-form.html.twig' only %}
+
+{{ form_start(form) }}
+<div id="{{ form.vars.id }}" class="form-row mb-0">
+  {{- form_errors(form) -}}
+  {% for child in form|filter(child => not child.rendered) %}
+    {{- form_row(child, {inline: true}) -}}
+  {% endfor %}
+</div>
+{{ form_end(form) }}

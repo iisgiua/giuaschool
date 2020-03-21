@@ -82,7 +82,11 @@
 $(document).ready(function() {
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
     var url = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-remote-content').load(url);
+    $(this).find('#gs-modal-remote-content').load(url, function() {
+      if ($(this).find('title').text()) {
+        window.location.replace("{{ path('genitori_avvisi') }}");
+      }
+    });
   });
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();

@@ -39,30 +39,20 @@ class AtaType extends AbstractType {
     // aggiunge campi al form
     $builder
       ->add('nome', TextType::class, array('label' => 'label.nome',
+        'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('sesso', ChoiceType::class, array('label' => 'label.sesso',
         'choices' => array('label.maschile' => 'M', 'label.femminile' => 'F'),
-        'expanded' => true,
-        'multiple' => false,
-        'label_attr' => ['class' => 'radio-inline'],
+        'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('username', TextType::class, array('label' => 'label.username',
+        'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('email', TextType::class, array('label' => 'label.email',
-        'required' => true))
-      ->add('tipo', ChoiceType::class, array('label' => 'label.ata_tipo',
-        'choices' => array('label.ata_tipo_A' => 'A', 'label.ata_tipo_C' => 'C', 'label.ata_tipo_D' => 'D',
-          'label.ata_tipo_T' => 'T'),
-        'expanded' => false,
-        'multiple' => false,
-        'required' => true))
-      ->add('segreteria', ChoiceType::class, array('label' => 'label.ata_segreteria',
-        'choices' => array('label.si' => true, 'label.no' => false),
-        'expanded' => true,
-        'multiple' => false,
-        'label_attr' => ['class' => 'radio-inline'],
+        'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('sede', EntityType::class, array('label' => 'label.sede',
         'class' => 'App:Sede',
@@ -74,7 +64,17 @@ class AtaType extends AbstractType {
             return $er->createQueryBuilder('s')
               ->orderBy('s.ordinamento', 'ASC');
           },
+        'attr' => ['widget' => 'gs-row-end'],
         'required' => false))
+      ->add('tipo', ChoiceType::class, array('label' => 'label.ata_tipo',
+        'choices' => array('label.ata_tipo_D' => 'D', 'label.ata_tipo_A' => 'A', 'label.ata_tipo_T' => 'T',
+           'label.ata_tipo_U' => 'U', 'label.ata_tipo_C' => 'C'),
+        'attr' => ['widget' => 'gs-row-start'],
+        'required' => true))
+      ->add('segreteria', ChoiceType::class, array('label' => 'label.ata_segreteria',
+        'choices' => array('label.si' => true, 'label.no' => false),
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',

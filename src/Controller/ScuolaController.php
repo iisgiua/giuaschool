@@ -23,20 +23,4 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  */
 class ScuolaController extends AbstractController {
 
-  /**
-   * Gestione dei dati della scuola
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/scuola/", name="scuola",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
-   */
-  public function scuolaAction() {
-    return $this->render('scuola/index.html.twig', array(
-      'pagina_titolo' => 'page.scuola',
-    ));
-  }
-
 }

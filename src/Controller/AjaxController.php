@@ -18,6 +18,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 
 /**
@@ -129,6 +130,25 @@ class AjaxController extends AbstractController {
       $dati['fine'] = min($pagina + 5, $dati['max']);
       $dati['inizio'] = $dati['fine'] - 9;
     }
+    // restituisce dati
+    return new JsonResponse($dati);
+  }
+
+  /**
+   * Restituisce il token per la validazione CSRF
+   *
+   * @param string $id Identificativo per il token da generare
+   *
+   * @return JsonResponse Informazioni di risposta
+   *
+   * @Route("/ajax/token/{id}", name="ajax_token",
+   *    requirements={"id": "authenticate"},
+   *    methods={"GET"})
+   */
+  public function tokenAjaxAction(CsrfTokenManagerInterface $tokenManager, $id) {
+    // genera token
+    $dati = array();
+    $dati[$id] = $tokenManager->getToken($id)->getValue();
     // restituisce dati
     return new JsonResponse($dati);
   }

@@ -262,7 +262,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
     $url = $request->getSession()->get('_security.'.$providerKey.'.target_path');
     if (!$url) {
       // se non presente, usa l'homepage
-      $url = $this->router->generate('home');
+      $url = $this->router->generate('login_home');
     }
     // tipo di login
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'app-1');
@@ -340,4 +340,3 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
   }
 
 }
-

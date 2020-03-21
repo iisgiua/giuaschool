@@ -21,6 +21,7 @@ label.ata_tipo_A: Amministrativo
 label.ata_tipo_C: Collaboratore Scolastico
 label.ata_tipo_D: DSGA
 label.ata_tipo_T: Tecnico
+label.ata_tipo_U: Autista
 label.attivita: Attività
 label.attivita_sostegno: Attività del sostegno
 label.autore: Autore
@@ -124,6 +125,9 @@ label.filtro_nessuno: Nessuno
 label.filtro_sede: Filtra per sede
 label.filtro_tutti: Tutti
 label.filtro_mese: Filtra per data
+label.filtro_nuovi: Solo nuovi
+label.filtro_esistenti: Solo già esistenti
+label.filtro_importazione: Dati da importare
 label.frequenza_estero: Anno all'estero
 label.genitori_classe: Genitori della classe
 label.genitori: Genitori
@@ -188,8 +192,8 @@ label.presenti: Alunni presenti
 label.privacy_app: "Accetto che i miei dati personali presenti nel Registro Elettronico vengano inviati a servizi esterni e trattati da altri soggetti, liberando l' {intestazione_istituto_breve} da ogni responsabilità in merito.<br><a href=\"#\" data-toggle=\"modal\" data-target=\"#gs-privacy\">Clicca qui per avere maggiori dettagli.</a>"
 label.provvedimenti_disciplinari: Provvedimenti disciplinari
 label.provvedimento: Provvedimento disciplinare
-label.qualsiasi_classe: Tutte le classi
-label.qualsiasi_sede: Tutte le sedi
+label.qualsiasi_classe: Qualsiasi classe
+label.qualsiasi_sede: Qualsiasi sede
 label.rappresentante_classe: Rappresentante di classe
 label.rappresentante_consulta: Consulta Provinciale
 label.rappresentante_istituto: Rappresentante di Istituto
@@ -327,7 +331,27 @@ label.motivazione_facoltativa: Motivazione facoltativa
 label.documenti_scrutinio: Documenti dello scrutinio
 label.stato: Stato
 label.voto_in_media: Utilizza nel calcolo delle medie?
+label.mansioni: Mansioni
+label.utente_attivo: Utente attivo
+label.utente_disabilitato: Utente disabilitato
+label.pagina_precedente: Pagina precedente
+label.pagina_successiva: Pagina successiva
 
+
+##### PAGINE NUOVO TEMA #####
+page.info.noteLegali: Note legali
+title.info.noteLegali: Note legali
+page.info.privacy: Informativa sulla privacy
+title.info.privacy: Informativa sulla privacy
+page.info.cookie: Informativa sui cookie
+title.info.cookie: Informativa sui cookie
+page.info.credits: Credits
+title.info.credits: Credits
+page.ata.importa: Importa ATA
+title.ata.importa: Importa i dati del Personale ATA
+page.ata.modifica: Modifica ATA
+title.ata.modifica: Modifica i dati del Personale ATA
+title.ata.modifica_edit: Modifica i dati dell'utente
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -576,7 +600,7 @@ title.circolari_genitori: Circolari indirizzate ai genitori
 title.circolari_alunni: Circolari indirizzate agli studenti
 title.circolari_docenti: Lista delle circolari
 title.circolari_ata: Lista delle circolari
-title.importa_ata: Importa i dati del personale ATA da file
+title.importa_ata: Importa i dati del personale ATA
 title.modifica_ata: Modifica i dati del personale ATA
 title.gestione_notifiche: Abilita o disabila la notifica delle circolari
 title.documenti_doc15: Inserimento dei documenti del 15 Maggio
@@ -709,10 +733,11 @@ message.num_avvisi: "{num, plural, one {Avviso} other {Avvisi}}"
 message.num_circolari: "{num, plural, one {Circolare} other {Circolari}}"
 message.registro_lettura_circolare: "{num, plural, one {Letta la circolare n. {circolari}} other {Lette le circolari n. {circolari}}}"
 message.presenti_nuove_circolari: "{num, plural, one {È presente una nuova circolare da leggere} other {Sono presenti # nuove circolari da leggere}}"
-message.importa_ata: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
-  \"Cognome, Nome, Sesso, Username, Password, Email, Sede, Tipo\".
-  Se si attiva il controllo SOLO NUOVI verranno inseriti solo gli utenti che non risultano già presenti;
-  in caso contrario, verranno modificati anche i dati degli utenti esistenti."
+message.importa_ata: "Il file CSV da importare deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, Username, Password, Email, Sede, Tipo\"</span><br>
+  <span class=\"ml-5\">* campi obbligatori</span><br>
+  <span class=\"ml-5\">sesso: M=maschio, F=femmina</span><br>
+  <span class=\"ml-5\">tipo: A=amministrativo, C=collaboratore scolastico, D=DSGA, T=tecnico, U=autista</span>"
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.
 message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
 message.gestione_notifiche: "La ricezione via email della notifica delle nuove circolari può essere abilitata o disabilitata da questa pagina. Scegli l'opzione che preferisci e premi il pulsante di conferma."

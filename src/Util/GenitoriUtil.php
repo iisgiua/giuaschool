@@ -1200,10 +1200,10 @@ class GenitoriUtil {
    * @return bool Restituisce vero se l'azione è permessa
    */
   public function azioneGiustifica(\DateTime $data, Alunno $alunno) {
-    if ($this->regUtil->bloccoScrutinio($data, $alunno->getClasse())) {
-      // blocco scrutinio
-      return false;
-    }
+    //-- if ($this->regUtil->bloccoScrutinio($data, $alunno->getClasse())) {
+      //-- // blocco scrutinio
+      //-- return false;
+    //-- }
     $oggi = new \DateTime();
     if ($data->format('Y-m-d') <= $oggi->format('Y-m-d')) {
       // data non nel futuro

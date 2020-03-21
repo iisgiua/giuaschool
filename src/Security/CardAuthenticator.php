@@ -125,6 +125,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
         // errore, certificato non valido
         $this->logger->error('Certificato non valido nella richiesta di login tramite smartcard.', array(
           'ip' => $request->getClientIp(),
+          'SERVER' => $request->server->all(),
           ));
         throw new CustomUserMessageAuthenticationException('exception.invalid_card');
       }
@@ -220,7 +221,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
    */
   public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
     // homepage
-    $url = $this->router->generate('home');
+    $url = $this->router->generate('login_home');
     // ultimo accesso dell'utente
     $last_login = $token->getUser()->getUltimoAccesso();
     $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($last_login ? $last_login->format('d/m/Y H:i:s') : null));
@@ -252,7 +253,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
     // messaggio di errore
     $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('login_card_errore'));
+    return new RedirectResponse($this->router->generate('login_cardErrore'));
   }
 
   /**
@@ -277,4 +278,3 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
   }
 
 }
-

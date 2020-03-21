@@ -1,9 +1,11 @@
-/***** MODIFICHE A CLASSI ESISTENTI *****/
-
 /*** slim header ***/
 #gs-header .it-header-slim-wrapper {
-  background-color: #00264d; /* variante a11 */
+  background-color: #00264d; /* colore primario, variante a11 */
 }
+#gs-header .header-slim-right-zone a.btn-default:hover {
+  background-color: #435a70; /* colore secondario */
+}
+
 
 /*** menu principale ***/
 #gs-header nav {
@@ -34,6 +36,26 @@
 #gs-header .link-list-wrapper ul li a, #gs-header .navbar ul li a {
   font-weight: 600;
 }
+#gs-header .dropdown-menu {
+  border: 1px solid #b1b1b3!important;
+  border-top: 0!important;
+}
+#gs-mainmenu .menu-wrapper .navbar-nav ul li span.disabled {
+  line-height: 2.3em;
+  font-size: .889em;
+  font-weight: 600;
+  display: block;
+  padding: 0 24px;
+  position: relative;
+  cursor: not-allowed;
+  opacity: .5;
+}
+#gs-mainmenu .navbar-nav .nav-link.dropdown-toggle.active + .dropdown-menu:before {
+  display: none;
+}
+#gs-mainmenu > div.menu-wrapper > ul > li.nav-item.dropdown.show > div {
+  border: solid 4px #ff0000;
+}
 
 /*** breadcrumb ***/
 #gs-header .breadcrumb-container {
@@ -42,6 +64,7 @@
 #gs-header .breadcrumb-item .separator::after {
   content: ">";
 }
+
 
 /*** footer ***/
 #gs-footer .it-footer-main h2 {
@@ -63,4 +86,49 @@
 }
 #gs-footer .it-footer-small-prints a:hover {
   text-decoration: underline;
+}
+
+
+/*** contenuto ***/
+h1 {
+  font-size: 2em;
+}
+h2 {
+  font-size: 1.8em;
+}
+h3 {
+  font-size: 1.5em;
+}
+h4 {
+  font-size: 1.2em;
+}
+.card:after {
+  content: none;
+}
+img.svg {
+  overflow: hidden;
+}
+
+
+/*** form ***/
+legend {
+  margin-bottom: 0;
+  font-size: 1.1rem;
+}
+.form-group > label.required:before, .form-group > div > label.required:before, 
+.form-group legend.required:before {
+  content: "*";
+  color: #a31f33;
+}
+.form-group {
+  margin-bottom: 1rem;
+}
+.form-row {
+  margin-bottom: 3rem;
+}
+.form-check-inline {
+  margin-right: 1.5rem;
+}
+.form-check input[type=radio]:checked+label {
+  font-weight: 600;
 }

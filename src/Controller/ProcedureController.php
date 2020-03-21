@@ -38,6 +38,7 @@ use App\Entity\Configurazione;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\ArchiviazioneUtil;
+use App\Util\ConfigLoader;
 
 
 /**
@@ -140,6 +141,7 @@ class ProcedureController extends AbstractController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param ConfigLoader $config Gestore della configurazione su database
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -149,7 +151,8 @@ class ProcedureController extends AbstractController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aliasAction(Request $request, EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans, LogHandler $dblogger) {
+  public function aliasAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                              TranslatorInterface $trans, ConfigLoader $config, LogHandler $dblogger) {
     // form per l'input dell'alias
     $form = $this->container->get('form.factory')->createNamedBuilder('procedure_alias', FormType::class)
       ->add('username', TextType::class, array('label' => 'label.username', 'required' => true))
@@ -185,7 +188,7 @@ class ProcedureController extends AbstractController {
           'ID reale' => $this->getUser()->getId()
           ));
         // impersona l'alias e fa il redirect alla home
-        return $this->redirectToRoute('home', array('_alias' => $username));
+        return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => $username));
       }
     }
     // mostra la pagina di risposta
@@ -203,6 +206,7 @@ class ProcedureController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param SessionInterface $session Gestore delle sessioni
+   * @param ConfigLoader $config Gestore della configurazione su database
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -210,7 +214,8 @@ class ProcedureController extends AbstractController {
    * @Route("/procedure/alias/exit", name="procedure_alias_exit",
    *    methods={"GET"})
    */
-  public function aliasExitAction(Request $request, SessionInterface $session, LogHandler $dblogger) {
+  public function aliasExitAction(Request $request, SessionInterface $session, ConfigLoader $config,
+                                  LogHandler $dblogger) {
     // log azione
     $dblogger->write($this->getUser(), $request->getClientIp(), 'ACCESSO', 'Alias Exit', __METHOD__, array(
       'Username' => $this->getUser()->getUsername(),
@@ -227,8 +232,10 @@ class ProcedureController extends AbstractController {
     $session->remove('/APP/UTENTE/username_reale');
     $session->remove('/APP/UTENTE/ruolo_reale');
     $session->remove('/APP/UTENTE/id_reale');
+    $session->remove('/APP/ROUTE');
+    $session->remove('/APP/DOCENTE');
     // disconnette l'alias in uso e redirect alla home
-    return $this->redirectToRoute('home', array('_alias' => '_exit'));
+    return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => '_exit'));
   }
 
   /**

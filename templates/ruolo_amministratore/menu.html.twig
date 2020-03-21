@@ -1,5 +1,5 @@
 <ul class="nav navbar-nav gs-navbar-nav">
-  <li{{ app.request.attributes.get('_route') == 'home' ? ' class="active"' }}><a href="{{ path('home') }}" title="Visualizza la pagina principale">Home</a></li>
+  <li{{ app.request.attributes.get('_route') == 'login_home' ? ' class="active"' }}><a href="{{ path('login_home') }}" title="Visualizza la pagina principale">Home</a></li>
   <li class="dropdown{{ attivo is defined and attivo == 'sistema' ? ' active' }}">
     <a href="#" title="Configurazione del sistema" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sistema</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">

@@ -23,20 +23,4 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  */
 class SistemaController extends AbstractController {
 
-  /**
-   * Configurazione dei dati di sistema
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/sistema/", name="sistema",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
-   */
-  public function sistemaAction() {
-    return $this->render('sistema/index.html.twig', array(
-      'pagina_titolo' => 'page.sistema',
-    ));
-  }
-
 }

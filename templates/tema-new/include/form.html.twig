@@ -1,0 +1,12 @@
+{### form: generico form ###}
+{###    parametri: form, form_help ###}
+{% form_theme form with 'tema-new/layout-form.html.twig' only %}
+
+<div class="card border rounded">
+  {% if form_help %}
+  <div class="card-header bg-secondary text-white">{{ form_help|trans|raw  }}</div>
+  {% endif %}
+  <div class="card-body">
+    {{ form(form) }}
+  </div>
+</div>

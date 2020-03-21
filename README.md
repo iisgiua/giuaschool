@@ -45,12 +45,12 @@ Il progetto **giua@school** è basato sull'uso di:
 
 ## REQUISITI DI SISTEMA
 
-I requisiti minimi per l'installazione sono quelli richiesti da *Symfony 3.3*:
+I requisiti minimi per l'installazione sono quelli richiesti da *Symfony 4.3*:
   - web server **Apache 2.x** o superiore;
   - database server **MySQL 5.5** o superiore, o versioni equivalenti di
     **MariaDB** (sono supportate anche altre piattaforme, ma non sono state
     testate con *giua@school*)
-  - **PHP 5.5.9** o superiore (**ATTENZIONE: *giua@school* non è stato testato con PHP 7.x**);
+  - **PHP 7.1** o superiore;
   - ulteriori requisiti minori.
 
 Per semplificare le cose, *Symfony* mette a disposizione uno strumento di
@@ -68,7 +68,7 @@ computer, seguendo i passi descritti di seguito.
 
 Scaricare [XAMPP](https://www.apachefriends.org/it/download.html), facendo
 attenzione a scegliere la versione per il proprio sistema operativo che
-includa il **PHP 5.x** (non quelle con il *PHP 7.x*).
+includa il **PHP 7.x**.
 
 Installare XAMPP sul proprio computer; in caso di difficoltà consultare la
 sezione delle FAQ presente sul loro sito.

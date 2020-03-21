@@ -1,0 +1,68 @@
+{### dropzone-nostore: DropZone senza memorizzazione permanente ###}
+{###    parametri: dz_id,dz_pagina,dz_param,dz_numfile,dz_maxdim,dz_accettati,dz_idsubmit ###}
+<script src="{{ asset('vendor/dropzone-5.5.0/js/dropzone.min.js') }}"></script>
+<script>
+Dropzone.autoDiscover = false;
+$(document).ready(function() {
+{% if dz_idsubmit %}
+  $("#{{ dz_idsubmit }}").prop('disabled', true);
+{% endif %}
+  var id_previews = "#{{ dz_id }}_dzpreviews";
+  var id_template = "#{{ dz_id }}_dztemplate";
+  var preview = $(id_template);
+  preview.removeAttr("id");
+  var preview_template = preview.parent().html();
+  preview.parent().empty();
+  $(".dropzone").dropzone({
+    url: "{{ path('file_upload', {'pagina': dz_pagina, 'param': dz_param}) }}",
+    paramName: "{{ dz_param }}",
+    maxFiles: {{ dz_numfile }},
+    maxFilesize: {{ dz_maxdim }},
+    acceptedFiles: "{{ dz_accettati }}",
+    previewsContainer: id_previews,
+    previewTemplate: preview_template,
+    timeout: 0,
+    uploadMultiple: true,
+    createImageThumbnails: false,
+    clickable: ".dz-clickable",
+    dictDefaultMessage: "",
+    dictFallbackMessage: "{{ 'exception.upload_no_dropzone'|trans }}",
+    dictFileTooBig: "{{ 'exception.upload_dimensione'|trans }}",
+    dictInvalidFileType: "{{ 'exception.upload_tipo'|trans }}",
+    dictCancelUpload: "{{ 'label.upload_cancella'|trans }}",
+    dictCancelUploadConfirmation: "{{ 'message.upload_cancella'|trans }}",
+    dictRemoveFile: "{{ 'label.upload_rimuove_file'|trans }}",
+    dictMaxFilesExceeded: "{{ 'exception.upload_numero'|trans }}",
+    init: function() {
+      this.on("successmultiple", function(files, response) {
+        $.each(files, function(key,file){
+          file.uploaded = response[key];
+        });
+        $(id_previews+" li.dz-success p .sr-only").text("File caricato:");
+        $(id_previews+" li.dz-success button").attr("title", "Elimina file caricato");
+        $(id_previews+" li.dz-success .progress").hide();
+        $(id_previews+" li.dz-success").removeClass("dz-success uploading").addClass("success");
+      });
+      this.on("error", function(file,msg) {
+        $(id_previews+" li.dz-error p .sr-only").text("Errore caricamento file:");
+        $(id_previews+" li.dz-error button").hide();
+        $(id_previews+" li.dz-error .progress").hide();
+        $(id_previews+" li.dz-error").attr("title","Errore: "+msg);
+        $(id_previews+" li.dz-error svg use").attr("xlink:href", "{{ asset('vendor/fontawesome/sprites/solid.svg') }}#exclamation-triangle");
+        $(id_previews+" li.dz-error").removeClass("dz-error uploading").addClass("error");
+      });
+      this.on("removedfile", function(file) {
+        $.post("{{ path('file_remove', {'pagina': dz_pagina, 'param': dz_param}) }}", {"{{ dz_param }}": file.uploaded});
+{% if dz_idsubmit %}
+        $("#{{ dz_idsubmit }}").prop('disabled', true);
+{% endif %}
+      });
+{% if dz_idsubmit %}
+      this.on("maxfilesreached", function(file) {
+        $("#{{ dz_idsubmit }}").prop('disabled', false);
+      });
+{% endif %}
+    }
+  });
+});
+</script>

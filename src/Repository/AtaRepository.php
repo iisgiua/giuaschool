@@ -16,27 +16,31 @@ namespace App\Repository;
 /**
  * Ata - repository
  */
-class AtaRepository extends UtenteRepository {
+class AtaRepository extends BaseRepository {
 
   /**
    * Restituisce la lista degli ATA secondo i criteri di ricerca indicati
    *
-   * @param array $search Lista dei criteri di ricerca
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
    *
-   * @return Paginator Oggetto Paginator
+   * @return array Array associativo con i risultati della ricerca
    */
-  public function findAll($search=null, $page=1, $limit=10) {
+  public function cerca($criteri, $pagina=1) {
     // crea query
     $query = $this->createQueryBuilder('a')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome, a.nome, a.username', 'ASC')
-      ->setParameter(':nome', $search['nome'].'%')
-      ->setParameter(':cognome', $search['cognome'].'%')
-      ->getQuery();
+      ->setParameter(':nome', $criteri['nome'].'%')
+      ->setParameter(':cognome', $criteri['cognome'].'%');
+    if ($criteri['sede'] > 0) {
+      $query->join('a.sede', 's')
+        ->andwhere('s.id=:sede')->setParameter('sede', $criteri['sede']);
+    } elseif ($criteri['sede'] == -1) {
+      $query->andwhere('a.sede IS NULL');
+    }
     // crea lista con pagine
-    return $this->paginate($query, $page, $limit);
+    return $this->paginazione($query->getQuery(), $pagina);
   }
 
   /**
@@ -76,4 +80,3 @@ class AtaRepository extends UtenteRepository {
   }
 
 }
-

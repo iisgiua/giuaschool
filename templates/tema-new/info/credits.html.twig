@@ -1,0 +1,20 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+
+  <p>Si desidera ringraziare, per il loro importante contributo, tutti i membri della comunità <em>open source</em>,
+    e in particolare gli sviluppatori coinvolti nei seguenti progetti:</p>
+  <ul>
+    <li><a target="_blank" href="http://www.lampschool.it/joomla/">Lampschool</a> (registro elettronico realizzato dalla <em>Rete delle scuole veronesi per la dematerializzazione</em>)</li>
+    <li><a target="_blank" href="https://symfony.com/">Symfony</a> (framework per lo sviluppo in PHP)</li>
+    <li><a target="_blank" href="https://www.doctrine-project.org/">Doctrine</a> (libreria per la gestione del database in PHP)</li>
+    <li><a target="_blank" href="https://twig.symfony.com/">Twig</a> (libreria per la gestione dei template in PHP)</li>
+    <li><a target="_blank" href="https://jquery.com/">Jquery</a> (libreria Javascript)</li>
+    <li><a target="_blank" href="https://getbootstrap.com/">Bootstrap</a> (libreria per lo sviluppo di siti web responsive)</li>
+    <li><a target="_blank" href="https://italia.github.io/bootstrap-italia/">Bootstrap Italia</a> (libreria per lo sviluppo di applicazioni web per la Pubblica Amministrazione)</li>
+  </ul>
+
+</div>
+{% endblock %}

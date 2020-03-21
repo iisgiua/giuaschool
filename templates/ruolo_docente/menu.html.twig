@@ -1,5 +1,5 @@
 <ul class="nav navbar-nav gs-navbar-nav">
-  <li{{ app.request.attributes.get('_route') == 'home' ? ' class="active"' }}><a href="{{ path('home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
+  <li{{ app.request.attributes.get('_route') == 'login_home' ? ' class="active"' }}><a href="{{ path('login_home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
   <li{{ attivo is defined and attivo == 'lezioni' ? ' class="active"' }}><a href="{{ path('lezioni') }}" title="Compila i registri e gestisci le lezioni"><span class="glyphicon glyphicon-blackboard gs-mr-2" aria-hidden="true"></span>Lezioni</a></li>
   <li{{ attivo is defined and attivo == 'colloqui' ? ' class="active"' }}><a href="{{ path('colloqui') }}" title="Gestisci le prenotazioni dei colloqui"><span class="glyphicon glyphicon-comment gs-mr-2" aria-hidden="true"></span>Colloqui</a></li>
   <li{{ attivo is defined and attivo == 'documenti' ? ' class="active"' }}><a href="{{ path('documenti_piani') }}" title="Gestione dei documenti della classe"><span class="glyphicon glyphicon-duplicate gs-mr-2" aria-hidden="true"></span>Documenti</a></li>

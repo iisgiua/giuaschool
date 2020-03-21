@@ -2064,7 +2064,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(true);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="540">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // intestazione
     $alunno = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
@@ -2084,7 +2084,7 @@ class PagelleUtil {
     // oggetto
     $pdf->SetFont('times', 'B', 12);
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $text = 'OGGETTO: Comunicazione della VALUTAZIONE INTERMEDIA - '.$as;
+    $text = 'OGGETTO: Comunicazione della VALUTAZIONE INTERMEDIA - A.S. '.$as;
     $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
     $pdf->Ln(10);
     // contenuto

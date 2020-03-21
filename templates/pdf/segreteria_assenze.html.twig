@@ -20,11 +20,16 @@
 <div style="text-align:center"><strong>{{ v.nome }}</strong></div>
 <table border="1">
   <tr>
+  {% set vuota = true %}
   {% for giorno in v.inizio .. v.fine %}
     {% if (date(v.anno~'-'~mese~'-'~giorno)|date('w') != 0) and v[giorno] is not defined %}
+      {% set vuota = false %}
     <td style="text-align:center; font-family:arial; font-size:10pt"><strong>{{ giorno }}</strong></td>
     {% endif %}
   {% endfor %}
+  {% if vuota %}
+    <td> *** </td>
+  {% endif %}
   </tr>
   <tr>
   {% for giorno in v.inizio .. v.fine %}
@@ -36,6 +41,9 @@
       {% endif %}
     {% endif %}
   {% endfor %}
+  {% if vuota %}
+    <td></td>
+  {% endif %}
   </tr>
 </table>
 <br>
