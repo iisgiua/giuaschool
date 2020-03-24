@@ -33,6 +33,17 @@ class ImportaCsvType extends AbstractType {
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
+    if ($options['formMode'] == 'docenti') {
+      $builder
+        ->add('tipo', ChoiceType::class, array('label' => 'label.importazione_docenti_tipo',
+          'choices' => array('label.utenti' => 'U', 'label.cattedre' => 'C', 'label.orario' => 'O',
+            'label.colloqui' => 'L'),
+          'data' => 'U',
+          'expanded' => true,
+          'multiple' => false,
+          'label_attr' => ['class' => 'radio-inline'],
+          'required' => true));
+    }
     $builder
       ->add('file', FileType::class, array('label' => 'label.csv_file'))
       ->add('filtro', ChoiceType::class, array('label' => 'label.filtro_importazione',
@@ -51,6 +62,9 @@ class ImportaCsvType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
+    $resolver->setDefined('formMode');
+    $resolver->setDefaults(array(
+      'formMode' => 'ata'));
   }
 
 }

@@ -30,6 +30,7 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Colloquio;
 use App\Entity\Orario;
+use App\Entity\OrarioDocente;
 
 
 /**
@@ -94,13 +95,14 @@ class CsvImporter {
   /**
    * Importa i docenti da file CSV
    *
-   * @param UploadedFile $file File da importare
+   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
    * @return array Lista dei docenti importati
    */
-  public function importaDocenti(UploadedFile $file, Form $form) {
-    $header = array('cognome', 'nome', 'sesso', 'username', 'password', 'email', 'codiceFiscale');
+  public function importaDocenti(File $file=null, Form $form) {
+    $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email');
+    $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
     if ($error) {
@@ -109,7 +111,7 @@ class CsvImporter {
         fclose($this->fh);
         $this->fh = null;
       }
-      $form->get('file')->addError(new FormError($this->trans->trans($error)));
+      $form->addError(new FormError($this->trans->trans($error)));
       return null;
     }
     // lettura dati
@@ -127,7 +129,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -149,7 +151,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       if (empty($fields['username'])) {
@@ -178,10 +180,7 @@ class CsvImporter {
       $docente = $this->em->getRepository('App:Docente')->findOneByUsername($fields['username']);
       if ($docente) {
         // docente esiste
-        if ($form->get('onlynew')->getData()) {
-          // nessuna modifica
-          $imported['NONE'][$count] = $fields;
-        } else {
+        if ($filtro == 'T' || $filtro == 'E') {
           // modifica docente
           if (isset($empty_fields['username'])) {
             // errore: non modifica utente con username generata automaticamente
@@ -199,18 +198,27 @@ class CsvImporter {
             return $imported;
           }
           $imported['EDIT'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONE'][$count] = $fields;
         }
       } else {
-        // crea nuovo docente
-        $error = $this->nuovoDocente($fields);
-        if ($error) {
-          // errore
-          fclose($this->fh);
-          $this->fh = null;
-          $form->addError(new FormError('# '.$count.': '.$error));
-          return $imported;
+        // docente non esiste
+        if ($filtro == 'T' || $filtro == 'N') {
+          // crea nuovo docente
+          $error = $this->nuovoDocente($fields);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['NEW'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONEW'][$count] = $fields;
         }
-        $imported['NEW'][$count] = $fields;
       }
     }
     // ok
@@ -222,13 +230,14 @@ class CsvImporter {
   /**
    * Importa i docenti da file CSV
    *
-   * @param UploadedFile $file File da importare
+   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista dei docenti importati
+   * @return array Lista delle cattedtre importate
    */
-  public function importaCattedre(UploadedFile $file, Form $form) {
-    $header = array('docente','usernameDocente','classe','materia','alunno','usernameAlunno','tipo','supplenza');
+  public function importaCattedre(File $file=null, Form $form) {
+    $header = array('usernameDocente','classe','materia','usernameAlunno','tipo','supplenza');
+    $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
     if ($error) {
@@ -237,7 +246,7 @@ class CsvImporter {
         fclose($this->fh);
         $this->fh = null;
       }
-      $form->get('file')->addError(new FormError($this->trans->trans($error)));
+      $form->addError(new FormError($this->trans->trans($error)));
       return null;
     }
     // lettura dati
@@ -254,7 +263,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -264,34 +273,23 @@ class CsvImporter {
         $fields[$this->header[$key]] = $val;
       }
       // formattazione campi
-      $fields['docente'] =
-        strtoupper(str_replace([' ',"'","`","\t","\r","\n"], '', iconv('UTF-8', 'ASCII//TRANSLIT',$fields['docente'])));
       $fields['usernameDocente'] = strtolower(trim($fields['usernameDocente']));
       $fields['classe'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['classe']));
-      $fields['materia'] =
-        strtoupper(str_replace([' ',',','(',')',"'","`","\t","\r","\n"], '', iconv('UTF-8', 'ASCII//TRANSLIT',$fields['materia'])));
-      $fields['alunno'] =
-        strtoupper(str_replace([' ',"'","`","\t","\r","\n"], '', iconv('UTF-8', 'ASCII//TRANSLIT',$fields['alunno'])));
+      $fields['materia'] = strtoupper(str_replace([' ',',','(',')',"'","`","\t","\r","\n"], '',
+        iconv('UTF-8', 'ASCII//TRANSLIT', $fields['materia'])));
       $fields['usernameAlunno'] = strtolower(trim($fields['usernameAlunno']));
-      $fields['tipo'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['tipo']));
-      $fields['supplenza'] = ($fields['supplenza'] > 0 ? 1 : 0);
+      $fields['tipo'] = strtoupper(trim($fields['tipo']));
+      $fields['supplenza'] = strtoupper(trim($fields['supplenza']));
       // controlla campi obbligatori
-      if ((empty($fields['docente']) && empty($fields['usernameDocente'])) ||
-           empty($fields['classe']) || empty($fields['materia'])) {
+      if (empty($fields['usernameDocente']) || empty($fields['classe']) || empty($fields['materia'])) {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       // controlla esistenza di docente
-      if (!empty($fields['usernameDocente'])) {
-        $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['usernameDocente']);
-        unset($fields['docente']);
-      } else {
-        $lista = $this->em->getRepository('App:Docente')->findByNomeNormalizzato($fields['docente']);
-        unset($fields['usernameDocente']);
-      }
+      $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['usernameDocente']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -310,7 +308,7 @@ class CsvImporter {
       $lista = $this->em->getRepository('App:Classe')->findBy(array(
         'anno' => $fields['classe']{0},
         'sezione' => $fields['classe']{1}));
-      if (count($lista) != 1) {
+      if (count($lista) != 1 || strlen($fields['classe']) != 2) {
         // errore: classe
         fclose($this->fh);
         $this->fh = null;
@@ -329,16 +327,15 @@ class CsvImporter {
       }
       $materia = $lista[0];
       // controlla esistenza di alunno
-      if (!empty($fields['usernameAlunno'])) {
+      if (!empty($fields['usernameAlunno']) && $fields['usernameAlunno'] != '---') {
         $lista = $this->em->getRepository('App:Alunno')->findByUsername($fields['usernameAlunno']);
-        unset($fields['alunno']);
-      } elseif (!empty($fields['alunno'])) {
-        $lista = $this->em->getRepository('App:Alunno')->findByNomeNormalizzato($fields['alunno']);
-        unset($fields['usernameAlunno']);
+      } elseif ($fields['usernameAlunno'] == '---') {
+        // alunno da rimuovere
+        $lista = null;
+        $alunno = null;
       } else {
         // alunno non specificato
-        unset($fields['alunno']);
-        unset($fields['usernameAlunno']);
+        $empty_fields['usernameAlunno'] = true;
         $lista = null;
         $alunno = null;
       }
@@ -357,15 +354,23 @@ class CsvImporter {
       } elseif ($lista !== null) {
         $alunno = $lista[0];
       }
-      // controlla tipo
+      // controlla altri campi
       if (empty($fields['tipo'])) {
-        // default
+        // default: normale
+        $empty_fields['tipo'] = true;
         $fields['tipo'] = 'N';
       }
+      if (empty($fields['supplenza'])) {
+        // default: no
+        $empty_fields['supplenza'] = true;
+        $fields['supplenza'] = false;
+      } else {
+        // imposta valore
+        $fields['supplenza'] = ($fields['supplenza'] == 'S');
+      }
       // controlli incrociati su sostegno
-      if ($materia->getTipo() == 'S') {
+      if ($materia->getTipo() == 'S' && $fields['tipo'] == 'N') {
         // sostegno
-        //-- $fields['tipo'] = 'S';
         if ($alunno && $alunno->getClasse() != $classe) {
           // classe diversa da quella di alunno
           fclose($this->fh);
@@ -374,38 +379,49 @@ class CsvImporter {
           return $imported;
         }
       } else {
-        // materia non è sostegno, nessun alunno deve essere presente
+        // materia non è sostegno (o sostegno su potenziamento): alunno ignorato
         $alunno = null;
-        unset($fields['alunno']);
-        unset($fields['usernameAlunno']);
-        if ($fields['tipo'] == 'S') {
-          // tipo sostegno su materia non di sostegno
-          fclose($this->fh);
-          $this->fh = null;
-          $form->addError(new FormError($this->trans->trans('exception.file_tipo', ['num' => $count])));
-          return $imported;
-        }
+        $fields['usernameAlunno'] = null;
+        $empty_fields['usernameAlunno'] = true;
       }
       // controlla esistenza di cattedra
-      $lista = $this->em->getRepository('App:Cattedra')->findBy(array(
-        'docente' => $docente, 'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno));
-      if (count($lista) > 0) {
-        // cattedra esiste già: salta
-        unset($fields['tipo']);
-        unset($fields['supplenza']);
-        $imported['NONE'][$count] = $fields;
-        continue;
+      $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['docente' => $docente,
+        'classe' => $classe, 'materia' => $materia]);
+      if ($cattedra) {
+        // cattedra esiste
+        if ($filtro == 'T' || $filtro == 'E') {
+          // modifica cattedra
+          $error = $this->modificaCattedra($cattedra, $alunno, $fields, $empty_fields);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['EDIT'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONE'][$count] = $fields;
+        }
+      } else {
+        // cattedra non esiste
+        if ($filtro == 'T' || $filtro == 'N') {
+          // crea nuova cattedra
+          $error = $this->nuovaCattedra($fields, $docente, $classe, $materia, $alunno);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['NEW'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONEW'][$count] = $fields;
+        }
       }
-      // crea nuova cattedra
-      $error = $this->nuovaCattedra($fields, $docente, $classe, $materia, $alunno);
-      if ($error) {
-        // errore
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError('# '.$count.': '.$error));
-        return $imported;
-      }
-      $imported['NEW'][$count] = $fields;
     }
     // ok
     fclose($this->fh);
@@ -419,9 +435,9 @@ class CsvImporter {
    * @param UploadedFile $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista dei docenti importati
+   * @return array Lista degli alunni importati
    */
-  public function importaAlunni(UploadedFile $file, Form $form) {
+  public function importaAlunni(UploadedFile $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
       'citta', 'indirizzo', 'numeriTelefono', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
       'classe', 'email');
@@ -433,7 +449,7 @@ class CsvImporter {
         fclose($this->fh);
         $this->fh = null;
       }
-      $form->get('file')->addError(new FormError($this->trans->trans($error)));
+      $form->addError(new FormError($this->trans->trans($error)));
       return null;
     }
     // lettura dati
@@ -451,7 +467,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -500,7 +516,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       // controlla campi opzionali
@@ -657,17 +673,17 @@ class CsvImporter {
     return $imported;
   }
 
-
   /**
    * Importa i colloqui dei docenti da file CSV
    *
-   * @param UploadedFile $file File da importare
+   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
-   * @return array Lista dei docenti importati
+   * @return array Lista dei colloqui importati
    */
-  public function importaColloqui(UploadedFile $file, Form $form) {
-    $header = array('docente', 'username', 'sede', 'giorno', 'ora', 'frequenza', 'note');
+  public function importaColloqui(File $file=null, Form $form) {
+    $header = array('username', 'sede', 'giorno', 'ora', 'frequenza', 'note');
+    $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
     if ($error) {
@@ -676,7 +692,7 @@ class CsvImporter {
         fclose($this->fh);
         $this->fh = null;
       }
-      $form->get('file')->addError(new FormError($this->trans->trans($error)));
+      $form->addError(new FormError($this->trans->trans($error)));
       return null;
     }
     // lettura dati
@@ -693,7 +709,7 @@ class CsvImporter {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
         return $imported;
       }
       // lettura campi
@@ -703,33 +719,23 @@ class CsvImporter {
         $fields[$this->header[$key]] = $val;
       }
       // formattazione campi
-      $fields['docente'] =
-        strtoupper(str_replace([' ',"'","`","\t","\r","\n"], '', iconv('UTF-8', 'ASCII//TRANSLIT',$fields['docente'])));
       $fields['username'] = strtolower(trim($fields['username']));
       $fields['sede'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['sede']));
-      $fields['giorno'] =
-        strtoupper(str_replace([' ',"'","`","\t","\r","\n"], '', iconv('UTF-8', 'ASCII//TRANSLIT',$fields['giorno'])));
+      $fields['giorno'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['giorno']));
       $fields['ora'] = trim($fields['ora']);
       $fields['frequenza'] = strtoupper(trim($fields['frequenza']));
       $fields['note'] = trim($fields['note']);
       // controlla campi obbligatori
-      if ((empty($fields['docente']) && empty($fields['username'])) ||
-           empty($fields['sede']) || empty($fields['giorno']) || empty($fields['ora']) ||
+      if (empty($fields['username']) || empty($fields['sede']) || empty($fields['giorno']) || empty($fields['ora']) ||
            empty($fields['frequenza'])) {
         // errore
         fclose($this->fh);
         $this->fh = null;
-        $form->get('file')->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
+        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
       // controlla esistenza di docente
-      if (!empty($fields['username'])) {
-        $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['username']);
-        unset($fields['docente']);
-      } else {
-        $lista = $this->em->getRepository('App:Docente')->findByNomeNormalizzato($fields['docente']);
-        unset($fields['username']);
-      }
+      $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['username']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -774,7 +780,7 @@ class CsvImporter {
           $so->getFine()->format('H:i'), $so->getDurata()];
       }
       // controlla giorno
-      $lista_giorni = ['DOMENICA', 'LUNEDI', 'MARTEDI', 'MERCOLEDI', 'GIOVEDI', 'VENERDI', 'SABATO'];
+      $lista_giorni = ['DO', 'LU', 'MA', 'ME', 'GI', 'VE', 'SA'];
       $giorno = array_search($fields['giorno'], $lista_giorni);
       if ($giorno === false || !isset($ore[$giorno])) {
         // errore: giorno
@@ -803,16 +809,13 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di colloquio
-      $colloquio = $this->em->getRepository('App:Colloquio')->findBy(array(
-        'docente' => $docente, 'orario' => $scansione_oraria[0]->getOrario()));
+      $colloquio = $this->em->getRepository('App:Colloquio')->findOneBy(['docente' => $docente,
+        'orario' => $scansione_oraria[0]->getOrario()]);
       if ($colloquio) {
         // colloquio esiste
-        if ($form->get('onlynew')->getData()) {
-          // nessuna modifica
-          $imported['NONE'][$count] = $fields;
-        } else {
+        if ($filtro == 'T' || $filtro == 'E') {
           // modifica colloquio
-          $error = $this->modificaColloquio($colloquio[0], $giorno, $ora, $frequenza, $fields['note']);
+          $error = $this->modificaColloquio($colloquio, $giorno, $ora, $frequenza, $fields['note']);
           if ($error) {
             // errore
             fclose($this->fh);
@@ -821,21 +824,29 @@ class CsvImporter {
             return $imported;
           }
           $imported['EDIT'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONE'][$count] = $fields;
         }
       } else {
         // crea nuovo colloquio
-        $error = $this->nuovoColloquio($docente, $scansione_oraria[0]->getOrario(), $giorno, $ora,
-          $frequenza, $fields['note']);
-        if ($error) {
-          // errore
-          fclose($this->fh);
-          $this->fh = null;
-          $form->addError(new FormError('# '.$count.': '.$error));
-          return $imported;
+        if ($filtro == 'T' || $filtro == 'N') {
+          // inserisce
+          $error = $this->nuovoColloquio($docente, $scansione_oraria[0]->getOrario(), $giorno, $ora,
+            $frequenza, $fields['note']);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['NEW'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONEW'][$count] = $fields;
         }
-        $imported['NEW'][$count] = $fields;
       }
-
     }
     // ok
     fclose($this->fh);
@@ -852,7 +863,7 @@ class CsvImporter {
    * @return array Lista degli ATA importati
    */
   public function importaAta(File $file=null, Form $form) {
-    $header = array('cognome', 'nome', 'sesso', 'username', 'password', 'email', 'sede', 'tipo');
+    $header = array('cognome', 'nome', 'sesso', 'username', 'password', 'email', 'sede', 'tipo', 'segreteria');
     $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
@@ -898,6 +909,7 @@ class CsvImporter {
       $fields['email'] = trim($fields['email']);
       $fields['sede'] = strtoupper(trim($fields['sede']));
       $fields['tipo'] = strtoupper(trim($fields['tipo']));
+      $fields['segreteria'] = strtoupper(trim($fields['segreteria']));
       // controlla campi obbligatori
       if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso'])) {
         // errore
@@ -931,7 +943,16 @@ class CsvImporter {
       if (empty($fields['tipo'])) {
         // default: amministrativo
         $empty_fields['tipo'] = true;
-        $fields['sede'] = 'A';
+        $fields['tipo'] = 'A';
+      }
+      if (empty($fields['segreteria'])) {
+        // default: no
+        $empty_fields['segreteria'] = true;
+        $fields['segreteria'] = false;
+      } else {
+        // valore dipende da tipo
+        $fields['segreteria'] = ($fields['tipo'] == 'A' || $fields['tipo'] == 'D') ?
+          ($fields['segreteria'] == 'S') : false;
       }
       // controlla esistenza
       $ata = $this->em->getRepository('App:Ata')->findOneByUsername($fields['username']);
@@ -984,6 +1005,234 @@ class CsvImporter {
     return $imported;
   }
 
+  /**
+   * Importa l'orario dei docenti da file CSV
+   *
+   * @param File $file File da importare
+   * @param Form $form Form su cui visualizzare gli errori
+   *
+   * @return array Lista degli orari importati
+   */
+  public function importaOrario(File $file=null, Form $form) {
+    $header = array('username', 'sede', 'giorno', 'ora', 'classe', 'materia');
+    $filtro = $form->get('filtro')->getData();
+    // controllo file
+    $error = $this->checkFile($file, $header);
+    if ($error) {
+      // errore
+      if ($this->fh) {
+        fclose($this->fh);
+        $this->fh = null;
+      }
+      $form->addError(new FormError($this->trans->trans($error)));
+      return null;
+    }
+    // lettura dati
+    $imported = array();
+    $count = 0;
+    while (($data = fgetcsv($this->fh)) !== false) {
+      $count++;
+      if (count($data) == 0 || (count($data) == 1 && $data[0] == '')) {
+        // riga vuota, salta
+        continue;
+      }
+      // controllo numero campi
+      if (count($data) != count($header)) {
+        // errore
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
+        return $imported;
+      }
+      // lettura campi
+      $fields = array();
+      $empty_fields = array();
+      foreach ($data as $key=>$val) {
+        $fields[$this->header[$key]] = $val;
+      }
+      // formattazione campi
+      $fields['username'] = strtolower(trim($fields['username']));
+      $fields['sede'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['sede']));
+      $fields['giorno'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['giorno']));
+      $fields['ora'] = trim($fields['ora']);
+      $fields['classe'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['classe']));
+      $fields['materia'] = strtoupper(str_replace([' ',',','(',')',"'","`","\t","\r","\n"], '',
+        iconv('UTF-8', 'ASCII//TRANSLIT', $fields['materia'])));
+      // controlla campi obbligatori
+      if (empty($fields['username']) || empty($fields['sede']) || empty($fields['giorno']) || empty($fields['ora']) ||
+          empty($fields['classe']) || empty($fields['materia'])) {
+        // errore
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
+        return $imported;
+      }
+      // controlla esistenza di docente
+      $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['username']);
+      if (count($lista) == 0) {
+        // errore: docente non esiste
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_docente_mancante', ['num' => $count])));
+        return $imported;
+      } elseif (count($lista) > 1) {
+        // errore: docente duplicato
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_docente_duplicato', ['num' => $count])));
+        return $imported;
+      }
+      $docente = $lista[0];
+      // controlla esistenza di sede
+      $lista = $this->em->getRepository('App:Sede')->findByCitta($fields['sede']);
+      if (count($lista) != 1) {
+        // errore: sede
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_sede', ['num' => $count])));
+        return $imported;
+      }
+      $sede = $lista[0];
+      // legge orario
+      $definizione_orario = $this->em->getRepository('App:Orario')->createQueryBuilder('o')
+        ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+        ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $sede])
+        ->getQuery()
+        ->getResult();
+      $scansione_oraria = $this->em->getRepository('App:ScansioneOraria')->createQueryBuilder('so')
+        ->join('so.orario', 'o')
+        ->where('o.id=:orario')
+        ->setParameters(['orario' => ($definizione_orario ? $definizione_orario[0] : null)])
+        ->getQuery()
+        ->getResult();
+      if (!$scansione_oraria) {
+        // errore: orario
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_orario', ['num' => $count])));
+        return $imported;
+      }
+      $ore = array();
+      foreach ($scansione_oraria as $so) {
+        $ore[$so->getGiorno()][$so->getOra()] = [$so->getInizio()->format('H:i'),
+          $so->getFine()->format('H:i'), $so->getDurata()];
+      }
+      // controlla giorno
+      $lista_giorni = ['DO', 'LU', 'MA', 'ME', 'GI', 'VE', 'SA'];
+      $giorno = array_search($fields['giorno'], $lista_giorni);
+      if ($giorno === false || !isset($ore[$giorno])) {
+        // errore: giorno
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_giorno', ['num' => $count])));
+        return $imported;
+      }
+      // controlla ora
+      $ora = intval($fields['ora']);
+      if (!isset($ore[$giorno][$ora])) {
+        // errore: ora
+        fclose($this->fh);
+        $this->fh = null;
+        $form->addError(new FormError($this->trans->trans('exception.file_ora', ['num' => $count])));
+        return $imported;
+      }
+      // controlla esistenza di classe
+      $classe = null;
+      if ($fields['classe'] != '---') {
+        $lista = $this->em->getRepository('App:Classe')->findBy(array(
+          'anno' => $fields['classe']{0},
+          'sezione' => $fields['classe']{1}));
+        if (count($lista) != 1 || strlen($fields['classe']) != 2) {
+          // errore: classe
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
+          return $imported;
+        }
+        $classe = $lista[0];
+      }
+      // controlla esistenza di materia
+      $materia = null;
+      if ($fields['materia'] != '---') {
+        $lista = $this->em->getRepository('App:Materia')->findByNomeNormalizzato($fields['materia']);
+        if (count($lista) != 1) {
+          // errore: materia
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError($this->trans->trans('exception.file_materia', ['num' => $count])));
+          return $imported;
+        }
+        $materia = $lista[0];
+      }
+      // controlla esistenza cattedra
+      if ($classe && $materia) {
+        $lista = $this->em->getRepository('App:Cattedra')->findBy(['docente' => $docente,
+          'classe' => $classe, 'materia' => $materia]);
+        if (count($lista) != 1) {
+          // errore: cattedra
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError($this->trans->trans('exception.file_cattedra_mancante', ['num' => $count])));
+          return $imported;
+        }
+        $cattedra = $lista[0];
+      } else {
+        // cancella dato
+        $classe = null;
+        $materia = null;
+        $cattedra = null;
+      }
+      // controlla esistenza di orario
+      $orario = $this->em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+        ->join('od.orario', 'o')
+        ->join('od.cattedra', 'c')
+        ->where('o.id=:orario AND c.docente=:docente AND od.giorno=:giorno AND od.ora=:ora')
+        ->setParameters(['orario' => $definizione_orario[0], 'docente' => $docente,
+          'giorno' => $giorno, 'ora' => $ora])
+        ->getQuery()
+        ->getOneOrNullResult();
+      if ($orario) {
+        // orario esiste
+        if ($filtro == 'T' || $filtro == 'E') {
+          // modifica orario
+          $error = $this->modificaOrario($orario, $cattedra);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['EDIT'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONE'][$count] = $fields;
+        }
+      } else {
+        // crea nuovo orario
+        if (($filtro == 'T' || $filtro == 'N') && $cattedra) {
+          // inserisce
+          $error = $this->nuovoOrario($definizione_orario[0], $giorno, $ora, $cattedra);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['NEW'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONEW'][$count] = $fields;
+        }
+      }
+    }
+    // ok
+    fclose($this->fh);
+    $this->fh = null;
+    return $imported;
+  }
+
 
   //==================== METODI PRIVATI ====================
 
@@ -1002,10 +1251,6 @@ class CsvImporter {
       // errore file mancante
       return 'exception.file_mancante';
     }
-    //-- if (strtolower($file->getExtension()) != 'csv') {
-      //-- // errore di formato
-      //-- return 'exception.file_format';
-    //-- }
     // apre file
     $this->fh = fopen($file->getPathname(), 'r');
     if (!$this->fh) {
@@ -1128,7 +1373,7 @@ class CsvImporter {
     // crea oggetto cattedra
     $cattedra = (new Cattedra())
       ->setAttiva(true)
-      ->setSupplenza($fields['supplenza'] == 1)
+      ->setSupplenza($fields['supplenza'])
       ->setTipo($fields['tipo'])
       ->setMateria($materia)
       ->setDocente($docente)
@@ -1389,7 +1634,8 @@ class CsvImporter {
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso'])
       ->setSede($sede)
-      ->setTipo($fields['tipo']);
+      ->setTipo($fields['tipo'])
+      ->setSegreteria($fields['segreteria']);
     $password = $this->encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
     $ata->setPassword($password);
     // valida dati
@@ -1438,6 +1684,11 @@ class CsvImporter {
     } else {
       unset($fields['tipo']);
     }
+    if (!isset($empty_fields['segreteria'])) {
+      $ata->setSegreteria($fields['segreteria']);
+    } else {
+      unset($fields['segreteria']);
+    }
     // legge sede
     $sede = $this->em->getRepository('App:Sede')->findOneByCitta($fields['sede']);
     if (!isset($empty_fields['sede']) && !$sede) {
@@ -1452,6 +1703,103 @@ class CsvImporter {
     }
     // valida dati
     $errors = $this->validator->validate($ata);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+    } else {
+      // ok, memorizza su db
+      $this->em->flush();
+      return null;
+    }
+  }
+
+  /**
+   * Modifica una cattedra esistente
+   *
+   * @param Cattedra $cattedra Cattedra da modificare
+   * @param Alunno $alunno Alunno da modificare
+   * @param array $fields Lista dei dati dell'utente
+   * @param array $empty_fields Lista dei dati nulli
+   *
+   * @return string|null Messaggio di errore o NULL se tutto ok
+   */
+  private function modificaCattedra(Cattedra $cattedra, Alunno $alunno=null, &$fields, $empty_fields) {
+    // modifica dati opzionali solo se specificati
+    if (!isset($empty_fields['usernameAlunno'])) {
+      $cattedra->setAlunno($alunno);
+    } else {
+      unset($fields['usernameAlunno']);
+    }
+    if (!isset($empty_fields['tipo'])) {
+      $cattedra->setTipo($fields['tipo']);
+    } else {
+      unset($fields['tipo']);
+    }
+    if (!isset($empty_fields['supplenza'])) {
+      $cattedra->setSupplenza($fields['supplenza']);
+    } else {
+      unset($fields['supplenza']);
+    }
+    // valida dati
+    $errors = $this->validator->validate($cattedra);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+    } else {
+      // ok, memorizza su db
+      $this->em->flush();
+      return null;
+    }
+  }
+
+  /**
+   * Crea un nuovo colloquio
+   *
+   * @param Orario $orario Orario per la sede
+   * @param int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+   * @param int $ora Numero dell'ora di lezione [1,2,...]
+   * @param Cattedra $cattedra Cattedra del docente
+   *
+   * @return string|null Messaggio di errore o NULL se tutto ok
+   */
+  private function nuovoOrario(Orario $orario, $giorno, $ora, Cattedra $cattedra) {
+    // crea oggetto orario
+    $orario = (new OrarioDocente())
+      ->setOrario($orario)
+      ->setGiorno($giorno)
+      ->setOra($ora)
+      ->setCattedra($cattedra);
+    // valida dati
+    $errors = $this->validator->validate($orario);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
+    } else {
+      // ok, memorizza su db
+      $this->em->persist($orario);
+      $this->em->flush();
+      return null;
+    }
+  }
+
+  /**
+   * Modifica un orario esistente
+   *
+   * @param OrarioDocente $orario Orario del docente da modificare
+   * @param Cattedra $cattedra Cattedra del docente
+   *
+   * @return string|null Messaggio di errore o NULL se tutto ok
+   */
+  private function modificaOrario(OrarioDocente $orario, Cattedra $cattedra=null) {
+    if ($cattedra) {
+      // modifica catttedra di orario
+      $orario->setCattedra($cattedra);
+    } else {
+      // cancella orario
+      $this->em->remove($orario);
+    }
+    // valida dati
+    $errors = $this->validator->validate($orario);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
       return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();

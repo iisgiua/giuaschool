@@ -1,41 +1,49 @@
 # translations/messages+intl-icu.it.yml
 
+##### ETICHETTE #####
 label.abilitato: Abilitato
 label.action: Azione
 label.add: Aggiungi
 label.alias: Alias
+label.allegati: Allegati
+label.altri_info: Lista separata da virgole
+label.altri: Altri
 label.altro: Altro
-label.alunni: Alunni
 label.alunni_assenti: Seleziona alunni assenti
-label.alunno: Alunno
+label.alunni: Alunni
 label.alunno_H: Alunno disabile
+label.alunno: Alunno
 label.annotazione: Annotazione sul registro
 label.appello_A: Assente
 label.appello_P: Presente
 label.appello_R: Ritardo
 label.appId: ID APP
-label.argomenti: Argomenti
 label.argomenti_sostegno: Argomenti del sostegno
+label.argomenti: Argomenti
 label.assenze: Assenze
+label.ata_segreteria: Gestione Segreteria
 label.ata_tipo_A: Amministrativo
 label.ata_tipo_C: Collaboratore Scolastico
 label.ata_tipo_D: DSGA
 label.ata_tipo_T: Tecnico
 label.ata_tipo_U: Autista
-label.attivita: Attività
+label.ata_tipo: Mansioni
+label.ata: ATA
 label.attivita_sostegno: Attività del sostegno
+label.attivita: Attività
 label.autore: Autore
 label.autorizza_entrata: Autorizzazione ritardo
 label.autorizza_uscita: Autorizzazione uscita
 label.bes_B: Alunno con bisogni educativi speciali
-label.bes: BES
 label.bes_D: Alunno con certificazione DSA
 label.bes_H: Alunno con sostegno
 label.bes_N: No
+label.bes: BES
 label.cancel: Annulla
-label.cattedra: Classe e materia
 label.cattedra_compito: Classe e materia
 label.cattedra_verifica: Classe e materia
+label.cattedra: Classe e materia
+label.cattedre: Cattedre
 label.certificazione_italiano: Asse dei linguaggi - Lingua italiana
 label.certificazione_lingua: Asse dei linguaggi - Lingua straniera
 label.certificazione_linguaggio: Asse dei linguaggi - Altri linguaggi
@@ -47,6 +55,12 @@ label.certificazione_matematica: Asse matematico
 label.certificazione_scienze: Asse scientifico-tecnologico
 label.certificazione_storia: Asse storico-sociale
 label.choose_option: Scegli un'opzione
+label.circolari_da_leggere: Da leggere
+label.circolari_filtro_oggetto: Filtra per oggetto
+label.circolari_filtro_visualizza: Filtra per tipo di visualizzazione
+label.circolari_lette: Lette
+label.circolari_proprie: Destinate a me
+label.circolari_tutte: Tutte
 label.citta: Città
 label.classe: Classe
 label.classi: Classi
@@ -54,17 +68,20 @@ label.close: Chiude
 label.codice_fiscale: Codice fiscale
 label.cognome: Cognome
 label.colloquio: Colloquio
+label.colloqui: Colloqui
 label.comune_nascita: Comune di nascita
 label.conteggio_entrate: Valido per il conteggio dei ritardi?
 label.conteggio_uscite: Valido per il conteggio delle uscite?
 label.continua: Continua
+label.convalida_assenze: Convalida giustificazioni assenze
+label.convalida_ritardi: Convalida giustificazioni ritardi
 label.coordinatore: Coordinatore
 label.coordinatori: Coordinatori
 label.crea_annotazione: Annotazione sul registro
-label.credito3: Credito terza
-label.credito4: Credito quarta
 label.credito_formativo: Credito formativo
 label.credito_scolastico: Credito scolastico
+label.credito3: Credito terza
+label.credito4: Credito quarta
 label.criterio_credito_A: Alternanza scuola lavoro
 label.criterio_credito_desc_A: Partecipazione alle attività di Alternanza Scuola Lavoro
 label.criterio_credito_desc_F: Frequenza assidua
@@ -83,12 +100,13 @@ label.csv_file: File CSV
 label.current_password: Password attuale
 label.data_colloquio: Data del colloquio
 label.data_compito: Data
-label.data: Data
 label.data_evento: Data dell'evento
 label.data_fine: Data fine
 label.data_inizio: Data inizio
 label.data_nascita: Data di nascita
+label.data_numero: Data e Numero
 label.data_verifica: Data
+label.data: Data
 label.delete: Cancella
 label.deroga_famiglia: Deroga per gravi situazioni famigliari
 label.deroga_religione: Deroga per religione che considera il sabato come giorno di riposo
@@ -99,11 +117,14 @@ label.descrizione_verifica: Descrizione o argomenti
 label.destinatari: Destinatari
 label.disabilitato: Disabilitato
 label.disable: Disabilita
+label.doc15: Documenti del 15 maggio
 label.docente: Docente
 label.docenti_classe: Docenti della classe
 label.docenti: Docenti
-label.documento: Documento
+label.documenti_scrutinio: Documenti dello scrutinio
 label.documento_mancante: Documento non inserito
+label.documento: Documento
+label.dsga: DSGA
 label.duplica_dati: Duplica dati su
 label.edit: Modifica
 label.email: Email
@@ -119,15 +140,17 @@ label.femminile: Donna
 label.filtra: Filtra
 label.filtro_alunno: Filtra per alunno
 label.filtro_classe: Filtra per classe
+label.filtro_esistenti: Solo già esistenti
+label.filtro_importazione: Filtro sui dati da importare
 label.filtro_individuale: Filtra per utente
 label.filtro_materia: Filtra per materia
+label.filtro_mese: Filtra per data
 label.filtro_nessuno: Nessuno
+label.filtro_nuovi: Solo nuovi
 label.filtro_sede: Filtra per sede
 label.filtro_tutti: Tutti
-label.filtro_mese: Filtra per data
-label.filtro_nuovi: Solo nuovi
-label.filtro_esistenti: Solo già esistenti
-label.filtro_importazione: Dati da importare
+label.filtro_utenti: Filtro per utente
+label.firma_circolare: Conferma lettura
 label.frequenza_estero: Anno all'estero
 label.genitori_classe: Genitori della classe
 label.genitori: Genitori
@@ -138,35 +161,43 @@ label.giustifica_salute: Motivi di salute
 label.giustifica_sport: Attività sportiva
 label.giustifica_trasporto: Problemi di trasporto
 label.giustificazione: Giustificato?
+label.impostazioni: Impostazioni
 label.indietro: Indietro
 label.indirizzo: Indirizzo
 label.inserisci_motivazione: Inserisci la motivazione predefinita
 label.invia: Invia
-label.no_scrutinabile_assenze: Non scrutinabile per superamento del limite di assenze
+label.invio_notifiche: Invio delle notifiche
 label.leggere_in_classe: Leggere agli alunni
-label.login: Accedi
 label.login_otp: Codice OTP<br>(solo per i docenti abilitati)
+label.login: Accedi
 label.logout: Esci
 label.lunedi: Lunedì
 label.mai: Mai
+label.mansioni: Mansioni
 label.martedi: Martedì
 label.maschile: Uomo
 label.materia: Materia
 label.mercoledi: Mercoledì
 label.messaggio_colloquio: Messaggio per i genitori
 label.motivazione_assenza: Motivazione dell'assenza
+label.motivazione_facoltativa: Motivazione facoltativa
+label.motivazione_obbligatoria: Motivazione obbligatoria
 label.motivazione_ritardo: Motivazione del ritardo
 label.nessuna_classe: Nessuna classe
+label.nessuna_sede: Nessuna sede
 label.nessuno: Nessuno
-label.new_password2: Ripeti la nuova password
 label.new_password: Nuova password
-label.nome: Nome
-label.no: No
+label.new_password2: Ripeti la nuova password
+label.no_scrutinabile_assenze: Non scrutinabile per superamento del limite di assenze
 label.no_scrutinabile_cessata_frequenza: Non scrutinabile perché ha cessato di frequentare entro il 15 marzo (senza formalizzare il ritiro)
+label.no: No
+label.nome: Nome
 label.nota_classe: Nota di classe
 label.nota_individuale: Nota individuale
 label.note: Note
+label.notifica_circolare: Forza invio notifica
 label.numeri_telefono: Numeri di telefono
+label.numero: Numero
 label.nuova_password_classe: Genera password per la classe
 label.nuova_password: Genera password
 label.oggetto: Oggetto
@@ -174,22 +205,28 @@ label.ogni_materia: Tutte le materie
 label.ora_entrata: Ora ingresso
 label.ora_fine: Ora fine
 label.ora_inizio: Ora inizio
-label.ora: Ora
 label.ora_uscita: Ora uscita
+label.ora: Ora
 label.otp: Codice OTP
-label.password2: Ripeti la password
+label.pagina_precedente: Pagina precedente
+label.pagina_successiva: Pagina successiva
 label.password: Password
-label.periodo_A: A.S. Precedente
+label.password2: Ripeti la password
 label.periodo_1: Valutazione Intermedia
 label.periodo_2: ~
+label.periodo_A: A.S. Precedente
 label.periodo_F: Scrutinio Finale
-label.periodo_P: Primo Trimestre
 label.periodo_I: Scrutinio Integrativo
+label.periodo_P: Primo Trimestre
 label.periodo_S: ~
 label.periodo_X: Scrutinio Rinviato
+label.piani: Piani di lavoro
 label.precedente: Precedente
 label.presenti: Alunni presenti
 label.privacy_app: "Accetto che i miei dati personali presenti nel Registro Elettronico vengano inviati a servizi esterni e trattati da altri soggetti, liberando l' {intestazione_istituto_breve} da ogni responsabilità in merito.<br><a href=\"#\" data-toggle=\"modal\" data-target=\"#gs-privacy\">Clicca qui per avere maggiori dettagli.</a>"
+label.privacy_circolare: Tutela della privacy
+label.prof_F: "Prof.ssa"
+label.prof_M: "Prof."
 label.provvedimenti_disciplinari: Provvedimenti disciplinari
 label.provvedimento: Provvedimento disciplinare
 label.qualsiasi_classe: Qualsiasi classe
@@ -208,9 +245,9 @@ label.registro_sostegno: Registro di sostegno
 label.religione_D: No, studio con docente
 label.religione_I: No, studio individuale
 label.religione_M: No, materia alternativa
-label.religione: Religione
 label.religione_S: Si avvale
 label.religione_U: No, uscita
+label.religione: Religione
 label.reset_otp: Reset OTP
 label.ritardi: Ritardi
 label.ROLE_ALUNNO: Studente
@@ -222,15 +259,21 @@ label.ROLE_PRESIDE: Preside
 label.ROLE_STAFF: Staff
 label.ROLE_UTENTE: Utente
 label.sabato: Sabato
+label.scegli_alunni: Scegli gli alunni
 label.scegli_alunno: Scegli l'alunno
 label.scegli_cattedra: Scegli la classe e la materia
 label.scegli_classe: Scegli la classe
+label.scegli_classi: Scegli le classi
 label.scegli_docente: Scegli il docente
+label.scegli_docenti: Scegli i docenti
 label.scegli_esito: Scegli l'esito dello scrutinio
+label.scegli_genitori: Scegli i genitori degli alunni
 label.scegli_materia: Scegli la materia
+label.scegli_materie: Scegli le materie
 label.scegli_periodo: Scegli il periodo
 label.scegli_recupero_2: Indica se il debito formativo è stato recuperato
 label.scegli_recupero: Scegli la modalità di recupero
+label.scegli_utenti: Scegli gli utenti
 label.scelta_giustifica: Scegli la motivazione
 label.scelta_materia: Scegli la materia
 label.scrutinabile_deroga: Scrutinabile in deroga con la seguente motivazione
@@ -249,14 +292,20 @@ label.si: Si
 label.solo_nuovi: Solo nuovi
 label.staff: Staff
 label.stampa: Stampa su PDF
+label.stato_circolare_bozza: In bozza
+label.stato_circolare_pubblicata: Pubblicata
+label.stato_circolare_tutti: Qualsiasi stato
+label.stato_circolare: Stato
 label.stato_colloquio_C: Colloquio confermato
 label.stato_colloquio_N: Colloquio rifiutato
 label.stato_colloquio: Stato della richiesta
+label.stato: Stato
 label.submit: Conferma
 label.successiva: Successiva
 label.successivo: Successivo
 label.supplenza: Supplenza
 label.testo: Testo
+label.tipo_documento: Tipo di documenti
 label.tipo_I: ITP
 label.tipo_N: Normale
 label.tipo_nota: Tipo di nota
@@ -266,12 +315,16 @@ label.tipo: Tipo
 label.tutte_classi: Tutte le classi
 label.tutti_destinatari: Tutti i destinatari
 label.tutti_docenti: Tutti i docenti
+label.tutti_documenti: Tutti i documenti
 label.tutti_staff: Tutto lo staff
 label.ultimo_accesso: Ultimo accesso
 label.upload_cancella: Annulla
 label.upload_rimuove_file: Cancella
 label.uscite: Uscite
 label.username: Nome utente
+label.utenti: Utenti
+label.utente_attivo: Utente attivo
+label.utente_disabilitato: Utente disabilitato
 label.valutazione_O: orale
 label.valutazione_P: pratica
 label.valutazione_S: scritta
@@ -285,60 +338,17 @@ label.voti_P: Pratico
 label.voti_S: Scritto/Grafico
 label.voto_argomento: Argomenti o descrizione della prova
 label.voto_giudizio: Giudizio
-label.warning: Attenzione!
-label.convalida_assenze: Convalida giustificazioni assenze
-label.convalida_ritardi: Convalida giustificazioni ritardi
-label.numero: Numero
-label.allegati: Allegati
-label.data_numero: Data e Numero
-label.impostazioni: Impostazioni
-label.firma_circolare: Conferma lettura
-label.privacy_circolare: Tutela della privacy
-label.dsga: DSGA
-label.ata: ATA
-label.altri: Altri
-label.scegli_classi: Scegli le classi
-label.scegli_materie: Scegli le materie
-label.scegli_docenti: Scegli i docenti
-label.scegli_utenti: Scegli gli utenti
-label.filtro_utenti: Filtro per utente
-label.scegli_genitori: Scegli i genitori degli alunni
-label.scegli_alunni: Scegli gli alunni
-label.altri_info: Lista separata da virgole
-label.stato_circolare: Stato
-label.stato_circolare_bozza: In bozza
-label.stato_circolare_pubblicata: Pubblicata
-label.stato_circolare_tutti: Qualsiasi stato
-label.circolari_tutte: Tutte
-label.circolari_proprie: Destinate a me
-label.circolari_da_leggere: Da leggere
-label.circolari_lette: Lette
-label.circolari_filtro_visualizza: Filtra per tipo di visualizzazione
-label.circolari_filtro_oggetto: Filtra per oggetto
-label.nessuna_sede: Nessuna sede
-label.ata_tipo: Mansioni
-label.ata_segreteria: Gestione Segreteria
-label.notifica_circolare: Forza invio notifica
-label.invio_notifiche: Invio delle notifiche
-label.tutti_documenti: Tutti i documenti
-label.piani: Piani di lavoro
-label.doc15: Documenti del 15 maggio
-label.tipo_documento: Tipo di documenti
-label.prof_M: "Prof."
-label.prof_F: "Prof.ssa"
-label.motivazione_obbligatoria: Motivazione obbligatoria
-label.motivazione_facoltativa: Motivazione facoltativa
-label.documenti_scrutinio: Documenti dello scrutinio
-label.stato: Stato
 label.voto_in_media: Utilizza nel calcolo delle medie?
-label.mansioni: Mansioni
-label.utente_attivo: Utente attivo
-label.utente_disabilitato: Utente disabilitato
-label.pagina_precedente: Pagina precedente
-label.pagina_successiva: Pagina successiva
+label.warning: Attenzione!
+label.importazione_docenti_tipo: Tipo di dati da importare
+label.orario: Orario
 
 
-##### PAGINE NUOVO TEMA #####
+
+
+##### PAGINE #####
+
+#=== nuovo tema ===#
 page.info.noteLegali: Note legali
 title.info.noteLegali: Note legali
 page.info.privacy: Informativa sulla privacy
@@ -352,6 +362,8 @@ title.ata.importa: Importa i dati del Personale ATA
 page.ata.modifica: Modifica ATA
 title.ata.modifica: Modifica i dati del Personale ATA
 title.ata.modifica_edit: Modifica i dati dell'utente
+page.docenti.importa: Importa Docenti
+title.docenti.importa: Importa i dati dei Docenti
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -366,18 +378,23 @@ page.archiviazione: Archiviazione Registri
 page.bacheca_avvisi: Avvisi Docenti
 page.cambio_classe: Cambio Classe
 page.cattedre: Gestione Cattedre
+page.circolari_ata: Lista Circolari
+page.circolari_docenti: Lista Circolari
+page.circolari_genitori: Lista Circolari
+page.circolari_gestione: Gestione Circolari
 page.colloqui_edit: Risposta Colloquio Richiesto
 page.coordinatore_assenze: Assenze della Classe
 page.coordinatore_avvisi: Gestione Avvisi
 page.coordinatore_classe: Classe
 page.coordinatore_note: Note della Classe
-page.coordinatore: Ruolo di Coordinatore
 page.coordinatore_scrutinio: Gestione Scrutinio
 page.coordinatore_situazione: Situazione Alunni
 page.coordinatore_voti: Voti della Classe
+page.coordinatore: Ruolo di Coordinatore
 page.docenti_colloqui: Colloqui Docenti
 page.docenti: Gestione Docenti
 page.documenti_classi: Documenti Classi
+page.documenti_doc15: Documenti 15 Maggio
 page.documenti_piani: Inserimento Piani
 page.documenti_programmi: Inserimento Programmi
 page.documenti_relazioni: Inserimento Relazioni
@@ -386,34 +403,36 @@ page.genitori_argomenti: Argomenti delle Lezioni
 page.genitori_assenze: Assenze
 page.genitori_avvisi: Avvisi Genitori
 page.genitori_colloqui: Prenotazione Colloqui
+page.genitori_deroghe: Autorizzazioni
 page.genitori_eventi: Agenda Genitori
 page.genitori_lezioni: Lezioni Svolte
 page.genitori_note: Note Disciplinari
 page.genitori_osservazioni: Osservazioni
 page.genitori_pagelle: Pagelle
 page.genitori_voti: Valutazioni
-page.genitori_deroghe: Autorizzazioni
 page.home: Pagina Principale
 page.importa_alunni: Importa Alunni
+page.importa_ata: Importa ATA
 page.importa_docenti: Importa Docenti
 page.lezioni_argomenti: Argomenti delle Lezioni
 page.lezioni_assenze: Registro Assenze
 page.lezioni_classe: Classe/Materia
-page.lezioni: Gestione Lezioni
 page.lezioni_note: Note Disciplinari
-page.lezioni_osservazioni: Osservazioni sugli Alunni
 page.lezioni_osservazioni_personali: Diario Personale
+page.lezioni_osservazioni: Osservazioni sugli Alunni
 page.lezioni_proposte: Proposte di Voto
 page.lezioni_registro: Registro Lezioni
 page.lezioni_riepilogo: Riepilogo delle Lezioni
 page.lezioni_tabellone: Tabellone Scrutini
 page.lezioni_voti_dettagli: Dettagli Valutazioni
 page.lezioni_voti: Quadro Valutazioni
-page.login: Accesso al Registro Elettronico
+page.lezioni: Gestione Lezioni
 page.login_attivazione: Attivazione Alunni
 page.login_conferma: Conferma Attivazione
+page.login: Accesso al Registro Elettronico
 page.manutenzione: Manutenzione Registro
 page.modifica_alunni: Modifica Alunni
+page.modifica_ata: Modifica ATA
 page.modifica_docenti: Modifica Docenti
 page.modifica_profilo: Gestione Profilo
 page.mostra_alunni: Dettagli Alunni
@@ -434,36 +453,29 @@ page.staff_annotazioni: Annotazioni sul Registro
 page.staff_assenze: Gestione Assenze
 page.staff_autorizza: Ritardi e Uscite
 page.staff_avvisi_attivita: Avvisi Attività
-page.staff_avvisi: Avvisi Generici
 page.staff_avvisi_entrate: Avvisi Ingresso
 page.staff_avvisi_individuali: Avvisi Individuali
 page.staff_avvisi_uscite: Avvisi Uscita
+page.staff_avvisi: Avvisi Generici
+page.staff_circolari: Gestione Circolari
 page.staff_colloqui: Ore Colloqui
 page.staff_deroghe: Deroghe Ingressi e Uscite
+page.staff_doc15: Documenti 15 Maggio
 page.staff_password: Genera Password
 page.staff_piani: Inserimento Piani
 page.staff_programmi: Inserimento Programmi
 page.staff_relazioni: Inserimento Relazioni
-page.staff: Ruolo di Staff
 page.staff_situazione: Situazione Alunni
 page.staff_statistiche: Statistiche Lezioni
+page.staff: Ruolo di Staff
 page.utenti_email: Cambia Email
+page.utenti_notifiche: Gestione Notifiche
 page.utenti_otp: Abilita OTP
 page.utenti_password: Cambia Password
 page.utenti_profilo: Profilo Utente
-page.staff_circolari: Gestione Circolari
-page.circolari_gestione: Gestione Circolari
-page.circolari_genitori: Lista Circolari
-page.circolari_docenti: Lista Circolari
-page.circolari_ata: Lista Circolari
-page.importa_ata: Importa ATA
-page.modifica_ata: Modifica ATA
-page.utenti_notifiche: Gestione Notifiche
-page.documenti_doc15: Documenti 15 Maggio
-page.staff_doc15: Documenti 15 Maggio
-
 
 title.agenda_eventi: Agenda degli eventi per il docente
+title.alias_exit: Esci dall'alias
 title.alias: Impersona un altro utente
 title.alunni_avvisi: Avvisi indirizzati agli studenti
 title.annotazioni: Inserimento annotazioni sul registro
@@ -471,9 +483,13 @@ title.appello: Appello degli studenti
 title.archiviazione: Creazione e archiviazione dei registri
 title.autorizza: Gestione dei ritardi e delle uscite anticipate
 title.bacheca_avvisi: Avvisi indirizzati al docente
-title.cambio_classe: Inserisci un nuovo cambio di classe
 title.cambio_classe_modifica: Modifica un cambio di classe esistente
-title.coordinatore: Aggiungi o modifica un coordinatore del Consiglio di Classe
+title.cambio_classe: Inserisci un nuovo cambio di classe
+title.circolari_alunni: Circolari indirizzate agli studenti
+title.circolari_ata: Lista delle circolari
+title.circolari_docenti: Lista delle circolari
+title.circolari_genitori: Circolari indirizzate ai genitori
+title.circolari_gestione: Gestione delle circolari
 title.coordinatore_assenze: Assenze della classe
 title.coordinatore_avvisi: Gestione degli avvisi per la classe
 title.coordinatore_classe: Scegli la classe
@@ -483,10 +499,12 @@ title.coordinatore_situazione_alunno: Situazione dell'alunn{sex}
 title.coordinatore_situazione: Situazione degli alunni della classe
 title.coordinatore_valutazione_intermedia: Valutazione intermedia della classe
 title.coordinatore_voti: Medie dei voti della classe
+title.coordinatore: Aggiungi o modifica un coordinatore del Consiglio di Classe
 title.deroghe: Inserimento deroghe e annotazioni sugli alunni
-title.docenti_colloqui: Gestione dei colloqui individuali
 title.docenti_colloqui_importa: Importa le ore di colloquio individuale dei docenti da file
+title.docenti_colloqui: Gestione dei colloqui individuali
 title.documenti_classi: Visualizza i documenti dei Consigli di Classe
+title.documenti_doc15: Inserimento dei documenti del 15 Maggio
 title.documenti_piani: Inserimento dei piani di lavoro
 title.documenti_programmi: Inserimento dei programmi svolti
 title.documenti_relazioni: Inserimento delle relazioni finali
@@ -495,47 +513,53 @@ title.genitori_argomenti: Argomenti e attività della classe
 title.genitori_assenze: Assenze dell'alunn{sex}
 title.genitori_avvisi: Avvisi indirizzati ai genitori
 title.genitori_colloqui: Colloqui individuali con i docenti
+title.genitori_deroghe: Autorizzazioni in deroga per l'alunn{sex}
 title.genitori_eventi: Agenda degli eventi per il genitore
 title.genitori_lezioni: Lezioni della classe
 title.genitori_note: Note dell'alunn{sex}
 title.genitori_osservazioni: Osservazioni sull'alunn{sex}
-title.genitori_deroghe: Autorizzazioni in deroga per l'alunn{sex}
 title.genitori_pagelle: Pagelle dell'alunn{sex}
 title.genitori_voti: Valutazioni dell'alunn{sex}
+title.gestione_notifiche: Abilita o disabila la notifica delle circolari
 title.giustifica: Giustifica le assenze e i ritardi o convalida le giustificazioni online
 title.importa_alunni: Importa gli alunni da file
+title.importa_ata: Importa i dati del personale ATA
 title.importa_cattedre: Importa le cattedre dei docenti da file
 title.importa_docenti: Importa i docenti da file
 title.lezioni_argomenti: Argomenti e attività della classe
 title.lezioni_assenze: Assenze della classe
 title.lezioni_classe: Scegli la classe o la materia
 title.lezioni_note: Note della classe
-title.lezioni_osservazioni: Osservazioni sugli alunni della classe
 title.lezioni_osservazioni_personali: Diario personale della classe
+title.lezioni_osservazioni: Osservazioni sugli alunni della classe
 title.lezioni_proposte: Proposte di voto per la classe
 title.lezioni_registro: Registro della classe
 title.lezioni_riepilogo: Riepilogo delle lezioni della classe
 title.lezioni_tabellone: Tabellone dello scrutinio della classe
 title.lezioni_voti_dettagli: Dettagli delle valutazioni della classe
 title.lezioni_voti: Valutazioni della classe
+title.logout: Esci dal Registro Elettronico
 title.manutenzione: Impostazione della modalità manutenzione per il registro
 title.modifica_alunno: Modifica i dati di un alunno
 title.modifica_annotazione: Modifica una annotazione esistente
+title.modifica_ata: Modifica i dati del personale ATA
 title.modifica_avviso_attivita: Modifica l'avviso per lo svolgimento di un'attività
 title.modifica_avviso_coordinatore: Modifica l'avviso per la classe
 title.modifica_avviso_entrate: Modifica l'avviso per l'ingresso posticipato
 title.modifica_avviso_individuale: Modifica l'avviso individuale per i genitori
-title.modifica_avviso: Modifica l'avviso
 title.modifica_avviso_uscite: Modifica l'avviso per l'uscita anticipata
+title.modifica_avviso: Modifica l'avviso
+title.modifica_circolare: Modifica la circolare
 title.modifica_colloquio: Modifica l'orario di colloquio individuale
 title.modifica_compito: Modifica i compiti per casa esistenti nell'agenda
+title.modifica_doc15: Modifica il documento del 15 maggio
 title.modifica_docenti: Modifica i dati di un docente
 title.modifica_email: Cambia l'indirizzo di posta elettronica
 title.modifica_entrata: Modifica il ritardo dell'alunno
 title.modifica_lezione: Modifica una lezione esistente
 title.modifica_nota: Modifica una nota disciplinare
-title.modifica_osservazione: Modifica l'osservazione sull'alunno
 title.modifica_osservazione_personale: Modifica l'osservazione personale
+title.modifica_osservazione: Modifica l'osservazione sull'alunno
 title.modifica_password: Cambia la password di accesso
 title.modifica_piano: Modifica il piano di lavoro
 title.modifica_profilo: Gestione del profilo dell'utente
@@ -546,11 +570,12 @@ title.modifica_verifica: Modifica la verifica esistente nell'agenda
 title.mostra_alunni: Mostra i dettagli dell'alunno
 title.nuova_annotazione: Inserisci una annotazione
 title.nuova_cattedra: Inserisci una nuova cattedra
+title.nuova_circolare: Inserisci una nuova circolare
 title.nuova_entrata: Inserisci il ritardo dell'alunno
 title.nuova_lezione: Inserisci una lezione
 title.nuova_nota: Inserisci una nota disciplinare
-title.nuova_osservazione: Inserisci l'osservazione sull'alunno
 title.nuova_osservazione_personale: Inserisci l'osservazione personale
+title.nuova_osservazione: Inserisci l'osservazione sull'alunno
 title.nuova_relazione: Inserisci la relazione finale
 title.nuova_uscita: Inserisci l'uscita anticipata dell'alunno
 title.nuova_verifica: Inserisci una nuova verifica nell'agenda
@@ -559,10 +584,11 @@ title.nuovo_avviso_attivita: Inserisci un nuovo avviso per lo svolgimento di un'
 title.nuovo_avviso_coordinatore: Inserisci un nuovo avviso per la classe
 title.nuovo_avviso_entrate: Inserisci un nuovo avviso per l'ingresso posticipato
 title.nuovo_avviso_individuale: Inserisci un nuovo avviso individuale per i genitori
-title.nuovo_avviso: Inserisci un nuovo avviso
 title.nuovo_avviso_uscite: Inserisci un nuovo avviso per l'uscita anticipata
+title.nuovo_avviso: Inserisci un nuovo avviso
 title.nuovo_colloquio: Aggiunge un orario di colloquio individuale
 title.nuovo_compito: Inserisci nuovi compiti per casa nell'agenda
+title.nuovo_doc15: Inserisci il documento del 15 maggio
 title.nuovo_piano: Inserisci il piano di lavoro
 title.nuovo_programma: Inserisci il programma svolto
 title.ore_colloqui: Ore di ricevimento per i colloqui individuali
@@ -576,47 +602,29 @@ title.segretario: Aggiungi o modifica un segretario del Consiglio di Classe
 title.segreteria_assenze: Visualizza la frequenza
 title.segreteria_scrutini_mostra: Documenti dello scrutinio
 title.segreteria_scrutini: Visualizza gli scrutini
-title.staff: Aggiungi un docente allo staff
 title.staff_assenze: Gestione assenze della classe
 title.staff_avvisi_attivita: Avvisi per lo svolgimento di attività per le classi
-title.staff_avvisi: Avvisi di tipo generico
 title.staff_avvisi_entrate: Avvisi per l'ingresso posticipato delle classi
 title.staff_avvisi_individuali: Avvisi individuali per i genitori
 title.staff_avvisi_uscite: Avvisi per l'uscita anticipata delle classi
+title.staff_avvisi: Avvisi di tipo generico
+title.staff_doc15: Inserimento dei documenti del 15 maggio
 title.staff_piani: Inserimento dei piani di lavoro
 title.staff_programmi: Inserimento dei programmi svolti
 title.staff_relazioni: Inserimento delle relazioni finali
 title.staff_situazione: Visualizza situazione degli alunni
 title.staff_statistiche: Statistiche sulle presenze degli alunni
+title.staff: Aggiungi un docente allo staff
 title.statistiche_lezioni: Statistiche sulle ore di lezione dei docenti
 title.utenti_otp: Abilitazione all'uso del codice OTP
 title.utenti_profilo: Profilo dell'utente
 title.voti_alunno: Aggiungi o modifica una valutazione per l'alunno
 title.voti_classe: Aggiungi o modifica una valutazione per la classe
-title.nuova_circolare: Inserisci una nuova circolare
-title.modifica_circolare: Modifica la circolare
-title.circolari_gestione: Gestione delle circolari
-title.circolari_genitori: Circolari indirizzate ai genitori
-title.circolari_alunni: Circolari indirizzate agli studenti
-title.circolari_docenti: Lista delle circolari
-title.circolari_ata: Lista delle circolari
-title.importa_ata: Importa i dati del personale ATA
-title.modifica_ata: Modifica i dati del personale ATA
-title.gestione_notifiche: Abilita o disabila la notifica delle circolari
-title.documenti_doc15: Inserimento dei documenti del 15 Maggio
-title.nuovo_doc15: Inserisci il documento del 15 maggio
-title.modifica_doc15: Modifica il documento del 15 maggio
-title.staff_doc15: Inserimento dei documenti del 15 maggio
-title.logout: Esci dal Registro Elettronico
-title.alias_exit: Esci dall'alias
 
 
+##### MESSAGGI #####
 message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbligatori.
 message.update_ok: La modifica è stata memorizzata correttamente.
-message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
-  \"Cognome, Nome, Sesso, Username, Password, Email, CodiceFiscale\".
-  Se si attiva il controllo SOLO NUOVI verranno inseriti solo i docenti che non risultano già presenti;
-  in caso contrario, verranno modificati anche i dati dei docenti esistenti."
 message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
   \"Docente, UsernameDocente, Classe, Materia, Alunno, UsernameAlunno, Tipo, Supplenza\".
   Verranno inserite solo le cattedre che non risultano già presenti."
@@ -734,10 +742,27 @@ message.num_circolari: "{num, plural, one {Circolare} other {Circolari}}"
 message.registro_lettura_circolare: "{num, plural, one {Letta la circolare n. {circolari}} other {Lette le circolari n. {circolari}}}"
 message.presenti_nuove_circolari: "{num, plural, one {È presente una nuova circolare da leggere} other {Sono presenti # nuove circolari da leggere}}"
 message.importa_ata: "Il file CSV da importare deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
-  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, Username, Password, Email, Sede, Tipo\"</span><br>
-  <span class=\"ml-5\">* campi obbligatori</span><br>
-  <span class=\"ml-5\">sesso: M=maschio, F=femmina</span><br>
-  <span class=\"ml-5\">tipo: A=amministrativo, C=collaboratore scolastico, D=DSGA, T=tecnico, U=autista</span>"
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, Username, Password, Email, Sede, Tipo, Segreteria\"</span><br>
+  <small>
+    <span class=\"ml-5\">* campi obbligatori</span><br>
+    <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
+    <span class=\"ml-5\">Tipo: D=DSGA, A=amministrativo, T=tecnico, U=autista, C=collaboratore scolastico</span><br>
+    <span class=\"ml-5\">Segreteria: S=si, N=no</span>
+  <small>"
+message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
+  <span class=\"ml-4\"><strong>Utenti</strong>: \"*Cognome, *Nome, *Sesso, CodiceFiscale, Username, Password, Email\"</span><br>
+  <span class=\"ml-4\"><strong>Cattedre</strong>: \"*UsernameDocente, *Classe, *Materia, UsernameAlunno, Tipo, Supplenza\"</span><br>
+  <span class=\"ml-4\"><strong>Orario</strong>: \"*Username, *Sede, *Giorno, *Ora, *Classe, *Materia\"</span><br>
+  <span class=\"ml-4\"><strong>Colloqui</strong>: \"*Username, *Sede, *Giorno, *Ora, *Frequenza, Note\"</span><br>
+  <small>
+    <span class=\"ml-5\">* campi obbligatori</span><br>
+    <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
+    <span class=\"ml-5\">Tipo: N=normale, I=itp, P=potenziamento</span><br>
+    <span class=\"ml-5\">Supplenza: S=si, N=no</span><br>
+    <span class=\"ml-5\">Giorno: LU=lunedì, MA=martedì, ME=mercoledì, GI=giovedì, VE=venerdì, SA=sabato</span><br>
+    <span class=\"ml-5\">Frequenza: S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=quarta settimana</span><br>
+    <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
+  </small>"
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.
 message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
 message.gestione_notifiche: "La ricezione via email della notifica delle nuove circolari può essere abilitata o disabilitata da questa pagina. Scegli l'opzione che preferisci e premi il pulsante di conferma."
@@ -747,6 +772,7 @@ message.cancella_doc15: Verrà cancellato il documento del 15 maggio indicato. V
 message.inserimento_doc15: "Inserire il documento del 15 maggio come un unico documento comprensivo di ogni sezione prevista.<br>E' possibile caricare il documento in formato PDF, Microsoft Word, LibreOffice/OpenOffice."
 
 
+##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
 exception.annotazione_no_classi: Non puoi creare l'annotazione sul Registro senza indicare le classi.
 exception.annotazione_non_permessa: Spiacente non puoi creare o modificare l'annotazione sul Registro.
@@ -786,6 +812,7 @@ exception.festivo_per_classi: La data risulta festiva per la sede di alcune clas
 exception.file_alunno_duplicato: L'alunno indicato nel record {num} è presente più volte nel sistema.
 exception.file_alunno_mancante: L'alunno indicato nel record {num} non è presente nel sistema.
 exception.file_cattedra: La cattedra indicata nel record {num} è già presente nel sistema.
+exception.file_cattedra_mancante: La cattedra indicata nel record {num} non risulta presente nel sistema.
 exception.file_classe: La classe non è corretta nel record {num}.
 exception.file_data: I campi del file non corrispondono a quanto previsto nel record {num}.
 exception.file_date: La data '{date}' non è valida nel record {num}.

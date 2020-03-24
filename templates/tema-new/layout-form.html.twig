@@ -557,7 +557,6 @@
   {%- if help is not empty -%}
     {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
   {%- endif -%}
-
   {%- if attr.widget is defined and attr.widget == 'gs-row-start' -%}
     {%- set inline = true -%}
     <div class="form-row">
@@ -619,7 +618,7 @@
 {#-- {%- endblock checkbox_row %} #}
 
 {%- block file_row -%}
-  <div id="{{ id }}" class="form-group dropzone">
+  <div id="{{ id }}" class="form-group mb-5 dropzone">
     <div class="fallback"></div>
     <button type="button" class="dz-clickable btn btn-success btn-sm">
       <svg class="icon icon-white icon-xs mr-1" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#arrow-circle-up"></use></svg>
@@ -737,13 +736,15 @@
 
 {% block attributes -%}
   {%- for attrname, attrvalue in attr -%}
-    {{- " " -}}
-    {%- if attrname in ['placeholder', 'title'] -%}
-      {{- attrname }}="{{ translation_domain is same as(false) ? attrvalue : attrvalue|trans(attr_translation_parameters, translation_domain) }}"
-    {%- elseif attrvalue is same as(true) -%}
-      {{- attrname }}="{{ attrname }}"
-    {%- elseif attrvalue is not same as(false) -%}
-      {{- attrname }}="{{ attrvalue }}"
+    {%- if attrname != 'widget' -%}
+      {{- " " -}}
+      {%- if attrname in ['placeholder', 'title'] -%}
+        {{- attrname }}="{{ translation_domain is same as(false) ? attrvalue : attrvalue|trans(attr_translation_parameters, translation_domain) }}"
+      {%- elseif attrvalue is same as(true) -%}
+        {{- attrname }}="{{ attrname }}"
+      {%- elseif attrvalue is not same as(false) -%}
+        {{- attrname }}="{{ attrvalue }}"
+      {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
 {%- endblock attributes -%}

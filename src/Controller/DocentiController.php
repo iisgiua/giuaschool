@@ -12,14 +12,19 @@
 
 namespace App\Controller;
 
+use App\Entity\Cattedra;
+use App\Form\ImportaCsvType;
+use App\Util\CsvImporter;
+use App\Util\LogHandler;
+use App\Util\PdfManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,39 +34,23 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use App\Entity\Cattedra;
-use App\Util\CsvImporter;
-use App\Util\LogHandler;
-use App\Util\PdfManager;
+use Symfony\Component\Translation\TranslatorInterface;
 
 
 /**
  * DocentiController - gestione docenti
  */
-class DocentiController extends AbstractController {
-
-  /**
-   * Gestione docenti
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/docenti/", name="docenti",
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
-   */
-  public function docentiAction() {
-    return $this->render('docenti/index.html.twig', array(
-      'pagina_titolo' => 'page.docenti',
-    ));
-  }
+class DocentiController extends BaseController {
 
   /**
    * Importa docenti da file
    *
    * @param Request $request Pagina richiesta
+   * @param SessionInterface $session Gestore delle sessioni
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
@@ -71,49 +60,54 @@ class DocentiController extends AbstractController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, CsvImporter $importer) {
+  public function importaAction(Request $request, SessionInterface $session, CsvImporter $importer) {
     $lista = null;
-    // form docenti
-    $form1 = $this->container->get('form.factory')->createNamedBuilder('docenti_importa_docenti', FormType::class)
-      ->add('file', FileType::class, array('label' => 'label.csv_file',
-        'required' => true
-        ))
-      ->add('onlynew', CheckboxType::class, array('label' => 'label.solo_nuovi',
-        'required' => false
-        ))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
-      ->getForm();
-    $form1->handleRequest($request);
-    if ($form1->isSubmitted() && $form1->isValid()) {
-      // importa file
-      $file = $form1->get('file')->getData();
-      $lista = $importer->importaDocenti($file, $form1);
+    $var_sessione = '/APP/FILE/docenti_importa';
+    $fs = new FileSystem();
+    if (!$request->isMethod('POST')) {
+      // cancella dati sessione
+      $session->remove($var_sessione);
+      // elimina file temporanei
+      $finder = new Finder();
+      $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
+      foreach ($finder as $f) {
+        $fs->remove($f);
+      }
     }
-    // form cattedre
-    $form2 = $this->container->get('form.factory')->createNamedBuilder('docenti_importa_cattedre', FormType::class)
-      ->add('file', FileType::class, array('label' => 'label.csv_file',
-        'required' => true
-        ))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit'))
-      ->getForm();
-    $form2->handleRequest($request);
-    if ($form2->isSubmitted() && $form2->isValid()) {
+    // form
+    $form = $this->createForm(ImportaCsvType::class, null, ['formMode' => 'docenti']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // trova file caricato
+      $file = null;
+      foreach ($session->get($var_sessione.'/file', []) as $f) {
+        $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
+      }
       // importa file
-      $file = $form2->get('file')->getData();
-      $lista = $importer->importaCattedre($file, $form2);
+      switch ($form->get('tipo')->getData()) {
+        case 'U':
+          // importa utenti
+          $lista = $importer->importaDocenti($file, $form);
+          break;
+        case 'C':
+          // importa cattedre
+          $lista = $importer->importaCattedre($file, $form);
+          break;
+        case 'O':
+          // importa orario
+          $lista = $importer->importaOrario($file, $form);
+          break;
+        case 'L':
+          // importa colloqui
+          $lista = $importer->importaColloqui($file, $form);
+          break;
+      }
+      // cancella dati sessione
+      $session->remove($var_sessione);
     }
-    return $this->render('docenti/importa.html.twig', array(
-      'pagina_titolo' => 'page.importa_docenti',
-      'lista' => $lista,
-      'form1' => $form1->createView(),
-      'form1_title' => 'title.importa_docenti',
-      'form1_help' => 'message.importa_docenti',
-      'form1_success' => null,
-      'form2' => $form2->createView(),
-      'form2_title' => 'title.importa_cattedre',
-      'form2_help' => 'message.importa_cattedre',
-      'form2_success' => null,
-    ));
+    // visualizza pagina
+    return $this->renderHtml('docenti', 'importa', $lista ? $lista : [], [],
+      [$form->createView(),  'message.importa_docenti']);
   }
 
   /**

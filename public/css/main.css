@@ -115,13 +115,13 @@ legend {
   margin-bottom: 0;
   font-size: 1.1rem;
 }
-.form-group > label.required:before, .form-group > div > label.required:before, 
+.form-group > label.required:before, .form-group > div > label.required:before,
 .form-group legend.required:before {
   content: "*";
   color: #a31f33;
 }
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 .form-row {
   margin-bottom: 3rem;

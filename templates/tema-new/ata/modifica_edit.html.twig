@@ -6,3 +6,22 @@
   {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
 </div>
 {% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  $("#ata_tipo").on("change", function() {
+    var s = $('#ata_segreteria');
+    if ($(this).val() == 'D' || $(this).val() == 'A') {
+      s.prop('disabled', false);
+      s.parents('.bootstrap-select-wrapper').removeClass('disabled');
+    } else {
+      s.selectpicker('val', '0');
+      {#-- s.val('0'); #}
+      s.prop('disabled', true);
+      s.parents('.bootstrap-select-wrapper').addClass('disabled');
+    }
+  }).change();
+});
+</script>
+{% endblock %}
