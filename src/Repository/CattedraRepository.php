@@ -157,4 +157,71 @@ class CattedraRepository extends EntityRepository {
     return $docenti;
   }
 
+  /**
+   * Restituisce la lista delle cattedre del docente indicato, compreso l'orario di servizio (se presente)
+   *
+   * @param Docente $docente Docente di cui recuperare le cattedre
+   *
+   * @return Array Dati formattati in un array associativo
+   */
+  public function cattedreOrarioDocente(Docente $docente) {
+    $dati = array();
+    // lista cattedre
+    $cattedre = $this->createQueryBuilder('c')
+      ->join('c.classe', 'cl')
+      ->join('c.materia', 'm')
+      ->leftJoin('c.alunno', 'a')
+      ->where('c.docente=:docente AND c.attiva=:attiva')
+      ->orderBy('cl.anno,cl.sezione,m.nomeBreve,a.cognome,a.nome', 'ASC')
+      ->setParameters(['docente' => $docente, 'attiva' => 1])
+      ->getQuery()
+      ->getResult();
+    // array associativo
+    $dati['choice'] = array();
+    $dati['lista'] = array();
+    foreach ($cattedre as $cat) {
+      $label = $cat->getClasse()->getAnno().'ª '.$cat->getClasse()->getSezione().' - '.$cat->getMateria()->getNomeBreve().
+        ($cat->getAlunno() ? ' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')' : '');
+      $dati['choice'][$label] = $cat;
+      $dati['lista'][$cat->getId()]['object'] = $cat;
+      $dati['lista'][$cat->getId()]['label'] = $label;
+      // legge orario
+      $dati['lista'][$cat->getId()]['orario'] = array();
+      if ($cat->getMateria()->getTipo() != 'S') {
+        // cattedra curricolare
+        $orario = $this->_em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+          ->select('od.giorno,od.ora,so.inizio')
+          ->join('od.orario', 'o')
+          ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->where('od.cattedra=:cattedra AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
+          ->orderBy('od.giorno,od.ora', 'ASC')
+          ->setParameters(['cattedra' => $cat, 'sede' => $cat->getClasse()->getSede(),
+            'data' => new \DateTime('today')])
+          ->getQuery()
+          ->getArrayResult();
+        foreach ($orario as $o) {
+          $dati['lista'][$cat->getId()]['orario'][$o['giorno']][$o['ora']] = $o['inizio'];
+        }
+      } else {
+        // cattedra di sostegno: imposta orari di tutte le materie della classe
+        $orari = $this->_em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+          ->select('(c.id) AS materia,od.giorno,od.ora,so.inizio')
+          ->join('od.orario', 'o')
+          ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->join('od.cattedra', 'c')
+          ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
+          ->orderBy('c.id,od.giorno,od.ora', 'ASC')
+          ->setParameters(['classe' => $cat->getClasse(), 'attiva' => 1, 'tipo' => 'N', 'supplenza' => 0,
+            'sede' => $cat->getClasse()->getSede(), 'data' => new \DateTime('today')])
+          ->getQuery()
+          ->getArrayResult();
+        foreach ($orari as $o) {
+          $dati['lista'][$cat->getId()]['orario'][$o['materia']][$o['giorno']][$o['ora']] = $o['inizio'];
+        }
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }
