@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="alert alert-success gs-mt-5">
+    <p class="text-center gs-big gs-mt-3 gs-mb-3"><strong>Accesso alla piattaforma APPRENDERE<strong></p>
+    <div class="text-center">
+      <a class="btn btn-success gs-mr-5" href="{{ url }}"><strong>Conferma</strong></a>
+      <a class="btn btn-default" href="{{ path('login_home') }}"><strong>Annulla</strong></a>
+    </div>
+  </div>
+</div>
+{% endblock %}

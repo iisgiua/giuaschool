@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\DefinizioneScrutinio;
+use App\Entity\App;
 
 
 /**
@@ -30,6 +31,17 @@ class TestController extends AbstractController {
    *    methods={"GET"})
    */
   public function testAction(EntityManagerInterface $em) {
+
+    //-- // set App
+    //-- $dati = [ 'sito' => 'http://apprendere.giua.edu.it', 'funzione' => 'auth_userkey_request_login_url' ];
+    //-- $app = (new App())
+      //-- ->setNome('AccessoMoodle')
+      //-- ->setToken('xx')
+      //-- ->setAttiva(true)
+      //-- ->setAbilitati('AGD')
+      //-- ->setDati($dati);
+    //-- $em->persist($app);
+    //-- $em->flush();
 
     //-- // set TEMA nuovo per utente
     //-- $user = $em->getRepository('App:Docente')->findOneByUsername('x');

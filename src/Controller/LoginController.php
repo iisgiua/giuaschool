@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
+use Symfony\Component\HttpFoundation\Response;
 use App\Util\NotificheUtil;
 use App\Util\LogHandler;
 use App\Util\ConfigLoader;

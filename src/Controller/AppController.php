@@ -44,6 +44,7 @@ use App\Entity\Ata;
 use App\Entity\Notifica;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
+use App\Util\GenitoriUtil;
 
 
 /**
@@ -407,6 +408,87 @@ class AppController extends AbstractController {
       ));
     $risposta->headers->set('Content-Type', 'application/xml; charset=utf-8');
     return $risposta;
+  }
+
+  /**
+   * Crea collegamento con MOODLE
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param LoggerInterface $logger Gestore dei log su file
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/app/moodle", name="app_moodle",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_UTENTE")
+   */
+  public function moodleAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                               GenitoriUtil $gen, LoggerInterface $logger) {
+    // init
+    $error_msg = null;
+    $error_log = null;
+    $app = $em->getRepository('App:App')->findOneBy(['token' => $session->get('/CONFIG/SISTEMA/moodle'), 'attiva' => 1]);
+    if (!$app) {
+      $error_msg = 'exception.moodle_disabilitato';
+      $error_log = 'App per l\'accesso a MOODLE non attiva';
+    } else {
+      // app attiva
+      $usertype = ($this->getUser() instanceof Alunno ? 'A' : ($this->getUser() instanceof Genitore ? 'G' :
+        ($this->getUser() instanceof Docente ? 'D' : ($this->getUser() instanceof Ata ? 'T' : ''))));
+      if (!$usertype || strpos($app->getAbilitati(), $usertype) === false) {
+        // tipo utente non valido
+        $error_msg = 'exception.moodle_utente';
+        $error_log = 'Tipo utente non valido per l\'accesso a MOODLE';
+      } else {
+        // tipo utente ok
+        $token = $app->getToken();
+        $domain = $app->getDati()['sito'];
+        $function = $app->getDati()['funzione'];;
+        $username = $this->getUser()->getUsername();
+        if ($usertype == 'G') {
+          // utente è genitore: prende username di alunno
+          $alunno = $gen->alunno($this->getUser());
+          $username = $alunno->getUsername();
+        }
+        $ip = $request->getClientIp();
+        $url = $domain.'/webservice/rest/server.php'.'?wstoken='.$token.'&wsfunction='.$function.'&moodlewsrestformat=json'.
+          '&user[username]='.$username.'&user[ip]='.$ip;
+        // invia tramite curl
+        $cu = \curl_init();
+        \curl_setopt($cu, CURLOPT_URL, $url);
+        \curl_setopt($cu, CURLOPT_RETURNTRANSFER, true);
+        \curl_setopt($cu, CURLOPT_HEADER, false);
+        \curl_setopt($cu, CURLOPT_CONNECTTIMEOUT, 20);
+        \curl_setopt($cu, CURLOPT_TIMEOUT, 20);
+        \curl_setopt($cu, CURLOPT_SSL_VERIFYHOST, false);
+        \curl_setopt($cu, CURLOPT_SSL_VERIFYPEER, false);
+        \curl_setopt($cu, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json'));
+        $risposta = \json_decode(\curl_exec($cu));
+        \curl_close($cu);
+        if (empty($risposta) || empty($risposta->loginurl)) {
+          // errore di connessione
+          $error_msg = 'exception.moodle_connessione';
+          $error_log = 'Connessione a MOODLE non riuscita';
+        } else {
+          // connessione ok
+          return $this->render('app/moodle.html.twig', array(
+            'pagina_titolo' => 'page.app_moodle',
+            'url' => $risposta->loginurl,
+            ));
+        }
+      }
+    }
+    // gestione errore
+    $logger->error($error_log.'.', array(
+      'username' => $this->getUser()->getUsername(),
+      'ip' => $request->getClientIp()));
+    $this->addFlash('danger', $error_msg);
+    // redirezione alla pagina home
+    return $this->redirectToRoute('login_home');
   }
 
 

@@ -364,6 +364,8 @@ title.ata.modifica: Modifica i dati del Personale ATA
 title.ata.modifica_edit: Modifica i dati dell'utente
 page.docenti.importa: Importa Docenti
 title.docenti.importa: Importa i dati dei Docenti
+page.login.home: Pagina Principale
+title.login.home: Pagina Principale
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -374,6 +376,7 @@ page.alunno_edit: Modifica Alunno
 page.app_info: App e Servizi
 page.app_login: Accesso tramite App
 page.app_telegram: Registrazione per Telegram
+page.app_moodle: Accesso ad APPRENDERE
 page.archiviazione: Archiviazione Registri
 page.bacheca_avvisi: Avvisi Docenti
 page.cambio_classe: Cambio Classe
@@ -923,3 +926,6 @@ exception.lezione_non_esiste: Non esiste una lezione firmata per la materia {mat
 exception.non_permesso_in_data: Azione richiesta non permessa nella data indicata.
 exception.alunno_no_classe_in_data: "{alunno} non risulta nell'elenco della classe nella data indicata."
 exception.motivo_scrutinio_rinviato: Non è stato inserita la motivazione per il rinvio dello scrutinio dell'alunn{sex} {alunno}.
+exception.moodle_connessione: Errore di connessione alla piattaforma Apprendere
+exception.moodle_utente: Il tuo utente non esiste sulla piattaforma Apprendere
+exception.moodle_disabilitato: L'accesso alla piattaforma Apprendere non è abilitato
