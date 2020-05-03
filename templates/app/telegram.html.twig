@@ -104,7 +104,7 @@ $(document).ready(function() {
 {% block _app_telegram_privacy_widget %}
 <div class="checkbox">
   <label class="gs-big required" for="app_telegram_privacy">
-    <input type="checkbox" id="app_telegram_privacy" name="app_telegram[privacy]" required="required" value=""> <em>{{ ('label.privacy_app'|trans)|raw }}</em>
+    <input type="checkbox" id="app_telegram_privacy" name="app_telegram[privacy]" required="required" value=""> <em>{{ ('label.privacy_app'|trans({'intestazione_istituto_breve': app.session.get('/CONFIG/ISTITUTO/intestazione_breve')}))|raw }}</em>
   </label>
 </div>
 {% endblock %}

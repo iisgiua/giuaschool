@@ -243,13 +243,6 @@ class AppController extends AbstractController {
       }
     }
     if (!$modo_manutenzione) {
-      // controllo REFERER
-      $referer = 'http://giuabot.it/registrazione/';
-      if ($request->getMethod() == 'GET' && $request->headers->get('referer') != $referer) {
-        // pagina di provenienza non riconosciuta: redirect a inizio procedura
-        $url = 'http://www.andreasiddi.cloud/wp-content/1427538690/bot/GiuaBot/redirect-registrazione-errore-permessi.php';
-        return new RedirectResponse($url);
-      }
       // crea form
       $form = $this->container->get('form.factory')->createNamedBuilder('app_telegram', FormType::class)
         ->add('username', TextType::class, array('label' => 'label.username',
@@ -305,9 +298,6 @@ class AppController extends AbstractController {
             'chat' => $chat,
             'ip' => $request->getClientIp()));
           $form->addError(new FormError($trans->trans('exception.invalid_user_type')));
-          // redirect esterno: pagina errore
-          $url = 'http://www.andreasiddi.cloud/wp-content/1427538690/bot/GiuaBot/redirect-registro-utente-non-ammesso.php';
-          return new RedirectResponse($url);
         } elseif (!$privacy) {
           // privacy non selezionata
           $logger->error('Clausola privacy non accettata nella richiesta di registrazione Telegram.', array(
