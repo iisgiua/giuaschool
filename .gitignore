@@ -52,6 +52,7 @@
 !/public/app/.gitkeep
 /public/img/.local/
 /src/Command/Argo/
+/src/Controller/TestController.php
 /src/DataFixtures/AppFixturesLocal.php
 /templates/argo/
 ###< trinko/giuaschool ###
