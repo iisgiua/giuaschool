@@ -15,7 +15,7 @@
     <div class="gs-text-normal">
       <strong>Docente: {{ v.avviso.docente.nome }} {{ v.avviso.docente.cognome }}</strong>
     </div>
-    <div class="gs-text-normal gs-pt-3 gs-pb-3">{{ v.testo|nl2br }}</div>
+    <div class="gs-text-normal gs-pt-3 gs-pb-3">{{ v.testo|raw|nl2br }}</div>
   </div>
 {% endfor %}
 </div>

@@ -29,6 +29,7 @@ use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
+use App\Form\MessageType;
 
 
 /**
@@ -256,7 +257,7 @@ class OsservazioniController extends AbstractController {
         'multiple' => false,
         'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
         'required' => true))
-      ->add('testo', TextareaType::class, array('label' => 'label.testo',
+      ->add('testo', MessageType::class, array('label' => 'label.testo',
         'trim' => true,
         'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
@@ -532,7 +533,7 @@ class OsservazioniController extends AbstractController {
     $label['classe'] = $cattedra->getClasse()->getAnno()."ª ".$cattedra->getClasse()->getSezione();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_personale_edit', FormType::class, $osservazione)
-      ->add('testo', TextareaType::class, array('label' => 'label.testo',
+      ->add('testo', MessageType::class, array('label' => 'label.testo',
         'trim' => true,
         'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',

@@ -12,7 +12,7 @@
 </div>
 <div class="modal-body gs-pt-0 gs-mb-3">
   <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
-    <div class="gs-text-normal">{{ dati.testo|nl2br }}</div>
+    <div class="gs-text-normal">{{ dati.testo|raw|nl2br }}</div>
     <div class="text-right gs-text-normal"><em>({{ dati.avviso.docente.nome }} {{ dati.avviso.docente.cognome }})</em></div>
   </div>
 {% if dati.avviso.allegati|length > 0 %}

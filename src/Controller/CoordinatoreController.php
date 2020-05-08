@@ -38,6 +38,7 @@ use App\Entity\Staff;
 use App\Entity\Preside;
 use App\Entity\Classe;
 use App\Entity\Avviso;
+use App\Form\MessageType;
 
 
 /**
@@ -757,7 +758,7 @@ class CoordinatoreController extends AbstractController {
     }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('avviso_edit', FormType::class, $avviso)
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.testo',
         'attr' => array('rows' => '4'),
         'required' => true))

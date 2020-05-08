@@ -121,10 +121,10 @@
               {% if v1.alunni is defined %}
                 <small><em>Alunni: {{ v1.alunni }}</em></small><br>
               {% endif %}
-                {{ v1.testo|nl2br }}
+                {{ v1.testo|raw|nl2br }}
                 <small><em>({{ v1.docente }})</em></small>
               {% if v1.provvedimento %}
-                <br><strong>{{ v1.provvedimento|nl2br }}
+                <br><strong>{{ v1.provvedimento|raw|nl2br }}
                 <small><em>({{ v1.docente_provvedimento }})</em></small></strong>
               {% endif %}
               </div>
@@ -141,7 +141,7 @@
               {% if v1.alunni is not empty %}
                 <strong>Destinatari: {% for al in v1.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
               {% endif %}
-                {{ v1.testo|nl2br }}
+                {{ v1.testo|raw|nl2br }}
                 <small><em>({{ v1.docente }})</em></small>
               </div>
             </div>
@@ -158,7 +158,7 @@
               <div class="list-group-item-text">
                 <strong>{{ v1.inizio }} - {{ v1.fine }} {{ v1.materia }}</strong>
                 <small><em>({% for v2 in v1.docenti %}{{ v2 }}{{ not loop.last ? ', ' }}{% endfor %})</em></small><br>
-                {{ v1.argomenti }}
+                {{ v1.argomenti|raw }}
               </div>
             </div>
               {% if v1.sostegno is defined %}
@@ -168,7 +168,7 @@
               <div class="list-group-item-text">
                 <strong>Argomenti e attività del sostegno - {{ v1.sostegno.alunno[sk] }}</strong>
                 <small><em>({{ v1.sostegno.docente[sk] }})</em></small><br>
-                {{ sv }}
+                {{ sv|raw }}
               </div>
             </div>
                   {% endif %}

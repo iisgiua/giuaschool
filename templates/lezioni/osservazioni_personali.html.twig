@@ -54,7 +54,7 @@
           {% for e in v1 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
-        <td><small>{{ e.testo }}</small></td>
+        <td><small>{{ e.testo|raw|nl2br }}</small></td>
         <td>
             {% if e.edit %}
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione personale"><span class="glyphicon glyphicon-edit"></span></a>

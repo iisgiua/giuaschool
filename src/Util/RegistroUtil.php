@@ -2376,7 +2376,8 @@ class RegistroUtil {
       ->getArrayResult();
     // imposta programma (elimina ripetizioni)
     foreach ($lezioni as $l) {
-      $argomento = trim(str_replace(["\n", "\r"], ' ',  $l['argomento']));
+      $argomento = strip_tags($l['argomento']);
+      $argomento = trim(str_replace(["\n", "\r"], ' ',  $argomento));
       if ($argomento == '') {
         // riga vuota
         continue;

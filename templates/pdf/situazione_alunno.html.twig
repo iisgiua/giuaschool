@@ -283,13 +283,13 @@
           {% if tipo == 'classe' %}
     <td><strong>{{ e.data }}</strong></td>
     <td><strong>Nota di classe</strong></td>
-    <td>{{ e.nota }}<br><em style="font-size:9pt">({{ e.nota_doc }})</em></td>
-    <td>{{ e.provvedimento ? (e.provvedimento~'<br><em style="font-size:9pt">('~e.nota_doc~')</em>')|raw }}</td>
+    <td>{{ e.nota|striptags|nl2br }}<br><em style="font-size:9pt">({{ e.nota_doc }})</em></td>
+    <td>{{ e.provvedimento ? ((e.provvedimento|striptags|nl2br)~'<br><em style="font-size:9pt">('~e.nota_doc~')</em>')|raw }}</td>
           {% else %}
     <td><strong>{{ e.data }}</strong></td>
     <td><strong>Nota individuale</strong></td>
-    <td>{{ e.nota }}<br><em style="font-size:9pt">({{ e.nota_doc }})</em></td>
-    <td>{{ e.provvedimento ? (e.provvedimento~'<br><em style="font-size:9pt">('~e.provvedimento_doc~')</em>')|raw }}</td>
+    <td>{{ e.nota|striptags|nl2br }}<br><em style="font-size:9pt">({{ e.nota_doc }})</em></td>
+    <td>{{ e.provvedimento ? ((e.provvedimento|striptags|nl2br)~'<br><em style="font-size:9pt">('~e.provvedimento_doc~')</em>')|raw }}</td>
           {% endif %}
   </tr>
         {% endfor %}
@@ -316,7 +316,7 @@
   <tr nobr="true">
     <td><strong>{{ e.data }}</strong></td>
     <td><strong>{{ e.materia }}</strong><br><em style="font-size:9pt">({{ e.docente }})</em></td>
-    <td style="font-size:9pt">{{ e.testo }}</td>
+    <td style="font-size:9pt">{{ e.testo|striptags|nl2br }}</td>
   </tr>
       {% endfor %}
     {% endfor %}
@@ -327,4 +327,3 @@
 </p>
   {% endfor %}
 {% endif %}
-

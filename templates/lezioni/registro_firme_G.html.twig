@@ -99,9 +99,9 @@
             {% if v.alunni is defined %}
             <small><em>Alunni: {{ v.alunni }}</em></small><br>
             {% endif %}
-            {{ v.testo|nl2br }}<br><small><em>({{ v.docente }})</em></small>
+            {{ v.testo|raw|nl2br }}<br><small><em>({{ v.docente }})</em></small>
             {% if v.provvedimento %}
-            <br><strong>{{ v.provvedimento|nl2br }}<br><small><em>({{ v.docente_provvedimento }})</em></small></strong>
+            <br><strong>{{ v.provvedimento|raw|nl2br }}<br><small><em>({{ v.docente_provvedimento }})</em></small></strong>
             {% endif %}
             {% if v.delete is defined %}
             <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
@@ -128,7 +128,7 @@
             {% if v.alunni is not empty %}
               <strong>Destinatari: {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
             {% endif %}
-            {{ v.testo|nl2br }}<br>
+            {{ v.testo|raw|nl2br }}<br>
             <small><em>({{ v.docente }})</em></small>
             {% if v.delete is defined and (not v.avviso or v.visibile) %}
             <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella l'annotazione sul registro" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_annotazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
@@ -162,11 +162,20 @@
           {% if v.sostegno is defined %}
             {% for sk,sv in v.sostegno.argomento %}
               {% if sv is not empty %}
-          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ v.sostegno.alunno[sk] }} ({{ v.sostegno.docente[sk] }})" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ sv }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ v.sostegno.alunno[sk] }} ({{ v.sostegno.docente[sk] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ sk }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+          <div id="sostegno-{{ k }}-{{ sk }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <p><strong>Alunno: {{ v.sostegno.alunno[sk] }}</strong></p>
+                <p><strong>Docente: {{ v.sostegno.docente[sk] }}</strong></p>
+                {{ sv|raw }}
+              </div>
+            </div>
+          </div>
               {% endif %}
             {% endfor %}
           {% endif %}
-          <small>{{ v.argomenti }}</small>
+          <small>{{ v.argomenti|raw }}</small>
         </td>
         <td>
           {% if v.add is defined  %}

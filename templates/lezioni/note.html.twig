@@ -34,8 +34,8 @@
           {% else %}
         <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
           {% endif %}
-        <td><small>{{ e.nota }}<br><em>({{ e.nota_doc }})</em></small></td>
-        <td><small>{{ e.provvedimento ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</small></td>
+        <td><small>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></small></td>
+        <td><small>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</small></td>
       </tr>
           {% endfor %}
         {% endfor %}

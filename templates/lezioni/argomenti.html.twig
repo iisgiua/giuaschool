@@ -44,8 +44,8 @@
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ v1[0].data }}</strong></a>
         </td>
           {% endif %}
-        <td{{ e.firme is not empty ? ' class="bg-info"' }}><small>{{ e.argomento }}{{ e.firme is not empty and e.argomento is not empty ? '<br>' }}{% if e.firme is not empty %}<em>({{ e.firme }})</em>{% endif %}</small></td>
-        <td{{ e.firme is not empty ? ' class="bg-info"' }}><small>{{ e.attivita }}{{ e.firme is not empty and e.attivita is not empty ? '<br>' }}{% if e.firme is not empty %}<em>({{ e.firme }})</em>{% endif %}</small></td>
+        <td{{ e.firme is not empty ? ' class="bg-info"' }}><small>{{ e.argomento|raw }}{{ e.firme is not empty and e.argomento is not empty ? '<br>' }}{% if e.firme is not empty %}<em>({{ e.firme }})</em>{% endif %}</small></td>
+        <td{{ e.firme is not empty ? ' class="bg-info"' }}><small>{{ e.attivita|raw }}{{ e.firme is not empty and e.attivita is not empty ? '<br>' }}{% if e.firme is not empty %}<em>({{ e.firme }})</em>{% endif %}</small></td>
       </tr>
         {% endfor %}
       {% endfor %}

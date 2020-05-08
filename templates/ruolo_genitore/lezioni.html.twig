@@ -41,10 +41,10 @@
       <tr>
         <td><strong>{{ v.inizio }} - {{ v.fine }}</strong></td>
         <td>{{ v.materia }}</td>
-        <td><small>{{ v.argomenti }}</small></td>
-        <td><small>{{ v.attivita }}</small></td>
+        <td><small>{{ v.argomenti|raw }}</small></td>
+        <td><small>{{ v.attivita|raw }}</small></td>
         {% if alunno.bes == 'H' %}
-        <td><small>{{ v.sostegno }}</small></td>
+        <td><small>{{ v.sostegno|raw }}</small></td>
         {% endif %}
       </tr>
       {% endfor %}

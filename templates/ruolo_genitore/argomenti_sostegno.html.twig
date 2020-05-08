@@ -47,8 +47,8 @@
         </td>
         <td rowspan="{{ v2|length }}"><small>{{ materia }}</small></td>
             {% endif %}
-        <td><small>{{ e.argomento }}{{ e.argomento and e.attivita ? '<br>' }}{{ e.attivita }}</small></td>
-        <td><small>{{ e.argomento_sost }}{{ e.argomento_sost and e.attivita_sost ? '<br>' }}{{ e.attivita_sost }}</small></td>
+        <td><small>{{ e.argomento|raw }}{{ e.argomento and e.attivita ? '<br>' }}{{ e.attivita|raw }}</small></td>
+        <td><small>{{ e.argomento_sost|raw }}{{ e.argomento_sost and e.attivita_sost ? '<br>' }}{{ e.attivita_sost|raw }}</small></td>
       </tr>
           {% endfor %}
         {% endfor %}

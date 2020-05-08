@@ -27,7 +27,6 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -38,6 +37,7 @@ use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
 use App\Util\AgendaUtil;
 use App\Util\LogHandler;
+use App\Form\MessageType;
 
 
 /**
@@ -255,7 +255,7 @@ class AgendaController extends AbstractController {
         'data' => $scelta_materia,
         'mapped' => false,
         'required' => false))
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.descrizione_verifica',
         'attr' => array('rows' => '4'),
         'required' => true))
@@ -657,7 +657,7 @@ class AgendaController extends AbstractController {
         'data' => $scelta_materia,
         'mapped' => false,
         'required' => false))
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.descrizione_compito',
         'attr' => array('rows' => '4'),
         'required' => true))

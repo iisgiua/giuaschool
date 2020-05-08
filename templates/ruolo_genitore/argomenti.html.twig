@@ -47,10 +47,10 @@
           <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {'data': data}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
         </td>
           {% endif %}
-        <td><small>{{ e.argomento }}</small></td>
-        <td><small>{{ e.attivita }}</small></td>
+        <td><small>{{ e.argomento|raw }}</small></td>
+        <td><small>{{ e.attivita|raw }}</small></td>
           {% if alunno.bes == 'H' %}
-        <td><small>{{ e.argomento_sost }}{{ e.argomento_sost and e.attivita_sost ? '<br>' }}{{ e.attivita_sost }}</small></td>
+        <td><small>{{ e.argomento_sost|raw }}{{ e.argomento_sost and e.attivita_sost ? '<br>' }}{{ e.attivita_sost|raw }}</small></td>
           {% endif %}
       </tr>
         {% endfor %}

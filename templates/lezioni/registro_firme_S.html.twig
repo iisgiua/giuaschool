@@ -134,11 +134,20 @@
             {% if v1.sostegno is defined %}
               {% for sk,sv in v1.sostegno.argomento %}
                 {% if sv is not empty %}
-          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ v1.sostegno.alunno[sk] }} ({{ v1.sostegno.docente[sk] }})" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ sv }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+          <button type="button" class="btn btn-xs btn-default" title="Argomenti e attività del sostegno - {{ v1.sostegno.alunno[sk] }} ({{ v1.sostegno.docente[sk] }})" data-toggle="modal" data-target="#gs-modal-info" data-title="Argomenti e attività del sostegno" data-body="sostegno-{{ k }}-{{ sk }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+          <div id="sostegno-{{ k }}-{{ sk }}" style="display:none">
+            <div class="list-group-item">
+              <div class="list-group-item-text">
+                <p><strong>Alunno: {{ v1.sostegno.alunno[sk] }}</strong></p>
+                <p><strong>Docente: {{ v1.sostegno.docente[sk] }}</strong></p>
+                {{ sv|raw }}
+              </div>
+            </div>
+          </div>
                 {% endif %}
               {% endfor %}
             {% endif %}
-          <small>{{ v1.argomenti }}</small>
+          <small>{{ v1.argomenti|raw }}</small>
         </td>
       </tr>
           {% endfor %}
@@ -152,7 +161,7 @@
               {% if v1.alunni is not empty %}
         <strong>Destinatari: {% for al in v1.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
               {% endif %}
-        {{ v1.testo|nl2br }}
+        {{ v1.testo|raw|nl2br }}
         <small><em>({{ v1.docente }})</em></small>
       </div>
     </div>
@@ -167,10 +176,10 @@
               {% if v1.alunni is defined %}
         <small><em>Alunni: {{ v1.alunni }}</em></small><br>
               {% endif %}
-        {{ v1.testo|nl2br }}
+        {{ v1.testo|raw|nl2br }}
         <small><em>({{ v1.docente }})</em></small>
               {% if v1.provvedimento %}
-        <br><strong>{{ v1.provvedimento|nl2br }}
+        <br><strong>{{ v1.provvedimento|raw|nl2br }}
         <small><em>({{ v1.docente_provvedimento }})</em></small></strong>
               {% endif %}
       </div>

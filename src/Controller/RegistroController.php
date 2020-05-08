@@ -41,6 +41,7 @@ use App\Entity\Staff;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
+use App\Form\MessageType;
 
 
 /**
@@ -310,11 +311,11 @@ class RegistroController extends AbstractController {
         'choices'  => $ora_fine,
         'translation_domain' => false,
         'required' => true))
-      ->add('argomenti', TextareaType::class, array(
+      ->add('argomenti', MessageType::class, array(
         'label' => ($materia->getTipo() == 'S' ? 'label.argomenti_sostegno' : 'label.argomenti'),
         'trim' => true,
         'required' => false))
-      ->add('attivita', TextareaType::class, array(
+      ->add('attivita', MessageType::class, array(
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
         'required' => false))
@@ -497,12 +498,12 @@ class RegistroController extends AbstractController {
         'translation_domain' => false,
         'disabled' => true,
         'required' => true))
-      ->add('argomenti', TextareaType::class, array(
+      ->add('argomenti', MessageType::class, array(
         'data' => ($materia->getTipo() == 'S' ? (($firma_docente && $firma_docente instanceof FirmaSostegno) ? $firma_docente->getArgomento() : '') : $lezione->getArgomento()),
         'label' => ($materia->getTipo() == 'S' ? 'label.argomenti_sostegno' : 'label.argomenti'),
         'trim' => true,
         'required' => false))
-      ->add('attivita', TextareaType::class, array(
+      ->add('attivita', MessageType::class, array(
         'data' => ($materia->getTipo() == 'S' ? (($firma_docente && $firma_docente instanceof FirmaSostegno) ? $firma_docente->getAttivita() : '') : $lezione->getAttivita()),
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
@@ -830,7 +831,7 @@ class RegistroController extends AbstractController {
     }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('annotazione_edit', FormType::class, $annotazione)
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.testo',
         'trim' => true,
         'required' => true))
@@ -1143,13 +1144,13 @@ class RegistroController extends AbstractController {
         'disabled' => false,
         'label_attr' => ['class' => 'gs-pt-1 checkbox-split-vertical'],
         'required' => true))
-      ->add('testo', TextareaType::class, array('label' => 'label.testo',
+      ->add('testo', MessageType::class, array('label' => 'label.testo',
         'trim' => true,
         'disabled' => false,
         'required' => true));
     if ($docente_staff) {
       // docente è dello staff
-      $form->add('provvedimento', TextareaType::class, array('label' => 'label.provvedimento',
+      $form->add('provvedimento', MessageType::class, array('label' => 'label.provvedimento',
           'trim' => true,
           'required' => false));
     }

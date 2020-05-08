@@ -54,6 +54,7 @@ use App\Util\BachecaUtil;
 use App\Form\EntrataType;
 use App\Form\UscitaType;
 use App\Form\AppelloType;
+use App\Form\MessageType;
 
 
 /**
@@ -328,7 +329,7 @@ class StaffController extends AbstractController {
       ->add('oggetto', TextType::class, array(
         'label' => 'label.oggetto',
         'required' => true))
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.testo',
         'attr' => array('rows' => '4'),
         'required' => true))
@@ -949,7 +950,7 @@ class StaffController extends AbstractController {
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'required' => true))
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.testo',
         'attr' => array('rows' => '4'),
         'required' => true))
@@ -1309,7 +1310,7 @@ class StaffController extends AbstractController {
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'required' => true))
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.testo',
         'attr' => array('rows' => '4'),
         'required' => true))
@@ -1650,7 +1651,7 @@ class StaffController extends AbstractController {
     }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('avvisi_individuali_edit', FormType::class, $avviso)
-      ->add('testo', TextareaType::class, array(
+      ->add('testo', MessageType::class, array(
         'label' => 'label.testo',
         'attr' => array('rows' => '4'),
         'required' => true))

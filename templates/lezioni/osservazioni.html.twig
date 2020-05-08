@@ -72,7 +72,7 @@
             {% endif %}
               </div>
               <div class="list-group-item-text">
-                <small>{{ e.testo }}</small>
+                <small>{{ e.testo|raw|nl2br }}</small>
               </div>
             </div>
           {% endfor %}

@@ -30,8 +30,8 @@
       {% else %}
     <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
       {% endif %}
-    <td style="font-size:9pt">{{ e.nota }}<br><em>({{ e.nota_doc }})</em></td>
-    <td style="font-size:9pt">{{ e.provvedimento ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</td>
+    <td style="font-size:9pt">{{ e.nota|striptags|nl2br }}<br><em>({{ e.nota_doc }})</em></td>
+    <td style="font-size:9pt">{{ e.provvedimento ? ((e.provvedimento|striptags|nl2br)~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</td>
   </tr>
       {% endfor %}
     {% endfor %}

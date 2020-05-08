@@ -334,13 +334,13 @@
           {% if tipo == 'classe' %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Nota di classe</strong></td>
-        <td>{{ e.nota }}<br><em>({{ e.nota_doc }})</em></td>
-        <td>{{ e.provvedimento ? (e.provvedimento~'<br><em>('~e.nota_doc~')</em>')|raw }}</td>
+        <td>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></td>
+        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.nota_doc~')</em>')|raw }}</td>
           {% else %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Nota individuale</strong></td>
-        <td>{{ e.nota }}<br><em>({{ e.nota_doc }})</em></td>
-        <td>{{ e.provvedimento ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</td>
+        <td>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></td>
+        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</td>
           {% endif %}
       </tr>
           {% endfor %}
@@ -371,7 +371,7 @@
       <tr>
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>{{ e.materia }}</strong><br><small><em>({{ e.docente }})</em></small></td>
-        <td>{{ e.testo }}</td>
+        <td>{{ e.testo|raw|nl2br }}</td>
       </tr>
         {% endfor %}
       {% endfor %}
