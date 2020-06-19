@@ -3,8 +3,6 @@
 /.env.local
 /.env.local.php
 /.env.*.local
-/bin/*
-!/bin/.gitkeep
 /public/bundles/
 /var/cache/*
 !var/cache/.gitkeep
