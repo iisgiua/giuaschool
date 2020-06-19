@@ -30,6 +30,8 @@ use App\Entity\Staff;
 use App\Entity\Genitore;
 use App\Entity\Alunno;
 use App\Entity\Istituto;
+use App\Entity\Menu;
+use App\Entity\MenuOpzione;
 
 
 /**
@@ -70,6 +72,8 @@ class AppFixtures extends Fixture {
   public function load(ObjectManager $manager) {
     // configurazione sistema
     $this->configSistema($manager);
+    // configurazione menu
+    $this->configMenu($manager);
     // configurazione scuola (istituto/sedi/corsi/classi)
     $this->configScuola($manager);
     // configurazione materie
@@ -101,6 +105,7 @@ class AppFixtures extends Fixture {
    *                  [testo nel formato 'AAAA-MM-GG,HH:MM,HH:MM' che indica giorno, ora inizio e ora fine]
    *    messaggio: indica la visualizzazione del messaggio nella pagina di accesso al registro
    *               [testo libero che può contenere formattazione HTML]
+   *    moodle: indica se presente pulsante per accesso diretto a MOODLE [token di app se attiva funzione]
    *
    *  Parametri della categoria SCUOLA:
    *    anno_scolastico: anno scolastico corrente [testo nel formato 'AAAA-AAAA']
@@ -117,6 +122,7 @@ class AppFixtures extends Fixture {
    *                   (se è usato un terzo periodo, inizia a <periodo2_fine>+1 e finisce a <anno_fine>)
    *                   ['' se non presente un terzo periodo, testo libero in caso contrario]
    *    ritardo_breve: numero di minuti per la definizione di ritardo breve (non richiede giustificazione)
+   *    mesi_colloqui: mesi dell'A.S. con i colloqui generali, lista separata da virgola dei numeri dei mese
    *    notifica_circolari: ore di notifica giornaliera delle circolari, lista separata da virgola delle ore (formato HH)
    *    tabelloni_quinta: cosa pubblicare sui tabelloni per gli ammessi allo scrutinio di quinta:
    *                 [N=niente voti, T=tutti voti, V=voti suff., A=voti di alunno tutto suff.]
@@ -152,11 +158,15 @@ class AppFixtures extends Fixture {
       ->setCategoria('SISTEMA')
       ->setParametro('messaggio')
       ->setValore('');
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SISTEMA')
+      ->setParametro('moodle')
+      ->setValore('');
     // SCUOLA
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('anno_scolastico')
-      ->setValore('2019-2020');
+      ->setValore('2019/2020');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('anno_inizio')
@@ -172,7 +182,7 @@ class AppFixtures extends Fixture {
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo1_fine')
-      ->setValore('2019-12-15');
+      ->setValore('2019-12-16');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo2_nome')
@@ -189,6 +199,10 @@ class AppFixtures extends Fixture {
       ->setCategoria('SCUOLA')
       ->setParametro('ritardo_breve')
       ->setValore('10');
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SCUOLA')
+      ->setParametro('mesi_colloqui')
+      ->setValore('12,3');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('notifica_circolari')
@@ -222,6 +236,233 @@ class AppFixtures extends Fixture {
     // rende persistenti i parametri
     foreach ($this->dati['param'] as $obj) {
       $manager->persist($obj);
+    }
+  }
+
+  /**
+   * Carica i dati dei menu
+   *
+   *  Dati del vettore menu (usato per il caricamento nel database):
+   *    menu[<id_menu>] = [ <nome>, <descrizione>, <megamenu>, [
+   *      [<nome>, <descrizione>, <url>, <icona>, <disabilitato>, <id_sottomenu>, <ruolo> ],
+   *    ]]
+   *  Il ruolo è una stringa di uno o più dei seguenti codici:
+   *    N : nessuno (pubblico)
+   *    U : utente (qualsiasi utente)
+   *    M : amministratore
+   *    T : ata
+   *    E : segreteria
+   *    A : alunno
+   *    G : genitore
+   *    D : docente
+   *    C : coordinatore
+   *    S : staff
+   *    P : preside
+   *
+   * @param ObjectManager $manager Gestore dei dati
+   */
+  private function configMenu(ObjectManager $manager) {
+    // definizione menu come array associativo
+    $menu['help'] = ['Aiuto', 'Mostra le pagine di supporto all\'utente', 0, [
+        //-- ['Guida', 'Mostra la guida per le funzioni presenti nella pagina corrente', '#', null, 0, null, 'U'],
+        ['Manuale', 'Scarica il manuale d\'uso dell\'applicazione', '', null, 0, null, 'U'],
+        //-- ['FAQ', 'Mostra la pagina delle domande frequenti', '#', null, 0, null, 'U'],
+        //-- ['Segnalazioni', 'Mostra la pagina delle segnalazioni', '#', null, 0, null, 'U'],
+      ]];
+    $menu['user'] = ['Utente', 'Gestione del profilo dell\'utente', 0, [
+        ['Profilo', 'Gestione del profilo dell\'utente', 'utenti_profilo', null, 0, null, 'U'],
+      ]];
+    $menu['info'] = ['Informazioni', 'Informazioni sul sito web', 0, [
+        ['Note&nbsp;legali', 'Mostra le note legali', 'info_noteLegali', null, 0, null, 'NU'],
+        ['Privacy', 'Mostra l\'informativa sulla privacy', 'info_privacy', null, 0, null, 'NU'],
+        ['Cookie', 'Mostra l\'informativa sui cookie', 'info_cookie', null, 0, null, 'NU'],
+        ['Credits', 'Mostra i credits', 'info_credits', null, 0, null, 'NU'],
+      ]];
+    $menu['sistema'] = ['', '', 0, [
+        ['Configurazione', 'Configurazione dei parametri di sistema', '', null, 1, null, 'M'],
+        ['Amministratori', 'Gestione degli amministratori', '', null, 1, null, 'M'],
+      ]];
+    $menu['scuola'] = ['', '', 0, [
+        ['Preside', 'Gestione del preside', '', null, 1, null, 'M'],
+        ['Istituto', 'Configurazione dei dati dell\'Istituto', '', null, 1, null, 'M'],
+        ['Sedi', 'Configurazione dei dati delle sedi dell\'Istituto', '', null, 1, null, 'M'],
+        ['Corsi', 'Gestione dei corsi di studio', '', null, 1, null, 'M'],
+        ['Classi', 'Gestione delle classi dell\'Istituto', '', null, 1, null, 'M'],
+        ['Materie', 'Gestione delle materie scolastiche', '', null, 1, null, 'M'],
+        ['Festività', 'Configurazione del calendario delle festività', '', null, 1, null, 'M'],
+      ]];
+    $menu['ata'] = ['', '', 0, [
+        ['Importa', 'Importa da file i dati del personale ATA', 'ata_importa', null, 0, null, 'M'],
+        ['Modifica', 'Modifica i dati del personale ATA', 'ata_modifica', null, 0, null, 'M'],
+      ]];
+    $menu['docenti'] = ['', '', 0, [
+        ['Importa', 'Importa da file i dati dei docenti', 'docenti_importa', null, 0, null, 'M'],
+        ['Modifica', 'Modifica i dati dei docenti', 'docenti_modifica', null, 0, null, 'M'],
+        ['Cattedre', 'Gestione delle cattedre dei docenti', 'docenti_cattedre', null, 0, null, 'M'],
+        ['Colloqui', 'Gestione dei colloqui dei docenti', 'docenti_colloqui', null, 0, null, 'M'],
+        ['Staff', 'Gestione dei docenti facenti parte dello staff', 'docenti_staff', null, 0, null, 'M'],
+        ['Coordinatori', 'Gestione dei docenti coordinatori del Consiglio di Classe', 'docenti_coordinatori', null, 0, null, 'M'],
+        ['Segretari', 'Gestione dei docenti segretari del Consiglio di Classe', 'docenti_segretari', null, 0, null, 'M'],
+      ]];
+    $menu['alunni'] = ['', '', 0, [
+        ['Importa', 'Importa da file i dati degli alunni', 'alunni_importa', null, 0, null, 'M'],
+        ['Modifica', 'Modifica i dati degli alunni', 'alunni_modifica', null, 0, null, 'M'],
+        ['Cambio&nbsp;classe', 'Gestione del cambio di classe degli alunni', 'alunni_classe', null, 0, null, 'M'],
+        ['Password', 'Genera una nuova password per i genitori degli alunni', 'alunni_password', null, 0, null, 'M'],
+      ]];
+    $menu['procedure'] = ['', '', 0, [
+        ['Alias', 'Assumi l\'identità di un altro utente', 'procedure_alias', null, 0, null, 'M'],
+        ['Password', 'Cambia la password di qualunque utente', 'procedure_password', null, 0, null, 'M'],
+        ['Manutenzione', 'Imposta la modalità di manutenzione', 'procedure_manutenzione', null, 0, null, 'M'],
+        ['Archiviazione', 'Gestisce l\'archiviazione dei registri', 'procedure_archiviazione', null, 0, null, 'M'],
+        ['Ricalcola&nbsp;assenze', 'Ricalcola le ore di assenza degli alunni', 'procedure_ricalcola', null, 0, null, 'M'],
+      ]];
+    $menu['main'] = ['Menu Principale', 'Apri il menu principale', 0, [
+        // PUBBLICO
+        //-- ['Accesso', 'Accedi al registro usando utente e password', 'login_form', null, 0, null, 'N'],
+        //-- ['Accesso&nbsp;con&nbsp;Tessera&nbsp;Sanitaria', 'Accedi al registro usando la Carta Nazionale dei Servizi', 'login_cardErrore', null, 0, null, 'N'],
+        //-- ['Recupero&nbsp;Password', 'Recupera la password di accesso tramite la posta elettronica', 'login_recovery', null, 0, null, 'N'],
+        //-- ['App&nbsp;e&nbsp;Servizi', 'Informazioni su app e servizi disponibili', 'app_info', null, 0, null, 'N'],
+        // UTENTI
+        ['Home', 'Mostra la pagina principale', 'login_home', 'home', 0, null, 'U'],
+        // AMMINISTRATORE
+        ['Sistema', 'Configurazione del sistema', '', 'cog', 0, 'sistema', 'M'],
+        ['Scuola', 'Configurazione dei dati della scuola', '', 'school', 0, 'scuola', 'M'],
+        ['ATA', 'Gestione del personale ATA', '', 'user-tie', 0, 'ata', 'M'],
+        ['Docenti', 'Gestione dei docenti', '', 'user-graduate', 0, 'docenti', 'M'],
+        ['Alunni', 'Gestione degli alunni', '', 'child', 0, 'alunni', 'M'],
+        ['Procedure', 'Procedure generali di gestione del registro', '', 'wrench', 0, 'procedure', 'M'],
+
+
+      ]];
+
+    // caricamento del menu nel database
+    foreach ($menu as $idmenu=>$m) {
+      $menu_obj[$idmenu] = (new Menu())
+        ->setSelettore($idmenu)
+        ->setNome($m[0])
+        ->setDescrizione($m[1])
+        ->setMega($m[2]);
+      $manager->persist($menu_obj[$idmenu]);
+      $opzione_obj = [];
+      foreach ($m[3] as $ord=>$opzione) {
+        if (strchr($opzione[6], 'N')) {
+          // ruolo nessuno (pubblico)
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('NESSUNO')
+            ->setFunzione('NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+        if (strchr($opzione[6], 'M') || strchr($opzione[6], 'U')) {
+          // ruolo amministratore
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('ROLE_AMMINISTRATORE')
+            ->setFunzione('NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+        if (strchr($opzione[6], 'T') || strchr($opzione[6], 'E') || strchr($opzione[6], 'U')) {
+          // ruolo ata/segreteria
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('ROLE_ATA')
+            ->setFunzione(strchr($opzione[6], 'E') ? 'SEGRETERIA' : 'NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+        if (strchr($opzione[6], 'A') || strchr($opzione[6], 'U')) {
+          // ruolo alunno
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('ROLE_ALUNNO')
+            ->setFunzione('NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+        if (strchr($opzione[6], 'G') || strchr($opzione[6], 'U')) {
+          // ruolo genitore
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('ROLE_GENITORE')
+            ->setFunzione('NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+        if (strchr($opzione[6], 'D') || strchr($opzione[6], 'C') || strchr($opzione[6], 'U')) {
+          // ruolo docente/coordinatore
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('ROLE_DOCENTE')
+            ->setFunzione(strchr($opzione[6], 'C') ? 'COORDINATORE' : 'NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+        if (strchr($opzione[6], 'S') || strchr($opzione[6], 'U')) {
+          // ruolo staff
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('ROLE_STAFF')
+            ->setFunzione('NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+        if (strchr($opzione[6], 'P') || strchr($opzione[6], 'U')) {
+          // ruolo preside
+          $opzione_obj[] = (new MenuOpzione())
+            ->setNome($opzione[0])
+            ->setDescrizione($opzione[1])
+            ->setUrl($opzione[2])
+            ->setIcona($opzione[3])
+            ->setDisabilitato($opzione[4])
+            ->setOrdinamento($ord + 1)
+            ->setRuolo('ROLE_PRESIDE')
+            ->setFunzione('NESSUNA')
+            ->setSottoMenu($opzione[5] ? $menu_obj[$opzione[5]] : null)
+            ->setMenu($menu_obj[$idmenu]);
+        }
+      }
+      // rende persistenti le opzioni
+      foreach ($opzione_obj as $obj) {
+        $manager->persist($obj);
+      }
     }
   }
 
@@ -276,7 +517,7 @@ class AppFixtures extends Fixture {
       ->setUrlSito('http://www.scuola.edu.it')
       ->setUrlRegistro('https://registro.scuola.edu.it')
       ->setFirmaPreside('Prof. Nome Cognome')
-      ->setEmailAmministratore('postmaster@scuola.edu.it')
+      ->setEmailAmministratore('nome.cognome@gmail.com')
       ->setEmailNotifiche('postmaster@scuola.edu.it');
     // rende persistente l'istituto
     $manager->persist($this->dati['istituto']);
@@ -285,15 +526,15 @@ class AppFixtures extends Fixture {
       ->setNome('Sede centrale di Città')
       ->setNomeBreve('Città')
       ->setCitta('Città')
-      ->setIndirizzo('Via Indirizzo, sn')
-      ->setTelefono('000 000000')
+      ->setIndirizzo('Via indirizzo, 1')
+      ->setTelefono('000 111111')
       ->setOrdinamento(10);
     $this->dati['sedi']['AS'] = (new Sede())
       ->setNome('Sede staccata di Città2')
       ->setNomeBreve('Città2')
       ->setCitta('Città2')
-      ->setIndirizzo('Via Indirizzo, sn')
-      ->setTelefono('000 000000')
+      ->setIndirizzo('Via indirizzo2, 2')
+      ->setTelefono('000 222222')
       ->setOrdinamento(20);
     // rende persistenti le sedi
     foreach ($this->dati['sedi'] as $obj) {
@@ -322,7 +563,7 @@ class AppFixtures extends Fixture {
     foreach ($this->dati['corsi'] as $obj) {
       $manager->persist($obj);
     }
-    // classi - CITTA - biennio informatica
+    // classi - città - biennio informatica
     $this->dati['classi']['1A'] = (new Classe())
       ->setAnno(1)
       ->setSezione('A')
@@ -389,7 +630,13 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(33)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['BIN']);
-    // classi - CITTA - biennio chimica
+    $this->dati['classi']['1T'] = (new Classe())
+      ->setAnno(1)
+      ->setSezione('T')
+      ->setOreSettimanali(33)
+      ->setSede($this->dati['sedi']['CA'])
+      ->setCorso($this->dati['corsi']['BIN']);
+    // classi - città - biennio chimica
     $this->dati['classi']['1E'] = (new Classe())
       ->setAnno(1)
       ->setSezione('E')
@@ -402,7 +649,7 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['BCH']);
-    // classi - CITTA - triennio informatica
+    // classi - città - triennio informatica
     $this->dati['classi']['3A'] = (new Classe())
       ->setAnno(3)
       ->setSezione('A')
@@ -463,13 +710,13 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['INF']);
-    $this->dati['classi']['5D'] = (new Classe())
-      ->setAnno(5)
+    $this->dati['classi']['4D'] = (new Classe())
+      ->setAnno(4)
       ->setSezione('D')
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['INF']);
-    // classi - CITTA - triennio chimica
+    // classi - città - triennio chimica
     $this->dati['classi']['3E'] = (new Classe())
       ->setAnno(3)
       ->setSezione('E')
@@ -488,13 +735,7 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['CHM']);
-    // classi - CITTA - triennio biotec. amb.
-    $this->dati['classi']['3F'] = (new Classe())
-      ->setAnno(3)
-      ->setSezione('F')
-      ->setOreSettimanali(32)
-      ->setSede($this->dati['sedi']['CA'])
-      ->setCorso($this->dati['corsi']['CBA']);
+    // classi - città - triennio biotec. amb.
     $this->dati['classi']['4F'] = (new Classe())
       ->setAnno(4)
       ->setSezione('F')
@@ -507,7 +748,7 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['CBA']);
-    // classi - CITTA - liceo
+    // classi - città - liceo
     $this->dati['classi']['1I'] = (new Classe())
       ->setAnno(1)
       ->setSezione('I')
@@ -544,12 +785,6 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(27)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['LSA']);
-    $this->dati['classi']['2L'] = (new Classe())
-      ->setAnno(2)
-      ->setSezione('L')
-      ->setOreSettimanali(27)
-      ->setSede($this->dati['sedi']['CA'])
-      ->setCorso($this->dati['corsi']['LSA']);
     $this->dati['classi']['3L'] = (new Classe())
       ->setAnno(3)
       ->setSezione('L')
@@ -568,7 +803,7 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(30)
       ->setSede($this->dati['sedi']['CA'])
       ->setCorso($this->dati['corsi']['LSA']);
-    // classi - CITTA2 - biennio informatica
+    // classi - città2 - biennio informatica
     $this->dati['classi']['1N'] = (new Classe())
       ->setAnno(1)
       ->setSezione('N')
@@ -611,7 +846,13 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(33)
       ->setSede($this->dati['sedi']['AS'])
       ->setCorso($this->dati['corsi']['BIN']);
-    // classi - CITTA2 - triennio informatica
+    $this->dati['classi']['1S'] = (new Classe())
+      ->setAnno(1)
+      ->setSezione('S')
+      ->setOreSettimanali(33)
+      ->setSede($this->dati['sedi']['AS'])
+      ->setCorso($this->dati['corsi']['BIN']);
+    // classi - città2 - triennio informatica
     $this->dati['classi']['3N'] = (new Classe())
       ->setAnno(3)
       ->setSezione('N')
@@ -648,13 +889,13 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['AS'])
       ->setCorso($this->dati['corsi']['INF']);
-    $this->dati['classi']['3P'] = (new Classe())
-      ->setAnno(3)
+    $this->dati['classi']['4P'] = (new Classe())
+      ->setAnno(4)
       ->setSezione('P')
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['AS'])
       ->setCorso($this->dati['corsi']['INF']);
-    // classi - CITTA - liceo
+    // classi - città - liceo
     $this->dati['classi']['1R'] = (new Classe())
       ->setAnno(1)
       ->setSezione('R')
@@ -667,8 +908,8 @@ class AppFixtures extends Fixture {
       ->setOreSettimanali(27)
       ->setSede($this->dati['sedi']['AS'])
       ->setCorso($this->dati['corsi']['LSA']);
-    $this->dati['classi']['4R'] = (new Classe())
-      ->setAnno(4)
+    $this->dati['classi']['3R'] = (new Classe())
+      ->setAnno(3)
       ->setSezione('R')
       ->setOreSettimanali(30)
       ->setSede($this->dati['sedi']['AS'])
@@ -806,7 +1047,7 @@ class AppFixtures extends Fixture {
       ->setOrdinamento(80);
     $this->dati['materie'][] = (new Materia())
       ->setNome('Scienze integrate (Scienze della Terra e Biologia)')
-      ->setNomeBreve('Sc. Terra')
+      ->setNomeBreve('Sc. Terra Biologia')
       ->setTipo('N')
       ->setValutazione('N')
       ->setMedia(true)
@@ -1115,12 +1356,12 @@ class AppFixtures extends Fixture {
       ->setSede(null);
     // giorni a disposizione dell'Istituto
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '31/10/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '29/04/2020'))
       ->setDescrizione('Chiusura stabilita dal Consiglio di Istituto')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '27/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '30/04/2020'))
       ->setDescrizione('Chiusura stabilita dal Consiglio di Istituto')
       ->setTipo('F')
       ->setSede(null);
@@ -1151,82 +1392,29 @@ class AppFixtures extends Fixture {
    */
   private function configOrario(ObjectManager $manager) {
     // ORARI
-    $this->dati['orari']['CA0'] = (new Orario())
-      ->setNome('CITTA - Orario Iniziale')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
-      ->setSede($this->dati['sedi']['CA']);
-    $this->dati['orari']['AS0'] = (new Orario())
-      ->setNome('CITTA2 - Orario Iniziale')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
-      ->setSede($this->dati['sedi']['AS']);
     $this->dati['orari']['CA1'] = (new Orario())
-      ->setNome('CITTA - Orario Provvisorio')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '17/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '31/10/2019'))
+      ->setNome('città - Orario Provvisorio')
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '29/09/2019'))
       ->setSede($this->dati['sedi']['CA']);
     $this->dati['orari']['AS1'] = (new Orario())
-      ->setNome('CITTA - Orario Provvisorio')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '17/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '31/10/2019'))
+      ->setNome('città2 - Orario Provvisorio')
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '29/09/2019'))
       ->setSede($this->dati['sedi']['AS']);
     $this->dati['orari']['CA2'] = (new Orario())
-      ->setNome('CITTA - Orario Definitivo')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '01/11/2019'))
+      ->setNome('città - Orario Definitivo')
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '30/09/2019'))
       ->setFine(\DateTime::createFromFormat('d/m/Y', '06/06/2020'))
       ->setSede($this->dati['sedi']['CA']);
     $this->dati['orari']['AS2'] = (new Orario())
-      ->setNome('CITTA2 - Orario Definitivo')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '01/11/2019'))
+      ->setNome('città2 - Orario Definitivo')
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '30/09/2019'))
       ->setFine(\DateTime::createFromFormat('d/m/Y', '06/06/2020'))
       ->setSede($this->dati['sedi']['AS']);
     // rende persistenti gli orari
     foreach ($this->dati['orari'] as $obj) {
       $manager->persist($obj);
-    }
-    // SCANSIONI ORARIE per orario iniziale
-    for ($giorno = 1; $giorno <= 6; $giorno++) {
-      $ora_inizio = \DateTime::createFromFormat('H:i', '08:30');
-      $ora_fine = \DateTime::createFromFormat('H:i', '09:30');
-      for ($ora = 1; $ora <= 2; $ora++) {
-        $this->dati['scansioni_orarie'][] = (new ScansioneOraria())
-          ->setGiorno($giorno)
-          ->setOra($ora)
-          ->setInizio(clone $ora_inizio)
-          ->setFine(clone $ora_fine)
-          ->setDurata(60)
-          ->setOrario($this->dati['orari']['CA0']);
-        $this->dati['scansioni_orarie'][] = (new ScansioneOraria())
-          ->setGiorno($giorno)
-          ->setOra($ora)
-          ->setInizio(clone $ora_inizio)
-          ->setFine(clone $ora_fine)
-          ->setDurata(60)
-          ->setOrario($this->dati['orari']['AS0']);
-        $ora_inizio->modify('+1 hour');
-        $ora_fine->modify('+1 hour');
-      }
-      $ora_inizio = \DateTime::createFromFormat('H:i', '11:00');
-      $ora_fine = \DateTime::createFromFormat('H:i', '12:00');
-      for ($ora = 3; $ora <= 4; $ora++) {
-        $this->dati['scansioni_orarie'][] = (new ScansioneOraria())
-          ->setGiorno($giorno)
-          ->setOra($ora)
-          ->setInizio(clone $ora_inizio)
-          ->setFine(clone $ora_fine)
-          ->setDurata(60)
-          ->setOrario($this->dati['orari']['CA0']);
-        $this->dati['scansioni_orarie'][] = (new ScansioneOraria())
-          ->setGiorno($giorno)
-          ->setOra($ora)
-          ->setInizio(clone $ora_inizio)
-          ->setFine(clone $ora_fine)
-          ->setDurata(60)
-          ->setOrario($this->dati['orari']['AS0']);
-        $ora_inizio->modify('+1 hour');
-        $ora_fine->modify('+1 hour');
-      }
     }
     // SCANSIONI ORARIE per orario provvisorio
     for ($giorno = 1; $giorno <= 6; $giorno++) {
@@ -1307,8 +1495,9 @@ class AppFixtures extends Fixture {
    *    Il tipo di utente è stabilito dal nome dell'oggetto istanziato:
    *      new Amministratore()    -> amministratore del sistema
    *      new Preside()           -> dirigente scolastico
-   *      new Docente()           -> docente
    *      new Staff()             -> docente collaboratore del dirigente
+   *      new Docente()           -> docente
+   *      new Ata()               -> personale ATA
    *      new Genitore()          -> genitore di un alunno
    *      new Alunno()            -> alunno
    *
