@@ -454,6 +454,14 @@ class VotoScrutinio {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->dati = array();
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
@@ -463,4 +471,3 @@ class VotoScrutinio {
   }
 
 }
-

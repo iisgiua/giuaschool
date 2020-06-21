@@ -187,16 +187,14 @@ class SegreteriaUtil {
    */
   public function pagelleAlunni(Paginator $lista) {
     $dati = array();
-    $adesso = (new \DateTime())->format('Y-m-d H:i:0');
     // trova pagelle di alunni
     foreach ($lista as $alu) {
       // scrutini di classe corrente o altre di cambio classe
       $scrutini = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
         ->leftJoin('s.classe', 'c')
         ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
-        ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso')
-        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(),
-          'stato' => 'C', 'adesso' => $adesso])
+        ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato')
+        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(), 'stato' => 'C'])
         ->orderBy('s.data')
         ->getQuery()
         ->getResult();
@@ -278,6 +276,26 @@ class SegreteriaUtil {
         } else {
           // non scrutinato
           $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
+        }
+        // PAI
+        $dati['PAI'] = false;
+        if ($alunno->getClasse()->getAnno() != 5 && $dati['esito']->getEsito() == 'A') {
+          // legge i voti e PAI (solo ammessi)
+          $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            ->join('vs.materia', 'm')
+            ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND m.tipo IN (:materie)')
+            ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'materie' => ['N','R']])
+            ->getQuery()
+            ->getResult();
+          foreach ($voti as $v) {
+            // inserisce voti
+            if (($v->getMateria()->getTipo() == 'R' && $v->getUnico() < 22) ||
+                ($v->getMateria()->getTipo() != 'R' && $v->getUnico() < 6)) {
+              // solo materie insufficienti
+              $dati['PAI'] = true;
+              break;
+            }
+          }
         }
       } elseif ($scrutinio->getPeriodo() == 'I' || $scrutinio->getPeriodo() == 'X') {
         // controlla verbale

@@ -109,6 +109,13 @@ class PropostaVoto {
   private $assenze;
 
   /**
+   * @var array $dati Lista dei dati aggiuntivi
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $dati;
+
+  /**
    * @var Alunno $alunno Alunno a cui si attribuisce la proposta di voto
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
@@ -364,6 +371,74 @@ class PropostaVoto {
   }
 
   /**
+   * Restituisce la lista dei dati aggiuntivi
+   *
+   * @return array Lista dei dati aggiuntivi
+   */
+  public function getDati() {
+    return $this->dati;
+  }
+
+  /**
+   * Modifica la lista dei dati aggiuntivi
+   *
+   * @param array $dati Lista dei dati aggiuntivi
+   *
+   * @return PropostaVoto Oggetto PropostaVoto
+   */
+  public function setDati($dati) {
+    if ($dati === $this->dati) {
+      // clona array per forzare update su doctrine
+      $dati = unserialize(serialize($dati));
+    }
+    $this->dati = $dati;
+    return $this;
+  }
+
+  /**
+   * Restituisce il valore del dato indicato all'interno della lista dei dati aggiuntivi
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return mixed Valore del dato o null se non esiste
+   */
+  public function getDato($nome) {
+    if (isset($this->dati[$nome])) {
+      return $this->dati[$nome];
+    }
+    return null;
+  }
+
+  /**
+   * Aggiunge/modifica un dato alla lista dei dati aggiuntivi
+   *
+   * @param string $nome Nome identificativo del dato
+   * @param mixed $valore Valore del dato
+   *
+   * @return PropostaVoto Oggetto PropostaVoto
+   */
+  public function addDato($nome, $valore) {
+    if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
+      // clona array per forzare update su doctrine
+      $valore = unserialize(serialize($valore));
+    }
+    $this->dati[$nome] = $valore;
+    return $this;
+  }
+
+  /**
+   * Elimina un dato dalla lista dei dati aggiuntivi
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return PropostaVoto Oggetto PropostaVoto
+   */
+  public function removeDato($nome) {
+    unset($this->dati[$nome]);
+    return $this;
+  }
+
+  /**
    * Restituisce l'alunno a cui si attribuisce la proposta di voto
    *
    * @return Alunno Alunno a cui si attribuisce la proposta di voto
@@ -451,6 +526,14 @@ class PropostaVoto {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->dati = array();
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
@@ -460,4 +543,3 @@ class PropostaVoto {
   }
 
 }
-

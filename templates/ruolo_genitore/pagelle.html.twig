@@ -152,13 +152,20 @@
   </div>
           {% endif %}
         {% else %}
+  <div class="text-info text-center gs-big gs-pb-2">
+    <strong>Scrutinio finale</strong>
+  </div>
+  <div class="text-center gs-mb-3">
+          {% if dati.esito.esito == 'A' %}
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
+            {% if dati.PAI %}
+    <br><a class="btn btn-primary btn gs-mt-3" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'X', 'periodo': periodo}) }}" role="button" title="Scarica il Piano di Apprendimento Individualizzato"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Piano di Apprendimento Individualizzato</strong></a>
+            {% endif %}
+          {% elseif dati.esito.esito == 'N' %}
+    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
+          {% endif %}
+  </div>
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-2">
-      <strong>Scrutinio finale</strong>
-          {%if dati.esito.esito == 'A' %}
-      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
-          {%endif %}
-    </caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-6">Materia</th>
@@ -197,8 +204,8 @@
     <strong class="gs-big">Credito: {{ dati.esito.credito }}</strong><br>
             {% endif %}
             {% if classe.anno > 3 %}
-    <strong class="gs-big">Credito anni precedenti: {{ dati.esito.creditoPrecedente }}</strong><br>
-    <strong class="gs-big">Credito totale: {{ dati.esito.credito + dati.esito.creditoPrecedente }}</strong><br>
+    <strong class="gs-big">Credito anni precedenti: {{ classe.anno == 5 ? (dati.esito.dati['creditoConvertito3'] + dati.esito.dati['creditoConvertito4']) : dati.esito.creditoPrecedente }}</strong><br>
+    <strong class="gs-big">Credito totale: {{ dati.esito.credito + (classe.anno == 5 ? (dati.esito.dati['creditoConvertito3'] + dati.esito.dati['creditoConvertito4']) : dati.esito.creditoPrecedente) }}</strong><br>
             {% endif %}
   </div>
             {% if dati.carenze is defined %}
@@ -221,9 +228,6 @@
           {% elseif dati.esito.esito == 'N' %}
   <div class="alert alert-danger" role="alert">
     <div class="text-center"><strong class="gs-big">Esito dello scrutinio: NON AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}</strong></div>
-  </div>
-  <div class="text-center">
-    <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
   </div>
           {% endif %}
         {% endif%}

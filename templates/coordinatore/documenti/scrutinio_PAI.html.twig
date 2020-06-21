@@ -1,0 +1,27 @@
+{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<p style="text-align:center;font-family:helvetica;font-size:11pt">
+  <strong>Piano di Apprendimento Individualizzato</strong> <br><br>
+  <strong>Alunn{{ dati.alunno.sesso == 'M' ? 'o' : 'a' }}: {{ dati.alunno.nome }} {{ dati.alunno.cognome }}</strong> <br>
+  <strong>Classe: {{ dati.alunno.classe.anno }}ª {{ dati.alunno.classe.sezione }} - {{ dati.alunno.classe.corso.nomeBreve }}</strong> <br>
+</p>
+<p style="text-align:justify;font-family:helvetica;font-size:11pt">
+Il Consiglio di Classe, nello scrutinio finale del {{ dati.data_scrutinio|date('d/m/Y') }},
+avendo ammesso alla classe successiva l'alunn{{ dati.alunno.sesso == 'M' ? 'o' : 'a' }} {{ dati.alunno.nome }} {{ dati.alunno.cognome }} con votazioni inferiori a sei decimi,
+predispone il seguente piano di apprendimento individualizzato nel quale sono indicati, per ciascuna disciplina, gli obiettivi di apprendimento
+da conseguire nonché le specifiche strategie per il raggiungimento dei relativi livelli di apprendimento (OM n. 11 del 16/05/2020).
+</p>
+{% for p in dati.piani %}
+  {% if p %}
+<div style="text-align:center;font-family:helvetica;font-size:11pt"><strong>{{ p.materia.nome }}</strong></div>
+<table border="1" cellpadding="4" style="font-family:helvetica;font-size:10pt" nobr="true">
+  <tr nobr="true"><td><strong>&nbsp;&nbsp;Obiettivi di apprendimento da conseguire:</strong></td></tr>
+  <tr nobr="true"><td>{{ p.debito|raw|nl2br }}<br></td></tr>
+</table>
+<table border="1" cellpadding="4" style="font-family:helvetica;font-size:10pt" nobr="true">
+  <tr nobr="true"><td><strong>&nbsp;&nbsp;Strategie per il raggiungimento dei relativi obiettivi di apprendimento:</strong></td></tr>
+  <tr nobr="true"><td>{{ p.dati.strategie|raw|nl2br }}<br></td></tr>
+</table>
+<br>
+  {% endif %}
+{% endfor %}
+{{ include('coordinatore/documenti/firma.html.twig') }}

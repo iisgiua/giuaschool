@@ -1,0 +1,54 @@
+{{ form_start(form) }}
+  <div class="modal-header">
+    <h3 class="modal-title gs-h3">{{ form_title|trans }}</h3>
+    <h4 class="modal-title gs-h4"><em>Classe: {{ info.classe }}</em></h4>
+    <h4 class="modal-title gs-h4"><em>Materia: {{ info.materia }}</em></h4>
+  </div>
+  <div class="modal-body">
+    <div id="modal-message"></div>
+    <div class="form-group bg-danger gs-pb-2">
+      <label class="col-sm-8 control-label" for="piano_integrazione_obiettivi">{{ 'label.PIA_necessario'|trans }}</label>
+      <div class="col-sm-4">{{ form_widget(form.necessario) }}</div>
+    </div>
+    <div id="gs-piano" style="display:none">
+      {{ form_row(form.obiettivi) }}
+      {{ form_row(form.strategie) }}
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" id="piano_integrazione_submit" class="btn-primary btn gs-mr-3">{{ 'label.submit'|trans }}</button>
+    <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+  </div>
+{{ form_end(form) }}
+
+<script>
+$(document).ready(function() {
+  $('#piano_integrazione_submit').on('click', function(e) {
+    $.ajax({
+      url: "{{ path('lezioni_scrutinio_pia_invio', {'cattedra': info.cattedra}) }}",
+      type: "POST",
+      data: {'necessario': $('#gs-modal-remote-content input[name="piano_integrazione[necessario]"]:checked').val(), 'obiettivi': $('#{{ form.obiettivi.vars.id }}').val(), 'strategie': $('#{{ form.strategie.vars.id }}').val()},
+      dataType: "json",
+      success: function (data) {
+        if (data['stato'] == 'ok') {
+          $('#gs-modal-remote').modal('hide');
+        } else {
+          $('#modal-message').html('<div class="alert alert-danger" role="alert">'+data['errore']+'</div>');
+        } },
+      error: function (data) {
+        $('#modal-message').html('<div class="alert alert-danger" role="alert">{{ 'exception.errore_invio_PIA'|trans }}</div>'); },
+    });
+  });
+  $('#gs-modal-remote-content label.radio-inline input[type="radio"]').change(function() {
+    if (this.value == 1 && this.checked) {
+      $(this).parent().css('font-weight', 'bold');
+      $(this).parent().siblings('label.radio-inline').css('font-weight', 'normal');
+      $('#gs-piano').fadeIn(300);
+    } else if (this.checked) {
+      $(this).parent().css('font-weight', 'bold');
+      $(this).parent().siblings('label.radio-inline').css('font-weight', 'normal');
+      $('#gs-piano').fadeOut(300);
+    }
+  }).change();
+});
+</script>

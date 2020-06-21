@@ -1,6 +1,8 @@
 # config/packages/twig.yaml
 
 twig:
+  globals:
+    LOCAL_PATH: '%env(LOCAL_PATH)%'
   date:
     format: '%locale_date%'
   number_format:

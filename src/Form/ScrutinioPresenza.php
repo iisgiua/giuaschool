@@ -41,6 +41,16 @@ class ScrutinioPresenza {
    */
   private $sessoSostituto;
 
+  /**
+   * @var string $surrogaProtocollo Numero protocollo del provvedimento di surroga
+   */
+  private $surrogaProtocollo;
+
+  /**
+   * @var \DateTime $surrogaData Data del provvedimento di surroga
+   */
+  private $surrogaData;
+
 
   //==================== METODI SETTER/GETTER ====================
 
@@ -128,5 +138,46 @@ class ScrutinioPresenza {
     return $this;
   }
 
-}
+  /**
+   * Restituisce il numero protocollo del provvedimento di surroga
+   *
+   * @return string Numero protocollo del provvedimento di surroga
+   */
+  public function getSurrogaProtocollo() {
+    return $this->surrogaProtocollo;
+  }
 
+  /**
+   * Modifica il numero protocollo del provvedimento di surroga
+   *
+   * @var string $surrogaProtocollo Numero protocollo del provvedimento di surroga
+   *
+   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   */
+  public function setSurrogaProtocollo($surrogaProtocollo) {
+    $this->surrogaProtocollo = $surrogaProtocollo;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data del provvedimento di surroga
+   *
+   * @return \DateTime Data del provvedimento di surroga
+   */
+  public function getSurrogaData() {
+    return $this->surrogaData;
+  }
+
+  /**
+   * Modifica la data del provvedimento di surroga
+   *
+   * @var \DateTime $surrogaData Data del provvedimento di surroga
+   *
+   * @return ScrutinioPresenza Oggetto ScrutinioPresenza
+   */
+  public function setSurrogaData(\DateTime $surrogaData=null) {
+    $this->surrogaData = $surrogaData;
+    return $this;
+  }
+
+}

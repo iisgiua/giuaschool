@@ -18,6 +18,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 
 /**
@@ -46,9 +47,18 @@ class ScrutinioPresenzaType extends AbstractType {
         'expanded' => false,
         'multiple' => false,
         'required' => true))
-      ->add('sostituto', TextType::class, array(
-        'label' => 'label.scrutinio_sostituto',
+      ->add('sostituto', TextType::class, array('label' => false,
+        'attr' => ['placeholder' => 'label.scrutinio_sostituto'],
         'trim' => true,
+        'required' => false))
+      ->add('surrogaProtocollo', TextType::class, array('label' => 'label.scrutinio_surroga_protocollo',
+        'trim' => true,
+        'required' => false))
+      ->add('surrogaData', DateType::class, array('label' => 'label.scrutinio_surroga_data',
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-picker'],
+        'format' => 'dd/MM/yyyy',
         'required' => false));
   }
 
@@ -62,4 +72,3 @@ class ScrutinioPresenzaType extends AbstractType {
   }
 
 }
-

@@ -11,12 +11,12 @@
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
     {% if classe.anno == 1 %}
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 5</h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 4</h2>
   <div class="alert alert-success gs-mb-3" role="alert">
     <strong class="gs-big">Per le classi prime non è previsto questo passaggio.<br>Vai al passo successivo.</strong>
   </div>
     {% elseif classe.anno == 2 %}
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 5: certificazione competenze</h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 4: certificazione competenze</h2>
   <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-1"><em>Clicca sul pulsante di modifica per inserire le competenze, o su una certificazione compilata per modificarla.</em></h2>
   <div id="gs-fixed-header">
     <table class="table table-bordered table-hover table-striped">
@@ -39,9 +39,6 @@
         {% if a.bes != 'N' %}
             <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
         {% endif %}
-        {% if a.note is not empty %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-        {% endif %}
           </td>
           <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2,',') }}</strong></td>
           <td>
@@ -57,7 +54,7 @@
     </table>
   </div>
     {% else %}
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 5: attribuzione crediti</h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 4: attribuzione crediti</h2>
   <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-1"><em>Clicca sul pulsante di modifica per inserire il credito, o su un credito esistente per modificarlo.</em></h2>
   <div id="gs-fixed-header">
     <table class="table table-bordered table-hover table-striped">
@@ -85,13 +82,10 @@
         {% if a.bes != 'N' %}
             <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
         {% endif %}
-        {% if a.note is not empty %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-        {% endif %}
           </td>
           <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2,',') }}</strong></td>
         {% if classe.anno > 3 %}
-          <td><strong class="gs-big">{{ dati.esiti[alunno].creditoPrecedente }}</strong></td>
+          <td><strong class="gs-big">{{ classe.anno == 5 ? 'Da convertire' : dati.esiti[alunno].creditoPrecedente }}</strong></td>
         {% endif %}
           <td>
         {% if dati.esiti[alunno].credito %}

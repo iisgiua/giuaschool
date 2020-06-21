@@ -135,6 +135,7 @@ class CattedraRepository extends EntityRepository {
       ->getQuery()
       ->getArrayResult();
     // elimina docente titolare se esiste supplente
+    // problemi con SOSTEGNO
     $mat = array();
     foreach ($docenti as $k=>$doc) {
       if (!isset($mat[$doc['materia_id']][$doc['tipo']])) {

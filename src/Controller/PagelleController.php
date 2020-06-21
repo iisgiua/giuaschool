@@ -47,7 +47,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/classe/{classe}/{tipo}/{periodo}", name="pagelle_classe",
-   *    requirements={"classe": "\d+", "tipo": "R|T|F|I|V|C", "periodo": "P|S|F|I|1|2|X"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
@@ -107,7 +107,7 @@ class PagelleController extends AbstractController {
       switch ($tipo) {
         case 'V':
           // verbale
-          $nomefile = $pag->verbale($classe, $periodo);
+          $nomefile = $pag->verbale2($classe, $periodo);
           break;
         case 'R':
           // riepilogo voti
@@ -117,17 +117,25 @@ class PagelleController extends AbstractController {
           // tabellone voti
           $nomefile = $pag->tabelloneVoti($classe, $periodo);
           break;
-        case 'F':
-          // firme verbale
-          $nomefile = $pag->firmeVerbale($classe, $periodo);
-          break;
-        case 'I':
-          // firme registro voti
-          $nomefile = $pag->firmeRegistro($classe, $periodo);
-          break;
+        //-- case 'F':
+          //-- // firme verbale
+          //-- $nomefile = $pag->firmeVerbale($classe, $periodo);
+          //-- break;
+        //-- case 'I':
+          //-- // firme registro voti
+          //-- $nomefile = $pag->firmeRegistro($classe, $periodo);
+          //-- break;
         case 'C':
           // certificazioni
           $nomefile = $pag->certificazioni($classe, $periodo);
+          break;
+        case 'X':
+          // PIA
+          $nomefile = $pag->PIA($classe, $periodo);
+          break;
+        case 'Y':
+          // PAI di tutti
+          $nomefile = $pag->tuttiPAI($classe, $periodo);
           break;
       }
     } elseif ($periodo == 'I' || $periodo == 'X') {
@@ -182,7 +190,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C", "periodo": "P|S|F|I|1|2|X"},
+   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C|E|X", "periodo": "P|S|F|I|1|2|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
@@ -244,17 +252,25 @@ class PagelleController extends AbstractController {
           // non ammesso
           $nomefile = $pag->nonAmmesso($classe, $alunno, $periodo);
           break;
-        case 'D':
-          // debiti
-          $nomefile = $pag->debiti($classe, $alunno, $periodo);
-          break;
-        case 'C':
-          // carenze
-          $nomefile = $pag->carenze($classe, $alunno, $periodo);
+        //-- case 'D':
+          //-- // debiti
+          //-- $nomefile = $pag->debiti($classe, $alunno, $periodo);
+          //-- break;
+        //-- case 'C':
+          //-- // carenze
+          //-- $nomefile = $pag->carenze($classe, $alunno, $periodo);
+          //-- break;
+        case 'E':
+          // certificazione
+          $nomefile = $pag->certificazione($classe, $alunno, $periodo);
           break;
         case 'P':
           // pagella
           $nomefile = $pag->pagella($classe, $alunno, $periodo);
+          break;
+        case 'X':
+          // PAI
+          $nomefile = $pag->PAI($classe, $alunno, $periodo);
           break;
       }
     } elseif ($periodo == 'I' || $periodo == 'X') {

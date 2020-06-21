@@ -1,0 +1,37 @@
+{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<p style="text-align:center;font-family:helvetica;font-size:11pt">
+  <strong>Piano di Integrazione degli Apprendimenti</strong> <br><br>
+  <strong>Classe: {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - {{ dati.classe.corso.nomeBreve }}</strong> <br>
+</p>
+{% if dati.no_piano %}
+<p style="text-align:justify;font-family:helvetica;font-size:11pt">
+Il Consiglio di Classe, nello scrutinio finale del {{ dati.data_scrutinio|date('d/m/Y') }},
+dichiara che tutti i contenuti disciplinari ritenuti imprescindibili per affrontare l’anno scolastico successivo
+sono stati svolti regolarmente, per cui non si ravvisa la
+necessità di elaborare un piano di integrazione degli apprendimenti (OM n. 11 del 16/05/2020).
+</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+{% else %}
+<p style="text-align:justify;font-family:helvetica;font-size:11pt">
+Il Consiglio di Classe, nello scrutinio finale del {{ dati.data_scrutinio|date('d/m/Y') }},
+ha individuato, per ogni disciplina, le attività didattiche non svolte rispetto alle progettazioni di inizio anno
+e i correlati obiettivi di apprendimento ritenuti imprescindibili per affrontare l’anno scolastico successivo,
+definendo il seguente piano di integrazione degli apprendimenti (OM n. 11 del 16/05/2020).
+</p>
+  {% for p in dati.piani %}
+    {% if p.dati.necessario %}
+<div style="text-align:center;font-family:helvetica;font-size:11pt"><strong>{{ p.materia.nome }}</strong></div>
+<table border="1" cellpadding="4" style="font-family:helvetica;font-size:10pt" nobr="true">
+  <tr nobr="true"><td><strong>&nbsp;&nbsp;Obiettivi di apprendimento da conseguire:</strong></td></tr>
+  <tr nobr="true"><td>{{ p.dati.obiettivi|raw|nl2br }}<br></td></tr>
+</table>
+<table border="1" cellpadding="4" style="font-family:helvetica;font-size:10pt" nobr="true">
+  <tr nobr="true"><td><strong>&nbsp;&nbsp;Strategie per il raggiungimento dei relativi obiettivi di apprendimento:</strong></td></tr>
+  <tr nobr="true"><td>{{ p.dati.strategie|raw|nl2br }}<br></td></tr>
+</table>
+<br>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{{ include('coordinatore/documenti/firma.html.twig') }}

@@ -764,6 +764,7 @@ class GenitoriUtil {
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
+    $dati['PAI'] = false;
     foreach ($voti as $v) {
       // inserisce voti/debiti
       $dati['voti'][$v->getMateria()->getId()] = array(
@@ -783,12 +784,17 @@ class GenitoriUtil {
       } elseif ($periodo == '1') {
         // valutazione intermedia
         $dati['voti'][$v->getMateria()->getId()]['recupero'] = $v->getRecupero();
-      } elseif ($periodo == 'F') {
+      } elseif ($periodo == 'F' && $classe->getAnno() != 5) {
         // scrutinio finale
-        if ($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) {
-          $dati['debiti'][$v->getMateria()->getId()] = array(
-            'recupero' => $v->getRecupero(),
-            'debito' => $v->getDebito());
+        //-- if ($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) {
+          //-- $dati['debiti'][$v->getMateria()->getId()] = array(
+            //-- 'recupero' => $v->getRecupero(),
+            //-- 'debito' => $v->getDebito());
+        //-- }
+        // PAI
+        if (($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) ||
+            ($v->getMateria()->getTipo() == 'R' && $v->getUnico() < 22)) {
+          $dati['PAI'] = true;
         }
       }
     }

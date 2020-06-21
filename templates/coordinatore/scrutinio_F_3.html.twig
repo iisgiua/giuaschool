@@ -8,7 +8,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 3: voto di condotta</h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 2: voto di condotta</h2>
   <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-1"><em>Clicca sul pulsante di modifica per inserire tutte le valutazioni della Condotta, o su un voto per modificare solo quello indicato.</em></h2>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
@@ -79,7 +79,7 @@
   </div>
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
-      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '2'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '1'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
       <button class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
@@ -107,6 +107,9 @@ $(document).ready(function() {
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
     var url = $(event.relatedTarget).data('href')+'/'+Math.floor($('html').scrollTop());
     $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $('#gs-modal-remote').on('shown.bs.modal', function (event) {
+    window.dispatchEvent(new Event('resize'));
   });
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();

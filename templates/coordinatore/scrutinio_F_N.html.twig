@@ -27,7 +27,7 @@
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
     {% for materia,m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-      {% if dati.errori[materia] is defined %}
+      {% if dati.errori[materia] is defined and (dati.errori[materia] b-and 15) > 0 %}
             <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i dati mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {'classe': classe.id, 'materia': materia, 'periodo': 'F'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
             <br>
       {% endif %}
@@ -43,9 +43,6 @@
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
       {% if a.bes != 'N' %}
             <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-      {% endif %}
-      {% if a.note is not empty %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
           </td>
       {% for materia,m in dati.materie %}
@@ -74,11 +71,11 @@
       </tbody>
     </table>
   </div>
-    {% if dati.errori is not defined or min(dati.errori) > 1 %}
+    {% if not dati.blocco %}
   <div class="alert alert-info text-center gs-mt-4" role="alert">
     <strong class="gs-big">
       Con l'apertura dello scrutinio verranno bloccate le modifiche ai dati del registro e saranno calcolate le ore di assenza.<br>
-      Le modifiche alle proposte di voto inserite saranno possibili durante l'esecuzione dello scrutinio.
+      Le modifiche alle proposte di voto, al <em>Piano di Apprendimento Individualizzato</em> e al <em>Piano di Integrazione degli Apprendimenti</em> saranno possibili durante l'esecuzione dello scrutinio.
     </strong>
   </div>
   <div class="text-center">
@@ -107,6 +104,9 @@ $(document).ready(function() {
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
     var url = $(event.relatedTarget).data('href')+'/'+Math.floor($('html').scrollTop());
     $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $('#gs-modal-remote').on('shown.bs.modal', function (event) {
+    window.dispatchEvent(new Event('resize'));
   });
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();

@@ -6,13 +6,13 @@
     <ul id="gs-form-collection" class="list-group">
   {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     null, null, null, null, null, null, null, null, null,
-    'NC', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'] %}
+    'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
   {% for voto in dati.voti %}
       <li class="list-group-item gs-pt-1 gs-pb-1">
         <div class="form-group gs-mb-0">
           <label class="control-label col-sm-6 gs-pl-1 gs-pr-1">{{ dati.materie[voto.materia.id].nomeBreve }}</label>
           <div class="col-sm-6">
-            <span style="display:inline-block;width:7em;" class="label label-success gs-big">{{ valutazioni[voto.unico] }}</span>
+            <span style="display:inline-block;width:7em;" class="label label-{{ (voto.unico < 5 or (voto.unico >= 20 and voto.unico < 22)) ? 'danger' : (voto.unico < 6 ? 'warning' : 'success') }} gs-big">{{ valutazioni[voto.unico] }}</span>
           </div>
         </div>
       </li>
@@ -30,6 +30,7 @@
         </div>
       </li>
     </ul>
+  {% if alunno.classe.anno == 5 or dati.esito.media >= 6 %}
     <div class="form-group bg-success gs-mb-1">
       <label class="col-sm-4 control-label gs-big">{{ 'label.credito_scolastico'|trans }}</label>
       <div class="col-sm-8">
@@ -38,16 +39,19 @@
   {% endfor %}
       </div>
     </div>
+  {% endif %}
     <div class="form-group gs-mb-0">
       <label class="col-sm-4 control-label gs-big">Punteggio attribuito</label>
       <div class="col-sm-8 gs-mt-2">
         <span id="gs-credito-alunno" class="label label-info gs-big">{{ dati.credito }}</span>
+  {% if alunno.classe.anno == 5 or dati.esito.media >= 6 %}
         <strong class="gs-big gs-ml-3">(intervallo: {{ dati.credito }} - {{ dati.credito + 1 }})</strong>
+  {% endif %}
       </div>
     </div>
   </div>
   <div class="modal-footer">
-    {{ form_widget(form.submit) }}
+    {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}

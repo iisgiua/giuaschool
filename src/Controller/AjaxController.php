@@ -153,4 +153,19 @@ class AjaxController extends AbstractController {
     return new JsonResponse($dati);
   }
 
+  /**
+   * Estende la il tempo di scadenza della sessione
+   *
+   * @return JsonResponse Informazioni di risposta
+   *
+   * @Route("/ajax/sessione", name="ajax_sessione",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_UTENTE")
+   */
+  public function sessioneAjaxAction() {
+    // restituisce dati
+    return new JsonResponse(['ok']);
+  }
+
 }

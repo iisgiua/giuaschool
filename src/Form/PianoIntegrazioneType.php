@@ -16,15 +16,16 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use App\Entity\PropostaVoto;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use App\Entity\DocumentoInterno;
 
 
 /**
  * PropostaVotoType - form per la classe PropostaVoto
  */
-class PropostaVotoType extends AbstractType {
+class PianoIntegrazioneType extends AbstractType {
 
   /**
    * Crea il form
@@ -35,23 +36,21 @@ class PropostaVotoType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
-      ->add('unico', HiddenType::class)
-      ->add('recupero', ChoiceType::class, array('label' => false,
-        'choices' => ['label.recupero_A' => 'A', 'label.recupero_S' => 'S', 'label.recupero_C' => 'C',
-          'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
-        'placeholder' => 'label.scegli_recupero',
-        'expanded' => false,
+      ->add('necessario', ChoiceType::class, array('label' => 'label.PIA_necessario',
+        'choices' => ['label.si' => true, 'label.no' => false],
+        'expanded' => true,
         'multiple' => false,
-        'required' => false))
-      ->add('debito', TextareaType::class, array('label' => false,
+        'label_attr' => ['class' => 'radio-inline'],
+        'required' => true,
+        'property_path' => 'dati[necessario]'))
+      ->add('obiettivi', TextareaType::class, array('label' => 'label.obiettivi_apprendimento',
         'trim' => true,
-        'attr' => array('rows' => '3'),
-        'required' => false))
-      // aggiunta COVID
-      ->add('strategie', TextareaType::class, array('label' => false,
+        'attr' => array('rows' => '5'),
+        'required' => false,
+        'property_path' => 'dati[obiettivi]'))
+      ->add('strategie', TextareaType::class, array('label' => 'label.strategie_apprendimento',
         'trim' => true,
-        'attr' => array('rows' => '3'),
+        'attr' => array('rows' => '5'),
         'required' => false,
         'property_path' => 'dati[strategie]'));
   }
@@ -62,7 +61,7 @@ class PropostaVotoType extends AbstractType {
    * @param OptionsResolver $resolver Gestore delle opzioni
    */
   public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults(array('data_class' => PropostaVoto::class));
+    $resolver->setDefaults(array('data_class' => DocumentoInterno::class));
   }
 
 }

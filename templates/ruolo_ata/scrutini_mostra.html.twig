@@ -76,8 +76,9 @@
     </tbody>
   </table>
     {% elseif scrutinio.periodo == 'F' %}
+  <div class="text-center text-info"><strong class="gs-big">Scrutinio finale del {{ scrutinio.data|date('d/m/Y') }}</strong></div>
   <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Scrutinio svolto in data {{ scrutinio.data|date('d/m/Y') }}</strong></caption>
+    <caption class="text-center text-info"><strong class="gs-big">Documenti della classe</strong></caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-6">Documento</th>
@@ -88,14 +89,14 @@
       <tr>
         <td><strong>Verbale dello scrutinio</strong></td>
         <td>
-      {% if dati.verbale %}
+      {#-- {% if dati.verbale %} #}
           <div class="gs-mb-2">
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'V', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </div>
-      {% else %}
-          <em>Documento non disponibile</em>
-      {% endif %}
-        </td>
+      {#-- {% else %} #}
+          {#-- <em>Documento non disponibile</em> #}
+      {#-- {% endif %} #}
+    </td>
       </tr>
       <tr>
         <td><strong>Quadro di riepilogo dei voti</strong></td>
@@ -109,19 +110,44 @@
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'T', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
+      {% if scrutinio.classe.anno == 2 %}
+      <tr>
+        <td><strong>Certificazione delle competenze</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'C', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica tutte le certficazioni della classe</strong></a>
+        </td>
+      </tr>
+      {% endif %}
+      {% if scrutinio.classe.anno != 5 %}
+      <tr>
+        <td><strong>PIA - Piano di Integrazione degli Apprendimenti</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'X', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>PAI - Piano di Apprendimento Individualizzato</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'Y', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica tutti i piani della classe</strong></a>
+        </td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+  <table class="table table-bordered table-hover table-striped gs-mt-4">
+    <caption class="text-center text-info"><strong class="gs-big">Documenti dello studente</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6">Documento</th>
+        <th class="col-sm-6">Azioni</th>
+      </tr>
+    </thead>
+    <tbody>
       {% if dati.esito is defined and dati.esito.esito != 'N' %}
       <tr>
         <td><strong>Comunicazione dei voti</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-        </td>
-      </tr>
-      {% endif %}
-      {% if scrutinio.classe.anno == 2 and dati.esito.esito == 'A' %}
-      <tr>
-        <td><strong>Certificazione delle competenze</strong></td>
-        <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'C', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica tutte le certficazioni della classe</strong></a>
         </td>
       </tr>
       {% endif %}
@@ -139,6 +165,22 @@
         <td><strong>Comunicazione per il recupero autonomo</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'C', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        </td>
+      </tr>
+          {% endif %}
+          {% if dati.PAI %}
+      <tr>
+        <td><strong>PAI - Piano di Apprendimento Individualizzato</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'X', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        </td>
+      </tr>
+          {% endif %}
+          {% if scrutinio.classe.anno == 2 %}
+      <tr>
+        <td><strong>Certificazione delle competenze</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'E', 'periodo': scrutinio.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
           {% endif %}

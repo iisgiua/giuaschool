@@ -16,6 +16,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Entity\VotoScrutinio;
@@ -52,12 +53,20 @@ class VotoScrutinioType extends AbstractType {
             'multiple' => false,
             'label_attr' => ['class' => 'radio-inline gs-mr-4'],
             'required' => false))
-          ->add('contrari', ChoiceType::class, array('label' => false,
+          //-- ->add('contrari', ChoiceType::class, array('label' => false,
+            //-- 'property_path' => 'dati[contrari]',
+            //-- 'choices' => ['1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10],
+            //-- 'expanded' => false,
+            //-- 'multiple' => false,
+            //-- 'choice_translation_domain' => false,
+            //-- 'required' => false));
+          ->add('contrari', TextType::class, array('label' => false,
             'property_path' => 'dati[contrari]',
-            'choices' => ['1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10],
-            'expanded' => false,
-            'multiple' => false,
-            'choice_translation_domain' => false,
+            'trim' => true,
+            'required' => false))
+          ->add('contrari_motivazione', TextareaType::class, array('label' => false,
+            'property_path' => 'dati[contrari_motivazione]',
+            'trim' => true,
             'required' => false));
       } elseif ($options['attr']['subType'] == 'esito') {
         // esito
@@ -67,20 +76,26 @@ class VotoScrutinioType extends AbstractType {
       } elseif ($options['attr']['subType'] == 'debiti') {
         // debiti
         $builder
-        ->add('recupero', ChoiceType::class, array('label' => false,
-          'choices' => ['label.recupero_A' => 'A', 'label.recupero_S' => 'S', 'label.recupero_C' => 'C',
-            'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
-          'placeholder' => 'label.scegli_recupero',
-          'expanded' => false,
-          'multiple' => false,
-          'choice_attr' => function($val, $key, $index) {
-              return ['class' => 'gs-no-placeholder'];
-            },
-          'attr' => ['class' => 'gs-placeholder'],
-          'required' => false))
+        //-- ->add('recupero', ChoiceType::class, array('label' => false,
+          //-- 'choices' => ['label.recupero_A' => 'A', 'label.recupero_S' => 'S', 'label.recupero_C' => 'C',
+            //-- 'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
+          //-- 'placeholder' => 'label.scegli_recupero',
+          //-- 'expanded' => false,
+          //-- 'multiple' => false,
+          //-- 'choice_attr' => function($val, $key, $index) {
+              //-- return ['class' => 'gs-no-placeholder'];
+            //-- },
+          //-- 'attr' => ['class' => 'gs-placeholder'],
+          //-- 'required' => false))
         ->add('debito', TextareaType::class, array('label' => false,
           'trim' => true,
-          'required' => false));
+          'attr' => array('rows' => '3'),
+          'required' => false))
+        ->add('strategie', TextareaType::class, array('label' => false,
+          'trim' => true,
+          'attr' => array('rows' => '3'),
+          'required' => false,
+          'property_path' => 'dati[strategie]'));
       } elseif ($options['attr']['subType'] == 'carenze') {
         // carenze
         $builder
@@ -139,4 +154,3 @@ class VotoScrutinioType extends AbstractType {
   }
 
 }
-

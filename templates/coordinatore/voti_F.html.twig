@@ -7,7 +7,7 @@
     <ul id="gs-form-collection" class="list-group">
   {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     null, null, null, null, null, null, null, null, null,
-    'NC', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'] %}
+    'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
   {% for voto in form.lista %}
       <li class="list-group-item">
         <div class="row gs-pl-2 gs-pr-2"><strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong></div>
@@ -25,25 +25,25 @@
     {% endif %}
           </div>
         </div>
-        <div id="row_{{ voto.recupero.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2" for="{{ voto.recupero.vars.id }}">Recupero</label>
-          <div class="col-sm-10">
-            {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[1],voto.recupero.vars.choices[2]] }) }}
-          </div>
-        </div>
-        <div id="row_{{ voto.debito.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2" for="{{ voto.debito.vars.id }}">Argomenti</label>
-          <div class="col-sm-10">
-            {{ form_widget(voto.debito) }}
-          </div>
-        </div>
+        {#-- <div id="row_{{ voto.recupero.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}> #}
+          {#-- <label class="control-label col-sm-2" for="{{ voto.recupero.vars.id }}">Recupero</label> #}
+          {#-- <div class="col-sm-10"> #}
+            {#-- {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[1],voto.recupero.vars.choices[2]] }) }} #}
+          {#-- </div> #}
+        {#-- </div> #}
+        {#-- <div id="row_{{ voto.debito.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}> #}
+          {#-- <label class="control-label col-sm-2" for="{{ voto.debito.vars.id }}">Argomenti</label> #}
+          {#-- <div class="col-sm-10"> #}
+            {#-- {{ form_widget(voto.debito) }} #}
+          {#-- </div> #}
+        {#-- </div> #}
         {{ form_widget(voto.alunno) }}
       </li>
   {% endfor %}
     </ul>
   </div>
   <div class="modal-footer">
-    {{ form_widget(form.submit) }}
+    {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
@@ -62,7 +62,7 @@ $(document).ready(function() {
     formatter: function(val) {
       var d = ['Non Classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         null, null, null, null, null, null, null, null, null,
-        'Non Classificato', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'];
+        'Non Classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
       return d[val];
       },
     natural_arrow_keys: true
@@ -80,7 +80,7 @@ $(document).ready(function() {
         formatter: function(val) {
           var d = ['Non Classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
             null, null, null, null, null, null, null, null, null,
-            'Non Classificato', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'];
+            'Non Classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
           return d[val];
           },
         natural_arrow_keys: true
@@ -93,7 +93,7 @@ $(document).ready(function() {
   $("#gs-form-collection").on("change", "input.slider", function(e) {
     var d = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
       null, null, null, null, null, null, null, null, null,
-      'NC', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'];
+      'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
     var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
       (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);

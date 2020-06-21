@@ -520,3 +520,7 @@ body {
 .radio-inline.active {
   font-weight: bold;
 }
+
+.modal {
+  z-index: 1100;
+}

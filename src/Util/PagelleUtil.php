@@ -45,6 +45,11 @@ class PagelleUtil {
   private $session;
 
   /**
+   * @var \Twig\Environment $tpl Gestione template
+   */
+  private $tpl;
+
+  /**
    * @var PdfManager $pdf Gestore dei documenti PDF
    */
   private $pdf;
@@ -63,14 +68,16 @@ class PagelleUtil {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param SessionInterface $session Gestore delle sessioni
+   * @param \Twig\Environment $tpl Gestione template
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param string $root Directory principale dell'applicazione
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session, PdfManager $pdf, $root) {
+                               SessionInterface $session, \Twig\Environment $tpl, PdfManager $pdf, $root) {
     $this->em = $em;
     $this->trans = $trans;
     $this->session = $session;
+    $this->tpl = $tpl;
     $this->pdf = $pdf;
     $this->root = $root;
   }
@@ -1078,6 +1085,7 @@ class PagelleUtil {
         ->setParameters(['lista' => $scrutinio->getDato('alunni')])
         ->getQuery()
         ->getArrayResult();
+      $dati['alunni_noreligione'] = array();
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
       }
@@ -1093,6 +1101,8 @@ class PagelleUtil {
         $dati['voti'][$v->getAlunno()->getId()] = $v;
       }
     } elseif ($periodo == 'F') {
+      // nomi mesi
+      $dati['nomi_mesi'] = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
       // scrutinio finale
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
@@ -1113,6 +1123,44 @@ class PagelleUtil {
       foreach ($docenti as $doc) {
         // dati per la visualizzazione della pagina
         $dati['docenti'][$doc['id']][] = $doc;
+        if ($doc['tipo'] == 'R') {
+          $doc_religione = $doc['id'];
+        }
+      }
+      // presidente
+      if ($dati['scrutinio']->getDato('presiede_ds')) {
+        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
+      } else {
+        $d = $dati['docenti'][$dati['scrutinio']->getDato('presiede_docente')][0];
+        if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
+          $dati['presidente_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'];
+          $dati['presidente'] = 'il Coordinatore della classe, '.($d['sesso'] == 'M' ? 'il' : 'la').' '.$dati['presidente_nome'].', '.
+            'delegat'.($d['sesso'] == 'M' ? 'o' : 'a').' dal Dirigente Scolastico';
+        } else {
+          $s = $dati['scrutinio']->getDato('presenze')[$d['id']];
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
+          $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['presidente_nome'].', '.
+            'delegat'.($s->getSessoSostituto() == 'M' ? 'o' : 'a').' dal Dirigente Scolastico';
+        }
+      }
+      // segretario
+      $d = $dati['docenti'][$dati['scrutinio']->getDato('segretario')][0];
+      if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
+        $dati['segretario_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'];
+        $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
+      } else {
+        $s = $dati['scrutinio']->getDato('presenze')[$d['id']];
+        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
+        $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
+      }
+      // docente di religione
+      $d = $dati['docenti'][$doc_religione][0];
+      if ($dati['scrutinio']->getDato('presenze')[$d['id']]->getPresenza()) {
+        $dati['religione'] = ($d['sesso'] == 'M' ? 'Il prof.' : 'La prof.ssa').' '.$d['cognome'].' '.$d['nome'];
+      } else {
+        $s = $dati['scrutinio']->getDato('presenze')[$d['id']];
+        $dati['religione'] = ($s->getSessoSostituto() == 'M' ? 'Il prof.' : 'La prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
       }
       // alunni scrutinati
       $dati['scrutinati'] = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
@@ -1159,8 +1207,12 @@ class PagelleUtil {
             array_keys($dati['ritirati']))])
         ->getQuery()
         ->getResult();
+      $dati['alunni_noreligione'] = array();
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
+        if ($alu['religione'] != 'S' && in_array($alu['id'], $dati['scrutinati'])) {
+          $dati['alunni_noreligione'][] = $alu['cognome'].' '.$alu['nome'];
+        }
       }
       // legge condotta
       $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
@@ -1179,8 +1231,12 @@ class PagelleUtil {
         ->setParameters(['lista' => $dati['scrutinati'], 'scrutinio' => $dati['scrutinio']])
         ->getQuery()
         ->getResult();
+      $dati['non_ammessi'] = 0;
       foreach ($esiti as $e) {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
+        if ($e->getEsito() == 'N') {
+          $dati['non_ammessi']++;
+        }
       }
       // legge debiti
       $dati['debiti'] = array();
@@ -1196,6 +1252,31 @@ class PagelleUtil {
         ->getArrayResult();
       foreach ($debiti as $d) {
         $dati['debiti'][$d['alunno']][] = $d;
+      }
+      // PIA
+      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+        ->orderBy('m.ordinamento', 'ASC')
+        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+        ->getQuery()
+        ->getResult();
+      foreach ($materie as $mat) {
+        $dati['piani'][$mat->getId()] = null;
+      }
+      // legge piani
+      $piani = $this->em->getRepository('App:DocumentoInterno')->createQueryBuilder('di')
+        ->join('di.materia', 'm')
+        ->where('di.tipo=:tipo AND di.classe=:classe')
+        ->setParameters(['tipo' => 'A', 'classe' => $classe])
+        ->getQuery()
+        ->getResult();
+      $dati['no_piano'] = true;
+      foreach ($piani as $p) {
+        $dati['piani'][$p->getMateria()->getId()] = $p;
+        if ($p->getDato('necessario')) {
+          $dati['no_piano'] = false;
+        }
       }
     } elseif ($periodo == 'I' || $periodo == 'X') {
       // scrutinio integrativo
@@ -2513,7 +2594,7 @@ class PagelleUtil {
   public function creaRiepilogoVoti_F($pdf, $classe, $classe_completa, $dati) {
     $info_voti['N'] = [0 => 'NC', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['C'] = [4 => 'NC', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
+    $info_voti['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     // set margins
     $pdf->SetMargins(10, 15, 10, true);
     // set auto page breaks
@@ -2727,7 +2808,9 @@ class PagelleUtil {
           if ($dati['esiti'][$idalunno]->getEsito() == 'A') {
             // ammessi
             $credito = $dati['esiti'][$idalunno]->getCredito();
-            $creditoprec = $dati['esiti'][$idalunno]->getCreditoPrecedente();
+            $creditoprec = ($dati['classe']->getAnno() == 5 ?
+              ($dati['esiti'][$idalunno]->getDati()['creditoConvertito3'] + $dati['esiti'][$idalunno]->getDati()['creditoConvertito4']) :
+              $dati['esiti'][$idalunno]->getCreditoPrecedente());
             $creditotot = $credito + $creditoprec;
           } else {
             // non ammessi o sospesi
@@ -2875,7 +2958,7 @@ class PagelleUtil {
   public function creaTabelloneVoti_F($pdf, $classe, $classe_completa, $dati) {
     $info_voti['N'] = [0 => 'NC', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['C'] = [4 => 'NC', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
+    $info_voti['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     // set margins
     $pdf->SetMargins(10, 15, 10, true);
     // set auto page breaks
@@ -3066,42 +3149,44 @@ class PagelleUtil {
               $voti_num++;
             }
             // scrive voto/assenze
-            if ($dati['classe']->getAnno() == 5) {
+            //-- if ($dati['classe']->getAnno() == 5) {
               // controlla visualizzazione ammessi
-              switch ($this->session->get('/CONFIG/SCUOLA/tabelloni_quinta')) {
-                case 'N':
-                  // non pubblica niente
-                  $voto = '';
-                  $assenze = '';
-                  break;
-                case 'V':
-                  // pubblica solo voti suff.
-                  $voto = (($mat['tipo'] != 'R' && $voto < 6) ||
-                    ($mat['tipo'] == 'R' && $alu['religione'] == 'S' && $dati['voti'][$idalunno][$idmateria]['unico'] < 22)) ? ' ' : $voto;
-                  break;
-                case 'A':
-                  // pubblica dati di alunni con tutto suff.
-                  foreach ($dati['voti'][$idalunno] as $mm=>$vv) {
-                    if (($dati['materie'][$mm]['tipo'] != 'R' && $vv['unico'] < 6) ||
-                        ($dati['materie'][$mm]['tipo'] == 'R' && $alu['religione'] == 'S' && $vv['unico'] < 22)) {
-                      // insuff. presente
-                      $voto = '';
-                      $assenze = '';
-                      break;
-                    }
-                  }
-                  break;
-                default:  // opzione 'T'
-                  // pubblica tutto
-              }
-            }
+              //-- switch ($this->session->get('/CONFIG/SCUOLA/tabelloni_quinta')) {
+                //-- case 'N':
+                  //-- // non pubblica niente
+                  //-- $voto = '';
+                  //-- $assenze = '';
+                  //-- break;
+                //-- case 'V':
+                  //-- // pubblica solo voti suff.
+                  //-- $voto = (($mat['tipo'] != 'R' && $voto < 6) ||
+                    //-- ($mat['tipo'] == 'R' && $alu['religione'] == 'S' && $dati['voti'][$idalunno][$idmateria]['unico'] < 22)) ? ' ' : $voto;
+                  //-- break;
+                //-- case 'A':
+                  //-- // pubblica dati di alunni con tutto suff.
+                  //-- foreach ($dati['voti'][$idalunno] as $mm=>$vv) {
+                    //-- if (($dati['materie'][$mm]['tipo'] != 'R' && $vv['unico'] < 6) ||
+                        //-- ($dati['materie'][$mm]['tipo'] == 'R' && $alu['religione'] == 'S' && $vv['unico'] < 22)) {
+                      //-- // insuff. presente
+                      //-- $voto = '';
+                      //-- $assenze = '';
+                      //-- break;
+                    //-- }
+                  //-- }
+                  //-- break;
+                //-- default:  // opzione 'T'
+                  //-- // pubblica tutto
+              //-- }
+            //-- }
             $this->cella($pdf, $width, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
             $this->cella($pdf, $width, 5.50, -$width, 5.50, $assenze, 1, 'C', 'M');
           }
           if ($dati['classe']->getAnno() >= 3) {
             // credito
             $credito = $dati['esiti'][$idalunno]->getCredito();
-            $creditoprec = $dati['esiti'][$idalunno]->getCreditoPrecedente();
+            $creditoprec = ($dati['classe']->getAnno() == 5 ?
+              ($dati['esiti'][$idalunno]->getDati()['creditoConvertito3'] + $dati['esiti'][$idalunno]->getDati()['creditoConvertito4']) :
+              $dati['esiti'][$idalunno]->getCreditoPrecedente());
             $creditotot = $credito + $creditoprec;
             $this->cella($pdf, 6, 5.50, 0, -5.50, $credito, 1, 'C', 'M');
             $this->cella($pdf, 6, 5.50, -6, 5.50, '', 1, 'C', 'M');
@@ -3436,7 +3521,7 @@ class PagelleUtil {
       $alu_nascita = $alu['dataNascita']->format('d/m/Y');
       $alu_citta = strtoupper($alu['comuneNascita']);
       // prima pagina
-      $html = '<img src="/img/intestazione-documenti.jpg" width="500">';
+      $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
       $pdf->writeHTML($html, true, false, false, false, 'C');
       $pdf->Ln(3);
       $pdf->SetFont('times', 'B', 12);
@@ -3889,7 +3974,7 @@ class PagelleUtil {
   public function creaNonAmmesso_F($pdf, $classe, $classe_completa, $dati) {
     $info_voti['N'] = [0 => 'Non Classificato', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['C'] = [4 => 'Non Classificato', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     $datascrutinio = $dati['scrutinio']->getData()->format('d/m/Y');
     // set margins
     $pdf->SetMargins(10, 15, 10, true);
@@ -3902,7 +3987,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(false);
     $pdf->AddPage('P');
     // intestazione pagina
-    $html = '<img src="/img/intestazione-documenti.jpg" width="500">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     $alunno_nome = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
     $alunno_sesso = $dati['alunno']->getSesso();
@@ -3953,8 +4038,8 @@ class PagelleUtil {
       $pdf->writeHTML($html, true, false, false, true);
       $html = '<p align="justify"><i>'.htmlentities($dati['esito']->getDati()['giudizio']).'</i></p>';
       $pdf->writeHTMLCell(186, 0, $pdf->GetX()+2, $pdf->GetY(), $html, 0, 1);
-      $html = '<p align="justify">Il Coordinatore di Classe sarà disponibile a fornire ulteriori chiarimenti previo appuntamento telefonico.</p>';
-      $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY()+2, $html, 0, 1);
+      //-- $html = '<p align="justify">Il Coordinatore di Classe sarà disponibile a fornire ulteriori chiarimenti previo appuntamento telefonico.</p>';
+      //-- $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY()+2, $html, 0, 1);
       $html = '<p align="justify">Di seguito viene riportato il riepilogo dei voti attribuiti durante lo scrutinio:</p>';
       $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY()+2, $html, 0, 1);
       // voti
@@ -4017,7 +4102,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(false);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="500">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // intestazione
     $datascrutinio = $dati['scrutinio']->getData()->format('d/m/Y');
@@ -4206,7 +4291,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(false);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="500">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // intestazione
     $alunno_nome = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
@@ -4279,7 +4364,7 @@ class PagelleUtil {
   public function creaPagella_F($pdf, $classe, $classe_completa, $dati) {
     $info_voti['N'] = [0 => 'Non Classificato', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['C'] = [4 => 'Non Classificato', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     // set margins
     $pdf->SetMargins(10, 15, 10, true);
     // set auto page breaks
@@ -4291,7 +4376,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(false);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="500">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // intestazione
     $alunno = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
@@ -4317,13 +4402,14 @@ class PagelleUtil {
     // contenuto
     $pdf->SetFont('times', '', 12);
     $sex = ($alunno_sesso == 'M' ? 'o' : 'a');
-    $html = '<p align="justify">Si comunica che il Consiglio di Classe, nella seduta dello scrutinio finale dell’anno scolastico '.$as.', tenutasi il giorno '.$dati['scrutinio']->getData()->format('d/m/Y').', ha attribuito all\'alunn'.$sex.' '.
+    $html = '<p align="justify">Si comunica che il Consiglio di Classe, nella seduta dello scrutinio finale dell’anno scolastico '.$as.', tenutasi il giorno '.$dati['scrutinio']->getData()->format('d/m/Y').', ha attribuito all\'alunn'.$sex.' '.$alunno.' '.
             'le valutazioni che vengono riportate di seguito:</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $pdf->Ln(5);
     // voti
     $html = '<table border="1" cellpadding="3">';
     $html .= '<tr><td width="60%"><strong>MATERIA</strong></td><td width="20%"><strong>VOTO</strong></td><td width="20%"><strong>ORE DI ASSENZA</strong></td></tr>';
+    $num_insuff = 0;
     foreach ($dati['materie'] as $idmateria=>$mat) {
       $html .= '<tr><td align="left"><strong>'.$mat['nome'].'</strong></td>';
       $voto = '';
@@ -4333,6 +4419,9 @@ class PagelleUtil {
           // si avvale
           $voto = $info_voti['R'][$dati['voti'][$idmateria]['unico']];
           $assenze = $dati['voti'][$idmateria]['assenze'];
+          if ($dati['voti'][$idmateria]['unico'] < 22) {
+            $num_insuff++;
+          }
         } else {
           // N.A.
           $voto = '///';
@@ -4344,12 +4433,65 @@ class PagelleUtil {
         // altre
         $voto = $info_voti['N'][$dati['voti'][$idmateria]['unico']];
         $assenze = $dati['voti'][$idmateria]['assenze'];
+        if ($dati['voti'][$idmateria]['unico'] < 6) {
+          $num_insuff++;
+        }
       }
       $html .= "<td>$voto</td><td>$assenze</td></tr>";
     }
-    $html .= '</table><br><br>';
+    $html .= '</table><br>';
     $pdf->SetFont('helvetica', '', 10);
     $pdf->writeHTML($html, true, false, false, true, 'C');
+    // credito
+    if ($dati['classe']->getAnno() >= 3) {
+      $pdf->SetFont('helvetica', '', 10);
+      if ($dati['classe']->getAnno() == 3) {
+        $html = '<table border="1" cellpadding="3">'.
+          '<tr nobr="true"><td width="40%" align="center"><strong>ALUNNO</strong></td><td width="10%" align="center"><strong>Media voti</strong></td><td width="40%" align="center"><strong>Criteri</strong></td><td width="10%" align="center"><strong>Credito</strong></td></tr>';
+      } else {
+        $html = '<table border="1" cellpadding="3">'.
+          '<tr nobr="true"><td width="40%" align="center"><strong>ALUNNO</strong></td><td width="10%" align="center"><strong>Media voti</strong></td><td width="20%" align="center"><strong>Criteri</strong></td><td width="10%" align="center"><strong>Credito</strong></td><td width="10%" align="center"><strong>Credito anni prec.</strong></td><td width="10%" align="center"><strong>Credito totale</strong></td></tr>';
+      }
+      $html = '<div style="text-align:center"><strong>CREDITO SCOLASTICO</strong></div>'.$html;
+      $nome = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome().' ('.$dati['alunno']->getDataNascita()->format('d/m/Y').')';
+      $media = number_format($dati['esito']->getMedia(), 2, ',', '');
+      $valori = $dati['esito']->getDati();
+      // criteri
+      $criteri = '';
+      foreach ($valori['creditoScolastico'] as $c) {
+        $criteri .= '; '.$this->trans->trans('label.criterio_credito_desc_'.$c);
+      }
+      if (strlen($criteri) <= 2) {
+        $criteri = '-----';
+      } else {
+        $criteri = substr($criteri, 2).'.';
+      }
+      if ($dati['classe']->getAnno() == 3) {
+        $html .= '<tr nobr="true"><td>'.$nome.'</td><td align="center">'.$media.'</td><td style="font-size:9pt">'.$criteri.'</td><td align="center">'. $dati['esito']->getCredito().'</td></tr>';
+      } elseif ($dati['classe']->getAnno() == 4) {
+        $cred_tot = $dati['esito']->getCredito() + $dati['esito']->getCreditoPrecedente();
+        $html .= '<tr nobr="true"><td>'.$nome.'</td><td align="center">'.$media.'</td><td style="font-size:9pt">'.$criteri.'</td><td align="center">'. $dati['esito']->getCredito().'</td><td align="center">'. $dati['esito']->getCreditoPrecedente().'</td><td align="center">'. $cred_tot.'</td></tr>';
+      } else {
+        // quinta: dati convertiti
+        $cred3 = $dati['esito']->getDati()['creditoConvertito3'];
+        $cred4 = $dati['esito']->getDati()['creditoConvertito4'];
+        $cred_prec = $cred3 + $cred4;
+        $cred_tot = $dati['esito']->getCredito() + $cred_prec;
+        $html .= '<tr nobr="true"><td>'.$nome.'</td><td align="center">'.$media.'</td><td style="font-size:9pt">'.$criteri.'</td><td align="center">'. $dati['esito']->getCredito().'</td><td align="center">'.$cred_prec.'</td><td align="center">'. $cred_tot.'</td></tr>';
+      }
+      $html .= '</table><br>';
+      $pdf->writeHTML($html, true, false, false, true);
+    }
+    // PAI
+    if ($num_insuff > 0 && $dati['alunno']->getClasse()->getAnno() != 5) {
+      $pdf->Ln(2);
+      $pdf->SetFont('times', '', 12);
+      $html = '<p align="justify">Il Consiglio di Classe, avendo ammesso alla classe successiva l\'alunn'.$sex.' '.$alunno.' con votazioni inferiori a sei decimi, '.
+              'predispone il piano di apprendimento individualizzato nel quale sono indicati, per ciascuna disciplina, gli obiettivi di apprendimento '.
+              'da conseguire nonché le specifiche strategie per il raggiungimento dei relativi livelli di apprendimento (OM n. 11 del 16/05/2020).</p><br>';
+      $pdf->writeHTML($html, true, false, false, true);
+    }
+    $pdf->Ln(2);
     // firma
     $pdf->SetFont('times', '', 12);
     $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
@@ -4382,7 +4524,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(true);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="540">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // struttura
     foreach ($dati['definizione']->getStruttura() as $step=>$args) {
@@ -5378,7 +5520,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(false);
     $pdf->AddPage('P');
     // intestazione pagina
-    $html = '<img src="/img/intestazione-documenti.jpg" width="500">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     $alunno_nome = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
     $alunno_sesso = $dati['alunno']->getSesso();
@@ -5475,7 +5617,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(false);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="500">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // intestazione
     $alunno = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
@@ -5566,7 +5708,7 @@ class PagelleUtil {
     $pdf->setPrintFooter(true);
     $pdf->AddPage('P');
     // logo
-    $html = '<img src="/img/intestazione-documenti.jpg" width="540">';
+    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
     $pdf->writeHTML($html, true, false, false, false, 'C');
     // struttura
     foreach ($dati['definizione']->getStruttura() as $step=>$args) {
@@ -6299,6 +6441,629 @@ class PagelleUtil {
     $html = '<p align="justify">Il Consiglio di Classe predispone quindi le comunicazioni da inviare alle famiglie a riguardo dell\'esito dello scrutinio e degli eventuali debiti formativi. Le famiglie potranno visualizzare queste comunicazioni direttamente sul registro elettronico.</p>';
     $pdf->writeHTML($html, true, false, false, true);
     $pdf->Ln(1);
+  }
+
+  /**
+   * Crea la tabella di conversione dei crediti per la classe quinta
+   *
+   * @param TCPDF $pdf Gestore del documento PDF
+   * @param string $classe Nome della classe
+   * @param string $classe_completa Nome della classe con corso e sede
+   * @param array $dati Dati dello scrutinio
+   * @param int $step Passo della struttura del verbale
+   * @param array $args Argomenti della struttura del verbale
+   */
+  public function CreaVerbale_F_ScrutinioConversioneCrediti($pdf, $classe, $classe_completa, $dati, $step, $args) {
+  }
+
+  /**
+   * Gestione PAI
+   *
+   * @param TCPDF $pdf Gestore del documento PDF
+   * @param string $classe Nome della classe
+   * @param string $classe_completa Nome della classe con corso e sede
+   * @param array $dati Dati dello scrutinio
+   * @param int $step Passo della struttura del verbale
+   * @param array $args Argomenti della struttura del verbale
+   */
+  public function CreaVerbale_F_ScrutinioPAI($pdf, $classe, $classe_completa, $dati, $step, $args) {
+  }
+
+  /**
+   * Gestione PIA
+   *
+   * @param TCPDF $pdf Gestore del documento PDF
+   * @param string $classe Nome della classe
+   * @param string $classe_completa Nome della classe con corso e sede
+   * @param array $dati Dati dello scrutinio
+   * @param int $step Passo della struttura del verbale
+   * @param array $args Argomenti della struttura del verbale
+   */
+  public function CreaVerbale_F_ScrutinioPIA($pdf, $classe, $classe_completa, $dati, $step, $args) {
+  }
+
+  /**
+   * Crea il documento PIA
+   *
+   * @param Classe $classe Classe dello scrutinio
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return Percorso completo del file da inviare
+   */
+  public function PIA(Classe $classe, $periodo) {
+    // inizializza
+    $fs = new Filesystem();
+    if ($periodo == 'F' && $classe->getAnno() != 5) {
+      // scrutinio finale
+      $percorso = $this->root.'/finale/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-piano-di-integrazione-degli-apprendimenti.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Piano di Integrazione degli Apprendimenti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // legge materie
+        $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+          ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+          ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+          ->orderBy('m.ordinamento', 'ASC')
+          ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+          ->getQuery()
+          ->getResult();
+        foreach ($materie as $mat) {
+          $dati['piani'][$mat->getId()] = null;
+        }
+        // legge piani
+        $piani = $this->em->getRepository('App:DocumentoInterno')->createQueryBuilder('di')
+          ->join('di.materia', 'm')
+          ->where('di.tipo=:tipo AND di.classe=:classe')
+          ->setParameters(['tipo' => 'A', 'classe' => $classe])
+          ->getQuery()
+          ->getResult();
+        $dati['no_piano'] = true;
+        foreach ($piani as $p) {
+          $dati['piani'][$p->getMateria()->getId()] = $p;
+          if ($p->getDato('necessario')) {
+            $dati['no_piano'] = false;
+          }
+        }
+        // legge scrutinio
+        $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => 'F']);
+        // crea documento
+        $dati['classe'] = $classe;
+        $dati['data_scrutinio'] = $scrutinio->getData();
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_PIA.html.twig', array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    }
+    // errore
+    return null;
+  }
+
+  /**
+   * Crea il documento PAI
+   *
+   * @param Classe $classe Classe dello scrutinio
+   * @param Alunno $alunno Alunno selezionato
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return Percorso completo del file da inviare
+   */
+  public function PAI(Classe $classe, Alunno $alunno, $periodo) {
+    // inizializza
+    $fs = new Filesystem();
+    if ($periodo == 'F' && $classe->getAnno() != 5) {
+      // scrutinio finale
+      $percorso = $this->root.'/finale/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-piano-di-apprendimento-individualizzato-'.
+        $alunno->getId().'.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Piano di Apprendimento Individualizzato - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // legge materie
+        $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+          ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+          ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+          ->orderBy('m.ordinamento', 'ASC')
+          ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+          ->getQuery()
+          ->getResult();
+        foreach ($materie as $mat) {
+          $dati['piani'][$mat->getId()] = null;
+        }
+        // legge i voti e PAI
+        $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+          ->join('vs.scrutinio', 's')
+          ->join('vs.materia', 'm')
+          ->join('App:Esito', 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
+          ->where('s.classe=:classe AND s.periodo=:periodo AND vs.unico IS NOT NULL AND vs.alunno=:alunno AND m.tipo!=:condotta AND e.esito=:ammesso')
+          ->setParameters(['classe' => $classe, 'periodo' => 'F', 'alunno' => $alunno, 'condotta' => 'C', 'ammesso' => 'A'])
+          ->getQuery()
+          ->getResult();
+        foreach ($voti as $v) {
+          // inserisce voti
+          if (($v->getMateria()->getTipo() == 'R' && $v->getUnico() < 22) ||
+              ($v->getMateria()->getTipo() != 'R' && $v->getUnico() < 6)) {
+            // solo materie insufficienti
+            $dati['piani'][$v->getMateria()->getId()] = $v;
+          }
+        }
+        // legge scrutinio
+        $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => 'F']);
+        // crea documento
+        $dati['classe'] = $classe;
+        $dati['alunno'] = $alunno;
+        $dati['data_scrutinio'] = $scrutinio->getData();
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_PAI.html.twig', array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    }
+    // errore
+    return null;
+  }
+
+  /**
+   * Crea il documento del verbale
+   *
+   * @param Classe $classe Classe dello scrutinio
+   * @param Alunno $alunno Alunno selezionato
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return Percorso completo del file da inviare
+   */
+  public function verbale2(Classe $classe, $periodo) {
+    // inizializza
+    $fs = new Filesystem();
+    if ($periodo == 'F') {
+      // scrutinio finale
+      $percorso = $this->root.'/finale/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-verbale.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio Finale - Verbale classe '.$nome_classe);
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // legge dati
+        $dati = $this->verbaleDati($classe, $periodo);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_verbale.html.twig', array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    }
+    // errore
+    return null;
+  }
+
+  /**
+   * Crea tutti i documenti PAI della classe
+   *
+   * @param Classe $classe Classe dello scrutinio
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return Percorso completo del file da inviare
+   */
+  public function tuttiPAI(Classe $classe, $periodo) {
+    // inizializza
+    $fs = new Filesystem();
+    if ($periodo == 'F' && $classe->getAnno() != 5) {
+      // scrutinio finale
+      $percorso = $this->root.'/finale/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-piani-di-apprendimento-individualizzato.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Piani di Apprendimento Individualizzato - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // legge scrutinio
+        $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => 'F']);
+        // legge materie
+        $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+          ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+          ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+          ->orderBy('m.ordinamento', 'ASC')
+          ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+          ->getQuery()
+          ->getResult();
+        // legge alunni ammessi
+        $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+          ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
+          ->where('a.id IN (:lista) AND e.scrutinio=:scrutinio AND e.esito=:esito')
+          ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+          ->setParameters(['lista' => array_keys($scrutinio->getDato('scrutinabili')),
+            'scrutinio' => $scrutinio, 'esito' => 'A'])
+          ->getQuery()
+          ->getResult();
+        foreach ($alunni as $alu) {
+          // dati di alunno
+          $dati = array();
+          foreach ($materie as $mat) {
+            $dati['piani'][$mat->getId()] = null;
+          }
+          // legge i voti e PAI
+          $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            ->join('vs.materia', 'm')
+            ->where('vs.alunno=:alunno AND vs.scrutinio=:scrutinio AND vs.unico IS NOT NULL AND m.tipo!=:condotta')
+            ->setParameters(['alunno' => $alu, 'scrutinio' => $scrutinio, 'condotta' => 'C'])
+            ->getQuery()
+            ->getResult();
+          $da_fare = false;
+          foreach ($voti as $v) {
+            // inserisce voti
+            if (($v->getMateria()->getTipo() == 'R' && $v->getUnico() < 22) ||
+                ($v->getMateria()->getTipo() != 'R' && $v->getUnico() < 6)) {
+              // solo materie insufficienti
+              $dati['piani'][$v->getMateria()->getId()] = $v;
+              $da_fare = true;
+            }
+          }
+          if ($da_fare) {
+            // crea documento
+            $dati['classe'] = $classe;
+            $dati['alunno'] = $alu;
+            $dati['data_scrutinio'] = $scrutinio->getData();
+            $this->pdf->getHandler()->startPageGroup();
+            $html = $this->tpl->render('coordinatore/documenti/scrutinio_PAI.html.twig', array('dati' => $dati));
+            $this->pdf->createFromHtml($html);
+          }
+        }
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    }
+    // errore
+    return null;
+  }
+
+  /**
+   * Crea la certificazione delle competenze
+   *
+   * @param Classe $classe Classe dello scrutinio
+   * @param Alunno $alunno Alunno dello scrutinio
+   * @param string $periodo Periodo dello scrutinio
+   *
+   * @return Percorso completo del file da inviare
+   */
+  public function certificazione(Classe $classe, Alunno $alunno, $periodo) {
+    // inizializza
+    $fs = new Filesystem();
+    if ($periodo == 'F') {
+      // scrutinio finale
+      $percorso = $this->root.'/finale/'.$classe->getAnno().$classe->getSezione();
+      if (!$fs->exists($percorso)) {
+        // crea directory
+        $fs->mkdir($percorso, 0775);
+      }
+      // nome documento
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazione-'.$alunno->getId().'.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio Finale - Certificazione delle competenze - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+        $dati = $this->certificazioniDati($classe, $periodo);
+        if (!in_array($alunno->getId(), array_keys($dati['ammessi']))) {
+          // errore: alunno non ammesso
+        }
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaCertificazione_F($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati, $alunno);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    }
+    // errore
+    return null;
+  }
+
+  /**
+   * Crea le certificazioni delle competenze come documento PDF
+   *
+   * @param TCPDF $pdf Gestore del documento PDF
+   * @param string $classe Nome della classe
+   * @param string $classe_completa Nome della classe con corso e sede
+   * @param array $dati Dati dello scrutinio
+   * @param Alunno $alunno Alunno dello scrutinio
+   */
+  public function creaCertificazione_F($pdf, $classe, $classe_completa, $dati, Alunno $alunno) {
+    // set margins
+    $pdf->SetMargins(20, 20, 20, true);
+    // set auto page breaks
+    $pdf->SetAutoPageBreak(false, 15);
+    // set font
+    $pdf->SetFont('helvetica', '', 10);
+    // inizio pagina
+    $pdf->SetFooterMargin(15);
+    $pdf->setFooterFont(Array('helvetica', '', 8));
+    $pdf->setFooterData(array(0,0,0), array(255,255,255));
+    $pdf->setPrintFooter(true);
+    $pdf->setHeaderTemplateAutoreset(true);
+    foreach ($dati['ammessi'] as $idalunno=>$alu) {
+      if ($idalunno != $alunno->getId()) {
+        // salta
+        continue;
+      }
+      // alunno da certificare
+      $valori = $alu['dati'];
+      // inizia gruppo pagine
+      $pdf->setPrintHeader(false);
+      $pdf->startPageGroup();
+      $pdf->AddPage('P');
+      $alu_cognome = strtoupper($alu['cognome']);
+      $alu_nome = strtoupper($alu['nome']);
+      $alu_sesso = $alu['sesso'];
+      $alu_nascita = $alu['dataNascita']->format('d/m/Y');
+      $alu_citta = strtoupper($alu['comuneNascita']);
+      // prima pagina
+      $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
+      $pdf->writeHTML($html, true, false, false, false, 'C');
+      $pdf->Ln(3);
+      $pdf->SetFont('times', 'B', 12);
+      $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $html = '<p><span style="font-size:14">CERTIFICATO delle COMPETENZE DI BASE</span><br>'.
+              '<span style="font-size:11">acquisite nell\'assolvimento dell\' OBBLIGO DI ISTRUZIONE</span></p>'.
+              '<p>Anno Scolastico '.$as.'</p>'.
+              '<p>&nbsp;</p>';
+      $pdf->writeHTML($html, true, false, false, false, 'C');
+      $pdf->SetFont('times', '', 11);
+      $html = '<p>N° ..............</p>'.
+              '<p style="text-align:center;font-weight:bold">IL DIRIGENTE SCOLASTICO</p>'.
+              '<p>Visto il regolamento emanato dal Ministro dell\'Istruzione, Università e Ricerca con decreto 22 agosto 2007, n.139;</p>'.
+              '<p>Visti gli atti di ufficio;</p>';
+      $pdf->writeHTML($html, true, false, false, false, 'L');
+      $this->acapo($pdf, 5);
+      $text = ($alu_sesso == 'M' ? 'che lo studente' : 'che la studentessa');
+      $pdf->SetFont('times', 'B', 14);
+      $html = '<p>CERTIFICA<br>'.
+              '<span style="font-style:italic">'.$text.'</span></p>';
+      $pdf->writeHTML($html, true, false, false, false, 'C');
+      // cognome e nome
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 18, 8, 0, 0, 'cognome', 0, 'L', 'B');
+      $pdf->SetFont('times', 'B', 11);
+      $this->cella($pdf, 67, 8, 0, 0, $alu_cognome, 'B', 'L', 'B');
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 18, 8, 0, 0, 'nome', 0, 'R', 'B');
+      $pdf->SetFont('times', 'B', 11);
+      $this->cella($pdf, 67, 8, 0, 0, $alu_nome, 'B', 'L', 'B');
+      $this->acapo($pdf, 8);
+      // data e città nascita
+      $text = ($alu_sesso == 'M' ? 'nato' : 'nata').' il';
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 18, 8, 0, 0, $text, 0, 'L', 'B');
+      $pdf->SetFont('times', 'B', 11);
+      $this->cella($pdf, 67, 8, 0, 0, $alu_nascita, 'B', 'L', 'B');
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 18, 8, 0, 0, 'a', 0, 'R', 'B');
+      $pdf->SetFont('times', 'B', 11);
+      $this->cella($pdf, 67, 8, 0, 0, $alu_citta, 'B', 'L', 'B');
+      $this->acapo($pdf, 8);
+      // sezione
+      $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $text = ($alu_sesso == 'M' ? 'iscritto' : 'iscritta').
+              ' nell\'anno scolastico '.$as.' presso questo Istituto nella classe II sezione';
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 132, 8, 0, 0, $text, 0, 'L', 'B');
+      $pdf->SetFont('times', 'B', 11);
+      $text = $dati['classe']->getSezione().' - '.$dati['classe']->getSede()->getCitta();
+      $this->cella($pdf, 0, 8, 0, 0, $text, 'B', 'L', 'B');
+      $this->acapo($pdf, 8);
+      // corso
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 32, 8, 0, 0, 'indirizzo di studio', 0, 'L', 'B');
+      $pdf->SetFont('times', 'B', 11);
+      $this->cella($pdf, 0, 8, 0, 0, $dati['classe']->getCorso()->getNome(), 'B', 'L', 'B');
+      $this->acapo($pdf, 8);
+      // dichiarazione
+      $text = 'nell\'assolvimento dell\'obbligo di istruzione, della durata di 10 anni,';
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 0, 8, 0, 0, $text, 0, 'L', 'B');
+      $this->acapo($pdf, 8);
+      $pdf->SetFont('times', 'BI', 14);
+      $this->cella($pdf, 0, 10, 0, 0, 'ha acquisito', 0, 'C', 'B');
+      $this->acapo($pdf, 10);
+      $text = 'le competenze di base di seguito indicate.';
+      $pdf->SetFont('times', '', 11);
+      $this->cella($pdf, 0, 8, 0, 0, $text, 0, 'L', 'B');
+      $this->acapo($pdf, 8);
+      // note
+      $pdf->SetFont('helvetica', 'B', 9);
+      $this->acapo($pdf, 20);
+      $this->cella($pdf, 90, 5, 40, 0, 'Note', 'T', 'C', 'B');
+      $this->acapo($pdf, 5);
+      $html = '<p>1) Il presente certificato ha validità nazionale.</p>'.
+              '<p>2) I livelli relativi all’acquisizione delle competenze di ciascun asse sono i seguenti:<br>'.
+              'LIVELLO BASE: lo studente svolge compiti semplici in situazioni note, mostrando di possedere conoscenze ed abilità essenziali e di saper applicare regole e procedure fondamentali. Nel caso in cui non sia stato raggiunto il livello base, è riportata l’espressione "Livello base non raggiunto", con l’indicazione della relativa motivazione.<br>'.
+              'LIVELLO INTERMEDIO: lo studente svolge compiti e risolve problemi complessi in situazioni note, compie scelte consapevoli, mostrando di saper utilizzare le conoscenze e le abilità acquisite.<br>'.
+              'LIVELLO AVANZATO: lo studente svolge compiti e problemi complessi in situazioni anche non note, mostrando padronanza nell’uso delle conoscenze e delle abilità. Es. proporre e sostenere le proprie opinioni e assumere autonomamente decisioni consapevoli.</p>';
+      $pdf->writeHTML($html, true, false, false, false, 'L');
+      // nuova pagina
+      $pdf->SetHeaderMargin(10);
+      $pdf->setHeaderFont(Array('helvetica', 'B', 6));
+      $pdf->setHeaderData('', 0, $alu_cognome.' '.$alu_nome.' - 2ª '.$dati['classe']->getSezione(), '', array(0,0,0), array(255,255,255));
+      $pdf->setPrintHeader(true);
+      $pdf->AddPage('P');
+      // intestazione
+      $pdf->SetFont('helvetica', 'B', 11);
+      $this->cella($pdf, 0, 5, 0, 0, 'COMPETENZE DI BASE E RELATIVI LIVELLI RAGGIUNTI', 0, 'C', 'M');
+      $this->acapo($pdf, 5);
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 85, 5, 0, 0, 'ASSE DEI LINGUAGGI', 1, 'C', 'M');
+      $this->cella($pdf, 0, 5, 0, 0, 'LIVELLI', 1, 'C', 'M');
+      $this->acapo($pdf, 5);
+      // asse linguaggi-1
+      $pdf->SetFont('helvetica', '', 9);
+      $pdf->setListIndentWidth(3);
+      $tagvs = array('ul' => array(0 => array('h' => 0.0001, 'n' => 1)));
+      $pdf->setHtmlVSpace($tagvs);
+      $html = '<i><b>Lingua Italiana:</b></i><ul>'.
+              '<li>Padroneggiare gli strumenti espressivi ed argomentativi indispensabili per gestire l\'interazione comunicativa verbale in vari contesti</li>'.
+              '<li>Leggere comprendere e interpretare testi scritti di vario tipo</li>'.
+              '<li>Produrre testi di vario tipo in relazione ai differenti scopi comunicativi</li></ul>';
+      $pdf->writeHTMLCell(85, 32, $pdf->GetX(), $pdf->GetY(), $html, 1, 0, false, true, 'L', true);
+      $text = $this->trans->trans('label.certificazione_livello_'.$valori['certificazione_italiano']).
+        ($valori['certificazione_italiano'] == 'N' ?
+        ' per la seguente motivazione: '.$valori['certificazione_italiano_motivazione'] : '');
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 0, 32, 0, 0, $text, 1, 'C', 'M');
+      $this->acapo($pdf, 32);
+      // asse linguaggi-2
+      $pdf->SetFont('helvetica', '', 9);
+      $pdf->setListIndentWidth(3);
+      $tagvs = array('ul' => array(0 => array('h' => 0.0001, 'n' => 1)));
+      $pdf->setHtmlVSpace($tagvs);
+      $html = '<i><b>Lingua straniera:</b></i><ul>'.
+              '<li>Utilizzare la lingua Inglese per i principali scopi comunicativi ed operativi</li></ul>';
+      $pdf->writeHTMLCell(85, 18, $pdf->GetX(), $pdf->GetY(), $html, 1, 0, false, true, 'L', true);
+      $text = $this->trans->trans('label.certificazione_livello_'.$valori['certificazione_lingua']).
+        ($valori['certificazione_lingua'] == 'N' ?
+        ' per la seguente motivazione: '.$valori['certificazione_lingua_motivazione'] : '');
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 0, 18, 0, 0, $text, 1, 'C', 'M');
+      $this->acapo($pdf, 18);
+      // asse linguaggi-3
+      $pdf->SetFont('helvetica', '', 9);
+      $pdf->setListIndentWidth(3);
+      $tagvs = array('ul' => array(0 => array('h' => 0.0001, 'n' => 1)));
+      $pdf->setHtmlVSpace($tagvs);
+      $html = '<i><b>Altri linguaggi:</b></i><ul>'.
+              '<li>Utilizzare gli strumenti fondamentali per una fruizione consapevole del patrimonio artistico e letterario</li>'.
+              '<li>Utilizzare e produrre testi multimediali</li></ul>';
+      $pdf->writeHTMLCell(85, 18, $pdf->GetX(), $pdf->GetY(), $html, 1, 0, false, true, 'L', true);
+      $text = $this->trans->trans('label.certificazione_livello_'.$valori['certificazione_linguaggio']).
+        ($valori['certificazione_linguaggio'] == 'N' ?
+        ' per la seguente motivazione: '.$valori['certificazione_linguaggio_motivazione'] : '');
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 0, 18, 0, 0, $text, 1, 'C', 'M');
+      $this->acapo($pdf, 18);
+      // asse matematico-4
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 85, 5, 0, 0, 'ASSE MATEMATICO', 1, 'C', 'M');
+      $this->cella($pdf, 0, 5, 0, 0, 'LIVELLI', 1, 'C', 'M');
+      $this->acapo($pdf, 5);
+      $pdf->SetFont('helvetica', '', 9);
+      $pdf->setListIndentWidth(3);
+      $tagvs = array('ul' => array(0 => array('h' => 0.0001, 'n' => 1)));
+      $pdf->setHtmlVSpace($tagvs);
+      $html = '<ul><li>Utilizzare le tecniche e le procedure del calcolo aritmetico ed algebrico, rappresentandole anche sotto forma grafica</li>'.
+              '<li>Confrontare ed analizzare figure geometriche, individuando invarianti e relazioni</li>'.
+              '<li>Individuare le strategie appropriate per la soluzione dei problemi</li>'.
+              '<li>Analizzare dati e interpretarli sviluppando deduzioni e ragionamenti sugli stessi anche con l’ausilio di rappresentazioni grafiche, usando consapevolmente gli strumenti di calcolo e le potenzialità offerte da applicazioni specifiche di tipo informatico</li></ul>';
+      $pdf->writeHTMLCell(85, 48, $pdf->GetX(), $pdf->GetY(), $html, 1, 0, false, true, 'L', true);
+      $text = $this->trans->trans('label.certificazione_livello_'.$valori['certificazione_matematica']).
+        ($valori['certificazione_matematica'] == 'N' ?
+        ' per la seguente motivazione: '.$valori['certificazione_matematica_motivazione'] : '');
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 0, 48, 0, 0, $text, 1, 'C', 'M');
+      $this->acapo($pdf, 48);
+      // asse scientifico-5
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 85, 5, 0, 0, 'ASSE SCIENTIFICO-TECNOLOGICO', 1, 'C', 'M');
+      $this->cella($pdf, 0, 5, 0, 0, 'LIVELLI', 1, 'C', 'M');
+      $this->acapo($pdf, 5);
+      $pdf->SetFont('helvetica', '', 9);
+      $pdf->setListIndentWidth(3);
+      $tagvs = array('ul' => array(0 => array('h' => 0.0001, 'n' => 1)));
+      $pdf->setHtmlVSpace($tagvs);
+      $html = '<ul><li>Osservare, descrivere ed analizzare fenomeni appartenenti alla realtà naturale e artificiale e riconoscere nelle varie forme i concetti di sistema e di complessità</li>'.
+              '<li>Analizzare qualitativamente e quantitativamente fenomeni legati alle trasformazioni di energia a partire dall’esperienza</li>'.
+              '<li>Essere consapevoli delle potenzialità e dei limiti delle tecnologie nel contesto culturale e sociale in cui vengono applicate</li></ul>';
+      $pdf->writeHTMLCell(85, 40, $pdf->GetX(), $pdf->GetY(), $html, 1, 0, false, true, 'L', true);
+      $text = $this->trans->trans('label.certificazione_livello_'.$valori['certificazione_scienze']).
+        ($valori['certificazione_scienze'] == 'N' ?
+        ' per la seguente motivazione: '.$valori['certificazione_scienze_motivazione'] : '');
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 0, 40, 0, 0, $text, 1, 'C', 'M');
+      $this->acapo($pdf, 40);
+      // asse storico-6
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 85, 5, 0, 0, 'ASSE STORICO-SOCIALE', 1, 'C', 'M');
+      $this->cella($pdf, 0, 5, 0, 0, 'LIVELLI', 1, 'C', 'M');
+      $this->acapo($pdf, 5);
+      $pdf->SetFont('helvetica', '', 9);
+      $pdf->setListIndentWidth(3);
+      $tagvs = array('ul' => array(0 => array('h' => 0.0001, 'n' => 1)));
+      $pdf->setHtmlVSpace($tagvs);
+      $html = '<ul><li>Comprendere il cambiamento e la diversità dei tempi storici in una dimensione diacronica attraverso il confronto fra epoche e in una dimensione sincronica attraverso il confronto fra aree geografiche e culturali</li>'.
+              '<li>Collocare l’esperienza personale in un sistema di regole fondato sul reciproco riconoscimento dei diritti garantiti dalla Costituzione, a tutela della persona, della collettività e dell’ambiente</li>'.
+              '<li>Riconoscere le caratteristiche essenziali del sistema socio economico per orientarsi nel tessuto produttivo del proprio territorio</li></ul>';
+      $pdf->writeHTMLCell(85, 44, $pdf->GetX(), $pdf->GetY(), $html, 1, 0, false, true, 'L', true);
+      $text = $this->trans->trans('label.certificazione_livello_'.$valori['certificazione_storia']).
+        ($valori['certificazione_storia'] == 'N' ?
+        ' per la seguente motivazione: '.$valori['certificazione_storia_motivazione'] : '');
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 0, 44, 0, 0, $text, 1, 'C', 'M');
+      $this->acapo($pdf, 44);
+      // dichiarazione
+      $text = 'Le competenze di base relative agli assi culturali sopra richiamati sono state acquisite dallo studente con riferimento alle competenze chiave di cittadinanza di cui all’allegato 2 del regolamento citato in premessa (1. imparare ad imparare; 2. progettare; 3. comunicare; 4. collaborare e partecipare; 5. agire in modo autonomo e responsabile; 6. risolvere problemi; 7. individuare collegamenti e  relazioni; 8. acquisire e interpretare l’informazione).';
+      $pdf->SetFont('helvetica', '', 10);
+      $this->cella($pdf, 0, 18, 0, 0, $text, 0, 'L', 'B');
+      $this->acapo($pdf, 18);
+      // data e firma
+      $datascrutinio = $dati['scrutinio']->getData()->format('d/m/Y');
+      $pdf->SetFont('helvetica', '', 11);
+      $this->cella($pdf, 30, 14, 0, 0, 'Cagliari,', 0, 'R', 'B');
+      $this->cella($pdf, 30, 14, 0, 0, $datascrutinio, 'B', 'C', 'B');
+      $pdf->SetXY(-80, $pdf->GetY());
+      $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+      $text = '(Il Dirigente Scolastico)'."\n".$preside;
+      $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
+    }
   }
 
 }

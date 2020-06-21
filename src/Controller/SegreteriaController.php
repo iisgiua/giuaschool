@@ -345,10 +345,9 @@ class SegreteriaController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla scrutinio
-    $adesso = (new \DateTime())->format('Y-m-d H:i:0');
     $scrutinio = $em->getRepository('App:Scrutinio')->createQueryBuilder('s')
-      ->where('s.id=:scrutinio AND s.periodo=:periodo AND s.stato=:stato AND s.visibile<=:adesso')
-      ->setParameters(['scrutinio' => $scrutinio, 'periodo' => $periodo, 'stato' => 'C', 'adesso' => $adesso])
+      ->where('s.id=:scrutinio AND s.periodo=:periodo AND s.stato=:stato')
+      ->setParameters(['scrutinio' => $scrutinio, 'periodo' => $periodo, 'stato' => 'C'])
       ->getQuery()
       ->setMaxResults(1)
       ->getOneOrNullResult();
