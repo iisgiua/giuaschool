@@ -2,19 +2,19 @@
 
 monolog:
   use_microseconds: false
-  channels: ['command']
+  channels: ["command"]
   handlers:
     main:
-      type: 'rotating_file'
+      type: rotating_file
       max_files: 10
-      path: '%kernel.logs_dir%/app_%kernel.environment%.log'
-      level: 'debug'
-      channels: ['!command']
+      path: "%kernel.logs_dir%/app_%kernel.environment%.log"
+      level: debug
+      channels: ["!command","!event"]
     command:
-      type: 'rotating_file'
+      type: rotating_file
       max_files: 10
-      path: '%kernel.logs_dir%/command_%kernel.environment%.log'
-      level: 'debug'
-      channels: ['command']
+      path: "%kernel.logs_dir%/command_%kernel.environment%.log"
+      level: debug
+      channels: ["command"]
     console:
-      type: 'console'
+      type: console

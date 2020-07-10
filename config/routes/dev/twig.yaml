@@ -1,5 +1,0 @@
-# config/routes/dev/twig.yaml
-
-_errors:
-  resource: '@TwigBundle/Resources/config/routing/errors.xml'
-  prefix: /_error

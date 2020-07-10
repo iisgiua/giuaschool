@@ -29,4 +29,3 @@ framework:
   serializer: ~
   php_errors:
     log: true
-  cache: ~
