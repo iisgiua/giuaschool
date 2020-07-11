@@ -103,9 +103,8 @@ class AppFixtures extends Fixture {
    *    versione: numero di versione dell'applicazione
    *    manutenzione: indica una manutenzione programmata durante la quale il registro non sarà accessibile
    *                  [testo nel formato 'AAAA-MM-GG,HH:MM,HH:MM' che indica giorno, ora inizio e ora fine]
-   *    messaggio: indica la visualizzazione del messaggio nella pagina di accesso al registro
+   *    messaggio: indica la visualizzazione del messaggio nella pagina di login del registro
    *               [testo libero che può contenere formattazione HTML]
-   *    moodle: indica se presente pulsante per accesso diretto a MOODLE [token di app se attiva funzione]
    *
    *  Parametri della categoria SCUOLA:
    *    anno_scolastico: anno scolastico corrente [testo nel formato 'AAAA-AAAA']
@@ -149,7 +148,7 @@ class AppFixtures extends Fixture {
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SISTEMA')
       ->setParametro('versione')
-      ->setValore('1.2.0');
+      ->setValore('1.3.0');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SISTEMA')
       ->setParametro('manutenzione')
@@ -158,23 +157,19 @@ class AppFixtures extends Fixture {
       ->setCategoria('SISTEMA')
       ->setParametro('messaggio')
       ->setValore('');
-    $this->dati['param'][] = (new Configurazione())
-      ->setCategoria('SISTEMA')
-      ->setParametro('moodle')
-      ->setValore('');
     // SCUOLA
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('anno_scolastico')
-      ->setValore('2019/2020');
+      ->setValore('2020/2021');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('anno_inizio')
-      ->setValore('2019-09-16');
+      ->setValore('2020-09-14');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('anno_fine')
-      ->setValore('2020-06-06');
+      ->setValore('2021-06-08');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo1_nome')
@@ -182,7 +177,7 @@ class AppFixtures extends Fixture {
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo1_fine')
-      ->setValore('2019-12-16');
+      ->setValore('2020-12-14');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo2_nome')
@@ -190,7 +185,7 @@ class AppFixtures extends Fixture {
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo2_fine')
-      ->setValore('2020-06-06');
+      ->setValore('2021-06-08');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo3_nome')
@@ -1205,163 +1200,163 @@ class AppFixtures extends Fixture {
   private function configFestivi(ObjectManager $manager) {
     // festività
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '30/10/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '30/10/2020'))
       ->setDescrizione('Festa del Santo Patrono')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '01/11/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '01/11/2020'))
       ->setDescrizione('Tutti i Santi')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '02/11/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '02/11/2020'))
       ->setDescrizione('Commemorazione dei defunti')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '08/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '08/12/2020'))
       ->setDescrizione('Immacolata Concezione')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '23/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '23/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '24/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '24/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '25/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '25/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '26/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '26/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '27/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '27/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '28/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '28/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '29/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '29/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '30/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '30/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '31/12/2019'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '31/12/2020'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '01/01/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '01/01/2021'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '02/01/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '02/01/2021'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '03/01/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '03/01/2021'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '04/01/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '04/01/2021'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '05/01/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '05/01/2021'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '06/01/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '06/01/2021'))
       ->setDescrizione('Vacanze di Natale')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '25/02/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '16/02/2021'))
       ->setDescrizione('Martedì grasso')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '09/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '01/04/2021'))
       ->setDescrizione('Vacanze di Pasqua')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '10/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '02/04/2021'))
       ->setDescrizione('Vacanze di Pasqua')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '11/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '03/04/2021'))
       ->setDescrizione('Vacanze di Pasqua')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '12/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '04/04/2021'))
       ->setDescrizione('Vacanze di Pasqua')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '13/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '05/04/2021'))
       ->setDescrizione('Vacanze di Pasqua')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '14/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '06/04/2021'))
       ->setDescrizione('Vacanze di Pasqua')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '25/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '25/04/2021'))
       ->setDescrizione('Anniversario della Liberazione')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '28/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '28/04/2021'))
       ->setDescrizione('Sa Die de sa Sardinia')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '01/05/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '01/05/2021'))
       ->setDescrizione('Festa del Lavoro')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '02/06/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '02/06/2021'))
       ->setDescrizione('Festa nazionale della Repubblica')
       ->setTipo('F')
       ->setSede(null);
     // giorni a disposizione dell'Istituto
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '29/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '29/04/2021'))
       ->setDescrizione('Chiusura stabilita dal Consiglio di Istituto')
       ->setTipo('F')
       ->setSede(null);
     $this->dati['festivi'][] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '30/04/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '30/04/2021'))
       ->setDescrizione('Chiusura stabilita dal Consiglio di Istituto')
       ->setTipo('F')
       ->setSede(null);
@@ -1394,23 +1389,23 @@ class AppFixtures extends Fixture {
     // ORARI
     $this->dati['orari']['CA1'] = (new Orario())
       ->setNome('città - Orario Provvisorio')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '29/09/2019'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '14/09/2020'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '05/10/2020'))
       ->setSede($this->dati['sedi']['CA']);
     $this->dati['orari']['AS1'] = (new Orario())
       ->setNome('città2 - Orario Provvisorio')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '16/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '29/09/2019'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '14/09/2020'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '04/10/2020'))
       ->setSede($this->dati['sedi']['AS']);
     $this->dati['orari']['CA2'] = (new Orario())
       ->setNome('città - Orario Definitivo')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '30/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '06/06/2020'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '05/10/2020'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '08/06/2021'))
       ->setSede($this->dati['sedi']['CA']);
     $this->dati['orari']['AS2'] = (new Orario())
       ->setNome('città2 - Orario Definitivo')
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '30/09/2019'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '06/06/2020'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '05/10/2020'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '08/06/2021'))
       ->setSede($this->dati['sedi']['AS']);
     // rende persistenti gli orari
     foreach ($this->dati['orari'] as $obj) {
