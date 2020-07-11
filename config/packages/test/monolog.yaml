@@ -2,7 +2,7 @@
 
 monolog:
   use_microseconds: false
-  channels: ["command"]
+  channels: ['command']
   handlers:
     main:
       type: rotating_file
@@ -10,12 +10,10 @@ monolog:
       path: "%kernel.logs_dir%/app_%kernel.environment%.log"
       level: warning
       excluded_http_codes: [404, 405]
-      channels: ["!command","!event"]
+      channels: ['!command','!console']
     command:
       type: rotating_file
       max_files: 10
       path: "%kernel.logs_dir%/command_%kernel.environment%.log"
       level: debug
-      channels: ["command"]
-    console:
-      type: console
+      channels: ['command','console']

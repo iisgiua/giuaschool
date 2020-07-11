@@ -37,7 +37,9 @@ services:
   # explicit commands registration
   App\Command\:
     resource: '../src/Command/*'
-    tags: ['console.command']
+    tags:
+      - { name: console.command }
+      - { name: monolog.logger, channel: command }
 
   # ridefinisce sessione per poter usare NamespacedAttributeBag
   session:
