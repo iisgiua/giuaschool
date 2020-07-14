@@ -12,7 +12,7 @@ framework:
     enabled: true
   esi: false
   fragments: false
-  http_client: ~
+  #http_client: ~
   request: ~
   session:
     enabled: true

@@ -144,8 +144,23 @@
     "guzzlehttp/psr7": {
         "version": "1.6.1"
     },
-    "hslavich/oneloginsaml-bundle": {
-        "version": "dev-master"
+    "knpuniversity/oauth2-client-bundle": {
+        "version": "1.20",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "1.20",
+            "ref": "80acc9223a205cbf5d9828fd616c82a374d281dd"
+        },
+        "files": [
+            "config/packages/knpu_oauth2_client.yaml"
+        ]
+    },
+    "league/oauth2-client": {
+        "version": "2.4.1"
+    },
+    "league/oauth2-google": {
+        "version": "3.0.2"
     },
     "monolog/monolog": {
         "version": "1.24.0"
@@ -158,9 +173,6 @@
     },
     "ocramius/proxy-manager": {
         "version": "2.2.2"
-    },
-    "onelogin/php-saml": {
-        "version": "3.4.1"
     },
     "paragonie/random_compat": {
         "version": "v9.99.99"
@@ -349,12 +361,6 @@
             "src/Controller/.gitignore",
             "src/Kernel.php"
         ]
-    },
-    "symfony/http-client": {
-        "version": "v4.3.3"
-    },
-    "symfony/http-client-contracts": {
-        "version": "v1.1.5"
     },
     "symfony/http-foundation": {
         "version": "v4.3.3"
