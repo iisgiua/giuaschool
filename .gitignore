@@ -23,10 +23,9 @@
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+
 ###> trinko/giuaschool ###
 /last_deploy.date
-/config/googleapi/*
-!/config/googleapi/.gitkeep
 /DEV/
 /FILES/archivio/classi/*
 !/FILES/archivio/classi/.gitkeep
@@ -47,6 +46,6 @@
 /public/img/.local/
 /src/Command/Argo/
 /src/Controller/TestController.php
-/src/DataFixtures/AppFixturesLocal.php
+/src/DataFixtures/AppLocalFixtures.php
 /templates/argo/
 ###< trinko/giuaschool ###
