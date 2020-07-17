@@ -46,9 +46,8 @@ class MenuOpzioneRepository extends EntityRepository {
         $funzione = array('NESSUNA');
       }
       // legge dati
-      $dati = $this->createQueryBuilder('m')
+      $dati = $this->createQueryBuilder('o')
         ->select('o.nome,o.descrizione,o.url,(o.sottoMenu) AS sottomenu,o2.nome AS nome2,o2.descrizione AS descrizione2,o2.url AS url2,o3.nome AS nome3,o3.descrizione AS descrizione3,o3.url AS url3')
-        ->join('App:MenuOpzione', 'o', 'WITH', 'o.menu=m.id')
         ->leftJoin('App:MenuOpzione', 'o2', 'WITH', 'o.menu=o2.sottoMenu AND o2.ruolo=:ruolo AND o2.funzione IN (:funzione)')
         ->leftJoin('App:MenuOpzione', 'o3', 'WITH', 'o2.menu=o3.sottoMenu AND o3.ruolo=:ruolo AND o3.funzione IN (:funzione)')
         ->where('o.url=:url AND o.ruolo=:ruolo AND o.funzione IN (:funzione)')

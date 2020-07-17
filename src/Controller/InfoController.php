@@ -36,7 +36,7 @@ class InfoController extends BaseController {
    */
   public function noteLegaliAction(ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->loadAll();
+    $config->carica();
     return $this->renderHtml('info', 'noteLegali');
   }
 
@@ -52,7 +52,7 @@ class InfoController extends BaseController {
    */
   public function privacyAction(ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->loadAll();
+    $config->carica();
     return $this->renderHtml('info', 'privacy');
   }
 
@@ -68,7 +68,7 @@ class InfoController extends BaseController {
    */
   public function cookieAction(ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->loadAll();
+    $config->carica();
     return $this->renderHtml('info', 'cookie');
   }
 
@@ -84,7 +84,7 @@ class InfoController extends BaseController {
    */
   public function creditsAction(ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->loadAll();
+    $config->carica();
     return $this->renderHtml('info', 'credits');
   }
 

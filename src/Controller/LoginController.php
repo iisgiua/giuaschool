@@ -52,7 +52,6 @@ class LoginController extends BaseController {
   /**
    * Login dell'utente attraverso username e password
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
@@ -62,21 +61,15 @@ class LoginController extends BaseController {
    * @Route("/login/form/", name="login_form",
    *    methods={"GET", "POST"})
    */
-  public function formAction(EntityManagerInterface $em, SessionInterface $session, AuthenticationUtils $auth,
+  public function formAction(SessionInterface $session, AuthenticationUtils $auth,
                              ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->loadAll();
-    // manutenzione
-    $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if ($manutenzione) {
-      // manutenzione programmata
-      $dati = explode(',', $manutenzione);
-      $manutenzione = null;
-      if ($dati[0] == date('Y-m-d')) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      }
-    }
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // conserva ultimo errore del login, se presente
     $errore = $auth->getLastAuthenticationError();
     // conserva ultimo username inserito
@@ -114,18 +107,12 @@ class LoginController extends BaseController {
    */
   public function registrazioneAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->loadAll();
-    // manutenzione
-    $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if ($manutenzione) {
-      // manutenzione programmata
-      $dati = explode(',', $manutenzione);
-      $manutenzione = null;
-      if ($dati[0] == date('Y-m-d')) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      }
-    }
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // conserva ultimo errore del login, se presente
     $errore = $auth->getLastAuthenticationError();
     // conserva ultimo username inserito
@@ -193,7 +180,6 @@ class LoginController extends BaseController {
    * Login dell'utente tramite smartcard: pagina con messaggio di errore.
    * Sono necessari due url per evitare errore del server "too many redirections".
    *
-   * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
@@ -203,20 +189,14 @@ class LoginController extends BaseController {
    * @Route("/login/card-errore/", name="login_cardErrore",
    *    methods={"GET"})
    */
-  public function cardErroreAction(EntityManagerInterface $em, SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
+  public function cardErroreAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
-    $config->loadAll();
-    // manutenzione
-    $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if ($manutenzione) {
-      // manutenzione programmata
-      $dati = explode(',', $manutenzione);
-      $manutenzione = null;
-      if ($dati[0] == date('Y-m-d')) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      }
-    }
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // legge ultimo errore del login
     $errore = $auth->getLastAuthenticationError();
     // mostra la pagina di risposta
@@ -244,7 +224,7 @@ class LoginController extends BaseController {
   public function homeAction(Request $request, ConfigLoader $config, NotificheUtil $notifiche) {
     if ($request->query->get('reload') == 'yes') {
       // ricarica configurazione di sistema
-      $config->loadAll();
+      $config->carica();
     }
     // legge dati
     $dati = $notifiche->notificheHome($this->getUser());
@@ -274,18 +254,12 @@ class LoginController extends BaseController {
                                   ConfigLoader $config, UserPasswordEncoderInterface $encoder, OtpUtil $otp,
                                   \Swift_Mailer $mailer, LoggerInterface $logger, LogHandler $dblogger) {
     // carica configurazione di sistema
-    $config->loadAll();
-    // manutenzione
-    $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if ($manutenzione) {
-      // manutenzione programmata
-      $dati = explode(',', $manutenzione);
-      $manutenzione = null;
-      if ($dati[0] == date('Y-m-d')) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      }
-    }
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
     $errore = null;
     $successo = null;
     // crea form inserimento email
@@ -467,18 +441,12 @@ class LoginController extends BaseController {
                                      ConfigLoader $config, \Swift_Mailer $mailer, LoggerInterface $logger,
                                      LogHandler $dblogger) {
     // carica configurazione di sistema
-    $config->loadAll();
-    // manutenzione
-    $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if ($manutenzione) {
-      // manutenzione programmata
-      $dati = explode(',', $manutenzione);
-      $manutenzione = null;
-      if ($dati[0] == date('Y-m-d')) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      }
-    }
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
     $errore = null;
     $successo = null;
     // crea form
@@ -647,18 +615,12 @@ class LoginController extends BaseController {
                                   TranslatorInterface $trans, ConfigLoader $config, UserPasswordEncoderInterface $encoder, LogHandler $dblogger,
                                   $token) {
     // carica configurazione di sistema
-    $config->loadAll();
-    // manutenzione
-    $manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if ($manutenzione) {
-      // manutenzione programmata
-      $dati = explode(',', $manutenzione);
-      $manutenzione = null;
-      if ($dati[0] == date('Y-m-d')) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      }
-    }
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // controlla token
     $ora = new \DateTime();
     $alunno = $em->getRepository('App:Alunno')->findOneBy(['token' => $token, 'abilitato' => 1]);

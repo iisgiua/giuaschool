@@ -95,42 +95,54 @@ class AppFixtures extends Fixture {
    * Carica i dati della configurazione di sistema
    *
    *  Dati caricati per ogni parametro:
-   *    $categoria: nome della categoria del parametro [SISTEMA|SCUOLA|ACCESSO]
-   *    $parametro: nome del parametro (deve essere univoco)
-   *    $valore: valore del parametro
+   *    $categoria: nome della categoria del parametro [valori: SISTEMA|SCUOLA|ACCESSO]
+   *    $parametro: nome del parametro [testo senza spazi, univoco]
+   *    $valore: valore del parametro [testo]
+   *    $sessione: se va memorizzato in sessione [booleano]
    *
    *  Parametri della categoria SISTEMA:
    *    versione: numero di versione dell'applicazione
-   *    manutenzione: indica una manutenzione programmata durante la quale il registro non sarà accessibile
-   *                  [testo nel formato 'AAAA-MM-GG,HH:MM,HH:MM' che indica giorno, ora inizio e ora fine]
-   *    messaggio: indica la visualizzazione del messaggio nella pagina di login del registro
-   *               [testo libero che può contenere formattazione HTML]
+   *              [testo]
+   *    manutenzione_inizio: inizio della modalità manutenzione durante la quale il registro è offline
+   *                         [formato: 'AAAA-MM-GG HH:MM']
+   *    manutenzione_fine: fine della modalità manutenzione durante la quale il registro è offline
+   *                       [formato: 'AAAA-MM-GG HH:MM']
+   *    banner_login: visualizza il messaggio nella pagina pubblica di login
+   *                  [testo HTML]
+   *    banner_home: visualizza il messaggio nella pagina home per tutti gli utenti autenticati
+   *                 [testo HTML]
    *
    *  Parametri della categoria SCUOLA:
-   *    anno_scolastico: anno scolastico corrente [testo nel formato 'AAAA-AAAA']
-   *    anno_inizio: data dell'inizio dell'anno scolastico [testo nel formato 'AAAA-MM-GG']
-   *    anno_fine: data della fine dell'anno scolastico [testo nel formato 'AAAA-MM-GG']
-   *    periodo1_nome: nome del primo periodo dell'anno scolastico (trimestri/quadrimestri/pentamestri)
-   *    periodo1_fine: data della fine del primo periodo (inizia a <anno_inizio> e finisce il giorno indicato)
-   *                   [testo nel formato 'AAAA-MM-GG']
-   *    periodo2_nome: nome del secondo periodo dell'anno scolastico (trimestri/quadrimestri/pentamestri)
-   *    periodo2_fine: data della fine del secondo periodo (inizia a <periodo1_fine>+1 e finisce il giorno indicato)
+   *    anno_scolastico: anno scolastico corrente
+   *                     [formato: 'AAAA-AAAA']
+   *    anno_inizio: data dell'inizio dell'anno scolastico
+   *                 [formato: 'AAAA-MM-GG']
+   *    anno_fine: data della fine dell'anno scolastico
+   *               [formato: 'AAAA-MM-GG']
+   *    periodo1_nome: nome del primo periodo dell'anno scolastico (primo trimestre/quadrimestre)
+   *                   [testo]
+   *    periodo1_fine: data della fine del primo periodo (da <anno_inizio> sino al giorno indicato incluso)
+   *                   [formato: 'AAAA-MM-GG']
+   *    periodo2_nome: nome del secondo periodo dell'anno scolastico (secondo trimestre/quadrimestre/pentamestre)
+   *                   [testo]
+   *    periodo2_fine: data della fine del secondo periodo (da <periodo1_fine>+1 sino al giorno indicato incluso)
    *                   (se non è usato un terzo periodo, la data dovrà essere uguale a <anno_fine>)
-   *                   [testo nel formato 'AAAA-MM-GG']
-   *    periodo3_nome: nome del terzo periodo dell'anno scolastico (trimestri/quadrimestri/pentamestri)
+   *                   [formato 'AAAA-MM-GG']
+   *    periodo3_nome: nome del terzo periodo dell'anno scolastico (terzo trimestre) o vuoto se non usato
    *                   (se è usato un terzo periodo, inizia a <periodo2_fine>+1 e finisce a <anno_fine>)
-   *                   ['' se non presente un terzo periodo, testo libero in caso contrario]
+   *                   [testo]
    *    ritardo_breve: numero di minuti per la definizione di ritardo breve (non richiede giustificazione)
-   *    mesi_colloqui: mesi dell'A.S. con i colloqui generali, lista separata da virgola dei numeri dei mese
-   *    notifica_circolari: ore di notifica giornaliera delle circolari, lista separata da virgola delle ore (formato HH)
-   *    tabelloni_quinta: cosa pubblicare sui tabelloni per gli ammessi allo scrutinio di quinta:
-   *                 [N=niente voti, T=tutti voti, V=voti suff., A=voti di alunno tutto suff.]
+   *                   [intero]
+   *    mesi_colloqui: mesi con i colloqui generali, nei quali non si può prenotare il colloquio individuale
+   *                   [lista separata da virgola dei numeri dei mesi in formato MM]
+   *    notifica_circolari: ore di notifica giornaliera delle nuove circolari
+   *                        [lista separata da virgola delle ore in formato HH]
    *
    *  Parametri della categoria ACCESSO:
    *    blocco_inizio: inizio orario del blocco di alcune modalità di accesso per i docenti
-   *                   [testo nel formato 'HH:MM', o '' se nessun blocco]
+   *                   [formato: 'HH:MM', vuoto se nessun blocco]
    *    blocco_fine: fine orario del blocco di alcune modalità di accesso per i docenti
-   *                 [testo nel formato 'HH:MM', o '' se nessun blocco]
+   *                 [formato 'HH:MM', vuoto se nessun blocco]
    *    ip_scuola: lista degli IP dei router di scuola (accerta che login provenga da dentro l'istituto)
    *               [lista di IP separata da virgole]
    *    giorni_festivi_istituto: indica i giorni festivi settimanali per l'intero istituto
@@ -151,12 +163,16 @@ class AppFixtures extends Fixture {
       ->setValore('1.3.0');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SISTEMA')
-      ->setParametro('manutenzione')
-      ->setValore('');
+      ->setParametro('manutenzione_inizio');
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SISTEMA')
-      ->setParametro('messaggio')
-      ->setValore('');
+      ->setParametro('manutenzione_fine');
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SISTEMA')
+      ->setParametro('banner_login');
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SISTEMA')
+      ->setParametro('banner_home');
     // SCUOLA
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
@@ -201,11 +217,7 @@ class AppFixtures extends Fixture {
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('notifica_circolari')
-      ->setValore('17,19');
-    $this->dati['param'][] = (new Configurazione())
-      ->setCategoria('SCUOLA')
-      ->setParametro('tabelloni_quinta')
-      ->setValore('V');
+      ->setValore('18,19,20');
     // ACCESSO
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('ACCESSO')
@@ -518,14 +530,14 @@ class AppFixtures extends Fixture {
     $manager->persist($this->dati['istituto']);
     // sedi
     $this->dati['sedi']['CA'] = (new Sede())
-      ->setNome('Sede centrale di Città')
+      ->setNome('Sede centrale')
       ->setNomeBreve('Città')
       ->setCitta('Città')
       ->setIndirizzo('Via indirizzo, 1')
       ->setTelefono('000 111111')
       ->setOrdinamento(10);
     $this->dati['sedi']['AS'] = (new Sede())
-      ->setNome('Sede staccata di Città2')
+      ->setNome('Sede staccata')
       ->setNomeBreve('Città2')
       ->setCitta('Città2')
       ->setIndirizzo('Via indirizzo2, 2')

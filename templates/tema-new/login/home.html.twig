@@ -2,6 +2,11 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
+
+  {% if app.session.get('/CONFIG/SISTEMA/banner_home') %}
+  <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_home')|raw }}</strong></div>
+  {% endif %}
+
   <div class="panel panel-info gs-mb-5">
     <div class="panel-heading gs-pt-1 gs-pb-1">
       <div class="panel-title">

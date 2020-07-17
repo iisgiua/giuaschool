@@ -63,43 +63,23 @@ class ConfigLoader {
   }
 
   /**
-   * Legge la configurazione relativa alla categoria indicata e la ricarica nella sessione
-   *
-   * @param string $categoria Categoria della configurazione
-   */
-  public function load($categoria) {
-    // rimuove la configurazione esistente
-    $this->session->remove('/CONFIG/'.$categoria);
-    if ($categoria == 'ISTITUTO') {
-      // carica dati dall'entità Istituto
-      $this->caricaIstituto();
-    } else {
-      // carica dati dall'entità Configurazione
-      $list = $this->em->getRepository('App:Configurazione')->findByCategoria($categoria);
-      foreach ($list as $item) {
-        $this->session->set('/CONFIG/'.$categoria.'/'.$item->getParametro(), $item->getValore());
-      }
-    }
-  }
-
-  /**
    * Legge tutta la configurazione e la memorizza nella sessione
    */
-  public function loadAll() {
+  public function carica() {
     // rimuove la configurazione esistente
     $this->session->remove('/CONFIG');
-    // carica dati dall'entità Configurazione
-    $list = $this->em->getRepository('App:Configurazione')->findAll();
+    // carica dati dall'entità Configurazione (/CONFIG/SISTEMA/*, /CONFIG/SCUOLA/*, /CONFIG/ACCESSO/*)
+    $list = $this->em->getRepository('App:Configurazione')->load();
     foreach ($list as $item) {
-      $this->session->set('/CONFIG/'.$item->getCategoria().'/'.$item->getParametro(), $item->getValore());
+      $this->session->set('/CONFIG/'.$item['categoria'].'/'.$item['parametro'], $item['valore']);
     }
-    // carica dati dell'utente
-    $this->caricaUtente();
-    // carica dati dall'entità Istituto
+    // carica dati dall'entità Istituto (/CONFIG/ISTITUTO/*)
     $this->caricaIstituto();
-    // carica i menu
+    // carica i menu (/CONFIG/MENU/*)
     $this->caricaMenu();
-    // carica il tema
+    // carica dati dell'utente (/APP/<tipo_utente>/*)
+    $this->caricaUtente();
+    // carica il tema (/APP/APP/*)
     $this->caricaTema();
 }
 
@@ -107,6 +87,7 @@ class ConfigLoader {
    * Carica la configurazione dall'entità Istituto
    */
   private function caricaIstituto() {
+    // carica istituto
     $istituto = $this->em->getRepository('App:Istituto')->findAll();
     if (count($istituto) > 0) {
       $this->session->set('/CONFIG/ISTITUTO/tipo', $istituto[0]->getTipo());
@@ -123,6 +104,21 @@ class ConfigLoader {
       $this->session->set('/CONFIG/ISTITUTO/email_amministratore', $istituto[0]->getEmailAmministratore());
       $this->session->set('/CONFIG/ISTITUTO/email_notifiche', $istituto[0]->getEmailNotifiche());
     }
+    // carica sedi
+    $sedi = $this->em->getRepository('App:Sede')->createQueryBuilder('s')
+      ->select('s.nome,s.nomeBreve,s.citta,s.indirizzo1,s.indirizzo2,s.telefono')
+      ->orderBy('s.ordinamento', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    $this->session->set('/CONFIG/ISTITUTO/num_sedi', count($sedi));
+    foreach ($sedi as $key=>$sede) {
+      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_nome', $sede['nome']);
+      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_nome_breve', $sede['nomeBreve']);
+      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_citta', $sede['citta']);
+      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_indirizzo1', $sede['indirizzo1']);
+      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_indirizzo2', $sede['indirizzo2']);
+      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_telefono', $sede['telefono']);
+    }
   }
 
   /**
@@ -137,23 +133,6 @@ class ConfigLoader {
       $menu = $this->em->getRepository('App:Menu')->menu($m['selettore'], $utente, $this->session);
       $this->session->set('/CONFIG/MENU/'.$m['selettore'], $menu);
     }
-  }
-
-  /**
-   * Carica il tema CSS per l'utente collegato
-   */
-  private function caricaTema() {
-    $tema = '';
-    // legge impostazione tema dell'utente connesso
-    $utente = $this->security->getUser();
-    //-- if ($utente && ($utente instanceOf Amministratore ||
-        //-- (isset($utente->getNotifica()['tema']) && $utente->getNotifica()['tema'] == 'new'))) {
-    if ($utente && ($utente instanceOf Amministratore)) {
-      // imposta il nuovo tema
-      $tema = 'tema-new';
-    }
-    // imposta tema
-    $this->session->set('/APP/APP/tema', $tema);
   }
 
   /**
@@ -173,6 +152,23 @@ class ConfigLoader {
       $lista = implode(',', array_column($classi, 'id'));
       $this->session->set('/APP/DOCENTE/coordinatore', $lista);
     }
+  }
+
+  /**
+   * Carica il tema CSS per l'utente collegato
+   */
+  private function caricaTema() {
+    $tema = '';
+    // legge impostazione tema dell'utente connesso
+    $utente = $this->security->getUser();
+    //-- if ($utente && ($utente instanceOf Amministratore ||
+        //-- (isset($utente->getNotifica()['tema']) && $utente->getNotifica()['tema'] == 'new'))) {
+    if ($utente && ($utente instanceOf Amministratore)) {
+      // imposta il nuovo tema
+      $tema = 'tema-new';
+    }
+    // imposta tema
+    $this->session->set('/APP/APP/tema', $tema);
   }
 
 }

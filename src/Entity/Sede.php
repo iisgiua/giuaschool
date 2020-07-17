@@ -80,14 +80,24 @@ class Sede {
   private $citta;
 
   /**
-   * @var string $indirizzo Indirizzo della sede scolastica
+   * @var string $indirizzo1 Prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $indirizzo;
+  private $indirizzo1;
+
+  /**
+   * @var string $indirizzo2 Seconda riga per l'indirizzo della sede scolastica (cap/città)
+   *
+   * @ORM\Column(type="string", length=64, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
+   */
+  private $indirizzo2;
 
   /**
    * @var string $telefono Numero di telefono della sede scolastica
@@ -206,23 +216,44 @@ class Sede {
   }
 
   /**
-   * Restituisce l'indirizzo della sede scolastica
+   * Restituisce la prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
-   * @return string Indirizzo della sede scolastica
+   * @return string Prima riga per l'indirizzo della sede scolastica (via/num.civico)
    */
-  public function getIndirizzo() {
-    return $this->indirizzo;
+  public function getIndirizzo1() {
+    return $this->indirizzo1;
   }
 
   /**
-   * Modifica l'indirizzo della sede scolastica
+   * Modifica la prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
-   * @param string $indirizzo Indirizzo della sede scolastica
+   * @param string $indirizzo1 Prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
    * @return Sede Oggetto Sede
    */
-  public function setIndirizzo($indirizzo) {
-    $this->indirizzo = $indirizzo;
+  public function setIndirizzo1($indirizzo1) {
+    $this->indirizzo1 = $indirizzo1;
+    return $this;
+  }
+
+  /**
+   * Restituisce la seconda riga per l'indirizzo della sede scolastica (cap/città)
+   *
+   * @return string Seconda riga per l'indirizzo della sede scolastica (cap/città)
+   */
+  public function getIndirizzo2() {
+    return $this->indirizzo2;
+  }
+
+  /**
+   * Modifica la seconda riga per l'indirizzo della sede scolastica (cap/città)
+   *
+   * @param string $indirizzo2 Seconda riga per l'indirizzo della sede scolastica (cap/città)
+   *
+   * @return Sede Oggetto Sede
+   */
+  public function setIndirizzo2($indirizzo2) {
+    $this->indirizzo2 = $indirizzo2;
     return $this;
   }
 

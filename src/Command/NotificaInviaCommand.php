@@ -100,7 +100,7 @@ class NotificaInviaCommand extends Command {
     $this->config = $config;
     $this->logger = $logger;
     // carica configurazione
-    $this->config->loadAll();
+    $this->config->carica();
   }
 
   /**

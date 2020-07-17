@@ -72,26 +72,14 @@ class AppController extends AbstractController {
    */
   public function loginAction(SessionInterface $session,  AuthenticationUtils $auth, ConfigLoader $config, $codice, $lusr, $lpsw, $lapp) {
     $errore = null;
-    $manutenzione = null;
-    $modo_manutenzione = false;
     // carica configurazione di sistema
-    $config->loadAll();
-    // controlla manutenzione programmata
-    $dati_manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if (!empty($dati_manutenzione)) {
-      // manutenzione programmata
-      $dati = explode(',', $dati_manutenzione);
-      $ora = new \DateTime();
-      if ($ora->format('Y-m-d') == $dati[0] && $ora->format('H:i') < $dati[1]) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      } elseif ($ora->format('Y-m-d') == $dati[0] && $ora->format('H:i') <= $dati[2]) {
-        // in modalità manutenzione
-        $manutenzione = $dati;
-        $modo_manutenzione = true;
-      }
-    }
-    if (!$modo_manutenzione) {
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    if (!$manutenzione) {
       // conserva ultimo errore del login, se presente
       $errore = $auth->getLastAuthenticationError();
     }
@@ -157,7 +145,7 @@ class AppController extends AbstractController {
   public function infoAction(EntityManagerInterface $em, ConfigLoader $config) {
     $applist = array();
     // carica configurazione di sistema
-    $config->loadAll();
+    $config->carica();
     // legge app abilitate
     $apps = $em->getRepository('App:App')->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
@@ -185,7 +173,7 @@ class AppController extends AbstractController {
    */
   public function downloadAction(EntityManagerInterface $em, ConfigLoader $config, $id) {
     // carica configurazione di sistema
-    $config->loadAll();
+    $config->carica();
     // controllo app
     $app = $em->getRepository('App:App')->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
@@ -223,26 +211,14 @@ class AppController extends AbstractController {
                                   UserPasswordEncoderInterface $encoder, TranslatorInterface $trans, ConfigLoader $config, LoggerInterface $logger,
                                   LogHandler $dblogger, $token, $chat) {
     $successo = null;
-    $manutenzione = null;
-    $modo_manutenzione = false;
     // carica configurazione di sistema
-    $config->loadAll();
-    // controlla manutenzione programmata
-    $dati_manutenzione = $session->get('/CONFIG/SISTEMA/manutenzione');
-    if (!empty($dati_manutenzione)) {
-      // manutenzione programmata
-      $dati = explode(',', $dati_manutenzione);
-      $ora = new \DateTime();
-      if ($ora->format('Y-m-d') == $dati[0] && $ora->format('H:i') < $dati[1]) {
-        // manutenzione programmata per oggi
-        $manutenzione = $dati;
-      } elseif ($ora->format('Y-m-d') == $dati[0] && $ora->format('H:i') <= $dati[2]) {
-        // in modalità manutenzione
-        $manutenzione = $dati;
-        $modo_manutenzione = true;
-      }
-    }
-    if (!$modo_manutenzione) {
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    if (!$manutenzione) {
       // crea form
       $form = $this->container->get('form.factory')->createNamedBuilder('app_telegram', FormType::class)
         ->add('username', TextType::class, array('label' => 'label.username',
@@ -348,7 +324,6 @@ class AppController extends AbstractController {
       'form' => $form->createView(),
       'successo' => $successo,
       'manutenzione' => $manutenzione,
-      'modo_manutenzione' => $modo_manutenzione,
       ));
   }
 

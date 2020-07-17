@@ -179,6 +179,14 @@ class Configurazione {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->valore = '';
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
@@ -188,4 +196,3 @@ class Configurazione {
   }
 
 }
-

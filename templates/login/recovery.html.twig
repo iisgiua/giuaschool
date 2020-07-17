@@ -2,16 +2,20 @@
 
 {% block pagina_contenuto %}
 <div class="container_fluid gs-mt-0">
-  {% if manutenzione is not empty and 'now'|date('H:i') <= manutenzione[2] %}
+  {% if manutenzione or 'now'|date('Y-m-d H:i') <= app.session.get('/CONFIG/SISTEMA/manutenzione_inizio') %}
   <div class="col-sm-12 bg-danger gs-mb-4 text-center">
     <h1 class="gs-h2">ATTENZIONE</h1>
     <p>
-      <span class="gs-big">A causa di una manutenzione programmata del sistema informatico, il registro elettronico non sarà disponibile
-      <strong>dalle ore {{ manutenzione[1] }} alle ore {{ manutenzione[2] }}</strong>.</span>
+      <span class="gs-big">A causa di una manutenzione programmata del sistema informatico,<br>
+        il registro elettronico non sarà disponibile
+        <strong>dalle ore {{ app.session.get('/CONFIG/SISTEMA/manutenzione_inizio')|date('H:i') }} del {{ app.session.get('/CONFIG/SISTEMA/manutenzione_inizio')|date('d/m/Y') }}
+        alle ore {{ app.session.get('/CONFIG/SISTEMA/manutenzione_fine')|date('H:i') }} del {{ app.session.get('/CONFIG/SISTEMA/manutenzione_fine')|date('d/m/Y') }}
+        </strong>.
+      </span>
     </p>
   </div>
   {% endif %}
-  {% if manutenzione is empty or 'now'|date('H:i') < manutenzione[1] or 'now'|date('H:i') > manutenzione[2] %}
+  {% if not manutenzione %}
   <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4">
     <div class="panel panel-primary" >
       <div class="panel-heading">

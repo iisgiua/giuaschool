@@ -100,7 +100,7 @@ class NotificaPreparaCommand extends Command {
     $this->config = $config;
     $this->logger = $logger;
     // carica configurazione
-    $this->config->loadAll();
+    $this->config->carica();
   }
 
   /**
@@ -232,7 +232,7 @@ class NotificaPreparaCommand extends Command {
   private function creaMessaggi($dati) {
     $num = 0;
     // controlla se è attiva la notifica delle circolari
-    $notifica_circolari = $this->em->getRepository('App:Configurazione')->parametro('notifica_circolari');
+    $notifica_circolari = $this->em->getRepository('App:Configurazione')->getParametro('notifica_circolari', []);
     $ora_notifica = explode(',', $notifica_circolari);
     $adesso = new \DateTime();
     $attiva_notifica_circolari = in_array($adesso->format('H'), $ora_notifica, true);

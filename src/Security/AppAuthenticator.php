@@ -298,7 +298,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       'appId' => $appId,
       ));
     // carica configurazione
-    $this->config->loadAll();
+    $this->config->carica();
     // redirect alla pagina da visualizzare
     return new RedirectResponse($url);
   }

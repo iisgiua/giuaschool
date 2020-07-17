@@ -316,47 +316,49 @@ class ProcedureController extends AbstractController {
   public function manutenzioneAction(Request $request, EntityManagerInterface $em) {
     $dati = null;
     // legge manutenzione
-    $config = $em->getRepository('App:Configurazione')->findOneByParametro('manutenzione');
-    if ($config) {
-      // manutenzione programmata
-      $dati = explode(',', $config->getValore());
-    } else {
-      // crea nuova configurazione
-      $config = (new Configurazione())
-        ->setParametro('manutenzione')
-        ->setValore('')
-        ->setCategoria('SISTEMA');
-      $em->persist($config);
-    }
-    //crea valori per form
-    $manutenzione = true;
-    if (empty($dati) || count($dati) < 3) {
+    $param_inizio = $em->getRepository('App:Configurazione')->findOneByParametro('manutenzione_inizio');
+    $param_fine = $em->getRepository('App:Configurazione')->findOneByParametro('manutenzione_fine');
+    if (empty($param_inizio->getValore())) {
+      // non è impostata una manutenzione
       $manutenzione = false;
-      $adesso = new \DateTime();
-      $dati[0] = $adesso->format('Y-m-d');
-      $dati[1] = $adesso->format('H:i');
-      $dati[2] = $adesso->modify('+30 minutes')->format('H:i');
+      $inizio = new \DateTime();
+      $inizio->modify('+'.(10 - $inizio->format('i') % 10).' minutes');
+    } else {
+      // è già impostata una manutenzione
+      $manutenzione = true;
+      $inizio = \DateTime::createFromFormat('Y-m-d H:i', $param_inizio->getValore());
     }
-    $manu[0] = \DateTime::createFromFormat('Y-m-d', $dati[0]);
-    $manu[1] = \DateTime::createFromFormat('H:i', $dati[1]);
-    $manu[2] = \DateTime::createFromFormat('H:i', $dati[2]);
+    if (empty($param_fine->getValore())) {
+      // non è impostata una fine per la manutenzione
+      $fine = (clone $inizio)->modify('+30 minutes');
+    } else {
+      // è già impostata una fine per la manutenzione
+      $fine = \DateTime::createFromFormat('Y-m-d H:i', $param_fine->getValore());
+    }
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('procedure_manutenzione', FormType::class)
-      ->add('data', DateType::class, array('label' => 'label.data',
-        'data' => $manu[0],
+      ->add('data_inizio', DateType::class, array('label' => 'label.data_inizio',
+        'data' => $inizio,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'format' => 'dd/MM/yyyy',
         'required' => true))
-      ->add('inizio', TimeType::class, array('label' => 'label.ora_inizio',
-        'data' => $manu[1],
+      ->add('ora_inizio', TimeType::class, array('label' => 'label.ora_inizio',
+        'data' => $inizio,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'required' => true))
-      ->add('fine', TimeType::class, array('label' => 'label.ora_fine',
-        'data' => $manu[2],
+      ->add('data_fine', DateType::class, array('label' => 'label.data_fine',
+        'data' => $fine,
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-picker'],
+        'format' => 'dd/MM/yyyy',
+        'required' => true))
+      ->add('ora_fine', TimeType::class, array('label' => 'label.ora_fine',
+        'data' => $fine,
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
@@ -378,13 +380,20 @@ class ProcedureController extends AbstractController {
       // form inviato
       if ($manutenzione && $form->get('delete')->isClicked()) {
         // cancella manutenzione
-        $em->remove($config);
+        $param_inizio->setValore('');
+        $param_fine->setValore('');
       } else {
         // imposta manutenzione
-        $dati[0] = $form->get('data')->getData()->format('Y-m-d');
-        $dati[1] = $form->get('inizio')->getData()->format('H:i');
-        $dati[2] = $form->get('fine')->getData()->format('H:i');
-        $config->setValore(implode(',', $dati));
+        $param_inizio->setValore($form->get('data_inizio')->getData()->format('Y-m-d').' '.
+          $form->get('ora_inizio')->getData()->format('H:i'));
+        $param_fine->setValore($form->get('data_fine')->getData()->format('Y-m-d').' '.
+          $form->get('ora_fine')->getData()->format('H:i'));
+        if ($param_inizio->getValore() > $param_fine->getValore()) {
+          // inverte l'ordine
+          $temp = $param_inizio->getValore();
+          $param_inizio->setValore($param_fine->getValore());
+          $param_fine->setValore($temp);
+        }
       }
       // ok: memorizza dati
       $em->flush();
