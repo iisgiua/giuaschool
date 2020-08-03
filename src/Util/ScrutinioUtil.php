@@ -2735,8 +2735,8 @@ class ScrutinioUtil {
     $altri_festivi = explode(',', $this->session->get('/CONFIG/ACCESSO/giorni_festivi_classi'));
     foreach($altri_festivi  as $f) {
       // formato <settimana>:<classe_anno><classe_sezione>
-      if (strlen($f) > 0 && $classe->getAnno() == $f{2} && $classe->getSezione() == $f{3}) {
-        $giorni_settimana[] = $f{0};
+      if (strlen($f) > 0 && $classe->getAnno() == $f[2] && $classe->getSezione() == $f[3]) {
+        $giorni_settimana[] = $f[0];
       }
     }
     // lezioni

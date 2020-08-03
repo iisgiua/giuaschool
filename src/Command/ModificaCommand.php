@@ -131,7 +131,7 @@ class ModificaCommand extends Command {
   protected function interact(InputInterface $input, OutputInterface $output) {
     // controlla classe
     $classe = $input->getArgument('classe');
-    if ($classe && (strlen($classe) != 2 || $classe{0} < '1' || $classe{0} > '5' || $classe{1} < 'A' || $classe{1} > 'Z'))  {
+    if ($classe && (strlen($classe) != 2 || $classe[0] < '1' || $classe[0] > '5' || $classe[1] < 'A' || $classe[1] > 'Z'))  {
       // errore
       throw new InvalidArgumentException('Classe non valida.');
     }
@@ -155,7 +155,7 @@ class ModificaCommand extends Command {
 
     // verbale
     $classe_par = $input->getArgument('classe');
-    $classe = $this->em->getRepository('App:Classe')->findOneBy(['anno' => $classe_par{0}, 'sezione' => $classe_par{1}]);
+    $classe = $this->em->getRepository('App:Classe')->findOneBy(['anno' => $classe_par[0], 'sezione' => $classe_par[1]]);
     if (!$classe) {
       // errore
       throw new InvalidArgumentException('Classe non valida.');

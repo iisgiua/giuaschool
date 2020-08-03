@@ -306,8 +306,8 @@ class CsvImporter {
       $docente = $lista[0];
       // controlla esistenza di classe
       $lista = $this->em->getRepository('App:Classe')->findBy(array(
-        'anno' => $fields['classe']{0},
-        'sezione' => $fields['classe']{1}));
+        'anno' => $fields['classe'][0],
+        'sezione' => $fields['classe'][1]));
       if (count($lista) != 1 || strlen($fields['classe']) != 2) {
         // errore: classe
         fclose($this->fh);
@@ -579,8 +579,8 @@ class CsvImporter {
         } else {
           // classe esistente
           $lista = $this->em->getRepository('App:Classe')->findBy(array(
-            'anno' => $fields['classe']{0},
-            'sezione' => $fields['classe']{1}));
+            'anno' => $fields['classe'][0],
+            'sezione' => $fields['classe'][1]));
           if (count($lista) != 1) {
             // errore: classe
             fclose($this->fh);
@@ -1140,8 +1140,8 @@ class CsvImporter {
       $classe = null;
       if ($fields['classe'] != '---') {
         $lista = $this->em->getRepository('App:Classe')->findBy(array(
-          'anno' => $fields['classe']{0},
-          'sezione' => $fields['classe']{1}));
+          'anno' => $fields['classe'][0],
+          'sezione' => $fields['classe'][1]));
         if (count($lista) != 1 || strlen($fields['classe']) != 2) {
           // errore: classe
           fclose($this->fh);
