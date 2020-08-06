@@ -3,8 +3,11 @@
   <li class="dropdown{{ attivo is defined and attivo == 'sistema' ? ' active' }}">
     <a href="#" title="Configurazione del sistema" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sistema</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">
-      <li role="presentation" class="disabled"><a href="#" title="Impostazione dei parametri di configurazione">Configurazione</a></li>
-      <li role="presentation" class="disabled"><a href="#" title="Impostazione degli utenti amministratori">Amministratori</a></li>
+      <li role="presentation"{{ app.request.attributes.get('_route') == 'sistema_alias' ? ' class="active"' }}><a href="{{ path('sistema_alias') }}" title="Assumi l'identità di un altro utente">Alias</a></li>
+      <li role="presentation"{{ app.request.attributes.get('_route') == 'sistema_password' ? ' class="active"' }}><a href="{{ path('sistema_password') }}" title="Cambia la password di qualunque utente">Password</a></li>
+      {#-- <li role="presentation"{{ app.request.attributes.get('_route') == 'sistema_ricalcola' ? ' class="active"' }}><a href="{{ path('sistema_ricalcola') }}" title="Ricolcola le ore di assenza degli alunni">Ricalcola assenze</a></li> #}
+      <li role="presentation"{{ app.request.attributes.get('_route') == 'sistema_manutenzione' ? ' class="active"' }}><a href="{{ path('sistema_manutenzione') }}" title="Gestisce la modalità di manutenzione del sito">Manutenzione</a></li>
+      <li role="presentation"{{ app.request.attributes.get('_route') == 'sistema_archiviazione' ? ' class="active"' }}><a href="{{ path('sistema_archiviazione') }}" title="Gestisce l'archiviazione dei registri">Archiviazione</a></li>
     </ul>
   </li>
   <li class="dropdown{{ attivo is defined and attivo == 'scuola' ? ' active' }}">
@@ -44,16 +47,6 @@
       <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,15) == 'alunni_modifica' ? ' class="active"' }}><a href="{{ path('alunni_modifica') }}" title="Modifica i dati degli alunni">Modifica</a></li>
       <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,13) == 'alunni_classe' ? ' class="active"' }}><a href="{{ path('alunni_classe') }}" title="Gestione del cambio di classe degli alunni">Cambio classe</a></li>
       <li role="presentation"{{ app.request.attributes.get('_route')|slice(0,15) == 'alunni_password' ? ' class="active"' }}><a href="{{ path('alunni_password') }}" title="Genera una nuova password per gli alunni">Genera Password</a></li>
-    </ul>
-  </li>
-  <li class="dropdown{{ attivo is defined and attivo == 'procedure' ? ' active' }}">
-    <a href="#" title="Procedure generali di sistema" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Procedure</a>
-    <ul role="menu" class="dropdown-menu gs-dropdown-menu">
-      <li role="presentation"{{ app.request.attributes.get('_route') == 'procedure_alias' ? ' class="active"' }}><a href="{{ path('procedure_alias') }}" title="Assumi l'identità di un altro utente">Alias</a></li>
-      <li role="presentation"{{ app.request.attributes.get('_route') == 'procedure_password' ? ' class="active"' }}><a href="{{ path('procedure_password') }}" title="Cambia la password di qualunque utente">Password</a></li>
-      <li role="presentation"{{ app.request.attributes.get('_route') == 'procedure_ricalcola' ? ' class="active"' }}><a href="{{ path('procedure_ricalcola') }}" title="Ricolcola le ore di assenza degli alunni">Ricalcola assenze</a></li>
-      <li role="presentation"{{ app.request.attributes.get('_route') == 'procedure_manutenzione' ? ' class="active"' }}><a href="{{ path('procedure_manutenzione') }}" title="Gestisce la modalità di manutenzione del sito">Manutenzione</a></li>
-      <li role="presentation"{{ app.request.attributes.get('_route') == 'procedure_archiviazione' ? ' class="active"' }}><a href="{{ path('procedure_archiviazione') }}" title="Gestisce l'archiviazione dei registri">Archiviazione</a></li>
     </ul>
   </li>
 </ul>
