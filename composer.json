@@ -33,6 +33,8 @@
         "symfony/validator": "4.4.*",
         "symfony/web-link": "4.4.*",
         "symfony/yaml": "4.4.*",
+        "twig/extra-bundle": "^3.0",
+        "twig/intl-extra": "^3.0",
         "whiteoctober/tcpdf-bundle": "^1.1"
     },
     "require-dev": {

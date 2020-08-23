@@ -616,6 +616,12 @@
     "tecnickcom/tcpdf": {
         "version": "6.2.26"
     },
+    "twig/extra-bundle": {
+        "version": "v3.0.5"
+    },
+    "twig/intl-extra": {
+        "version": "v3.0.5"
+    },
     "twig/twig": {
         "version": "v2.11.3"
     },
