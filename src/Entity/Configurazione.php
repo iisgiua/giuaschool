@@ -60,7 +60,7 @@ class Configurazione {
   /**
    * @var string $parametro Parametro della configurazione
    *
-   * @ORM\Column(length=64, unique=true, nullable=false)
+   * @ORM\Column(type="string", length=64, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
@@ -68,14 +68,29 @@ class Configurazione {
   private $parametro;
 
   /**
+  * @var string $descrizione Descrizione dell'utilizzo del parametro
+   *
+   * @ORM\Column(type="string", length=1024, nullable=true)
+   *
+   * @Assert\Length(max=1024,maxMessage="field.maxlength")
+   */
+  private $descrizione;
+
+  /**
    * @var string $valore Valore della configurazione
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
   private $valore;
+
+  /**
+  * @var boolean $gestito Indica se il parametro viene gestito da una procedura apposita
+   *
+   * @ORM\Column(type="boolean", nullable=false)
+   */
+  private $gestito;
 
 
   //==================== EVENTI ORM ====================
@@ -155,6 +170,27 @@ class Configurazione {
   }
 
   /**
+   * Restituisce la descrizione dell'utilizzo del parametro
+   *
+   * @return string Descrizione dell'utilizzo del parametro
+   */
+  public function getDescrizione() {
+    return $this->descrizione;
+  }
+
+  /**
+   * Modifica la descrizione dell'utilizzo del parametro
+   *
+   * @param string $descrizione Descrizione dell'utilizzo del parametro
+   *
+   * @return Configurazione Oggetto Configurazione
+   */
+  public function setDescrizione($descrizione) {
+    $this->descrizione = $descrizione;
+    return $this;
+  }
+
+  /**
    * Restituisce il valore della configurazione
    *
    * @return string Valore della configurazione
@@ -175,6 +211,26 @@ class Configurazione {
     return $this;
   }
 
+  /**
+   * Restituisce se il parametro viene gestito da una procedura apposita o no
+   *
+   * @return boolean Indica se il parametro viene gestito da una procedura apposita
+   */
+  public function getGestito() {
+    return $this->gestito;
+  }
+
+  /**
+   * Modifica se il parametro viene gestito da una procedura apposita o no
+   *
+   * @param boolean $gestito Indica se il parametro viene gestito da una procedura apposita
+   *
+   * @return Configurazione Oggetto Configurazione
+   */
+  public function setGestito($gestito) {
+    $this->gestito = $gestito;
+    return $this;
+  }
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -184,6 +240,7 @@ class Configurazione {
   public function __construct() {
     // valori predefiniti
     $this->valore = '';
+    $this->gestito = false;
   }
 
   /**

@@ -1,0 +1,136 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('tema-new/include/filtro.html.twig', {form: form[0]}) }}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="margin-top:-2.5rem">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.cognome'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.nome'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.data_nascita'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.bes'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.classe'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for u in dati.lista %}
+        <tr{% if not u.alunno.abilitato %} class="table-danger"{% endif %}>
+          <td>
+    {% if u.alunno.abilitato %}
+            <span title="{{ 'label.utente_attivo'|trans }}">
+              <svg class="icon icon-xs icon-success" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
+              </svg>
+            </span>
+    {% else %}
+            <span title="{{ 'label.utente_disabilitato'|trans }}">
+              <svg class="icon icon-sm icon-danger" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#ban"></use>
+              </svg>
+            </span>
+    {% endif %}
+          </td>
+          <td><small>{{ u.alunno.cognome }}</small></td>
+          <td><small>{{ u.alunno.nome }}</small></td>
+          <td><small>{{ u.alunno.dataNascita|date('d/m/Y') }}</small></td>
+          <td><small>{{ ('label.bes_'~u.alunno.bes)|trans }}</small></td>
+          <td><small>{{ u.alunno.classe ? u.alunno.classe.anno~'ª '~u.alunno.classe.sezione }}</small></td>
+          <td class="pb-0">
+            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ u.alunno.cognome }} {{ u.alunno.nome }}" data-cont-id="info-utente-{{ u.alunno.id }}">{{ 'label.show'|trans }}</button>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_modifica_edit', {'id': u.alunno.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 0}) }}" role="button" title="Genera una nuova password e la invia all'alunno">{{ 'label.password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 1}) }}" role="button" title="Genera una nuova password e la invia al genitore">{{ 'label.password_genitore'|trans }}</a>
+    {% if u.alunno.abilitato %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('alunni_abilita', {'id': u.alunno.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
+    {% else %}
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('alunni_abilita', {'id': u.alunno.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
+    {% endif %}
+            <div class="d-none" id="info-utente-{{ u.alunno.id }}">
+              <dl class="row">
+                <dt class="col-sm-3">{{ 'label.username'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.username }}<br><strong>Genitore: {{ u.username }}</strong></dd>
+                <dt class="col-sm-3">{{ 'label.email'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.email }}<br><strong>Genitore: {{ u.email }}</strong></dd>
+                <dt class="col-sm-3">{{ 'label.ultimo_accesso'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.ultimoAccesso ? (u.alunno.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}<br>
+                  <strong>Genitore: {{ u.ultimoAccesso ? (u.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</strong>
+                </dd>
+                <dt class="col-sm-3">{{ 'label.cognome'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.cognome }}</dd>
+                <dt class="col-sm-3">{{ 'label.nome'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.nome }}</dd>
+                <dt class="col-sm-3">{{ 'label.sesso'|trans }}</dt>
+                <dd class="col-sm-9">{{ (u.alunno.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
+                <dt class="col-sm-3">{{ 'label.data_nascita'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.dataNascita|date('d/m/Y') }}</dd>
+                <dt class="col-sm-3">{{ 'label.comune_nascita'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.comuneNascita }}</dd>
+                <dt class="col-sm-3">{{ 'label.codice_fiscale'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.codiceFiscale }}</dd>
+                <dt class="col-sm-3">{{ 'label.indirizzo'|trans }}</dt>
+                <dd class="col-sm-9">{{ (u.alunno.citta and u.alunno.indirizzo) ? u.alunno.indirizzo~' - '~u.alunno.citta }}</dd>
+                <dt class="col-sm-3">{{ 'label.numeri_telefono'|trans }}</dt>
+                <dd class="col-sm-9">{% for t in u.alunno.numeriTelefono %}{{ t }}{{ not loop.last ? ', ' }}{% endfor %}</dd>
+                <dt class="col-sm-3">{{ 'label.religione'|trans }}</dt>
+                <dd class="col-sm-9">{{ ('label.religione_'~u.alunno.religione)|trans }}</dd>
+                <dt class="col-sm-3">{{ 'label.bes'|trans }}</dt>
+                <dd class="col-sm-9">{{ ('label.bes_'~u.alunno.bes)|trans }}</dd>
+                <dt class="col-sm-3">{{ 'label.note_bes'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.noteBes|raw }}</dd>
+                <dt class="col-sm-3">{{ 'label.autorizza_entrata'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.autorizzaEntrata }}</dd>
+                <dt class="col-sm-3">{{ 'label.autorizza_uscita'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.autorizzaUscita }}</dd>
+                <dt class="col-sm-3">{{ 'label.note'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.note|raw }}</dd>
+                <dt class="col-sm-3">{{ 'label.frequenza_estero'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.frequenzaEstero ? 'Si' : 'No' }}</dd>
+                <dt class="col-sm-3">{{ 'label.credito3'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.credito3 }}</dd>
+                <dt class="col-sm-3">{{ 'label.credito4'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.credito4 }}</dd>
+                <dt class="col-sm-3">{{ 'label.classe'|trans }}</dt>
+                <dd class="col-sm-9">{{ u.alunno.classe ? u.alunno.classe.anno~'ª '~u.alunno.classe.sezione }}</dd>
+              </dl>
+            </div>
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="7">
+            <a class="btn btn-primary btn-sm" href="{{ path('alunni_modifica_edit') }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {{ include('tema-new/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_modifica'}) }}
+  {{ include('tema-new/include/modal-info.html.twig') }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/thfloat.html.twig') }}
+<script>
+$(document).ready(function() {
+  $("#gs-paginazione").on("submit", function() {
+    var p = $("#jumpToPage").val();
+    window.location.href = "{{ path('alunni_modifica') }}/"+p;
+    return false;
+  });
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $('#'+$(e.relatedTarget).data('cont-id')).html();
+    $(this).find('#gs-modal-info-titolo').html(titolo);
+    $(this).find('#gs-modal-info-contenuto').html(contenuto);
+  });
+});
+</script>
+{% endblock %}

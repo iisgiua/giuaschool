@@ -2,8 +2,8 @@
 
 {% block pagina_contenuto %}
 <div class="container_fluid gs-mt-0">
-  {% if app.session.get('/CONFIG/SISTEMA/banner_home') %}
-  <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_home')|raw }}</strong></div>
+  {% if app.session.get('/CONFIG/SISTEMA/banner_login') %}
+  <div class="alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_login')|raw }}</strong></div>
   {% endif %}
 
   {% if manutenzione or 'now'|date('Y-m-d H:i') <= app.session.get('/CONFIG/SISTEMA/manutenzione_inizio') %}

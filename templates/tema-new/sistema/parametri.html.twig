@@ -1,0 +1,44 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% form_theme form[0] with 'tema-new/layout-form.html.twig' only %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% if form[0].vars.submitted and form[0].vars.valid %}
+  <div class="alert alert-success" role="alert">{{ 'message.update_ok'|trans }}</div>
+  {% elseif form[0].vars.submitted and not form[0].vars.valid and form[0].vars.errors|length == 0 %}
+  <div class="alert alert-danger" role="alert">{{ 'exception.update_errors'|trans }}</div>
+  {% endif %}
+  <div class="card-wrapper card-space">
+    <div class="card border rounded card-bg">
+  {% if form[1] %}
+      <div class="card-header bg-secondary text-white">{{ form[1]|trans|raw  }}</div>
+  {% endif %}
+      <div class="card-body">
+        {{ form_start(form[0]) }}
+          {{ form_errors(form[0]) }}
+  {% set cat = '' %}
+  {% for p in form[0].parametri %}
+    {% if cat != p.categoria.vars.value %}
+      {% set cat = p.categoria.vars.value %}
+          <h3 class="text-center mb-5">Categoria: {{ p.categoria.vars.value }}</h3>
+    {% endif %}
+          <div class="form-group">
+            {{ form_label(p.valore, null, {label: 'Parametro: ' ~ p.parametro.vars.value, translation_domain: false}) }}
+            {{ form_widget(p.valore, {attr: {'aria-describedby': p.valore.vars.id ~ '_help'}}) }}
+    {% if not p.valore.vars.valid %}
+            {{ form_errors(p.valore) }}
+    {% else %}
+            <div id="{{ p.valore.vars.id }}_help" class="form-text text-muted">{{ p.descrizione.vars.value|raw }}</div>
+    {% endif %}
+          </div>
+  {% endfor %}
+          {{ form_row(form[0].submit) }}
+          {{ form_widget(form[0]._token) }}
+        {{ form_end(form[0], {render_rest: false}) }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('tema-new/include/filtro.html.twig', {form: form[0]}) }}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="margin-top:-2.5rem">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.classe'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.materia'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.docente'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.tipo'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for c in dati.lista %}
+        <tr{% if not c.attiva %} class="table-danger"{% endif %}>
+          <td>
+    {% if c.attiva %}
+            <span title="{{ 'label.cattedra_attiva'|trans }}">
+              <svg class="icon icon-xs icon-success" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
+              </svg>
+            </span>
+    {% else %}
+            <span title="{{ 'label.cattedra_disabilitata'|trans }}">
+              <svg class="icon icon-sm icon-danger" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#ban"></use>
+              </svg>
+            </span>
+    {% endif %}
+          </td>
+          <td><small>{{ c.classe.anno }}ª {{ c.classe.sezione }}</small></td>
+          <td><small>{{ c.materia.nomeBreve }}</small></td>
+          <td><small>{{ c.docente.cognome }} {{ c.docente.nome }} ({{ c.docente.username }})</small></td>
+          <td><small>{{ ('label.tipo_'~c.tipo)|trans }}{{ c.supplenza ? ' (supplenza)' }}</small></td>
+          <td class="pb-0">
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_cattedre_edit', {'id': c.id}) }}" role="button" title="Modifica i dati della cattedra">{{ 'label.edit'|trans }}</a>
+    {% if c.attiva %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('docenti_cattedre_abilita', {'id': c.id, 'abilita': 0}) }}" role="button" title="Disabilita la cattedra">{{ 'label.disable'|trans }}</a>
+    {% else %}
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('docenti_cattedre_abilita', {'id': c.id, 'abilita': 1}) }}" role="button" title="Abilita la cattedra">{{ 'label.enable'|trans }}</a>
+    {% endif %}
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6">
+            <a class="btn btn-primary btn-sm" href="{{ path('docenti_cattedre_edit', {id: 0}) }}" role="button" title="Nuova cattedra">{{ 'label.add'|trans }}</a>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {{ include('tema-new/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_cattedre'}) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/thfloat.html.twig') }}
+<script>
+$(document).ready(function() {
+  $("#gs-paginazione").on("submit", function() {
+    var p = $("#jumpToPage").val();
+    window.location.href = "{{ path('docenti_cattedre') }}/"+p;
+    return false;
+  });
+});
+</script>
+{% endblock %}

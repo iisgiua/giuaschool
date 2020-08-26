@@ -62,6 +62,13 @@ class StoricoVoto {
   private $carenze;
 
   /**
+   * @var array $dati Dati aggiuntivi sulla valutazione
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $dati;
+
+  /**
    * @var StoricoEsito $storicoEsito Esito dello storico a cui si riferisce il voto
    *
    * @ORM\ManyToOne(targetEntity="StoricoEsito")
@@ -159,6 +166,31 @@ class StoricoVoto {
   }
 
   /**
+   * Restituisce i dati aggiuntivi sulla valutazione
+   *
+   * @return array Dati aggiuntivi sulla valutazione
+   */
+  public function getDati() {
+    return $this->dati;
+  }
+
+  /**
+   * Modifica i dati aggiuntivi sulla valutazione
+   *
+   * @param array $dati Dati aggiuntivi sulla valutazione
+   *
+   * @return StoricoVoto Oggetto modificato
+   */
+  public function setDati($dati) {
+    if ($dati === $this->dati) {
+      // clona array per forzare update su doctrine
+      $dati = unserialize(serialize($dati));
+    }
+    $this->dati = $dati;
+    return $this;
+  }
+
+  /**
    * Restituisce l'esito dello storico a cui si riferisce il voto
    *
    * @return StoricoEsito Esito dello storico a cui si riferisce il voto
@@ -202,6 +234,14 @@ class StoricoVoto {
 
 
   //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->dati = array();
+  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo

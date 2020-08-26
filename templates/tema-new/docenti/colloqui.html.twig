@@ -1,0 +1,71 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('tema-new/include/filtro.html.twig', {form: form[0]}) }}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="margin-top:-2.5rem">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          <th class="col-auto" scope="col">{{ 'label.sede'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.docente'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.colloquio'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for c in dati.lista %}
+        <tr>
+          <td><small>{{ c.sede }}</small></td>
+          <td><small>{{ c.docente }}</small></td>
+          <td>
+            <small>
+    {% if c.colloquio.frequenza == 'S' %}
+              Ogni
+    {% elseif c.colloquio.frequenza == '1' %}
+              Primo
+    {% elseif c.colloquio.frequenza == '2' %}
+              Secondo
+    {% elseif c.colloquio.frequenza == '3' %}
+              Terzo
+    {% elseif c.colloquio.frequenza == '4' %}
+              Ultimo
+    {% endif %}
+              {{ date('next sunday +'~c.colloquio.giorno~' days')|format_date(pattern='EEEE') }}
+              {{ c.colloquio.frequenza != 'S' ? 'del mese' }}
+              dalle {{ c.inizio|date('G:i') }} alle {{ c.fine|date('G:i') }}
+            </small>
+          </td>
+          <td class="pb-0">
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_colloqui_edit', {'id': c.colloquio.id}) }}" role="button" title="Modifica i dati del colloquio">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('docenti_colloqui_delete', {'id': c.colloquio.id}) }}" role="button" title="Cancella il colloquio">{{ 'label.delete'|trans }}</a>
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">
+            <a class="btn btn-primary btn-sm" href="{{ path('docenti_colloqui_edit', {id: 0}) }}" role="button" title="Nuovo colloquio">{{ 'label.add'|trans }}</a>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {{ include('tema-new/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_colloqui'}) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/thfloat.html.twig') }}
+<script>
+$(document).ready(function() {
+  $("#gs-paginazione").on("submit", function() {
+    var p = $("#jumpToPage").val();
+    window.location.href = "{{ path('docenti_colloqui') }}/"+p;
+    return false;
+  });
+});
+</script>
+{% endblock %}

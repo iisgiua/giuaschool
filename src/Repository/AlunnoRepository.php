@@ -19,7 +19,7 @@ use App\Entity\Classe;
 /**
  * Alunno - repository
  */
-class AlunnoRepository extends UtenteRepository {
+class AlunnoRepository extends BaseRepository {
 
   /**
    * Restituisce la lista degli alunni secondo i criteri di ricerca indicati
@@ -44,7 +44,8 @@ class AlunnoRepository extends UtenteRepository {
       $query->andwhere('a.classe IS NULL');
     }
     // crea lista con pagine
-    return $this->paginate($query->getQuery(), $page, $limit);
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
   /**
@@ -72,7 +73,8 @@ class AlunnoRepository extends UtenteRepository {
       $query->andwhere('a.classe IS NULL');
     }
     // crea lista con pagine
-    return $this->paginate($query->getQuery(), $page, $limit);
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
   /**
@@ -97,7 +99,8 @@ class AlunnoRepository extends UtenteRepository {
       $query->andWhere('cl.id=:classe')->setParameter('classe', $search['classe']);
     }
     // crea lista con pagine
-    return $this->paginate($query->getQuery(), $page, $limit);
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
   /**
@@ -128,7 +131,8 @@ class AlunnoRepository extends UtenteRepository {
         ->setParameter('classe', $search['classe']);
     }
     // crea lista con pagine
-    return $this->paginate($query->getQuery(), $page, $limit);
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
   /**
@@ -145,7 +149,8 @@ class AlunnoRepository extends UtenteRepository {
       ->where('a.abilitato=:abilitato')
       ->setParameters(['abilitato' => -1]);
     // crea lista con pagine
-    return $this->paginate($query->getQuery(), $pagina, $limite);
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
   /**
@@ -275,6 +280,34 @@ class AlunnoRepository extends UtenteRepository {
     }
     // restituisce dati
     return $alunni;
+  }
+
+  /**
+   * Restituisce la lista degli alunni secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function cerca($criteri, $pagina=1) {
+    // crea query base
+    $query = $this->createQueryBuilder('a')
+      ->select('a AS alunno,g.username,g.email,g.ultimoAccesso')
+      ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
+      ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
+      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%');
+    if ($criteri['classe'] > 0) {
+      $query->join('a.classe', 'cl')
+        ->andwhere('cl.id=:classe')
+        ->setParameter('classe', $criteri['classe']);
+    } elseif ($criteri['classe'] == -1) {
+      $query->andwhere('a.classe IS NULL');
+    }
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
   }
 
 }

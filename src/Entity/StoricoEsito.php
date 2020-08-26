@@ -67,12 +67,12 @@ class StoricoEsito {
   private $esito;
 
   /**
-   * @var string $periodo Periodo dello scrutinio [F=scrutinio finale, I=scrutinio integrativo]
+   * @var string $periodo Periodo dello scrutinio [F=scrutinio finale, I=scrutinio integrativo, X=scrutinio rimandato]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"F","I"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"F","I","X"}, strict=true, message="field.choice")
    */
   private $periodo;
 
@@ -178,7 +178,7 @@ class StoricoEsito {
   }
 
   /**
-   * Restituisce il periodo dello scrutinio [F=scrutinio finale, I=scrutinio integrativo]
+   * Restituisce il periodo dello scrutinio [F=scrutinio finale, I=scrutinio integrativo, X=scrutinio rimandato]
    *
    * @return string Periodo dello scrutinio
    */
@@ -187,7 +187,7 @@ class StoricoEsito {
   }
 
   /**
-   * Modifica il periodo dello scrutinio [F=scrutinio finale, I=scrutinio integrativo]
+   * Modifica il periodo dello scrutinio [F=scrutinio finale, I=scrutinio integrativo, X=scrutinio rimandato]
    *
    * @param string $periodo Periodo dello scrutinio
    *

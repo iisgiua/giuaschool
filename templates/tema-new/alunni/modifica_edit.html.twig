@@ -1,0 +1,39 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'alunno_dataNascita', dp_disabled: null, dp_week: null, dp_min: null, dp_max: date()|date('d/m/Y')}) }}
+<script>
+$(document).ready(function() {
+  $('#alunno_numeriTelefono').on('click', '.gs-remove-item', function(e) {
+    $(this).closest('.form-group').remove();
+  });
+  $('#alunno_numeriTelefono').parent().on('click', '.gs-add-item', function(e) {
+    var f = '<div class="form-group gs-collection"><div class="input-group"><input type="text" id="alunno_numeriTelefono___name__" name="alunno[numeriTelefono][__name__]" class="form-control" /><div class="input-group-append"><button class="btn btn-danger btn-xs gs-remove-item" type="button" title="Cancella il numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg></button></div></div></div>';
+    var id = $('#alunno_numeriTelefono').find('input').last().attr('id');
+    var re = /\d+$/;
+    var n0 = re.exec(id);
+    var n = (n0 == null ? 0 : parseInt(n0, 10) + 1);
+    f = f.replace(/__name__/g, n);
+    $('#alunno_numeriTelefono').append(f);
+  });
+  // init
+  var inizio = '<div class="input-group">';
+  var fine = '<div class="input-group-append"><button class="btn btn-danger btn-xs gs-remove-item" type="button" title="Cancella il numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg></button></div></div>';
+  $('#alunno_numeriTelefono .form-group').each(function(i,o) {
+    var i = $(o).html();
+    var html = inizio+i+fine;
+    $(o).html(html);
+    $(o).addClass('gs-collection');
+  });
+  var button = '<div class="text-right"><button class="btn btn-success btn-xs gs-add-item" type="button" title="Aggiunge un numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
+  $('#alunno_numeriTelefono').parent().append(button);
+});
+</script>
+{% endblock %}

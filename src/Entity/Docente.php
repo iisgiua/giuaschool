@@ -64,9 +64,72 @@ class Docente extends Utente {
   //==================== METODI SETTER/GETTER ====================
 
   /**
+   * Restituisce la prima chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @return string Prima chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   */
+  public function getChiave1() {
+    return $this->chiave1;
+  }
+
+  /**
+   * Modifica la prima chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @param string $chiave1 Prima chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @return Docente Oggetto Docente
+   */
+  public function setChiave1($chiave1) {
+    $this->chiave1 = $chiave1;
+    return $this;
+  }
+
+  /**
+   * Restituisce la seconda chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @return string Seconda chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   */
+  public function getChiave2() {
+    return $this->chiave2;
+  }
+
+  /**
+   * Modifica la seconda chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @param string $chiave2 Seconda chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @return Docente Oggetto Docente
+   */
+  public function setChiave2($chiave2) {
+    $this->chiave2 = $chiave2;
+    return $this;
+  }
+
+  /**
+   * Restituisce la terza chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @return string Terza chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   */
+  public function getChiave3() {
+    return $this->chiave3;
+  }
+
+  /**
+   * Modifica la terza chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @param string $chiave3 Terza chiave univoca per autenticare l'utente in modo alternativo al login con username/password
+   *
+   * @return Docente Oggetto Docente
+   */
+  public function setChiave3($chiave3) {
+    $this->chiave3 = $chiave3;
+    return $this;
+  }
+
+  /**
    * Restituisce il token segreto per l'accesso con OTP (se NULL non è attivato)
    *
-   * @return string $otp Token segreto per l'accesso con OTP
+   * @return string Token segreto per l'accesso con OTP
    */
   public function getOtp() {
     return $this->otp;
@@ -160,4 +223,3 @@ class Docente extends Utente {
   }
 
 }
-

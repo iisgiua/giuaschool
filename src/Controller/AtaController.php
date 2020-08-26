@@ -15,19 +15,11 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Doctrine\ORM\EntityRepository;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\File\File;
@@ -37,6 +29,7 @@ use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Form\AtaType;
 use App\Form\ImportaCsvType;
+use App\Form\RicercaType;
 use App\Entity\Ata;
 use App\Entity\Sede;
 
@@ -60,8 +53,10 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, SessionInterface $session, CsvImporter $importer) {
-    $lista = null;
+  public function importaAction(Request $request, SessionInterface $session, CsvImporter $importer): Response {
+    // init
+    $dati = [];
+    $info = [];
     $var_sessione = '/APP/FILE/ata_importa';
     $fs = new FileSystem();
     if (!$request->isMethod('POST')) {
@@ -75,7 +70,7 @@ class AtaController extends BaseController {
       }
     }
     // form
-    $form = $this->createForm(ImportaCsvType::class, null, []);
+    $form = $this->createForm(ImportaCsvType::class, null, ['formMode' => 'ata']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
@@ -84,13 +79,13 @@ class AtaController extends BaseController {
         $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
       }
       // importa file
-      $lista = $importer->importaAta($file, $form);
+      $dati = $importer->importaAta($file, $form);
+      $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
       $session->remove($var_sessione);
     }
     // visualizza pagina
-    return $this->renderHtml('ata', 'importa', $lista ? $lista : [], [],
-      [$form->createView(),  'message.importa_ata']);
+    return $this->renderHtml('ata', 'importa', $dati, $info, [$form->createView(),  'message.importa_ata']);
   }
 
   /**
@@ -102,6 +97,8 @@ class AtaController extends BaseController {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista degli utenti
    *
+   * @return Response Pagina di risposta
+   *
    * @Route("/ata/modifica/{pagina}", name="ata_modifica",
    *    requirements={"pagina": "\d+"},
    *    defaults={"pagina": 0},
@@ -110,7 +107,10 @@ class AtaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                 TranslatorInterface $trans, $pagina) {
+                                 TranslatorInterface $trans, $pagina): Response {
+    // init
+    $dati = [];
+    $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
     $criteri['nome'] = $session->get('/APP/ROUTE/ata_modifica/nome', '');
@@ -125,32 +125,11 @@ class AtaController extends BaseController {
       $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $sedi = $em->getRepository('App:Sede')->findBy([], ['ordinamento' =>'ASC']);
-    $sedi[] = -1;
-    $form = $this->container->get('form.factory')->createNamedBuilder('ata_modifica', FormType::class)
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
-        'data' => $criteri['cognome'],
-        'required' => false
-        ))
-      ->add('nome', TextType::class, array('label' => 'label.nome',
-        'data' => $criteri['nome'],
-        'required' => false
-        ))
-      ->add('sede', ChoiceType::class, array('label' => 'label.sede',
-        'data' => $sede,
-        'choices' => $sedi,
-        'choice_label' => function ($obj) use ($trans) {
-            return (is_object($obj) ? $obj->getCitta() :
-              $trans->trans('label.nessuna_sede'));
-          },
-        'choice_value' => function ($obj) {
-            return (is_object($obj)  ? $obj->getId() : $obj);
-          },
-        'placeholder' => 'label.qualsiasi_sede',
-        'choice_translation_domain' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.filtra'))
-      ->getForm();
+    $lista_sedi = $em->getRepository('App:Sede')->findBy([], ['ordinamento' =>'ASC']);
+    $lista_sedi[] = -1;
+    $label_sede = $trans->trans('label.nessuna_sede');
+    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'ata',
+      'dati' => [$criteri['cognome'], $criteri['nome'], $sede, $lista_sedi, $label_sede]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -180,13 +159,13 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/modifica/abilita/{id}/{abilita}", name="ata_modifica_abilita",
+   * @Route("/ata/abilita/{id}/{abilita}", name="ata_abilita",
    *    requirements={"id": "\d+", "abilita": "0|1"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAbilitaAction(EntityManagerInterface $em, $id, $abilita) {
+  public function abilitaAction(EntityManagerInterface $em, $id, $abilita): Response {
     // controlla ata
     $ata = $em->getRepository('App:Ata')->find($id);
     if (!$ata) {
@@ -211,14 +190,14 @@ class AtaController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/modifica/edit/{id}", name="ata_modifica_edit",
+   * @Route("/ata/edit/{id}", name="ata_modifica_edit",
    *    requirements={"id": "\d+"},
    *    defaults={"id": "0"},
    *    methods={"GET", "POST"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaEditAction(Request $request, EntityManagerInterface $em, $id) {
+  public function modificaEditAction(Request $request, EntityManagerInterface $em, $id): Response {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -260,20 +239,20 @@ class AtaController extends BaseController {
    * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $id ID del docente
+   * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/modifica/password/{id}", name="ata_modifica_password",
+   * @Route("/ata/password/{id}", name="ata_password",
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaPasswordAction(Request $request, EntityManagerInterface $em,
-                                         UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                         PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger,
-                                         LogHandler $dblogger, $id) {
+  public function passwordAction(Request $request, EntityManagerInterface $em,
+                                 UserPasswordEncoderInterface $encoder, SessionInterface $session,
+                                 PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 LogHandler $dblogger, $id): Response {
     // controlla ata
     $ata = $em->getRepository('App:Ata')->find($id);
     if (!$ata) {
@@ -292,8 +271,7 @@ class AtaController extends BaseController {
     $dblogger->write($ata, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
       'Username esecutore' => $this->getUser()->getUsername(),
       'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-      'ID esecutore' => $this->getUser()->getId()
-      ));
+      'ID esecutore' => $this->getUser()->getId()));
     // crea documento PDF
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
@@ -304,8 +282,7 @@ class AtaController extends BaseController {
       ));
     $pdf->createFromHtml($html);
     $html = $this->renderView('pdf/credenziali_privacy.html.twig', array(
-      'ata' => $ata,
-      ));
+      'utente' => $ata));
     $pdf->createFromHtml($html);
     $doc = $pdf->getHandler()->Output('', 'S');
     // crea il messaggio
@@ -313,8 +290,8 @@ class AtaController extends BaseController {
       ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
       ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
       ->setTo([$ata->getEmail()])
-      ->setBody($this->renderView('email/credenziali_ata.html.twig'), 'text/html')
-      ->addPart($this->renderView('email/credenziali_ata.txt.twig'), 'text/plain')
+      ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
+      ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
       ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
     // invia mail
     if (!$mailer->send($message)) {
@@ -322,8 +299,7 @@ class AtaController extends BaseController {
       $logger->error('Errore di spedizione email delle credenziali ata.', array(
         'username' => $ata->getUsername(),
         'email' => $ata->getEmail(),
-        'ip' => $request->getClientIp(),
-        ));
+        'ip' => $request->getClientIp()));
       $this->addFlash('danger', 'exception.errore_invio_credenziali');
     } else {
       // tutto ok

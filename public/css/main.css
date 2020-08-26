@@ -37,8 +37,20 @@
   font-weight: 600;
 }
 #gs-header .dropdown-menu {
-  border: 1px solid #b1b1b3!important;
+  border-left: 1px solid #b1b1b3!important;
+  border-right: 2px solid #818183!important;
+  border-bottom: 2px solid #818183!important;
   border-top: 0!important;
+}
+#gs-header .divider {
+  width: auto;
+  margin-left: 0;
+}
+#gs-mainmenu.expanded .dropdown-menu {
+  border: 0!important;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  background-color: #d1d1d3;
 }
 #gs-mainmenu .menu-wrapper .navbar-nav ul li span.disabled {
   line-height: 2.3em;
@@ -53,9 +65,7 @@
 #gs-mainmenu .navbar-nav .nav-link.dropdown-toggle.active + .dropdown-menu:before {
   display: none;
 }
-#gs-mainmenu > div.menu-wrapper > ul > li.nav-item.dropdown.show > div {
-  border: solid 4px #ff0000;
-}
+
 
 /*** breadcrumb ***/
 #gs-header .breadcrumb-container {
@@ -105,30 +115,135 @@ h4 {
 .card:after {
   content: none;
 }
-img.svg {
-  overflow: hidden;
+.table tfoot tr {
+  background-color: #ebeced;
+}
+.table tfoot td {
+  border: 0;
+  text-align: right;
+  padding-right: 1rem;
+  padding-left: 1rem;
 }
 
 
 /*** form ***/
-legend {
-  margin-bottom: 0;
-  font-size: 1.1rem;
-}
-.form-group > label.required:before, .form-group > div > label.required:before,
-.form-group legend.required:before {
-  content: "*";
+.form-group .required:before {
+  content: "* ";
   color: #a31f33;
 }
-.form-group {
+form .alert {
+  margin-bottom: 2rem;
+}
+.form-group legend {
+  color: #435a70;
+  font-size: 0.777rem;
+  font-weight: 600;
+  position: absolute;
+  top: -1rem;
+  display: block;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 .5rem;
+}
+.form-group .form-check-label {
+  font-weight: 300;
+}
+.form-group .form-check-input:checked+label {
+  font-weight: 600;
+}
+.form-group textarea {
+  border: 1px solid #979899;
+  border-radius: 4px;
+}
+
+
+/*** datepicker ***/
+.it-datepicker-wrapper .datepicker-calendar {
+  width: auto;
+  border-left: 1px solid #b1b1b3!important;
+  border-right: 1px solid #b1b1b3!important;
+  border-top: 2px solid #435a70!important;
+  border-bottom: 1px solid #b1b1b3!important;
+  border-radius: 0 0 4px 4px;
+  padding: 10px;
+}
+.it-datepicker-wrapper .input-group .datepicker-button,
+.it-datepicker-wrapper .input-group .datepicker-button:hover {
+  position: absolute;
+}
+.it-datepicker-wrapper .input-group .it-date-datepicker {
+  margin-left: 32px;
+}
+.it-datepicker-wrapper .datepicker-calendar.default .datepicker-month-wrap {
+  margin-bottom: 5px;
+}
+.it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.day {
+  padding: 0 0.1rem;
+}
+.it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.month,
+.it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.year {
+  padding: 0 0.5rem;
+}
+.it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.curDay span {
+  color: #ffffff;
+  background-color: #0066CC;
+}
+.it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.curMonth,
+.it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.curYear {
+  color: #ffffff;
+  background-color: #0066CC;
+}
+.it-datepicker-wrapper .datepicker-calendar.default .gs-datepicker-today {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: .83333rem;
+  letter-spacing: .1px;
+  line-height: 1.555;
+  font-weight: 700;
+  overflow: visible;
+  display: inline-block;
+  vertical-align: middle;
+  border: 0 solid transparent;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #435a70;
+}
+.it-datepicker-wrapper .datepicker-calendar.default .gs-datepicker-today:hover {
+  background-color: #eee;
+}
+
+
+/*** timepicker ***/
+.it-timepicker-wrapper .calendar-input-container {
+  top: -0.5rem;
+}
+.it-timepicker-wrapper .form-group small.form-text {
+  margin-top: -0.5rem;
+}
+.it-timepicker-wrapper .btn-time {
+  padding-left: 0;
+  padding-right: 0;
+}
+.it-timepicker-wrapper .spinner-control {
+  z-index: 2;
+  width: auto;
+  margin-top: -3rem;
+  border-left: 1px solid #b1b1b3!important;
+  border-right: 1px solid #b1b1b3!important;
+  border-top: 2px solid #435a70!important;
+  border-bottom: 1px solid #b1b1b3!important;
+  border-radius: 0 0 4px 4px;
+}
+
+
+/*** dynamic collection ***/
+fieldset .gs-collection {
+  padding: 0 2rem;
   margin-bottom: 0.5rem;
 }
-.form-row {
-  margin-bottom: 3rem;
-}
-.form-check-inline {
-  margin-right: 1.5rem;
-}
-.form-check input[type=radio]:checked+label {
-  font-weight: 600;
+fieldset .gs-add-item {
+  margin: 0 2rem;
 }

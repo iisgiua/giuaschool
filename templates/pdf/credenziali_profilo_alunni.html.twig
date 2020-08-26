@@ -1,0 +1,29 @@
+<p style="text-align:center; font-family:times; font-size:12pt">
+  <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
+  <strong><i>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</i></strong><br>
+  <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
+  TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
+  Email: {{ app.session.get('/CONFIG/ISTITUTO/email') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
+</p>
+<p>&nbsp;</p>
+<p style="text-align: right"><span style="font-size:13pt">All'alunn{{ sesso }} <strong>{{ alunno.nome }} {{ alunno.cognome }}</strong>
+<br>Classe: <strong>{{ alunno.classe ? alunno.classe.anno~'ª '~alunno.classe.sezione }}</strong></span></p>
+<p>&nbsp;</p>
+<p style="text-align: justify">Con le credenziali fornite di seguito potrai accedere al Registro Elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }},
+dove potrai visualizzare i dati relativi al tuo percorso scolastico:
+assenze, ritardi, uscite anticipate, valutazioni, note disciplinari, argomenti delle lezioni e altro ancora.</p>
+<p style="text-align: justify">Il Registro Elettronico è accessibile all'indirizzo internet seguente:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="font-size:13pt"><strong style="font-family:helvetica">{{ app.session.get('/CONFIG/ISTITUTO/url_registro') }}</strong></span></p>
+<p style="text-align: justify">Le credenziali di accesso al Registro Elettronico per il corrente Anno Scolastico sono le seguenti:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="font-size:13pt">Utente: &nbsp;&nbsp;<strong style="font-family:helvetica">{{ username }}</strong></span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="font-size:13pt">Password: &nbsp;&nbsp;<strong style="font-family:helvetica">{{ password }}</strong></span></p>
+<p>Quando si inserisce l'utente e la password nella pagina di accesso, <i>fai attenzione ad usare solo caratteri minuscoli, senza aggiungere spazi</i>.</p>
+<p>&nbsp;</p>
+<p>Cagliari, {{ 'now'|date('d/m/Y') }}.</p>
+<p>&nbsp;</p>
+<p style="text-align: right">Il Dirigente Scolastico<br>
+<i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>&nbsp;&nbsp;</p>

@@ -332,8 +332,8 @@ class LoginController extends BaseController {
         if ($utente instanceof Docente) {
           // docenti/staff/preside
           $num_pwdchars = 5;
-          $template_html = 'email/credenziali_docenti.html.twig';
-          $template_txt = 'email/credenziali_docenti.txt.twig';
+          $template_html = 'email/credenziali_recupero_docenti.html.twig';
+          $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
           $utente->setUltimoOtp($codice);

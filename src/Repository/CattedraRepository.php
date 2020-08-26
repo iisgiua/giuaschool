@@ -12,8 +12,6 @@
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Entity\Docente;
 use App\Entity\Classe;
 
@@ -21,7 +19,7 @@ use App\Entity\Classe;
 /**
  * Cattedra - repository
  */
-class CattedraRepository extends EntityRepository {
+class CattedraRepository extends BaseRepository {
 
   /**
    * Restituisce la lista dei docenti secondo i criteri di ricerca indicati
@@ -49,24 +47,8 @@ class CattedraRepository extends EntityRepository {
       $query->andwhere('d.id=:docente')->setParameter('docente', $search['docente']);
     }
     // crea lista con pagine
-    return $this->paginate($query->getQuery(), $page, $limit);
-  }
-
-  /**
-   * Paginatore dei risultati della query
-   *
-   * @param Query $dql Query da mostrare
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function paginate($dql, $page=1, $limit=10) {
-    $paginator = new Paginator($dql);
-    $paginator->getQuery()
-      ->setFirstResult($limit * ($page - 1))
-      ->setMaxResults($limit);
-    return $paginator;
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
   /**
@@ -223,6 +205,35 @@ class CattedraRepository extends EntityRepository {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Restituisce la lista delle cattedre secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con i risultati della ricerca
+   */
+  public function cerca($criteri, $pagina=1) {
+    // crea query base
+    $query = $this->createQueryBuilder('c')
+      ->join('c.classe', 'cl')
+      ->join('cl.sede', 's')
+      ->join('c.materia', 'm')
+      ->join('c.docente', 'd')
+      ->orderBy('s.ordinamento,cl.anno,cl.sezione,m.nomeBreve,d.cognome,d.nome', 'ASC');
+    if ($criteri['classe'] > 0) {
+      $query->andWhere('cl.id=:classe')->setParameter('classe', $criteri['classe']);
+    }
+    if ($criteri['materia'] > 0) {
+      $query->andwhere('m.id=:materia')->setParameter('materia', $criteri['materia']);
+    }
+    if ($criteri['docente'] > 0) {
+      $query->andwhere('d.id=:docente')->setParameter('docente', $criteri['docente']);
+    }
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
   }
 
 }

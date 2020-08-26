@@ -1628,16 +1628,16 @@ class ArchiviazioneUtil {
             $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Riepilogo'.
               ($data_file >= $adesso ? ' (NUOVO)': '');
           }
-          // verbale
-          if (!($file = $this->pag->verbale($classe, $periodo))) {
-            // errore
-            $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale: '.
-              'non creato per mancanza di dati.';
-          } else {
-            $data_file = new \DateTime('@'.filemtime($file));
-            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale'.
-              ($data_file >= $adesso ? ' (NUOVO)': '');
-          }
+          //-- // verbale
+          //-- if (!($file = $this->pag->verbale($classe, $periodo))) {
+            //-- // errore
+            //-- $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale: '.
+              //-- 'non creato per mancanza di dati.';
+          //-- } else {
+            //-- $data_file = new \DateTime('@'.filemtime($file));
+            //-- $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Verbale'.
+              //-- ($data_file >= $adesso ? ' (NUOVO)': '');
+          //-- }
           // certificazioni
           if ($classe->getAnno() == 2) {
             if (!($file = $this->pag->certificazioni($classe, $periodo))) {
@@ -1707,6 +1707,46 @@ class ArchiviazioneUtil {
           }
           $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Carenze: '.
             $carenze_num.' ('.$carenze_nuovi.' NUOVI)';
+          // PAI
+          if ($classe->getAnno() != 5) {
+            // alunni ammessi
+            $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+              ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=:scrutinio')
+              ->where('a.id IN (:lista) AND e.esito=:ammesso')
+              ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+              ->setParameters(['scrutinio' => $scrut, 'lista' => $scrut->getDato('alunni'), 'ammesso' => 'A'])
+              ->getQuery()
+              ->getResult();
+            $pai = 0;
+            $pai_nuovi = 0;
+            foreach ($alunni as $alu) {
+              // comunicazione PAI
+              $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+                ->join('vs.materia', 'm')
+                ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND ((m.tipo=:religione AND vs.unico<:suffrel) OR (m.tipo=:normale AND vs.unico<:suff))')
+                ->setParameters(['scrutinio' => $scrut, 'alunno' => $alu, 'religione' => 'R', 'suffrel' => 22,
+                  'normale' => 'N', 'suff' => 6])
+                ->getQuery()
+                ->getResult();
+              if (count($voti) > 0) {
+                // esiste PAI
+                if (!($file = $this->pag->PAI($classe, $alu, $periodo))) {
+                  // errore
+                  $msg['warning'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - PAI '.
+                    $alu->getCognome().' '.$alu->getNome().' ('.$alu->getDataNascita()->format('d/m/Y').') : '.
+                    'non creato per mancanza di dati.';
+                } else {
+                  $pai_num++;
+                  $data_file = new \DateTime('@'.filemtime($file));
+                  if ($data_file >= $adesso) {
+                    $pai_nuovi++;
+                  }
+                }
+              }
+            }
+            $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - PAI: '.
+              $pai_num.' ('.$pai_nuovi.' NUOVI)';
+          }
           break;
         case 'I': // scrutinio integrativo
           // riepilogo voti

@@ -1,0 +1,35 @@
+{### datepicker: gestione input date ###}
+{###    parametri: dp_field,dp_disabled,dp_week,dp_min,dp_max ###}
+<script>
+$(document).ready(function() {
+  $('#{{ dp_field }}').datepicker({
+    startView: 0,
+    inputFormat: 'dd/MM/yyyy',
+    outputFormat: 'dd/MM/yyyy',
+    {% if dp_disabled %}datesDisabled: {{ dp_disabled|raw }},{% endif %}
+    {% if dp_week %}daysOfWeekDisabled: {{ dp_week|raw }},{% endif %}
+    {% if dp_min %}min: '{{ dp_min }}',{% endif %}
+    {% if dp_max %}max: '{{ dp_max }}',{% endif %}
+  });
+  $('#datepicker-calendar-{{ dp_field }}').on('ab.datepicker.opening', function(ev) {
+    var html = '<button type="button" id="{{ dp_field }}_today" class="gs-datepicker-today" title="{{ 'label.form_date_today_title'|trans }}">{{ 'label.form_date_today'|trans }}</button>';
+    var t = $('#datepicker-calendar-{{ dp_field }} > table');
+    if (!$('#{{ dp_field }}_today').length) {
+      $(html).insertAfter(t);
+    }
+  });
+  $('#datepicker-calendar-{{ dp_field }}').on('ab.datepicker.opened', function() {
+    if ($(this).position().top > 24) {
+      $(this).css('top', $(this).position().top - 24);
+    }
+  });
+  $('#datepicker-calendar-{{ dp_field }}').on('click', '#{{ dp_field }}_today', function(ev) {
+    $('#{{ dp_field }}').datepicker('setDate', new Date());
+    $('#{{ dp_field }}').datepicker('hide');
+    $('#{{ dp_field }}').datepicker().change();
+  });
+  // init
+  var html = '<svg class="icon"><use xlink:href="{{ asset('vendor/fontawesome/sprites/regular.svg') }}#calendar-alt"></use></svg>';
+  $('#{{ dp_field }} + a.datepicker-button').html(html);
+});
+</script>

@@ -11,7 +11,7 @@ label.altri: Altri
 label.altro: Altro
 label.alunni_assenti: Seleziona alunni assenti
 label.alunni: Alunni
-label.alunno_H: Alunno disabile
+label.alunno_H: Alunno con sostegno
 label.alunno: Alunno
 label.annotazione: Annotazione sul registro
 label.appello_A: Assente
@@ -347,6 +347,47 @@ label.strategie_apprendimento: Strategie per il raggiungimento degli obiettivi
 label.PIA_necessario: "E' necessario inserire il Piano di Integrazione degli Apprendimenti?"
 label.scrutinio_surroga_protocollo: Numero protocollo
 label.scrutinio_surroga_data: Data protocollo
+label.database_precedente: Nome del database usato nel precedente A.S.
+label.directory_precedente: Percorso principale dell'applicazione usata nel precedente A.S.
+label.importa_dati: Dati da importare
+label.importa_istituto: Istituto e sedi scolastiche
+label.importa_corsi: Corsi di studio e materie scolastiche
+label.importa_classi: Classi
+label.importa_alunni: Utenti di alunni e genitori
+label.importa_personale: Utenti del personale scolastico
+label.importa_esiti: Esiti scrutini
+label.passaggio_classe: Assegna in automatico la nuova classe agli alunni
+label.banner_login: Messaggio visualizzato nella pagina pubblica di accesso
+label.banner_home: Messaggio visualizzato nella pagina iniziale degli utenti connessi
+label.form_date_placeholder: Clicca sull'icona o usa il formato GG/MM/AAAA
+label.form_date_title: Clicca sull'icona del calendario o inserisci una data usando il formato GG/MM/AAAA
+label.form_date_today_title: Imposta la data di oggi
+label.form_date_today: OGGI
+label.form_time_placeholder: Clicca sull'icona o usa il formato HH:MM
+label.form_time_hour_up: Clicca per incrementare le ore
+label.form_time_hour_down: Clicca decrementare le ore
+label.form_time_min_up: Clicca per incrementare i minuti
+label.form_time_min_down: Clicca decrementare i minuti
+label.manutenzione_attiva: Modalità manutenzione abilitata
+label.ruolo: Ruolo
+label.qualsiasi_materia: Qualsiasi materia
+label.qualsiasi_docente: Qualsiasi docente
+label.cattedra_attiva: Cattedra attiva
+label.cattedra_disabilitata: Cattedra disabilitata
+label.giorno: Giorno della settimana
+label.frequenza: Frequenza
+label.prima_settimana: Prima settimana del mese
+label.seconda_settimana: Seconda settimana del mese
+label.terza_settimana: Terza settimana del mese
+label.ultima_settimana: Ultima settimana del mese
+label.ogni_settimana: Ogni settimana
+label.note_bes: Note BES
+label.email_genitore: Email genitore
+label.password_genitore: Password genitore
+label.alunno_inserito: Inserisci in classe
+label.alunno_trasferito: Trasferisci alunno
+label.alunno_cambio_sezione: Cambia sezione
+label.cancella_dati: Cancella dati incongruenti
 
 
 ##### PAGINE #####
@@ -361,14 +402,55 @@ title.info.cookie: Informativa sui cookie
 page.info.credits: Credits
 title.info.credits: Credits
 page.ata.importa: Importa ATA
-title.ata.importa: Importa i dati del Personale ATA
+title.ata.importa: Importa i dati del personale ATA
 page.ata.modifica: Modifica ATA
-title.ata.modifica: Modifica i dati del Personale ATA
+title.ata.modifica: Modifica i dati del personale ATA
 title.ata.modifica_edit: Modifica i dati dell'utente
 page.docenti.importa: Importa Docenti
 title.docenti.importa: Importa i dati dei Docenti
 page.login.home: Pagina Principale
 title.login.home: Pagina Principale
+page.sistema.importa: Importa Anno
+title.sistema.importa: Importa i dati dell'anno precedente
+page.sistema.banner: Gestione Banner
+title.sistema.banner: Gestione dei banner per le pagine principali
+page.sistema.manutenzione: Modalità Manutenzione
+title.sistema.manutenzione: Impostazione della modalità manutenzione
+page.sistema.parametri: Configurazione Parametri
+title.sistema.parametri: Configurazione dei parametri dell'applicazione
+page.sistema.password: Cambio Password
+title.sistema.password: Cambia la password di un utente
+page.sistema.alias: Alias Utente
+title.sistema.alias: Impersona un altro utente
+page.sistema.archivia: Archiviazione Documenti
+title.sistema.archivia: Archivia i registri e i documenti degli scrutini
+page.docenti.modifica: Modifica Docenti
+title.docenti.modifica: Modifica i dati dei docenti
+page.docenti.staff: Configura Staff
+title.docenti.staff: Configura i docenti che fanno parte dello staff dirigenziale
+title.docenti.modifica_edit: Modifica i dati dei docenti
+title.docenti.staff_edit: Modifica i componenti dello staff dirigenziale
+page.docenti.coordinatori: Configura Coordinatori
+title.docenti.coordinatori: Configura i coordinatori dei Consigli di Classe
+title.docenti.coordinatori_edit: Modifica i dati del coordinatore del Consiglio di Classe
+page.docenti.segretari: Configura Segretari
+title.docenti.segretari: Configura i segretari dei Consigli di Classe
+title.docenti.segretari_edit: Modifica i dati del segretario del Consiglio di Classe
+page.docenti.cattedre: Configura Cattedre
+title.docenti.cattedre: Configura le cattedre dei docenti
+title.docenti.cattedre_edit: Modifica i dati di una cattedra
+page.docenti.colloqui: Configura Colloqui
+title.docenti.colloqui: Configura i colloqui dei docenti
+title.docenti.colloqui_edit: Modifica i dati dei colloqui
+page.alunni.importa: Importa Alunni
+title.alunni.importa: Importa i dati degli alunni e dei genitori
+page.alunni.modifica: Modifica Alunni
+title.alunni.modifica: Modifica i dati degli alunni e dei genitori
+title.alunni.modifica_edit: Modifica i dati degli alunni e dei genitori
+page.alunni.classe: Cambio classe Alunni
+title.alunni.classe: Cambia la classe degli alunni ad anno iniziato
+title.alunni.classe_edit: Cambia la classe degli alunni ad anno iniziato
+
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -635,11 +717,6 @@ message.update_ok: La modifica è stata memorizzata correttamente.
 message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
   \"Docente, UsernameDocente, Classe, Materia, Alunno, UsernameAlunno, Tipo, Supplenza\".
   Verranno inserite solo le cattedre che non risultano già presenti."
-message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
-  \"Cognome, Nome, Sesso, DataNascita, ComuneNascita, CodiceFiscale, Citta, Indirizzo, NumeriTelefono, Bes, FrequenzaEstero,
-  Religione, Credito3, Credito4, Classe, Email\".
-  Se si attiva il controllo SOLO NUOVI verranno inseriti solo gli alunni che non risultano già presenti;
-  in caso contrario, verranno modificati anche i dati degli alunni esistenti (i cambi classi sono ignorati)."
 message.nuova_password_classe: Verranno cambiate le password di tutti gli alunni della classe. Vuoi continuare?
 message.cattedra_mancante: Devi prima scegliere la classe o la materia per poter visualizzare questa pagina.
 message.cancella_lezione: Verrà cancellata la firma e, se sei l'unico docente, anche l'intera lezione. Vuoi continuare?
@@ -837,7 +914,7 @@ message.importa_ata: "Il file CSV da importare deve avere la struttura seguente 
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
     <span class=\"ml-5\">Tipo: D=DSGA, A=amministrativo, T=tecnico, U=autista, C=collaboratore scolastico</span><br>
     <span class=\"ml-5\">Segreteria: S=si, N=no</span>
-  <small>"
+  </small>"
 message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
   <span class=\"ml-4\"><strong>Utenti</strong>: \"*Cognome, *Nome, *Sesso, CodiceFiscale, Username, Password, Email\"</span><br>
   <span class=\"ml-4\"><strong>Cattedre</strong>: \"*UsernameDocente, *Classe, *Materia, UsernameAlunno, Tipo, Supplenza\"</span><br>
@@ -852,6 +929,17 @@ message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima
     <span class=\"ml-5\">Frequenza: S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=quarta settimana</span><br>
     <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
   </small>"
+message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, *CodiceFiscale, Citta, Indirizzo, NumeriTelefono, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, Email\"</span><br>
+  <small>
+    <span class=\"ml-5\">* campi obbligatori</span><br>
+    <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
+    <span class=\"ml-5\">Bes: N=No, H=disabile, D=DSA, B=BES</span><br>
+    <span class=\"ml-5\">FrequenzaEstero: 0=No, 1=Si</span><br>
+    <span class=\"ml-5\">Religione: S=Si, U=Uscita</span><br>
+    <span class=\"ml-5\">Credito3, Credito4: Punti di credito per la classe terza e quarta</span><br>
+    <span class=\"ml-5\">Classe: In caso di modifica, è inserito il nuovo valore senza gestire il cambio classe.</span><br>
+  </small>"
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.
 message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
 message.gestione_notifiche: "La ricezione via email della notifica delle nuove circolari può essere abilitata o disabilitata da questa pagina. Scegli l'opzione che preferisci e premi il pulsante di conferma."
@@ -860,7 +948,28 @@ message.no_cattedra_doc15: Non è previsto il caricamento del documento del 15 m
 message.cancella_doc15: Verrà cancellato il documento del 15 maggio indicato. Vuoi continuare?
 message.inserimento_doc15: "Inserire il documento del 15 maggio come un unico documento comprensivo di ogni sezione prevista.<br>E' possibile caricare il documento in formato PDF, Microsoft Word, LibreOffice/OpenOffice."
 message.strategie_PAI: "Il Collegio dei Docenti stabilirà come attuare il piano di apprendimento individualizzato, indicando modalità, mezzi e tempi di realizzazione delle attività didattiche, da svolgersi in orario curricolare o extracurricolare. E' comunque da sottolineare l'importanza fondamentale dello studio autonomo da parte dello studente e la sua partecipazione attiva alle proposte educative che saranno programmate."
-
+message.banner: "Imposta i messaggi che verranno visualizzati nelle pagine principali del registro; lascia la casella vuota per non visualizzare niente.<br>
+  Nelle caselle di testo si può inserire anche codice HTML."
+message.manutenzione: "Abilita o disabilita la modalità manutenzione, specificando il periodo in cui il registro non sarà accessibile."
+message.parametri: "Imposta i valori dei parametri utilizzati dall'applicazione per modificare il comportamento di alcune procedure."
+message.password: "Inserisci la username e la password (due volte).<br>
+  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.alias: "Inserisci la username dell'utente che vuoi impersonare.<br>
+  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.importa: "Inserisci il nome del database e il percorso dell'applicazione usati lo scorso anno scolastico nel registro, quindi indica quali dati importare.<br>
+  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.archivia: "Seleziona i documenti da archiviare."
+message.modifica_alunno: "Inserisci i dati dell'alunno e del genitore. Se si modifica la classe, verrà inserito il nuovo valore senza gestire il cambio classe.<br>
+  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.classe_alunno_inserito: "Indica l'alunno e la data dell'inserimento in classe.<br>
+  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.classe_alunno_trasferito: "Indica l'alunno e la data del trasferimento o del ritiro.<br>
+  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.classe_alunno_sezione: "Indica l'alunno, la nuova classe di destinazione e la data della modifica.<br>
+  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.note_classe_alunno_inserito: "Inserimento in data {date}"
+message.note_classe_alunno_trasferito: "Trasferimento/ritiro in data {date}"
+message.note_classe_alunno_sezione: "Cambio sezione in data {date}"
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
@@ -1039,3 +1148,16 @@ exception.non_ammissione_con_voti: "La non ammissione dell'alunn{sex} {alunno} �
 exception.non_ammissione_con_voti_P: "La non ammissione dell'alunn{sex} {alunno} è possibile solo se non si ha alcun elemento di valutazione, mentre sono presenti voti nello scrutinio del primo trimestre."
 exception.non_ammissione_con_voti_S: "La non ammissione dell'alunn{sex} {alunno} è possibile solo se non si ha alcun elemento di valutazione, mentre sono presenti valutazioni nel pentamestre."
 exception.non_ammissione_quinte: "La non ammissione all'Esame dell'alunn{sex} {alunno} non è possibile."
+exception.update_errors: Sono presenti errori nei dati inviati.
+exception.database_error: Impossibile connettersi al database.
+exception.directory_error: Il percorso indicato non esiste.
+exception.orario_sede_invalido: Non esiste un orario per la sede indicata.
+exception.scansione_ora_invalida: Il giorno e ora indicati non corrispondono ad un orario esistente.
+exception.colloquio_duplicato: Esiste già un colloquio per la sede e il docente indicati.
+exception.dati_presenti: Impossibile cancellare quanto richiesto perché sono presenti dei dati collegati.
+exception.classe_inizio_invalido: La data di iniziale è precedente all'inizio dell'anno scolastico.
+exception.classe_fine_invalido: La data finale è successiva alla fine dell'anno scolastico.
+exception.cambio_classe_esistente: Esiste già un altro cambio classe per lo stesso alunno.
+exception.classe_inizio_fine_invalido: La data di iniziale è successiva a quella finale.
+exception.classe_valutazioni_presenti: Sono presenti valutazioni in date incongruenti.
+exception.classe_note_presenti: Sono presenti note disciplinari in date incongruenti.

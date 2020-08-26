@@ -13,14 +13,13 @@
 namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Entity\Docente;
 
 
 /**
  * Colloquio - repository
  */
-class ColloquioRepository extends EntityRepository {
+class ColloquioRepository extends BaseRepository {
 
   /**
    * Restituisce la lista dei colloqui secondo i criteri di ricerca indicati
@@ -46,24 +45,8 @@ class ColloquioRepository extends EntityRepository {
       $query->andWhere('d.id=:docente')->setParameter('docente', $search['docente']);
     }
     // crea lista con pagine
-    return $this->paginate($query->getQuery(), $page, $limit);
-  }
-
-  /**
-   * Paginatore dei risultati della query
-   *
-   * @param Query $dql Query da mostrare
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function paginate($dql, $page=1, $limit=10) {
-    $paginator = new Paginator($dql);
-    $paginator->getQuery()
-      ->setFirstResult($limit * ($page - 1))
-      ->setMaxResults($limit);
-    return $paginator;
+    $res = $this->paginazione($query->getQuery(), $page);
+    return $res['lista'];
   }
 
   /**
@@ -87,5 +70,37 @@ class ColloquioRepository extends EntityRepository {
     return $colloqui;
   }
 
-}
+  /**
+   * Restituisce la lista dei colloqui secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con i risultati della ricerca
+   */
+  public function cerca($criteri, $pagina=1) {
+    // crea query
+    $query = $this->createQueryBuilder('c')
+      ->select("c AS colloquio,s.citta AS sede,CONCAT(d.cognome,' ',d.nome,' (',d.username,')') AS docente,so.inizio,so.fine")
+      ->join('c.docente', 'd')
+      ->join('c.orario', 'o')
+      ->join('o.sede', 's')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->where('d.abilitato=:abilitato')
+      ->orderBy('s.ordinamento,d.cognome,d.nome,d.username', 'ASC')
+      ->setParameter('abilitato', 1);
+    if ($criteri['sede'] > 0) {
+      $query->andWhere('s.id=:sede')->setParameter('sede', $criteri['sede']);
+    } elseif ($criteri['classe'] > 0) {
+      $query
+        ->join('App:Cattedra', 'ct', 'WITH', 'ct.docente=d.id AND ct.classe=:classe AND ct.attiva=:attiva')
+        ->setParameter('classe', $criteri['classe'])
+        ->setParameter('attiva', 1);
+    } elseif ($criteri['docente'] > 0) {
+      $query->andWhere('d.id=:docente')->setParameter('docente', $criteri['docente']);
+    }
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
+  }
 
+}

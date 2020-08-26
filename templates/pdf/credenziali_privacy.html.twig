@@ -8,7 +8,7 @@
 </p>
 <p>&nbsp;</p>
 <p style="text-align: center"><strong>Registro Elettronico - Informativa sulla privacy per il personale ATA</strong></p>
-<p style="font-size:10pt"><strong>Gentile Sig.{{ ata.sesso == 'F' ? 'ra' }} {{ ata.nome }} {{ ata.cognome }}</strong>,
+<p style="font-size:10pt"><strong>Gentile {% if 'ROLE_DOCENTE' in utente.roles %}Prof.{{ utente.sesso == 'F' ? 'ssa' }}{% else %}Sig.{{ utente.sesso == 'F' ? 'ra' }}{% endif %} {{ utente.nome }} {{ utente.cognome }}</strong>,
 <p style="text-align:justify;font-size:10pt">secondo le disposizioni dell'articolo 13 del Decreto Legislativo 30 giugno 2003, n. 196
 (“Codice in materia di protezione dei dati personali”) e del Regolamento Europeo 2016/679, Le forniamo le seguenti
 informazioni sul trattamento dei Suoi dati personali nell'ambito della gestione del Registro Elettronico.

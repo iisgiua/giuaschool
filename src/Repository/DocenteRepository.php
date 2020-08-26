@@ -16,7 +16,7 @@ namespace App\Repository;
 /**
  * Docente - repository
  */
-class DocenteRepository extends UtenteRepository {
+class DocenteRepository extends BaseRepository {
 
   /**
    * Restituisce la lista dei docenti secondo i criteri di ricerca indicati
@@ -36,7 +36,8 @@ class DocenteRepository extends UtenteRepository {
       ->setParameter(':cognome', $search['cognome'].'%')
       ->getQuery();
     // crea lista con pagine
-    return $this->paginate($query, $page, $limit);
+    $res = $this->paginazione($query, $page);
+    return $res['lista'];
   }
 
   /**
@@ -58,7 +59,8 @@ class DocenteRepository extends UtenteRepository {
       ->setParameter('abilitato', 1)
       ->getQuery();
     // crea lista con pagine
-    return $this->paginate($query, $page, $limit);
+    $res = $this->paginazione($query, $page);
+    return $res['lista'];
   }
 
   /**
@@ -207,7 +209,41 @@ class DocenteRepository extends UtenteRepository {
       ->orderBy('d.cognome,d.nome,d.username', 'ASC')
       ->getQuery();
     // crea lista con pagine
-    return $this->paginate($query, $pagina, $limite);
+    $res = $this->paginazione($query, $page);
+    return $res['lista'];
+  }
+
+  /**
+   * Restituisce la lista dei docenti secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con i risultati della ricerca
+   */
+  public function cerca($criteri, $pagina=1) {
+    // crea query
+    $query = $this->createQueryBuilder('d')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App:Preside)')
+      ->orderBy('d.cognome,d.nome,d.username', 'ASC')
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%');
+    if ($criteri['classe'] > 0) {
+      $query
+        ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.attiva=:attiva')
+        ->setParameter('classe', $criteri['classe'])
+        ->setParameter('attiva', 1);
+    } elseif ($criteri['classe'] == -1) {
+      $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+        ->select('c.id')
+        ->where('c.docente=d.id AND c.attiva=:attiva')
+        ->getDQL();
+      $query
+        ->andWhere('NOT EXISTS ('.$cattedre.')')
+        ->setParameter('attiva', 1);
+    }
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
   }
 
 }

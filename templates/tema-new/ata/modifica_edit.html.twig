@@ -14,11 +14,14 @@ $(document).ready(function() {
     var s = $('#ata_segreteria');
     if ($(this).val() == 'D' || $(this).val() == 'A') {
       s.prop('disabled', false);
+      s.siblings('.btn').removeClass('disabled');
+      s.parents('.bootstrap-select').removeClass('disabled');
       s.parents('.bootstrap-select-wrapper').removeClass('disabled');
     } else {
       s.selectpicker('val', '0');
-      {#-- s.val('0'); #}
       s.prop('disabled', true);
+      s.siblings('.btn').addClass('disabled');
+      s.parents('.bootstrap-select').addClass('disabled');
       s.parents('.bootstrap-select-wrapper').addClass('disabled');
     }
   }).change();

@@ -64,7 +64,8 @@ class ImportaCsvType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('formMode');
     $resolver->setDefaults(array(
-      'formMode' => 'ata'));
+      'formMode' => 'ata',
+      'data_class' => null));
   }
 
 }

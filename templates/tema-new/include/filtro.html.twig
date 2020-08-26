@@ -2,11 +2,15 @@
 {###    parametri: form ###}
 {% form_theme form with 'tema-new/layout-form.html.twig' only %}
 
-{{ form_start(form) }}
-<div id="{{ form.vars.id }}" class="form-row mb-0">
-  {{- form_errors(form) -}}
+{% for tipo,messaggi in app.flashes %}
+  {% for msg in messaggi %}
+<div class="alert alert-{{ tipo }}" role="alert">{{ msg|trans|raw }}</div>
+  {% endfor %}
+{% endfor %}
+{{ form_start(form, {attr: {class: 'mr-1'}}) }}
+<div id="{{ form.vars.id }}" class="form-row">
   {% for child in form|filter(child => not child.rendered) %}
-    {{- form_row(child, {inline: true}) -}}
+    {{ form_row(child, {inline: true}) }}
   {% endfor %}
 </div>
 {{ form_end(form) }}

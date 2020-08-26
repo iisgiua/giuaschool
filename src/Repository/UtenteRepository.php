@@ -20,24 +20,7 @@ use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 /**
  * Utente - repository
  */
-class UtenteRepository extends EntityRepository implements UserLoaderInterface {
-
-  /**
-   * Carica utente da username o email (usato dai moduli di sicurezza)
-   *
-   * @param string $username Parametro per identificare l'utente (username o email)
-   *
-   * @return Utente|null Restitusce l'utente trovato o null
-   */
-  public function loadUserByUsername($username) {
-    $utente = $this->createQueryBuilder('u')
-      ->where('u.username=:utente OR u.email=:utente')
-      ->setParameter('utente', $username)
-      ->getQuery()
-      ->getOneOrNullResult();
-    // restituisce dati
-    return $utente;
-  }
+class UtenteRepository extends EntityRepository {
 
   /**
    * Paginatore dei risultati della query

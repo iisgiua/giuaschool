@@ -18,7 +18,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 /**
  * Classe - repository
  */
-class ClasseRepository extends \Doctrine\ORM\EntityRepository {
+class ClasseRepository extends BaseRepository {
 
   /**
    * Restituisce la lista degli ID di classe corretti o l'errore nell'apposito parametro.
@@ -89,5 +89,58 @@ class ClasseRepository extends \Doctrine\ORM\EntityRepository {
     return array_column($classi, 'id');
   }
 
-}
+  /**
+   * Restituisce la lista delle classi con coordinatori secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con i risultati della ricerca
+   */
+  public function cercaCoordinatori($criteri, $pagina=1) {
+    // crea query
+    $query = $this->createQueryBuilder('c')
+      ->join('c.coordinatore', 'd')
+      ->join('c.sede', 's')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato')
+      ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%')
+      ->setParameter('abilitato', 1);
+    if ($criteri['classe'] > 0) {
+      $query
+        ->andWhere('c.id=:classe')
+        ->setParameter('classe', $criteri['classe']);
+    }
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
+  }
 
+  /**
+   * Restituisce la lista delle classi con segretari secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con i risultati della ricerca
+   */
+  public function cercaSegretari($criteri, $pagina=1) {
+    // crea query
+    $query = $this->createQueryBuilder('c')
+      ->join('c.segretario', 'd')
+      ->join('c.sede', 's')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato')
+      ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
+      ->setParameter('nome', $criteri['nome'].'%')
+      ->setParameter('cognome', $criteri['cognome'].'%')
+      ->setParameter('abilitato', 1);
+    if ($criteri['classe'] > 0) {
+      $query
+        ->andWhere('c.id=:classe')
+        ->setParameter('classe', $criteri['classe']);
+    }
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
+  }
+
+}

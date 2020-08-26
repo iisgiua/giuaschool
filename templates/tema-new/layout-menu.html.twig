@@ -2,40 +2,48 @@
 {% set page_route = app.request.attributes.get('_route') %}
 
 {% macro opzione(opt,route) %}
-  <li class="nav-item" role="none">
-  {% if opt.disabilitato %}
-    <span class="nav-link px-3 disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
+  {% if opt.nome == '__SEPARATORE__' %}
+    <li role="none"><span class="divider"></span></li>
   {% else %}
-    <a class="nav-link px-3{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+    <li class="nav-item" role="none">
+    {% if opt.disabilitato %}
+      <span class="nav-link px-3 disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
+    {% else %}
+      <a class="nav-link px-3{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+    {% endif %}
+    {% if opt.icona %}
+        <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
+          <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
+        </svg>
+    {% endif %}
+        <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
+    {% if opt.disabilitato %}
+      </span>
+    {% else %}
+      </a>
+    {% endif %}
+    </li>
   {% endif %}
-  {% if opt.icona %}
-      <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
-        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
-      </svg>
-  {% endif %}
-      <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
-  {% if opt.disabilitato %}
-    </span>
-  {% else %}
-    </a>
-  {% endif %}
-  </li>
 {% endmacro %}
 
 {% macro subopzione(opt,route) %}
-  <li role="none">
-  {% if opt.disabilitato %}
-    <span class="list-item disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
+  {% if opt.nome == '__SEPARATORE__' %}
+    <li role="none"><span class="divider"></span></li>
   {% else %}
-    <a class="list-item{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+    <li role="none">
+    {% if opt.disabilitato %}
+      <span class="list-item disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
+    {% else %}
+      <a class="list-item{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+    {% endif %}
+        <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
+    {% if opt.disabilitato %}
+      </span>
+    {% else %}
+      </a>
+    {% endif %}
+    </li>
   {% endif %}
-      <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
-  {% if opt.disabilitato %}
-    </span>
-  {% else %}
-    </a>
-  {% endif %}
-  </li>
 {% endmacro %}
 
 {% macro menu(opt,route) %}

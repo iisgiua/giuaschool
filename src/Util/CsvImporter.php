@@ -432,15 +432,16 @@ class CsvImporter {
   /**
    * Importa gli alunni da file CSV
    *
-   * @param UploadedFile $file File da importare
+   * @param File $file File da importare
    * @param Form $form Form su cui visualizzare gli errori
    *
    * @return array Lista degli alunni importati
    */
-  public function importaAlunni(UploadedFile $file=null, Form $form) {
+  public function importaAlunni(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
       'citta', 'indirizzo', 'numeriTelefono', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
       'classe', 'email');
+    $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
     if ($error) {
@@ -626,18 +627,7 @@ class CsvImporter {
       $alunno = $this->em->getRepository('App:Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']);
       if ($alunno) {
         // alunno esiste
-        if ($form->get('onlynew')->getData()) {
-          // nessuna modifica
-          $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
-          $fields['numeriTelefono'] = implode(', ', $fields['numeriTelefono']);
-          $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
-          foreach ($fields as $k=>$v) {
-            if (isset($empty_fields[$k])) {
-              unset($fields[$k]);
-            }
-          }
-          $imported['NONE'][$count] = $fields;
-        } else {
+        if ($filtro == 'T' || $filtro == 'E') {
           // modifica alunno
           $error = $this->modificaAlunno($alunno, $fields, $empty_fields);
           if ($error) {
@@ -653,18 +643,35 @@ class CsvImporter {
             }
           }
           $imported['EDIT'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
+          $fields['numeriTelefono'] = implode(', ', $fields['numeriTelefono']);
+          $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
+          foreach ($fields as $k=>$v) {
+            if (isset($empty_fields[$k])) {
+              unset($fields[$k]);
+            }
+          }
+          $imported['NONE'][$count] = $fields;
         }
       } else {
-        // crea nuovo alunno
-        $error = $this->nuovoAlunno($fields);
-        if ($error) {
-          // errore
-          fclose($this->fh);
-          $this->fh = null;
-          $form->addError(new FormError('# '.$count.': '.$error));
-          return $imported;
+        // utente non esiste
+        if ($filtro == 'T' || $filtro == 'N') {
+          // crea nuovo alunno
+          $error = $this->nuovoAlunno($fields);
+          if ($error) {
+            // errore
+            fclose($this->fh);
+            $this->fh = null;
+            $form->addError(new FormError('# '.$count.': '.$error));
+            return $imported;
+          }
+          $imported['NEW'][$count] = $fields;
+        } else {
+          // nessuna modifica
+          $imported['NONEW'][$count] = $fields;
         }
-        $imported['NEW'][$count] = $fields;
       }
     }
     // ok

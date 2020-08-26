@@ -72,13 +72,6 @@ class Menu {
    private $descrizione;
 
   /**
-   * @var string $icona Nome dell'eventuale icona del menu (nulla se sottomenu)
-   *
-   * @ORM\Column(type="string", length=64, nullable=true)
-   */
-   private $icona;
-
-  /**
    * @var boolean $mega Indica se utilizza la modalità mega menu
    *
    * @ORM\Column(type="boolean", nullable=false)
@@ -189,27 +182,6 @@ class Menu {
    */
   public function setDescrizione($descrizione) {
     $this->descrizione = $descrizione;
-    return $this;
-  }
-
-  /**
-   * Restituisce il nome dell'eventuale icona del menu (nulla se sottomenu)
-   *
-   * @return string Nome dell'icona del menu
-   */
-  public function getIcona() {
-    return $this->icona;
-  }
-
-  /**
-  * Modifica il nome dell'eventuale icona del menu
-   *
-   * @param string $icona Nome dell'icona del menu
-   *
-   * @return Menu Oggetto Menu
-   */
-  public function setIcona($icona) {
-    $this->icona = $icona;
     return $this;
   }
 
