@@ -532,6 +532,10 @@ class AlunniController extends BaseController {
             // errore sulla data
             $form->get('fine')->addError(new FormError($trans->trans('exception.classe_fine_invalido')));
           }
+          if ($cambio->getClasse() == $cambio->getAlunno()->getClasse()) {
+            // errore sulla classe
+            $form->get('classe')->addError(new FormError($trans->trans('exception.classe_non_diversa')));
+          }
           if ($em->getRepository('App:Valutazione')->numeroValutazioni($cambio->getAlunno(), $data, $anno_fine, $classe) > 0) {
             // errore valutazioni presenti
             $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
@@ -555,6 +559,13 @@ class AlunniController extends BaseController {
             ->setInizio($inizio)
             ->setFine($fine)
             ->setNote($note);
+          if ($form->get('cancella')->getData()) {
+            // cancella ore di assenza incongrue
+            $em->getRepository('App:Assenza')->elimina($cambio->getAlunno(), $inizio, $fine);
+            $em->getRepository('App:Entrata')->elimina($cambio->getAlunno(), $inizio, $fine);
+            $em->getRepository('App:Uscita')->elimina($cambio->getAlunno(), $inizio, $fine);
+            $em->getRepository('App:AssenzaLezione')->elimina($cambio->getAlunno(), $inizio, $fine);
+          }
         } elseif ($id == 0 && $tipo == 'T') {
           // trasferimento alunno
           $cambio
@@ -563,6 +574,13 @@ class AlunniController extends BaseController {
             ->setClasse($classe)
             ->setNote($note);
           $cambio->getAlunno()->setClasse(null);
+          if ($form->get('cancella')->getData()) {
+            // cancella ore di assenza incongrue
+            $em->getRepository('App:Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $em->getRepository('App:Entrata')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $em->getRepository('App:Uscita')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $em->getRepository('App:AssenzaLezione')->elimina($cambio->getAlunno(), $data, $anno_fine);
+          }
         } elseif ($id == 0 && $tipo == 'S') {
           // cambio sezione alunno
           $cambio->getAlunno()->setClasse($cambio->getClasse());
@@ -571,6 +589,13 @@ class AlunniController extends BaseController {
             ->setFine($fine)
             ->setClasse($classe)
             ->setNote($note);
+          if ($form->get('cancella')->getData()) {
+            // cancella ore di assenza incongrue
+            $em->getRepository('App:Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $em->getRepository('App:Entrata')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $em->getRepository('App:Uscita')->elimina($cambio->getAlunno(), $data, $anno_fine);
+            $em->getRepository('App:AssenzaLezione')->elimina($cambio->getAlunno(), $data, $anno_fine);
+          }
         }
         // memorizza modifiche
         $em->flush();

@@ -1161,3 +1161,4 @@ exception.cambio_classe_esistente: Esiste già un altro cambio classe per lo ste
 exception.classe_inizio_fine_invalido: La data di iniziale è successiva a quella finale.
 exception.classe_valutazioni_presenti: Sono presenti valutazioni in date incongruenti.
 exception.classe_note_presenti: Sono presenti note disciplinari in date incongruenti.
+exception.classe_non_diversa: La classe indicata è uguale a quella attualmente frequentata.

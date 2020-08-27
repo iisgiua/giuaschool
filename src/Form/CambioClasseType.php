@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -92,7 +93,10 @@ class CambioClasseType extends AbstractType {
           'widget' => 'single_text',
           'html5' => false,
           'format' => 'dd/MM/yyyy',
-          'required' => true));
+          'required' => true))
+        ->add('cancella', CheckboxType::class, array('label' => 'label.cancella_dati',
+          'mapped' => false,
+          'required' => false));
     } elseif ($options['formMode'] == 'T') {
       // form trasferimento alunno
       $builder
@@ -111,7 +115,10 @@ class CambioClasseType extends AbstractType {
           'widget' => 'single_text',
           'html5' => false,
           'format' => 'dd/MM/yyyy',
-          'required' => true));
+          'required' => true))
+        ->add('cancella', CheckboxType::class, array('label' => 'label.cancella_dati',
+          'mapped' => false,
+          'required' => false));
     } elseif ($options['formMode'] == 'S') {
       // form cambio sezione
       $builder
@@ -140,7 +147,10 @@ class CambioClasseType extends AbstractType {
           'widget' => 'single_text',
           'html5' => false,
           'format' => 'dd/MM/yyyy',
-          'required' => true));
+          'required' => true))
+        ->add('cancella', CheckboxType::class, array('label' => 'label.cancella_dati',
+          'mapped' => false,
+          'required' => false));
     }
     // aggiunge campi finali
     $builder
