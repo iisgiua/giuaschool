@@ -26,6 +26,8 @@
 
 ###> trinko/giuaschool ###
 /last_deploy.date
+/config/secrets/*
+!/config/secrets/.gitkeep
 /DEV/
 /FILES/archivio/classi/*
 !/FILES/archivio/classi/.gitkeep
