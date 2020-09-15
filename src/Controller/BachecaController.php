@@ -18,6 +18,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use App\Util\BachecaUtil;
 
 
@@ -29,6 +34,7 @@ class BachecaController extends AbstractController {
   /**
    * Visualizza gli avvisi destinati ai docenti
    *
+   * @param Request $request Pagina richiesta
    * @param SessionInterface $session Gestore delle sessioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
@@ -38,15 +44,18 @@ class BachecaController extends AbstractController {
    * @Route("/bacheca/avvisi/{pagina}", name="bacheca_avvisi",
    *    requirements={"pagina": "\d+"},
    *    defaults={"pagina": "0"},
-   *    methods={"GET"})
+   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(SessionInterface $session, BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, SessionInterface $session, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
-    $limite = 15;
+    $limite = 20;
     // recupera criteri dalla sessione
+    $cerca = array();
+    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'D');
+    $cerca['oggetto'] = $session->get('/APP/ROUTE/bacheca_avvisi/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/bacheca_avvisi/pagina', 1);
@@ -54,13 +63,42 @@ class BachecaController extends AbstractController {
       // pagina specificata: la conserva in sessione
       $session->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
     }
+    // form di ricerca
+    $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi', FormType::class)
+      ->add('visualizza', ChoiceType::class, array('label' => 'label.avvisi_filtro_visualizza',
+        'data' => $cerca['visualizza'],
+        'choices' => ['label.avvisi_da_leggere' => 'D', 'label.avvisi_tutti' => 'T'],
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true))
+      ->add('oggetto', TextType::class, array('label' => 'label.avvisi_filtro_oggetto',
+        'data' => $cerca['oggetto'],
+        'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $cerca['visualizza'] = $form->get('visualizza')->getData();
+      $cerca['oggetto'] = $form->get('oggetto')->getData();
+      $pagina = 1;
+      $session->set('/APP/ROUTE/bacheca_avvisi/visualizza', $cerca['visualizza']);
+      $session->set('/APP/ROUTE/bacheca_avvisi/oggetto', $cerca['oggetto']);
+      $session->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
+    }
     // recupera dati
-    $ultimo_accesso = \DateTime::createFromFormat('d/m/Y H:i:s',
-      ($session->get('/APP/UTENTE/ultimo_accesso') ? $session->get('/APP/UTENTE/ultimo_accesso') : '01/01/2018 00:00:00'));
-    $dati = $bac->bachecaAvvisi($pagina, $limite, $this->getUser(), $ultimo_accesso);
+    $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
     // mostra la pagina di risposta
     return $this->render('bacheca/avvisi.html.twig', array(
       'pagina_titolo' => 'page.bacheca_avvisi',
+      'form' => $form->createView(),
+      'form_help' => null,
+      'form_success' => null,
       'page' => $pagina,
       'maxPages' => ceil($dati['lista']->count() / $limite),
       'dati' => $dati,
@@ -68,7 +106,7 @@ class BachecaController extends AbstractController {
   }
 
   /**
-   * Mostra i dettagli di un avviso destinato al docente
+   * Mostra i dettagli di un avviso destinato al docente e segna la lettura
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -80,28 +118,28 @@ class BachecaController extends AbstractController {
    *    requirements={"id": "\d+"},
    *    methods={"GET"})
    *
-   * @IsGranted("ROLE_DOCENTE")
+   * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function avvisoDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
+  public function avvisiDettagliAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
     // inizializza
     $dati = null;
-    $letto = null;
     // controllo avviso
     $avviso = $em->getRepository('App:Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    if (!$bac->destinatario($avviso, $this->getUser(), $letto)) {
+    if (!$bac->destinatario($avviso, $this->getUser())) {
       // errore: non è destinatario dell'avviso
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge dati
     $dati = $bac->dettagliAvviso($avviso);
+    // aggiorna lettura
+    $bac->letturaAvviso($avviso, $this->getUser());
     // visualizza pagina
     return $this->render('bacheca/scheda_avviso.html.twig', array(
       'dati' => $dati,
-      'lettoCoord' => $letto,
     ));
   }
 
@@ -170,40 +208,77 @@ class BachecaController extends AbstractController {
   }
 
   /**
-   * Conferma la lettura dell'avviso destinato ai coordinatori
+   * Visualizza gli avvisi destinati al personale ATA
    *
-   * @param EntityManagerInterface $em Gestore delle entità
+   * @param Request $request Pagina richiesta
+   * @param SessionInterface $session Gestore delle sessioni
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param int $id ID dell'avviso
+   * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/bacheca/avvisi/coordinatori/firma/{id}", name="bacheca_avvisi_coordinatori_firma",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
+   * @Route("/bacheca/avvisi/ata/{pagina}", name="bacheca_avvisi_ata",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": "0"},
+   *    methods={"GET","POST"})
    *
-   * @IsGranted("ROLE_DOCENTE")
+   * @IsGranted("ROLE_ATA")
    */
-  public function avvisiCoordinatoriFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
-    $letto = null;
-    // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($id);
-    if (!$avviso) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
+  public function avvisiATAAction(Request $request, SessionInterface $session, BachecaUtil $bac, $pagina) {
+    // inizializza variabili
+    $dati = null;
+    $limite = 20;
+    // recupera criteri dalla sessione
+    $cerca = array();
+    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'D');
+    $cerca['oggetto'] = $session->get('/APP/ROUTE/bacheca_avvisi_ata/oggetto', '');
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $session->get('/APP/ROUTE/bacheca_avvisi_ata/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $session->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
     }
-    if (!$bac->destinatario($avviso, $this->getUser(), $letto)) {
-      // errore: non è destinatario dell'avviso
-      throw $this->createNotFoundException('exception.id_notfound');
+    // form di ricerca
+    $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi_ata', FormType::class)
+      ->add('visualizza', ChoiceType::class, array('label' => 'label.avvisi_filtro_visualizza',
+        'data' => $cerca['visualizza'],
+        'choices' => ['label.avvisi_da_leggere' => 'D', 'label.avvisi_tutti' => 'T'],
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true))
+      ->add('oggetto', TextType::class, array('label' => 'label.avvisi_filtro_oggetto',
+        'data' => $cerca['oggetto'],
+        'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $cerca['visualizza'] = $form->get('visualizza')->getData();
+      $cerca['oggetto'] = $form->get('oggetto')->getData();
+      $pagina = 1;
+      $session->set('/APP/ROUTE/bacheca_avvisi_ata/visualizza', $cerca['visualizza']);
+      $session->set('/APP/ROUTE/bacheca_avvisi_ata/oggetto', $cerca['oggetto']);
+      $session->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
     }
-    // aggiorna firma
-    if ($avviso->getDestinatariCoordinatori() && !$letto) {
-      $bac->letturaAvvisoCoordinatori($avviso, $this->getUser());
-      // ok: memorizza dati
-      $em->flush();
-    }
-    // redirect
-    return $this->redirectToRoute('bacheca_avvisi');
+    // recupera dati
+    $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
+    // mostra la pagina di risposta
+    return $this->render('bacheca/avvisi_ata.html.twig', array(
+      'pagina_titolo' => 'page.bacheca_avvisi_ata',
+      'form' => $form->createView(),
+      'form_help' => null,
+      'form_success' => null,
+      'page' => $pagina,
+      'maxPages' => ceil($dati['lista']->count() / $limite),
+      'dati' => $dati,
+    ));
   }
 
 }

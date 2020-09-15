@@ -57,6 +57,18 @@ class Avviso {
   private $tipo;
 
   /**
+   * @var ArrayCollection $sedi Sedi a cui è destinato l'avviso
+   *
+   * @ORM\ManyToMany(targetEntity="Sede")
+   * @ORM\JoinTable(name="gs_avviso_sede",
+   *    joinColumns={@ORM\JoinColumn(name="avviso_id", nullable=false)},
+   *    inverseJoinColumns={@ORM\JoinColumn(name="sede_id", nullable=false)})
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   */
+  private $sedi;
+
+  /**
    * @var \DateTime $data Data dell'evento associato all'avviso
    *
    * @ORM\Column(type="date", nullable=false)
@@ -85,12 +97,20 @@ class Avviso {
   private $oraFine;
 
   /**
-   * @var Cattedra $cattedra Cattedra associata ad una verifica
+   * @var Cattedra $cattedra Cattedra associata ad una verifica (o per altri usi)
    *
    * @ORM\ManyToOne(targetEntity="Cattedra")
    * @ORM\JoinColumn(nullable=true)
    */
   private $cattedra;
+
+  /**
+   * @var Materia $materia Materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
+   *
+   * @ORM\ManyToOne(targetEntity="Materia")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $materia;
 
   /**
    * @var string $oggetto Oggetto dell'avviso
@@ -119,46 +139,45 @@ class Avviso {
   private $allegati;
 
   /**
-   * @var boolean $destinatariStaff Indica se lo staff è destinatario o meno dell'avviso (in base alla sede)
+   * @var array $destinatariAta Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
    *
-   * @ORM\Column(name="destinatari_staff", type="boolean", nullable=false)
+   * @ORM\Column(name="destinatari_ata", type="simple_array", nullable=true)
    */
-  private $destinatariStaff;
+   private $destinatariAta;
 
   /**
-   * @var boolean $destinatariCoordinatori Indica se i coordinatori sono destinatari o meno dell'avviso (in base alla classe)
+   * @var string $destinatari Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
    *
-   * @ORM\Column(name="destinatari_coordinatori", type="boolean", nullable=false)
+   * @ORM\Column(type="simple_array", nullable=true)
    */
-  private $destinatariCoordinatori;
+   private $destinatari;
 
   /**
-   * @var boolean $destinatariDocenti Indica se i docenti sono destinatari o meno dell'avviso (in base alla classe)
+   * @var string $filtroTipo Indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
    *
-   * @ORM\Column(name="destinatari_docenti", type="boolean", nullable=false)
+   * @ORM\Column(name="filtro_tipo", type="string", length=1, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
-  private $destinatariDocenti;
+   private $filtroTipo;
 
   /**
-   * @var boolean $destinatariGenitori Indica se i genitori sono destinatari o meno dell'avviso (in base alla classe)
+   * @var array $filtro Lista degli ID per il tipo di filtro specificato
    *
-   * @ORM\Column(name="destinatari_genitori", type="boolean", nullable=false)
+   * @ORM\Column(name="filtro", type="simple_array", nullable=true)
    */
-  private $destinatariGenitori;
+  private $filtro;
 
   /**
-   * @var boolean $destinatariAlunni Indica se gli alunni sono destinatari o meno dell'avviso (in base alla classe)
+   * @var ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinato l'avviso
    *
-   * @ORM\Column(name="destinatari_alunni", type="boolean", nullable=false)
+   * @ORM\ManyToMany(targetEntity="ListaDistribuzione")
+   * @ORM\JoinTable(name="gs_avviso_lista_distribuzione",
+   *    joinColumns={@ORM\JoinColumn(name="avviso_id", nullable=false)},
+   *    inverseJoinColumns={@ORM\JoinColumn(name="lista_distribuzione_id", nullable=false)})
    */
-  private $destinatariAlunni;
-
-  /**
-   * @var boolean $destinatariIndividuali Indica se i genitori sono destinatari individuali o meno dell'avviso (in base all'utente)
-   *
-   * @ORM\Column(name="destinatari_individuali", type="boolean", nullable=false)
-   */
-  private $destinatariIndividuali;
+  private $listeDistribuzione;
 
   /**
    * @var Docente $docente Docente che ha scritto l'avviso
@@ -234,6 +253,53 @@ class Avviso {
   }
 
   /**
+   * Restituisce le sedi a cui è destinato l'avviso
+   *
+   * @return ArrayCollection Sedi a cui è destinato l'avviso
+   */
+  public function getSedi() {
+    return $this->sedi;
+  }
+
+  /**
+   * Modifica le sedi a cui è destinato l'avviso
+   *
+   * @param ArrayCollection $sedi Sedi a cui è destinato l'avviso
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setSedi(ArrayCollection $sedi) {
+    $this->sedi = $sedi;
+    return $this;
+  }
+
+  /**
+   * Aggiunge una sede a cui è destinato l'avviso
+   *
+   * @param Sede $sede Sede a cui è destinato l'avviso
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function addSede(Sede $sede) {
+    if (!$this->sedi->contains($sede)) {
+      $this->sedi[] = $sede;
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove una sede da quelle a cui è destinato l'avviso
+   *
+   * @param Sede $sede Sedi da rimuovere da quelle a cui è destinato l'avviso
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function removeSede(Sede $sede) {
+    $this->sedi->removeElement($sede);
+    return $this;
+  }
+
+  /**
    * Restituisce la data dell'evento associato all'avviso
    *
    * @return \DateTime Data dell'evento associato all'avviso
@@ -297,7 +363,7 @@ class Avviso {
   }
 
   /**
-   * Restituisce la cattedra associata ad una verifica
+   * Restituisce la cattedra associata ad una verifica (o per altri usi)
    *
    * @return Cattedra Cattedra associata ad una verifica
    */
@@ -306,14 +372,35 @@ class Avviso {
   }
 
   /**
-   * Modifica la cattedra associata ad una verifica
+   * Modifica la cattedra associata ad una verifica (o per altri usi)
    *
    * @param Cattedra $cattedra Cattedra associata ad una verifica
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setCattedra(Cattedra $cattedra) {
+  public function setCattedra(Cattedra $cattedra=null) {
     $this->cattedra = $cattedra;
+    return $this;
+  }
+
+  /**
+   * Restituisce la materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
+   *
+   * @return Materia Materia associata ad una verifica per una cattedra di sostegno
+   */
+  public function getMateria() {
+    return $this->materia;
+  }
+
+  /**
+   * Modifica la materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
+   *
+   * @param Materia $materia Materia associata ad una verifica per una cattedra di sostegno
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setMateria(Materia $materia=null) {
+    $this->materia = $materia;
     return $this;
   }
 
@@ -413,128 +500,191 @@ class Avviso {
   }
 
   /**
-   * Indica se lo staff è destinatario o meno dell'avviso (in base alla sede)
+   * Indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
    *
-   * @return boolean Indica se lo staff è destinatario o meno dell'avviso
+   * @return array Personale ATA destinatario dell'avviso
    */
-  public function getDestinatariStaff() {
-    return $this->destinatariStaff;
+  public function getDestinatariAta() {
+    return $this->destinatariAta;
   }
 
   /**
-   * Modifica l'indicazione sul fatto che lo staff è destinatario o meno dell'avviso (in base alla sede)
+   * Modifica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
    *
-   * @param boolean $destinatariStaff Indica se lo staff è destinatario o meno dell'avviso
+   * @param array $destinatariAta Personale ATA destinatario dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setDestinatariStaff($destinatariStaff) {
-    $this->destinatariStaff = $destinatariStaff;
+  public function setDestinatariAta($destinatariAta) {
+    $this->destinatariAta = $destinatariAta;
     return $this;
   }
 
   /**
-   * Indica se i coordinatori sono destinatari o meno dell'avviso (in base alla classe)
+   * Aggiunge una tipologia di personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
    *
-   * @return boolean Indica se i coordinatori sono destinatari o meno dell'avviso
-   */
-  public function getDestinatariCoordinatori() {
-    return $this->destinatariCoordinatori;
-  }
-
-  /**
-   * Modifica l'indicazione sul fatto che i coordinatori sono destinatari o meno dell'avviso (in base alla classe)
-   *
-   * @param boolean $destinatariCoordinatori Indica se i coordinatori sono destinatari o meno dell'avviso
+   * @param string $destinatario Personale ATA destinatario dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setDestinatariCoordinatori($destinatariCoordinatori) {
-    $this->destinatariCoordinatori = $destinatariCoordinatori;
+  public function addDestinatarioAta($destinatario) {
+    if (!in_array($destinatario, $this->destinatariAta)) {
+      $this->destinatariAta[] = $destinatario;
+    }
     return $this;
   }
 
   /**
-   * Indica se i docenti sono destinatari o meno dell'avviso (in base alla classe)
+   * Rimuove una tipologia di personale ATA dai destinatari dell'avviso [D=DSGA, A=personale ATA]
    *
-   * @return boolean Indica se i docenti sono destinatari o meno dell'avviso
-   */
-  public function getDestinatariDocenti() {
-    return $this->destinatariDocenti;
-  }
-
-  /**
-   * Modifica l'indicazione sul fatto che i docenti sono destinatari o meno dell'avviso (in base alla classe)
-   *
-   * @param boolean $destinatariDocenti Indica se i docenti sono destinatari o meno dell'avviso
+   * @param string $destinatario Personale ATA da rimuovere dai destinatari
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setDestinatariDocenti($destinatariDocenti) {
-    $this->destinatariDocenti = $destinatariDocenti;
+  public function removeDestinatarioAta($destinatario) {
+    if (in_array($destinatario, $this->destinatariAta)) {
+      unset($this->destinatariAta[array_search($destinatario, $this->destinatariAta)]);
+    }
     return $this;
   }
 
   /**
-   * Indica se i genitori sono destinatari o meno dell'avviso (in base alla classe)
+   * Indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
    *
-   * @return boolean Indica se i genitori sono destinatari o meno dell'avviso
+   * @return array Destinatari dell'avviso
    */
-  public function getDestinatariGenitori() {
-    return $this->destinatariGenitori;
+  public function getDestinatari() {
+    return $this->destinatari;
   }
 
   /**
-   * Modifica l'indicazione sul fatto che i genitori sono destinatari o meno dell'avviso (in base alla classe)
+   * Modifica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
    *
-   * @param boolean $destinatariGenitori Indica se i genitori sono destinatari o meno dell'avviso
+   * @param array $destinatari Destinatari dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setDestinatariGenitori($destinatariGenitori) {
-    $this->destinatariGenitori = $destinatariGenitori;
+  public function setDestinatari($destinatari) {
+    $this->destinatari = $destinatari;
     return $this;
   }
 
   /**
-   * Indica se gli alunni sono destinatari o meno dell'avviso (in base alla classe)
+   * Aggiunge un destinatario dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
    *
-   * @return boolean Indica se gli alunni sono destinatari o meno dell'avviso
-   */
-  public function getDestinatariAlunni() {
-    return $this->destinatariAlunni;
-  }
-
-  /**
-   * Modifica l'indicazione sul fatto che gli alunni sono destinatari o meno dell'avviso (in base alla classe)
-   *
-   * @param boolean $destinatariAlunni Indica se gli alunni sono destinatari o meno dell'avviso
+   * @param string $destinatario Destinatario dell'avviso
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setDestinatariAlunni($destinatariAlunni) {
-    $this->destinatariAlunni = $destinatariAlunni;
+  public function addDestinatario($destinatario) {
+    if (!in_array($destinatario, $this->destinatari)) {
+      $this->destinatari[] = $destinatario;
+    }
     return $this;
   }
 
   /**
-   * Indica se i genitori sono destinatari individuali o meno dell'avviso (in base all'utente)
+   * Rimuove un destinatario dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
    *
-   * @return boolean Indica se i genitori sono destinatari individuali o meno dell'avviso
-   */
-  public function getDestinatariIndividuali() {
-    return $this->destinatariIndividuali;
-  }
-
-  /**
-   * Modifica l'indicazione sul fatto che i genitori sono destinatari individuali o meno dell'avviso (in base all'utente)
-   *
-   * @param boolean $destinatariIndividuali Indica se i genitori sono destinatari individuali o meno dell'avviso
+   * @param string $destinatario Destinatario da rimuovere dalla lista
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setDestinatariIndividuali($destinatariIndividuali) {
-    $this->destinatariIndividuali = $destinatariIndividuali;
+  public function removeDestinatario($destinatario) {
+    if (in_array($destinatario, $this->destinatari)) {
+      unset($this->destinatari[array_search($destinatario, $this->destinatari)]);
+    }
+    return $this;
+  }
+
+  /**
+   * Restituisce il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (esclusi coordinatori)]
+   *
+   * @return string Il tipo di filtro da applicare
+   */
+  public function getFiltroTipo() {
+    return $this->filtroTipo;
+  }
+
+  /**
+   * Modifica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (esclusi coordinatori)]
+   *
+   * @param string $filtroTipo Il tipo di filtro da applicare
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setFiltroTipo($filtroTipo) {
+    $this->filtroTipo = $filtroTipo;
+    return $this;
+  }
+
+  /**
+   * Restituisce la lista degli ID per il tipo di filtro specificato
+   *
+   * @return array Lista degli ID per il tipo di filtro specificato
+   */
+  public function getFiltro() {
+    return $this->filtro;
+  }
+
+  /**
+   * Modifica la lista degli ID per il tipo di filtro specificato
+   *
+   * @param array $filtro Lista degli ID per il tipo di filtro specificato
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setFiltro($filtro) {
+    $this->filtro = $filtro;
+    return $this;
+  }
+
+  /**
+   * Aggiunge un filtro alla lista degli ID per il tipo di filtro specificato
+   *
+   * @param string $filtro Filtro da aggiungere alla lista
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function addFiltro($filtro) {
+    if (!in_array($filtro, $this->filtro)) {
+      $this->filtro[] = $filtro;
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove un filtro dalla lista degli ID per il tipo di filtro specificato
+   *
+   * @param string $filtro Filtro da rimuovere dalla lista
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function removeFiltro($filtro) {
+    if (in_array($filtro, $this->filtro)) {
+      unset($this->filtro[array_search($filtro, $this->filtro)]);
+    }
+    return $this;
+  }
+
+  /**
+   * Restituisce le liste di destinatari a cui è destinato l'avviso
+   *
+   * @return ArrayCollection Liste di destinatari a cui è destinato l'avviso
+   */
+  public function getListeDistribuzione() {
+    return $this->listeDistribuzione;
+  }
+
+  /**
+   * Modifica le liste di destinatari a cui è destinato l'avviso
+   *
+   * @param ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinato l'avviso
+   *
+   * @return Avviso Oggetto Avviso
+   */
+  public function setListeDistribuzione(ArrayCollection $listeDistribuzione) {
+    $this->listeDistribuzione = $listeDistribuzione;
     return $this;
   }
 
@@ -616,7 +766,12 @@ class Avviso {
    */
   public function __construct() {
     // valori predefiniti
+    $this->sedi = new ArrayCollection();
     $this->allegati = array();
+    $this->destinatariAta = array();
+    $this->destinatari = array();
+    $this->filtro = array();
+    $this->listeDistribuzione = new ArrayCollection();
     $this->annotazioni = new ArrayCollection();
   }
 
@@ -630,4 +785,3 @@ class Avviso {
   }
 
 }
-

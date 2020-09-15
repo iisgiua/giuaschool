@@ -19,6 +19,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+Use App\Entity\Staff;
 
 
 /**
@@ -41,7 +42,7 @@ class AjaxController extends AbstractController {
    *    defaults={"cognome": "-", "nome": "-", "sede": "-", "pagina": "1"},
    *    methods={"POST"})
    *
-   * @IsGranted("ROLE_STAFF")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function docentiAjaxAction(EntityManagerInterface $em, $cognome, $nome, $sede, $pagina) {
     // inizializza
@@ -95,7 +96,7 @@ class AjaxController extends AbstractController {
    *    defaults={"cognome": "-", "nome": "-", "classe": "-", "sede": "-", "pagina": "1"},
    *    methods={"POST"})
    *
-   * @IsGranted("ROLE_STAFF")
+   * @IsGranted("ROLE_DOCENTE")
    */
   public function alunniAjaxAction(EntityManagerInterface $em, $cognome, $nome, $classe, $sede, $pagina) {
     // inizializza
@@ -103,7 +104,7 @@ class AjaxController extends AbstractController {
       'sede' => array());
     $dati = array();
     // controlla sede
-    if ($this->getUser()->getSede()) {
+    if ($this->getUser() instanceOf Staff && $this->getUser()->getSede()) {
       $search['sede'] = array($this->getUser()->getSede()->getId());
     } elseif ($sede != '-') {
       // restrizione sulle sedi indicate

@@ -1,0 +1,6 @@
+<nav class="gs-navbar-submenu">
+  <ul class="nav nav-tabs">
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'circolari_ata' ? ' class="active"' }}><a href="{{ path('circolari_ata') }}" title="Visualizza le circolari indirizzati al personale ATA">Circolari</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route') == 'bacheca_avvisi_ata' ? ' class="active"' }}><a href="{{ path('bacheca_avvisi_ata') }}" title="Visualizza gli avvisi indirizzati al personale ATA">Avvisi</a></li>
+  </ul>
+</nav>

@@ -311,6 +311,10 @@ class CircolariController extends AbstractController {
         $form->addError(new FormError($trans->trans('exception.lista_altri_invalida')));
       }
       $circolare->setAltri($lista_altri);
+      // forza notifica SEMPRE
+      $circolare->setNotifica(true);
+      // forza firma MAI
+      $circolare->setFirma(false);
       // modifica dati
       if ($form->isValid()) {
         // documento
@@ -976,7 +980,7 @@ class CircolariController extends AbstractController {
   public function docentiAction(Request $request, EntityManagerInterface $em,
                                 SessionInterface $session, CircolariUtil $circ, $pagina) {
     // inizializza
-    $limite = 15;
+    $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // crea lista mesi
     $anno_inizio = substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);

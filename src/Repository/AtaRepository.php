@@ -71,8 +71,8 @@ class AtaRepository extends BaseRepository {
     $ata = $this->createQueryBuilder('a')
       ->select('a.id')
       ->where('a.abilitato=:abilitato')
-      ->andWhere('a.sede IS NULL OR a.sede IN (:sedi)')
-      ->setParameters(['abilitato' => 1, 'sedi' => $sedi])
+      ->andWhere('a.tipo!=:dsga AND (a.sede IS NULL OR a.sede IN (:sedi))')
+      ->setParameters(['dsga' => 'D', 'abilitato' => 1, 'sedi' => $sedi])
       ->getQuery()
       ->getArrayResult();
     // restituisce la lista degli ID

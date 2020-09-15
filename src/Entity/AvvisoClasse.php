@@ -19,7 +19,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * AvvisoClasse - entità
- * Classe a cui è indirizzato l'avviso: usata da destinatari coordinatori, docenti, genitori e alunni
+ * Classe a cui è indirizzato l'avviso: usata per la lettura in classe con destinatari alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\AvvisoClasseRepository")
  * @ORM\Table(name="gs_avviso_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"avviso_id","classe_id"})})
@@ -69,18 +69,11 @@ class AvvisoClasse {
   private $classe;
 
   /**
-   * @var \DateTime $lettoAlunni Data e ora di lettura dell'avviso in classe (se rivolto agli alunni)
+   * @var \DateTime $letto Data e ora di lettura dell'avviso in classe
    *
-   * @ORM\Column(name="letto_alunni", type="datetime", nullable=true)
+   * @ORM\Column(type="datetime", nullable=true)
    */
-  private $lettoAlunni;
-
-  /**
-   * @var \DateTime $lettoCoordinatore Data e ora di lettura dell'avviso dal coordinatore
-   *
-   * @ORM\Column(name="letto_coordinatore", type="datetime", nullable=true)
-   */
-  private $lettoCoordinatore;
+  private $letto;
 
 
   //==================== EVENTI ORM ====================
@@ -160,44 +153,23 @@ class AvvisoClasse {
   }
 
   /**
-   * Restituisce la data e ora di lettura dell'avviso in classe (se rivolto agli alunni)
+   * Restituisce la data e ora di lettura dell'avviso in classe
    *
    * @return \DateTime Data e ora di lettura dell'avviso in classe
    */
-  public function getLettoAlunni() {
-    return $this->lettoAlunni;
+  public function getLetto() {
+    return $this->letto;
   }
 
   /**
-   * Modifica la data e ora di lettura dell'avviso in classe (se rivolto agli alunni)
+   * Modifica la data e ora di lettura dell'avviso in classe
    *
-   * @param \DateTime $lettoAlunni Data e ora di lettura dell'avviso in classe
+   * @param \DateTime $letto Data e ora di lettura dell'avviso in classe
    *
    * @return AvvisoClasse Oggetto AvvisoClasse
    */
-  public function setLettoAlunni($lettoAlunni) {
-    $this->lettoAlunni = $lettoAlunni;
-    return $this;
-  }
-
-  /**
-   * Restituisce la data e ora di lettura dell'avviso dal coordinatore
-   *
-   * @return \DateTime Data e ora di lettura dell'avviso dal coordinatore
-   */
-  public function getLettoCoordinatore() {
-    return $this->lettoCoordinatore;
-  }
-
-  /**
-   * Modifica la data e ora di lettura dell'avviso dal coordinatore
-   *
-   * @param \DateTime $lettoCoordinatore Data e ora di lettura dell'avviso dal coordinatore
-   *
-   * @return AvvisoClasse Oggetto AvvisoClasse
-   */
-  public function setLettoCoordinatore($lettoCoordinatore) {
-    $this->lettoCoordinatore = $lettoCoordinatore;
+  public function setLetto($letto) {
+    $this->letto = $letto;
     return $this;
   }
 
@@ -206,4 +178,3 @@ class AvvisoClasse {
 
 
 }
-

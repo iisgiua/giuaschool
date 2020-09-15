@@ -143,4 +143,61 @@ class ClasseRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
+  /**
+   * Restituisce le classi per le sedi e il filtro indicato relativo agli utenti genitori
+   *
+   * @param array $sedi Sedi di servizio (lista ID di Sede)
+   * @param array|null $filtro Lista di ID per il filtro classi o null se nessun filtro
+   *
+   * @return array Lista di ID delle classi
+   */
+  public function getIdClasseGenitori($sedi, $filtro) {
+    $classi = $this->createQueryBuilder('c')
+      ->select('DISTINCT c.id')
+      ->where('c.sede IN (:sedi)')
+      ->setParameters(['sedi' => $sedi]);
+    if ($filtro) {
+      // filtro genitori
+      $classi
+        ->join('App:Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
+        ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
+        ->andWhere('g.id IN (:lista)')
+        ->setParameter('lista', $filtro)
+        ->setParameter('abilitato', 1);
+    }
+    $classi = $classi
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce la lista degli ID
+    return array_column($classi, 'id');
+  }
+
+  /**
+   * Restituisce le classi per le sedi e il filtro indicato relativo agli utenti alunni
+   *
+   * @param array $sedi Sedi di servizio (lista ID di Sede)
+   * @param array|null $filtro Lista di ID per il filtro classi o null se nessun filtro
+   *
+   * @return array Lista di ID delle classi
+   */
+  public function getIdClasseAlunni($sedi, $filtro) {
+    $classi = $this->createQueryBuilder('c')
+      ->select('DISTINCT c.id')
+      ->where('c.sede IN (:sedi)')
+      ->setParameters(['sedi' => $sedi]);
+    if ($filtro) {
+      // filtro alunni
+      $classi
+        ->join('App:Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
+        ->andWhere('a.id IN (:lista)')
+        ->setParameter('lista', $filtro)
+        ->setParameter('abilitato', 1);
+    }
+    $classi = $classi
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce la lista degli ID
+    return array_column($classi, 'id');
+  }
+
 }

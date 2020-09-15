@@ -1,5 +1,7 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
+{% form_theme form _self %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid gs-mt-4">
   <div class="panel panel-primary" >
@@ -15,18 +17,28 @@
       {{ form_row(form.oraFine) }}
       {{ form_row(form.testo) }}
       <div class="form-group">
-        <label class="col-sm-2 control-label required" for="avvisi_attivita_edit_destinatari">Destinatari</label>
+        <label class="col-sm-2 control-label required">{{ 'label.sede'|trans }}</label>
         <div class="col-sm-10">
-          {{ form_widget(form.filtro) }}
-          <div id="sedi" style="display:none">
-            {{ form_widget(form.filtroSedi) }}
-          </div>
-          <div id="classi" style="display:none">
-            {{ form_widget(form.filtroClassi) }}
-          </div>
+          {{ form_widget(form.sedi) }}
         </div>
       </div>
-      <div class="help-block gs-text-normal"><em>{{ 'message.info_avviso_con_annotazione'|trans }}</em></div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">{{ 'label.destinatari'|trans }}</label>
+        <div class="col-sm-10">
+          <div id="gs-modal-classi">
+            {{ form_widget(form.classi) }}
+          </div>
+          {{ form_widget(form.filtro) }}
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+          <div class="help-block gs-text-normal"><em>{{ 'message.info_avviso_con_annotazione'|trans }}</em></div>
+          {{ form_widget(form.submit) }}
+          {{ form_widget(form.cancel) }}
+        </div>
+      </div>
       {{ form_end(form) }}
     </div>
   </div>
@@ -85,18 +97,47 @@ $(document).ready(function() {
       $(this).parent().removeClass('active');
     }
   }).change();
-  $("#avvisi_attivita_edit_filtro").change(function() {
-    $('#sedi').hide();
-    $('#classi').hide();
-    switch ($(this).val()) {
-      case 'S':
-        $('#sedi').show();
-        break;
-      case 'C':
-        $('#classi').show();
-        break;
-    }
+  $("input[name='avviso[sedi][]']").change(function() {
+    $('input[name="avviso[sedi][]"]:checked').each(function() {
+      var s=$(this).parent().text().trim();
+      $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',false).parent().removeClass('text-muted');
+    });
+    $('input[name="avviso[sedi][]"]:not(:checked)').each(function() {
+      var s=$(this).parent().text().trim();
+      $('#gs-modal-classi div[data-sede="'+s+'"] input').prop('disabled',true).prop('checked',false).
+        parent().addClass('text-muted').removeClass('active');
+    });
   }).change();
+  // init
+  var c = '{{ form.filtro.vars.value }}'.split(',');
+  c.forEach(function(i) {
+    $('#avviso_classi_'+i).click();
+  });
 });
 </script>
+{% endblock %}
+
+{% block _avviso_classi_widget %}
+  {% set prec = '' %}
+  {% for group_label, group in choices %}
+    {% if group_label[:-2] != prec %}
+      {% if prec != '' %}
+</div>
+      {% endif %}
+      {% set prec = group_label[:-2] %}
+<div class="col-sm-6" data-sede="{{ prec }}">
+  <div><strong><em>{{ prec }}</em></strong></div>
+    {% endif %}
+  <div class="row">
+    {% for key, choice in group %}
+      {{- form_widget(form[key], {
+        parent_label_class: 'gs-checkbox-inline col-sm-2 gs-pt-1',
+        translation_domain: choice_translation_domain,
+      }) -}}
+    {% endfor %}
+  </div>
+  {% endfor %}
+  {% if prec != '' %}
+</div>
+  {% endif %}
 {% endblock %}

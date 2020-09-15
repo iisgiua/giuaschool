@@ -12,13 +12,10 @@
 
 namespace App\Repository;
 
-use \Doctrine\ORM\EntityRepository;
-
 
 /**
  * AvvisoClasse - repository
  */
-class AvvisoClasseRepository extends EntityRepository {
+class AvvisoClasseRepository extends BaseRepository {
 
 }
-

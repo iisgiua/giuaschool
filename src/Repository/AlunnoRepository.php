@@ -150,7 +150,7 @@ class AlunnoRepository extends BaseRepository {
       ->where('a.abilitato=:abilitato')
       ->setParameters(['abilitato' => -1]);
     // crea lista con pagine
-    $res = $this->paginazione($query->getQuery(), $page);
+    $res = $this->paginazione($query->getQuery(), $pagina);
     return $res['lista'];
   }
 

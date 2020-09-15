@@ -18,16 +18,16 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * AvvisoSede - entità
- * Sede a cui è indirizzato l'avviso: usata da destinatari staff
+ * AvvisoUtente - entità
+ * Utente a cui è indirizzato l'avviso: usata da destinatari genitori
  *
- * @ORM\Entity(repositoryClass="App\Repository\AvvisoSedeRepository")
- * @ORM\Table(name="gs_avviso_sede", uniqueConstraints={@ORM\UniqueConstraint(columns={"avviso_id","sede_id"})})
+ * @ORM\Entity(repositoryClass="App\Repository\AvvisoUtenteRepository")
+ * @ORM\Table(name="gs_avviso_utente", uniqueConstraints={@ORM\UniqueConstraint(columns={"avviso_id","utente_id"})})
  * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"avviso","sede"}, message="field.unique")
+ * @UniqueEntity(fields={"avviso","utente"}, message="field.unique")
  */
-class AvvisoSede {
+class AvvisoUtente {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -59,14 +59,21 @@ class AvvisoSede {
   private $avviso;
 
   /**
-   * @var Sede $sede Sede a cui è indirizzato l'avviso
+   * @var Utente $utente Utente destinatario della circolare
    *
-   * @ORM\ManyToOne(targetEntity="Sede")
+   * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $sede;
+  private $utente;
+
+  /**
+   * @var \DateTime $letto Data e ora di lettura dell'avviso da parte dell'utente
+   *
+   * @ORM\Column(type="datetime", nullable=true)
+   */
+  private $letto;
 
 
   //==================== EVENTI ORM ====================
@@ -117,7 +124,7 @@ class AvvisoSede {
    *
    * @param Avviso $avviso Avviso a cui ci si riferisce
    *
-   * @return AvvisoSede Oggetto AvvisoSede
+   * @return AvvisoUtente Oggetto AvvisoUtente
    */
   public function setAvviso(Avviso $avviso) {
     $this->avviso = $avviso;
@@ -125,23 +132,44 @@ class AvvisoSede {
   }
 
   /**
-   * Restituisce la sede a cui è indirizzato l'avviso
+   * Restituisce l'utente destinatario dell'avviso
    *
-   * @return Sede Sede a cui è indirizzato l'avviso
+   * @return Utente Utente destinatario dell'avviso
    */
-  public function getSede() {
-    return $this->sede;
+  public function getUtente() {
+    return $this->utente;
   }
 
   /**
-   * Modifica la sede a cui è indirizzato l'avviso
+   * Modifica l'utente destinatario dell'avviso
    *
-   * @param Sede $sede Sede a cui è indirizzato l'avviso
+   * @param Utente $utente Utente destinatario dell'avviso
    *
-   * @return AvvisoSede Oggetto AvvisoSede
+   * @return AvvisoUtente Oggetto AvvisoUtente
    */
-  public function setSede(Sede $sede) {
-    $this->sede = $sede;
+  public function setUtente(Utente $utente) {
+    $this->utente = $utente;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data e ora di lettura dell'avviso
+   *
+   * @return \DateTime Data e ora di lettura dell'avviso
+   */
+  public function getLetto() {
+    return $this->letto;
+  }
+
+  /**
+   * Modifica la data e ora di lettura dell'avviso
+   *
+   * @param \DateTime $letto Data e ora di lettura dell'avviso
+   *
+   * @return AvvisoUtente Oggetto AvvisoUtente
+   */
+  public function setLetto($letto) {
+    $this->letto = $letto;
     return $this;
   }
 
@@ -150,4 +178,3 @@ class AvvisoSede {
 
 
 }
-

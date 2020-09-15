@@ -11,17 +11,61 @@
     <div class="gs-text-normal">{{ dati.testo|raw|nl2br }}</div>
     <div class="text-right gs-text-normal"><em>({{ dati.avviso.docente.nome }} {{ dati.avviso.docente.cognome }})</em></div>
   </div>
-{% if not dati.avviso.destinatariIndividuali %}
   <div class="gs-mt-2">
     <strong>Destinatari:</strong>
-    {{ dati.avviso.destinatariDocenti ? 'Docenti' : 'Genitori' }} della classe {{ dati.classi[0].anno }}ª {{ dati.classi[0].sezione }}
+    {% if 'D' in dati.avviso.destinatari %}<span class="gs-mr-2">Docenti</span>{% endif %}
+    {% if 'G' in dati.avviso.destinatari %}<span class="gs-mr-2">Genitori</span>{% endif %}
+    {% if 'A' in dati.avviso.destinatari %}<span class="gs-mr-2">Alunni</span>{% endif %}
   </div>
-{% endif %}
-{% if dati.avviso.destinatariIndividuali and dati.utenti|length > 0 %}
+{% if dati.utenti|length > 0 %}
   <div class="gs-mt-2">
-    <strong>Destinatari genitori di:</strong>
+    <strong>Filtro utenti:</strong>
+    <div class="gs-ml-4">
   {% for u in dati.utenti %}
-    {{ u.cognome }} {{ u.nome }} ({{ u.letto ? 'letto '~(u.letto|date('d/m/Y G:i')) : 'non letto' }}){{ not loop.last ? ',' }}
+    {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }}) {{ u.anno }}ª {{ u.sezione }}
+    {% if 'A' in dati.avviso.destinatari %}
+      {{ u.letto ? '- Letto dall\'alunno in data '~(u.letto|date('d/m/Y G:i')) : '- Non letto dall\'alunno' }}
+    {% endif %}
+    {% if 'G' in dati.avviso.destinatari %}
+      {{ u.letto_genitore ? '- Letto dal genitore in data '~(u.letto_genitore|date('d/m/Y G:i')) : '- Non letto dal genitore' }}
+    {% endif %}
+    {{ not loop.last ? '<br>' }}
   {% endfor %}
+    </div>
+  </div>
+{% else %}
+  <div class="gs-mt-2">
+    <strong>Filtro:</strong>
+    Intera classe
   </div>
 {% endif %}
+  <div class="gs-mt-2">
+    <strong>Annotazione sul Registro:</strong> {{ dati.avviso.annotazioni|length > 0 ? 'Si' : 'No' }}
+  </div>
+  <div class="gs-mt-2">
+    <strong>Statistiche di lettura:</strong>
+{% if dati.statistiche.docenti[0] > 0 %}
+    <div class="gs-ml-4">
+      Docenti: {{ (dati.statistiche.docenti[1] / dati.statistiche.docenti[0] * 100)|number_format(0) }}% ({{ dati.statistiche.docenti[1] }} su {{ dati.statistiche.docenti[0] }})
+    </div>
+{% endif %}
+{% if dati.statistiche.genitori[0] > 0 %}
+    <div class="gs-ml-4">
+      Genitori: {{ (dati.statistiche.genitori[1] / dati.statistiche.genitori[0] * 100)|number_format(0) }}% ({{ dati.statistiche.genitori[1] }} su {{ dati.statistiche.genitori[0] }})
+    </div>
+{% endif %}
+{% if dati.statistiche.alunni[0] > 0 %}
+    <div class="gs-ml-4">
+      Alunni: {{ (dati.statistiche.alunni[1] / dati.statistiche.alunni[0] * 100)|number_format(0) }}% ({{ dati.statistiche.alunni[1] }} su {{ dati.statistiche.alunni[0] }})
+    </div>
+{% endif %}
+{% if dati.statistiche.classi[0] > 0 %}
+    <div class="gs-ml-4">
+      Classi: {{ (dati.statistiche.classi[1] / dati.statistiche.classi[0] * 100)|number_format(0) }}%  ({{ dati.statistiche.classi[1] }} su {{ dati.statistiche.classi[0] }})
+  {% if dati.statistiche.classi[1] < dati.statistiche.classi[0] %}
+      <br>Da leggere in: {% for c in dati.statistiche.classi[2] %}{{ c }}{{ not loop.last ? ', '}}{% endfor %}
+  {% endif %}
+    </div>
+{% endif %}
+  </div>
+</div>

@@ -17,6 +17,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use App\Util\BachecaUtil;
 use App\Entity\Alunno;
+use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Annotazione;
 use App\Entity\AvvisoIndividuale;
@@ -81,7 +82,7 @@ class AgendaUtil {
    */
   public function agendaEventi(Docente $docente, $mese) {
     $dati = null;
-    // colloqui
+    // colloqui confermati con il docente
     $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
       ->join('rc.colloquio', 'c')
       ->where('rc.stato=:stato AND MONTH(rc.data)=:mese AND c.docente=:docente')
@@ -92,55 +93,82 @@ class AgendaUtil {
     foreach ($colloqui as $c) {
       $dati[intval($c->getData()->format('j'))]['colloqui'] = 1;
     }
-    // attivita
+    // attivita che coinvolgono il docente o la classe
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
-      ->join('avc.classe', 'cl')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.classe=cl.id')
-      ->where('a.destinatariDocenti=:destinatario AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c.docente=:docente AND c.attiva=:attiva')
-      ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'mese' => $mese->format('n'),
-        'docente' => $docente, 'attiva' => 1])
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND au.utente=:docente')
+      ->setParameters(['tipo' => 'A', 'mese' => $mese->format('n'), 'docente' => $docente])
       ->getQuery()
       ->getResult();
     foreach ($attivita as $a) {
       $dati[intval($a->getData()->format('j'))]['attivita'] = 1;
     }
-    // verifiche
-    $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+    // verifiche inserite dal docente
+    $verifiche1 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->where('a.docente=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese')
       ->setParameters(['docente' => $docente, 'tipo' => 'V', 'mese' => $mese->format('n')])
       ->getQuery()
       ->getResult();
+    // verifiche sulla cattedra del docente inserite da itp
     $verifiche2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=c.materia AND c2.docente=:docente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
-      ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
-      ->setParameters(['docente' => $docente, 'tipo' => 'V', 'mese' => $mese->format('n'), 'attiva' => 1,
-        'no_destinatario' => 0])
+      ->setParameters(['docente' => $docente, 'tipo' => 'V', 'mese' => $mese->format('n'), 'attiva' => 1])
       ->getQuery()
       ->getResult();
-    foreach (array_merge($verifiche, $verifiche2) as $v) {
+    // verifiche sulla cattedra del docente inserite da sostegno
+    $verifiche3 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+      ->join('a.cattedra', 'c')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=a.materia AND c2.docente=:docente')
+      ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
+      ->setParameters(['docente' => $docente, 'tipo' => 'V', 'mese' => $mese->format('n'), 'attiva' => 1])
+      ->getQuery()
+      ->getResult();
+    // verifiche dell'alunno per cattedre di sostegno
+    $verifiche4 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+      ->join('a.cattedra', 'c')
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+      ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
+      ->setParameters(['docente' => $docente, 'tipo' => 'V', 'mese' => $mese->format('n'), 'attiva' => 1])
+      ->getQuery()
+      ->getResult();
+    foreach (array_merge($verifiche1, $verifiche2, $verifiche3, $verifiche4) as $v) {
       $dati[intval($v->getData()->format('j'))]['verifiche'] = 1;
     }
-    // compiti
-    $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+    // compiti inseriti dal docente
+    $compiti1 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->where('a.docente=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese')
       ->setParameters(['docente' => $docente, 'tipo' => 'P', 'mese' => $mese->format('n')])
       ->getQuery()
       ->getResult();
+    // compiti sulla cattedra del docente inserite da itp
     $compiti2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
-      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=c.materia AND c2.docente=:docente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
-      ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
-      ->setParameters(['docente' => $docente, 'tipo' => 'P', 'mese' => $mese->format('n'), 'attiva' => 1,
-        'no_destinatario' => 0])
+      ->setParameters(['docente' => $docente, 'tipo' => 'P', 'mese' => $mese->format('n'), 'attiva' => 1])
       ->getQuery()
       ->getResult();
-    foreach (array_merge($compiti, $compiti2) as $c) {
+    // compiti sulla cattedra del docente inserite da sostegno
+    $compiti3 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+      ->join('a.cattedra', 'c')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=a.materia AND c2.docente=:docente')
+      ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
+      ->setParameters(['docente' => $docente, 'tipo' => 'P', 'mese' => $mese->format('n'), 'attiva' => 1])
+      ->getQuery()
+      ->getResult();
+    // compiti dell'alunno per cattedre di sostegno
+    $compiti4 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+      ->join('a.cattedra', 'c')
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+      ->where('a.docente!=:docente AND a.tipo=:tipo AND MONTH(a.data)=:mese AND c2.attiva=:attiva')
+      ->setParameters(['docente' => $docente, 'tipo' => 'P', 'mese' => $mese->format('n'), 'attiva' => 1])
+      ->getQuery()
+      ->getResult();
+    foreach (array_merge($compiti1, $compiti2, $compiti3, $compiti4) as $c) {
       $dati[intval($c->getData()->format('j'))]['compiti'] = 1;
     }
     // festività
@@ -190,35 +218,47 @@ class AgendaUtil {
     } elseif ($tipo == 'A') {
       // attività
       $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
-        ->join('avc.classe', 'cl')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.classe=cl.id')
-        ->where('a.destinatariDocenti=:destinatario AND a.tipo=:tipo AND a.data=:data AND c.docente=:docente AND c.attiva=:attiva')
-        ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'data' => $data->format('Y-m-d'),
-          'docente' => $docente, 'attiva' => 1])
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->where('a.tipo=:tipo AND a.data=:data AND au.utente=:docente')
+        ->setParameters(['tipo' => 'A', 'data' => $data->format('Y-m-d'), 'docente' => $docente])
         ->getQuery()
         ->getResult();
       foreach ($attivita as $a) {
         $dati['attivita'][] = $this->bac->dettagliAvviso($a);
       }
     } elseif ($tipo == 'V') {
-      // verifiche
-      $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+      // verifiche inserite dal docente
+      $verifiche1 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->where('a.docente=:docente AND a.tipo=:tipo AND a.data=:data')
         ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $data->format('Y-m-d')])
         ->getQuery()
         ->getResult();
+      // verifiche sulla cattedra del docente inserite da itp
       $verifiche2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=c.materia AND c2.docente=:docente')
         ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
-        ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
-        ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $data->format('Y-m-d'), 'attiva' => 1,
-          'no_destinatario' => 0])
+        ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $data->format('Y-m-d'), 'attiva' => 1])
         ->getQuery()
         ->getResult();
-      foreach (array_merge($verifiche, $verifiche2) as $k=>$v) {
+      // verifiche sulla cattedra del docente inserite da sostegno
+      $verifiche3 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+        ->join('a.cattedra', 'c')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=a.materia AND c2.docente=:docente')
+        ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
+        ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $data->format('Y-m-d'), 'attiva' => 1])
+        ->getQuery()
+        ->getResult();
+      // verifiche dell'alunno per cattedre di sostegno
+      $verifiche4 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+        ->join('a.cattedra', 'c')
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+        ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
+        ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $data->format('Y-m-d'), 'attiva' => 1])
+        ->getQuery()
+        ->getResult();
+      foreach (array_merge($verifiche1, $verifiche2, $verifiche3, $verifiche4) as $k=>$v) {
         $dati['verifiche'][$k] = $this->bac->dettagliAvviso($v);
         // edit
         if ($this->azioneEvento('edit', $v->getData(), $docente, $v)) {
@@ -233,22 +273,38 @@ class AgendaUtil {
       }
     } elseif ($tipo == 'P') {
       // compiti
-      $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+      // verifiche inserite dal docente
+      $compiti1 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->where('a.docente=:docente AND a.tipo=:tipo AND a.data=:data')
         ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d')])
         ->getQuery()
         ->getResult();
+      // compiti sulla cattedra del docente inserite da itp
       $compiti2 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
         ->join('a.cattedra', 'c')
-        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno IS NOT NULL')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=c.materia AND c2.docente=:docente')
         ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
-        ->andWhere('a.destinatariIndividuali=:no_destinatario OR avi.alunno=c2.alunno')
-        ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d'), 'attiva' => 1,
-          'no_destinatario' => 0])
+        ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d'), 'attiva' => 1])
         ->getQuery()
         ->getResult();
-      foreach (array_merge($compiti, $compiti2) as $k=>$c) {
+      // compiti sulla cattedra del docente inserite da sostegno
+      $compiti3 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+        ->join('a.cattedra', 'c')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.materia=a.materia AND c2.docente=:docente')
+        ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
+        ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d'), 'attiva' => 1])
+        ->getQuery()
+        ->getResult();
+      // compiti dell'alunno per cattedre di sostegno
+      $compiti4 = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+        ->join('a.cattedra', 'c')
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+        ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
+        ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $data->format('Y-m-d'), 'attiva' => 1])
+        ->getQuery()
+        ->getResult();
+      foreach (array_merge($compiti1, $compiti2, $compiti3, $compiti4) as $k=>$c) {
         $dati['compiti'][$k] = $this->bac->dettagliAvviso($c);
         // edit
         if ($this->azioneEvento('edit', $c->getData(), $docente, $c)) {
@@ -320,6 +376,7 @@ class AgendaUtil {
    * @return Array Dati formattati come array associativo
    */
   public function controlloVerifiche(Avviso $avviso) {
+    $dati = array();
     // verifiche in stessa classe e stessa data
     $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
@@ -337,8 +394,44 @@ class AgendaUtil {
     $verifiche = $verifiche
       ->getQuery()
       ->getResult();
+    foreach ($verifiche as $k=>$v) {
+      $dati[$k] = $this->bac->dettagliAvviso($v);
+    }
     // restituisce dati
-    return $verifiche;
+    return $dati;
+  }
+
+  /**
+   * Controlla la presenza di altri compiti nello stesso giorno
+   *
+   * @param Avviso $avviso Avviso su cui eseguire l'azione
+   *
+   * @return Array Dati formattati come array associativo
+   */
+  public function controlloCompiti(Avviso $avviso) {
+    $dati = array();
+    // compiti in stessa classe e stessa data
+    $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+      ->join('a.cattedra', 'c')
+      ->join('c.classe', 'cl')
+      ->where('a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
+      ->setParameters(['tipo' => 'P', 'data' => $avviso->getData()->format('Y-m-d'),
+        'classe' => $avviso->getCattedra()->getClasse()])
+      ->orderBy('cl.anno,cl.sezione', 'ASC');
+    if ($avviso->getId()) {
+      // modifica di avviso esistente
+      $compiti = $compiti
+        ->andWhere('a.id!=:avviso')
+      ->setParameter('avviso', $avviso->getId());
+    }
+    $compiti = $compiti
+      ->getQuery()
+      ->getResult();
+    foreach ($compiti as $k=>$c) {
+      $dati[$k] = $this->bac->dettagliAvviso($c);
+    }
+    // restituisce dati
+    return $dati;
   }
 
   /**
@@ -384,14 +477,15 @@ class AgendaUtil {
   }
 
   /**
-   * Recupera i dati degli eventi per l'alunno indicato relativamente al mese indicato
+   * Recupera i dati degli eventi per il genitore dell'alunno indicato relativamente al mese indicato
    *
-   * @param Alunno $alunno Alunno a cui sono indirizzati gli eventi
+   * @param Genitore $genitore Genitore a cui sono indirizzati gli eventi
+   * @param Alunno $alunno Alunno di riferimento
    * @param \DateTime $mese Mese di riferemento degli eventi da recuperare
    *
    * @return Array Dati formattati come array associativo
    */
-  public function agendaEventiGenitori(Alunno $alunno, $mese) {
+  public function agendaEventiGenitori(Genitore $genitore, Alunno $alunno, $mese) {
     $dati = null;
     // colloqui
     $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
@@ -405,11 +499,9 @@ class AgendaUtil {
     }
     // attivita
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
-      ->join('avc.classe', 'cl')
-      ->where('a.destinatariGenitori=:destinatario AND a.tipo=:tipo AND MONTH(a.data)=:mese AND cl.id=:classe')
-      ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'mese' => $mese->format('n'),
-        'classe' => $alunno->getClasse()])
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND au.utente=:genitore')
+      ->setParameters(['tipo' => 'A', 'mese' => $mese->format('n'), 'genitore' => $genitore])
       ->getQuery()
       ->getResult();
     foreach ($attivita as $a) {
@@ -417,13 +509,9 @@ class AgendaUtil {
     }
     // verifiche
     $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-      ->leftJoin('avi.alunno', 'al')
-      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
-      ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-      ->setParameters(['tipo' => 'V', 'mese' => $mese->format('n'), 'classe' => $alunno->getClasse(),
-        'no_destinatario' => 0, 'alunno' => $alunno])
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND au.utente=:alunno')
+      ->setParameters(['tipo' => 'V', 'mese' => $mese->format('n'), 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
     foreach ($verifiche as $v) {
@@ -431,13 +519,9 @@ class AgendaUtil {
     }
     // compiti
     $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-      ->leftJoin('avi.alunno', 'al')
-      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
-      ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-      ->setParameters(['tipo' => 'P', 'mese' => $mese->format('n'), 'classe' => $alunno->getClasse(),
-        'no_destinatario' => 0, 'alunno' => $alunno])
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND au.utente=:alunno')
+      ->setParameters(['tipo' => 'P', 'mese' => $mese->format('n'), 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
     foreach ($compiti as $c) {
@@ -460,13 +544,14 @@ class AgendaUtil {
   /**
    * Recupera i dettagli degli eventi per il docente indicato relativamente alla data indicata
    *
+   * @param Genitore $genitore Genitore a cui sono indirizzati gli eventi
    * @param Alunno $alunno Alunno a cui sono indirizzati gli eventi
    * @param \DateTime $data Data di riferemento degli eventi da recuperare
    * @param string $tipo Tipo di evento da recuperare
    *
    * @return Array Dati formattati come array associativo
    */
-  public function dettagliEventoGenitore(Alunno $alunno, $data, $tipo) {
+  public function dettagliEventoGenitore(Genitore $genitore, Alunno $alunno, $data, $tipo) {
     $dati = null;
     if ($tipo == 'C') {
       // colloqui
@@ -484,11 +569,9 @@ class AgendaUtil {
     } elseif ($tipo == 'A') {
       // attività
       $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
-        ->join('avc.classe', 'cl')
-        ->where('a.destinatariGenitori=:destinatario AND a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
-        ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'data' => $data->format('Y-m-d'),
-          'classe' => $alunno->getClasse()])
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->where('a.tipo=:tipo AND a.data=:data AND au.utente=:genitore')
+        ->setParameters(['tipo' => 'A', 'data' => $data->format('Y-m-d'), 'genitore' => $genitore])
         ->getQuery()
         ->getResult();
       foreach ($attivita as $a) {
@@ -497,13 +580,9 @@ class AgendaUtil {
     } elseif ($tipo == 'V') {
       // verifiche
       $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-        ->leftJoin('avi.alunno', 'al')
-        ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
-        ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-        ->setParameters(['tipo' => 'V', 'data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
-          'no_destinatario' => 0, 'alunno' => $alunno])
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->where('a.tipo=:tipo AND a.data=:data AND au.utente=:alunno')
+        ->setParameters(['tipo' => 'V', 'data' => $data->format('Y-m-d'), 'alunno' => $alunno])
         ->getQuery()
         ->getResult();
       foreach ($verifiche as $v) {
@@ -512,13 +591,9 @@ class AgendaUtil {
     } elseif ($tipo == 'P') {
       // compiti
       $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-        ->leftJoin('avi.alunno', 'al')
-        ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
-        ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-        ->setParameters(['tipo' => 'P', 'data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
-          'no_destinatario' => 0, 'alunno' => $alunno])
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->where('a.tipo=:tipo AND a.data=:data AND au.utente=:alunno')
+        ->setParameters(['tipo' => 'P', 'data' => $data->format('Y-m-d'), 'alunno' => $alunno])
         ->getQuery()
         ->getResult();
       foreach ($compiti as $c) {
@@ -537,15 +612,13 @@ class AgendaUtil {
    *
    * @return Array Dati formattati come array associativo
    */
-  public function agendaEventiGenitoriAlunni(Alunno $alunno, $mese) {
+  public function agendaEventiAlunni(Alunno $alunno, $mese) {
     $dati = null;
     // attivita
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
-      ->join('avc.classe', 'cl')
-      ->where('a.destinatariAlunni=:destinatario AND a.tipo=:tipo AND MONTH(a.data)=:mese AND cl.id=:classe')
-      ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'mese' => $mese->format('n'),
-        'classe' => $alunno->getClasse()])
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND au.utente=:alunno')
+      ->setParameters(['tipo' => 'A', 'mese' => $mese->format('n'), 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
     foreach ($attivita as $a) {
@@ -553,13 +626,9 @@ class AgendaUtil {
     }
     // verifiche
     $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-      ->leftJoin('avi.alunno', 'al')
-      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
-      ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-      ->setParameters(['tipo' => 'V', 'mese' => $mese->format('n'), 'classe' => $alunno->getClasse(),
-        'no_destinatario' => 0, 'alunno' => $alunno])
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND au.utente=:alunno')
+      ->setParameters(['tipo' => 'V', 'mese' => $mese->format('n'), 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
     foreach ($verifiche as $v) {
@@ -567,13 +636,9 @@ class AgendaUtil {
     }
     // compiti
     $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-      ->join('a.cattedra', 'c')
-      ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-      ->leftJoin('avi.alunno', 'al')
-      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND c.classe=:classe')
-      ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-      ->setParameters(['tipo' => 'P', 'mese' => $mese->format('n'), 'classe' => $alunno->getClasse(),
-        'no_destinatario' => 0, 'alunno' => $alunno])
+      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->where('a.tipo=:tipo AND MONTH(a.data)=:mese AND au.utente=:alunno')
+      ->setParameters(['tipo' => 'P', 'mese' => $mese->format('n'), 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
     foreach ($compiti as $c) {
@@ -602,16 +667,14 @@ class AgendaUtil {
    *
    * @return Array Dati formattati come array associativo
    */
-  public function dettagliEventoGenitoreAlunno(Alunno $alunno, $data, $tipo) {
+  public function dettagliEventoAlunno(Alunno $alunno, $data, $tipo) {
     $dati = null;
     if ($tipo == 'A') {
       // attività
       $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
-        ->join('avc.classe', 'cl')
-        ->where('a.destinatariAlunni=:destinatario AND a.tipo=:tipo AND a.data=:data AND cl.id=:classe')
-        ->setParameters(['destinatario' => 1, 'tipo' => 'A', 'data' => $data->format('Y-m-d'),
-          'classe' => $alunno->getClasse()])
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->where('a.tipo=:tipo AND a.data=:data AND au.utente=:alunno')
+        ->setParameters(['tipo' => 'A', 'data' => $data->format('Y-m-d'), 'alunno' => $alunno])
         ->getQuery()
         ->getResult();
       foreach ($attivita as $a) {
@@ -620,13 +683,9 @@ class AgendaUtil {
     } elseif ($tipo == 'V') {
       // verifiche
       $verifiche = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-        ->leftJoin('avi.alunno', 'al')
-        ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
-        ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-        ->setParameters(['tipo' => 'V', 'data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
-          'no_destinatario' => 0, 'alunno' => $alunno])
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->where('a.tipo=:tipo AND a.data=:data AND au.utente=:alunno')
+        ->setParameters(['tipo' => 'V', 'data' => $data->format('Y-m-d'), 'alunno' => $alunno])
         ->getQuery()
         ->getResult();
       foreach ($verifiche as $v) {
@@ -635,13 +694,9 @@ class AgendaUtil {
     } elseif ($tipo == 'P') {
       // compiti
       $compiti = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
-        ->join('a.cattedra', 'c')
-        ->leftJoin('App:AvvisoIndividuale', 'avi', 'WITH', 'avi.avviso=a.id')
-        ->leftJoin('avi.alunno', 'al')
-        ->where('a.tipo=:tipo AND a.data=:data AND c.classe=:classe')
-        ->andWhere('a.destinatariIndividuali=:no_destinatario OR al.id=:alunno')
-        ->setParameters(['tipo' => 'P', 'data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
-          'no_destinatario' => 0, 'alunno' => $alunno])
+        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->where('a.tipo=:tipo AND a.data=:data AND au.utente=:alunno')
+        ->setParameters(['tipo' => 'P', 'data' => $data->format('Y-m-d'), 'alunno' => $alunno])
         ->getQuery()
         ->getResult();
       foreach ($compiti as $c) {
@@ -653,120 +708,23 @@ class AgendaUtil {
   }
 
   /**
-   * Restituisce i destinatari indicati nei filtri dell'avviso per verifiche o compiti
+   * Aggiorna data lettura dell'evento
    *
-   * @param Avviso $avviso Avviso da leggere
-   *
-   * @return array Dati come array associativo
+   * @param Avviso $avviso Evento di cui segnare la lettura
+   * @param Utente $utente Destinatario dell'avviso
    */
-  public function filtriVerificheCompiti(Avviso $avviso) {
-    $dati = array();
-    // legge classi
-    $dati['classi'] = $this->em->getRepository('App:AvvisoClasse')->createQueryBuilder('avc')
-      ->select('(avc.classe) AS classe')
-      ->join('avc.avviso', 'av')
-      ->join('avc.classe', 'c')
-      ->where('av.id=:avviso')
-      ->setParameters(['avviso' => $avviso->getId()])
+  public function letturaEvento(Avviso $avviso, Utente $utente) {
+    // solo avviso indicato
+    $au = $this->em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+      ->where('au.avviso=:avviso AND au.utente=:utente AND au.letto IS NULL')
+      ->setParameters(['avviso' => $avviso, 'utente' => $utente])
       ->getQuery()
-      ->getArrayResult();
-    // legge utenti
-    $dati['utenti'] = $this->em->getRepository('App:AvvisoIndividuale')->createQueryBuilder('avi')
-      ->select('(avi.genitore) AS genitore,(avi.alunno) AS alunno')
-      ->join('avi.avviso', 'av')
-      ->join('avi.alunno', 'a')
-      ->join('avi.genitore', 'g')
-      ->where('av.id=:avviso AND g.alunno = a.id AND a.abilitato=:abilitato')
-      ->setParameters(['avviso' => $avviso->getId(), 'abilitato' => 1])
-      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->getQuery()
-      ->getArrayResult();
-    // restituisce dati
-    return $dati;
-  }
-
-  /**
-   * Modifica i destinatari per un avviso esistente per verifiche o compiti
-   *
-   * @param Avviso $avviso Avviso da leggere
-   * @param array $avviso_destinatari Lista dei destinatari esistenti
-   * @param string $filtro Filtro per i destinatari [C=classe,I=individuale]
-   * @param array $filtro_id Lista di ID del tipo indicato nel filtro
-   */
-  public function modificaFiltriVerificheCompiti(Avviso $avviso, $avviso_destinatari, $filtro, $filtro_id) {
-    // controlla destinatari
-    if ($filtro == 'C') {
-      // destinataria intera classe
-      $avviso->setDestinatariIndividuali(false);
-      if (!in_array($filtro_id[0], array_column($avviso_destinatari['classi'], 'classe'))) {
-        // nuova classe
-        $classe = $this->em->getRepository('App:Classe')->find($filtro_id[0]);
-        if ($classe) {
-          $ac = (new AvvisoClasse())
-            ->setAvviso($avviso)
-            ->setClasse($classe);
-          $this->em->persist($ac);
-        }
-      }
-    } else {
-      // destinatari individuali
-      $avviso->setDestinatariIndividuali(true);
-      // aggiunge nuovi alunni
-      foreach (array_diff($filtro_id, array_column($avviso_destinatari['utenti'], 'alunno')) as $a) {
-        // nuovo alunno (potrebbe avere più genitori)
-        $lista = $this->em->getRepository('App:Genitore')->findBy(['alunno' => $a]);
-        foreach ($lista as $gen) {
-          $ai = (new AvvisoIndividuale())
-            ->setAvviso($avviso)
-            ->setGenitore($gen)
-            ->setAlunno($gen->getAlunno());
-          $this->em->persist($ai);
-        }
-      }
+      ->getOneOrNullResult();
+    // aggiorna data lettura
+    if ($au) {
+      $au->setLetto(new \DateTime());
+      $this->em->flush();
     }
-    // cancella altre classi (assicura rimanga solo una classe)
-    foreach (array_diff(array_column($avviso_destinatari['classi'], 'classe'), array($filtro_id[0])) as $c) {
-      $ac = $this->em->getRepository('App:AvvisoClasse')->findOneBy(['avviso' => $avviso->getId(), 'classe' => $c]);
-      if ($ac) {
-        $this->em->remove($ac);
-      }
-    }
-    // rimuove alunni non più presenti
-    foreach (array_diff(array_column($avviso_destinatari['utenti'], 'alunno'), $filtro_id) as $a) {
-      // cancella alunno (potrebbe avere più genitori)
-      $lista = $this->em->getRepository('App:AvvisoIndividuale')->findBy(['avviso' => $avviso->getId(), 'alunno' => $a]);
-      foreach ($lista as $ai) {
-        $this->em->remove($ai);
-      }
-    }
-  }
-
-  /**
-   * Elimina i destinatari per un avviso esistente per verifiche o compiti
-   *
-   * @param Avviso $avviso Avviso da leggere
-   *
-   * @return array Destinatari eliminati, come array associativo
-   */
-  public function eliminaFiltriVerificheCompiti(Avviso $avviso) {
-    $modifiche = array();
-    $modifiche['classi'] = [];
-    $modifiche['utenti'] = [];
-    // classi
-    $classi = $this->em->getRepository('App:AvvisoClasse')->findBy(['avviso' => $avviso->getId()]);
-    foreach ($classi as $c) {
-      $modifiche['classi'][] = $c->getClasse()->getId();
-      $this->em->remove($c);
-    }
-    // utenti
-    $utenti = $this->em->getRepository('App:AvvisoIndividuale')->findBy(['avviso' => $avviso->getId()]);
-    foreach ($utenti as $u) {
-      $modifiche['utenti'][] = ['genitore' => $u->getGenitore()->getId(), 'alunno' => $u->getAlunno()->getId()];
-      $this->em->remove($u);
-    }
-    // restituisce le modifiche
-    return $modifiche;
   }
 
 }
-

@@ -33,10 +33,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Annotazione;
 use App\Entity\Avviso;
+use App\Entity\AvvisoUtente;
 use App\Entity\Firma;
 use App\Entity\FirmaSostegno;
 use App\Entity\Lezione;
 use App\Entity\Nota;
+use App\Entity\Notifica;
 use App\Entity\Staff;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
@@ -239,8 +241,8 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function addAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
-                             $cattedra, $classe, $data, $ora) {
+
+                           public function addAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $classe, $data, $ora) {
     // inizializza
     $label = array();
     // controlla classe
@@ -415,8 +417,8 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function editAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
-                              $cattedra, $classe, $data, $ora) {
+  public function editAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator,
+                             RegistroUtil $reg, LogHandler $dblogger, $cattedra, $classe, $data, $ora) {
     // inizializza
     $label = array();
     // controlla classe
@@ -612,7 +614,7 @@ class RegistroController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function deleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
-                                $classe, $data, $ora) {
+                               $classe, $data, $ora) {
     // controlla classe
     $classe = $em->getRepository('App:Classe')->find($classe);
     if (!$classe) {
@@ -765,13 +767,11 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function annotazioneEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac,
-                                         LogHandler $dblogger, $classe, $data, $id) {
+  public function annotazioneEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+                                        RegistroUtil $reg, BachecaUtil $bac, LogHandler $dblogger, $classe, $data, $id) {
     // inizializza
     $label = array();
-    $dest_filtro['sedi'] = [];
-    $dest_filtro['classi'] = [];
-    $dest_filtro['utenti'] = [];
+    $dest_filtro = [];
     // controlla classe
     $classe = $em->getRepository('App:Classe')->find($classe);
     if (!$classe) {
@@ -793,10 +793,10 @@ class RegistroController extends AbstractController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      if ($annotazione->getAvviso()) {
-        $dest_filtro = $bac->filtriAvviso($annotazione->getAvviso());
-      }
       $annotazione_old = clone $annotazione;
+      if ($annotazione->getAvviso()) {
+        $dest_filtro = $annotazione->getAvviso()->getFiltro();
+      }
     } else {
       // azione add
       $annotazione = (new Annotazione())
@@ -824,9 +824,9 @@ class RegistroController extends AbstractController {
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     // opzione scelta filtro
     $alunni = array();
-    if (!empty($dest_filtro['utenti'])) {
-      foreach ($dest_filtro['utenti'] as $id) {
-        $alunni[] = $em->getRepository('App:Alunno')->find($id['alunno']);
+    if (!empty($dest_filtro)) {
+      foreach ($dest_filtro as $id) {
+        $alunni[] = $em->getRepository('App:Alunno')->find($id);
       }
     }
     // form di inserimento
@@ -896,9 +896,18 @@ class RegistroController extends AbstractController {
       if ($form->isValid()) {
         // cancella avviso
         $log_avviso = null;
+        $log_avviso_utenti = null;
         if ($annotazione->getAvviso()) {
           $log_avviso = $annotazione->getAvviso()->getId();
-          $log_destinatari_delete = $bac->eliminaFiltriAvviso($annotazione->getAvviso());
+          $log_avviso_utenti = $annotazione->getAvviso()->getFiltro();
+          // cancella destinatari precedenti e dati lettura
+          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.avviso=:avviso')
+            ->setParameters(['avviso' => $annotazione->getAvviso()])
+            ->getQuery()
+            ->execute();
+          // cancella avviso
           $em->remove($annotazione->getAvviso());
           $annotazione->setAvviso(null);
         }
@@ -910,12 +919,10 @@ class RegistroController extends AbstractController {
             $this->getUser()->getNome().' '.$this->getUser()->getCognome();
           $avviso = (new Avviso())
             ->setTipo('D')
-            ->setDestinatariStaff(false)
-            ->setDestinatariCoordinatori(false)
-            ->setDestinatariDocenti(false)
-            ->setDestinatariGenitori(true)
-            ->setDestinatariAlunni(false)
-            ->setDestinatariIndividuali(true)
+            ->setDestinatari(['G'])
+            ->setSedi(new ArrayCollection([$classe->getSede()]))
+            ->setFiltroTipo('U')
+            ->setFiltro($val_filtro_alunni_id)
             ->setData($annotazione->getData())
             ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
             ->setTesto($annotazione->getTesto())
@@ -924,26 +931,46 @@ class RegistroController extends AbstractController {
           $em->persist($avviso);
           $annotazione->setAvviso($avviso);
           // destinatari
-          $dest_filtro['utenti'] = array();
-          $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, 'N', [], ['G'], 'I',
-            $val_filtro_alunni_id);
+          $dest = $bac->destinatariAvviso($avviso);
+          // imposta utenti
+          foreach ($dest['utenti'] as $u) {
+            $obj = (new AvvisoUtente())
+              ->setAvviso($avviso)
+              ->setUtente($em->getReference('App:Utente', $u));
+            $em->persist($obj);
+          }
         }
         // ok: memorizza dati
         $em->flush();
-        // log azione
+        // log azione e notifica
         if (!$id) {
           // nuovo
+          if ($annotazione->getAvviso()) {
+            $notifica = (new Notifica())
+              ->setAzione('A')
+              ->setOggettoNome('Avviso')
+              ->setOggettoId($annotazione->getAvviso()->getId());
+            $em->persist($notifica);
+          }
           $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea annotazione', __METHOD__, array(
             'Annotazione' => $annotazione->getId(),
             'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null),
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, (isset($log_destinatari['utenti']['add']) ? $log_destinatari['utenti']['add'] : []))),
             ));
         } else {
           // modifica
-          if (isset($log_destinatari_delete)) {
-            $log_destinatari['utenti']['delete'] = $log_destinatari_delete['utenti'];
+          if ($annotazione->getAvviso()) {
+            if ($log_avviso) {
+              $notifica = (new Notifica())
+                ->setAzione('D')
+                ->setOggettoNome('Avviso')
+                ->setOggettoId($log_avviso);
+              $em->persist($notifica);
+            }
+            $notifica = (new Notifica())
+              ->setAzione('A')
+              ->setOggettoNome('Avviso')
+              ->setOggettoId($annotazione->getAvviso()->getId());
+            $em->persist($notifica);
           }
           $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica annotazione', __METHOD__, array(
             'Annotazione' => $annotazione->getId(),
@@ -952,12 +979,7 @@ class RegistroController extends AbstractController {
             'Visibile' => $annotazione_old->getVisibile(),
             'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null),
             'Avviso cancellato' => $log_avviso,
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, (isset($log_destinatari['utenti']['add']) ? $log_destinatari['utenti']['add'] : []))),
-            'Utenti cancellati' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, (isset($log_destinatari['utenti']['delete']) ? $log_destinatari['utenti']['delete'] : []))),
+            'Utenti avviso cancellati' => $log_avviso_utenti,
             ));
         }
         // redirezione
@@ -991,8 +1013,8 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function annotazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, BachecaUtil $bac,
-                                           LogHandler $dblogger, $id) {
+  public function annotazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
+                                          BachecaUtil $bac, LogHandler $dblogger, $id) {
     // controlla annotazione
     $annotazione = $em->getRepository('App:Annotazione')->find($id);
     if (!$annotazione) {
@@ -1014,9 +1036,19 @@ class RegistroController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // cancella avviso
+    $log_avviso = null;
+    $log_avviso_utenti = null;
     if ($annotazione->getAvviso()) {
       $log_avviso = $annotazione->getAvviso()->getId();
-      $log_destinatari = $bac->eliminaFiltriAvviso($annotazione->getAvviso());
+      $log_avviso_utenti = $annotazione->getAvviso()->getFiltro();
+      // cancella destinatari precedenti e dati lettura
+      $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+        ->delete()
+        ->where('au.avviso=:avviso')
+        ->setParameters(['avviso' => $annotazione->getAvviso()])
+        ->getQuery()
+        ->execute();
+      // cancella avviso
       $em->remove($annotazione->getAvviso());
       $annotazione->setAvviso(null);
     }
@@ -1025,7 +1057,14 @@ class RegistroController extends AbstractController {
     $em->remove($annotazione);
     // ok: memorizza dati
     $em->flush();
-    // log azione
+    // log azione e notifica
+    if ($log_avviso) {
+      $notifica = (new Notifica())
+        ->setAzione('D')
+        ->setOggettoNome('Avviso')
+        ->setOggettoId($log_avviso);
+      $em->persist($notifica);
+    }
     $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella annotazione', __METHOD__, array(
       'Annotazione' => $annotazione_id,
       'Classe' => $annotazione->getClasse()->getId(),
@@ -1033,10 +1072,8 @@ class RegistroController extends AbstractController {
       'Data' => $annotazione->getData()->format('Y-m-d'),
       'Testo' => $annotazione->getTesto(),
       'Visibile' => $annotazione->getVisibile(),
-      'Avviso cancellato' => isset($log_avviso) ? $log_avviso : null,
-      'Utenti cancellati' => implode(', ', array_map(function ($a) {
-          return $a['genitore'].'->'.$a['alunno'];
-        }, (isset($log_destinatari['utenti']) ? $log_destinatari['utenti'] : []))),
+      'Avviso cancellato' => $log_avviso,
+      'Utenti cancellati' => $log_avviso_utenti
       ));
     // redirezione
     return $this->redirectToRoute('lezioni_registro_firme');
@@ -1063,8 +1100,8 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function notaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger,
-                                  $classe, $data, $id) {
+  public function notaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+                                 RegistroUtil $reg, LogHandler $dblogger, $classe, $data, $id) {
     // inizializza
     $label = array();
     $docente_staff = in_array('ROLE_STAFF', $this->getUser()->getRoles());
@@ -1238,8 +1275,8 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function notaDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg, LogHandler $dblogger,
-                                    $id) {
+  public function notaDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
+                                   LogHandler $dblogger, $id) {
     // controlla nota
     $nota = $em->getRepository('App:Nota')->find($id);
     if (!$nota) {

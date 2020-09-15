@@ -23,6 +23,7 @@ use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormError;
@@ -725,8 +726,8 @@ class GenitoriController extends AbstractController {
   /**
    * Visualizza gli avvisi destinati ai genitori
    *
+   * @param Request $request Pagina richiesta
    * @param SessionInterface $session Gestore delle sessioni
-   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -735,18 +736,18 @@ class GenitoriController extends AbstractController {
    * @Route("/genitori/avvisi/{pagina}", name="genitori_avvisi",
    *    requirements={"pagina": "\d+"},
    *    defaults={"pagina": "0"},
-   *    methods={"GET"})
+   *    methods={"GET","POST"})
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function avvisiAction(SessionInterface $session, GenitoriUtil $gen, BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, SessionInterface $session, BachecaUtil $bac, $pagina) {
     // inizializza variabili
-    $dati = array();
-    $dati['nuovi'] = array();
-    $dati['lista'] = array();
-    $maxPages = 1;
-    $limite = 15;
+    $dati = null;
+    $limite = 20;
     // recupera criteri dalla sessione
+    $cerca = array();
+    $cerca['visualizza'] = $session->get('/APP/ROUTE/genitori_avvisi/visualizza', 'D');
+    $cerca['oggetto'] = $session->get('/APP/ROUTE/genitori_avvisi/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/genitori_avvisi/pagina', 1);
@@ -754,27 +755,44 @@ class GenitoriController extends AbstractController {
       // pagina specificata: la conserva in sessione
       $session->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
     }
-    // dati accesso
-    $ultimo_accesso = \DateTime::createFromFormat('d/m/Y H:i:s',
-        ($session->get('/APP/UTENTE/ultimo_accesso') ? $session->get('/APP/UTENTE/ultimo_accesso') : '01/01/2018 00:00:00'));
-    // legge l'alunno
-    if ($this->getUser() instanceOf Alunno) {
-      // utente è alunno
-      $dati = $bac->bachecaAvvisiGenitoriAlunni($pagina, $limite, $this->getUser(), $ultimo_accesso);
-      $maxPages = ceil($dati['lista']->count() / $limite);
-    } else {
-      // utente è genitore
-      $alunno = $gen->alunno($this->getUser());
-      if ($alunno) {
-        $dati = $bac->bachecaAvvisiGenitori($pagina, $limite, $this->getUser(), $alunno, $ultimo_accesso);
-        $maxPages = ceil($dati['lista']->count() / $limite);
-      }
+    // form di ricerca
+    $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi_genitori', FormType::class)
+      ->add('visualizza', ChoiceType::class, array('label' => 'label.avvisi_filtro_visualizza',
+        'data' => $cerca['visualizza'],
+        'choices' => ['label.avvisi_da_leggere' => 'D', 'label.avvisi_tutti' => 'T'],
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true))
+      ->add('oggetto', TextType::class, array('label' => 'label.avvisi_filtro_oggetto',
+        'data' => $cerca['oggetto'],
+        'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $cerca['visualizza'] = $form->get('visualizza')->getData();
+      $cerca['oggetto'] = $form->get('oggetto')->getData();
+      $pagina = 1;
+      $session->set('/APP/ROUTE/genitori_avvisi/visualizza', $cerca['visualizza']);
+      $session->set('/APP/ROUTE/genitori_avvisi/oggetto', $cerca['oggetto']);
+      $session->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
     }
+    // recupera dati
+    $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
     // mostra la pagina di risposta
     return $this->render('bacheca/avvisi_genitori.html.twig', array(
       'pagina_titolo' => 'page.genitori_avvisi',
+      'form' => $form->createView(),
+      'form_help' => null,
+      'form_success' => null,
       'page' => $pagina,
-      'maxPages' => $maxPages,
+      'maxPages' => ceil($dati['lista']->count() / $limite),
       'dati' => $dati,
     ));
   }
@@ -810,48 +828,13 @@ class GenitoriController extends AbstractController {
     }
     // legge dati
     $dati = $bac->dettagliAvviso($avviso);
+    // aggiorna lettura
+    $bac->letturaAvviso($avviso, $this->getUser());
     // visualizza pagina
     return $this->render('bacheca/scheda_avviso_genitori.html.twig', array(
       'dati' => $dati,
       'letto' => $letto,
     ));
-  }
-
-  /**
-   * Conferma la lettura dell'avviso destinato ai genitori
-   *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
-   * @param int $id ID dell'avviso
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/genitori/avvisi/firma/{id}", name="genitori_avvisi_firma",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_GENITORE")
-   */
-  public function avvisiFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $id) {
-    $letto = null;
-    // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($id);
-    if (!$avviso) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    if (!$bac->destinatario($avviso, $this->getUser(), $letto)) {
-      // errore: non è destinatario dell'avviso
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // aggiorna firma
-    if ($avviso->getDestinatariIndividuali() && !$letto) {
-      $bac->letturaAvvisoGenitori($avviso, $this->getUser());
-      // ok: memorizza dati
-      $em->flush();
-    }
-    // redirect
-    return $this->redirectToRoute('genitori_avvisi');
   }
 
   /**
@@ -913,13 +896,13 @@ class GenitoriController extends AbstractController {
     // legge l'utente
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
-      $dati = $age->agendaEventiGenitoriAlunni($this->getUser(), $mese);
+      $dati = $age->agendaEventiAlunni($this->getUser(), $mese);
     } else {
       // utente è genitore
       $alunno = $gen->alunno($this->getUser());
       if ($alunno) {
         // recupera dati
-        $dati = $age->agendaEventiGenitori($alunno, $mese);
+        $dati = $age->agendaEventiGenitori($this->getUser(), $alunno, $mese);
       }
     }
     // mostra la pagina di risposta
@@ -946,7 +929,7 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function eventoDettagliAction(AgendaUtil $age, $data, $tipo) {
+  public function eventiDettagliAction(AgendaUtil $age, $data, $tipo) {
     // inizializza
     $dati = null;
     // data
@@ -954,11 +937,12 @@ class GenitoriController extends AbstractController {
     // legge dati
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
-      $dati = $age->dettagliEventoGenitoreAlunno($this->getUser(), $data, $tipo);
+      $dati = $age->dettagliEventoAlunno($this->getUser(), $data, $tipo);
     } else {
       // utente è genitore
-      $dati = $age->dettagliEventoGenitore($this->getUser()->getAlunno(), $data, $tipo);
+      $dati = $age->dettagliEventoGenitore($this->getUser(), $this->getUser()->getAlunno(), $data, $tipo);
     }
+    
     // visualizza pagina
     return $this->render('agenda/scheda_evento_genitori_'.$tipo.'.html.twig', array(
       'dati' => $dati,

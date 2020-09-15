@@ -9,18 +9,25 @@
 <div class="modal-body">
 {% for v in dati.verifiche %}
   <div class="alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2" role="alert">
+  {% if v.avviso.docente != app.user %}
+    <div>
+      <strong>Docente: {{ v.avviso.docente.cognome }} {{ v.avviso.docente.nome }}</strong>
+    </div>
+  {% endif %}
     <div class="gs-text-normal">
       <strong class="gs-big">Classe: {{ v.avviso.cattedra.classe.anno }}ª {{ v.avviso.cattedra.classe.sezione }}</strong>
     </div>
     <div class="gs-text-normal">
-      <strong>Materia: {{ v.avviso.cattedra.materia.nome }}</strong>
+      <strong>Materia: {{ v.avviso.cattedra.materia.tipo == 'S' ? v.avviso.materia.nome : v.avviso.cattedra.materia.nome }}</strong>
     </div>
     <div class="gs-text-normal">
       <strong>Destinatari:
-  {% if v.avviso.destinatariIndividuali %}
-    {% for u in v.utenti %}{{ u.cognome }} {{ u.nome }}{{ not loop.last ? ', ' }}{% endfor %}
+  {% if v.utenti|length > 0 %}
+    {% for u in v.utenti %}
+        {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }}){{ not loop.last ? ',' }}
+    {% endfor %}
   {% else %}
-        tutta la classe
+        TUTTA LA CLASSE
   {% endif %}
       </strong>
     </div>

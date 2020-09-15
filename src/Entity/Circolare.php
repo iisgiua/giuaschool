@@ -914,7 +914,6 @@ class Circolare {
     $this->filtroDocenti = array();
     $this->listeDistribuzione = new ArrayCollection();
     $this->altri = array();
-    $this->classi = array();
     $this->ata = false;
     $this->dsga = false;
     $this->firma = false;
@@ -932,4 +931,3 @@ class Circolare {
   }
 
 }
-

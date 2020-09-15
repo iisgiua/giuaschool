@@ -14,6 +14,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -38,7 +39,12 @@ use App\Entity\Staff;
 use App\Entity\Preside;
 use App\Entity\Classe;
 use App\Entity\Avviso;
+use App\Entity\AvvisoClasse;
+use App\Entity\AvvisoUtente;
+use App\Entity\Notifica;
+use App\Entity\Annotazione;
 use App\Form\MessageType;
+use App\Form\AvvisoType;
 
 
 /**
@@ -609,10 +615,10 @@ class CoordinatoreController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisiAction(EntityManagerInterface $em, SessionInterface $session, BachecaUtil $bac,
-                                $classe, $pagina) {
+                               $classe, $pagina) {
     // inizializza variabili
     $dati = null;
-    $limite = 15;
+    $limite = 20;
     $maxPages = 1;
     // parametro classe
     if ($classe == 0) {
@@ -683,13 +689,15 @@ class CoordinatoreController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                    TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $classe, $id) {
+                                   TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg,
+                                   LogHandler $dblogger, $classe, $id) {
     // controllo classe
     $classe = $em->getRepository('App:Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    $dati['classe'] = $classe;
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
@@ -712,163 +720,161 @@ class CoordinatoreController extends AbstractController {
       // azione add
       $avviso = (new Avviso())
         ->setTipo('O')
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(false)
-        ->setDestinatariGenitori(false)
-        ->setDestinatariAlunni(false)
-        ->setDestinatariIndividuali(false)
         ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto',
           ['classe' => $classe->getAnno().'ª '.$classe->getSezione()]))
-        ->setData(new \DateTime('today'));
+        ->setData(new \DateTime('today'))
+        ->addSede($classe->getSede());
       $em->persist($avviso);
+      // imposta classe tramite cattedra
+      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);
+      $avviso->setCattedra($cattedra);
     }
-    // legge destinatari di filtri
-    $dest_filtro = $bac->filtriAvviso($avviso);
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
-    // imposta lettura non avvenuta (per avviso modificato)
-    foreach ($dest_filtro['classi'] as $k=>$v) {
-      $dest_filtro['classi'][$k]['lettoAlunni'] = null;
-      $dest_filtro['classi'][$k]['lettoCoordinatore'] = null;
-    }
-    foreach ($dest_filtro['utenti'] as $k=>$v) {
-      $dest_filtro['genitori'][$k]['letto'] = null;
-    }
-    // opzione scelta
-    $scelta_destinatari = '';
-    $scelta_filtro = 'N';
-    $scelta_filtro_individuale = array();
-    if ($avviso->getDestinatariDocenti()) {
-      $scelta_destinatari = 'D';
-      $scelta_filtro = 'T';
-    }
-    if ($avviso->getDestinatariGenitori()) {
-      $scelta_destinatari = 'G';
-      $scelta_filtro = 'T';
-      if ($avviso->getDestinatariIndividuali()) {
-        $scelta_filtro = 'I';
-        foreach (array_column($dest_filtro['utenti'], 'alunno') as $a) {
-          $alunno = $em->getRepository('App:Alunno')->find($a);
-          if ($alunno) {
-            $scelta_filtro_individuale[] = $alunno;
-          }
-        }
-      }
-    }
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('avviso_edit', FormType::class, $avviso)
-      ->add('testo', MessageType::class, array(
-        'label' => 'label.testo',
-        'attr' => array('rows' => '4'),
-        'required' => true))
-      ->add('destinatari', ChoiceType::class, array('label' => false,
-        'data' => $scelta_destinatari,
-        'choices' => ['label.docenti_classe' => 'D', 'label.genitori_classe' => 'G'],
-        'expanded' => true,
-        'multiple' => false,
-        'label_attr' => ['class' => 'radio-inline gs-mr-4'],
-        'mapped' => false,
-        'required' => true))
-      ->add('filtro', ChoiceType::class, array('label' => false,
-        'data' => $scelta_filtro,
-        'choices' => ['label.filtro_nessuno' => 'N', 'label.filtro_tutti' => 'T', 'label.filtro_individuale' => 'I'],
-        'expanded' => false,
-        'multiple' => false,
-        'mapped' => false,
-        'required' => true))
-      ->add('filtroIndividuale', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_individuale,
-        'class' => 'App:Alunno',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome();
-          },
-        'query_builder' => function (EntityRepository $er) use ($classe) {
-            return $er->createQueryBuilder('a')
-              ->where('a.classe=:classe AND a.abilitato=:abilitato')
-              ->orderBy('a.cognome,a.nome', 'ASC')
-              ->setParameters(['classe' => $classe, 'abilitato' => 1]);
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'choice_translation_domain' => false,
-        'attr' => ['style' => 'width:auto'],
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
-        'mapped' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('coordinatore_avvisi')."'"]))
-      ->getForm();
+    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'coordinatore',
+      'returnUrl' => $this->generateUrl('coordinatore_avvisi'),
+      'dati' => [(count($avviso->getAnnotazioni()) > 0)]]);
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // recupera dati
-      $val_staff_filtro = 'N';
-      $val_staff_sedi = array();
-      $val_destinatari = $form->get('destinatari')->getData();
-      $val_filtro = 'N';
-      $val_filtro_id = array();
-      if ($form->get('filtro')->getData() == 'T') {
-        // docenti/genitori della classe
-        $val_filtro = 'C';
-        $val_filtro_id = [$classe->getId()];
-      } elseif ($form->get('filtro')->getData() == 'I') {
-        // genitori individuali
-        $val_filtro = 'I';
-        $val_filtro_id = $form->get('filtroIndividuale')->getData();
-      }
+    // visualizzazione filtri
+    $dati['lista'] = '';
+    if ($form->get('filtroTipo')->getData() == 'U') {
+      $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    }
+    if ($form->isSubmitted()) {
       // controllo errori
-      if (empty($val_destinatari) || $val_filtro == 'N') {
-        // errore: nessun destinatario
+      if (!$avviso->getDestinatari()) {
+        // destinatari non definiti
         $form->addError(new FormError($trans->trans('exception.destinatari_mancanti')));
       }
-      if ($val_destinatari == 'G' && $val_filtro == 'I' && count($val_filtro_id) == 0) {
+      if ($form->get('filtroTipo')->getData() == 'U' && empty(implode(',', $form->get('filtro')->getData()))) {
         // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
+      }
+      // controlla filtro
+      $lista = array();
+      $errore = false;
+      if ($avviso->getFiltroTipo() == 'U') {
+        $lista = $em->getRepository('App:Alunno')
+          ->controllaAlunni([$classe->getSede()], $form->get('filtro')->getData(), $errore);
+        if ($errore) {
+          // utente non valido
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => ''])));
+        }
+        $avviso->setFiltro($lista);
       }
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
         $form->addError(new FormError($trans->trans('exception.avviso_non_permesso')));
       }
+      if ($form->get('creaAnnotazione')->getData() &&
+          !$reg->azioneAnnotazione('add', $avviso->getData(), $this->getUser(), null, null)) {
+        // errore: nuova annotazione non permessa
+        $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
+      }
+      if (count($avviso->getAnnotazioni()) > 0) {
+        $a = $avviso->getAnnotazioni()[0];
+        if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
+          // errore: cancellazione annotazione non permessa
+          $form->addError(new FormError($trans->trans('exception.annotazione_non_permessa')));
+        }
+      }
       // modifica dati
       if ($form->isValid()) {
-        // destinatari
-        $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, $val_staff_filtro, $val_staff_sedi,
-          [$val_destinatari], $val_filtro, $val_filtro_id);
+        // gestione destinatari
+        if ($id) {
+          // cancella destinatari precedenti e dati lettura
+          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+          $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+            ->delete()
+            ->where('ac.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+        }
+        if ($avviso->getFiltroTipo() == 'T') {
+          // destinatari solo classe corrente
+          $avviso->setFiltroTipo('C')->setFiltro([$classe->getId()]);
+          $dest = $bac->destinatariAvviso($avviso);
+          $avviso->setFiltroTipo('T')->setFiltro([]);
+        } else {
+          // destinatari utenti
+          $dest = $bac->destinatariAvviso($avviso);
+        }
+        // imposta utenti
+        foreach ($dest['utenti'] as $u) {
+          $obj = (new AvvisoUtente())
+            ->setAvviso($avviso)
+            ->setUtente($em->getReference('App:Utente', $u));
+          $em->persist($obj);
+        }
+        // imposta classe
+        foreach ($dest['classi'] as $c) {
+          $obj = (new AvvisoClasse())
+            ->setAvviso($avviso)
+            ->setClasse($em->getReference('App:Classe', $c));
+          $em->persist($obj);
+        }
+        // annotazione
+        $log_annotazioni['delete'] = array();
+        if ($id) {
+          // cancella annotazioni
+          foreach ($avviso->getAnnotazioni() as $a) {
+            $log_annotazioni['delete'][] = $a->getId();
+            $em->remove($a);
+          }
+          $avviso->setAnnotazioni(new ArrayCollection());
+        }
+        if ($form->get('creaAnnotazione')->getData()) {
+          // crea nuove annotazioni
+          $testo = $bac->testoAvviso($avviso);
+          $a = (new Annotazione())
+            ->setData($avviso->getData())
+            ->setTesto($testo)
+            ->setVisibile(false)
+            ->setAvviso($avviso)
+            ->setClasse($classe)
+            ->setDocente($avviso->getDocente());
+          $em->persist($a);
+          $avviso->addAnnotazione($a);
+        }
         // ok: memorizza dati
         $em->flush();
-        // log azione
+        // log azione e notifica
+        $notifica = (new Notifica())
+          ->setOggettoNome('Avviso')
+          ->setOggettoId($avviso->getId());
+        $em->persist($notifica);
         if (!$id) {
           // nuovo
+          $notifica->setAzione('A');
           $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso coordinatore', __METHOD__, array(
             'Avviso' => $avviso->getId(),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['add'])),
-            ));
+            'Annotazioni' => implode(', ', array_map(function ($a) {
+                return $a->getId();
+              }, $avviso->getAnnotazioni()->toArray())),
+          ));
         } else {
           // modifica
+          $notifica->setAzione('E');
           $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Modifica avviso coordinatore', __METHOD__, array(
             'Id' => $avviso->getId(),
-            'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Testo' => $avviso_old->getTesto(),
-            'Destinatari docenti' => $avviso_old->getDestinatariDocenti(),
-            'Destinatari genitori' => $avviso_old->getDestinatariGenitori(),
-            'Destinatari individuali' => $avviso_old->getDestinatariIndividuali(),
-            'Classi cancellate' => implode(', ', $log_destinatari['classi']['delete']),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
-            'Utenti cancellati' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['delete'])),
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['add'])),
+            'Destinatari' => $avviso_old->getDestinatari(),
+            'Filtro Tipo' => $avviso_old->getFiltroTipo(),
+            'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
-            ));
+            'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
+            'Annotazioni create' => implode(', ', array_map(function ($a) {
+                return $a->getId();
+              }, $avviso->getAnnotazioni()->toArray())),
+          ));
         }
         // redirezione
         return $this->redirectToRoute('coordinatore_avvisi');
@@ -879,6 +885,7 @@ class CoordinatoreController extends AbstractController {
       'pagina_titolo' => 'page.coordinatore_avvisi',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_avviso_coordinatore' : 'title.nuovo_avviso_coordinatore'),
+      'dati' => $dati,
     ));
   }
 
@@ -900,7 +907,7 @@ class CoordinatoreController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoDettagliAction(EntityManagerInterface $em, SessionInterface $session,
-                                        BachecaUtil $bac, $classe, $id) {
+                                       BachecaUtil $bac, $classe, $id) {
     // inizializza
     $dati = null;
     // controllo avviso
@@ -957,7 +964,7 @@ class CoordinatoreController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function avvisoDeleteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                      LogHandler $dblogger, BachecaUtil $bac, RegistroUtil $reg, $classe, $id) {
+                                     LogHandler $dblogger, BachecaUtil $bac, RegistroUtil $reg, $classe, $id) {
     // controllo avviso
     $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
     if (!$avviso) {
@@ -984,26 +991,53 @@ class CoordinatoreController extends AbstractController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    if (count($avviso->getAnnotazioni()) > 0) {
+      $a = $avviso->getAnnotazioni()[0];
+      if (!$reg->azioneAnnotazione('delete', $a->getData(), $this->getUser(), $a->getClasse(), $a)) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+    }
+    // cancella annotazioni
+    $log_annotazioni = array();
+    foreach ($avviso->getAnnotazioni() as $a) {
+      $log_annotazioni[] = $a->getId();
+      $em->remove($a);
+    }
     // cancella destinatari
-    $log_destinatari = $bac->eliminaFiltriAvviso($avviso);
+    $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+      ->delete()
+      ->where('au.avviso=:avviso')
+      ->setParameters(['avviso' => $avviso])
+      ->getQuery()
+      ->execute();
+    $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+      ->delete()
+      ->where('ac.avviso=:avviso')
+      ->setParameters(['avviso' => $avviso])
+      ->getQuery()
+      ->execute();
     // cancella avviso
     $avviso_id = $avviso->getId();
     $em->remove($avviso);
     // ok: memorizza dati
     $em->flush();
-    // log azione
+    // log azione e notifica
+    $notifica = (new Notifica())
+      ->setOggettoNome('Avviso')
+      ->setOggettoId($avviso_id)
+      ->setAzione('D');
+    $em->persist($notifica);
     $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Cancella avviso coordinatore', __METHOD__, array(
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),
-      'Destinatari docenti' => $avviso->getDestinatariDocenti(),
-      'Destinatari genitori' => $avviso->getDestinatariGenitori(),
-      'Destinatari individuali' => $avviso->getDestinatariIndividuali(),
-      'Classi cancellate' => implode(', ', $log_destinatari['classi']),
-      'Utenti cancellati' => implode(', ', array_map(function ($a) {
-          return $a['genitore'].'->'.$a['alunno'];
-        }, $log_destinatari['utenti'])),
+      'Destinatari' => $avviso->getDestinatari(),
+      'Filtro Tipo' => $avviso->getFiltroTipo(),
+      'Filtro' => $avviso->getFiltro(),
+      'Classe' => $avviso->getCattedra()->getCLasse()->getId(),
       'Docente' => $avviso->getDocente()->getId(),
+      'Annotazioni' => implode(', ', $log_annotazioni),
       ));
     // redirezione
     return $this->redirectToRoute('coordinatore_avvisi');

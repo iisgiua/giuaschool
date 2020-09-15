@@ -56,11 +56,15 @@ label.certificazione_scienze: Asse scientifico-tecnologico
 label.certificazione_storia: Asse storico-sociale
 label.choose_option: Scegli un'opzione
 label.circolari_da_leggere: Da leggere
+label.avvisi_da_leggere: Da leggere
 label.circolari_filtro_oggetto: Filtra per oggetto
+label.avvisi_filtro_oggetto: Filtra per oggetto
 label.circolari_filtro_visualizza: Filtra per tipo di visualizzazione
+label.avvisi_filtro_visualizza: Filtra per tipo di visualizzazione
 label.circolari_lette: Lette
 label.circolari_proprie: Destinate a me
 label.circolari_tutte: Tutte
+label.avvisi_tutti: Tutti
 label.citta: Città
 label.classe: Classe
 label.classi: Classi
@@ -120,6 +124,7 @@ label.disable: Disabilita
 label.doc15: Documenti del 15 maggio
 label.docente: Docente
 label.docenti_classe: Docenti della classe
+label.alunni_classe: Alunni della classe
 label.docenti: Docenti
 label.documenti_scrutinio: Documenti dello scrutinio
 label.documento_mancante: Documento non inserito
@@ -388,6 +393,7 @@ label.alunno_inserito: Inserisci in classe
 label.alunno_trasferito: Trasferisci alunno
 label.alunno_cambio_sezione: Cambia sezione
 label.cancella_dati: Cancella dati incongruenti
+label.filtri: Filtri
 
 
 ##### PAGINE #####
@@ -464,6 +470,7 @@ page.app_telegram: Registrazione per Telegram
 page.app_moodle: Accesso ad APPRENDERE
 page.archiviazione: Archiviazione Registri
 page.bacheca_avvisi: Avvisi Docenti
+page.bacheca_avvisi_ata: Avvisi ATA
 page.cambio_classe: Cambio Classe
 page.cattedre: Gestione Cattedre
 page.circolari_ata: Lista Circolari
@@ -571,6 +578,7 @@ title.appello: Appello degli studenti
 title.archiviazione: Creazione e archiviazione dei registri
 title.autorizza: Gestione dei ritardi e delle uscite anticipate
 title.bacheca_avvisi: Avvisi indirizzati al docente
+title.bacheca_avvisi_ata: Avvisi indirizzati al personale ATA
 title.cambio_classe_modifica: Modifica un cambio di classe esistente
 title.cambio_classe: Inserisci un nuovo cambio di classe
 title.circolari_alunni: Circolari indirizzate agli studenti
@@ -859,6 +867,7 @@ message.avviso_individuale_oggetto: "Messaggio dal{docente}"
 message.info_avviso_con_annotazione: All'avviso sarà associata una annotazione sul registro, inserita nella data e nelle classi indicate.
 message.verifica_oggetto: "Verifica per la materia {materia}"
 message.verifiche_presenti: "ATTENZIONE: sono previste altre verifiche per la data e la classe indicate.<br>Puoi scegliere se modificare la verifica inserita o confermarla senza effettuare cambiamenti."
+message.compiti_presenti: "ATTENZIONE: sono previsti altri compiti per la data e la classe indicate.<br>Puoi scegliere se modificare il compito inserito o confermarlo senza effettuare cambiamenti."
 message.compito_oggetto: "Compiti per casa per la materia {materia}"
 message.cancella_verifica: Verrà cancellata la verifica e l'annotazione sul registro collegata. Vuoi continuare?
 message.cancella_compito: Verranno cancellati i compiti assegnati per casa. Vuoi continuare?
@@ -888,6 +897,7 @@ message.inserimento_piani: "Inserire il piano di lavoro creando un documento dis
 message.autorizza_ritardo: "L'alunn{sex} {alunno} è autorizzat{sex} ad entrare alla seconda ora"
 message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore"
 message.conferma_supplenza: "Confermando la scelta entrerai come SUPPLENTE in una tua classe. Vuoi continuare?"
+message.presenti_compiti_oggi: "{num, plural, one {È presente un compito assegnato per oggi} other {Sono presenti # compiti assegnati per oggi}}"
 message.presenti_compiti_domani: "{num, plural, one {È presente un compito assegnato per domani} other {Sono presenti # compiti assegnati per domani}}"
 message.attivazione_ok: "Procedura eseguita senza errori.<br>Riceverai un'email all'indirizzo indicato con ulteriori istruzioni."
 message.attivazione_confermata: "Il tuo utente è stato attivato.<br><br>È stato inserito un avviso sul Registro Elettronico, leggibile dalla tua famiglia, con indicato il tuo nome utente e la tua password di accesso."
@@ -975,7 +985,7 @@ message.note_classe_alunno_sezione: "Cambio sezione in data {date}"
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
 exception.annotazione_no_classi: Non puoi creare l'annotazione sul Registro senza indicare le classi.
 exception.annotazione_non_permessa: Spiacente non puoi creare o modificare l'annotazione sul Registro.
-exception.annotazione_solo_staff: Non puoi creare l'annotazione sul Registro per un avviso indirizzato solo allo staff.
+exception.annotazione_solo_ata: Non puoi creare l'annotazione sul Registro per un avviso indirizzato solo al personale ATA.
 exception.attivazione_email_esistente: L'indirizzo di posta elettronica indicato risulta già in uso.
 exception.attivazione_esistente: L'utente risulta già attivo.
 exception.auth_required: Devi autenticarti per accedere alla pagina richiesta.
@@ -983,6 +993,9 @@ exception.avviso_non_permesso: Spiacente non puoi creare o modificare l'avviso.
 exception.blocked_ip: Accesso da una postazione non autorizzata.
 exception.blocked_time: Accesso in orario non autorizzato (dalle 8 alle 14).
 exception.campo_data_mancante: Il campo {DATA} non è presente nel testo.
+exception.campo_ora_mancante: Il campo {ORA} non è presente nel testo.
+exception.campo_ora_inizio_mancante: Il campo {INIZIO} non è presente nel testo.
+exception.campo_ora_fine_mancante: Il campo {FINE} non è presente nel testo.
 exception.cattedra_esiste: La cattedra è già presente.
 exception.cattedra_mancante: Devi indicare la classe e la materia
 exception.cattedra_non_valida: I dati indicati per la cattedra non sono validi
@@ -1162,3 +1175,7 @@ exception.classe_inizio_fine_invalido: La data di iniziale è successiva a quell
 exception.classe_valutazioni_presenti: Sono presenti valutazioni in date incongruenti.
 exception.classe_note_presenti: Sono presenti note disciplinari in date incongruenti.
 exception.classe_non_diversa: La classe indicata è uguale a quella attualmente frequentata.
+exception.avviso_sede_nulla: Non hai indicato la sede a cui è destinata l'avviso.
+exception.avviso_destinatari_nulli: Non hai indicato nessun destinatario dell'avviso.
+exception.filtro_classe_nullo: Non hai indicato nessuna classe.
+exception.filtro_utente_nullo: Non hai indicato nessun utente.

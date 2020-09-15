@@ -10,6 +10,12 @@
         <li{{ app.request.attributes.get('_route')[:24] == 'staff_avvisi_individuali' ? ' class="active"' }}><a href="{{ path('staff_avvisi_individuali') }}" title="Gestione degli avvisi individuali per i genitori">Messaggio personale</a></li>
       </ul>
     </li>
+    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route') == 'circolari_gestione' ? ' active' }}">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione delle circolari">Circolari<span class="caret gs-ml-3"></span></a>
+      <ul class="dropdown-menu">
+        <li{{ app.request.attributes.get('_route') == 'circolari_gestione' ? ' class="active"' }}><a href="{{ path('circolari_gestione') }}" title="Gestione delle circolari">Gestione circolari</a></li>
+      </ul>
+    </li>
     <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:14] == 'staff_studenti' ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione degli studenti">Studenti<span class="caret gs-ml-3"></span></a>
       <ul class="dropdown-menu">

@@ -16,35 +16,46 @@
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <thead class="bg-success">
       <tr>
-        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.docente'|trans }}</th>
-        <th class="col-sm-4">{{ 'label.oggetto'|trans }}</th>
-        <th class="col-sm-3">{{ 'label.destinatari'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
+        <th class="">{{ 'label.staff'|trans }}</th>
+        <th class="">{{ 'label.data'|trans }}</th>
+        <th class="">{{ 'label.oggetto'|trans }}</th>
+        <th class="">{{ 'label.destinatari'|trans }}</th>
+        <th class="">{{ 'label.filtri'|trans }}</th>
+        <th class="">{{ 'label.action'|trans }}</th>
       </tr>
     </thead>
     <tbody>
     {% for k,a in dati.lista %}
       <tr>
-        <td>{{ a.data|date('d/m/Y') }}</td>
-        <td>{{ a.docente.nome }} {{ a.docente.cognome }}</td>
+        <td><small>{{ a.docente.nome }} {{ a.docente.cognome }}</small></td>
+        <td><small>{{ a.data|date('d/m/Y') }}</small></td>
         <td><small>{{ a.oggetto }}</small></td>
         <td>
           <small>
-      {% if a.destinatariStaff  %}
-            Staff ({% for s in dati.sedi[a.id] %}{{ s.citta }}{{ not loop.last ? ', ' }}{% endfor %}){{ a.destinatariCoordinatori + a.destinatariDocenti + a.destinatariGenitori + a.destinatariAlunni > 0 ? ', ' }}
-      {% endif %}
-      {% if a.destinatariCoordinatori %}
-            Coordinatori{{ a.destinatariDocenti + a.destinatariGenitori + a.destinatariAlunni > 0 ? ',' }}
-      {% endif %}
-      {% if a.destinatariDocenti %}
-            Docenti{{ a.destinatariGenitori + a.destinatariAlunni > 0 ? ',' }}
-      {% endif %}
-      {% if a.destinatariGenitori %}
-            {{ a.destinatariIndividuali ? 'Singoli genitori' : 'Genitori' }}{{ a.destinatariAlunni ? ',' }}
-      {% endif %}
-      {% if a.destinatariAlunni %}
-            Alunni
+            {% if 'C' in a.destinatari %}<span class="gs-mr-2">Coordinatori</span>{% endif %}
+            {% if 'D' in a.destinatari %}<span class="gs-mr-2">Docenti</span>{% endif %}
+            {% if 'G' in a.destinatari %}<span class="gs-mr-2">Genitori</span>{% endif %}
+            {% if 'A' in a.destinatari %}<span class="gs-mr-2">Alunni</span>{% endif %}
+            {% if 'D' in a.destinatariAta %}<span class="gs-mr-2">DSGA</span>{% endif %}
+            {% if 'A' in a.destinatariAta %}<span class="gs-mr-2">ATA</span>{% endif %}
+          </small>
+        </td>
+        <td>
+          <small>
+      {% if a.filtroTipo == 'U' %}
+            Filtro per utente
+      {% elseif a.filtroTipo == 'M' %}
+            Filtro per materia
+      {% elseif a.filtroTipo == 'C' %}
+            Classi:
+        {% for c in dati[a.id].classi %}
+            {{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ',' }}
+        {% endfor %}
+      {% else %}
+            Sedi:
+        {% for s in a.sedi %}
+            {{ s.citta }}{{ not loop.last ? ',' }}
+        {% endfor %}
       {% endif %}
           </small>
         </td>

@@ -16,9 +16,9 @@
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <thead class="bg-success">
       <tr>
+        <th class="col-sm-2">{{ 'label.staff'|trans }}</th>
         <th class="col-sm-1">{{ 'label.data'|trans }}</th>
         <th class="col-sm-2">{{ 'label.ora'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.docente'|trans }}</th>
         <th class="col-sm-5">{{ 'label.classi'|trans }}</th>
         <th class="col-sm-2">{{ 'label.action'|trans }}</th>
       </tr>
@@ -26,10 +26,10 @@
     <tbody>
     {% for k,a in dati.lista %}
       <tr>
-        <td>{{ a.data|date('d/m/Y') }}</td>
-        <td>{{ a.ora|date('G:i') }}</td>
-        <td>{{ a.docente.nome }} {{ a.docente.cognome }}</td>
-        <td><small>{% for c in dati.classi[a.id] %}{{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
+        <td><small>{{ a.docente.nome }} {{ a.docente.cognome }}</small></td>
+        <td><small>{{ a.data|date('d/m/Y') }}</small></td>
+        <td><small>{{ a.ora|date('G:i') }}</small></td>
+        <td><small>{% for c in dati[a.id].classi %}{{ c.anno }}ª {{ c.sezione }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
         <td>
           <button class="btn btn-xs btn-primary" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('staff_avvisi_dettagli', {'id': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni[k].edit is defined %}

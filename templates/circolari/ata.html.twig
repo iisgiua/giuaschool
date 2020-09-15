@@ -1,5 +1,9 @@
 {% extends 'ruolo_ata/index.html.twig' %}
 
+{% block pagina_submenu %}
+  {% include 'ruolo_ata/menu_bacheca.html.twig' %}
+{% endblock %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.circolari_ata'|trans }}</h1>

@@ -32,12 +32,14 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormError;
 use App\Entity\Avviso;
+use App\Entity\AvvisoUtente;
 use App\Entity\Notifica;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
 use App\Util\AgendaUtil;
 use App\Util\LogHandler;
 use App\Form\MessageType;
+use App\Form\AvvisoType;
 
 
 /**
@@ -126,7 +128,7 @@ class AgendaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventoDettagliAction(AgendaUtil $age, $data, $tipo) {
+  public function eventiDettagliAction(AgendaUtil $age, $data, $tipo) {
     // inizializza
     $dati = null;
     // data
@@ -163,13 +165,13 @@ class AgendaController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function verificaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                      TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
+                                     TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
-    $lista_festivi = null;
     $dati = array();
+    $lista_festivi = null;
     $verifiche = array();
     $docente = $this->getUser();
-    $scelta_materia = null;
+    $materia_sostegno = null;
     if ($request->isMethod('GET')) {
       // inizializza sessione
       $session->set('/APP/ROUTE/agenda_verifica_edit/conferma', 0);
@@ -182,19 +184,8 @@ class AgendaController extends AbstractController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      // legge destinatari di filtri
-      $dest_filtro = $age->filtriVerificheCompiti($avviso);
       $avviso_old = clone $avviso;
-      // controlla sostegno
-      $sostegno = $em->getRepository('App:Cattedra')->findOneBy(['docente' => $docente,
-        'classe' => $avviso->getCattedra()->getClasse(),
-        'alunno' => (count($dest_filtro['utenti']) > 0 ? $dest_filtro['utenti'][0] : 0),
-        'attiva' => 1]);
-      if ($sostegno) {
-        // cattedra di sostegno: modifica dati
-        $scelta_materia = $avviso->getCattedra()->getId();
-        $avviso->setCattedra($sostegno);
-      }
+      $materia_sostegno = $avviso->getMateria() ? $avviso->getMateria()->getId() : null;
     } else {
       // azione add
       $oggi = new \DateTime();
@@ -211,91 +202,31 @@ class AgendaController extends AbstractController {
       $mese = $em->getRepository('App:Festivita')->giornoSuccessivo($mese);
       $avviso = (new Avviso())
         ->setTipo('V')
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(false)
-        ->setDestinatariGenitori(false)
-        ->setDestinatariAlunni(false)
-        ->setDestinatariIndividuali(false)
+        ->setDestinatari(['G', 'A'])
         ->setData($mese)
         ->setOggetto('__TEMP__'); // valore temporaneo
       $em->persist($avviso);
-      // destinatari di filtri
-      $dest_filtro['classi'] = array();
-      $dest_filtro['utenti'] = array();
     }
-    // recupera festivi per calendario
-    $lista_festivi = $age->festivi();
     // imposta autore dell'avviso
     $avviso->setDocente($docente);
-    // opzione scelta filtro
-    $scelta_filtro = 'T';
-    $scelta_filtro_individuale = array();
-    if ($avviso->getDestinatariIndividuali()) {
-      $scelta_filtro = 'I';
-      $scelta_filtro_individuale = array_column($dest_filtro['utenti'], 'alunno');
-    }
+    // recupera festivi per calendario
+    $lista_festivi = $age->festivi();
     // form di inserimento
     $dati = $em->getRepository('App:Cattedra')->cattedreDocente($docente);
-    $form = $this->container->get('form.factory')->createNamedBuilder('verifica_edit', FormType::class, $avviso)
-      ->add('data', DateType::class, array('label' => 'label.data_verifica',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'format' => 'dd/MM/yyyy',
-        'required' => true))
-      ->add('cattedra', ChoiceType::class, array('label' => 'label.cattedra_verifica',
-        'choices' => $dati['choice'],
-        'expanded' => false,
-        'multiple' => false,
-        'choice_translation_domain' => false,
-        'mapped' => true,
-        'required' => true))
-      ->add('materia',  HiddenType::class, array('label' => false,
-        'data' => $scelta_materia,
-        'mapped' => false,
-        'required' => false))
-      ->add('testo', MessageType::class, array(
-        'label' => 'label.descrizione_verifica',
-        'attr' => array('rows' => '4'),
-        'required' => true))
-      ->add('filtro', ChoiceType::class, array('label' => false,
-        'data' => $scelta_filtro,
-        'choices' => ['label.filtro_tutti' => 'T', 'label.filtro_alunno' => 'I'],
-        'expanded' => false,
-        'multiple' => false,
-        'mapped' => false,
-        'required' => true))
-      ->add('filtroIndividuale',  HiddenType::class, array('label' => false,
-        'data' => implode(',', $scelta_filtro_individuale),
-        'mapped' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('agenda_eventi')."'"]))
-      ->getForm();
+    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'verifica',
+      'returnUrl' => $this->generateUrl('agenda_eventi'),
+      'dati' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
+    // visualizzazione filtri
+    $dati['lista'] = '';
+    if ($form->get('filtroTipo')->getData() == 'U') {
+      $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    }
     if ($form->isSubmitted() && $form->isValid()) {
-      // recupera dati
-      $val_filtro_id = array();
-      if ($form->get('filtro')->getData() == 'T') {
-        // classe
-        $val_filtro = 'C';
-        if ($avviso->getCattedra()) {
-          $val_filtro_id = [$avviso->getCattedra()->getClasse()->getId()];
-        }
-      } else {
-        // individuali
-        $val_filtro = 'I';
-        $val_filtro_id = array_filter(explode(',', $form->get('filtroIndividuale')->getData()), function($v){
-          return ($v != ''); });
-      }
       // controllo errori
-      if ($val_filtro == 'I' && empty($val_filtro_id)) {
+      if ($form->get('filtroTipo')->getData() == 'U' && empty(implode(',', $form->get('filtro')->getData()))) {
         // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
@@ -312,12 +243,24 @@ class AgendaController extends AbstractController {
       $materia = null;
       if ($avviso->getCattedra() && $avviso->getCattedra()->getMateria()->getTipo() == 'S') {
         // legge materia scelta
-        $materia = $em->getRepository('App:Cattedra')->findOneBy(['id' => $form->get('materia')->getData(),
+        $materia = $em->getRepository('App:Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
           'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
-        if (!$materia || $avviso->getCattedra()->getAlunno()->getId() != $val_filtro_id[0]) {
-          // errore: dati inconsistenti
+        if (!$materia ||
+            ($avviso->getCattedra()->getAlunno() && $avviso->getCattedra()->getAlunno()->getId() != $avviso->getFiltro()[0])) {
           $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
         }
+      }
+      // controlla filtro
+      $lista = array();
+      $errore = false;
+      if ($avviso->getFiltroTipo() == 'U') {
+        $lista = $em->getRepository('App:Alunno')
+          ->controllaAlunni([$avviso->getCattedra()->getClasse()->getSede()], $form->get('filtro')->getData(), $errore);
+        if ($errore) {
+          // utente non valido
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => ''])));
+        }
+        $avviso->setFiltro($lista);
       }
       // controllo permessi
       if (!$age->azioneEvento(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
@@ -337,10 +280,6 @@ class AgendaController extends AbstractController {
       }
       // modifica dati
       if ($form->isValid()) {
-        if ($materia) {
-          // verifica sostegno: modifica dati cattedra
-          $avviso->setCattedra($materia);
-        }
         // controllo verifiche esistenti
         $verifiche = $age->controlloVerifiche($avviso);
         $data_classe = $avviso->getData()->format('Y-m-d').'|'.$avviso->getCattedra()->getClasse()->getId();
@@ -348,11 +287,40 @@ class AgendaController extends AbstractController {
           // richiede conferma
           $session->set('/APP/ROUTE/agenda_verifica_edit/conferma', $data_classe);
         } else {
+          // imposta sede
+          $avviso->setSedi(new ArrayCollection([$avviso->getCattedra()->getClasse()->getSede()]));
+          // verifica sostegno: aggiunge materia
+          $avviso->setMateria($materia ? $materia->getMateria() : null);
           // oggetto
           $avviso->setOggetto($trans->trans('message.verifica_oggetto',
-            ['materia' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
-          // destinatari
-          $age->modificaFiltriVerificheCompiti($avviso, $dest_filtro, $val_filtro, $val_filtro_id);
+            ['materia' => $materia ? $materia->getMateria()->getNomeBreve() :
+              $avviso->getCattedra()->getMateria()->getNomeBreve()]));
+          // gestione destinatari
+          if ($id) {
+            // cancella destinatari precedenti e dati lettura
+            $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+              ->delete()
+              ->where('au.avviso=:avviso')
+              ->setParameters(['avviso' => $avviso])
+              ->getQuery()
+              ->execute();
+          }
+          if ($avviso->getFiltroTipo() == 'T') {
+            // destinatari solo classe di cattedra
+            $avviso->setFiltroTipo('C')->setFiltro([$avviso->getCattedra()->getClasse()->getId()]);
+            $dest = $bac->destinatariAvviso($avviso);
+            $avviso->setFiltroTipo('T')->setFiltro([]);
+          } else {
+            // destinatari utenti
+            $dest = $bac->destinatariAvviso($avviso);
+          }
+          // imposta utenti
+          foreach ($dest['utenti'] as $u) {
+            $obj = (new AvvisoUtente())
+              ->setAvviso($avviso)
+              ->setUtente($em->getReference('App:Utente', $u));
+            $em->persist($obj);
+          }
           // annotazione
           $log_annotazioni['delete'] = array();
           if ($id) {
@@ -388,12 +356,11 @@ class AgendaController extends AbstractController {
               'Avviso' => $avviso->getId(),
               'Data' => $avviso_old->getData()->format('d/m/Y'),
               'Cattedra' => $avviso_old->getCattedra()->getId(),
+              'Materia' => $avviso_old->getMateria() ? $avviso_old->getMateria()->getId() : 0,
               'Testo' => $avviso_old->getTesto(),
-              'Destinatari individuali' => $avviso_old->getDestinatariIndividuali(),
-              'Classi' => implode(', ', array_column($dest_filtro['classi'], 'classe')),
-              'Utenti' => implode(', ', array_map(function ($a) {
-                    return $a['genitore'].'->'.$a['alunno'];
-                  }, $dest_filtro['utenti'])),
+              'Destinatari' => $avviso_old->getDestinatari(),
+              'Filtro Tipo' => $avviso_old->getFiltroTipo(),
+              'Filtro' => $avviso_old->getFiltro(),
               'Docente' => $avviso_old->getDocente()->getId(),
               'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
               'Annotazioni create' => implode(', ', array_map(function ($a) {
@@ -463,7 +430,7 @@ class AgendaController extends AbstractController {
   public function classeAjaxAction(EntityManagerInterface $em, $id) {
     // solo cattedre attive e normali, no supplenza, no sostegno
     $cattedre = $em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->select('c.id,m.nome')
+      ->select('m.id,m.nome')
       ->join('c.materia', 'm')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND m.tipo!=:sostegno')
       ->setParameters(['classe' => $id, 'attiva' => 1, 'tipo' => 'N', 'supplenza' => 0, 'sostegno' => 'S'])
@@ -494,7 +461,7 @@ class AgendaController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function verificaDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
-                                        RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, $id) {
+                                       RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, $id) {
     // controllo avviso
     $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
     if (!$avviso) {
@@ -520,7 +487,12 @@ class AgendaController extends AbstractController {
       $em->remove($a);
     }
     // cancella destinatari
-    $log_destinatari = $bac->eliminaFiltriAvviso($avviso);
+    $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+      ->delete()
+      ->where('au.avviso=:avviso')
+      ->setParameters(['avviso' => $avviso])
+      ->getQuery()
+      ->execute();
     // cancella avviso
     $avviso_id = $avviso->getId();
     $em->remove($avviso);
@@ -536,10 +508,10 @@ class AgendaController extends AbstractController {
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),
-      'Classi cancellate' => implode(', ', $log_destinatari['classi']),
-      'Utenti cancellati' => implode(', ', array_map(function ($a) {
-          return $a['genitore'].'->'.$a['alunno'];
-        }, $log_destinatari['utenti'])),
+      'Cattedra' => $avviso->getCattedra()->getId(),
+      'Materia' => $avviso->getMateria() ? $avviso->getMateria()->getId() : 0,
+      'Filtro Tipo' => $avviso->getFiltroTipo(),
+      'Filtro' => $avviso->getFiltro(),
       'Docente' => $avviso->getDocente()->getId(),
       'Annotazioni' => implode(', ', $log_annotazioni),
       ));
@@ -555,6 +527,7 @@ class AgendaController extends AbstractController {
    * @param SessionInterface $session Gestore delle sessioni
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Identificativo dell'avviso
@@ -569,12 +542,18 @@ class AgendaController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function compitoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                     TranslatorInterface $trans, RegistroUtil $reg, AgendaUtil $age, LogHandler $dblogger, $id) {
+                                    TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac,
+                                    AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
-    $lista_festivi = null;
-    $docente = $this->getUser();
     $dati = array();
-    $scelta_materia = null;
+    $lista_festivi = null;
+    $compiti = array();
+    $docente = $this->getUser();
+    $materia_sostegno = null;
+    if ($request->isMethod('GET')) {
+      // inizializza sessione
+      $session->set('/APP/ROUTE/agenda_compito_edit/conferma', 0);
+    }
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -583,20 +562,8 @@ class AgendaController extends AbstractController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      // conserva originale
       $avviso_old = clone $avviso;
-      // legge destinatari di filtri
-      $dest_filtro = $age->filtriVerificheCompiti($avviso);
-      // controlla sostegno
-      $sostegno = $em->getRepository('App:Cattedra')->findOneBy(['docente' => $docente,
-        'classe' => $avviso->getCattedra()->getClasse(),
-        'alunno' => (count($dest_filtro['utenti']) > 0 ? $dest_filtro['utenti'][0] : 0),
-        'attiva' => 1]);
-      if ($sostegno) {
-        // cattedra di sostegno: modifica dati
-        $scelta_materia = $avviso->getCattedra()->getId();
-        $avviso->setCattedra($sostegno);
-      }
+      $materia_sostegno = $avviso->getMateria() ? $avviso->getMateria()->getId() : null;
     } else {
       // azione add
       $oggi = new \DateTime();
@@ -613,91 +580,31 @@ class AgendaController extends AbstractController {
       $mese = $em->getRepository('App:Festivita')->giornoSuccessivo($mese);
       $avviso = (new Avviso())
         ->setTipo('P')
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(false)
-        ->setDestinatariGenitori(false)
-        ->setDestinatariAlunni(false)
-        ->setDestinatariIndividuali(false)
+        ->setDestinatari(['G', 'A'])
         ->setData($mese)
         ->setOggetto('__TEMP__'); // valore temporaneo
       $em->persist($avviso);
-      // destinatari di filtri
-      $dest_filtro['classi'] = array();
-      $dest_filtro['utenti'] = array();
     }
-    // recupera festivi per calendario
-    $lista_festivi = $age->festivi();
     // imposta autore dell'avviso
     $avviso->setDocente($docente);
-    // opzione scelta filtro
-    $scelta_filtro = 'T';
-    $scelta_filtro_individuale = array();
-    if ($avviso->getDestinatariIndividuali()) {
-      $scelta_filtro = 'I';
-      $scelta_filtro_individuale = array_column($dest_filtro['utenti'], 'alunno');
-    }
+    // recupera festivi per calendario
+    $lista_festivi = $age->festivi();
     // form di inserimento
     $dati = $em->getRepository('App:Cattedra')->cattedreDocente($docente);
-    $form = $this->container->get('form.factory')->createNamedBuilder('compito_edit', FormType::class, $avviso)
-      ->add('data', DateType::class, array('label' => 'label.data_compito',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'format' => 'dd/MM/yyyy',
-        'required' => true))
-      ->add('cattedra', ChoiceType::class, array('label' => 'label.cattedra_compito',
-        'choices' => $dati['choice'],
-        'expanded' => false,
-        'multiple' => false,
-        'choice_translation_domain' => false,
-        'mapped' => true,
-        'required' => true))
-      ->add('materia',  HiddenType::class, array('label' => false,
-        'data' => $scelta_materia,
-        'mapped' => false,
-        'required' => false))
-      ->add('testo', MessageType::class, array(
-        'label' => 'label.descrizione_compito',
-        'attr' => array('rows' => '4'),
-        'required' => true))
-      ->add('filtro', ChoiceType::class, array('label' => false,
-        'data' => $scelta_filtro,
-        'choices' => ['label.filtro_tutti' => 'T', 'label.filtro_alunno' => 'I'],
-        'expanded' => false,
-        'multiple' => false,
-        'mapped' => false,
-        'required' => true))
-      ->add('filtroIndividuale',  HiddenType::class, array('label' => false,
-        'data' => implode(',', $scelta_filtro_individuale),
-        'mapped' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('agenda_eventi')."'"]))
-      ->getForm();
+    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'compito',
+      'returnUrl' => $this->generateUrl('agenda_eventi'),
+      'dati' => [$dati['choice'], $materia_sostegno]]);
     $form->handleRequest($request);
+    // visualizzazione filtri
+    $dati['lista'] = '';
+    if ($form->get('filtroTipo')->getData() == 'U') {
+      $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    }
     if ($form->isSubmitted() && $form->isValid()) {
-      // recupera dati
-      $val_filtro_id = array();
-      if ($form->get('filtro')->getData() == 'T') {
-        // classe
-        $val_filtro = 'C';
-        if ($avviso->getCattedra()) {
-          $val_filtro_id = [$avviso->getCattedra()->getClasse()->getId()];
-        }
-      } else {
-        // individuali
-        $val_filtro = 'I';
-        $val_filtro_id = array_filter(explode(',', $form->get('filtroIndividuale')->getData()), function($v){
-          return ($v != ''); });
-      }
       // controllo errori
-      if ($val_filtro == 'I' && empty($val_filtro_id)) {
+      if ($form->get('filtroTipo')->getData() == 'U' && empty(implode(',', $form->get('filtro')->getData()))) {
         // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
@@ -714,12 +621,24 @@ class AgendaController extends AbstractController {
       $materia = null;
       if ($avviso->getCattedra() && $avviso->getCattedra()->getMateria()->getTipo() == 'S') {
         // legge materia scelta
-        $materia = $em->getRepository('App:Cattedra')->findOneBy(['id' => $form->get('materia')->getData(),
+        $materia = $em->getRepository('App:Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
           'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
-        if (!$materia || $avviso->getCattedra()->getAlunno()->getId() != $val_filtro_id[0]) {
-          // errore: dati inconsistenti
+        if (!$materia ||
+            ($avviso->getCattedra()->getAlunno() && $avviso->getCattedra()->getAlunno()->getId() != $avviso->getFiltro()[0])) {
           $form->addError(new FormError($trans->trans('exception.cattedra_non_valida')));
         }
+      }
+      // controlla filtro
+      $lista = array();
+      $errore = false;
+      if ($avviso->getFiltroTipo() == 'U') {
+        $lista = $em->getRepository('App:Alunno')
+          ->controllaAlunni([$avviso->getCattedra()->getClasse()->getSede()], $form->get('filtro')->getData(), $errore);
+        if ($errore) {
+          // utente non valido
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => ''])));
+        }
+        $avviso->setFiltro($lista);
       }
       // controllo permessi
       if (!$age->azioneEvento(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
@@ -728,46 +647,79 @@ class AgendaController extends AbstractController {
       }
       // modifica dati
       if ($form->isValid()) {
-        if ($materia) {
-          // sostegno: modifica dati cattedra
-          $avviso->setCattedra($materia);
-        }
-        // oggetto
-        $avviso->setOggetto($trans->trans('message.compito_oggetto',
-            ['materia' => $avviso->getCattedra()->getMateria()->getNomeBreve()]));
-        // destinatari
-        $age->modificaFiltriVerificheCompiti($avviso, $dest_filtro, $val_filtro, $val_filtro_id);
-        // ok: memorizza dati
-        $em->flush();
-        // log azione e notifica
-        $notifica = (new Notifica())
-          ->setOggettoNome('Avviso')
-          ->setOggettoId($avviso->getId());
-        $em->persist($notifica);
-        if (!$id) {
-          // nuovo
-          $notifica->setAzione('A');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Crea compito', __METHOD__, array(
-            'Avviso' => $avviso->getId(),
-            ));
+        // controllo compiti esistenti
+        $compiti = $age->controlloCompiti($avviso);
+        $data_classe = $avviso->getData()->format('Y-m-d').'|'.$avviso->getCattedra()->getClasse()->getId();
+        if (count($compiti) > 0 && $session->get('/APP/ROUTE/agenda_compito_edit/conferma', 0) != $data_classe) {
+          // richiede conferma
+          $session->set('/APP/ROUTE/agenda_compito_edit/conferma', $data_classe);
         } else {
-          // modifica
-          $notifica->setAzione('E');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Modifica compito', __METHOD__, array(
-            'Avviso' => $avviso->getId(),
-            'Data' => $avviso_old->getData()->format('d/m/Y'),
-            'Cattedra' => $avviso_old->getCattedra()->getId(),
-            'Testo' => $avviso_old->getTesto(),
-            'Destinatari individuali' => $avviso_old->getDestinatariIndividuali(),
-            'Classi' => implode(', ', array_column($dest_filtro['classi'], 'classe')),
-            'Utenti' => implode(', ', array_map(function ($a) {
-                  return $a['genitore'].'->'.$a['alunno'];
-                }, $dest_filtro['utenti'])),
-            'Docente' => $avviso_old->getDocente()->getId(),
+          // imposta sede
+          $avviso->setSedi(new ArrayCollection([$avviso->getCattedra()->getClasse()->getSede()]));
+          // verifica sostegno: aggiunge materia
+          $avviso->setMateria($materia ? $materia->getMateria() : null);
+          // oggetto
+          $avviso->setOggetto($trans->trans('message.compito_oggetto',
+            ['materia' => $materia ? $materia->getMateria()->getNomeBreve() :
+              $avviso->getCattedra()->getMateria()->getNomeBreve()]));
+          // gestione destinatari
+          if ($id) {
+            // cancella destinatari precedenti e dati lettura
+            $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+              ->delete()
+              ->where('au.avviso=:avviso')
+              ->setParameters(['avviso' => $avviso])
+              ->getQuery()
+              ->execute();
+          }
+          $dest = $bac->destinatariAvviso($avviso);
+          if ($avviso->getFiltroTipo() == 'T') {
+            // destinatari solo classe di cattedra
+            $avviso->setFiltroTipo('C')->setFiltro([$avviso->getCattedra()->getClasse()->getId()]);
+            $dest = $bac->destinatariAvviso($avviso);
+            $avviso->setFiltroTipo('T')->setFiltro([]);
+          } else {
+            // destinatari utenti
+            $dest = $bac->destinatariAvviso($avviso);
+          }
+          // imposta utenti
+          foreach ($dest['utenti'] as $u) {
+            $obj = (new AvvisoUtente())
+              ->setAvviso($avviso)
+              ->setUtente($em->getReference('App:Utente', $u));
+            $em->persist($obj);
+          }
+          // ok: memorizza dati
+          $em->flush();
+          // log azione e notifica
+          $notifica = (new Notifica())
+            ->setOggettoNome('Avviso')
+            ->setOggettoId($avviso->getId());
+          $em->persist($notifica);
+          if (!$id) {
+            // nuovo
+            $notifica->setAzione('A');
+            $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Crea compito', __METHOD__, array(
+              'Avviso' => $avviso->getId(),
             ));
+          } else {
+            // modifica
+            $notifica->setAzione('E');
+            $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Modifica compito', __METHOD__, array(
+              'Avviso' => $avviso->getId(),
+              'Data' => $avviso_old->getData()->format('d/m/Y'),
+              'Cattedra' => $avviso_old->getCattedra()->getId(),
+              'Materia' => $avviso_old->getMateria() ? $avviso_old->getMateria()->getId() : 0,
+              'Testo' => $avviso_old->getTesto(),
+              'Destinatari' => $avviso_old->getDestinatari(),
+              'Filtro Tipo' => $avviso_old->getFiltroTipo(),
+              'Filtro' => $avviso_old->getFiltro(),
+              'Docente' => $avviso_old->getDocente()->getId(),
+            ));
+          }
+          // redirezione
+          return $this->redirectToRoute('agenda_eventi');
         }
-        // redirezione
-        return $this->redirectToRoute('agenda_eventi');
       }
     }
     // mostra la pagina di risposta
@@ -775,6 +727,7 @@ class AgendaController extends AbstractController {
       'pagina_titolo' => 'page.agenda_compito',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_compito' : 'title.nuovo_compito'),
+      'compiti' => $compiti,
       'lista_festivi' => $lista_festivi,
       'dati' => $dati,
     ));
@@ -798,7 +751,7 @@ class AgendaController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function compitoDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
-                                       AgendaUtil $age, $id) {
+                                      AgendaUtil $age, $id) {
     // controllo avviso
     $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
     if (!$avviso) {
@@ -811,7 +764,12 @@ class AgendaController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // cancella destinatari
-    $log_destinatari = $age->eliminaFiltriVerificheCompiti($avviso);
+    $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+      ->delete()
+      ->where('au.avviso=:avviso')
+      ->setParameters(['avviso' => $avviso])
+      ->getQuery()
+      ->execute();
     // cancella avviso
     $avviso_id = $avviso->getId();
     $em->remove($avviso);
@@ -827,11 +785,10 @@ class AgendaController extends AbstractController {
       'Avviso' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),
-      'Destinatari individuali' => $avviso->getDestinatariIndividuali(),
-      'Classi' => implode(', ', $log_destinatari['classi']),
-      'Utenti' => implode(', ', array_map(function ($a) {
-                  return $a['genitore'].'->'.$a['alunno'];
-                }, $log_destinatari['utenti'])),
+      'Cattedra' => $avviso->getCattedra()->getId(),
+      'Materia' => $avviso->getMateria() ? $avviso->getMateria()->getId() : 0,
+      'Filtro Tipo' => $avviso->getFiltroTipo(),
+      'Filtro' => $avviso->getFiltro(),
       'Docente' => $avviso->getDocente()->getId(),
       ));
     // redirezione

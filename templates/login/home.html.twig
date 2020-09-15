@@ -41,6 +41,12 @@
     {% if dati.verifiche.prossime > 0 %}
       <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|trans({'num': dati.verifiche.prossime}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
+    {% if dati.compiti.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_oggi'|trans({'num': dati.compiti.oggi}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.oggi == 1 ? 'o' : 'i' }}</a></strong></div>
+    {% endif %}
+    {% if dati.compiti.domani > 0 %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({'num': dati.compiti.domani}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
+    {% endif %}
   {% elseif is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') %}
     {% if app.session.get('/CONFIG/SISTEMA/moodle') %}
       <div class="text-center gs-mt-3 gs-mb-3">
@@ -69,10 +75,16 @@
     {% if dati.verifiche.prossime > 0 %}
       <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|trans({'num': dati.verifiche.prossime}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
+    {% if dati.compiti.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_oggi'|trans({'num': dati.compiti.oggi}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.oggi == 1 ? 'o' : 'i' }}</a></strong></div>
+    {% endif %}
     {% if dati.compiti.domani > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({'num': dati.compiti.domani}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({'num': dati.compiti.domani}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
     {% endif %}
   {% elseif is_granted('ROLE_ATA') %}
+    {% if dati.avvisi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|trans({'num': dati.avvisi}) }}: <a href="{{ path('bacheca_avvisi_ata') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+    {% endif %}
     {% if dati.circolari > 0 %}
       <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({'num': dati.circolari}) }}: <a href="{{ path('circolari_ata') }}">vai alla pagina delle Circolari per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
@@ -83,8 +95,8 @@
   <p><em>{{ 'message.login_docente'|trans|raw }}</em></p>
   <p class="gs-mb-0"><strong>Si prega di prendere visione dei manuali:</strong></p>
   <ul class="gs-mb-0">
-    <li><a href="{{ asset('doc/giuaschool_manuale_scrutinio_finale_coordinatori.pdf') }}"><strong>Manuale per lo scrutinio finale - Operazioni svolte dai coordinatori</strong></a></li>
-    <li><a href="{{ asset('doc/giuaschool_manuale_scrutinio_finale_docenti.pdf') }}"><strong>Manuale per lo scrutinio finale - Operazioni svolte dai docenti</strong></a></li>
+    {#-- <li><a href="{{ asset('doc/giuaschool_manuale_scrutinio_finale_coordinatori.pdf') }}"><strong>Manuale per lo scrutinio finale - Operazioni svolte dai coordinatori</strong></a></li> #}
+    {#-- <li><a href="{{ asset('doc/giuaschool_manuale_scrutinio_finale_docenti.pdf') }}"><strong>Manuale per lo scrutinio finale - Operazioni svolte dai docenti</strong></a></li> #}
     <li><a href="{{ asset('doc/giuaschool_accesso_docenti.pdf') }}">Modalità di accesso per i docenti (aggiornato al {{ filedate('doc/giuaschool_accesso_docenti.pdf')|date('d/m/Y') }})</a></li>
     <li><a href="{{ asset('doc/giuaschool_manuale_docenti.pdf') }}">Manuale per i docenti (aggiornato al {{ filedate('doc/giuaschool_manuale_docenti.pdf')|date('d/m/Y') }})</a></li>
   </ul>

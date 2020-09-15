@@ -546,12 +546,23 @@ class RegistroUtil {
       $ann['docente'] = $a->getDocente()->getNome().' '.$a->getDocente()->getCognome();
       $ann['avviso'] = $a->getAvviso();
       $ann['alunni'] = null;
-      if ($ann['avviso']) {
+      if ($a->getAvviso() && in_array('A', $a->getAvviso()->getDestinatari())) {
         // legge alunno destinatario
         $ann['alunni'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-          ->join('App:AvvisoIndividuale', 'avi', 'WITH', 'a.id=avi.alunno')
-          ->where('avi.avviso=:avviso')
-          ->setParameters(['avviso' => $a->getAvviso()->getId()])
+          ->join('App:AvvisoUtente', 'au', 'WITH', 'au.utente=a.id')
+          ->join('au.avviso', 'av')
+          ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
+          ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'A', 'filtro' => 'U'])
+          ->getQuery()
+          ->getResult();
+      } elseif ($a->getAvviso() && in_array('G', $a->getAvviso()->getDestinatari())) {
+        // legge genitore destinatario
+        $ann['alunni'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+          ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
+          ->join('App:AvvisoUtente', 'au', 'WITH', 'au.utente=g.id')
+          ->join('au.avviso', 'av')
+          ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
+          ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'G', 'filtro' => 'U'])
           ->getQuery()
           ->getResult();
       }

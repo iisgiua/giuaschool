@@ -178,7 +178,7 @@ class DocenteRepository extends BaseRepository {
         ->getDQL();
       $docenti = $this->createQueryBuilder('d')
         ->select('DISTINCT d.id')
-        ->where('d.abilitato=:abilitato AND NOT EXISTS ('.$cattedre.')')
+        ->where('d NOT INSTANCE OF App:Preside AND d.abilitato=:abilitato AND NOT EXISTS ('.$cattedre.')')
         ->setParameters(['attiva' => 1, 'abilitato' => 1 ])
         ->getQuery()
         ->getArrayResult();
@@ -209,7 +209,7 @@ class DocenteRepository extends BaseRepository {
       ->orderBy('d.cognome,d.nome,d.username', 'ASC')
       ->getQuery();
     // crea lista con pagine
-    $res = $this->paginazione($query, $page);
+    $res = $this->paginazione($query, $pagina);
     return $res['lista'];
   }
 

@@ -42,6 +42,8 @@ use Symfony\Component\Translation\TranslatorInterface;
 use App\Entity\Annotazione;
 use App\Entity\Colloquio;
 use App\Entity\Avviso;
+use App\Entity\AvvisoUtente;
+use App\Entity\AvvisoClasse;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
 use App\Entity\Uscita;
@@ -55,6 +57,7 @@ use App\Form\EntrataType;
 use App\Form\UscitaType;
 use App\Form\AppelloType;
 use App\Form\MessageType;
+use App\Form\AvvisoType;
 
 
 /**
@@ -81,7 +84,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                BachecaUtil $bac, $pagina) {
+                               BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
@@ -99,7 +102,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_avvisi/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi', FormType::class)
       ->add('docente', EntityType::class, array('label' => 'label.autore',
         'data' => $docente,
@@ -123,7 +126,7 @@ class StaffController extends AbstractController {
       ->add('destinatari', ChoiceType::class, array('label' => 'label.destinatari',
         'data' => $search['destinatari'] ? $search['destinatari'] : '',
         'choices' => ['label.coordinatori' => 'C', 'label.docenti' => 'D',
-          'label.genitori' => 'G', 'label.alunni' => 'A'],
+          'label.genitori' => 'G', 'label.alunni' => 'A', 'label.dsga' => 'S', 'label.ata' => 'T'],
         'placeholder' => 'label.tutti_destinatari',
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => function($val, $key, $index) {
@@ -201,8 +204,9 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                    TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
+                                   TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
     // inizializza
+    $dati = array();
     $var_sessione = '/APP/FILE/staff_avvisi_edit/files';
     $dir = $this->getParameter('dir_avvisi').'/';
     $fs = new FileSystem();
@@ -215,18 +219,18 @@ class StaffController extends AbstractController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       $avviso_old = clone $avviso;
+      $avviso_sedi_old = $avviso->getSedi()->toArray();
     } else {
       // azione add
       $avviso = (new Avviso())
-        ->setTipo('C')
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(false)
-        ->setDestinatariGenitori(false)
-        ->setDestinatariAlunni(false)
-        ->setDestinatariIndividuali(false);
+        ->setTipo('C');
+      if ($this->getUser()->getSede()) {
+        $avviso->addSede($this->getUser()->getSede());
+      }
       $em->persist($avviso);
     }
+    // imposta autore dell'avviso
+    $avviso->setDocente($this->getUser());
     // legge allegati
     $allegati = array();
     if ($request->isMethod('POST')) {
@@ -256,225 +260,78 @@ class StaffController extends AbstractController {
         $fs->remove($f);
       }
     }
-    // legge destinatari di filtri
-    $dest_filtro = $bac->filtriAvviso($avviso);
-    // imposta autore dell'avviso
-    $avviso->setDocente($this->getUser());
-    // imposta lettura non avvenuta (per avviso modificato)
-    foreach ($dest_filtro['classi'] as $k=>$v) {
-      $dest_filtro['classi'][$k]['lettoAlunni'] = null;
-      $dest_filtro['classi'][$k]['lettoCoordinatore'] = null;
-    }
-    foreach ($dest_filtro['utenti'] as $k=>$v) {
-      $dest_filtro['genitori'][$k]['letto'] = null;
-    }
-    // opzione scelta per staff
-    $scelta_staff_filtro = 'N';
-    $scelta_staff_sedi = array();
-    if ($avviso->getDestinatariStaff()) {
-      $scelta_staff_filtro = 'S';
-      foreach (array_column($dest_filtro['sedi'], 'sede') as $s) {
-        $sede = $em->getRepository('App:Sede')->find($s);
-        if ($sede) {
-          $scelta_staff_sedi[] = $sede;
-        }
-      }
-    }
-    // opzione scelta destinatari
-    $scelta_destinatari = array();
-    if ($avviso->getDestinatariCoordinatori()) {
-      $scelta_destinatari[] = 'C';
-    }
-    if ($avviso->getDestinatariDocenti()) {
-      $scelta_destinatari[] = 'D';
-    }
-    if ($avviso->getDestinatariGenitori()) {
-      $scelta_destinatari[] = 'G';
-    }
-    if ($avviso->getDestinatariAlunni()) {
-      $scelta_destinatari[] = 'A';
-    }
-    // opzione scelta filtro
-    $scelta_filtro = 'N';
-    $scelta_filtro_sedi = array();
-    $scelta_filtro_classi = array();
-    $scelta_filtro_individuale = array();
-    $scelta_filtro_individuale_classe = null;
-    if ($avviso->getDestinatariIndividuali()) {
-      $scelta_filtro = 'I';
-      foreach (array_column($dest_filtro['utenti'], 'alunno') as $a) {
-        $alunno = $em->getRepository('App:Alunno')->find($a);
-        if ($alunno) {
-          $scelta_filtro_individuale[] = $alunno->getId();
-          $scelta_filtro_individuale_classe = $alunno->getClasse();
-        }
-      }
-    } elseif (!empty($scelta_destinatari)) {
-      $scelta_filtro = 'C';
-      foreach (array_column($dest_filtro['classi'], 'classe') as $c) {
-        $classe = $em->getRepository('App:Classe')->find($c);
-        if ($classe) {
-          $scelta_filtro_classi[] = $classe;
-        }
-      }
-    }
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('avvisi_edit', FormType::class, $avviso)
-      ->add('data', DateType::class, array('label' => 'label.data_evento',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'format' => 'dd/MM/yyyy',
-        'required' => true))
-      ->add('oggetto', TextType::class, array(
-        'label' => 'label.oggetto',
-        'required' => true))
-      ->add('testo', MessageType::class, array(
-        'label' => 'label.testo',
-        'attr' => array('rows' => '4'),
-        'required' => true))
-      ->add('creaAnnotazione', ChoiceType::class, array('label' => 'label.crea_annotazione',
-        'data' => (count($avviso->getAnnotazioni()) > 0),
-        'choices' => ['label.si' => true, 'label.no' => false],
-        'expanded' => true,
-        'multiple' => false,
-        'label_attr' => ['class' => 'radio-inline'],
-        'mapped' => false,
-        'required' => true))
-      ->add('destinatari', ChoiceType::class, array('label' => false,
-        'data' => $scelta_destinatari,
-        'choices' => ['label.coordinatori' => 'C', 'label.docenti' => 'D',
-          'label.genitori' => 'G', 'label.leggere_in_classe' => 'A'],
-        'expanded' => true,
-        'multiple' => true,
-        'label_attr' => ['class' => 'gs-mr-4 gs-checkbox-inline'],
-        'mapped' => false,
-        'required' => true))
-      ->add('filtro', ChoiceType::class, array('label' => false,
-        'data' => $scelta_filtro,
-        'choices' => ['label.filtro_nessuno' => 'N', 'label.filtro_tutti' => 'T', 'label.filtro_sede' => 'S',
-          'label.filtro_classe' => 'C', 'label.filtro_individuale' => 'I'],
-        'expanded' => false,
-        'multiple' => false,
-        'mapped' => false,
-        'required' => true))
-      ->add('filtroSedi', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_sedi,
-        'class' => 'App:Sede',
-        'choice_label' => function ($obj) {
-            return $obj->getCitta();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')
-              ->orderBy('s.ordinamento', 'ASC');
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
-        'mapped' => false,
-        'required' => false))
-      ->add('filtroClassi', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_classi,
-        'class' => 'App:Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-grouped-4'],
-        'mapped' => false,
-        'required' => false))
-      ->add('filtroIndividualeClasse', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_individuale_classe,
-        'class' => 'App:Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'expanded' => false,
-        'multiple' => false,
-        'placeholder' => 'label.scegli_classe',
-        'choice_translation_domain' => false,
-        'attr' => ['style' => 'width:auto'],
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
-        'mapped' => false,
-        'required' => false))
-      ->add('filtroIndividuale',  HiddenType::class, array('label' => false,
-        'data' => implode(',', $scelta_filtro_individuale),
-        'mapped' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('staff_avvisi')."'"]))
-      ->getForm();
+    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'generico',
+      'returnUrl' => $this->generateUrl('staff_avvisi'),
+      'dati' => [(count($avviso->getAnnotazioni()) > 0),
+        $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // recupera dati
-      $val_staff_filtro = 'N';
-      $val_staff_sedi = array();
-      $val_destinatari = $form->get('destinatari')->getData();
-      $val_filtro = $form->get('filtro')->getData();
-      $val_filtro_id = array();
-      $val_filtro_individuale_classe = $form->get('filtroIndividualeClasse')->getData();
-      switch ($val_filtro) {
-        case 'S':
-          foreach ($form->get('filtroSedi')->getData() as $f) {
-            $val_filtro_id[] = $f->getId();
-          }
-          break;
-        case 'C':
-          foreach ($form->get('filtroClassi')->getData() as $f) {
-            $val_filtro_id[] = $f->getId();
-          }
-          break;
-        case 'I':
-          foreach (explode(',', $form->get('filtroIndividuale')->getData()) as $fid) {
-            if ($val_filtro_individuale_classe &&
-                $em->getRepository('App:Alunno')->findOneBy(
-                  ['id' => $fid, 'abilitato' => 1, 'classe' => $val_filtro_individuale_classe->getId()])) {
-              $val_filtro_id[] = $fid;
-            }
-          }
-          break;
+    // visualizzazione filtri
+    $dati['lista'] = '';
+    if ($form->get('filtroTipo')->getData() == 'C') {
+      $dati['lista'] = $em->getRepository('App:Classe')->listaClassi($form->get('filtro')->getData());
+    } elseif ($form->get('filtroTipo')->getData() == 'M') {
+      $dati['lista'] = $em->getRepository('App:Materia')->listaMaterie($form->get('filtro')->getData());
+    } elseif ($form->get('filtroTipo')->getData() == 'U') {
+      $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    }
+    if ($form->isSubmitted()) {
+      // lista sedi
+      $sedi = array();
+      foreach ($avviso->getSedi() as $s) {
+        if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
+          // sede corretta
+          $sedi[] = $s->getId();
+        } else {
+          // elimina sede
+          $avviso->removeSede($s);
+        }
       }
       // controllo errori
-      if ($val_staff_filtro == 'N' && count($val_destinatari) == 0) {
-        // errore: nessun destinatario
-        $form->addError(new FormError($trans->trans('exception.destinatari_mancanti')));
+      if (count($sedi) == 0) {
+        // sedi non definite
+        $form->addError(new FormError($trans->trans('exception.avviso_sede_nulla')));
       }
-      if ($val_staff_filtro == 'S' && count($val_staff_sedi) == 0) {
-        // errore: nessun destinatario
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
+      if (!$avviso->getDestinatariAta() && !$avviso->getDestinatari()) {
+        // destinatari non definiti
+        $form->addError(new FormError($trans->trans('exception.avviso_destinatari_nulli')));
       }
-      if (count($val_destinatari) > 0  && $val_filtro != 'T' && count($val_filtro_id) == 0) {
-        // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
-      }
-      if ($form->get('creaAnnotazione')->getData() && count($val_destinatari) == 0 && $val_staff_filtro != 'N') {
-        // errore: annotazione per solo staff
-        $form->addError(new FormError($trans->trans('exception.annotazione_solo_staff')));
+      if ($form->get('creaAnnotazione')->getData() && $avviso->getDestinatariAta() && !$avviso->getDestinatari()) {
+        // errore: annotazione con destinatari ATA
+        $form->addError(new FormError($trans->trans('exception.annotazione_solo_ata')));
       }
       if ($form->get('creaAnnotazione')->getData() && count($allegati) > 0) {
         // errore: annotazione con allegati
         $form->addError(new FormError($trans->trans('exception.annotazione_con_file')));
       }
+      // controlla filtro
+      $lista = array();
+      $errore = false;
+      if ($avviso->getFiltroTipo() == 'C') {
+        // controlla classi
+        $lista = $em->getRepository('App:Classe')
+          ->controllaClassi($sedi, $form->get('filtro')->getData(), $errore);
+        if ($errore) {
+          // classe non valida
+          $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
+        }
+      } elseif ($avviso->getFiltroTipo() == 'M') {
+        // controlla materie
+        $lista = $em->getRepository('App:Materia')->controllaMaterie($form->get('filtro')->getData(), $errore);
+        if ($errore) {
+          // materia non valida
+          $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
+        }
+      } elseif ($avviso->getFiltroTipo() == 'U') {
+        // controlla utenti
+        $lista = $em->getRepository('App:Alunno')
+          ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
+        if ($errore) {
+          // utente non valido
+          $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => ''])));
+        }
+      }
+      $avviso->setFiltro($lista);
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
@@ -506,9 +363,37 @@ class StaffController extends AbstractController {
             $fs->remove($this->getParameter('dir_avvisi').'/'.$f['name']);
           }
         }
-        // destinatari
-        $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, $val_staff_filtro, $val_staff_sedi,
-          $val_destinatari, $val_filtro, $val_filtro_id);
+        // gestione destinatari
+        if ($id) {
+          // cancella destinatari precedenti e dati lettura
+          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+          $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+            ->delete()
+            ->where('ac.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+        }
+        $dest = $bac->destinatariAvviso($avviso);
+        // imposta utenti
+        foreach ($dest['utenti'] as $u) {
+          $obj = (new AvvisoUtente())
+            ->setAvviso($avviso)
+            ->setUtente($em->getReference('App:Utente', $u));
+          $em->persist($obj);
+        }
+        // imposta classi
+        foreach ($dest['classi'] as $c) {
+          $obj = (new AvvisoClasse())
+            ->setAvviso($avviso)
+            ->setClasse($em->getReference('App:Classe', $c));
+          $em->persist($obj);
+        }
         // annotazione
         $log_annotazioni['delete'] = array();
         if ($id) {
@@ -521,7 +406,7 @@ class StaffController extends AbstractController {
         }
         if ($form->get('creaAnnotazione')->getData()) {
           // crea nuove annotazioni
-          $bac->creaAnnotazione($avviso, $val_filtro, $val_filtro_id, $val_filtro_individuale_classe);
+          $bac->creaAnnotazione($avviso, $dest['sedi']);
         }
         // ok: memorizza dati
         $em->flush();
@@ -535,11 +420,6 @@ class StaffController extends AbstractController {
           $notifica->setAzione('A');
           $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso generico', __METHOD__, array(
             'Avviso' => $avviso->getId(),
-            'Sedi aggiunte' => implode(', ', $log_destinatari['sedi']['add']),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['add'])),
             'Annotazioni' => implode(', ', array_map(function ($a) {
                 return $a->getId();
               }, $avviso->getAnnotazioni()->toArray())),
@@ -553,22 +433,12 @@ class StaffController extends AbstractController {
             'Oggetto' => $avviso_old->getOggetto(),
             'Testo' => $avviso_old->getTesto(),
             'Allegati' => $avviso_old->getAllegati(),
-            'Destinatari staff' => $avviso_old->getDestinatariStaff(),
-            'Destinatari coordinatori' => $avviso_old->getDestinatariCoordinatori(),
-            'Destinatari docenti' => $avviso_old->getDestinatariDocenti(),
-            'Destinatari genitori' => $avviso_old->getDestinatariGenitori(),
-            'Destinatari alunni' => $avviso_old->getDestinatariAlunni(),
-            'Destinatari individuali' => $avviso_old->getDestinatariIndividuali(),
-            'Sedi cancellate' => implode(', ', $log_destinatari['sedi']['delete']),
-            'Sedi aggiunte' => implode(', ', $log_destinatari['sedi']['add']),
-            'Classi cancellate' => implode(', ', $log_destinatari['classi']['delete']),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
-            'Utenti cancellati' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['delete'])),
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['add'])),
+            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Destinatari ATA' => $avviso_old->getDestinatariAta(),
+            'Destinatari' => $avviso_old->getDestinatari(),
+            'Filtro Tipo' => $avviso_old->getFiltroTipo(),
+            'Filtro' => $avviso_old->getFiltro(),
+            'Destinatari Liste Distribuzione' => implode(', ', array_map(function ($l) { return $l->getId(); }, $avviso_old->getListeDistribuzione()->toArray())),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
             'Annotazioni create' => implode(', ', array_map(function ($a) {
@@ -586,6 +456,7 @@ class StaffController extends AbstractController {
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_avviso' : 'title.nuovo_avviso'),
       'allegati' => $allegati,
+      'dati' => $dati,
     ));
   }
 
@@ -641,7 +512,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger, BachecaUtil $bac,
-                                      RegistroUtil $reg, $tipo, $id) {
+                                     RegistroUtil $reg, $tipo, $id) {
     $dir = $this->getParameter('dir_avvisi').'/';
     $fs = new FileSystem();
     // controllo avviso
@@ -669,9 +540,21 @@ class StaffController extends AbstractController {
       $em->remove($a);
     }
     // cancella destinatari
-    $log_destinatari = $bac->eliminaFiltriAvviso($avviso);
+    $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+      ->delete()
+      ->where('au.avviso=:avviso')
+      ->setParameters(['avviso' => $avviso])
+      ->getQuery()
+      ->execute();
+    $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+      ->delete()
+      ->where('ac.avviso=:avviso')
+      ->setParameters(['avviso' => $avviso])
+      ->getQuery()
+      ->execute();
     // cancella avviso
     $avviso_id = $avviso->getId();
+    $avviso_sedi = $avviso->getSedi()->toArray();
     $em->remove($avviso);
     // ok: memorizza dati
     $em->flush();
@@ -695,17 +578,12 @@ class StaffController extends AbstractController {
       'Oggetto' => $avviso->getOggetto(),
       'Testo' => $avviso->getTesto(),
       'Allegati' => $avviso->getAllegati(),
-      'Destinatari staff' => $avviso->getDestinatariStaff(),
-      'Destinatari coordinatori' => $avviso->getDestinatariCoordinatori(),
-      'Destinatari docenti' => $avviso->getDestinatariDocenti(),
-      'Destinatari genitori' => $avviso->getDestinatariGenitori(),
-      'Destinatari alunni' => $avviso->getDestinatariAlunni(),
-      'Destinatari individuali' => $avviso->getDestinatariIndividuali(),
-      'Sedi cancellate' => implode(', ', $log_destinatari['sedi']),
-      'Classi cancellate' => implode(', ', $log_destinatari['classi']),
-      'Utenti cancellati' => implode(', ', array_map(function ($a) {
-          return $a['genitore'].'->'.$a['alunno'];
-        }, $log_destinatari['utenti'])),
+      'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi)),
+      'Destinatari ATA' => $avviso->getDestinatariAta(),
+      'Destinatari' => $avviso->getDestinatari(),
+      'Filtro Tipo' => $avviso->getFiltroTipo(),
+      'Filtro' => $avviso->getFiltro(),
+      'Destinatari Liste Distribuzione' => implode(', ', array_map(function ($l) { return $l->getId(); }, $avviso->getListeDistribuzione()->toArray())),
       'Docente' => $avviso->getDocente()->getId(),
       'Annotazioni' => implode(', ', $log_annotazioni),
       ));
@@ -723,44 +601,6 @@ class StaffController extends AbstractController {
       // avviso generico
       return $this->redirectToRoute('staff_avvisi');
     }
-  }
-
-  /**
-   * Gestione degli avvisi sugli orari di ingresso
-   *
-   * @param int $pagina Numero di pagina per l'elenco da visualizzare
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/staff/avvisi/entrata/{pagina}", name="staff_avvisi_entrata",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": "0"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_STAFF")
-   */
-  public function avvisiEntrataAction($pagina) {
-    // redirect
-    return $this->redirectToRoute('staff_avvisi_orario', ['tipo' => 'E', 'pagina' => $pagina]);
-  }
-
-  /**
-   * Gestione degli avvisi sugli orari di uscita
-   *
-   * @param int $pagina Numero di pagina per l'elenco da visualizzare
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/staff/avvisi/uscita/{pagina}", name="staff_avvisi_uscita",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": "0"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_STAFF")
-   */
-  public function avvisiUscitaAction($pagina) {
-    // redirect
-    return $this->redirectToRoute('staff_avvisi_orario', ['tipo' => 'U', 'pagina' => $pagina]);
   }
 
   /**
@@ -783,7 +623,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiOrarioAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                      BachecaUtil $bac, $tipo, $pagina) {
+                                     BachecaUtil $bac, $tipo, $pagina) {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
@@ -800,7 +640,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_orario', FormType::class)
       ->add('docente', EntityType::class, array('label' => 'label.autore',
         'data' => $docente,
@@ -890,7 +730,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiOrarioEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
-                                          RegistroUtil $reg, LogHandler $dblogger, $tipo, $id) {
+                                         RegistroUtil $reg, LogHandler $dblogger, $tipo, $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -900,133 +740,52 @@ class StaffController extends AbstractController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       $avviso_old = clone $avviso;
+      $avviso_sedi_old = $avviso->getSedi()->toArray();
     } else {
       // azione add
       $avviso = (new Avviso())
         ->setTipo($tipo)
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(false)
-        ->setDestinatariGenitori(true)
-        ->setDestinatariAlunni(true)
-        ->setDestinatariIndividuali(false)
+        ->setDestinatariAta(['D','A'])
+        ->setDestinatari(['D','G','A'])
+        ->setFiltroTipo('C')
         ->setData(new \DateTime('tomorrow'))
         ->setOra(\DateTime::createFromFormat('H:i', ($tipo == 'E' ? '09:20' : '12:50')))
         ->setOggetto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_oggetto' :
           'message.avviso_uscita_oggetto'))
         ->setTesto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_testo' :
           'message.avviso_uscita_testo'));
+      if ($this->getUser()->getSede()) {
+        $avviso->addSede($this->getUser()->getSede());
+      }
       $em->persist($avviso);
     }
-    // legge destinatari di filtri
-    $dest_filtro = $bac->filtriAvviso($avviso);
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
-    // imposta lettura non avvenuta (per avviso modificato)
-    foreach ($dest_filtro['classi'] as $k=>$v) {
-      $dest_filtro['classi'][$k]['lettoAlunni'] = null;
-      $dest_filtro['classi'][$k]['lettoCoordinatore'] = null;
-    }
-    // opzione scelta filtro
-    $scelta_filtro = 'C';
-    $scelta_filtro_sedi = array();
-    $scelta_filtro_classi = array();
-    foreach (array_column($dest_filtro['classi'], 'classe') as $c) {
-      $classe = $em->getRepository('App:Classe')->find($c);
-      if ($classe) {
-        $scelta_filtro_classi[] = $classe;
-      }
-    }
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('avvisi_orario_edit', FormType::class, $avviso)
-      ->add('data', DateType::class, array('label' => 'label.data',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'format' => 'dd/MM/yyyy',
-        'required' => true))
-      ->add('ora', TimeType::class, array('label' => ($tipo == 'E' ? 'label.ora_entrata' : 'label.ora_uscita'),
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'required' => true))
-      ->add('testo', MessageType::class, array(
-        'label' => 'label.testo',
-        'attr' => array('rows' => '4'),
-        'required' => true))
-      ->add('filtro', ChoiceType::class, array('label' => false,
-        'data' => $scelta_filtro,
-        'choices' => ['label.filtro_tutti' => 'T', 'label.filtro_sede' => 'S', 'label.filtro_classe' => 'C'],
-        'expanded' => false,
-        'multiple' => false,
-        'mapped' => false,
-        'required' => true))
-      ->add('filtroSedi', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_sedi,
-        'class' => 'App:Sede',
-        'choice_label' => function ($obj) {
-            return $obj->getCitta();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')
-              ->orderBy('s.ordinamento', 'ASC');
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
-        'mapped' => false,
-        'required' => false))
-      ->add('filtroClassi', EntityType::class, array('label' => 'ok_false',
-        'data' => $scelta_filtro_classi,
-        'class' => 'App:Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-grouped-4'],
-        'mapped' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('staff_avvisi_orario', ['tipo' => $tipo])."'"]))
-      ->getForm();
+    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'orario',
+      'returnUrl' => $this->generateUrl('staff_avvisi_orario', ['tipo' => $tipo]),
+      'dati' => [$tipo, $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // recupera dati
-      $val_staff_filtro = 'N';
-      $val_staff_sedi = [];
-      $val_destinatari = ['G', 'A'];
-      $val_filtro = $form->get('filtro')->getData();
-      $val_filtro_id = [];
-      $val_filtro_individuale_classe = 0;
-      switch ($val_filtro) {
-        case 'S':
-          foreach ($form->get('filtroSedi')->getData() as $f) {
-            $val_filtro_id[] = $f->getId();
-          }
-          break;
-        case 'C':
-          foreach ($form->get('filtroClassi')->getData() as $f) {
-            $val_filtro_id[] = $f->getId();
-          }
-          break;
+    if ($form->isSubmitted()) {
+      // lista sedi
+      $sedi = array();
+      foreach ($avviso->getSedi() as $s) {
+        if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
+          // sede corretta
+          $sedi[] = $s->getId();
+        } else {
+          // elimina sede
+          $avviso->removeSede($s);
+        }
       }
       // controllo errori
-      if ($val_filtro != 'T' && count($val_filtro_id) == 0) {
+      if (count($sedi) == 0) {
+        // sedi non definite
+        $form->addError(new FormError($trans->trans('exception.avviso_sede_nulla')));
+      }
+      if (empty($form->get('classi')->getData()->toArray())) {
         // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.filtro_classe_nullo')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
@@ -1039,6 +798,20 @@ class StaffController extends AbstractController {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
+      if (strpos($form->get('testo')->getData(), '{ORA}') === false) {
+        // errore: testo senza campo ora
+        $form->addError(new FormError($trans->trans('exception.campo_ora_mancante')));
+      }
+      // controlla filtro
+      $errore = false;
+      $lista_classi = array_map(function ($o) { return $o->getId(); },
+        $form->get('classi')->getData()->toArray());
+      $lista = $em->getRepository('App:Classe')->controllaClassi($sedi, $lista_classi, $errore);
+      if ($errore) {
+        // classe non valida
+        $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
+      }
+      $avviso->setFiltro($lista);
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
@@ -1057,9 +830,37 @@ class StaffController extends AbstractController {
       }
       // modifica dati
       if ($form->isValid()) {
-        // destinatari
-        $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, $val_staff_filtro, $val_staff_sedi,
-          $val_destinatari, $val_filtro, $val_filtro_id);
+        // gestione destinatari
+        if ($id) {
+          // cancella destinatari precedenti e dati lettura
+          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+          $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+            ->delete()
+            ->where('ac.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+        }
+        $dest = $bac->destinatariAvviso($avviso);
+        // imposta utenti
+        foreach ($dest['utenti'] as $u) {
+          $obj = (new AvvisoUtente())
+            ->setAvviso($avviso)
+            ->setUtente($em->getReference('App:Utente', $u));
+          $em->persist($obj);
+        }
+        // imposta classi
+        foreach ($dest['classi'] as $c) {
+          $obj = (new AvvisoClasse())
+            ->setAvviso($avviso)
+            ->setClasse($em->getReference('App:Classe', $c));
+          $em->persist($obj);
+        }
         // annotazione
         $log_annotazioni['delete'] = array();
         if ($id) {
@@ -1071,7 +872,7 @@ class StaffController extends AbstractController {
           $avviso->setAnnotazioni(new ArrayCollection());
         }
         // crea nuove annotazioni
-        $bac->creaAnnotazione($avviso, $val_filtro, $val_filtro_id, $val_filtro_individuale_classe);
+        $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
         $em->flush();
         // log azione e notifica
@@ -1084,7 +885,6 @@ class StaffController extends AbstractController {
           $notifica->setAzione('A');
           $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), __METHOD__, array(
             'Avviso' => $avviso->getId(),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
             'Annotazioni' => implode(', ', array_map(function ($a) {
                 return $a->getId();
               }, $avviso->getAnnotazioni()->toArray())),
@@ -1097,8 +897,8 @@ class StaffController extends AbstractController {
             'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Ora' => $avviso_old->getOra()->format('H:i'),
             'Testo' => $avviso_old->getTesto(),
-            'Classi cancellate' => implode(', ', $log_destinatari['classi']['delete']),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
+            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
             'Annotazioni create' => implode(', ', array_map(function ($a) {
@@ -1159,7 +959,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_avvisi_attivita/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_attivita', FormType::class)
       ->add('docente', EntityType::class, array('label' => 'label.autore',
         'data' => $docente,
@@ -1246,7 +1046,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiAttivitaEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, BachecaUtil $bac,
-                                            RegistroUtil $reg, LogHandler $dblogger, $id) {
+                                           RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1256,137 +1056,51 @@ class StaffController extends AbstractController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       $avviso_old = clone $avviso;
+      $avviso_sedi_old = $avviso->getSedi()->toArray();
     } else {
       // azione add
       $avviso = (new Avviso())
         ->setTipo('A')
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(true)
-        ->setDestinatariGenitori(true)
-        ->setDestinatariAlunni(true)
-        ->setDestinatariIndividuali(false)
+        ->setDestinatariAta(['D', 'A'])
+        ->setDestinatari(['D', 'G', 'A'])
+        ->setFiltroTipo('C')
         ->setData(new \DateTime('tomorrow'))
         ->setOra(\DateTime::createFromFormat('H:i', '08:20'))
         ->setOraFine(\DateTime::createFromFormat('H:i', '13:50'))
         ->setOggetto($trans->trans('message.avviso_attivita_oggetto'))
         ->setTesto($trans->trans('message.avviso_attivita_testo'));
+      if ($this->getUser()->getSede()) {
+        $avviso->addSede($this->getUser()->getSede());
+      }
       $em->persist($avviso);
     }
-    // legge destinatari di filtri
-    $dest_filtro = $bac->filtriAvviso($avviso);
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
-    // imposta lettura non avvenuta (per avviso modificato)
-    foreach ($dest_filtro['classi'] as $k=>$v) {
-      $dest_filtro['classi'][$k]['lettoAlunni'] = null;
-      $dest_filtro['classi'][$k]['lettoCoordinatore'] = null;
-    }
-    // opzione scelta filtro
-    $scelta_filtro = 'C';
-    $scelta_filtro_sedi = array();
-    $scelta_filtro_classi = array();
-    foreach (array_column($dest_filtro['classi'], 'classe') as $c) {
-      $classe = $em->getRepository('App:Classe')->find($c);
-      if ($classe) {
-        $scelta_filtro_classi[] = $classe;
-      }
-    }
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('avvisi_attivita_edit', FormType::class, $avviso)
-      ->add('data', DateType::class, array('label' => 'label.data_evento',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'format' => 'dd/MM/yyyy',
-        'required' => true))
-      ->add('ora', TimeType::class, array('label' => 'label.ora_inizio',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'required' => true))
-      ->add('oraFine', TimeType::class, array('label' => 'label.ora_fine',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'required' => true))
-      ->add('testo', MessageType::class, array(
-        'label' => 'label.testo',
-        'attr' => array('rows' => '4'),
-        'required' => true))
-      ->add('filtro', ChoiceType::class, array('label' => false,
-        'data' => $scelta_filtro,
-        'choices' => ['label.filtro_tutti' => 'T', 'label.filtro_sede' => 'S', 'label.filtro_classe' => 'C'],
-        'expanded' => false,
-        'multiple' => false,
-        'mapped' => false,
-        'required' => true))
-      ->add('filtroSedi', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_sedi,
-        'class' => 'App:Sede',
-        'choice_label' => function ($obj) {
-            return $obj->getCitta();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')
-              ->orderBy('s.ordinamento', 'ASC');
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
-        'mapped' => false,
-        'required' => false))
-      ->add('filtroClassi', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_classi,
-        'class' => 'App:Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'expanded' => true,
-        'multiple' => true,
-        'choice_translation_domain' => false,
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-grouped-4'],
-        'mapped' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('staff_avvisi_attivita')."'"]))
-      ->getForm();
+    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'attivita',
+      'returnUrl' => $this->generateUrl('staff_avvisi_attivita'),
+      'dati' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // recupera dati
-      $val_staff_filtro = 'N';
-      $val_staff_sedi = [];
-      $val_destinatari = ['D', 'G', 'A'];
-      $val_filtro = $form->get('filtro')->getData();
-      $val_filtro_id = [];
-      $val_filtro_individuale_classe = 0;
-      switch ($val_filtro) {
-        case 'S':
-          foreach ($form->get('filtroSedi')->getData() as $f) {
-            $val_filtro_id[] = $f->getId();
-          }
-          break;
-        case 'C':
-          foreach ($form->get('filtroClassi')->getData() as $f) {
-            $val_filtro_id[] = $f->getId();
-          }
-          break;
+    if ($form->isSubmitted()) {
+      // lista sedi
+      $sedi = array();
+      foreach ($avviso->getSedi() as $s) {
+        if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
+          // sede corretta
+          $sedi[] = $s->getId();
+        } else {
+          // elimina sede
+          $avviso->removeSede($s);
+        }
       }
       // controllo errori
-      if ($val_filtro != 'T' && count($val_filtro_id) == 0) {
+      if (count($sedi) == 0) {
+        // sedi non definite
+        $form->addError(new FormError($trans->trans('exception.avviso_sede_nulla')));
+      }
+      if (empty($form->get('classi')->getData()->toArray())) {
         // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
+        $form->addError(new FormError($trans->trans('exception.filtro_classe_nullo')));
       }
       // controllo data
       $errore = $reg->controlloData($form->get('data')->getData(), null);
@@ -1399,6 +1113,24 @@ class StaffController extends AbstractController {
         // errore: testo senza campo data
         $form->addError(new FormError($trans->trans('exception.campo_data_mancante')));
       }
+      if (strpos($form->get('testo')->getData(), '{INIZIO}') === false) {
+        // errore: testo senza campo ora
+        $form->addError(new FormError($trans->trans('exception.campo_ora_inizio_mancante')));
+      }
+      if (strpos($form->get('testo')->getData(), '{FINE}') === false) {
+        // errore: testo senza campo ora
+        $form->addError(new FormError($trans->trans('exception.campo_ora_fine_mancante')));
+      }
+      // controlla filtro
+      $errore = false;
+      $lista_classi = array_map(function ($o) { return $o->getId(); },
+        $form->get('classi')->getData()->toArray());
+      $lista = $em->getRepository('App:Classe')->controllaClassi($sedi, $lista_classi, $errore);
+      if ($errore) {
+        // classe non valida
+        $form->addError(new FormError($trans->trans('exception.filtro_classi_invalido', ['dest' => ''])));
+      }
+      $avviso->setFiltro($lista);
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
@@ -1417,9 +1149,37 @@ class StaffController extends AbstractController {
       }
       // modifica dati
       if ($form->isValid()) {
-        // destinatari
-        $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, $val_staff_filtro, $val_staff_sedi,
-          $val_destinatari, $val_filtro, $val_filtro_id);
+        // gestione destinatari
+        if ($id) {
+          // cancella destinatari precedenti e dati lettura
+          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+          $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+            ->delete()
+            ->where('ac.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+        }
+        $dest = $bac->destinatariAvviso($avviso);
+        // imposta utenti
+        foreach ($dest['utenti'] as $u) {
+          $obj = (new AvvisoUtente())
+            ->setAvviso($avviso)
+            ->setUtente($em->getReference('App:Utente', $u));
+          $em->persist($obj);
+        }
+        // imposta classi
+        foreach ($dest['classi'] as $c) {
+          $obj = (new AvvisoClasse())
+            ->setAvviso($avviso)
+            ->setClasse($em->getReference('App:Classe', $c));
+          $em->persist($obj);
+        }
         // annotazione
         $log_annotazioni['delete'] = array();
         if ($id) {
@@ -1431,7 +1191,7 @@ class StaffController extends AbstractController {
           $avviso->setAnnotazioni(new ArrayCollection());
         }
         // crea nuove annotazioni
-        $bac->creaAnnotazione($avviso, $val_filtro, $val_filtro_id, $val_filtro_individuale_classe);
+        $bac->creaAnnotazione($avviso, $dest['sedi']);
         // ok: memorizza dati
         $em->flush();
         // log azione e notifica
@@ -1444,7 +1204,6 @@ class StaffController extends AbstractController {
           $notifica->setAzione('A');
           $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso attività', __METHOD__, array(
             'Avviso' => $avviso->getId(),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
             'Annotazioni' => implode(', ', array_map(function ($a) {
                 return $a->getId();
               }, $avviso->getAnnotazioni()->toArray())),
@@ -1458,8 +1217,8 @@ class StaffController extends AbstractController {
             'Ora inizio' => $avviso_old->getOra()->format('H:i'),
             'Ora fine' => $avviso_old->getOraFine()->format('H:i'),
             'Testo' => $avviso_old->getTesto(),
-            'Classi cancellate' => implode(', ', $log_destinatari['classi']['delete']),
-            'Classi aggiunte' => implode(', ', $log_destinatari['classi']['add']),
+            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
             'Annotazioni create' => implode(', ', array_map(function ($a) {
@@ -1498,15 +1257,13 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiIndividualiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                           BachecaUtil $bac, $pagina) {
+                                          BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
     $search['docente'] = $session->get('/APP/ROUTE/staff_avvisi_individuali/docente', 0);
-    $search['classe_individuale'] = $session->get('/APP/ROUTE/staff_avvisi_individuali/classe_individuale', 0);
     $docente = ($search['docente'] > 0 ? $em->getRepository('App:Docente')->find($search['docente']) : 0);
-    $classe = ($search['classe_individuale'] > 0 ? $em->getRepository('App:Classe')->find($search['classe_individuale']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/staff_avvisi_individuali/pagina', 1);
@@ -1515,7 +1272,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_avvisi_individuali/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_avvisi_individuali', FormType::class)
       ->add('docente', EntityType::class, array('label' => 'label.autore',
         'data' => $docente,
@@ -1536,37 +1293,14 @@ class StaffController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => false))
-      ->add('classe_individuale', EntityType::class, array('label' => 'label.classe',
-        'data' => $classe,
-        'class' => 'App:Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione();
-          },
-        'placeholder' => 'label.qualsiasi_classe',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'label_attr' => ['class' => 'sr-only'],
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder'],
-        'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.search'))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
       $search['docente'] = (is_object($form->get('docente')->getData()) ? $form->get('docente')->getData()->getId() : 0);
-      $search['classe_individuale'] = (is_object($form->get('classe_individuale')->getData()) ?
-        $form->get('classe_individuale')->getData()->getId() : 0);
       $pagina = 1;
       $session->set('/APP/ROUTE/staff_avvisi_individuali/docente', $search['docente']);
-      $session->set('/APP/ROUTE/staff_avvisi_individuali/classe_individuale', $search['classe_individuale']);
       $session->set('/APP/ROUTE/staff_avvisi_individuali/pagina', $pagina);
     }
     // recupera dati
@@ -1604,7 +1338,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function avvisiIndividualiEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                               TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
+                                              TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg, LogHandler $dblogger, $id) {
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -1614,99 +1348,59 @@ class StaffController extends AbstractController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       $avviso_old = clone $avviso;
+      $avviso_sedi_old = $avviso->getSedi()->toArray();
     } else {
       // azione add
       $docente = ($this->getUser()->getSesso() == 'M' ? ' prof. ' : 'la prof.ssa ').
         $this->getUser()->getNome().' '.$this->getUser()->getCognome();
       $avviso = (new Avviso())
         ->setTipo('I')
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(false)
-        ->setDestinatariGenitori(true)
-        ->setDestinatariAlunni(false)
-        ->setDestinatariIndividuali(true)
+        ->setDestinatari(['G'])
+        ->setFiltroTipo('U')
         ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
         ->setData(new \DateTime('today'));
+      if ($this->getUser()->getSede()) {
+        $avviso->addSede($this->getUser()->getSede());
+      }
       $em->persist($avviso);
     }
-    // legge destinatari di filtri
-    $dest_filtro = $bac->filtriAvviso($avviso);
     // imposta autore dell'avviso
     $avviso->setDocente($this->getUser());
-    // imposta lettura non avvenuta (per avviso modificato)
-    foreach ($dest_filtro['utenti'] as $k=>$v) {
-      $dest_filtro['genitori'][$k]['letto'] = null;
-    }
-    // opzione scelta filtro
-    $scelta_filtro = 'I';
-    $scelta_filtro_individuale = array();
-    $scelta_filtro_individuale_classe = null;
-    foreach (array_column($dest_filtro['utenti'], 'alunno') as $a) {
-      $alunno = $em->getRepository('App:Alunno')->find($a);
-      if ($alunno) {
-        $scelta_filtro_individuale[] = $alunno->getId();
-        $scelta_filtro_individuale_classe = $alunno->getClasse();
-      }
-    }
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('avvisi_individuali_edit', FormType::class, $avviso)
-      ->add('testo', MessageType::class, array(
-        'label' => 'label.testo',
-        'attr' => array('rows' => '4'),
-        'required' => true))
-      ->add('filtroIndividualeClasse', EntityType::class, array('label' => false,
-        'data' => $scelta_filtro_individuale_classe,
-        'class' => 'App:Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          },
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')
-              ->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => function ($obj) {
-            return $obj->getSede()->getCitta();
-          },
-        'expanded' => false,
-        'multiple' => false,
-        'placeholder' => 'label.scegli_classe',
-        'choice_translation_domain' => false,
-        'attr' => ['style' => 'width:auto'],
-        'label_attr' => ['class' => 'gs-pt-0 checkbox-split-vertical'],
-        'mapped' => false,
-        'required' => false))
-      ->add('filtroIndividuale',  HiddenType::class, array('label' => false,
-        'data' => implode(',', $scelta_filtro_individuale),
-        'mapped' => false,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('staff_avvisi_individuali')."'"]))
-      ->getForm();
+    $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'individuale',
+      'returnUrl' => $this->generateUrl('staff_avvisi_individuali'),
+      'dati' => [$this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null]]);
     $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // recupera dati
-      $val_staff_filtro = 'N';
-      $val_staff_sedi = [];
-      $val_destinatari = ['G', 'I'];
-      $val_filtro = 'I';
-      $val_filtro_id = [];
-      $val_filtro_individuale_classe = $form->get('filtroIndividualeClasse')->getData();
-      foreach (explode(',', $form->get('filtroIndividuale')->getData()) as $fid) {
-        if ($val_filtro_individuale_classe &&
-            $em->getRepository('App:Alunno')->findOneBy(
-              ['id' => $fid, 'abilitato' => 1, 'classe' => $val_filtro_individuale_classe->getId()])) {
-          $val_filtro_id[] = $fid;
+    $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+    if ($form->isSubmitted()) {
+      // lista sedi
+      $sedi = array();
+      foreach ($avviso->getSedi() as $s) {
+        if (!$this->getUser()->getSede() || $this->getUser()->getSede() == $s) {
+          // sede corretta
+          $sedi[] = $s->getId();
+        } else {
+          // elimina sede
+          $avviso->removeSede($s);
         }
       }
-      // controllo errori
-      if (count($val_filtro_id) == 0) {
-        // errore: filtro vuoto
-        $form->addError(new FormError($trans->trans('exception.destinatari_filtro_mancanti')));
+      if (count($sedi) == 0) {
+        // sedi non definite
+        $form->addError(new FormError($trans->trans('exception.avviso_sede_nulla')));
       }
+      if (empty(implode(',', $form->get('filtro')->getData()))) {
+        // errore: filtro vuoto
+        $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
+      }
+      // controlla filtro
+      $errore = false;
+      $lista = $em->getRepository('App:Alunno')
+        ->controllaAlunni($sedi, $form->get('filtro')->getData(), $errore);
+      if ($errore) {
+        // utente non valido
+        $form->addError(new FormError($trans->trans('exception.filtro_utenti_invalido', ['dest' => ''])));
+      }
+      $avviso->setFiltro($lista);
       // controllo permessi
       if (!$bac->azioneAvviso(($id > 0 ? 'edit' : 'add'), $avviso->getData(), $this->getUser(), ($id > 0 ? $avviso : null))) {
         // errore: avviso non permesso
@@ -1714,31 +1408,45 @@ class StaffController extends AbstractController {
       }
       // modifica dati
       if ($form->isValid()) {
-        // destinatari
-        $log_destinatari = $bac->modificaFiltriAvviso($avviso, $dest_filtro, $val_staff_filtro, $val_staff_sedi,
-          $val_destinatari, $val_filtro, $val_filtro_id);
+        // gestione destinatari
+        if ($id) {
+          // cancella destinatari precedenti e dati lettura
+          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.avviso=:avviso')
+            ->setParameters(['avviso' => $avviso])
+            ->getQuery()
+            ->execute();
+        }
+        $dest = $bac->destinatariAvviso($avviso);
+        // imposta utenti
+        foreach ($dest['utenti'] as $u) {
+          $obj = (new AvvisoUtente())
+            ->setAvviso($avviso)
+            ->setUtente($em->getReference('App:Utente', $u));
+          $em->persist($obj);
+        }
         // ok: memorizza dati
         $em->flush();
-        // log azione
+        // log azione e notifica
+        $notifica = (new Notifica())
+          ->setOggettoNome('Avviso')
+          ->setOggettoId($avviso->getId());
+        $em->persist($notifica);
         if (!$id) {
           // nuovo
+          $notifica->setAzione('A');
           $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso individuale', __METHOD__, array(
             'Avviso' => $avviso->getId(),
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['add'])),
             ));
         } else {
           // modifica
+          $notifica->setAzione('E');
           $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Modifica avviso individuale', __METHOD__, array(
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),
-            'Utenti cancellati' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['delete'])),
-            'Utenti aggiunti' => implode(', ', array_map(function ($a) {
-                return $a['genitore'].'->'.$a['alunno'];
-              }, $log_destinatari['utenti']['add'])),
+            'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
+            'Filtro' => $avviso_old->getFiltro(),
             'Docente' => $avviso_old->getDocente()->getId(),
             ));
         }
@@ -1751,6 +1459,7 @@ class StaffController extends AbstractController {
       'pagina_titolo' => 'page.staff_avvisi_individuali',
       'form' => $form->createView(),
       'form_title' => ($id > 0 ? 'title.modifica_avviso_individuale' : 'title.nuovo_avviso_individuale'),
+      'dati' => $dati,
     ));
   }
 

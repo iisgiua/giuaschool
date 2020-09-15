@@ -69,7 +69,7 @@ class AssenzeController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function quadroAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
+                               RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
     // inizializza variabili
     $lista_festivi = null;
     $errore = null;

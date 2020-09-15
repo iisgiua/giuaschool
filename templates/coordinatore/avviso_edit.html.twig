@@ -10,15 +10,52 @@
       {{ form_start(form) }}
       {{ form_errors(form) }}
       {{ form_row(form.testo) }}
+      {{ form_row(form.creaAnnotazione) }}
       <div class="form-group">
-        <label class="col-sm-2 control-label required" for="avviso_edit_destinatari">Destinatari</label>
+        <label class="col-sm-2 control-label required">{{ 'label.destinatari'|trans }}</label>
         <div class="col-sm-10">
           {{ form_widget(form.destinatari) }}
-          {{ form_widget(form.filtro) }}
-          <div id="individuale" style="display:none">
-            <div class="col-sm-6"></div>
-            <div class="col-sm-6"></div>
-            {{ form_widget(form.filtroIndividuale) }}
+          <div class="form-group gs-mb-4 gs-mt-2 gs-vertical-center">
+            <div class="col-sm-2">{{ form_widget(form.filtroTipo) }}</div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteFiltro" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-8 text-info"><strong><em id="gs-filtro" style="display:none"></em></strong></div>
+            {{ form_widget(form.filtro) }}
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+          {{ form_widget(form.submit) }}
+          {{ form_widget(form.cancel) }}
+        </div>
+      </div>
+      <div class="modal fade" id="gs-modal-alunni" tabindex="-1" role="dialog" aria-labelledby="gs-modal-alunni-label" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header gs-pt-2 gs-pb-0">
+              <h3 id="gs-modal-alunni-label" class="modal-title text-center gs-h2"></h3>
+            </div>
+            <div class="modal-body clearfix gs-pt-2 gs-pb-2 gs-pr-4 gs-pl-4">
+              <div id="gs-modal-alunni-row" class="row bg-info gs-mr-0 gs-ml-0 gs-pt-1 gs-pb-1">
+              </div>
+              <div class="row gs-pr-4 gs-pl-4 gs-pt-2 gs-pb-2">
+                <input type="text" id="gs-modal-alunni-cognome" name="cerca[cognome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.cognome'|trans }}">
+                <input type="text" id="gs-modal-alunni-nome" name="cerca[nome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.nome'|trans }}">
+                <button type="button" id="gs-modal-alunni-search" class="btn btn-default"><strong>{{ 'label.search'|trans }}</strong></button>
+              </div>
+              <div class="row gs-pr-4 gs-pl-4">
+                <div id="gs-modal-alunni-col1" class="col-sm-6"></div>
+                <div id="gs-modal-alunni-col2" class="col-sm-6"></div>
+              </div>
+              <div id="gs-modal-alunni-pag" class="row text-center gs-pr-4 gs-pl-4 gs-pt-3"></div>
+            </div>
+            <div class="modal-footer gs-pb-3 gs-pt-3">
+              <div class="text-center">
+                <button type="button" id="gs-modal-alunni-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+                <button type="button" id="gs-modal-alunni-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -26,54 +63,174 @@
     </div>
   </div>
 </div>
+  {% include 'include/modal-waiting.html.twig' %}
 {% endblock %}
 
 {% block pagina_js_fine %}
 {{ parent() }}
 <script>
 $(document).ready(function() {
-  $('label.radio-inline input').change(function() {
-    $('label.radio-inline input').parent().removeClass('active');
-    if ($(this).is(":checked")) {
-      $(this).parent().addClass('active');
-    }
-  });
-  $("input[name='avviso_edit[filtroIndividuale][]']").change(function() {
+  $('label.gs-checkbox-inline input').change(function() {
     if ($(this).is(":checked")) {
       $(this).parent().addClass('active');
     } else {
       $(this).parent().removeClass('active');
     }
   }).change();
-  $("input[name='avviso_edit[destinatari]']").change(function() {
-    var f='<option value="N">Nessuno</option>';
-    var b='<option value="T">Tutti</option>';
-    var i='<option value="I">Filtra per utente</option>';
-    if ($("input[name='avviso_edit[destinatari]'][value='D']").is(":checked")) {
-      f=b;
-    } else if ($("input[name='avviso_edit[destinatari]'][value='G']").is(":checked")) {
-      f=b+i;
+  $("input[name='avviso[destinatari][]']").change(function() {
+    var v = '<option class="gs-no-placeholder" value="N">Nessuno</option>';
+    var v_t = '<option class="gs-no-placeholder" value="T">Tutti</option>';
+    var v_u = '<option class="gs-no-placeholder" value="U">Filtra per utente</option>';
+    if ($("input[name='avviso[destinatari][]']:checked").length > 0) {
+      v = v_t;
+      if (!$("input[name='avviso[destinatari][]'][value='D']").is(":checked")) {
+        v = v + v_u;
+      }
     }
-    $("#avviso_edit_filtro").html(f).change();
+    $("#avviso_filtroTipo").html(v).change();
   });
-  $("#avviso_edit_filtro").change(function() {
-    $('#individuale').hide();
-    if ($(this).val() == 'I') {
-      $('#individuale').show();
+  $("#gs-pulsanteFiltro").click(function() {
+    var opt = $('#avviso_filtro').val();
+    $('#gs-modal-alunni-label').text("{{ 'label.scegli_utenti'|trans }}");
+    $('#gs-modal-alunni-row').data('id', '').data('nomi','').html('');
+    $('#gs-modal-alunni-col1').html('');
+    $('#gs-modal-alunni-col2').html('');
+    $('#gs-modal-alunni-pag').html('');
+    $('#gs-modal-alunni-cognome').val('');
+    $('#gs-modal-alunni-nome').val('');
+    if (opt != "") {
+      $('#gs-modal-alunni-row').data('id', opt);
+      $('#gs-modal-alunni-row').data('nomi', $('#avviso_filtro').data('nomi'));
+      $('#gs-filtro span').each(function(){
+        var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+$(this).attr('id')+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+$(this).text()+'</strong></div>';
+        $('#gs-modal-alunni-row').append(s);
+      });
     }
+    $("#gs-modal-alunni").modal('show');
+  });
+  $("#avviso_filtroTipo").change(function() {
+    $("#avviso_filtro").val('');
+    if ($(this).val() == 'U') {
+      $("#gs-pulsanteFiltro").click();
+    } else {
+      $(this).data('previous', $(this).val());
+      $("#gs-pulsanteFiltro").hide();
+      $("#gs-filtro").hide();
+    }
+  });
+  $("#gs-modal-alunni-search").click(function() {
+    $('#gs-modal-waiting').modal('show');
+    var par1 = "-"+encodeURIComponent($('#gs-modal-alunni-cognome').val());
+    var par2 = "-"+encodeURIComponent($('#gs-modal-alunni-nome').val());
+    var par3 = "-{{ dati.classe.id }}";
+    var par4 = "-{{ dati.classe.sede.id }}-";
+    $('#gs-modal-alunni-pag').data('par1', par1).data('par2', par2).data('par3', par3).data('par4', par4);
+    alunniSearch(1);
+  });
+  $("#gs-modal-alunni-confirm").click(function() {
+    var id = $('#gs-modal-alunni-row').data('id');
+    var nomi = $('#gs-modal-alunni-row').data('nomi');
+    if (id == null || id == '') {
+      alert('ATTENZIONE: Devi selezionare almeno un utente');
+    } else {
+      $("#gs-modal-alunni").modal('hide');
+      $("#avviso_filtro").val(id);
+      $("#avviso_filtro").data('nomi', nomi);
+      $("#avviso_filtroTipo").data('previous', $("#avviso_filtroTipo").val());
+      $("#gs-pulsanteFiltro").show();
+      var lista_id = id.split(',');
+      var lista_nomi = nomi.split(', ').map(function(item,index){
+        return '<span id="gs-filtro-'+lista_id[index]+'">'+item+'</span>';
+      });
+      $("#gs-filtro").html(lista_nomi.join(', ')).show();
+    }
+  });
+  $("#gs-modal-alunni-cancel").click(function() {
+    var old = $("#avviso_filtroTipo").data('previous');
+    $("#avviso_filtroTipo").val(old);
+    $("#gs-modal-alunni").modal('hide');
+  });
+  $(document).on('keypress','.modal', function(e){
+    return event.keyCode != 13;
   });
   // init
-  $('label.radio-inline input:checked').parent().addClass('active');
-  var f='<option value="N">Nessuno</option>';
-  var b='<option value="T">Tutti</option>';
-  var i='<option value="I">Filtra per utente</option>';
-  if ($("input[name='avviso_edit[destinatari]'][value='D']").is(":checked")) {
-    f=b;
-  } else if ($("input[name='avviso_edit[destinatari]'][value='G']").is(":checked")) {
-    f=b+i;
+  $("input[name='avviso[destinatari][]']").change();
+  $("#avviso_filtroTipo").val('{{ form.filtroTipo.vars.value ? form.filtroTipo.vars.value : 'N' }}');
+  $("#avviso_filtro").val('{{ form.filtro.vars.value }}');
+  if ($("#avviso_filtroTipo").val() == 'U') {
+    $("#gs-pulsanteFiltro").show();
+    $("#avviso_filtro").data('nomi', $("{{ dati.lista|raw }}").text());
+    $("#gs-filtro").html("{{ dati.lista|raw }}").show();
   }
-  var s = $('#avviso_edit_filtro').val();
-  $("#avviso_edit_filtro").html(f).val(s).change();
+  $("select").each(function() {
+    $(this).data('previous', $(this).val());
+  })
 });
+function addUser(element) {
+  var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
+  var nome = $(element).parent().text();
+  var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+id+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+nome+'</strong></div>';
+  var txt = $('#gs-modal-alunni-row').data('nomi');
+  txt = (txt == null || txt == '' ? nome : txt+', '+nome);
+  $('#gs-modal-alunni-row').data('nomi', txt);
+  txt = $('#gs-modal-alunni-row').data('id');
+  txt = (txt == null || txt == '' ? id : txt+','+id);
+  $('#gs-modal-alunni-row').data('id', txt);
+  $('#gs-modal-alunni-row').append(s);
+  $(element).hide();
+}
+function removeUser(element) {
+  var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
+  var nome = $(element).parent().text();
+  var txt = ', '+$('#gs-modal-alunni-row').data('nomi')+', ';
+  txt = txt.replace(', '+nome+', ',', ').slice(2,-2);
+  $('#gs-modal-alunni-row').data('nomi', txt);
+  txt = ','+$('#gs-modal-alunni-row').data('id')+',';
+  txt = txt.replace(','+id+',',',').slice(1,-1);
+  $('#gs-modal-alunni-row').data('id', txt);
+  $(element).parent().remove();
+  $('#gs-modal-alunni-lista-'+id).show();
+}
+function alunniSearch(page) {
+  $('#gs-modal-waiting').modal('show');
+  var par1 = $('#gs-modal-alunni-pag').data('par1');
+  var par2 = $('#gs-modal-alunni-pag').data('par2');
+  var par3 = $('#gs-modal-alunni-pag').data('par3');
+  var par4 = $('#gs-modal-alunni-pag').data('par4');
+  var url = "{{ path('ajax_alunni') }}/"+par1+"/"+par2+"/"+par3+"/"+par4+"/"+page;
+  $.post(url, function (data) {
+      var sl='';
+      var sr='';
+      var s='';
+      $.each(data.lista, function(idx,item){
+        if ((','+$('#gs-modal-alunni-row').data('id')+',').indexOf(','+item.id+',') == -1) {
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(this)"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+        } else {
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(this)" style="display:none"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+        }
+        if (idx < 10) {
+          sl+=s;
+        } else {
+          sr+=s;
+        }
+      });
+      $('#gs-modal-alunni-col1').html(sl);
+      $('#gs-modal-alunni-col2').html(sr);
+      $('#gs-modal-alunni-pag').html('');
+      if (data.fine > 1) {
+        s = '<span><strong>Pagina: </strong></span><button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="alunniSearch(1)">Prima</button>';
+        for (i = data.inizio; i<=data.fine; i++) {
+          if (i == data.pagina) {
+            s = s+'<span class="gs-mr-2">'+i+'</span>';
+          } else {
+            s = s+'<button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="alunniSearch('+i+')">'+i+'</button>';
+          }
+        }
+        s = s+'<button type="button" class="btn btn-default btn-xs gs-mr-2" onClick="alunniSearch('+data.max+')">Ultima</button>';
+        $('#gs-modal-alunni-pag').html(s);
+      }
+    }, 'json');
+  $('#gs-modal-waiting').modal('hide');
+}
 </script>
 {% endblock %}
