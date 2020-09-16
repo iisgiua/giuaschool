@@ -28,6 +28,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
+use App\Util\StaffUtil;
 use App\Form\RicercaType;
 use App\Form\AlunnoType;
 use App\Form\ImportaCsvType;
@@ -273,6 +274,7 @@ class AlunniController extends BaseController {
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param SessionInterface $session Gestore delle sessioni
    * @param PdfManager $pdf Gestore dei documenti PDF
+   * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
@@ -289,7 +291,7 @@ class AlunniController extends BaseController {
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                 PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $genitore): Response {
     // controlla alunno
     $alunno = $em->getRepository('App:Alunno')->find($id);
@@ -298,8 +300,7 @@ class AlunniController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // crea password
-    $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
-    $password = substr(str_shuffle($pwdchars), 0, 4).substr(str_shuffle($pwdchars), 0, 4);
+    $password = $staff->creaPassword(8);
     if ($genitore) {
       // password genitore
       $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);

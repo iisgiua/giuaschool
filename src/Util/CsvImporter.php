@@ -62,6 +62,11 @@ class CsvImporter {
   private $validator;
 
   /**
+   * @var StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
+   */
+  private $staff;
+
+  /**
    * @var resource $fh Gestore del file
    */
   private $fh;
@@ -81,13 +86,15 @@ class CsvImporter {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param ValidatorBuilder $valbuilder Costruttore per il gestore della validazione dei dati
+   * @param StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, UserPasswordEncoderInterface $encoder,
-                               ValidatorBuilder $valbuilder) {
+                              ValidatorBuilder $valbuilder, StaffUtil $staff) {
     $this->em = $em;
     $this->trans = $trans;
     $this->encoder = $encoder;
     $this->validator = $valbuilder->getValidator();
+    $this->staff = $staff;
     $this->fh = null;
     $this->header = array();
   }
@@ -116,7 +123,6 @@ class CsvImporter {
     }
     // lettura dati
     $imported = array();
-    $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -164,7 +170,7 @@ class CsvImporter {
       if (empty($fields['password'])) {
         // crea password
         $empty_fields['password'] = true;
-        $fields['password'] = substr(str_shuffle($pwdchars), 0, 5).substr(str_shuffle($pwdchars), 0, 5);
+        $fields['password'] = $this->staff->creaPassword(10);
       }
       if (empty($fields['email'])) {
         // crea finta email
@@ -455,7 +461,6 @@ class CsvImporter {
     }
     // lettura dati
     $imported = array();
-    $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -617,7 +622,7 @@ class CsvImporter {
       $fields['usernameGenitore'] = $username.'.f'.(1 + $result[0]['cnt']);
       // crea password
       $empty_fields['password'] = true;
-      $fields['password'] = substr(str_shuffle($pwdchars), 0, 4).substr(str_shuffle($pwdchars), 0, 4);
+      $fields['password'] = $this->staff->creaPassword(8);
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
@@ -885,7 +890,6 @@ class CsvImporter {
     }
     // lettura dati
     $imported = array();
-    $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
     $count = 0;
     while (($data = fgetcsv($this->fh)) !== false) {
       $count++;
@@ -935,7 +939,7 @@ class CsvImporter {
       if (empty($fields['password'])) {
         // crea password
         $empty_fields['password'] = true;
-        $fields['password'] = substr(str_shuffle($pwdchars), 0, 4).substr(str_shuffle($pwdchars), 0, 4);
+        $fields['password'] = $this->staff->creaPassword(8);
       }
       if (empty($fields['email'])) {
         // crea finta email

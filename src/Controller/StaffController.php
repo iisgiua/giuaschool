@@ -2993,6 +2993,7 @@ class StaffController extends AbstractController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param SessionInterface $session Gestore delle sessioni
+   * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param LogHandler $dblogger Gestore dei log su database
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param int $alunno ID dell'alunno
@@ -3007,8 +3008,8 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em,
-                                        UserPasswordEncoderInterface $encoder, SessionInterface $session, LogHandler $dblogger,
-                                        PdfManager $pdf, $classe, $alunno) {
+                                        UserPasswordEncoderInterface $encoder, SessionInterface $session,
+                                        StaffUtil $staff, LogHandler $dblogger, PdfManager $pdf, $classe, $alunno) {
     if ($classe > 0) {
       // controlla classe
       $classe = $em->getRepository('App:Classe')->find($classe);
@@ -3028,7 +3029,6 @@ class StaffController extends AbstractController {
         return $this->redirectToRoute('staff_password');
       } else {
         // alunni presenti
-        $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
         // crea documento PDF
         $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
           'Credenziali di accesso al Registro Elettronico');
@@ -3040,7 +3040,7 @@ class StaffController extends AbstractController {
             throw $this->createNotFoundException('exception.id_notfound');
           }
           // crea password
-          $password = substr(str_shuffle($pwdchars), 0, 4).substr(str_shuffle($pwdchars), 0, 4);
+          $password = $staff->creaPassword(8);
           foreach ($genitori as $gen) {
             $gen->setPasswordNonCifrata($password);
             $pswd = $encoder->encodePassword($gen, $gen->getPasswordNonCifrata());
@@ -3081,8 +3081,7 @@ class StaffController extends AbstractController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       // crea password
-      $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
-      $password = substr(str_shuffle($pwdchars), 0, 4).substr(str_shuffle($pwdchars), 0, 4);
+      $password = $staff->creaPassword(8);
       foreach ($genitori as $gen) {
         $gen->setPasswordNonCifrata($password);
         $pswd = $encoder->encodePassword($gen, $gen->getPasswordNonCifrata());

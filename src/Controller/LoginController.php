@@ -36,6 +36,7 @@ use App\Util\NotificheUtil;
 use App\Util\LogHandler;
 use App\Util\ConfigLoader;
 use App\Util\OtpUtil;
+use App\Util\StaffUtil;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
@@ -241,6 +242,7 @@ class LoginController extends BaseController {
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param OtpUtil $otp Gestione del codice OTP
+   * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
@@ -251,8 +253,9 @@ class LoginController extends BaseController {
    *    methods={"GET", "POST"})
    */
   public function recoveryAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                  ConfigLoader $config, UserPasswordEncoderInterface $encoder, OtpUtil $otp,
-                                  \Swift_Mailer $mailer, LoggerInterface $logger, LogHandler $dblogger) {
+                                 ConfigLoader $config, UserPasswordEncoderInterface $encoder, OtpUtil $otp,
+                                 StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 LogHandler $dblogger) {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
@@ -331,7 +334,7 @@ class LoginController extends BaseController {
       } else {
         if ($utente instanceof Docente) {
           // docenti/staff/preside
-          $num_pwdchars = 5;
+          $num_pwdchars = 10;
           $template_html = 'email/credenziali_recupero_docenti.html.twig';
           $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
           $utente_mail = $utente;
@@ -339,29 +342,28 @@ class LoginController extends BaseController {
           $utente->setUltimoOtp($codice);
         } elseif ($utente instanceof Ata) {
           // ATA
-          $num_pwdchars = 4;
+          $num_pwdchars = 8;
           $template_html = 'email/credenziali_recupero_ata.html.twig';
           $template_txt = 'email/credenziali_recupero_ata.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
         } elseif ($utente instanceof Genitore) {
           // genitori
-          $num_pwdchars = 4;
+          $num_pwdchars = 8;
           $template_html = 'email/credenziali_alunni.html.twig';
           $template_txt = 'email/credenziali_alunni.txt.twig';
           $utente_mail = $utente->getAlunno();
           $sesso = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
         } elseif ($utente instanceof Alunno) {
           // alunni
-          $num_pwdchars = 4;
+          $num_pwdchars = 8;
           $template_html = 'email/credenziali_alunni.html.twig';
           $template_txt = 'email/credenziali_alunni.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
         }
         // ok: genera password
-        $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
-        $password = substr(str_shuffle($pwdchars), 0, $num_pwdchars).substr(str_shuffle($pwdchars), 0, $num_pwdchars);
+        $password = $staff->creaPassword($num_pwdchars);
         $utente->setPasswordNonCifrata($password);
         $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
         $utente->setPassword($pswd);
@@ -602,6 +604,7 @@ class LoginController extends BaseController {
    * @param SessionInterface $session Gestore delle sessioni
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ConfigLoader $config Gestore della configurazione su database
+   * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param LogHandler $dblogger Gestore dei log su database
    * @param string $token Token di conferma dell'attivazione
@@ -612,8 +615,8 @@ class LoginController extends BaseController {
    *    methods={"GET"})
    */
   public function confermaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                  TranslatorInterface $trans, ConfigLoader $config, UserPasswordEncoderInterface $encoder, LogHandler $dblogger,
-                                  $token) {
+                                 TranslatorInterface $trans, ConfigLoader $config, StaffUtil $staff,
+                                 UserPasswordEncoderInterface $encoder, LogHandler $dblogger, $token) {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
@@ -635,9 +638,8 @@ class LoginController extends BaseController {
       $messaggio = array('warning', 'message.conferma_utente_attivo');
     } else {
       // ok: genera password
-      $num_pwdchars = 4;
-      $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
-      $password = substr(str_shuffle($pwdchars), 0, $num_pwdchars).substr(str_shuffle($pwdchars), 0, $num_pwdchars);
+      $num_pwdchars = 8;
+      $password = $staff->creaPassword($num_pwdchars);
       $alunno->setPasswordNonCifrata($password);
       $pswd = $encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
       $alunno->setPassword($pswd);

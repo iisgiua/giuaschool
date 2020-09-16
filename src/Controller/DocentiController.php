@@ -34,6 +34,7 @@ use App\Form\ColloquioType;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
+use App\Util\StaffUtil;
 use App\Entity\Docente;
 use App\Entity\Cattedra;
 use App\Entity\Colloquio;
@@ -256,6 +257,7 @@ class DocentiController extends BaseController {
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param SessionInterface $session Gestore delle sessioni
    * @param PdfManager $pdf Gestore dei documenti PDF
+   * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
@@ -271,7 +273,7 @@ class DocentiController extends BaseController {
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                 PdfManager $pdf, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger,  $id): Response {
     // controlla docente
     $docente = $em->getRepository('App:Docente')->find($id);
@@ -280,8 +282,7 @@ class DocentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // crea password
-    $pwdchars = "abcdefghikmnopqrstuvwxyz123456789";
-    $password = substr(str_shuffle($pwdchars), 0, 5).substr(str_shuffle($pwdchars), 0, 5);
+    $password = $staff->creaPassword(10);
     $docente->setPasswordNonCifrata($password);
     $pswd = $encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
     $docente->setPassword($pswd);

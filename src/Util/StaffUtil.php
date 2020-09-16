@@ -921,4 +921,24 @@ class StaffUtil {
     return $stat;
   }
 
+  /**
+   * Restituisce una password casuale della lunghezza indicata
+   *
+   * @param int $lunghezza Numero di caratteri per la password
+   * @param boolean $simboli Vero per inserire anche simboli di punteggiatura
+   *
+   * @return string Password creata
+   */
+  public function creaPassword($lunghezza, $simboli=false) {
+    // caratteri ammessi
+    $pwdchars1 = "abcdefghikmnopqrstuvwxyz123456789ABCDEFGHKLMNPQRSTUVWXYZ";
+    $pwdchars2 = $pwdchars1.($simboli ? '.:-+%&' : '');
+    // crea password
+    $lun = $lunghezza / 2;
+    $password = substr(str_shuffle($pwdchars1), 0, $lun).substr(str_shuffle($pwdchars2), 0, $lun);
+    // restituisce la password
+    return $password;
+  }
+
+
 }
