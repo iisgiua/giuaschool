@@ -31,8 +31,10 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\File\File;
@@ -2922,7 +2924,7 @@ class StaffController extends AbstractController {
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     if ($sede) {
       // limita a classi di sede
       $classi = $em->getRepository('App:Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
@@ -2996,124 +2998,65 @@ class StaffController extends AbstractController {
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param LogHandler $dblogger Gestore dei log su database
    * @param PdfManager $pdf Gestore dei documenti PDF
-   * @param int $alunno ID dell'alunno
-   * @param int $classe ID della classe
+   * @param int $id ID dell'alunno
+   * @param boolean $genitore Vero se si vuole cambiare la password del genitore, falso per la password dell'alunno
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/staff/password/create/{classe}/{alunno}", name="staff_password_create",
-   *    requirements={"alunno": "\d+", "classe": "\d+"},
+   * @Route("/staff/password/create/{id}/{genitore}", name="staff_password_create",
+   *    requirements={"id": "\d+", "genitore": "0|1"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_STAFF")
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em,
-                                        UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                        StaffUtil $staff, LogHandler $dblogger, PdfManager $pdf, $classe, $alunno) {
-    if ($classe > 0) {
-      // controlla classe
-      $classe = $em->getRepository('App:Classe')->find($classe);
-      if (!$classe) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // recupera alunni della classe
-      $alunni = $em->getRepository('App:Alunno')->createQueryBuilder('a')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1])
-        ->orderBy('a.cognome,a.nome', 'ASC')
-        ->getQuery()
-        ->getResult();
-      if (empty($alunni)) {
-        // nessun alunno
-        return $this->redirectToRoute('staff_password');
-      } else {
-        // alunni presenti
-        // crea documento PDF
-        $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Credenziali di accesso al Registro Elettronico');
-        foreach ($alunni as $alu) {
-          // recupera genitori (anche più di uno)
-          $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alu]);
-          if (empty($genitori)) {
-            // errore
-            throw $this->createNotFoundException('exception.id_notfound');
-          }
-          // crea password
-          $password = $staff->creaPassword(8);
-          foreach ($genitori as $gen) {
-            $gen->setPasswordNonCifrata($password);
-            $pswd = $encoder->encodePassword($gen, $gen->getPasswordNonCifrata());
-            $gen->setPassword($pswd);
-          }
-          // memorizza su db
-          $em->flush();
-          // log azione
-          $dblogger->write($alu, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
-            'Username esecutore' => $this->getUser()->getUsername(),
-            'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-            'ID esecutore' => $this->getUser()->getId()
-            ));
-          // contenuto in formato HTML
-          $html = $this->renderView('pdf/credenziali_alunni.html.twig', array(
-            'alunno' => $alu,
-            'username' => $genitori[0]->getUsername(),
-            'password' => $password,
-            'sesso' => $alu->getSesso() == 'M' ? 'o' : 'a',
-            ));
-          $pdf->createFromHtml($html);
-        }
-        // invia il documento
-        $nomefile = 'credenziali-registro-CLASSE-'.$classe->getAnno().$classe->getSezione().'.pdf';
-        return $pdf->send($nomefile);
-      }
-    } elseif ($alunno > 0) {
-      // controlla alunno
-      $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
-      if (!$alunno) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // recupera genitori (anche più di uno)
-      $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);
-      if (empty($genitori)) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // crea password
-      $password = $staff->creaPassword(8);
-      foreach ($genitori as $gen) {
-        $gen->setPasswordNonCifrata($password);
-        $pswd = $encoder->encodePassword($gen, $gen->getPasswordNonCifrata());
-        $gen->setPassword($pswd);
-      }
-      // memorizza su db
-      $em->flush();
-      // log azione
-      $dblogger->write($alunno, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
-        'Username esecutore' => $this->getUser()->getUsername(),
-        'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-        'ID esecutore' => $this->getUser()->getId()
-        ));
-      // crea documento PDF
-      $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
-        'Credenziali di accesso al Registro Elettronico');
-      // contenuto in formato HTML
-      $html = $this->renderView('pdf/credenziali_alunni.html.twig', array(
-        'alunno' => $alunno,
-        'username' => $genitori[0]->getUsername(),
-        'password' => $password,
-        'sesso' => $alunno->getSesso() == 'M' ? 'o' : 'a',
-        ));
-      $pdf->createFromHtml($html);
-      // invia il documento
-      $nomealunno = preg_replace('/[^\w-]/', '', strtoupper($alunno->getCognome().'-'.$alunno->getNome()));
-      $nomefile = 'credenziali-registro-'.$nomealunno.'.pdf';
-      return $pdf->send($nomefile);
-    } else {
+                                       UserPasswordEncoderInterface $encoder, SessionInterface $session,
+                                       StaffUtil $staff, LogHandler $dblogger, PdfManager $pdf, $id, $genitore) {
+    // controlla alunno
+    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $id, 'abilitato' => 1]);
+    if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    // crea password
+    $password = $staff->creaPassword(8);
+    if ($genitore) {
+      // password genitore
+      $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);
+      $utente = $genitori[0];
+    } else {
+      // password alunno
+      $utente = $alunno;
+    }
+    $utente->setPasswordNonCifrata($password);
+    $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
+    $utente->setPassword($pswd);
+    // memorizza su db
+    $em->flush();
+    // log azione
+    $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
+      'Username esecutore' => $this->getUser()->getUsername(),
+      'Ruolo esecutore' => $this->getUser()->getRoles()[0],
+      'ID esecutore' => $this->getUser()->getId()
+      ));
+    // crea documento PDF
+    $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
+      'Credenziali di accesso al Registro Elettronico');
+    // contenuto in formato HTML
+    $html = $this->renderView($genitore ? 'pdf/credenziali_profilo_genitori.html.twig' :
+      'pdf/credenziali_profilo_alunni.html.twig', array(
+        'alunno' => $alunno,
+        'sesso' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+        'username' => $utente->getUsername(),
+        'password' => $password));
+    $pdf->createFromHtml($html);
+    // crea pdf e lo scarica
+    $doc = $pdf->getHandler()->Output('', 'S');
+    $nomefile = 'credenziali-registro.pdf';
+    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+    $response = new Response($doc);
+    $response->headers->set('Content-Disposition', $disposition);
+    return $response;
   }
 
   /**

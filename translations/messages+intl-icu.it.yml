@@ -394,6 +394,11 @@ label.alunno_trasferito: Trasferisci alunno
 label.alunno_cambio_sezione: Cambia sezione
 label.cancella_dati: Cancella dati incongruenti
 label.filtri: Filtri
+label.PIA: Piano Integrativo degli Apprendimenti
+label.email_password: Invia password
+label.email_password_genitore: Invia password genitore
+label.pdf_password: Scarica password
+label.pdf_password_genitore: Scarica password genitore
 
 
 ##### PAGINE #####

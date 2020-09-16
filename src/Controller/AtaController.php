@@ -20,6 +20,7 @@ use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\File\File;
@@ -242,11 +243,12 @@ class AtaController extends BaseController {
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
+   * @param string $tipo Tipo di creazione del documento [E=email, P=Pdf]
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/ata/password/{id}", name="ata_password",
-   *    requirements={"id": "\d+"},
+   * @Route("/ata/password/{id}/{tipo}", name="ata_password",
+   *    requirements={"id": "\d+", "tipo": "E|P"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
@@ -254,7 +256,7 @@ class AtaController extends BaseController {
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
                                  PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger, $id): Response {
+                                 LogHandler $dblogger, $id, $tipo): Response {
     // controlla ata
     $ata = $em->getRepository('App:Ata')->find($id);
     if (!$ata) {
@@ -286,28 +288,37 @@ class AtaController extends BaseController {
       'utente' => $ata));
     $pdf->createFromHtml($html);
     $doc = $pdf->getHandler()->Output('', 'S');
-    // crea il messaggio
-    $message = (new \Swift_Message())
-      ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
-      ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-      ->setTo([$ata->getEmail()])
-      ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
-      ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
-      ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
-    // invia mail
-    if (!$mailer->send($message)) {
-      // errore di spedizione
-      $logger->error('Errore di spedizione email delle credenziali ata.', array(
-        'username' => $ata->getUsername(),
-        'email' => $ata->getEmail(),
-        'ip' => $request->getClientIp()));
-      $this->addFlash('danger', 'exception.errore_invio_credenziali');
+    if ($tipo == 'E') {
+      // invia per email
+      $message = (new \Swift_Message())
+        ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
+        ->setTo([$ata->getEmail()])
+        ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
+        ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
+        ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
+      // invia mail
+      if (!$mailer->send($message)) {
+        // errore di spedizione
+        $logger->error('Errore di spedizione email delle credenziali ata.', array(
+          'username' => $ata->getUsername(),
+          'email' => $ata->getEmail(),
+          'ip' => $request->getClientIp()));
+        $this->addFlash('danger', 'exception.errore_invio_credenziali');
+      } else {
+        // tutto ok
+        $this->addFlash('success', 'message.credenziali_inviate');
+      }
+      // redirezione
+      return $this->redirectToRoute('ata_modifica');
     } else {
-      // tutto ok
-      $this->addFlash('success', 'message.credenziali_inviate');
+      // crea pdf e lo scarica
+      $nomefile = 'credenziali-registro.pdf';
+      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+      $response = new Response($doc);
+      $response->headers->set('Content-Disposition', $disposition);
+      return $response;
     }
-    // redirezione
-    return $this->redirectToRoute('ata_modifica');
   }
 
 }

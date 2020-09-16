@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Util\CsvImporter;
@@ -280,11 +281,12 @@ class AlunniController extends BaseController {
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
    * @param boolean $genitore Vero se si vuole cambiare la password del genitore, falso per la password dell'alunno
+   * @param string $tipo Tipo di creazione del documento [E=email, P=Pdf]
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/password/{id}/{genitore}", name="alunni_password",
-   *    requirements={"id": "\d+", "genitore": "0|1"},
+   * @Route("/alunni/password/{id}/{genitore}/{tipo}", name="alunni_password",
+   *    requirements={"id": "\d+", "genitore": "0|1", "tipo": "E|P"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
@@ -292,7 +294,7 @@ class AlunniController extends BaseController {
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
                                  PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger, $id, $genitore): Response {
+                                 LogHandler $dblogger, $id, $genitore, $tipo): Response {
     // controlla alunno
     $alunno = $em->getRepository('App:Alunno')->find($id);
     if (!$alunno) {
@@ -331,28 +333,37 @@ class AlunniController extends BaseController {
         'password' => $password));
     $pdf->createFromHtml($html);
     $doc = $pdf->getHandler()->Output('', 'S');
-    // crea il messaggio
-    $message = (new \Swift_Message())
-      ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
-      ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-      ->setTo([$utente->getEmail()])
-      ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
-      ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
-      ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
-    // invia mail
-    if (!$mailer->send($message)) {
-      // errore di spedizione
-      $logger->error('Errore di spedizione email delle credenziali alunno/genitore.', array(
-        'username' => $utente->getUsername(),
-        'email' => $utente->getEmail(),
-        'ip' => $request->getClientIp()));
-      $this->addFlash('danger', 'exception.errore_invio_credenziali');
+    if ($tipo == 'E') {
+      // invia per email
+      $message = (new \Swift_Message())
+        ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
+        ->setTo([$utente->getEmail()])
+        ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
+        ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
+        ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
+      // invia mail
+      if (!$mailer->send($message)) {
+        // errore di spedizione
+        $logger->error('Errore di spedizione email delle credenziali alunno/genitore.', array(
+          'username' => $utente->getUsername(),
+          'email' => $utente->getEmail(),
+          'ip' => $request->getClientIp()));
+        $this->addFlash('danger', 'exception.errore_invio_credenziali');
+      } else {
+        // tutto ok
+        $this->addFlash('success', 'message.credenziali_inviate');
+      }
+      // redirezione
+      return $this->redirectToRoute('alunni_modifica');
     } else {
-      // tutto ok
-      $this->addFlash('success', 'message.credenziali_inviate');
+      // crea pdf e lo scarica
+      $nomefile = 'credenziali-registro.pdf';
+      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+      $response = new Response($doc);
+      $response->headers->set('Content-Disposition', $disposition);
+      return $response;
     }
-    // redirezione
-    return $this->redirectToRoute('alunni_modifica');
   }
 
   /**
@@ -637,6 +648,84 @@ class AlunniController extends BaseController {
     $this->addFlash('success', 'message.update_ok');
     // redirezione
     return $this->redirectToRoute('alunni_classe');
+  }
+
+  /**
+   * Generazione e invio della password agli alunni o ai genitori
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param PdfManager $pdf Gestore dei documenti PDF
+   * @param StaffUtil $staff Funzioni disponibili allo staff
+   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
+   * @param LoggerInterface $logger Gestore dei log su file
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param boolean $genitore Vero se si vuole cambiare la password del genitore, falso per la password dell'alunno
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/alunni/passwordFiltro/{genitore}", name="alunni_passwordFiltro",
+   *    requirements={"genitore": "0|1"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function passwordFiltroAction(Request $request, EntityManagerInterface $em,
+                                       UserPasswordEncoderInterface $encoder, SessionInterface $session,
+                                       PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer,
+                                       LoggerInterface $logger, LogHandler $dblogger, $genitore): Response {
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['nome'] = $session->get('/APP/ROUTE/alunni_modifica/nome', '');
+    $criteri['cognome'] = $session->get('/APP/ROUTE/alunni_modifica/cognome', '');
+    $criteri['classe'] = $session->get('/APP/ROUTE/alunni_modifica/classe', 0);
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App:Classe')->find($criteri['classe']) : 0);
+    $pagina = $session->get('/APP/ROUTE/alunni_modifica/pagina', 1);
+    // recupera dati
+    $dati = $em->getRepository('App:Alunno')->cerca($criteri, $pagina);
+    // crea documento PDF
+    $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
+      'Credenziali di accesso al Registro Elettronico');
+    // legge alunni
+    foreach ($dati['lista'] as $alu) {
+      // crea password
+      $password = $staff->creaPassword(8);
+      if ($genitore) {
+        // password genitore
+        $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alu['alunno']]);
+        $utente = $genitori[0];
+      } else {
+        // password alunno
+        $utente = $alu['alunno'];
+      }
+      $utente->setPasswordNonCifrata($password);
+      $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
+      $utente->setPassword($pswd);
+      // memorizza su db
+      $em->flush();
+      // log azione
+      $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
+        'Username esecutore' => $this->getUser()->getUsername(),
+        'Ruolo esecutore' => $this->getUser()->getRoles()[0],
+        'ID esecutore' => $this->getUser()->getId()));
+      // contenuto in formato HTML
+      $html = $this->renderView($genitore ? 'pdf/credenziali_profilo_genitori.html.twig' :
+        'pdf/credenziali_profilo_alunni.html.twig', array(
+          'alunno' => $alu['alunno'],
+          'sesso' => ($alu['alunno']->getSesso() == 'M' ? 'o' : 'a'),
+          'username' => $utente->getUsername(),
+          'password' => $password));
+      $pdf->createFromHtml($html);
+    }
+    // crea pdf e lo scarica
+    $doc = $pdf->getHandler()->Output('', 'S');
+    $nomefile = 'credenziali-registro-'.($genitore ? 'genitori' : 'alunni').'.pdf';
+    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+    $response = new Response($doc);
+    $response->headers->set('Content-Disposition', $disposition);
+    return $response;
   }
 
 }

@@ -39,7 +39,8 @@
           <td class="pb-0">
             <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ u.cognome }} {{ u.nome }}" data-cont-id="info-utente-{{ u.id }}">{{ 'label.show'|trans }}</button>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_modifica_edit', {'id': u.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_password', {'id': u.id}) }}" role="button" title="Genera una nuova password e la invia all'utente">{{ 'label.password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_password', {'id': u.id, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password e la invia all'utente tramite email">{{ 'label.email_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_password', {'id': u.id, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
     {% if u.otp %}
             <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('docenti_reset', {'id': u.id}) }}" role="button" title="Reset codice OTP">{{ 'label.reset_otp'|trans }}</a>
     {% endif %}

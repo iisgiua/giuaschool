@@ -43,8 +43,10 @@
           <td class="pb-0">
             <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ u.alunno.cognome }} {{ u.alunno.nome }}" data-cont-id="info-utente-{{ u.alunno.id }}">{{ 'label.show'|trans }}</button>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_modifica_edit', {'id': u.alunno.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 0}) }}" role="button" title="Genera una nuova password e la invia all'alunno">{{ 'label.password'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 1}) }}" role="button" title="Genera una nuova password e la invia al genitore">{{ 'label.password_genitore'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 0, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per l'alunno e la invia tramite email">{{ 'label.email_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 0, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per l'alunno e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 1, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per il genitore e la invia tramite email">{{ 'label.email_password_genitore'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 1, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per il genitore e la scarica come documento PDF">{{ 'label.pdf_password_genitore'|trans }}</a>
     {% if u.alunno.abilitato %}
             <a class="btn btn-danger btn-xs mb-1" href="{{ path('alunni_abilita', {'id': u.alunno.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
     {% else %}
@@ -106,6 +108,8 @@
         <tr>
           <td colspan="7">
             <a class="btn btn-primary btn-sm" href="{{ path('alunni_modifica_edit') }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('alunni_passwordFiltro', {'genitore': 0}) }}" role="button" title="Genera le nuove password per gli alunni selezionati e le scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('alunni_passwordFiltro', {'genitore': 1}) }}" role="button" title="Genera le nuove password per i genitori degli alunni selezionati e le scarica come documento PDF">{{ 'label.pdf_password_genitore'|trans }}</a>
           </td>
         </tr>
       </tfoot>
