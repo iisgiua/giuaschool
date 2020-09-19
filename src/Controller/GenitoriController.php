@@ -31,6 +31,7 @@ use App\Entity\RichiestaColloquio;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
+use App\Entity\Scrutinio;
 use App\Util\GenitoriUtil;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
@@ -470,7 +471,7 @@ class GenitoriController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/pagelle/{periodo}", name="genitori_pagelle",
-   *    requirements={"periodo": "P|S|F|I|1|2|0"},
+   *    requirements={"periodo": "A|P|S|F|I|1|2|0"},
    *    defaults={"periodo": "0"},
    *    methods={"GET"})
    *
@@ -483,7 +484,7 @@ class GenitoriController extends AbstractController {
     $dati = array();
     $lista_periodi = null;
     $info = array();
-    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     $info['giudizi']['1']['N'] = [30 => 'Non Classificato', 31 => 'Scarso', 32 => 'Insufficiente', 33 => 'Mediocre', 34 => 'Sufficiente', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
     $info['giudizi']['1']['C'] = [40 => 'Non Classificata', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
@@ -515,15 +516,21 @@ class GenitoriController extends AbstractController {
       }
       // lista periodi ammessi
       foreach ($dati_periodi as $per) {
-        $lista_periodi[$per[0]] = $per[1]->getStato();
+        $lista_periodi[$per[0]] = ($per[1] instanceOf Scrutinio ? $per[1]->getStato() : 'C');
       }
       // visualizza pagella o lista periodi
       $periodo = null;
       if ($scrutinio) {
         // pagella
+        $periodo = ($scrutinio instanceOf Scrutinio  ? $scrutinio->getPeriodo() : 'A');
         $classe = $scrutinio->getClasse();
-        $periodo = $scrutinio->getPeriodo();
-        $dati = $gen->pagelle($classe, $alunno, $periodo);
+        if ($periodo == 'A') {
+          // precedente A.S.
+          $dati = $gen->pagellePrecedenti($alunno);
+        } else {
+          // altri periodi
+          $dati = $gen->pagelle($classe, $alunno, $periodo);
+        }
       }
     } else {
       // nessuna classe
@@ -942,7 +949,7 @@ class GenitoriController extends AbstractController {
       // utente è genitore
       $dati = $age->dettagliEventoGenitore($this->getUser(), $this->getUser()->getAlunno(), $data, $tipo);
     }
-    
+
     // visualizza pagina
     return $this->render('agenda/scheda_evento_genitori_'.$tipo.'.html.twig', array(
       'dati' => $dati,

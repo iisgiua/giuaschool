@@ -46,12 +46,12 @@ class Documento {
   private $modificato;
 
   /**
-   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio]
+   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, I=PIA]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"L","P","R","H","D","M"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"L","P","R","H","D","M","I"}, strict=true, message="field.choice")
    */
   private $tipo;
 
@@ -147,7 +147,7 @@ class Documento {
   }
 
   /**
-   * Restituisce il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio]
+   * Restituisce il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, I=PIA]
    *
    * @return string Tipo di documento
    */
@@ -156,7 +156,7 @@ class Documento {
   }
 
   /**
-   * Modifica il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio]
+   * Modifica il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, I=PIA]
    *
    * @param string $tipo Tipo di documento
    *
@@ -306,4 +306,3 @@ class Documento {
   }
 
 }
-

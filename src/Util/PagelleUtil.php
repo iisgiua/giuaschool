@@ -5507,7 +5507,7 @@ class PagelleUtil {
   public function creaNonAmmesso_I($pdf, $classe, $classe_completa, $dati) {
     $info_voti['N'] = [0 => 'Non Classificato', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['C'] = [4 => 'Non Classificato', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     $datascrutinio = $dati['scrutinio']->getData()->format('d/m/Y');
     // set margins
     $pdf->SetMargins(10, 15, 10, true);
@@ -5605,7 +5605,7 @@ class PagelleUtil {
   public function creaPagella_I($pdf, $classe, $classe_completa, $dati) {
     $info_voti['N'] = [0 => 'Non Classificato', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['C'] = [4 => 'Non Classificato', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info_voti['R'] = [20 => 'Non Classificato', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     // set margins
     $pdf->SetMargins(10, 15, 10, true);
     // set auto page breaks

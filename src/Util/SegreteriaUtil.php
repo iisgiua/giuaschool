@@ -15,9 +15,11 @@ namespace App\Util;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use App\Util\RegistroUtil;
 use App\Entity\Alunno;
 use App\Entity\Scrutinio;
+use App\Entity\StoricoEsito;
 
 
 /**
@@ -43,6 +45,11 @@ class SegreteriaUtil {
    */
   private $regUtil;
 
+  /**
+  * @var string $dirProgetto Percorso per i file dell'applicazione
+  */
+  private $dirProgetto;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -52,11 +59,14 @@ class SegreteriaUtil {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
+   * @param string $dirProgetto Percorso per i file dell'applicazione
    */
-  public function __construct(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $regUtil) {
+  public function __construct(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $regUtil,
+                              $dirProgetto) {
     $this->em = $em;
     $this->session = $session;
     $this->regUtil = $regUtil;
+    $this->dirProgetto = $dirProgetto;
   }
 
   /**
@@ -69,6 +79,7 @@ class SegreteriaUtil {
   public function riepilogoAssenze(Alunno $alunno) {
     // inizializza
     $dati = array();
+    $dati['mese'] = array();
     $classe = $alunno->getClasse();
     $inizio = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_inizio').'00:00');
     $fine = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
@@ -208,6 +219,16 @@ class SegreteriaUtil {
         }
       }
       $dati[$alu->getId()] = $periodi;
+      // situazione A.S. precedente
+      $storico = $this->em->getRepository('App:StoricoEsito')->createQueryBuilder('se')
+        ->join('se.alunno', 'a')
+        ->where('a.id=:alunno')
+        ->setParameters(['alunno' => $alu])
+        ->getQuery()
+        ->getOneOrNullResult();
+      if ($storico) {
+        $dati[$alu->getId()][] = array('A', $storico->getId());
+      }
     }
     // restituisce dati come array associativo
     return $dati;
@@ -308,6 +329,46 @@ class SegreteriaUtil {
         // dati esito
         $dati['esito'] = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio,
           'alunno' => $alunno]);
+      }
+    }
+    // restituisce dati come array associativo
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista dei documenti dello scrutinio dell'alunno
+   *
+   * @param Alunno $alunno Alunno di cui si vuole conoscere lo scrutinio
+   * @param StoricoEsito $storico Situazione del precedenta A.S.
+   *
+   * @return array Restituisce i dati come array associativo
+   */
+  public function scrutinioPrecedenteAlunno(Alunno $alunno, StoricoEsito $storico) {
+    // inizializza
+    $dati = array();
+    $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
+    $fs = new Filesystem();    
+    // riepilogo voti
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf';
+    if ($fs->exists($documento)) {
+      $dati['documenti'][] = 'R';
+    }
+    // verbale
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-verbale.pdf';
+    if ($fs->exists($documento)) {
+      $dati['documenti'][] = 'V';
+    }
+    // PIA
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-piano-di-integrazione-degli-apprendimenti.pdf';
+    if ($fs->exists($documento)) {
+      $dati['documenti'][] = 'I';
+    }
+    // PAI
+    $storico_dati = $storico->getDati();
+    if (isset($storico_dati['PAI'])) {
+      $documento = $this->dirProgetto.'/'.$storico_dati['PAI'];
+      if ($fs->exists($documento)) {
+        $dati['documenti'][] = 'A';
       }
     }
     // restituisce dati come array associativo

@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\File;
 use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use App\Form\ConfigurazioneType;
 use App\Form\UtenteType;
@@ -43,6 +44,7 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\StoricoEsito;
 use App\Entity\StoricoVoto;
+use App\Entity\Documento;
 
 
 /**
@@ -486,7 +488,10 @@ class SistemaController extends BaseController {
           $stmt = $conn->prepare($sql);
           $stmt->execute(['alunno' => 'ALU', 'abilitato' => 1, 'genitore' => 'GEN', 'esiti' => "'S','X'"]);
           foreach ($stmt->fetchAll() as $utente_old) {
-            // sono esclusi alunni di quinta ammessi
+            if (in_array($utente_old['esito'], ['A','E']) && $utente_old['anno'] == 5) {
+              // sono esclusi alunni di quinta ammessi
+              continue;
+            }
             if (in_array($utente_old['esito'], ['A','E'])) {
               // ammesso (o all'estero): anno successivo
               $utente_old['anno']++;
@@ -756,6 +761,9 @@ class SistemaController extends BaseController {
             $percorso_old = $dir.'finale/'.$scrutinio['anno'].$scrutinio['sezione'];
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
+              $esito_dati = $esito->getDati();
+              $esito_dati['PIA'] = 'FILES/archivio/scrutini/storico/'.$scrutinio['anno'].$scrutinio['sezione'].'/'.$documento;
+              $esito->setDati($esito_dati);
             }
             // PAI
             $documento = $scrutinio['anno'].$scrutinio['sezione'].'-piano-di-apprendimento-individualizzato-'.
@@ -764,7 +772,7 @@ class SistemaController extends BaseController {
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
               $esito_dati = $esito->getDati();
-              $esito_dati['PAI'] = $percorso.'/'.$documento;
+              $esito_dati['PAI'] = 'FILES/archivio/scrutini/storico/'.$scrutinio['anno'].$scrutinio['sezione'].'/'.$documento;
               $esito->setDati($esito_dati);
             }
           }

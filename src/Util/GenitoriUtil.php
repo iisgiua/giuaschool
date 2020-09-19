@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\Genitore;
 use App\Entity\Utente;
 use App\Entity\Alunno;
@@ -24,6 +25,7 @@ use App\Entity\Docente;
 use App\Entity\Materia;
 use App\Entity\Colloquio;
 use App\Entity\Scrutinio;
+use App\Entity\StoricoEsito;
 
 
 /**
@@ -59,6 +61,11 @@ class GenitoriUtil {
    */
   private $regUtil;
 
+  /**
+  * @var string $dirProgetto Percorso per i file dell'applicazione
+  */
+  private $dirProgetto;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -70,14 +77,16 @@ class GenitoriUtil {
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
+   * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session, RegistroUtil $regUtil) {
+                              SessionInterface $session, RegistroUtil $regUtil, $dirProgetto) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
     $this->session = $session;
     $this->regUtil = $regUtil;
+    $this->dirProgetto = $dirProgetto;
   }
 
   /**
@@ -1172,6 +1181,16 @@ class GenitoriUtil {
         $periodi[] = array($sc->getPeriodo(), $sc);
       }
     }
+    // situazione A.S. precedente
+    $storico = $this->em->getRepository('App:StoricoEsito')->createQueryBuilder('se')
+      ->join('se.alunno', 'a')
+      ->where('a.id=:alunno')
+      ->setParameters(['alunno' => $alunno])
+      ->getQuery()
+      ->getOneOrNullResult();
+    if ($storico) {
+      $periodi[] = array('A', $storico);
+    }
     // restituisce dati come array associativo
     return $periodi;
   }
@@ -1220,6 +1239,32 @@ class GenitoriUtil {
     }
     // non consentito
     return false;
+  }
+
+  /**
+   * Restituisce comunicazioni del precedente A.S. per l'alunno indicato
+   *
+   * @param Alunno $alunno Alunno di cui si desiderano le assenze
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function pagellePrecedenti(Alunno $alunno) {
+    // inizializza
+    $dati = array();
+    $dati['voti'] = array();
+    $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
+    $fs = new Filesystem();
+    $storico = $this->em->getRepository('App:StoricoEsito')->findOneByAlunno($alunno);
+    // PAI
+    $storico_dati = $storico->getDati();
+    if (isset($storico_dati['PAI'])) {
+      $documento = $this->dirProgetto.'/'.$storico_dati['PAI'];
+      if ($fs->exists($documento)) {
+        $dati['documenti'][] = 'A';
+      }
+    }
+    // restituisce dati come array associativo
+    return $dati;
   }
 
 }

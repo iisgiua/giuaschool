@@ -383,7 +383,7 @@ class ArchiviazioneUtil {
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
     $info_voti['N'] = [0 => 'N.C.', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'N.C.', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+    $info_voti['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $dati['lezioni'] = array();
     $dati['argomenti'] = array();
     $dati['voti'] = array();

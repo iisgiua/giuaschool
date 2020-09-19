@@ -80,13 +80,13 @@ class ScrutinioController extends AbstractController {
     $elenco = array();
     $elenco['alunni'] = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['P']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['P']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $valutazioni['1']['N'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
     $valutazioni['1']['R'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $valutazioni['I']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['I']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['I']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $valutazioni['X']['N'] = $valutazioni['I']['N'];
     $valutazioni['X']['R'] = $valutazioni['I']['R'];
     $title['P']['N'] = 'message.proposte';
@@ -339,7 +339,7 @@ class ScrutinioController extends AbstractController {
     $dati = null;
     $form = null;
     $template = 'coordinatore/scrutinio.html.twig';
-    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
+    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insuff.', 33 => 'Mediocre', 34 => 'Suff.', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
     $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
@@ -461,7 +461,7 @@ class ScrutinioController extends AbstractController {
     // inizializza variabili
     $info = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['P']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['P']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $info['valutazioni'] = $valutazioni['P']['N'];
@@ -779,7 +779,7 @@ class ScrutinioController extends AbstractController {
     // inizializza variabili
     $info = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['P']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['P']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $valutazioni['1']['N'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
     $valutazioni['1']['R'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
@@ -933,10 +933,10 @@ class ScrutinioController extends AbstractController {
     $dati = array();
     $lista_periodi = null;
     $info = array();
-    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
+    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insuff.', 33 => 'Mediocre', 34 => 'Suff.', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
-    $info['giudizi']['I']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Buono', 24 => 'Dist.', 25 => 'Ottimo'];
+    $info['giudizi']['I']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['A']['R'] = $info['giudizi']['F']['R'];
     $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     // parametri cattedra/classe
@@ -980,7 +980,7 @@ class ScrutinioController extends AbstractController {
       if ($periodo == '0') {
         // cerca scrutinio chiuso
         $scrutinio = $scr->scrutinioChiuso($classe);
-        $periodo = $scrutinio['periodo'];
+        $periodo = (isset($scrutinio['periodo']) ? $scrutinio['periodo'] : null);
       } elseif (!isset($lista_periodi[$periodo]) || $lista_periodi[$periodo] != 'C') {
         // periodo indicato non valido
         $periodo = null;

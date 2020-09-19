@@ -80,7 +80,7 @@
       {% else %}
         {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
           null, null, null, null, null, null, null, null, null,
-          'NC', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'] %}
+          'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
   <div class="panel panel-info gs-mt-2" >
     <div class="panel-heading">
       <div class="panel-title"><strong>{{ form_title|trans }}</strong></div>
@@ -158,7 +158,7 @@ $(document).ready(function() {
     formatter: function(val) {
       var d = ['Non Classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         null, null, null, null, null, null, null, null, null,
-        'Non Classificato', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'];
+        'Non Classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
       return d[val];
       },
     natural_arrow_keys: true
@@ -176,7 +176,7 @@ $(document).ready(function() {
         formatter: function(val) {
           var d = ['Non Classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
             null, null, null, null, null, null, null, null, null,
-            'Non Classificato', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'];
+            'Non Classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
           return d[val];
           },
         natural_arrow_keys: true
@@ -189,7 +189,7 @@ $(document).ready(function() {
   $("#gs-form-collection").on("change", "input.slider", function(e) {
     var d = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
       null, null, null, null, null, null, null, null, null,
-      'NC', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'];
+      'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
     var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
       (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
@@ -232,7 +232,7 @@ $(document).ready(function() {
 {% block _proposte_lista_entry_widget %}
   {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     null, null, null, null, null, null, null, null, null,
-    'NC', 'Insufficiente', 'Sufficiente', 'Buono', 'Distinto', 'Ottimo'] %}
+    'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
   <div class="col-sm-9">
     <div class="row">
       <label class="control-label col-sm-2" for="{{ form.unico.vars.id }}">Voto</label>

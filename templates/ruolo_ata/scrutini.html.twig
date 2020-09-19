@@ -23,8 +23,10 @@
         <td>{{ u.classe ? u.classe.anno~'ª '~u.classe.sezione : 'Ritirato/Trasferito/Estero' }}</td>
         <td>
       {% for periodo in dati.pagelle[u.id] %}
-        {% if periodo[0] == 'P' %}
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Primo trimestre</strong></a>
+        {% if periodo[0] == 'A' %}
+          <a class="btn btn-warning btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>A.S. precedente</strong></a>
+        {% elseif periodo[0] == 'P' %}
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Primo quadrimestre</strong></a>
         {% elseif periodo[0] == '1' %}
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Valutazione intermedia</strong></a>
         {% elseif periodo[0] == 'F' %}

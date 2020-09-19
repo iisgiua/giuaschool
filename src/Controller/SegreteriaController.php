@@ -331,13 +331,13 @@ class SegreteriaController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/segreteria/scrutini/mostra/{alunno}/{periodo}/{scrutinio}", name="segreteria_scrutini_mostra",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2|X", "scrutinio": "\d+", },
+   *    requirements={"alunno": "\d+", "periodo": "A|P|S|F|I|1|2|X", "scrutinio": "\d+", },
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_ATA")
    */
   public function scrutiniMostraAction(EntityManagerInterface $em, SegreteriaUtil $segr,
-                                        $alunno, $periodo, $scrutinio) {
+                                       $alunno, $periodo, $scrutinio) {
     // controlla alunno
     $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
@@ -345,12 +345,15 @@ class SegreteriaController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla scrutinio
-    $scrutinio = $em->getRepository('App:Scrutinio')->createQueryBuilder('s')
-      ->where('s.id=:scrutinio AND s.periodo=:periodo AND s.stato=:stato')
-      ->setParameters(['scrutinio' => $scrutinio, 'periodo' => $periodo, 'stato' => 'C'])
-      ->getQuery()
-      ->setMaxResults(1)
-      ->getOneOrNullResult();
+    if ($periodo == 'A') {
+      // dati storico
+      $scrutinio = $em->getRepository('App:StoricoEsito')->findOneBy(['id' => $scrutinio,
+        'alunno' => $alunno]);
+    } else {
+      // dati scrutinio
+      $scrutinio = $em->getRepository('App:Scrutinio')->findOneBy(['id' => $scrutinio,
+        'periodo' => $periodo, 'stato' => 'C']);
+    }
     if (!$scrutinio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -361,12 +364,19 @@ class SegreteriaController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // recupera dati
-    $dati = $segr->scrutinioAlunno($alunno, $scrutinio);
+    if ($periodo == 'A') {
+      // precedente A.S.
+      $dati = $segr->scrutinioPrecedenteAlunno($alunno, $scrutinio);
+    } else {
+      // periodo in corso d'anno
+      $dati = $segr->scrutinioAlunno($alunno, $scrutinio);
+    }
     // visualizza pagina
     return $this->render('ruolo_ata/scrutini_mostra.html.twig', array(
       'pagina_titolo' => 'page.segreteria_scrutini_mostra',
       'alunno' => $alunno,
       'scrutinio' => $scrutinio,
+      'periodo' => $periodo,
       'dati' => $dati,
     ));
   }

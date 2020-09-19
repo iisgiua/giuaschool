@@ -179,7 +179,7 @@ class FileController extends AbstractController {
    * @return Response Documento inviato in risposta
    *
    * @Route("/file/documento/{tipo}/{id}", name="file_documento",
-   *    requirements={"tipo": "L|P|R|M", "id": "\d+"},
+   *    requirements={"tipo": "L|P|R|M|I", "id": "\d+"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
@@ -198,6 +198,123 @@ class FileController extends AbstractController {
     $nome = $documento->getFile();
     // invia il documento
     return $this->file($file, $nome);
+  }
+
+  /**
+   * Esegue il download del PAI o del PIA per i docenti.
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param string $tipo Tipo del documento da scaricare
+   * @param int $id ID dell'alunno a cui si fa riferimento
+   *
+   * @return Response Documento inviato in risposta
+   *
+   * @Route("/file/download/docente/{tipo}/{id}", name="file_download_docenti",
+   *    requirements={"tipo": "A|I", "id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function downloadDocenteAction(EntityManagerInterface $em, $tipo, $id) {
+    // controllo
+    $storico = $em->getRepository('App:StoricoEsito')->findOneByAlunno($id);
+    if (!$storico) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // file da scaricare
+    $file = new File($this->getParameter('kernel.project_dir').'/'.
+      $storico->getDati()[$tipo == 'A' ? 'PAI' : 'PIA']);
+    // invia il documento
+    return $this->file($file);
+  }
+
+  /**
+   * Esegue il download dei documenti dello scrutinio per la segreteria.
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param string $tipo Tipo del documento da scaricare
+   * @param int $id ID dell'alunno a cui si fa riferimento
+   *
+   * @return Response Documento inviato in risposta
+   *
+   * @Route("/file/download/segreteria/{tipo}/{id}", name="file_download_segreteria",
+   *    requirements={"tipo": "V|R|A|I", "id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_ATA")
+   */
+  public function downloadSegreteriaAction(EntityManagerInterface $em, $tipo, $id) {
+    // controllo
+    $storico = $em->getRepository('App:StoricoEsito')->findOneByAlunno($id);
+    if (!$storico) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!$this->getUser()->getSegreteria()) {
+      // ATA non abiliatato alla segreteria
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // file da scaricare
+    $percorso = $this->getParameter('kernel.project_dir');
+    switch ($tipo) {
+      case 'V':
+        // verbale
+        $file = new File($percorso.'/FILES/archivio/scrutini/storico/'.
+          $storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-verbale.pdf');
+        break;
+      case 'R':
+        // riepilogo
+        $file = new File($percorso.'/FILES/archivio/scrutini/storico/'.
+          $storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf');
+        break;
+      case 'I':
+        // PIA
+        $file = new File($percorso.'/FILES/archivio/scrutini/storico/'.
+          $storico->getClasse().'/'.$storico->getClasse().'-piano-di-integrazione-degli-apprendimenti.pdf');
+        break;
+      case 'A':
+        // PAI
+        $file = new File($percorso.'/'.$storico->getDati()['PAI']);
+        break;
+    }
+    // invia il documento
+    return $this->file($file);
+  }
+
+  /**
+   * Esegue il download dei documenti dello scrutinio per i genitori e gli alunni.
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param string $tipo Tipo del documento da scaricare
+   * @param int $id ID dell'alunno a cui si fa riferimento
+   *
+   * @return Response Documento inviato in risposta
+   *
+   * @Route("/file/download/genitori/{tipo}/{id}", name="file_download_genitori",
+   *    requirements={"tipo": "A", "id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
+   */
+  public function downloadGenitoriAction(EntityManagerInterface $em, $tipo, $id) {
+    // controllo
+    $storico = $em->getRepository('App:StoricoEsito')->findOneByAlunno($id);
+    if (!$storico) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // file da scaricare
+    $percorso = $this->getParameter('kernel.project_dir');
+    switch ($tipo) {
+      case 'A':
+        // PAI
+        $file = new File($percorso.'/'.$storico->getDati()['PAI']);
+        break;
+    }
+    // invia il documento
+    return $this->file($file);
   }
 
 }

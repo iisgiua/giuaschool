@@ -4384,7 +4384,7 @@ class ScrutinioUtil {
     $errore = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['C'] = ['min' => 4, 'max' => 10, 'start' => 6, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
-    $valutazioni['F']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     // alunni della classe
     $lista_id = $this->alunniInScrutinio($classe, 'I');
     foreach ($lista_id as $id) {
@@ -5361,7 +5361,7 @@ class ScrutinioUtil {
     $errore = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['C'] = ['min' => 4, 'max' => 10, 'start' => 6, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
-    $valutazioni['F']['R'] = ['min' => 20, 'max' => 25, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25', 'labels' => '"NC", "Insuff.", "Suff.", "Buono", "Dist.", "Ottimo"'];
+    $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     // alunni della classe
     $lista_id = $this->alunniInScrutinio($classe, 'X');
     foreach ($lista_id as $id) {
@@ -5739,11 +5739,11 @@ class ScrutinioUtil {
     }
     // legge i voti
     $voti = $this->em->getRepository('App:StoricoVoto')->createQueryBuilder('sv')
-      ->select('sv.voto,sv.carenze,a.id AS alunno_id,m.id AS materia_id')
+      ->select('sv.voto,sv.carenze,sv.dati,a.id AS alunno_id,m.id AS materia_id')
       ->join('sv.materia', 'm')
       ->join('sv.storicoEsito', 'se')
       ->join('se.alunno', 'a')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=sv.materia AND c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe')
+      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=sv.materia AND c.attiva=:attiva AND c.docente=:docente AND c.classe=a.classe')
       ->where('a.classe=:classe')
       ->setParameters(['attiva' => 1, 'docente' => $docente->getId(), 'classe' => $classe->getId()])
       ->getQuery()

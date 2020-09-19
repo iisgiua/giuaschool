@@ -787,7 +787,7 @@ class DocumentiController extends AbstractController {
     $form = $this->container->get('form.factory')->createNamedBuilder('documenti_classi', FormType::class)
       ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documento',
         'data' => $search['tipo'] ? $search['tipo'] : '',
-        'choices' => ['label.piani' => 'L', 'label.doc15' => 'M'],
+        'choices' => ['label.PIA' => 'I', 'label.piani' => 'L', 'label.doc15' => 'M'],
         'placeholder' => 'label.tutti_documenti',
         'label_attr' => ['class' => 'sr-only'],
         'choice_attr' => function($val, $key, $index) {

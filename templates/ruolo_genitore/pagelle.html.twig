@@ -14,7 +14,7 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['P','1','F','I'] %}
+    {% for p in ['A','P','1','F','I'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('genitori_pagelle', {'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
       {% endif %}
@@ -24,7 +24,32 @@
     </div>
   </div>
     {% if dati.voti is defined %}
-      {% if periodo == 'P' %}
+      {% if periodo == 'A' %}
+        {% if dati.documenti is defined %}
+  <table class="table table-bordered table-hover table-striped gs-mt-4">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6">Documento</th>
+        <th class="col-sm-6">Azioni</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% if 'A' in dati.documenti %}
+      <tr>
+        <td><strong>PAI - Piano di Apprendimento Individualizzato</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('file_download_genitori', {'tipo': 'A', 'id': alunno.id}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        </td>
+      </tr>
+        {% endif %}
+    </tbody>
+  </table>
+        {% else %}
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">Nessun documento presente</strong>
+  </div>
+        {% endif %}
+      {% elseif periodo == 'P' %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-2">
       <strong>Scrutinio del {{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}</strong>

@@ -1,10 +1,9 @@
 <nav class="gs-navbar-submenu">
   <ul class="nav nav-tabs">
+    <li role="presentation"{{ app.request.attributes.get('_route')[:16] == 'documenti_classi' ? ' class="active"' }}><a href="{{ path('documenti_classi') }}" title="Visualizza i documenti delle classi">Classi</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')[:14] == 'documenti_pian' ? ' class="active"' }}><a href="{{ path('documenti_piani') }}" title="Inserimento dei piani di lavoro">Piani di lavoro</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')[:15] == 'documenti_doc15' ? ' class="active"' }}><a href="{{ path('documenti_doc15') }}" title="Inserimento dei documenti del 15 maggio">15 Maggio</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')[:18] == 'documenti_programm' ? ' class="active"' }}><a href="{{ path('documenti_programmi') }}" title="Inserimento dei programmi svolti">Programmi</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')[:18] == 'documenti_relazion' ? ' class="active"' }}><a href="{{ path('documenti_relazioni') }}" title="Inserimento delle relazioni finali">Relazioni</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route')[:16] == 'documenti_classi' ? ' class="active"' }}><a href="{{ path('documenti_classi') }}" title="Visualizza i documenti delle classi">Classi</a></li>
   </ul>
 </nav>
-
