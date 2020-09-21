@@ -234,7 +234,7 @@ class LoginController extends BaseController {
   }
 
   /**
-   * Recupero della password per i genitori
+   * Recupero della password per gli utenti abilitati
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
@@ -281,10 +281,18 @@ class LoginController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       $codice = $form->get('otp')->getData();
-      // controlla email
       $email = $form->get('email')->getData();
       $utente = $em->getRepository('App:Utente')->findOneByEmail($email);
-      if (!$utente) {
+      // legge configurazione: id_provider
+      $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+      // se id_provider controlla tipo utente
+      if ($id_provider && ($utente instanceOf Docente || $utente instanceOf Alunno)) {
+        // errore: docente/staff/preside/alunno
+        $logger->error('Tipo di utente non valido nella richiesta di recupero password.', array(
+          'email' => $email,
+          'ip' => $request->getClientIp()));
+        $errore = 'exception.invalid_user_type_recovery';
+      } elseif (!$utente) {
         // utente non esiste
         $logger->error('Email non valida nella richiesta di recupero password.', array(
           'email' => $email,
@@ -419,274 +427,6 @@ class LoginController extends BaseController {
       'form' => $form->createView(),
       'errore' => $errore,
       'successo' => $successo,
-      'manutenzione' => $manutenzione,
-      ));
-  }
-
-  /**
-   * Attivazione dell'utente per gli alunni
-   *
-   * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
-   * @param ConfigLoader $config Gestore della configurazione su database
-   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
-   * @param LoggerInterface $logger Gestore dei log su file
-   * @param LogHandler $dblogger Gestore dei log su database
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/login/attivazione/", name="login_attivazione",
-   *    methods={"GET", "POST"})
-   */
-  public function attivazioneAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                     ConfigLoader $config, \Swift_Mailer $mailer, LoggerInterface $logger,
-                                     LogHandler $dblogger) {
-    // carica configurazione di sistema
-    $config->carica();
-    // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
-    $errore = null;
-    $successo = null;
-    // crea form
-    $form = $this->container->get('form.factory')->createNamedBuilder('login_attivazione', FormType::class)
-      ->add('nome', TextType::class, array('label' => 'label.nome',
-        'required' => true,
-        'trim' => true,
-        'attr' => array('placeholder' => 'label.nome')))
-      ->add('cognome', TextType::class, array('label' => 'label.cognome',
-        'required' => true,
-        'trim' => true,
-        'attr' => array('placeholder' => 'label.cognome')))
-      ->add('classe', EntityType::class, array('label' => 'label.classe',
-        'class' => 'App:Classe',
-        'choice_label' => function ($obj) {
-            return $obj->getAnno().'ª '.$obj->getSezione();
-          },
-        'placeholder' => 'label.scegli_classe',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('c')->orderBy('c.anno,c.sezione', 'ASC');
-          },
-        'group_by' => 'sede.citta',
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder'],
-        'required' => true))
-      ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
-        'required' => true,
-        'trim' => true,
-        'attr' => array('placeholder' => 'label.codice_fiscale')))
-      ->add('email', EmailType::class, array('label' => 'label.email',
-        'required' => true,
-        'trim' => true,
-        'attr' => array('placeholder' => 'label.email')))
-      ->add('submit', SubmitType::class, array('label' => 'label.invia',
-        'attr' => array('class' => 'btn-success')))
-      ->getForm();
-    $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      $nome = $form->get('nome')->getData();
-      $cognome = $form->get('cognome')->getData();
-      $classe = $form->get('classe')->getData();
-      $codiceFiscale = $form->get('codiceFiscale')->getData();
-      $email = $form->get('email')->getData();
-      // controlla dati
-      $search =  ['à','è','é','ì','ò','ù','À','È','É','Ì','Ò','Ù',' ',"'"];
-      $replace = ['a','e','e','i','o','u','A','E','E','I','O','U','' ,''];
-      $alunno = $em->getRepository('App:Alunno')->findOneByCodiceFiscale($codiceFiscale);
-      if (!$alunno) {
-        // utente non esiste
-        $logger->error('Codice fiscale non valido nella richiesta di attivazione alunno.', array(
-          'codiceFiscale' => $codiceFiscale,
-          'cognome' => $cognome,
-          'nome' => $nome,
-          'classe' => $classe->getAnno().$classe->getSezione(),
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.invalid_user';
-      } elseif (!$alunno->getAbilitato()) {
-        // utente disabilitato
-        $logger->error('Utente disabilitato nella richiesta di attivazione alunno.', array(
-          'username' => $alunno->getUsername(),
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.invalid_user';
-      } elseif ($alunno->getClasse() != $classe ||
-                strtoupper(str_replace($search, $replace, $cognome.$nome)) !=
-                strtoupper(str_replace($search, $replace, $alunno->getCognome().$alunno->getNome()))) {
-        // classe errata
-        $logger->error('Dati incoerenti nella richiesta di attivazione alunno.', array(
-          'username' => $alunno->getUsername(),
-          'cognome' => $cognome,
-          'nome' => $nome,
-          'classe' => $classe->getAnno().$classe->getSezione(),
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.invalid_data';
-      } elseif ($alunno->getPassword() != 'NOPASSWORD') {
-        // classe errata
-        $logger->error('Utente già attivato nella richiesta di attivazione alunno.', array(
-          'username' => $alunno->getUsername(),
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.attivazione_esistente';
-      } elseif ($em->getRepository('App:Utente')->findOneByEmail($email)) {
-        // email esistente
-        $logger->error('Email già utilizzata da un altro utente nella richiesta di attivazione alunno.', array(
-          'username' => $alunno->getUsername(),
-          'email' => $email,
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.attivazione_email_esistente';
-      } else {
-        // ok: genera token
-        $alunno->creaToken();
-        // memorizza dati
-        $alunno->setEmail($email);
-        // memorizza su db
-        $em->flush();
-        // log azione
-        $dblogger->write($alunno, $request->getClientIp(), 'SICUREZZA', 'Attivazione alunno', __METHOD__, array(
-          'Username' => $alunno->getUsername(),
-          ));
-        // crea messaggio
-        $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-        $message = (new \Swift_Message())
-          ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Attivazione dell\'accesso al Registro Elettronico da parte degli studenti")
-          ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-          ->setTo([$email])
-          ->setBody($this->renderView('email/attivazione_alunni.html.twig',
-            array(
-              'alunno' => $alunno,
-              'sesso' => $sesso
-            )),
-            'text/html')
-          ->addPart($this->renderView('email/attivazione_alunni.txt.twig',
-            array(
-              'alunno' => $alunno,
-              'sesso' => $sesso
-            )),
-            'text/plain');
-        // invia mail
-        if (!$mailer->send($message)) {
-          // errore di spedizione
-          $logger->error('Errore di spedizione email nell\'attivazione alunno.', array(
-            'username' => $alunno->getUsername(),
-            'email' => $email,
-            'ip' => $request->getClientIp(),
-            ));
-          $errore = 'exception.errore_attivazione';
-        } else {
-          // tutto ok
-          $successo = 'message.attivazione_ok';
-        }
-      }
-    }
-    // mostra la pagina di risposta
-    return $this->render('login/attivazione.html.twig', array(
-      'pagina_titolo' => 'page.login_attivazione',
-      'form' => $form->createView(),
-      'successo' => $successo,
-      'errore' => $errore,
-      'manutenzione' => $manutenzione,
-      ));
-  }
-
-  /**
-   * Conferma dell'attivazione dell'utente per gli alunni
-   *
-   * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param ConfigLoader $config Gestore della configurazione su database
-   * @param StaffUtil $staff Funzioni disponibili allo staff
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
-   * @param LogHandler $dblogger Gestore dei log su database
-   * @param string $token Token di conferma dell'attivazione
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/login/conferma/{token}", name="login_conferma",
-   *    methods={"GET"})
-   */
-  public function confermaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                 TranslatorInterface $trans, ConfigLoader $config, StaffUtil $staff,
-                                 UserPasswordEncoderInterface $encoder, LogHandler $dblogger, $token) {
-    // carica configurazione di sistema
-    $config->carica();
-    // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
-    // controlla token
-    $ora = new \DateTime();
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['token' => $token, 'abilitato' => 1]);
-    if (!$alunno) {
-      // utente inesistente
-      $messaggio = array('danger', 'exception.conferma_invalida');
-    } elseif ($alunno->getTokenCreato()->diff($ora)->days >= 2) {
-      // la richiesta di attivazione è scaduta (48 ore)
-      $messaggio = array('danger', 'exception.conferma_scaduta');
-    } elseif ($alunno->getPassword() != 'NOPASSWORD') {
-      // utente già attivo
-      $messaggio = array('warning', 'message.conferma_utente_attivo');
-    } else {
-      // ok: genera password
-      $num_pwdchars = 8;
-      $password = $staff->creaPassword($num_pwdchars);
-      $alunno->setPasswordNonCifrata($password);
-      $pswd = $encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
-      $alunno->setPassword($pswd);
-      // crea avviso
-      $preside = $em->getRepository('App:Preside')->findOneBy(['abilitato' => 1]);
-      $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-      $nome = $alunno->getNome().' '.$alunno->getCognome();
-      $oggetto = $trans->trans('message.attivazione_alunno_oggetto',
-        ['sex' => $sesso, 'alunno' => $nome]);
-      $testo = $trans->trans('message.attivazione_alunno_testo',
-        ['sex' => $sesso, 'alunno' => $nome, 'username' => $alunno->getUsername(), 'password' => $password]);
-      $avviso = (new Avviso())
-        ->setTipo('I')
-        ->setData(new \DateTime('today'))
-        ->setDestinatariStaff(false)
-        ->setDestinatariCoordinatori(false)
-        ->setDestinatariDocenti(false)
-        ->setDestinatariGenitori(true)
-        ->setDestinatariAlunni(false)
-        ->setDestinatariIndividuali(true)
-        ->setDocente($preside)
-        ->setOggetto($oggetto)
-        ->setTesto($testo);
-      $em->persist($avviso);
-      $genitori = $em->getRepository('App:Genitore')->findByAlunno($alunno);
-      foreach ($genitori as $g) {
-        // aggiunge destinatario
-        $ai = (new AvvisoIndividuale())
-          ->setAvviso($avviso)
-          ->setGenitore($g)
-          ->setAlunno($alunno);
-        $em->persist($ai);
-      }
-      // memorizza su db
-      $em->flush();
-      // log
-      $dblogger->write($alunno, $request->getClientIp(), 'SICUREZZA', 'Attivazione Alunno', __METHOD__, array(
-        'Username' => $alunno->getUsername(),
-        'Avviso' => $avviso->getId(),
-        ));
-      // messaggio di successo
-      $messaggio = array('success', 'message.attivazione_confermata');
-    }
-    // mostra la pagina di risposta
-    return $this->render('login/conferma.html.twig', array(
-      'pagina_titolo' => 'page.login_conferma',
-      'messaggio' => $messaggio,
       'manutenzione' => $manutenzione,
       ));
   }

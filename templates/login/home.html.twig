@@ -16,11 +16,6 @@
     </div>
     <div class="panel-body">
   {% if is_granted('ROLE_DOCENTE') %}
-    {% if app.session.get('/CONFIG/SISTEMA/moodle') %}
-      <div class="text-center gs-mt-3 gs-mb-3">
-        <a class="btn btn-success" href="{{ path('app_moodle') }}" target="_blank" role="button" title="Clicca per accedere alla piattaforma Apprendere"><strong>Accesso alla piattaforma APPRENDERE</strong></a>
-      </div>
-    {% endif %}
     {% if dati.richieste > 0 %}
       <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1 richiesta' : 'Sono presenti '~dati.richieste~' richieste' }} di colloquio a cui rispondere: <a href="{{ path('colloqui') }}">vai alla gestione dei colloqui</a></strong></div>
     {% endif %}
@@ -48,11 +43,6 @@
       <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({'num': dati.compiti.domani}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
     {% endif %}
   {% elseif is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') %}
-    {% if app.session.get('/CONFIG/SISTEMA/moodle') %}
-      <div class="text-center gs-mt-3 gs-mb-3">
-        <a class="btn btn-success" href="{{ path('app_moodle') }}" target="_blank" role="button" title="Clicca per accedere alla piattaforma Apprendere"><strong>Accesso alla piattaforma APPRENDERE</strong></a>
-      </div>
-    {% endif %}
     {% if dati.colloqui is defined and dati.colloqui %}
       {% for c in dati.colloqui %}
       <div class="alert alert-success gs-mb-2 gs-big" role="alert">
@@ -95,8 +85,6 @@
   <p><em>{{ 'message.login_docente'|trans|raw }}</em></p>
   <p class="gs-mb-0"><strong>Si prega di prendere visione dei manuali:</strong></p>
   <ul class="gs-mb-0">
-    {#-- <li><a href="{{ asset('doc/giuaschool_manuale_scrutinio_finale_coordinatori.pdf') }}"><strong>Manuale per lo scrutinio finale - Operazioni svolte dai coordinatori</strong></a></li> #}
-    {#-- <li><a href="{{ asset('doc/giuaschool_manuale_scrutinio_finale_docenti.pdf') }}"><strong>Manuale per lo scrutinio finale - Operazioni svolte dai docenti</strong></a></li> #}
     <li><a href="{{ asset('doc/giuaschool_accesso_docenti.pdf') }}">Modalità di accesso per i docenti (aggiornato al {{ filedate('doc/giuaschool_accesso_docenti.pdf')|date('d/m/Y') }})</a></li>
     <li><a href="{{ asset('doc/giuaschool_manuale_docenti.pdf') }}">Manuale per i docenti (aggiornato al {{ filedate('doc/giuaschool_manuale_docenti.pdf')|date('d/m/Y') }})</a></li>
   </ul>

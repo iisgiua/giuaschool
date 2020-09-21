@@ -5,7 +5,6 @@
   {% if app.session.get('/CONFIG/SISTEMA/banner_login') %}
   <div class="alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_login')|raw }}</strong></div>
   {% endif %}
-
   {% if manutenzione or 'now'|date('Y-m-d H:i') <= app.session.get('/CONFIG/SISTEMA/manutenzione_inizio') %}
   <div class="col-sm-12 bg-danger gs-mb-4 text-center">
     <h1 class="gs-h2">ATTENZIONE</h1>
@@ -19,14 +18,56 @@
     </p>
   </div>
   {% endif %}
-  {% if not manutenzione %}
+  {% if not manutenzione and app.session.get('/CONFIG/SISTEMA/id_provider') %}
+  <div class="col-sm-10 col-sm-offset-1 gs-mt-4">
+    <div class="panel panel-primary" >
+      <div class="panel-heading">
+        <div class="panel-title">Accesso al Registro Elettronico</div>
+      </div>
+      <div class="panel-body">
+        {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
+        <div class="col-sm-6">
+          <p class="text-center text-primary gs-big"><strong>Alunni e Docenti</strong></p>
+          <div class="help-block"><span class="gs-text-normal">Clicca sul pulsante <strong>Accedi con GSuite</strong>, quindi inserisci nella nuova pagina l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
+          <div class="text-center gs-mt-5">
+            <a href="{{ path('login_gsuite') }}" class="btn btn-primary"><strong>Accedi con GSuite</strong></a>
+          </div>
+        </div>
+        <div class="col-sm-6" style="border-left:2px solid #337ab7">
+          <p class="text-center text-primary gs-big"><strong>Genitori e Personale ATA</strong></p>
+          <div class="help-block"><span class="gs-text-normal">Inserisci l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>Accedi</strong>.</span></div>
+          <form name="login_form" method="post" class="form-horizontal">
+            <div class="form-group">
+              <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
+              <div class="input-group gs-ml-4 gs-mr-4">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+                <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
+              <div class="input-group gs-ml-4 gs-mr-4">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+                <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
+              </div>
+            </div>
+            <div class="form-group text-center">
+              <button type="submit" class="btn btn-primary" id="login" name="login">{{ 'label.login'|trans }}</button>
+            </div>
+            <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% elseif not manutenzione %}
   <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4">
     <div class="panel panel-primary" >
       <div class="panel-heading">
         <div class="panel-title">Accesso al Registro Elettronico</div>
       </div>
-      <div class="panel-body" >
-        <div class="help-block"><span class="gs-text-normal">Inserisci il tuo <strong>nome utente</strong> e la tua <strong>password</strong>, quindi clicca sul pulsante <strong>Accedi</strong>.</span></div>
+      <div class="panel-body">
+        <div class="help-block gs-text-normal">Inserisci il tuo <strong>nome utente</strong> e la tua <strong>password</strong>, quindi clicca sul pulsante <strong>Accedi</strong>.</div>
         {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
         <form name="login_form" method="post" class="form-horizontal">
           <div class="form-group">

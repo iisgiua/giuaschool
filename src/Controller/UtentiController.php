@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Genitore;
+use App\Entity\Alunno;
 use App\Entity\Docente;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
@@ -63,6 +64,8 @@ class UtentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -73,7 +76,8 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function emailAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, LogHandler $dblogger) {
+  public function emailAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                              TranslatorInterface $trans, ValidatorInterface $validator, LogHandler $dblogger) {
     $success = null;
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_email', FormType::class)
@@ -88,12 +92,17 @@ class UtentiController extends AbstractController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // validazione
       $vecchia_email = $this->getUser()->getEmail();
+      // legge configurazione: id_provider
+      $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+      // validazione
       $this->getUser()->setEmail($form->get('email')->getData());
       $errors = $validator->validate($this->getUser());
       if (count($errors) > 0) {
         $form->addError(new FormError($errors[0]->getMessage()));
+      } elseif ($id_provider && ($this->getUser() instanceOf Docente || $this->getUser() instanceOf Alunno)) {
+        // errore: docente/staff/preside/alunno
+        $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
       } else {
         // memorizza modifica
         $em->flush();
@@ -122,6 +131,7 @@ class UtentiController extends AbstractController {
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
+   * @param SessionInterface $session Gestore delle sessioni
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -133,7 +143,8 @@ class UtentiController extends AbstractController {
    * @IsGranted("ROLE_UTENTE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
-                                  TranslatorInterface $trans, ValidatorInterface $validator, OtpUtil $otp, LogHandler $dblogger) {
+                                 TranslatorInterface $trans, ValidatorInterface $validator, SessionInterface $session,
+                                 OtpUtil $otp, LogHandler $dblogger) {
     $success = null;
     $errore = null;
     $form = null;
@@ -171,6 +182,12 @@ class UtentiController extends AbstractController {
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
+        // legge configurazione: id_provider
+        $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+        if ($id_provider && ($this->getUser() instanceOf Docente || $this->getUser() instanceOf Alunno)) {
+          // errore: docente/staff/preside/alunno
+          $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
+        }
         // controllo password esistente
         if (!$encoder->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
           // vecchia password errata
@@ -255,8 +272,12 @@ class UtentiController extends AbstractController {
     $msg = null;
     $qrcode = null;
     $form = null;
-    // controlla se già associato ad un dispositivo
-    if ($docente->getOtp()) {
+    // legge configurazione: id_provider
+    $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+    if ($id_provider) {
+      // errore: docente/staff/preside/alunno
+      $msg = array('tipo' => 'danger', 'messaggio' => 'exception.invalid_user_type_recovery');
+    } elseif ($docente->getOtp()) {
       // risulta già associato
       $msg = array('tipo' => 'warning', 'messaggio' => 'exception.otp_associato');
     } else {

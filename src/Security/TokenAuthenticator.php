@@ -33,8 +33,12 @@ use App\Util\LogHandler;
 
 
 /**
- * TokenAuthenticator - servizio usato per l'autenticazione di un utente tramite token (utilizzato dal lettore di impronte)
- */
+ * TokenAuthenticator - servizio usato per l'autenticazione di un utente tramite token (lettore di impronte)
+ *
+ * Usato solo per docenti/staff/preside. Previsto un blocco sugli IP (controlla provienienza sia rete di scuola).
+ * Se è attivato un identity provider esterno l'autenticazione non subisce modifiche, ma
+ * si verrà autenticati esclusivamente sul Registro, senza SSO.
+*/
 class TokenAuthenticator extends AbstractGuardAuthenticator {
 
 

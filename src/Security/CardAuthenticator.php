@@ -31,6 +31,10 @@ use App\Util\LogHandler;
 
 /**
  * CardAuthenticator - servizio usato per gestire l'autenticazione tramite tessera CNS
+ *
+ * Usato solo per docenti/staff/preside. Nessun blocco previsto.
+ * Se è attivato un identity provider esterno l'autenticazione non subisce modifiche, ma
+ * si verrà autenticati esclusivamente sul Registro, senza SSO.
  */
 class CardAuthenticator extends AbstractGuardAuthenticator {
 

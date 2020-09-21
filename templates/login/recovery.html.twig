@@ -16,7 +16,7 @@
   </div>
   {% endif %}
   {% if not manutenzione %}
-  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4">
+  <div class="col-sm-10 col-sm-offset-1 gs-mt-4">
     <div class="panel panel-primary" >
       <div class="panel-heading">
         <div class="panel-title">Recupero della password di accesso</div>
@@ -27,9 +27,15 @@
           <span class="gs-text-normal gs-big"><strong>{{ successo|trans }}</strong></span>
         </div>
     {% endif %}
+    {% if app.session.get('/CONFIG/SISTEMA/id_provider') %}
+        <div class="help-block text-center gs-mb-4">
+          <span class="text-danger gs-big">Il recupero password è attivo solo per i <strong>Genitori</strong> e il <strong>Personale ATA</strong>.</span><br>
+          <span class="text-danger gs-big">Gli <strong>Alunni</strong> e i <strong>Docenti</strong> possono effettuare il recupero password sulla <strong>GSuite</strong>.</span>
+        </div>
+    {% endif %}
         <div class="help-block">
           <span class="gs-text-normal">Inserisci l'indirizzo di posta elettronica che hai configurato nel Registro Elettronico, quindi clicca sul pulsante <strong>Conferma</strong>.</span><br>
-          <span class="text-danger"><strong><em>Se non hai configurato il tuo indirizzo email, non potrai usare questo servizio.</em></strong></span>
+          <span><strong><em>Se non hai configurato il tuo indirizzo email, non potrai usare questo servizio.</em></strong></span>
         </div>
         {{ form_start(form) }}
     {% if errore %}
@@ -42,6 +48,7 @@
               {{ form_widget(form.email) }}
             </div>
           </div>
+    {% if app.session.get('/CONFIG/SISTEMA/id_provider') is empty %}
           <div class="form-group">
             <label for="otp" class="col-sm-6 text-primary text-right">{{ 'label.login_otp'|trans|raw }}</label>
             <div class="col-sm-6 input-group gs-pr-4 gs-pl-4 gs-mb-4">
@@ -49,10 +56,12 @@
               {{ form_widget(form.otp) }}
             </div>
           </div>
+    {% endif %}
           <div class="form-group text-center">
             {{ form_widget(form.submit) }}
           </div>
-        {{ form_end(form) }}
+          {{ form_widget(form._token) }}
+        {{ form_end(form, {'render_rest': false}) }}
       </div>
     </div>
   </div>

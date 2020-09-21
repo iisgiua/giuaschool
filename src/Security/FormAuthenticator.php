@@ -30,6 +30,8 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use App\Entity\Docente;
 use App\Entity\Staff;
 use App\Entity\Preside;
+use App\Entity\Genitore;
+use App\Entity\Alunno;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
@@ -37,6 +39,16 @@ use App\Util\OtpUtil;
 
 /**
  * FormAuthenticator - servizio usato per l'autenticazione di un utente tramite form
+ *
+ * Senza identity provider esterno:
+ *    - utente Docente: blocco orario secondo parametri nei giorni di lezione,
+ *                      per impedire uso di password in classe (se usato OTP nessun blocco)
+ *    - utente Staff/Preside/Ata/Alunno/Genitore: nessun blocco
+ *    - utente Docente/Staff/Preside: possibilità di uso dell'OTP tramite Google Authenticator
+ *
+ * Con identity provider esterno:
+ *    - utente Docente/Staff/Preside/Alunno: autentificazione tramite email da GSuite
+ *    - utente Ata/Genitore: autenticazione interna senza modifiche
  */
 class FormAuthenticator extends AbstractGuardAuthenticator {
 
@@ -99,8 +111,8 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @param ConfigLoader $config Gestore della configurazione su database
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
-                               CsrfTokenManagerInterface $csrf, OtpUtil $otp, LoggerInterface $logger, LogHandler $dblogger,
-                               ConfigLoader $config) {
+                              CsrfTokenManagerInterface $csrf, OtpUtil $otp, LoggerInterface $logger, LogHandler $dblogger,
+                              ConfigLoader $config) {
     $this->router = $router;
     $this->em = $em;
     $this->encoder = $encoder;
@@ -144,8 +156,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     if (!$this->csrf->isTokenValid(new CsrfToken($intention, $csrfToken))) {
       $this->logger->error('Token CSRF non valido nella richiesta di login.', array(
         'username' => $request->request->get('_username'),
-        'ip' => $request->getClientIp(),
-        ));
+        'ip' => $request->getClientIp()));
       throw new CustomUserMessageAuthenticationException('exception.invalid_csrf');
     }
     // restituisce le credenziali
@@ -175,8 +186,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login.', array(
         'username' => $credentials['username'],
-        'ip' => $credentials['ip'],
-        ));
+        'ip' => $credentials['ip']));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // utente trovato
@@ -194,21 +204,30 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @return bool Vero se le credenziali sono valide, falso altrimenti
    */
   public function checkCredentials($credentials, UserInterface $user) {
-    // controllo se l'utente è abilitato
+    // legge configurazione: id_provider
+    $id_provider = $this->em->getRepository('App:Configurazione')->findOneByParametro('id_provider');
+    // se id_provider controlla tipo utente
+    if ($id_provider && $id_provider->getValore() && ($user instanceOf Docente || $user instanceOf Alunno)) {
+      // errore: docente/staff/preside/alunno
+      $this->logger->error('Tipo di utente non valido nella richiesta di login.', array(
+        'username' => $credentials['username'],
+        'ip' => $credentials['ip']));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
+    }
+    // controlla se l'utente è abilitato
     if (!$user->getAbilitato()) {
       // utente disabilitato
       $this->logger->error('Utente disabilitato nella richiesta di login.', array(
         'username' => $credentials['username'],
-        'ip' => $credentials['ip'],
-        ));
+        'ip' => $credentials['ip']));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    // controllo username/password
+    // controlla username/password
     $plainPassword = $credentials['password'];
     if ($this->encoder->isPasswordValid($user, $plainPassword)) {
       // password ok
       if (($user instanceof Docente) && $user->getOtp()) {
-        // controllo otp
+        // controlla otp
         if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
           // otp corretto
           if ($credentials['otp'] != $user->getUltimoOtp()) {
@@ -231,8 +250,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
         // validazione fallita
         $this->logger->error($otp_errore_log, array(
           'username' => $credentials['username'],
-          'ip' => $credentials['ip'],
-          ));
+          'ip' => $credentials['ip']));
         throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
       }
       // legge configurazione
@@ -253,8 +271,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
             // non è giorno settimanale festivo: blocca
             $this->logger->error('Docente in orario di blocco nella richiesta di login.', array(
               'username' => $credentials['username'],
-              'ip' => $credentials['ip'],
-              ));
+              'ip' => $credentials['ip']));
             throw new CustomUserMessageAuthenticationException('exception.blocked_time');
           }
         }
@@ -265,8 +282,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     // validazione fallita
     $this->logger->error('Password errata nella richiesta di login.', array(
       'username' => $credentials['username'],
-      'ip' => $credentials['ip'],
-      ));
+      'ip' => $credentials['ip']));
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
   }
 
@@ -291,19 +307,27 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
     // ultimo accesso dell'utente
     $last_login = $token->getUser()->getUltimoAccesso();
-    $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($last_login ? $last_login->format('d/m/Y H:i:s') : null));
-    $token->getUser()->setUltimoAccesso(new \DateTime());
+    if ($last_login || !($token->getUser() instanceOf Genitore)) {
+      // ha già effettuato altri login
+      $request->getSession()->set('/APP/UTENTE/ultimo_accesso',
+        $last_login ? $last_login->format('d/m/Y H:i:s') : '');
+      $token->getUser()->setUltimoAccesso(new \DateTime());
+    } else {
+      // primo accesso
+      $request->getSession()->set('/APP/UTENTE/ultimo_accesso', '');
+      $request->getSession()->set('/APP/UTENTE/primo_accesso', (new \DateTime())->format('d/m/Y H:i:s'));
+    }
     if ($tipo_accesso != 'form') {
       // memorizza ultimo codice OTP usato
       $token->getUser()->setUltimoOtp($request->request->get('_otp'));
     }
+    // memorizza modifiche
     $this->em->flush($token->getUser());
     // log azione
     $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Login', __METHOD__, array(
       'Login' => $tipo_accesso,
       'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()
-      ));
+      'Ruolo' => $token->getRoles()[0]->getRole()));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare

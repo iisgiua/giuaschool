@@ -13,7 +13,7 @@ security:
   firewalls:
     main:
       provider: 'db_provider'
-      anonymous: ~
+      anonymous: lazy
       switch_user:
         role: 'ROLE_AMMINISTRATORE'
         parameter: '_alias'
@@ -24,9 +24,10 @@ security:
         handlers: ['App\Security\LogoutHandler']
       guard:
         authenticators:
+          - 'App\Security\GSuiteAuthenticator'
           - 'App\Security\FormAuthenticator'
           - 'App\Security\TokenAuthenticator'
           - 'App\Security\CardAuthenticator'
           - 'App\Security\AppAuthenticator'
           - 'App\Security\EnrollAuthenticator'
-        entry_point: 'App\Security\FormAuthenticator'
+        entry_point: 'App\Security\GSuiteAuthenticator'

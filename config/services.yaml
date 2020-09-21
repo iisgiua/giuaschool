@@ -21,6 +21,7 @@ services:
     bind:               # Pass defined values to any <$name> argument for any service
       $dirProgetto:     '%kernel.project_dir%'
       $dirScrutini:     '%dir_scrutini%'
+      $connessioneDB:   '@doctrine.dbal.connection_factory'
 
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name

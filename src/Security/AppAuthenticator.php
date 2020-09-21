@@ -37,6 +37,9 @@ use App\Util\LogHandler;
 
 /**
  * AppAuthenticator - servizio usato per l'autenticazione di un utente tramite app
+ *
+ * Se è attivato un identity provider esterno il servizio viene disattiva mostrando un errore,
+ * in quanto non è attualmente compatibile con il SSO.
  */
 class AppAuthenticator extends AbstractGuardAuthenticator {
 
@@ -123,6 +126,16 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    * @return mixed|null Le credenziali dell'autenticazione o null
    */
   public function getCredentials(Request $request) {
+    // legge configurazione: id_provider
+    $id_provider = $this->em->getRepository('App:Configurazione')->findOneByParametro('id_provider');
+    // se id_provider controlla tipo utente
+    if ($id_provider && $id_provider->getValore()) {
+      // errore: servizio non compatibile
+      $this->logger->error('Servizio non compatibile nella richiesta di login da app.', array(
+        'username' => $credentials['username'],
+        'ip' => $credentials['ip']));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_service_idprovider');
+    }
     // decodifica le credenziali
     $codice = $request->get('codice');
     $lusr = $request->get('lusr');
@@ -292,7 +305,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole(),
       ));
-    // log su file per finis statistici
+    // log su file per fini statistici
     $this->logger->info('LOGIN APP-1', array(
       'username' => $token->getUsername(),
       'appId' => $appId,
