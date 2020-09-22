@@ -1,23 +1,8 @@
 # config/packages/doctrine.yaml
 
-parameters:
-  database_version: '%env(DATABASE_VERSION)%'
-  database_host: '%env(DATABASE_HOST)%'
-  database_port: '%env(DATABASE_PORT)%'
-  database_user: '%env(DATABASE_USER)%'
-  database_password: '%env(DATABASE_PASSWORD)%'
-  database_name: '%env(DATABASE_NAME)%'
-
 doctrine:
   dbal:
-    server_version: '%database_version%'
-    host: '%database_host%'
-    port: '%database_port%'
-    user: '%database_user%'
-    password: '%database_password%'
-    dbname: '%database_name%'
-    driver: 'pdo_mysql'
-    charset: 'utf8'
+    url: '%env(resolve:DATABASE_URL)%'
     default_table_options:
       charset: 'utf8'
       collate: 'utf8_unicode_ci'

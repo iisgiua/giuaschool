@@ -1,9 +1,6 @@
 # config/packages/swiftmailer.yaml
 
 swiftmailer:
-  transport: '%env(MAILER_TRANSPORT)%'
-  host: '%env(MAILER_HOST)%'
-  username: '%env(MAILER_USER)%'
-  password: '%env(MAILER_PASSWORD)%'
+  url: '%env(resolve:MAILER_URL)%'
   spool:
     type: 'memory'
