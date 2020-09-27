@@ -522,7 +522,7 @@ class AppFixtures extends Fixture {
       ->setNome('Sede centrale')
       ->setNomeBreve('Città')
       ->setCitta('Città')
-      ->setIndirizzo('Via indirizzo, 1')
+      ->setIndirizzo1('Via indirizzo, 1')
       ->setIndirizzo2('00000 - CITTA')
       ->setTelefono('000 111111')
       ->setOrdinamento(10);
@@ -530,7 +530,7 @@ class AppFixtures extends Fixture {
       ->setNome('Sede staccata')
       ->setNomeBreve('Città2')
       ->setCitta('Città2')
-      ->setIndirizzo('Via indirizzo2, 2')
+      ->setIndirizzo1('Via indirizzo2, 2')
       ->setIndirizzo2('00000 - CITTA2')
       ->setTelefono('000 222222')
       ->setOrdinamento(20);
