@@ -1184,3 +1184,7 @@ exception.filtro_classe_nullo: Non hai indicato nessuna classe.
 exception.filtro_utente_nullo: Non hai indicato nessun utente.
 exception.invalid_service_idprovider: "Spiacente il servizio è disabilitato per incompatibilità con la GSuite. Il problema sarà risolto con il rilascio della nuova versione dell'app."
 exception.invalid_user_type_recovery: "Spiacente il servizio non è disponibile per il tipo di utente indicato."
+exception.provisioning_init_gsuite: Errore nell'inizializzazione del provisioning GSuite
+exception.provisioning_init_moodle: Errore nell'inizializzazione del provisioning MOODLE
+exception.provisioning_exec_gsuite: Errore nell'esecuzione del provisioning GSuite
+exception.provisioning_exec_moodle: Errore nell'esecuzione del provisioning MOODLE

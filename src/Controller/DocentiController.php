@@ -39,6 +39,7 @@ use App\Util\StaffUtil;
 use App\Entity\Docente;
 use App\Entity\Cattedra;
 use App\Entity\Colloquio;
+use App\Entity\Provisioning;
 
 
 /**
@@ -239,6 +240,12 @@ class DocentiController extends BaseController {
     $form = $this->createForm(DocenteType::class, $docente, ['returnUrl' => $this->generateUrl('docenti_modifica')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // provisioning
+      $provisioning = (new Provisioning())
+        ->setUtente($docente)
+        ->setAzione($id ? 'E' : 'A')
+        ->setFunzione($id ? 'ModificaUtente' : 'CreaUtente');
+      $em->persist($provisioning);
       // memorizza modifiche
       $em->flush();
       // messaggio

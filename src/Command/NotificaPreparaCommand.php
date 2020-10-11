@@ -336,15 +336,15 @@ class NotificaPreparaCommand extends Command {
           $destinatari = array_merge($destinatari, $alunni);
         } else {
           // destinatari per altri tipi di avvisi
-          if ($avviso->getDestinatariAlunni()) {
-            // alunni destinatari
-            $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-              ->where('a.notifica IS NOT NULL AND a.classe IN (:classi)')
-              ->setParameters(['classi' => array_column($filtri['classi'], 'classe')])
-              ->getQuery()
-              ->getResult();
-            $destinatari = array_merge($destinatari, $alunni);
-          }
+          //-- if ($avviso->getDestinatariAlunni()) {
+            //-- // alunni destinatari
+            //-- $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+              //-- ->where('a.notifica IS NOT NULL AND a.classe IN (:classi)')
+              //-- ->setParameters(['classi' => array_column($filtri['classi'], 'classe')])
+              //-- ->getQuery()
+              //-- ->getResult();
+            //-- $destinatari = array_merge($destinatari, $alunni);
+          //-- }
         }
         // testo avviso
         switch ($avviso->getTipo()) {

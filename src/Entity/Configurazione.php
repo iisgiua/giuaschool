@@ -79,9 +79,9 @@ class Configurazione {
   /**
    * @var string $valore Valore della configurazione
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
+   * @ORM\Column(type="text", nullable=false)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
+   * @Assert\NotBlank(message="field.notblank")
    */
   private $valore;
 

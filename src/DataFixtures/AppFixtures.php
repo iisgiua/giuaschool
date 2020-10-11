@@ -136,6 +136,17 @@ class AppFixtures extends Fixture {
       ->setParametro('id_provider')
       ->setDescrizione("Se presente indica l'uso di un identity provider esterno (es. SSO su GSuite)<br>[testo]")
       ->setGestito(false);
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SISTEMA')
+      ->setParametro('dominio_default')
+      ->setDescrizione("Indica il dominio di posta predefinito per le email degli utenti (usato nell'importazione)<br>[testo]")
+      ->setGestito(false)
+      ->setValore('noemail.local');
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SISTEMA')
+      ->setParametro('dominio_id_provider')
+      ->setDescrizione("Nel caso si utilizzi un identity provider esterno, indica il dominio di posta predefinito per le email degli utenti (usato nell'importazione)<br>[testo]")
+      ->setGestito(false);
     // SCUOLA
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('SCUOLA')
@@ -731,7 +742,7 @@ class AppFixtures extends Fixture {
       ->setSezione('D')
       ->setOreSettimanali(32)
       ->setSede($this->dati['sedi']['CA'])
-      ->setCorso($this->dati['corsi']['INF']);    
+      ->setCorso($this->dati['corsi']['INF']);
     // classi - città - triennio chimica
     $this->dati['classi']['3E'] = (new Classe())
       ->setAnno(3)

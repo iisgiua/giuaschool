@@ -37,6 +37,7 @@ use App\Form\CambioClasseType;
 use App\Entity\CambioClasse;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
+use App\Entity\Provisioning;
 
 
 /**
@@ -256,6 +257,17 @@ class AlunniController extends BaseController {
         substr($alunno->getUsername(), $username_pos + 2);
       $genitori[0]->setUsername($username);
       $genitori[0]->setEmail($form->get('email_genitore')->getData());
+      // provisioning
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setAzione($id ? 'E' : 'A')
+        ->setFunzione($id ? 'ModificaUtente' : 'CreaUtente');
+      $em->persist($provisioning);
+      $provisioning = (new Provisioning())
+        ->setUtente($genitori[0])
+        ->setAzione($id ? 'E' : 'A')
+        ->setFunzione($id ? 'ModificaUtente' : 'CreaUtente');
+      $em->persist($provisioning);
       // memorizza modifiche
       $em->flush();
       // messaggio
@@ -316,7 +328,16 @@ class AlunniController extends BaseController {
     $utente->setPassword($pswd);
     // memorizza su db
     $em->flush();
-    // log azione
+    // log azione e provisioning
+    if (!$genitore) {
+      $provisioning = (new Provisioning())
+        ->setUtente($utente)
+        ->setDati(['password' => $utente->getPasswordNonCifrata()])
+        ->setAzione('E')
+        ->setFunzione('PasswordUtente');
+      $em->persist($provisioning);
+    }
+    // aggiunge log
     $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
       'Username esecutore' => $this->getUser()->getUsername(),
       'Ruolo esecutore' => $this->getUser()->getRoles()[0],
@@ -705,6 +726,15 @@ class AlunniController extends BaseController {
       $utente->setPassword($pswd);
       // memorizza su db
       $em->flush();
+      // log azione e provisioning
+      if (!$genitore) {
+        $provisioning = (new Provisioning())
+          ->setUtente($utente)
+          ->setDati(['password' => $utente->getPasswordNonCifrata()])
+          ->setAzione('E')
+          ->setFunzione('PasswordUtente');
+        $em->persist($provisioning);
+      }
       // log azione
       $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
         'Username esecutore' => $this->getUser()->getUsername(),

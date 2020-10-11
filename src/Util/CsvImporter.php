@@ -18,6 +18,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\ValidatorBuilder;
 use Symfony\Component\Validator\ValidatorInterface;
@@ -52,6 +53,11 @@ class CsvImporter {
   private $trans;
 
   /**
+   * @var SessionInterface $session Gestore delle sessioni
+   */
+  private $session;
+
+  /**
    * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    */
   private $encoder;
@@ -84,14 +90,16 @@ class CsvImporter {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param SessionInterface $session Gestore delle sessioni
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param ValidatorBuilder $valbuilder Costruttore per il gestore della validazione dei dati
    * @param StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, UserPasswordEncoderInterface $encoder,
-                              ValidatorBuilder $valbuilder, StaffUtil $staff) {
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, SessionInterface $session,
+                              UserPasswordEncoderInterface $encoder, ValidatorBuilder $valbuilder, StaffUtil $staff) {
     $this->em = $em;
     $this->trans = $trans;
+    $this->session = $session;
     $this->encoder = $encoder;
     $this->validator = $valbuilder->getValidator();
     $this->staff = $staff;
@@ -175,7 +183,8 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@noemail.local';
+        $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
+          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->session->get('/CONFIG/SISTEMA/dominio_default'));
       }
       if (empty($fields['codiceFiscale'])) {
         // valore null
@@ -626,7 +635,8 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@noemail.local';
+        $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
+          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->session->get('/CONFIG/SISTEMA/dominio_default'));
       }
       // controlla esistenza di alunno (su codice fiscale)
       $alunno = $this->em->getRepository('App:Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']);
@@ -944,7 +954,7 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@noemail.local';
+        $fields['email'] = $fields['username'].'@'.$this->session->get('/CONFIG/SISTEMA/dominio_default');
       }
       if (empty($fields['sede'])) {
         // valore null
@@ -1446,7 +1456,7 @@ class CsvImporter {
     $genitore = (new Genitore())
       ->setUsername($fields['usernameGenitore'])
       ->setPasswordNonCifrata($fields['password'])
-      ->setEmail($fields['usernameGenitore'].'@noemail.local')
+      ->setEmail($fields['usernameGenitore'].'@'.$this->session->get('/CONFIG/SISTEMA/dominio_default'))
       ->setAbilitato(true)
       ->setNome($fields['nome'])
       ->setCognome($fields['cognome'])
