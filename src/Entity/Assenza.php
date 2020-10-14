@@ -76,6 +76,20 @@ class Assenza {
   private $motivazione;
 
   /**
+   * @var array $dichiarazione Informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $dichiarazione;
+
+  /**
+   * @var array $certificato Lista di file allegati per i certificati medici
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $certificati;
+
+  /**
    * @var Alunno $alunno Alunno al quale si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
@@ -202,6 +216,84 @@ class Assenza {
   }
 
   /**
+   * Restituisce le informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
+   *
+   * @return array Informazioni sulla sottoscrizione della dichiarazione
+   */
+  public function getDichiarazione() {
+    return $this->dichiarazione;
+  }
+
+  /**
+   * Modifica le informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
+   *
+   * @param array $dichiarazione Informazioni sulla sottoscrizione della dichiarazione
+   *
+   * @return Assenza Oggetto Assenza
+   */
+  public function setDichiarazione($dichiarazione) {
+    if ($dichiarazione === $this->dichiarazione) {
+      // clona array per forzare update su doctrine
+      $dichiarazione = unserialize(serialize($dichiarazione));
+    }
+    $this->dichiarazione = $dichiarazione;
+    return $this;
+  }
+
+  /**
+   * Restituisce la lista di file allegati per i certificati medici
+   *
+   * @return array Lista di file allegati per i certificati medici
+   */
+  public function getCertificati() {
+    return $this->certificati;
+  }
+
+  /**
+   * Modifica la lista di file allegati per i certificati medici
+   *
+   * @param array $certificati Lista di file allegati per i certificati medici
+   *
+   * @return Assenza Oggetto Assenza
+   */
+  public function setCertificati($certificati) {
+    if ($certificati === $this->certificati) {
+      // clona array per forzare update su doctrine
+      $certificati = unserialize(serialize($certificati));
+    }
+    $this->certificati = $certificati;
+    return $this;
+  }
+
+  /**
+   * Aggiunge un file alla lista di allegati per i certificati medici
+   *
+   * @param File $certificato File allegato per i certificati medici
+   *
+   * @return Assenza Oggetto Assenza
+   */
+  public function addCertificato(File $certificato) {
+    if (!in_array($certificato->getBasename(), $this->certificati)) {
+      $this->certificati[] = $certificato->getBasename();
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove un file dalla lista di allegati per i certificati medici
+   *
+   * @param File $certificato File da rimuovere dalla lista di allegati per i certificati medici
+   *
+   * @return Assenza Oggetto Assenza
+   */
+  public function removeCertificato(File $certificato) {
+    if (in_array($certificato->getBasename(), $this->certificati)) {
+      unset($this->certificati[array_search($certificato->getBasename(), $this->certificati)]);
+    }
+    return $this;
+  }
+
+  /**
    * Restituisce l'alunno al quale si riferisce l'assenza
    *
    * @return Alunno Alunno al quale si riferisce l'assenza
@@ -268,6 +360,15 @@ class Assenza {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->dichiarazione = array();
+    $this->certificati = array();
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
@@ -277,4 +378,3 @@ class Assenza {
   }
 
 }
-

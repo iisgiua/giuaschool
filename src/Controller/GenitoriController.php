@@ -23,12 +23,16 @@ use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\RichiestaColloquio;
 use App\Entity\Alunno;
+use App\Entity\Genitore;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
 use App\Entity\Scrutinio;
@@ -36,6 +40,7 @@ use App\Util\GenitoriUtil;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
 use App\Util\AgendaUtil;
+use App\Util\PdfManager;
 use App\Util\LogHandler;
 
 
@@ -962,6 +967,9 @@ class GenitoriController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param LogHandler $dblogger Gestore dei log su database
    * @param Assenza $assenza Assenza da giustificare
@@ -976,9 +984,11 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function giustificaAssenzaAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
-                                           LogHandler $dblogger, Assenza $assenza, $posizione) {
+  public function giustificaAssenzaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                          TranslatorInterface $trans, PdfManager $pdf, GenitoriUtil $gen,
+                                          LogHandler $dblogger, Assenza $assenza, $posizione) {
     // inizializza
+    $fs = new Filesystem();
     $info = array();
     $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
     // legge l'alunno
@@ -1004,15 +1014,27 @@ class GenitoriController extends AbstractController {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
+    // dati assenze
+    $dati_assenze = $gen->raggruppaAssenze($alunno);
+    $data_str = $assenza->getData()->format('Y-m-d');
+    $dich = null;
+    foreach ($dati_assenze['gruppi'] as $per=>$ass) {
+      foreach ($ass as $dt=>$a) {
+        if ($dt == $data_str) {
+          $info['assenza'] = $a['assenza'];
+        }
+        $dich = empty($dich) ? $a['assenza']['dichiarazione'] : $dich;
+      }
+    }
+    if (!isset($info['assenza'])) {
+      // errore: assenza non definita
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
     // dati in formato stringa
-    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $info['data'] =  $formatter->format($assenza->getData());
     $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form
-    $assenza_old = clone $assenza;
-    $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_assenza', FormType::class, $assenza)
+    $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_assenza', FormType::class)
       ->setAction($this->generateUrl('genitori_giustifica_assenza', ['assenza' => $assenza->getId(), 'posizione' => $posizione]))
       ->add('tipo', ChoiceType::class, array('label' => 'label.motivazione_assenza',
         'choices' => $lista_motivazioni,
@@ -1023,11 +1045,58 @@ class GenitoriController extends AbstractController {
             return ['class' => 'gs-no-placeholder'];
           },
         'attr' => ['class' => 'gs-placeholder'],
-        'mapped' => false,
-        'required' => true))
+        'required' => false))
       ->add('motivazione', TextareaType::class, array('label' => null,
+        'data' => $info['assenza']['motivazione'],
         'trim' => true,
         'attr' => array('rows' => '3'),
+        'required' => true))
+      // aggiunta COVID
+      ->add('genitoreSesso', ChoiceType::class, array('label' => false,
+        'data' => isset($info['assenza']['dichiarazione']['genitoreSesso']) ?
+          $info['assenza']['dichiarazione']['genitoreSesso'] : (isset($dich['genitoreSesso']) ? $dich['genitoreSesso'] : null),
+        'choices' => ['label.sottoscritto_M' => 'M', 'label.sottoscritto_F' => 'F'],
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
+        'required' => true))
+      ->add('genitoreNome', TextType::class, array('label' => false,
+        'data' => isset($info['assenza']['dichiarazione']['genitoreNome']) ?
+          $info['assenza']['dichiarazione']['genitoreNome'] : (isset($dich['genitoreNome']) ? $dich['genitoreNome'] : null),
+        'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
+          'placeholder' => $trans->trans('label.cognome_nome'), ],
+        'required' => true))
+      ->add('genitoreNascita', TextType::class, array('label' => 'label.data_nascita',
+        'data' => (isset($info['assenza']['dichiarazione']['genitoreNascita']) && $info['assenza']['dichiarazione']['genitoreNascita']) ?
+          $info['assenza']['dichiarazione']['genitoreNascita']->format('d/m/Y') :
+          ((isset($dich['genitoreNascita']) && $dich['genitoreNascita']) ? $dich['genitoreNascita']->format('d/m/Y') : null),
+        'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
+          'placeholder' => 'gg/mm/aaaa'],
+        'required' => true))
+      ->add('genitoreCitta', TextType::class, array('label' => false,
+        'data' => isset($info['assenza']['dichiarazione']['genitoreCitta']) ?
+          $info['assenza']['dichiarazione']['genitoreCitta'] : (isset($dich['genitoreCitta']) ? $dich['genitoreCitta'] : null),
+        'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-0 gs-mb-2 gs-text-normal gs-strong',
+          'placeholder' => $trans->trans('label.luogo_nascita'), ],
+        'required' => true))
+      ->add('genitoreRuolo', ChoiceType::class, array('label' => false,
+        'data' => isset($info['assenza']['dichiarazione']['genitoreRuolo']) ?
+          $info['assenza']['dichiarazione']['genitoreRuolo'] : (isset($dich['genitoreRuolo']) ? $dich['genitoreRuolo'] : null),
+        'choices' => ['label.genitore_ruolo_P' => 'P', 'label.genitore_ruolo_M' => 'M',
+          'label.genitore_ruolo_T' => 'T'],
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
+        'required' => true))
+      ->add('firma', CheckboxType::class, array('label' => 'label.sottoscrizione_dichiarazione_covid',
+        'data' => $assenza->getGiustificato() != null,
+        'label_attr' => ['class' => 'gs-big gs-strong'],
         'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['class' => 'btn-primary']))
@@ -1036,38 +1105,108 @@ class GenitoriController extends AbstractController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
-        // errore: motivazione assente
-        $this->addFlash('error', $trans->trans('exception.no_motivazione'));
+      $errore = false;
+      if ($form->get('delete')->isClicked()) {
+        // cancella dati
+        $giustificato = null;
+        $motivazione = null;
+        $dichiarazione = array();
+        $certificati = array();
       } else {
-        // dati validi
-        if ($form->get('delete')->isClicked()) {
-          // cancella
-          $assenza
-            ->setMotivazione(null)
-            ->setGiustificato(null);
+        // controlla campi
+        $motivazione = $form->get('motivazione')->getData();
+        $genitoreSesso = $form->get('genitoreSesso')->getData();
+        $genitoreNome = strtoupper($form->get('genitoreNome')->getData());
+        $genitoreNascita = \DateTime::createFromFormat('d/m/Y', $form->get('genitoreNascita')->getData());
+        $genitoreCitta = strtoupper($form->get('genitoreCitta')->getData());
+        $genitoreRuolo = $form->get('genitoreRuolo')->getData();
+        $giustificato = null;
+        $dichiarazione = array(
+          'genitore' => ($this->getUser() instanceOf Genitore),
+          'genitoreSesso' => $genitoreSesso,
+          'genitoreNome' => $genitoreNome,
+          'genitoreNascita' => $genitoreNascita,
+          'genitoreCitta' => $genitoreCitta,
+          'genitoreRuolo' => $genitoreRuolo);
+        $certificati = array();
+        if (empty($motivazione)) {
+          // errore: motivazione assente
+          $errore = true;
+          $this->addFlash('errore', $trans->trans('exception.no_motivazione'));
+        } elseif (($this->getUser() instanceOf Genitore) &&
+            (empty($genitoreSesso) || empty($genitoreNome) || empty($genitoreCitta) || empty($genitoreRuolo))) {
+          // errore: dichiarazione non compilata
+          $errore = true;
+          $this->addFlash('errore', $trans->trans('exception.dichiarazione_incompleta'));
+        } elseif (($this->getUser() instanceOf Genitore) &&
+            (empty($genitoreNascita) || $genitoreNascita->format('d/m/Y') != $form->get('genitoreNascita')->getData())) {
+          // errore: data nascita non valida
+          $errore = true;
+          $this->addFlash('errore', $trans->trans('exception.data_invalida'));
+        } elseif (!$form->get('firma')->getData()) {
+          // errore: niente firma
+          $errore = true;
+          $this->addFlash('errore', $trans->trans('exception.no_firma_dichiarazione'));
         } else {
-          // aggiorna dati
-          $assenza->setGiustificato(new \DateTime());
+          // dati validi
+          $giustificato = new \DateTime();
+          // id documento
+          $id_documento = 'AUTODICHIARAZIONE-'.$alunno->getId().'-'.$assenza->getId();
+          // percorso PDF
+          $percorso = $this->getParameter('dir_classi').'/'.
+            $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().'/certificati';
+          if (!$fs->exists($percorso)) {
+            // crea directory
+            $fs->mkdir($percorso, 0775);
+          }
+          // crea pdf
+          $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
+            'Autodichiarazione assenze no COVID');
+          // contenuto in formato HTML
+          $html = $this->renderView('pdf/autodichiarazione_nocovid.html.twig', array(
+            'alunno' => $alunno,
+            'dichiarazione' => $dichiarazione,
+            'assenza' => $info['assenza'],
+            'giustificato' => $giustificato,
+            'id' => $id_documento));
+          $pdf->createFromHtml($html);
+          // salva il documento
+          $pdf->save($percorso.'/'.$id_documento.'.pdf');
         }
-        // ok: memorizza dati
-        $em->flush();
-        // log azione
-        if ($form->get('delete')->isClicked()) {
-          // cancella
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Elimina giustificazione online', __METHOD__, array(
-            'Assenza' => $assenza->getId(),
-            'Motivazione' => $assenza_old->getMotivazione(),
-            'Giustificato' => $assenza_old->getGiustificato() ? $assenza_old->getGiustificato()->format('Y-m-d') : null,
-            ));
-        } else {
-          // inserisce o modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustificazione online', __METHOD__, array(
-            'Assenza' => $assenza->getId(),
-            'Motivazione' => $assenza_old->getMotivazione(),
-            'Giustificato' => $assenza_old->getGiustificato() ? $assenza_old->getGiustificato()->format('Y-m-d') : null,
-            ));
-        }
+      }
+      // aggiorna dati
+      $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')
+        ->update()
+        ->set('ass.modificato', ':modificato')
+        ->set('ass.giustificato', ':giustificato')
+        ->set('ass.motivazione', ':motivazione')
+        ->set('ass.dichiarazione', ':dichiarazione')
+        ->set('ass.certificati', ':certificati')
+        ->where('ass.id in (:ids)')
+        ->setParameters(['modificato' => new \DateTime(), 'giustificato' => $giustificato,
+          'motivazione' => $motivazione, 'dichiarazione' => serialize($dichiarazione),
+          'certificati' => serialize($certificati), 'ids' => explode(',', $info['assenza']['ids'])])
+        ->getQuery()
+        ->getResult();
+      // memorizza dati
+      $em->flush();
+      // log azione
+      if ($form->get('delete')->isClicked()) {
+        // eliminazione
+        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Elimina giustificazione online', __METHOD__, array(
+          'ID' => $info['assenza']['ids'],
+          'Giustificato' => $info['assenza']['giustificato'],
+          'Motivazione' => $info['assenza']['motivazione'],
+          'Dichiarazione' => $info['assenza']['dichiarazione'],
+          'Certificati' => $info['assenza']['certificati']));
+      } elseif (!$errore) {
+        // inserimento o modifica
+        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustificazione online', __METHOD__, array(
+          'ID' => $info['assenza']['ids'],
+          'Giustificato' => $info['assenza']['giustificato'],
+          'Motivazione' => $info['assenza']['motivazione'],
+          'Dichiarazione' => $info['assenza']['dichiarazione'],
+          'Certificati' => $info['assenza']['certificati']));
       }
       // redirezione
       return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
@@ -1075,6 +1214,7 @@ class GenitoriController extends AbstractController {
     // visualizza pagina
     return $this->render('ruolo_genitore/giustifica_assenza.html.twig', array(
       'info' => $info,
+      'alunno' => $alunno,
       'form' => $form->createView(),
     ));
   }

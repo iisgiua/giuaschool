@@ -1,0 +1,61 @@
+<p style="text-align:center; font-family:times; font-size:12pt">
+  <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
+  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
+  <strong><i>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</i></strong><br>
+  <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
+  TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
+  Email: {{ app.session.get('/CONFIG/ISTITUTO/email') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
+</p>
+<p>&nbsp;</p>
+<p style="font-size:13pt;text-align:center;"><b>AUTODICHIARAZIONE</b></p>
+{% if dichiarazione.genitore %}
+<p style="text-align:justify;">{{ dichiarazione.genitoreSesso == 'M' ? 'Il sottoscritto' : 'La sottoscritta' }}
+  {{ dichiarazione.genitoreNome }} {{ dichiarazione.genitoreSesso == 'M' ? 'nato' : 'nata' }}
+  il {{ dichiarazione.genitoreNascita|date('d/m/Y') }}
+  a {{ dichiarazione.genitoreCitta }},
+  {{ ('label.genitore_ruolo_'~dichiarazione.genitoreRuolo)|trans }} dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}
+  <b>{{ alunno.cognome }} {{ alunno.nome }}</b> (codice fiscale {{ alunno.codiceFiscale }})
+  frequentante la <b>classe {{ alunno.classe.anno }}ª {{ alunno.classe.sezione }}</b>
+  presso l'<i>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</i>,
+  in qualità di esercente la responsabilità genitoriale,
+  consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
+  dichiara che l'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}:
+</p>
+<ul style="text-align:justify;">
+  <li>è stato assente {% if assenza.giorni == 1 %}il giorno {{ assenza.data }}{% else %}dal {{ assenza.data }} al {{ assenza.data_fine }}{% endif %};</li>
+  <li>non ha presentato sintomatologia respiratoria o febbre superiore a 37.5° C in data odierna e nei giorni di assenza indicati;</li>
+  <li>non è stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</li>
+  <li>non è stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</li>
+</ul>
+<p style="text-align:justify;">La presente autodichiarazione viene rilasciata quale misura di prevenzione correlata con l’emergenza pandemica del COVID-19.</p>
+<p>&nbsp;</p>
+<p>Cagliari, {{ 'now'|date('d/m/Y') }}.</p>
+<p>&nbsp;</p>
+<p style="text-align:right"><i>{{ dichiarazione.genitoreNome }}&nbsp;&nbsp;</i><br>
+(sottoscritto digitalmente tramite il Registro Elettronico)&nbsp;&nbsp;</p>
+{% else %}
+<p style="text-align:justify;">{{ alunno.sesso == 'M' ? 'Il sottoscritto' : 'La sottoscritta' }}
+  <b>{{ alunno.cognome }} {{ alunno.nome }}</b>
+  {{ alunno.sesso == 'M' ? 'nato' : 'nata' }} il {{ alunno.dataNascita|date('d/m/Y') }}
+  a {{ alunno.comuneNascita }} (codice fiscale {{ alunno.codiceFiscale }}),
+  frequentante la <b>classe {{ alunno.classe.anno }}ª {{ alunno.classe.sezione }}</b>
+  presso l'<i>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</i>,
+  consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
+  dichiara:
+</p>
+<ul style="text-align:justify;">
+  <li>di essere stato assente {% if assenza.giorni == 1 %}il giorno {{ assenza.data }}{% else %}dal {{ assenza.data }} al {{ assenza.data_fine }}{% endif %};</li>
+  <li>di non aver presentato sintomatologia respiratoria o febbre superiore a 37.5° C in data odierna e nei giorni di assenza indicati;</li>
+  <li>di non essere stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</li>
+  <li>di non essere stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</li>
+</ul>
+<p style="text-align:justify;">La presente autodichiarazione viene rilasciata quale misura di prevenzione correlata con l’emergenza pandemica del COVID-19.</p>
+<p>&nbsp;</p>
+<p>Cagliari, {{ 'now'|date('d/m/Y') }}.</p>
+<p>&nbsp;</p>
+<p style="text-align:right"><i>{{ alunno.nome }} {{ alunno.cognome }}&nbsp;&nbsp;</i><br>
+(sottoscritto digitalmente tramite il Registro Elettronico)&nbsp;&nbsp;</p>
+{% endif %}
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p style="font-size:10pt;">[{{ id }}]</p>

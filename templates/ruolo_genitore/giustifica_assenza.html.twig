@@ -1,7 +1,7 @@
 {{ form_start(form) }}
   <div class="modal-header">
     <h3 class="modal-title gs-h3">{{ info.alunno }} - Classe: {{ info.classe }}</h3>
-    <h4 class="modal-title gs-h4"><em>Giustificazione dell'assenza del giorno: {{ info.data }}</em></h4>
+    <h4 class="modal-title gs-h4"><em>Giustificazione {% if info.assenza.giorni == 1 %}dell'assenza del giorno: {{ info.assenza.data }}{% else %}del periodo di assenza: dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %}</em></h4>
   </div>
   <div class="modal-body">
     <div class="form-group gs-pl-4 gs-pr-4">
@@ -11,13 +11,58 @@
     <div class="form-group gs-pl-4 gs-pr-4">
       {{ form_widget(form.motivazione) }}
     </div>
+    <div class="form-group gs-pl-4 gs-pr-4">
+      <p class="text-center"><strong>AUTODICHIARAZIONE</strong></p>
+  {% if is_granted('ROLE_GENITORE') %}
+      <p><em>
+        {{ form_widget(form.genitoreSesso) }} {{ form_widget(form.genitoreNome) }}
+        <span id="gs-genitore-nascita">nato</span> il {{ form_widget(form.genitoreNascita) }}
+        a {{ form_widget(form.genitoreCitta) }},
+        {{ form_widget(form.genitoreRuolo) }} dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}
+        <strong>{{ alunno.cognome }} {{ alunno.nome }}</strong>
+        (codice fiscale {{ alunno.codiceFiscale }}) frequentante la classe {{ info.classe }}
+        presso l'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }},
+        in qualità di esercente la responsabilità genitoriale,
+        consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
+        dichiara che l'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}:
+      </em></p>
+      <ul>
+        <li><em>è stato assente {% if info.assenza.giorni == 1 %}il giorno {{ info.assenza.data }}{% else %}dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %};</em></li>
+        <li><em>non ha presentato sintomatologia respiratoria o febbre superiore a 37.5° C in data odierna e nei giorni di assenza indicati;</em></li>
+        <li><em>non è stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</em></li>
+        <li><em>non è stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</em></li>
+      </ul>
+  {% else %}
+      <p><em>
+        {{ alunno.sesso == 'M' ? 'Il sottoscritto' : 'La sottoscritta' }}
+        <strong>{{ alunno.cognome }} {{ alunno.nome }}</strong>
+        {{ alunno.sesso == 'M' ? 'nato' : 'nata' }} il {{ alunno.dataNascita|date('d/m/Y') }}
+        a {{ alunno.comuneNascita }} (codice fiscale {{ alunno.codiceFiscale }}),
+        frequentante la classe {{ info.classe }}
+        presso l'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }},
+        consapevole di tutte le conseguenze civili e penali previste in caso di dichiarazioni mendaci,
+        dichiara:
+      </em></p>
+      <ul>
+        <li><em>di essere stato assente {% if info.assenza.giorni == 1 %}il giorno {{ info.assenza.data }}{% else %}dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %};</em></li>
+        <li><em>di non aver presentato sintomatologia respiratoria o febbre superiore a 37.5° C in data odierna e nei giorni di assenza indicati;</em></li>
+        <li><em>di non essere stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</em></li>
+        <li><em>di non essere stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</em></li>
+      </ul>
+  {% endif %}
+      <p><em>La presente autodichiarazione viene rilasciata quale misura di prevenzione correlata con l’emergenza pandemica del COVID-19.</em></p>
+      <p><em>Cagliari, {{ date()|date('d/m/Y') }}.</em></p>
+      {{ form_widget(form.firma) }}
+    </div>
   </div>
   <div class="modal-footer">
     {{ form_widget(form.submit) }}
+  {% if info.assenza.giustificato %}
     {{ form_widget(form.delete) }}
+  {% endif %}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
-{{ form_end(form) }}
+{{ form_end(form, {'render_rest': false}) }}
 
 <script>
 $(document).ready(function() {
@@ -34,6 +79,19 @@ $(document).ready(function() {
     $('#giustifica_assenza_tipo').attr('required', false);
     $('#giustifica_assenza_motivazione').attr('required', false);
     return true;
+  });
+  $('#giustifica_assenza_genitoreSesso').change(function () {
+    if ($(this).val() == 'M') {
+      $('#gs-genitore-nascita').text('nato');
+      if ($('#giustifica_assenza_genitoreRuolo').val() == 'M') {
+        $('#giustifica_assenza_genitoreRuolo').val('P');
+      }
+    } else {
+      $('#gs-genitore-nascita').text('nata');
+      if ($('#giustifica_assenza_genitoreRuolo').val() == 'P') {
+        $('#giustifica_assenza_genitoreRuolo').val('M');
+      }
+    }
   });
 });
 </script>

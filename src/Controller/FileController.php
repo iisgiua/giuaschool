@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\Staff;
+use App\Entity\Alunno;
 use App\Entity\Preside;
 use App\Util\BachecaUtil;
 
@@ -314,6 +315,45 @@ class FileController extends AbstractController {
         break;
     }
     // invia il documento
+    return $this->file($file);
+  }
+
+  /**
+   * Esegue il download del certificato del tipo indicato.
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param string $tipo Tipo del certificato da scaricare [D=autodichiarazione]
+   * @param int $id ID dell'oggetto di riferimento
+   *
+   * @return Response Certificato inviato in risposta
+   *
+   * @Route("/file/certificato/{tipo}/{id}", name="file_certificato",
+   *    requirements={"tipo": "D", "id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function certificatoAction(EntityManagerInterface $em, $tipo, $id) {
+    // init
+    $fs = new Filesystem();
+    if ($tipo == 'D') {
+      $assenza = $em->getRepository('App:Assenza')->find($id);
+      if (!$assenza) {
+        // errore assenza non definita
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $percorso = $this->getParameter('dir_classi').'/'.
+        $assenza->getAlunno()->getClasse()->getAnno().$assenza->getAlunno()->getClasse()->getSezione().'/certificati/';
+      $nomefile = 'AUTODICHIARAZIONE-'.$assenza->getAlunno()->getId().'-'.$id.'.pdf';
+    }
+    // controllo esistenza certificato
+    if (!$fs->exists($percorso.$nomefile)) {
+      // errore certificato non esiste
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // file
+    $file = new File($percorso.$nomefile);
+    // invia il certificato
     return $this->file($file);
   }
 

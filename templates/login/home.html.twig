@@ -59,6 +59,9 @@
     {% if dati.circolari > 0 %}
       <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({'num': dati.circolari}) }}: <a href="{{ path('circolari_genitori') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}
+    {% if dati.giustificazioni > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_assenze_ingiustificate'|trans }}: <a href="{{ path('genitori_assenze', {'_fragment': 'gs-giustificazioni'}) }}">vai alla Situazione Assenze per giustificare</a></strong></div>
+    {% endif %}
     {% if dati.verifiche.oggi > 0 %}
       <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|trans({'num': dati.verifiche.oggi}) }}: <a href="{{ path('genitori_eventi') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
     {% endif %}

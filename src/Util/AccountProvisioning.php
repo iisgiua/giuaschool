@@ -434,7 +434,29 @@ class AccountProvisioning {
   }
 
 
-
+  public function test() {
+    $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      ->join('c.classe', 'cl')
+      ->join('c.docente', 'd')
+      ->join('c.materia', 'm')
+      ->where('c.attiva=:attiva AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
+      ->setParameters(['attiva' => 1, 'abilitato' => 1, 'sostegno' => 'S'])
+      ->getQuery()
+      ->getResult();
+    $ct = array();
+    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
+    foreach ($cattedre as $cat) {
+      if (!isset($ct[$cat->getClasse()->getId()][$cat->getDocente()->getId()])) {
+        $ct[$cat->getClasse()->getId()][$cat->getDocente()->getId()] = 1;
+        $errore = $this->aggiungeUtenteGruppoGsuite($cat->getDocente()->getEmail(),
+          'docenti'.strtolower($cat->getClasse()->getAnno().$cat->getClasse()->getSezione()).'@'.$dominio);
+        if ($errore) {
+          return $errore;
+        }
+      }
+    }
+    return null;
+  }
 
 
   //==================== METODI PRIVATI PER LA GESTIONE GSUITE ====================

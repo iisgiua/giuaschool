@@ -840,9 +840,9 @@ class AssenzeController extends AbstractController {
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_edit', FormType::class)
       ->add('convalida_assenze', ChoiceType::class, array('label' => 'label.convalida_assenze',
         'choices' => $giustifica['convalida_assenze'],
-        'choice_label' => function ($value, $key, $index) use ($settimana) {
-            return $settimana[$value->getData()->format('w')].' '.$value->getData()->format('d/m/Y').
-              '<br>Motivazione: <em>'.$value->getMotivazione().'</em>';
+        'choice_label' => function ($value, $key, $index) {
+            return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '').
+              '<br>Motivazione: <em>'.$value->motivazione.'</em>';
           },
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],
@@ -865,7 +865,7 @@ class AssenzeController extends AbstractController {
       ->add('assenze', ChoiceType::class, array('label' => 'label.assenze',
         'choices' => $giustifica['assenze'],
         'choice_label' => function ($value, $key, $index) use ($settimana) {
-            return $settimana[$value->getData()->format('w')].' '.$value->getData()->format('d/m/Y');
+            return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '');
           },
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],
@@ -893,18 +893,34 @@ class AssenzeController extends AbstractController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // gruppi di assenze
       foreach ($form->get('assenze')->getData() as $ass) {
-        $ass
-          ->setGiustificato($data_obj)
-          ->setDocenteGiustifica($this->getUser());
+        $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')
+          ->update()
+          ->set('ass.modificato', ':modificato')
+          ->set('ass.giustificato', ':giustificato')
+          ->set('ass.docenteGiustifica', ':docenteGiustifica')
+          ->where('ass.id in (:ids)')
+          ->setParameters(['modificato' => new \DateTime(), 'giustificato' => $data_obj,
+            'docenteGiustifica' => $this->getUser(), 'ids' => explode(',', $ass->ids)])
+          ->getQuery()
+          ->getResult();
       }
+      foreach ($form->get('convalida_assenze')->getData() as $ass) {
+        $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')
+          ->update()
+          ->set('ass.modificato', ':modificato')
+          ->set('ass.docenteGiustifica', ':docenteGiustifica')
+          ->where('ass.id in (:ids)')
+          ->setParameters(['modificato' => new \DateTime(), 'docenteGiustifica' => $this->getUser(),
+            'ids' => explode(',', $ass->ids)])
+          ->getQuery()
+          ->getResult();
+      }
+      // ritardi
       foreach ($form->get('ritardi')->getData() as $rit) {
         $rit
           ->setGiustificato($data_obj)
-          ->setDocenteGiustifica($this->getUser());
-      }
-      foreach ($form->get('convalida_assenze')->getData() as $ass) {
-        $ass
           ->setDocenteGiustifica($this->getUser());
       }
       foreach ($form->get('convalida_ritardi')->getData() as $rit) {
@@ -916,15 +932,13 @@ class AssenzeController extends AbstractController {
       // log azione
       if (count($form->get('assenze')->getData()) + count($form->get('ritardi')->getData()) > 0) {
         $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustifica', __METHOD__, array(
-          'Assenze' => implode(', ', array_map(function ($a) { return $a->getId(); }, $form->get('assenze')->getData())),
-          'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('ritardi')->getData())),
-          ));
+          'Assenze' => implode(', ', array_map(function ($a) { return $a->ids; }, $form->get('assenze')->getData())),
+          'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('ritardi')->getData()))));
       }
       if (count($form->get('convalida_assenze')->getData()) + count($form->get('convalida_ritardi')->getData()) > 0) {
         $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Convalida', __METHOD__, array(
-          'Assenze' => implode(', ', array_map(function ($a) { return $a->getId(); }, $form->get('convalida_assenze')->getData())),
-          'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('convalida_ritardi')->getData())),
-          ));
+          'Assenze' => implode(', ', array_map(function ($a) { return $a->ids; }, $form->get('convalida_assenze')->getData())),
+          'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('convalida_ritardi')->getData()))));
       }
       // redirezione
       return $this->redirectToRoute('lezioni_assenze_quadro');
@@ -937,6 +951,7 @@ class AssenzeController extends AbstractController {
       'label' => $label,
       'giustificazioni' => $giustifica['tot_giustificazioni'],
       'convalide' => $giustifica['tot_convalide'],
+      'alunno' => $alunno
     ));
   }
 

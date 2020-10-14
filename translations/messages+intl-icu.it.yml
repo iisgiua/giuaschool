@@ -399,6 +399,14 @@ label.email_password: Invia password
 label.email_password_genitore: Invia password genitore
 label.pdf_password: Scarica password
 label.pdf_password_genitore: Scarica password genitore
+label.sottoscrizione_dichiarazione_covid: Sottoscrivo la dichiarazione
+label.sottoscritto_M: Il sottoscritto
+label.sottoscritto_F: La sottoscritta
+label.cognome_nome: Cognome e Nome
+label.luogo_nascita: Luogo di nascita
+label.genitore_ruolo_P: padre
+label.genitore_ruolo_M: madre
+label.genitore_ruolo_T: tutore
 
 
 ##### PAGINE #####
@@ -982,6 +990,7 @@ message.classe_alunno_sezione: "Indica l'alunno, la nuova classe di destinazione
 message.note_classe_alunno_inserito: "Inserimento in data {date}"
 message.note_classe_alunno_trasferito: "Trasferimento/ritiro in data {date}"
 message.note_classe_alunno_sezione: "Cambio sezione in data {date}"
+message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
@@ -1188,3 +1197,6 @@ exception.provisioning_init_gsuite: Errore nell'inizializzazione del provisionin
 exception.provisioning_init_moodle: Errore nell'inizializzazione del provisioning MOODLE
 exception.provisioning_exec_gsuite: Errore nell'esecuzione del provisioning GSuite
 exception.provisioning_exec_moodle: Errore nell'esecuzione del provisioning MOODLE
+exception.no_firma_dichiarazione: "Errore: devi sottoscrivere la dichiarazione."
+exception.dichiarazione_incompleta: "Errore: devi compilare la dichiarazione e sottoscriverla."
+exception.data_invalida: "Errore: data non valida. Devi inserire una data nel formato gg/mm/aaaa."

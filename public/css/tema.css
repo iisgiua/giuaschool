@@ -1,4 +1,4 @@
-/***** CLASSI PERSONALIZZZATE *****/
+/***** CLASSI PERSONALIZZATE *****/
 
 .gs-page-container {
   height: 100%;
@@ -440,6 +440,11 @@
   background-color: #b8b8b8;
 }
 
+.gs-strong {
+  font-weight: bold !important;
+}
+
+
 /***** MODIFICHE A CLASSI ESISTENTI *****/
 
 html {
@@ -508,7 +513,7 @@ body {
   vertical-align: middle;
 }
 
-.form-group>label.required:after {
+.form-group label.required:after {
   content: "*";
   margin-left: 0.25rem;
   color: #0066cc;

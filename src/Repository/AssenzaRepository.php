@@ -37,4 +37,20 @@ class AssenzaRepository extends BaseRepository {
       ->execute();
   }
 
+  /**
+   * Restituisce il numero di assenze ingiustificate
+   *
+   * @param Alunno $alunno Alunno di cui si vogliono eliminare le assenze
+   */
+  public function assenzeIngiustificate(Alunno $alunno) {
+    // crea query base
+    $assenze = $this->createQueryBuilder('ass')
+      ->select('COUNT(ass.id)')
+      ->where('ass.alunno=:alunno AND ass.giustificato IS NULL')
+      ->setParameters(['alunno' => $alunno])
+      ->getQuery()
+      ->getSingleScalarResult();
+    return $assenze;
+  }
+
 }

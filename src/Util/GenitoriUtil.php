@@ -445,32 +445,16 @@ class GenitoriUtil {
     $periodi = $this->regUtil->infoPeriodi();
     $dati = array();
     $dati['lista'] = array();
-    // legge assenze
-    $assenze = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id')
-      ->join('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe])
-      ->getQuery()
-      ->getArrayResult();
-    // imposta array associativo per assenze
     $dati_periodo = array();
-    foreach ($assenze as $a) {
-      $data = $a['data']->format('Y-m-d');
-      $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-      $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
-      $dati_periodo[$numperiodo][$data]['assenza']['giustificato'] =
-        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
-      $dati_periodo[$numperiodo][$data]['assenza']['motivazione'] = $a['motivazione'];
-      $dati_periodo[$numperiodo][$data]['assenza']['id'] = $a['id'];
-      $dati_periodo[$numperiodo][$data]['assenza']['permesso'] = $this->azioneGiustifica($a['data'], $alunno);
-    }
+    // raggruppa assenze continuative
+    $dati_assenze = $this->raggruppaAssenze($alunno);
+    $dati_periodo = $dati_assenze['gruppi'];
     // legge ritardi
     $ritardi = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('e.data,e.ora,e.ritardoBreve,e.note,e.giustificato,e.valido,e.motivazione,(e.docenteGiustifica) AS docenteGiustifica,e.id')
       ->join('App:Entrata', 'e', 'WITH', 'a.id=e.alunno')
       ->where('a.id=:alunno AND a.classe=:classe')
+      ->orderBy('e.data', 'DESC')
       ->setParameters(['alunno' => $alunno, 'classe' => $classe])
       ->getQuery()
       ->getArrayResult();
@@ -506,6 +490,7 @@ class GenitoriUtil {
       ->select('u.data,u.ora,u.note,u.valido')
       ->join('App:Uscita', 'u', 'WITH', 'a.id=u.alunno')
       ->where('a.id=:alunno AND a.classe=:classe')
+      ->orderBy('u.data', 'DESC')
       ->setParameters(['alunno' => $alunno, 'classe' => $classe])
       ->getQuery()
       ->getArrayResult();
@@ -561,7 +546,7 @@ class GenitoriUtil {
     // statistiche
     $data = (new \DateTime())->format('Y-m-d');
     $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-    $dati['stat']['assenze'] = count($assenze);
+    $dati['stat']['assenze'] = $dati_assenze['num_assenze'];
     $dati['stat']['brevi'] = $num_brevi;
     $dati['stat']['ritardi'] = $num_ritardi;
     $dati['stat']['ritardi_validi'] = $num_ritardi_validi[$numperiodo];
@@ -1264,6 +1249,114 @@ class GenitoriUtil {
       }
     }
     // restituisce dati come array associativo
+    return $dati;
+  }
+
+  /**
+   * Raggruppa le assenze di un alunno
+   *
+   * @param Alunno $alunno Alunno di cui leggere le assenze
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function raggruppaAssenze(Alunno $alunno) {
+    // init
+    $gruppi = array();
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    $periodi = $this->regUtil->infoPeriodi();
+    $tot_assenze = 0;
+    // legge assenze
+    $assenze = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
+      ->join('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
+      ->where('a.id=:alunno AND a.classe=:classe')
+      ->orderBy('ass.data', 'DESC')
+      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse()])
+      ->getQuery()
+      ->getArrayResult();
+    // imposta array associativo per assenze
+    foreach ($assenze as $a) {
+      $data = $a['data']->format('Y-m-d');
+      $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
+      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))].' '.substr($data, 0, 4);
+      $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
+      $dati_periodo[$numperiodo][$data]['assenza']['data_fine'] = $data_str;
+      $dati_periodo[$numperiodo][$data]['assenza']['giorni'] = 1;
+      $dati_periodo[$numperiodo][$data]['assenza']['giustificato'] =
+        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
+      $dati_periodo[$numperiodo][$data]['assenza']['motivazione'] = $a['motivazione'];
+      $dati_periodo[$numperiodo][$data]['assenza']['dichiarazione'] =
+        empty($a['dichiarazione']) ? array() : $a['dichiarazione'];
+      $dati_periodo[$numperiodo][$data]['assenza']['certificati'] = 
+        empty($a['certificati']) ? array() : $a['certificati'];
+      $dati_periodo[$numperiodo][$data]['assenza']['id'] = $a['id'];
+      $dati_periodo[$numperiodo][$data]['assenza']['permesso'] = $this->azioneGiustifica($a['data'], $alunno);
+    }
+    // separa periodi
+    foreach ($dati_periodo as $per=>$ass) {
+      // raggruppa
+      $prec = new \DateTime('2000-01-01');
+      $inizio = null;
+      $inizio_data = null;
+      $fine = null;
+      $fine_data = null;
+      $giustificato = 'D';
+      $dichiarazione = array();
+      $certificati = array();
+      $ids = '';
+      foreach ($ass as $data=>$a) {
+        $dataObj = new \DateTime($data);
+        if ($dataObj != $prec) {
+          // nuovo gruppo
+          if ($fine) {
+            // termina gruppo precedente
+            $data_str = $inizio_data->format('Y-m-d');
+            $gruppi[$per][$data_str] = $inizio;
+            $gruppi[$per][$data_str]['assenza']['data'] = $fine['assenza']['data'];
+            $gruppi[$per][$data_str]['assenza']['data_fine'] = $inizio['assenza']['data'];
+            $gruppi[$per][$data_str]['assenza']['giorni'] = 1 + $inizio_data->diff($fine_data)->format('%d');
+            $gruppi[$per][$data_str]['assenza']['giustificato'] = $giustificato;
+            $gruppi[$per][$data_str]['assenza']['dichiarazione'] = $dichiarazione;
+            $gruppi[$per][$data_str]['assenza']['certificati'] = $certificati;
+            $gruppi[$per][$data_str]['assenza']['ids'] = substr($ids, 1);
+            $tot_assenze += $gruppi[$per][$data_str]['assenza']['giorni'];
+          }
+          // inizia nuovo gruppo
+          $inizio = $a;
+          $inizio_data = $dataObj;
+          $giustificato = 'D';
+          $dichiarazione = array();
+          $certificati = array();
+          $ids = '';
+        }
+        // aggiorna dati
+        $fine = $a;
+        $fine_data = $dataObj;
+        $giustificato = (!$giustificato || !$a['assenza']['giustificato']) ? null :
+          (($giustificato == 'G' || $a['assenza']['giustificato'] == 'G') ? 'G' : 'D');
+        $dichiarazione = array_merge($dichiarazione, $a['assenza']['dichiarazione']);
+        $certificati = array_merge($certificati, $a['assenza']['certificati']);
+        $ids .= ','.$a['assenza']['id'];
+        $prec = $this->em->getRepository('App:Festivita')->giornoPrecedente($dataObj, null, $alunno->getClasse());
+      }
+      if ($fine) {
+        // termina gruppo precedente
+        $data_str = $inizio_data->format('Y-m-d');
+        $gruppi[$per][$data_str] = $inizio;
+        $gruppi[$per][$data_str]['assenza']['data'] = $fine['assenza']['data'];
+        $gruppi[$per][$data_str]['assenza']['data_fine'] = $inizio['assenza']['data'];
+        $gruppi[$per][$data_str]['assenza']['giorni'] = 1 + $inizio_data->diff($fine_data)->format('%d');
+        $gruppi[$per][$data_str]['assenza']['giustificato'] = $giustificato;
+        $gruppi[$per][$data_str]['assenza']['dichiarazione'] = $dichiarazione;
+        $gruppi[$per][$data_str]['assenza']['certificati'] = $certificati;
+        $gruppi[$per][$data_str]['assenza']['ids'] = substr($ids, 1);
+        $tot_assenze += $gruppi[$per][$data_str]['assenza']['giorni'];
+      }
+    }
+    // restituisce dati come array associativo
+    $dati = array();
+    $dati['gruppi'] = $gruppi;
+    $dati['num_assenze'] = $tot_assenze;
     return $dati;
   }
 

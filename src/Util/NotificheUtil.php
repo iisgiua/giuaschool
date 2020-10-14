@@ -109,6 +109,8 @@ class NotificheUtil {
         $dati['verifiche'] = $this->numeroVerificheGenitori($alunno);
         // legge compiti
         $dati['compiti'] = $this->numeroCompitiGenitori($alunno);
+        // legge assenze da giustificare
+        $dati['giustificazioni'] = $this->em->getRepository('App:Assenza')->assenzeIngiustificate($alunno);
       }
     } elseif ($utente instanceof Alunno) {
       // legge avvisi
@@ -119,6 +121,8 @@ class NotificheUtil {
       $dati['verifiche'] = $this->numeroVerificheGenitori($utente);
       // legge compiti
       $dati['compiti'] = $this->numeroCompitiGenitori($utente);
+      // legge assenze da giustificare
+      $dati['giustificazioni'] = $this->em->getRepository('App:Assenza')->assenzeIngiustificate($utente);
     } elseif ($utente instanceof Docente) {
       // notifiche per i docenti
       $richieste = $this->em->getRepository('App:RichiestaColloquio')->colloquiDocente($utente, ['R']);

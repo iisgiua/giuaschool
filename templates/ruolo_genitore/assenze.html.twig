@@ -8,35 +8,25 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-    {% for message in app.flashes('error') %}
-  <div class="alert alert-danger">{{ message }}</div>
-    {% endfor %}
+    {% include 'include/modal-error.html.twig' %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>Situazione globale</strong></caption>
     <tbody>
       <tr>
-        <th class="gs-big">Giorni di assenza</th>
+        <th class="gs-big">Numero di giorni di assenza</th>
         <td><span class="label label-default gs-big">{{ dati.stat.assenze }}</span></td>
       </tr>
       <tr>
-        <th class="gs-big">Numero di ritardi brevi (entro 10 minuti)</th>
+        <th>Numero di ritardi brevi (entro {{ app.session.get('CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
         <td><span class="label label-default gs-big">{{ dati.stat.brevi }}</span></td>
       </tr>
       <tr>
-        <th class="gs-big">Numero di ritardi (oltre 10 minuti)</th>
-        <td><span class="label label-default gs-big">{{ dati.stat.ritardi }}</span></td>
-      </tr>
-      <tr>
-        <th class="gs-big "><span class="glyphicon glyphicon-hand-right gs-mr-3" aria-hidden="true"></span><em>considerati per conteggio del numero massimo di ritardi</em></th>
-        <td><span class="label label-{{ dati.stat.ritardi_validi > 0 ? 'warning' : 'default' }} gs-big">{{ dati.stat.ritardi_validi }}</span></td>
+        <th class="gs-big">Numero di ritardi (oltre {{ app.session.get('CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
+        <td><span class="label label-default gs-big">{{ dati.stat.ritardi }}</span> <strong>di cui <span class="label label-{{ dati.stat.ritardi_validi > 0 ? 'warning' : 'default' }}">{{ dati.stat.ritardi_validi }}</span> considerati per il conteggio del numero massimo ammesso</strong></td>
       </tr>
       <tr>
         <th class="gs-big">Numero di uscite anticipate</th>
-        <td><span class="label label-default gs-big">{{ dati.stat.uscite }}</span></td>
-      </tr>
-      <tr>
-        <th class="gs-big "><span class="glyphicon glyphicon-hand-right gs-mr-3" aria-hidden="true"></span><em>considerate per il conteggio del numero massimo di uscite</em></th>
-        <td><span class="label label-{{ dati.stat.uscite_valide > 0 ? 'warning' : 'default' }} gs-big">{{ dati.stat.uscite_valide }}</span></td>
+        <td><span class="label label-default gs-big">{{ dati.stat.uscite }}</span> <strong>di cui <span class="label label-{{ dati.stat.uscite_valide > 0 ? 'warning' : 'default' }}">{{ dati.stat.uscite_valide }}</span> considerate per il conteggio del numero massimo ammesso</strong></td>
       </tr>
       <tr>
         <th class="gs-big">Totale ore di assenza</th>
@@ -44,6 +34,7 @@
       </tr>
     </tbody>
   </table>
+  <div id="gs-giustificazioni"></div>
     {% for periodo,v in dati.lista %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
@@ -60,8 +51,8 @@
         {% for tipo,e in v1 %}
       <tr>
           {% if tipo == 'assenza' %}
-        <td><strong>{{ e.data }}</strong></td>
-        <td><strong>Assenza</strong></td>
+        <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
+        <td><strong>Assenza{% if e.giorni > 1 %} di {{ e.giorni }} giorni{% endif %}</strong></td>
         <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
@@ -127,9 +118,21 @@ $(document).ready(function() {
     e.preventDefault();
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
   });
+  // init
   {% if posizione > 0 %}
   $('html').scrollTop({{ posizione }});
   {% endif %}
+  // init
+  {% for messaggio in app.flashes('errore') %}
+    {% if loop.first %}
+  var m = '';
+    {% endif %}
+  m = m + "{{ messaggio|raw }}<br>";
+    {% if loop.last %}
+  $('#gs-modal-error-text').html(m);
+  $('#gs-modal-error').modal('show');
+    {% endif %}
+  {% endfor %}
 });
 </script>
 {% endblock %}

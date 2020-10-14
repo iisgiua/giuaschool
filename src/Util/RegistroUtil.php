@@ -979,14 +979,95 @@ class RegistroUtil {
    * @return array Dati restituiti come array associativo
    */
   public function assenzeRitardiDaGiustificare(\DateTime $data, Alunno $alunno, Classe $classe) {
-    // assenze da giustificare
-    $assenze = $this->em->getRepository('App:Assenza')->createQueryBuilder('ass')
-      ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NULL')
+    $dati['convalida_assenze'] = array();
+    $dati['assenze'] = array();
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    $periodi = $this->infoPeriodi();
+    // legge assenze
+    $assenze = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
+      ->join('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
+      ->where('a.id=:alunno AND a.classe=:classe AND ass.data<:data')
       ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'data' => $data->format('Y-m-d')])
       ->getQuery()
-      ->getResult();
-    $dati['assenze'] = $assenze;
+      ->getArrayResult();
+    // imposta array associativo per assenze
+    foreach ($assenze as $a) {
+      $data_assenza = $a['data']->format('Y-m-d');
+      $numperiodo = ($data_assenza <= $periodi[1]['fine'] ? 1 : ($data_assenza <= $periodi[2]['fine'] ? 2 : 3));
+      $data_str = intval(substr($data_assenza, 8)).' '.$mesi[intval(substr($data_assenza, 5, 2))].' '.substr($data_assenza, 0, 4);
+      $dati_periodo[$numperiodo][$data_assenza]['data'] = $data_str;
+      $dati_periodo[$numperiodo][$data_assenza]['data_fine'] = $data_str;
+      $dati_periodo[$numperiodo][$data_assenza]['giorni'] = 1;
+      $dati_periodo[$numperiodo][$data_assenza]['giustificato'] =
+        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
+      $dati_periodo[$numperiodo][$data_assenza]['motivazione'] = $a['motivazione'];
+      $dati_periodo[$numperiodo][$data_assenza]['dichiarazione'] =
+        empty($a['dichiarazione']) ? array() : $a['dichiarazione'];
+      $dati_periodo[$numperiodo][$data_assenza]['certificati'] =
+        empty($a['certificati']) ? array() : $a['certificati'];
+      $dati_periodo[$numperiodo][$data_assenza]['id'] = $a['id'];
+    }
+    // separa periodi
+    foreach ($dati_periodo as $per=>$ass) {
+      // raggruppa
+      $prec = new \DateTime('2000-01-01');
+      $inizio = null;
+      $inizio_data = null;
+      $fine = null;
+      $fine_data = null;
+      $giustificato = 'D';
+      $dichiarazione = array();
+      $certificati = array();
+      $ids = '';
+      foreach ($ass as $data_assenza=>$a) {
+        $dataObj = new \DateTime($data_assenza);
+        if ($dataObj != $prec) {
+          // nuovo gruppo
+          if ($fine && $giustificato != 'D') {
+            // termina gruppo precedente
+            $data_str = $inizio_data->format('Y-m-d');
+            $gruppo = $inizio;
+            $gruppo['data'] = $fine['data'];
+            $gruppo['data_fine'] = $inizio['data'];
+            $gruppo['giorni'] = 1 + $inizio_data->diff($fine_data)->format('%d');
+            $gruppo['dichiarazione'] = $dichiarazione;
+            $gruppo['certificati'] = $certificati;
+            $gruppo['ids'] = substr($ids, 1);
+            $dati[$giustificato == 'G' ? 'convalida_assenze' : 'assenze'][$data_str] = (object) $gruppo;
+          }
+          // inizia nuovo gruppo
+          $inizio = $a;
+          $inizio_data = $dataObj;
+          $giustificato = 'D';
+          $dichiarazione = array();
+          $certificati = array();
+          $ids = '';
+        }
+        // aggiorna dati
+        $fine = $a;
+        $fine_data = $dataObj;
+        $giustificato = (!$giustificato || !$a['giustificato']) ? null :
+          (($giustificato == 'G' || $a['giustificato'] == 'G') ? 'G' : 'D');
+        $dichiarazione = array_merge($dichiarazione, $a['dichiarazione']);
+        $certificati = array_merge($certificati, $a['certificati']);
+        $ids .= ','.$a['id'];
+        $prec = $this->em->getRepository('App:Festivita')->giornoPrecedente($dataObj, null, $alunno->getClasse());
+      }
+      if ($fine && $giustificato != 'D') {
+        // termina gruppo precedente
+        $data_str = $inizio_data->format('Y-m-d');
+        $gruppo = $inizio;
+        $gruppo['data'] = $fine['data'];
+        $gruppo['data_fine'] = $inizio['data'];
+        $gruppo['giorni'] = 1 + $inizio_data->diff($fine_data)->format('%d');
+        $gruppo['dichiarazione'] = $dichiarazione;
+        $gruppo['certificati'] = $certificati;
+        $gruppo['ids'] = substr($ids, 1);
+        $dati[$giustificato == 'G' ? 'convalida_assenze' : 'assenze'][$data_str] = (object) $gruppo;
+      }
+    }
     // ritardi da giustificare
     $ritardi = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
@@ -995,14 +1076,6 @@ class RegistroUtil {
       ->getQuery()
       ->getResult();
     $dati['ritardi'] = $ritardi;
-    // assenze da convalidare
-    $convalida_assenze = $this->em->getRepository('App:Assenza')->createQueryBuilder('ass')
-      ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NOT NULL AND ass.docenteGiustifica IS NULL')
-      ->orderBy('ass.data', 'DESC')
-      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_assenze'] = $convalida_assenze;
     // ritardi da convalidare
     $convalida_ritardi = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
@@ -1013,7 +1086,7 @@ class RegistroUtil {
     $dati['convalida_ritardi'] = $convalida_ritardi;
     // numero totale di giustificazioni
     $dati['tot_giustificazioni'] = count($assenze) + count($ritardi);
-    $dati['tot_convalide'] = count($convalida_assenze) + count($convalida_ritardi);
+    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']);
     // restituisce dati
     return $dati;
   }
