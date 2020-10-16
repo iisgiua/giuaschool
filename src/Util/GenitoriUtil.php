@@ -1262,6 +1262,7 @@ class GenitoriUtil {
   public function raggruppaAssenze(Alunno $alunno) {
     // init
     $gruppi = array();
+    $dati_periodo = array();
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->regUtil->infoPeriodi();
     $tot_assenze = 0;
@@ -1287,7 +1288,7 @@ class GenitoriUtil {
       $dati_periodo[$numperiodo][$data]['assenza']['motivazione'] = $a['motivazione'];
       $dati_periodo[$numperiodo][$data]['assenza']['dichiarazione'] =
         empty($a['dichiarazione']) ? array() : $a['dichiarazione'];
-      $dati_periodo[$numperiodo][$data]['assenza']['certificati'] = 
+      $dati_periodo[$numperiodo][$data]['assenza']['certificati'] =
         empty($a['certificati']) ? array() : $a['certificati'];
       $dati_periodo[$numperiodo][$data]['assenza']['id'] = $a['id'];
       $dati_periodo[$numperiodo][$data]['assenza']['permesso'] = $this->azioneGiustifica($a['data'], $alunno);
