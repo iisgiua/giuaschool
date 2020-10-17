@@ -51,3 +51,7 @@
 /src/DataFixtures/AppLocalFixtures.php
 /templates/argo/
 ###< trinko/giuaschool ###
+
+###> symfony/web-server-bundle ###
+/.web-server-pid
+###< symfony/web-server-bundle ###
