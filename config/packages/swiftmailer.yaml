@@ -1,6 +1,0 @@
-# config/packages/swiftmailer.yaml
-
-swiftmailer:
-  url: '%env(resolve:MAILER_URL)%'
-  spool:
-    type: 'memory'
