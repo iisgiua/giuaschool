@@ -66,6 +66,7 @@ computer, seguendo i passi descritti di seguito.
 
 ### 1. Installazione del web server e del database server
 
+#### 1.1 Su Windows
 Scaricare [XAMPP](https://www.apachefriends.org/it/download.html), facendo
 attenzione a scegliere la versione per il proprio sistema operativo che
 includa il **PHP 7.x**.
@@ -81,18 +82,49 @@ sezione delle FAQ presente sul loro sito.
 Al termine dell'installazione avviare il server database **MySQL/MariaDB** usando il *Control Panel* di
 XAMPP.
 
+#### 1.2 Su Linux
+Esistono molte guide sull'installazione di server LAMP (Apache, Mysql e Php su Linux).
+In seguito è presente una breve guida riguardante l'installazione su Ubuntu (qualsiasi versione dalla 16.04).
+Aprire una finestra di terminale ed eseguire il seguente comando.
+```bash
+sudo apt-get install apache2 mysql-server curl php7.3 php7.3-mysql php7.3-initl -y
+```
+A questo punto, dovrebbe partire l'installazione dei software necessari.
+Verranno effettuate alcune domande, tra cui la password da utilizzare per MySql: scegliere una password e scriverla in un posto sicuro.
+Alla fine dell'esecuzione del comando precedentemente indicato, verificare la corretta esecuzione del server web aprendo un broser e andando su `http://localhost/` oppure, utilizzando il terminale, scrivere il comando
+```bash
+curl --silent http://localhost -o /dev/null -w "%{http_code}"
+```
+Se viene visualizzata una pagina web (dal browser) o se viene visualizzato il numero 200 (da terminale), la prima parte dell'installazione è avvenuta con successo.
+Aprire nuovamente il terminale per inserire gli ultimi comandi necessari all'installazione del server web.
+```bash
+printf "<IfModule mod_dir.c>\nDirectoryIndex index.php index.html index.htm index.cgi index.pl\n</IfModule>" | sudo tee /etc/apache2/mods-enabled/dir.conf
+sudo systemctl restart apache2
+sudo rm /var/www/html/index.*
+echo "<?php echo('fun'); echo('ziona'); ?>" | sudo tee /var/www/html/index.php
+curl --silent http://localhost
+sudo rm /var/www/html/index.php
+```
+Se viene visualizzata la scritta "funziona" nel terminale, significa che il web server è stato installato con successo
 
 ### 2. Installazione di giua@school
 
-Scaricare sul proprio computer l'ultima versione disponibile di *giua@school*,
-quindi estrarre i file nella cartella usata da XAMPP per contenere i siti web.
+Scaricare sul proprio computer l'ultima versione disponibile di *giua@school* dal sito https://github.com/trinko/giuaschool/releases/latest,
+quindi estrarre i file nella cartella usata dal server web.
 Normalmente il percorso di questa cartella è simile a quanto segue:
 ```
 ### SISTEMI WINDOWS
-<percorso_installazione_xampp>\xampp\htdocs
+C:\xampp\htdocs
 
 ### SISTEMI LINUX
-<percorso_installazione_xampp>/lampp/htdocs
+/var/www/html
+```
+
+**ATTENZIONE UTENTI LINUX:** Dopo aver copiato/scaricato i files nella cartella /var/www/html è necessario aprire il terminale e scrivere
+```bash
+sudo find /var/www/ -type d -exec chmod 755 {} \;
+sudo find /var/www/ -type f -exec chmod 644 {} \;
+sudo chown -R www-data:www-data /var/www/
 ```
 
 Aprire una finestra di terminale (o *Prompt dei comandi* per
@@ -105,7 +137,7 @@ dell'applicazione, sarà il seguente:
 cd <percorso_installazione_xampp>\xampp\htdocs\giuaschool
 
 ### SISTEMI LINUX
-cd <percorso_installazione_xampp>/lampp/htdocs/giuaschool
+cd /var/www/html/giuaschool
 ```
 
 Sempre dalla finestra di terminale, eseguire il seguente comando per verificare che i requisiti di sistema siano
@@ -115,7 +147,7 @@ corretti:
 <percorso_installazione_xampp>\xampp\php\php bin\symfony_requirements
 
 ### SISTEMI LINUX
-<percorso_installazione_xampp>/lampp/bin/php bin/symfony_requirements
+php bin/symfony_requirements
 ```
 Nel caso siano mostrati degli errori, sarà necessario
 installare i componenti mancanti prima di continuare.
@@ -130,21 +162,15 @@ Quindi cercare la riga seguente, rimuovere il punto e virgola iniziale (caratter
 ;extension=php_intl.dll
 ```
 
-Se invece si usa Linux e risulta non installata l'estensione **intl**, dovrebbe
-essere sufficiente eseguire il seguente comando dalla finestra di terminale:
-```
-sudo apt-get install php-intl
-```
-
 **ATTENZIONE:** se anziché una nuova installazione di XAMPP si è scelto di utilizzare
 un'installazione pre-esistente di MySQL/MariaDB, sarà necessario
 modificare i parametri di connessione al database, che si trovano nel file:
 ```
 ### SISTEMI WINDOWS
-<percorso_installazione_giua-school>\app\config\parameters.yml
+<percorso_installazione_giua-school>\.env
 
 ### SISTEMI LINUX
-<percorso_installazione_giua-school>/app/config/parameters.yml
+<percorso_installazione_giua-school>/.env
 ```
 
 
@@ -158,8 +184,8 @@ finestra di terminale:
 <percorso_installazione_xampp>\xampp\php\php bin\console doctrine:schema:create
 
 ### SISTEMI LINUX
-<percorso_installazione_xampp>/lampp/bin/php bin/console doctrine:database:create
-<percorso_installazione_xampp>/lampp/bin/php bin/console doctrine:schema:create
+php bin/console doctrine:database:create
+php bin/console doctrine:schema:create
 ```
 
 A questo punto, inserire i dati iniziali del sistema, eseguendo il seguente comando
@@ -169,27 +195,55 @@ dalla finestra di terminale:
 <percorso_installazione_xampp>\xampp\php\php bin\console doctrine:fixtures:load
 
 ### SISTEMI LINUX
-<percorso_installazione_xampp>/lampp/bin/php bin/console doctrine:fixtures:load
+php bin/console doctrine:fixtures:load
 ```
 
 
 ### 4. Utilizzo dell'applicazione giua@school
 
-Per provare l'applicazione è conveniente usare il server di sviluppo di Symfony al posto di *Apache*.
-
+### 4.1 Avviare il database server
+### SISTEMI WINDOWS
 Per prima cosa, tramite il *Control Panel* di XAMPP, assicurarsi che sia attivo il database server *MySQL/MariaDB*.
 
-Dalla finestra di terminale, quindi, inserire il seguente comando:
+### SISTEMI LINUX
+Il database server dovrebbe essersi avviato automaticamente durante l'installazione. Per verificarne il funzionamento, aprire il terminale e scrivere (se si usa Ubuntu):
+```bash
+sudo service mysql status
+```
+
+### 4.2 Avviare il server Web di prova
+
+Per provare l'applicazione è conveniente usare il server di sviluppo di Symfony al posto di *Apache*.
+
+**ATTENZIONE:** il server di sviluppo **NON** deve essere usato normalmente per eseguire il registro sul server scolastico, dato che può contenere bug e vulnerabilità e che le performance sono ridotte. Una volta provato il funzionamento di giua@school è consigliabile l'utilizzo di Webserver veri e propri, come Apache o Nginx. Per ulteriori informazioni, leggi il paragrafo *4.3*.
+
+Dalla finestra di terminale, inserire i seguente comandi:
 ```
 ### SISTEMI WINDOWS
+cd <percorso_installazione_xampp>\xampp\htdocs\giuaschool
 <percorso_installazione_xampp>\xampp\php\php bin\console server:run
 
 ### SISTEMI LINUX
-<percorso_installazione_xampp>/lampp/bin/php bin/console server:run
+cd /var/www/html/giuaschool
+php bin/console server:run
 ```
 
-Una volta eseguito il comando, non chiudere la finestra di terminale e aprire il browser,
-andando all'indirizzo: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Una volta eseguito il comando, senza chiudere la finestra di terminale, aprire il browser, 
+andando all'indirizzo: [http://127.0.0.1:8000](http://127.0.0.1:8000)  
+Chiudendo la finestra di terminale, verrà disattivato il server di prova.  
+
+### 4.3 Avviare il server Web
+Per eseguire giua@school in sicurezza e con ottime performance, è necessario utilizzare un Webserver come Apache o Nginx.  
+Attualmente è consigliato l'uso di **Apache**, dato che non richiede configurazione ed è gia stato installato nello step 3. Per avviare Apache, seguire i seguenti passaggi:
+- SISTEMI WINDOWS
+  1. Aprire nuovamente *Control Panel* di XAMPP (usato precedentemente per avviare il server database)
+  2. Premere su *start* nella riga di *Apache*
+- SISTEMI LINUX
+  1. Apache dovrebbe essersi avviato automaticamente durante l'installazione.
+
+Per aumentare le preformance e rimuovere le opzioni di debug e sviluppo, aprire il file ```.env``` e modificare l'opzione ```APP_ENV=dev``` (seconda linea) in ```APP_ENV=prod```.  
+Una volta avviato il web server, aprire il browser, 
+andando all'indirizzo: [http://127.0.0.1](http://127.0.0.1)
 
 Per poter provare l'applicazione, sono stati configurati alcuni utenti:
   - **admin**: amministratore di sistema
@@ -198,9 +252,18 @@ Per poter provare l'applicazione, sono stati configurati alcuni utenti:
 La password è uguale per tutti gli utenti ed è la seguente:
   - **12345678**
 
-Per terminare l'applicazione: chiudere la finestra di terminale, quindi disattivare il
-database server *MySQL/MariaDB* usando il *Control Panel* di XAMPP.
+Per terminare l'applicazione:
+### SISTEMI WINDOWS
+Riaprire il *Control Panel* di XAMPP, e premere *stop* nelle righe di *MySQL/MariaDB* e di *Apache*.
 
+### SISTEMI LINUX
+Aprire il terminale e scrivere:
+```bash
+sudo systemctl stop apache
+sudo systemctl disable apache
+sudo systemctl stop mysql
+sudo systemctl disable mysql
+```
 
 ## CREDITS
 
