@@ -1,0 +1,55 @@
+# config/packages/doctrine.yaml
+
+parameters:
+  database_version: '%env(DATABASE_VERSION)%'
+  database_host: '%env(DATABASE_HOST)%'
+  database_port: '%env(DATABASE_PORT)%'
+  database_user: '%env(DATABASE_USER)%'
+  database_password: '%env(DATABASE_PASSWORD)%'
+  database_name: '%env(DATABASE_NAME)%'
+
+doctrine:
+  dbal:
+    server_version: '%database_version%'
+    host: '%database_host%'
+    port: '%database_port%'
+    user: '%database_user%'
+    password: '%database_password%'
+    dbname: '%database_name%'
+    driver: 'pdo_mysql'
+    charset: 'utf8'
+    default_table_options:
+      charset: 'utf8'
+      collate: 'utf8_unicode_ci'
+      engine: 'InnoDB'
+  orm:
+    auto_generate_proxy_classes: '%kernel.debug%'
+    default_entity_manager: default
+    metadata_cache_driver:
+      type: pool
+      pool: doctrine.system_cache_pool
+    query_cache_driver:
+      type: pool
+      pool: doctrine.system_cache_pool
+    result_cache_driver:
+      type: pool
+      pool: doctrine.result_cache_pool
+    naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+    auto_mapping: true
+    mappings:
+      App:
+        is_bundle: false
+        type: 'annotation'
+        dir: '%kernel.project_dir%/src/Entity'
+        prefix: 'App\Entity'
+        alias: 'App'
+    dql:
+      numeric_functions:
+        day: App\DQL\DayFunction
+        month: App\DQL\MonthFunction
+        year: App\DQL\YearFunction
+        weekday: App\DQL\WeekdayFunction
+      string_functions:
+        date_format: App\DQL\DateFormatFunction
+        replace: App\DQL\ReplaceFunction
+        instr: App\DQL\InstrFunction
