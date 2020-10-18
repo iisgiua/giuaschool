@@ -270,6 +270,8 @@ class RegistroUtil {
    */
   public function lezioneOreConsecutive(\DateTime $data, $ora, Docente $docente, Classe $classe, Materia $materia) {
     $dati = array();
+    $ora_str = array('1' => 'Prima', '2' => 'Seconda', '3' => 'Terza', '4' => 'Quarta', '5' => 'Quinta', '6' => 'Sesta',
+      '7' => 'Settima', '8' => 'Ottava', '9' => 'Nona', '10' => 'Decima');
     // legge ora di inzio
     $scansione_orario = $this->em->getRepository('App:ScansioneOraria')->createQueryBuilder('s')
       ->join('s.orario', 'o')
@@ -284,9 +286,7 @@ class RegistroUtil {
       if ($k == 0) {
         // ora iniziale
         $dati['inizio'] = $s->getInizio()->format('H:i');
-        $durata = $s->getDurata() / 60.0;
-        $durata_str = ($durata < 1 ? 'mezz\'ora' : '1 ora');
-        $key = $s->getFine()->format('H:i')." ($durata_str)";
+        $key = $s->getFine()->format('H:i').' ('.$ora_str[$s->getOra()].' ora)';
         $dati['fine'][$key] = $s->getOra();
       } else {
         // ore successive
@@ -296,9 +296,7 @@ class RegistroUtil {
           // operazione non ammessa: esce
           break;
         }
-        $durata += $s->getDurata() / 60.0;
-        $durata_str = intval($durata).($durata >= 2 ? ' ore' : ' ora').($durata > intval($durata) ? ' e mezza' : '');
-        $key = $s->getFine()->format('H:i')." ($durata_str)";
+        $key = $s->getFine()->format('H:i').' ('.$ora_str[$s->getOra()].' ora)';
         $dati['fine'][$key] = $s->getOra();
       }
     }

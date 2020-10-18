@@ -935,10 +935,16 @@ class StaffUtil {
     $pwdchars2 = $pwdchars1.($simboli ? '.:-+%&' : '');
     // crea password
     $lun = $lunghezza / 2;
-    $password = substr(str_shuffle($pwdchars1), 0, $lun).substr(str_shuffle($pwdchars2), 0, $lun);
+    while (true) {
+      $password = substr(str_shuffle($pwdchars1), 0, $lun).substr(str_shuffle($pwdchars2), 0, $lun);
+      if (preg_match('/[A-Z]/', $password) && preg_match('/[a-z]/', $password) &&
+          preg_match('/[0-9]/', $password)) {
+        // controllo password ok
+        break;
+      }
+    }
     // restituisce la password
     return $password;
   }
-
 
 }

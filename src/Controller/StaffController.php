@@ -744,6 +744,33 @@ class StaffController extends AbstractController {
       $avviso_old = clone $avviso;
       $avviso_sedi_old = $avviso->getSedi()->toArray();
     } else {
+      // legge ora predefinita
+      if ($tipo == 'E') {
+        // inizio seconda ora di lunedì su orario di dopodomani (per eventuale salto da sabato a lunedì)
+        $ora_predefinita = $em->getRepository('App:ScansioneOraria')->createQueryBuilder('so')
+          ->select('so.inizio')
+          ->join('so.orario', 'o')
+          ->join('o.sede', 's')
+          ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno AND so.ora=:ora')
+          ->orderBy('s.ordinamento', 'ASC')
+          ->setParameters(['data' => new \DateTime('tomorrow + 1day'), 'giorno' => 1, 'ora' => 2])
+          ->setMaxResults(1)
+          ->getQuery()
+          ->getSingleScalarResult();
+      } else {
+        // inizio ultima ora di lunedì su orario di dopodomani (per eventuale salto da sabato a lunedì)
+        $ora_predefinita = $em->getRepository('App:ScansioneOraria')->createQueryBuilder('so')
+          ->select('so.inizio')
+          ->join('so.orario', 'o')
+          ->join('o.sede', 's')
+          ->where(':data BETWEEN o.inizio AND o.fine AND so.giorno=:giorno ')
+          ->orderBy('s.ordinamento', 'ASC')
+          ->addOrderBy('so.ora', 'DESC')
+          ->setParameters(['data' => new \DateTime('tomorrow + 1day'), 'giorno' => 1])
+          ->setMaxResults(1)
+          ->getQuery()
+          ->getSingleScalarResult();
+      }
       // azione add
       $avviso = (new Avviso())
         ->setTipo($tipo)
@@ -751,7 +778,7 @@ class StaffController extends AbstractController {
         ->setDestinatari(['D','G','A'])
         ->setFiltroTipo('C')
         ->setData(new \DateTime('tomorrow'))
-        ->setOra(\DateTime::createFromFormat('H:i', ($tipo == 'E' ? '09:20' : '12:50')))
+        ->setOra(\DateTime::createFromFormat('H:i:00', $ora_predefinita))
         ->setOggetto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_oggetto' :
           'message.avviso_uscita_oggetto'))
         ->setTesto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_testo' :
