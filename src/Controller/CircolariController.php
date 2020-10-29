@@ -767,7 +767,7 @@ class CircolariController extends AbstractController {
   public function genitoriAction(Request $request, EntityManagerInterface $em,
                                  SessionInterface $session, $pagina) {
     // inizializza
-    $limite = 15;
+    $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // crea lista mesi
     $anno_inizio = substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);
@@ -1088,7 +1088,7 @@ class CircolariController extends AbstractController {
   public function ataAction(Request $request, EntityManagerInterface $em,
                             SessionInterface $session, $pagina) {
     // inizializza
-    $limite = 15;
+    $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // crea lista mesi
     $anno_inizio = substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);

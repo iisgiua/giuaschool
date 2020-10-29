@@ -1591,7 +1591,7 @@ class StaffController extends AbstractController {
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     if ($sede) {
       // limita a classi di sede
       $classi = $em->getRepository('App:Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
@@ -2064,7 +2064,7 @@ class StaffController extends AbstractController {
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     if ($sede) {
       // limita a classi di sede
       $classi = $em->getRepository('App:Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
@@ -2245,7 +2245,7 @@ class StaffController extends AbstractController {
     // legge sede
     $sede = $this->getUser()->getSede();
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     if ($sede) {
       // limita a classi di sede
       $classi = $em->getRepository('App:Classe')->findBy(['sede' => $sede], ['anno' =>'ASC', 'sezione' =>'ASC']);
@@ -2348,7 +2348,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_docenti_colloqui/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_docenti_colloqui', FormType::class)
       ->setAction($this->generateUrl('staff_docenti_colloqui'))
       ->add('docente', EntityType::class, array('label' => 'label.docente',
@@ -2430,7 +2430,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_docenti_statistiche/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $docenti = $em->getRepository('App:Docente')->createQueryBuilder('d')
       ->where('d NOT INSTANCE OF App:Preside AND d.abilitato=:abilitato')
       ->orderBy('d.cognome,d.nome', 'ASC')
@@ -2561,7 +2561,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_documenti_programmi/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_documenti_programmi', FormType::class)
       ->add('docente', EntityType::class, array('label' => 'label.autore',
         'data' => $docente,
@@ -2665,7 +2665,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_documenti_relazioni/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_documenti_relazioni', FormType::class)
       ->add('docente', EntityType::class, array('label' => 'label.autore',
         'data' => $docente,
@@ -2769,7 +2769,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_documenti_piani/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_documenti_piani', FormType::class)
       ->add('docente', EntityType::class, array('label' => 'label.autore',
         'data' => $docente,
@@ -2870,7 +2870,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_documenti_doc15/pagina', $pagina);
     }
     // form di ricerca
-    $limite = 25;
+    $limite = 20;
     $form = $this->container->get('form.factory')->createNamedBuilder('staff_documenti_doc15', FormType::class)
       ->add('classe', EntityType::class, array('label' => 'label.classe',
         'data' => $classe,
