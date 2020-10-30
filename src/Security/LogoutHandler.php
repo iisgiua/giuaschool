@@ -12,6 +12,7 @@
 
 namespace App\Security;
 
+use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +20,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
 use App\Util\LogHandler;
+use App\Util\AccountProvisioning;
 
 
 /**
@@ -39,6 +41,16 @@ class LogoutHandler implements LogoutHandlerInterface {
    */
   private $dblogger;
 
+  /**
+  * @var LoggerInterface $logger Gestore dei log su file
+  */
+  private $logger;
+
+  /**
+  * @var AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
+  */
+  private $prov;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -47,10 +59,15 @@ class LogoutHandler implements LogoutHandlerInterface {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param LogHandler $dblogger Gestore dei log su database
+   * @param LoggerInterface $logger Gestore dei log su file
+   * @param AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
    */
-  public function __construct(EntityManagerInterface $em, LogHandler $dblogger) {
+  public function __construct(EntityManagerInterface $em, LogHandler $dblogger, LoggerInterface $logger,
+                              AccountProvisioning $prov) {
     $this->em = $em;
     $this->dblogger = $dblogger;
+    $this->logger = $logger;
+    $this->prov = $prov;
   }
 
   /**
@@ -73,7 +90,18 @@ class LogoutHandler implements LogoutHandlerInterface {
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole()
       ));
+    // logout dall'identity provider (solo docenti/staff/preside)
+    $id_provider = $this->em->getRepository('App:Configurazione')->getParametro('id_provider');
+    if ($id_provider && in_array('ROLE_DOCENTE', $token->getRoles())) {
+      if (($errore = $this->prov->inizializza())) {
+        $this->logger->error('ERRORE durante il provisioning della disconnesione: '.$errore,
+          ['utente' => $token->getUsername()]);
+      }
+      if (($errore = $this->prov->disconnetteUtente($token->getUser()->getEmail()))) {
+        $this->logger->error('ERRORE durante il provisioning della disconnesione: '.$errore,
+          ['utente' => $token->getUsername()]);
+      }
+    }
   }
 
 }
-

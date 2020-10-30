@@ -26,14 +26,14 @@
       </div>
       <div class="panel-body">
         {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
-        <div class="col-sm-6">
+        <div class="col-sm-6 col-md-6 gs-pt-4 gs-pb-4 bg-info">
           <p class="text-center text-primary gs-big"><strong>Alunni e Docenti</strong></p>
           <div class="help-block"><span class="gs-text-normal">Clicca sul pulsante <strong>Accedi con GSuite</strong>, quindi inserisci nella nuova pagina l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
           <div class="text-center gs-mt-5">
             <a href="{{ path('login_gsuite') }}" class="btn btn-primary"><strong>Accedi con GSuite</strong></a>
           </div>
         </div>
-        <div class="col-sm-6" style="border-left:2px solid #337ab7">
+        <div class="col-sm-6 col-md-5 col-md-offset-1 gs-pt-4 gs-pb-4" style="border:2px solid #337ab7">
           <p class="text-center text-primary gs-big"><strong>Genitori e Personale ATA</strong></p>
           <div class="help-block"><span class="gs-text-normal">Inserisci l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>Accedi</strong>.</span></div>
           <form name="login_form" method="post" class="form-horizontal">
@@ -52,8 +52,9 @@
               </div>
             </div>
             <div class="form-group text-center">
-              <button type="submit" class="btn btn-primary" id="login" name="login">{{ 'label.login'|trans }}</button>
+              <button type="submit" class="btn btn-primary" id="login" name="login"><strong>{{ 'label.login'|trans }}</strong></button>
             </div>
+            <p><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></em></strong></p>
             <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
           </form>
         </div>

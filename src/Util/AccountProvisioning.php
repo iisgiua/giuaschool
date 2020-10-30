@@ -714,6 +714,27 @@ class AccountProvisioning {
     return null;
   }
 
+  /**
+   * Disconnette l'utente dal sistema esterno che fa da identity provider
+   *
+   * @param string $utente Email dell'utente da disconnettere
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function disconnetteUtente($utente) {
+    // disconnette da GSuite
+    $errore = null;
+    try {
+      $ris = $this->serviceGsuite['directory']->users->signOut($utente);
+    } catch (\Exception $e) {
+      // errore
+      $msg = json_decode($e->getMessage(), true);
+      $errore = '[disconnettiUtente] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
+    }
+    // restituisce eventuale errore
+    return $errore;
+  }
+
 
   //==================== METODI PRIVATI PER LA GESTIONE GSUITE ====================
 
@@ -731,6 +752,7 @@ class AccountProvisioning {
       $client->setSubject($this->session->get('/CONFIG/ISTITUTO/email_amministratore'));
       $client->setApplicationName("Registro Elettronico Utenti");
       $client->addScope('https://www.googleapis.com/auth/admin.directory.user');
+      $client->addScope('https://www.googleapis.com/auth/admin.directory.user.security');
       $client->addScope('https://www.googleapis.com/auth/admin.directory.group');
       $client->addScope('https://www.googleapis.com/auth/classroom.rosters');
       $client->addScope('https://www.googleapis.com/auth/classroom.courses');
