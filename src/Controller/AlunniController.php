@@ -183,6 +183,13 @@ class AlunniController extends BaseController {
     foreach ($genitori as $gen) {
       $gen->setAbilitato($abilita == 1);
     }
+    // provisioning
+    $provisioning = (new Provisioning())
+      ->setUtente($alunno)
+      ->setFunzione('sospendeUtente')
+      ->setDati(['sospeso' => !$abilita]);
+    $em->persist($provisioning);
+    // memorizza modifiche
     $em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
@@ -217,6 +224,9 @@ class AlunniController extends BaseController {
       }
       $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);
       $email = $genitori[0]->getEmail();
+      $classe_old = $alunno->getClasse() ? $alunno->getClasse()->getId() : null;
+      $alunno_old = array('cognome' => $alunno->getCognome(), 'nome' => $alunno->getNome(),
+        'sesso' => $alunno->getSesso());
     } else {
       // azione add
       $alunno = (new Alunno())
@@ -230,6 +240,7 @@ class AlunniController extends BaseController {
       $em->persist($genitore);
       $genitori = [$genitore];
       $email = null;
+      $classe_old = null;
     }
     // form
     $form = $this->createForm(AlunnoType::class, $alunno, ['returnUrl' => $this->generateUrl('alunni_modifica'),
@@ -258,16 +269,44 @@ class AlunniController extends BaseController {
       $genitori[0]->setUsername($username);
       $genitori[0]->setEmail($form->get('email_genitore')->getData());
       // provisioning
-      $provisioning = (new Provisioning())
-        ->setUtente($alunno)
-        ->setAzione($id ? 'E' : 'A')
-        ->setFunzione($id ? 'ModificaUtente' : 'CreaUtente');
-      $em->persist($provisioning);
-      $provisioning = (new Provisioning())
-        ->setUtente($genitori[0])
-        ->setAzione($id ? 'E' : 'A')
-        ->setFunzione($id ? 'ModificaUtente' : 'CreaUtente');
-      $em->persist($provisioning);
+      if (!$id) {
+        // crea alunno
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('creaUtente')
+          ->setDati(['password' => 'NOPASSWORD']);
+        $em->persist($provisioning);
+      } elseif ($alunno->getCognome() != $alunno_old['cognome'] || $alunno->getNome() != $alunno_old['nome'] ||
+                $alunno->getSesso() != $alunno_old['sesso']) {
+        // modifica dati alunno
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('modificaUtente')
+          ->setDati([]);
+        $em->persist($provisioning);
+      }
+      if (!$classe_old && $alunno->getClasse()) {
+        // aggiunge alunno a classe
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('aggiungeAlunnoClasse')
+          ->setDati(['classe' => $alunno->getClasse()->getId()]);
+        $em->persist($provisioning);
+      } elseif ($classe_old && !$alunno->getClasse()) {
+        // toglie alunno da classe
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('rimuoveAlunnoClasse')
+          ->setDati(['classe' => $classe_old]);
+        $em->persist($provisioning);
+      } elseif ($alunno->getClasse() && $classe_old != $alunno->getClasse()->getId()) {
+        // cambia classe ad alunno
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('modificaAlunnoClasse')
+          ->setDati(['classe_origine' => $classe_old, 'classe_destinazione' => $alunno->getClasse()->getId()]);
+        $em->persist($provisioning);
+      }
       // memorizza modifiche
       $em->flush();
       // messaggio
@@ -326,17 +365,16 @@ class AlunniController extends BaseController {
     $utente->setPasswordNonCifrata($password);
     $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
     $utente->setPassword($pswd);
-    // memorizza su db
-    $em->flush();
-    // log azione e provisioning
+    // provisioning
     if (!$genitore) {
       $provisioning = (new Provisioning())
         ->setUtente($utente)
-        ->setDati(['password' => $utente->getPasswordNonCifrata()])
-        ->setAzione('E')
-        ->setFunzione('PasswordUtente');
+        ->setFunzione('passwordUtente')
+        ->setDati(['password' => $utente->getPasswordNonCifrata()]);
       $em->persist($provisioning);
     }
+    // memorizza su db
+    $em->flush();
     // aggiunge log
     $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
       'Username esecutore' => $this->getUser()->getUsername(),
@@ -577,7 +615,6 @@ class AlunniController extends BaseController {
             // errore note presenti
             $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
           }
-
         }
       }
       if ($tipo == 'A' && $cambio->getInizio() > $cambio->getFine()) {
@@ -607,6 +644,12 @@ class AlunniController extends BaseController {
             ->setClasse($classe)
             ->setNote($note);
           $cambio->getAlunno()->setClasse(null);
+          // provisioning
+          $provisioning = (new Provisioning())
+            ->setUtente($cambio->getAlunno())
+            ->setFunzione('rimuoveAlunnoClasse')
+            ->setDati(['classe' => $classe->getId()]);
+          $em->persist($provisioning);
           if ($form->get('cancella')->getData()) {
             // cancella ore di assenza incongrue
             $em->getRepository('App:Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
@@ -622,6 +665,13 @@ class AlunniController extends BaseController {
             ->setFine($fine)
             ->setClasse($classe)
             ->setNote($note);
+          // provisioning
+          $provisioning = (new Provisioning())
+            ->setUtente($cambio->getAlunno())
+            ->setFunzione('modificaAlunnoClasse')
+            ->setDati(['classe_origine' => $classe->getId(),
+              'classe_destinazione' => $cambio->getAlunno()->getClasse()->getId()]);
+          $em->persist($provisioning);
           if ($form->get('cancella')->getData()) {
             // cancella ore di assenza incongrue
             $em->getRepository('App:Assenza')->elimina($cambio->getAlunno(), $data, $anno_fine);
@@ -724,17 +774,16 @@ class AlunniController extends BaseController {
       $utente->setPasswordNonCifrata($password);
       $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
       $utente->setPassword($pswd);
-      // memorizza su db
-      $em->flush();
-      // log azione e provisioning
+      // provisioning
       if (!$genitore) {
         $provisioning = (new Provisioning())
           ->setUtente($utente)
-          ->setDati(['password' => $utente->getPasswordNonCifrata()])
-          ->setAzione('E')
-          ->setFunzione('PasswordUtente');
+          ->setFunzione('passwordUtente')
+          ->setDati(['password' => $utente->getPasswordNonCifrata()]);
         $em->persist($provisioning);
       }
+      // memorizza su db
+      $em->flush();
       // log azione
       $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
         'Username esecutore' => $this->getUser()->getUsername(),

@@ -32,6 +32,7 @@ use App\Entity\Genitore;
 use App\Entity\Colloquio;
 use App\Entity\Orario;
 use App\Entity\OrarioDocente;
+use App\Entity\Provisioning;
 
 
 /**
@@ -685,6 +686,14 @@ class CsvImporter {
           $imported['NEW'][$count] = $fields;
         } else {
           // nessuna modifica
+          $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
+          $fields['numeriTelefono'] = implode(', ', $fields['numeriTelefono']);
+          $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
+          foreach ($fields as $k=>$v) {
+            if (isset($empty_fields[$k])) {
+              unset($fields[$k]);
+            }
+          }
           $imported['NONEW'][$count] = $fields;
         }
       }
@@ -1330,6 +1339,13 @@ class CsvImporter {
       // ok, memorizza su db
       $this->em->persist($docente);
       $this->em->flush();
+      // provisioning
+      $provisioning = (new Provisioning())
+        ->setUtente($docente)
+        ->setFunzione('creaUtente')
+        ->setDati(['password' => $docente->getPasswordNonCifrata()]);
+      $this->em->persist($provisioning);
+      $this->em->flush();
       return null;
     }
   }
@@ -1373,6 +1389,19 @@ class CsvImporter {
       // errore (restituisce solo il primo)
       return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
     } else {
+      // provisioning
+      $provisioning = (new Provisioning())
+        ->setUtente($docente)
+        ->setFunzione('modificaUtente')
+        ->setDati([]);
+      $this->em->persist($provisioning);
+      if (!isset($empty_fields['password'])) {
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('passwordUtente')
+          ->setDati(['password' => $docente->getPasswordNonCifrata()]);
+        $this->em->persist($provisioning);
+      }
       // ok, memorizza su db
       $this->em->flush();
       return null;
@@ -1408,6 +1437,13 @@ class CsvImporter {
     } else {
       // ok, memorizza su db
       $this->em->persist($cattedra);
+      $this->em->flush();
+      // provisioning
+      $provisioning = (new Provisioning())
+        ->setUtente($cattedra->getDocente())
+        ->setFunzione('aggiungeCattedra')
+        ->setDati(['cattedra' => $cattedra->getId()]);
+      $this->em->persist($provisioning);
       $this->em->flush();
       return null;
     }
@@ -1473,6 +1509,13 @@ class CsvImporter {
     }
     $this->em->persist($genitore);
     // ok, memorizza su db
+    $this->em->flush();
+    // provisioning
+    $provisioning = (new Provisioning())
+      ->setUtente($alunno)
+      ->setFunzione('creaUtente')
+      ->setDati(['password' => $alunno->getPasswordNonCifrata()]);
+    $this->em->persist($provisioning);
     $this->em->flush();
     // modifica dati per la visualizzazione
     $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
@@ -1559,6 +1602,12 @@ class CsvImporter {
           ' ['.$fields[$errors[0]->getPropertyPath()].']';
       }
     }
+    // provisioning
+    $provisioning = (new Provisioning())
+      ->setUtente($alunno)
+      ->setFunzione('modificaUtente')
+      ->setDati([]);
+    $this->em->persist($provisioning);
     // ok, memorizza su db
     $this->em->flush();
     // modifica dati per la visualizzazione

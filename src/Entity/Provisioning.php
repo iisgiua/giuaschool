@@ -63,15 +63,6 @@ class Provisioning {
   private $dati;
 
   /**
-   * @var string $azione Tipo di azione eseguita [A=creazione, E=modifica, D=cancellazione]
-   *
-   * @ORM\Column(type="string", length=1, nullable=false)
-   *
-   * @Assert\Choice(choices={"A","E","D"}, strict=true, message="field.choice")
-   */
-  private $azione;
-
-  /**
    * @var string $funzione Funzione da eseguire
    *
    * @ORM\Column(type="string", length=255, nullable=false)
@@ -80,6 +71,15 @@ class Provisioning {
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
   private $funzione;
+
+  /**
+   * @var string $stato Stato del provisioning [A=attesa,P=processato,C=da cancellare,E=errore]
+   *
+   * @ORM\Column(type="string", length=1, nullable=false)
+   *
+   * @Assert\Choice(choices={"A","P","C","E"}, strict=true, message="field.choice")
+   */
+  private $stato;
 
 
   //==================== EVENTI ORM ====================
@@ -163,27 +163,6 @@ class Provisioning {
   }
 
   /**
-   * Restituisce il tipo di azione eseguita [A=creazione, E=modifica, D=cancellazione]
-   *
-   * @return string Tipo di azione eseguita
-   */
-  public function getAzione() {
-    return $this->azione;
-  }
-
-  /**
-   * Modifica il tipo di azione eseguita [A=creazione, E=modifica, D=cancellazione]
-   *
-   * @param string $azione Tipo di azione eseguita
-   *
-   * @return Provisioning Oggetto Provisioning
-   */
-  public function setAzione($azione) {
-    $this->azione = $azione;
-    return $this;
-  }
-
-  /**
    * Restituisce la funzione da eseguire
    *
    * @return string Funzione da eseguire
@@ -204,6 +183,27 @@ class Provisioning {
     return $this;
   }
 
+  /**
+   * Restituisce lo stato del provisioning [A=attesa,P=processato,E=errore]
+   *
+   * @return string Stato del provisioning
+   */
+  public function getStato() {
+    return $this->stato;
+  }
+
+  /**
+   * Modifica lo stato del provisioning [A=attesa,P=processato,E=errore]
+   *
+   * @param string $stato Stato del provisioning [A=attesa,P=processato,E=errore]
+   *
+   * @return Provisioning Oggetto Provisioning
+   */
+  public function setStato($stato) {
+    $this->stato = $stato;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -213,6 +213,7 @@ class Provisioning {
   public function __construct() {
     // valori predefiniti
     $this->dati = array();
+    $this->stato = 'A';
   }
 
   /**
@@ -221,7 +222,7 @@ class Provisioning {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return $this->oggettoNome.':'.$this->oggettoId;
+    return $this->funzione.':'.$this->stato;
   }
 
 }

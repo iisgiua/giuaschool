@@ -197,6 +197,13 @@ class DocentiController extends BaseController {
     }
     // abilita o disabilita
     $docente->setAbilitato($abilita == 1);
+    // provisioning
+    $provisioning = (new Provisioning())
+      ->setUtente($docente)
+      ->setFunzione('sospendeUtente')
+      ->setDati(['sospeso' => !$abilita]);
+    $em->persist($provisioning);
+    // memorizza modifiche
     $em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
@@ -229,6 +236,8 @@ class DocentiController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
+      $docente_old = array('cognome' => $docente->getCognome(), 'nome' => $docente->getNome(),
+        'sesso' => $docente->getSesso());
     } else {
       // azione add
       $docente = (new Docente())
@@ -241,11 +250,22 @@ class DocentiController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // provisioning
-      $provisioning = (new Provisioning())
-        ->setUtente($docente)
-        ->setAzione($id ? 'E' : 'A')
-        ->setFunzione($id ? 'ModificaUtente' : 'CreaUtente');
-      $em->persist($provisioning);
+      if (!$id) {
+        // crea docente
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('creaUtente')
+          ->setDati(['password' => 'NOPASSWORD']);
+        $em->persist($provisioning);
+      } elseif ($docente->getCognome() != $docente_old['cognome'] || $docente->getNome() != $docente_old['nome'] ||
+                $docente->getSesso() != $docente_old['sesso']) {
+        // modifica dati docente
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('modificaUtente')
+          ->setDati([]);
+        $em->persist($provisioning);
+      }
       // memorizza modifiche
       $em->flush();
       // messaggio
@@ -295,6 +315,12 @@ class DocentiController extends BaseController {
     $docente->setPasswordNonCifrata($password);
     $pswd = $encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
     $docente->setPassword($pswd);
+    // provisioning
+    $provisioning = (new Provisioning())
+      ->setUtente($docente)
+      ->setFunzione('passwordUtente')
+      ->setDati(['password' => $docente->getPasswordNonCifrata()]);
+    $em->persist($provisioning);
     // memorizza su db
     $em->flush();
     // log azione
@@ -395,7 +421,7 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/staff/", name="docenti_staff",
+   * @Route("/docenti/staff/{pagina}", name="docenti_staff",
    *    requirements={"pagina": "\d+"},
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
@@ -536,7 +562,7 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/coordinatori/", name="docenti_coordinatori",
+   * @Route("/docenti/coordinatori/{pagina}", name="docenti_coordinatori",
    *    requirements={"pagina": "\d+"},
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
@@ -575,8 +601,8 @@ class DocentiController extends BaseController {
       $pagina = 1;
       $session->set('/APP/ROUTE/docenti_coordinatori/nome', $criteri['nome']);
       $session->set('/APP/ROUTE/docenti_coordinatori/cognome', $criteri['cognome']);
-      $session->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
       $session->set('/APP/ROUTE/docenti_coordinatori/classe', $criteri['classe']);
+      $session->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // lista coordinatori
     $dati = $em->getRepository('App:Classe')->cercaCoordinatori($criteri, $pagina);
@@ -674,7 +700,7 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/docenti/segretari/", name="docenti_segretari",
+   * @Route("/docenti/segretari/{pagina}", name="docenti_segretari",
    *    requirements={"pagina": "\d+"},
    *    defaults={"pagina": 0},
    *    methods={"GET", "POST"})
@@ -885,6 +911,8 @@ class DocentiController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
+      $cattedra_old = ['docente' => $cattedra->getDocente()->getId(),
+        'classe' => $cattedra->getClasse()->getId(), 'materia' => $cattedra->getMateria()->getId()];
     } else {
       // azione add
       $cattedra = (new Cattedra())
@@ -920,6 +948,26 @@ class DocentiController extends BaseController {
       if ($form->isValid()) {
         // memorizza dati
         $em->flush();
+        // provisioning
+        if (!$id) {
+          // crea cattedra
+          $provisioning = (new Provisioning())
+            ->setUtente($cattedra->getDocente())
+            ->setFunzione('aggiungeCattedra')
+            ->setDati(['cattedra' => $cattedra->getId()]);
+          $em->persist($provisioning);
+        } elseif ($cattedra->getDocente()->getId() != $cattedra_old['docente'] ||
+                  $cattedra->getClasse()->getId() != $cattedra_old['classe'] ||
+                  $cattedra->getMateria()->getId() != $cattedra_old['materia']) {
+          // modifica dati docente
+          $provisioning = (new Provisioning())
+            ->setUtente($cattedra->getDocente())
+            ->setFunzione('modificaCattedra')
+            ->setDati(['cattedra' => $cattedra->getId(), 'docente' => $cattedra_old['docente'],
+              'classe' => $cattedra_old['classe'], 'materia' => $cattedra_old['materia']]);
+          $em->persist($provisioning);
+        }
+        $em->flush();
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirect
@@ -954,6 +1002,24 @@ class DocentiController extends BaseController {
     }
     // abilita o disabilita
     $cattedra->setAttiva($abilita == 1);
+    // provisioning
+    if ($abilita) {
+      // aggiunge cattedra
+      $provisioning = (new Provisioning())
+        ->setUtente($cattedra->getDocente())
+        ->setFunzione('aggiungeCattedra')
+        ->setDati(['cattedra' => $cattedra->getId()]);
+      $em->persist($provisioning);
+    } else {
+      // rimuove cattedra
+      $provisioning = (new Provisioning())
+        ->setUtente($cattedra->getDocente())
+        ->setFunzione('rimuoveCattedra')
+        ->setDati(['docente' => $cattedra->getDocente()->getId(), 'classe' => $cattedra->getClasse()->getId(),
+          'materia' => $cattedra->getMateria()->getId()]);
+      $em->persist($provisioning);
+    }
+    // memorizza dati
     $em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');

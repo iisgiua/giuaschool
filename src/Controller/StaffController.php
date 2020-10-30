@@ -50,6 +50,7 @@ use App\Entity\Assenza;
 use App\Entity\Entrata;
 use App\Entity\Uscita;
 use App\Entity\Notifica;
+use App\Entity\Provisioning;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use App\Util\LogHandler;
@@ -3058,6 +3059,14 @@ class StaffController extends AbstractController {
     $utente->setPasswordNonCifrata($password);
     $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
     $utente->setPassword($pswd);
+    // provisioning
+    if (!$genitore) {
+      $provisioning = (new Provisioning())
+        ->setUtente($utente)
+        ->setFunzione('passwordUtente')
+        ->setDati(['password' => $utente->getPasswordNonCifrata()]);
+      $em->persist($provisioning);
+    }
     // memorizza su db
     $em->flush();
     // log azione
