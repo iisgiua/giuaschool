@@ -83,18 +83,6 @@ class LogoutHandler implements LogoutHandlerInterface {
       // logout già eseguito
       return;
     }
-    // logout dall'identity provider (solo docenti/staff/preside)
-    $id_provider = $this->em->getRepository('App:Configurazione')->getParametro('id_provider');
-    if ($id_provider && in_array('ROLE_DOCENTE', $token->getRoles())) {
-      if (($errore = $this->prov->inizializza())) {
-        $this->logger->error('ERRORE durante il provisioning della disconnesione: '.$errore,
-          ['utente' => $token->getUsername()]);
-      }
-      if (($errore = $this->prov->disconnetteUtente($token->getUser()->getEmail()))) {
-        $this->logger->error('ERRORE durante il provisioning della disconnesione: '.$errore,
-          ['utente' => $token->getUsername()]);
-      }
-    }
     // la sessione è già invalidata se è settato il parametro 'invalidate_session' in 'security.yml'
     $request->getSession()->invalidate();
     // log azione
