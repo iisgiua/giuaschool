@@ -20,7 +20,7 @@ security:
       logout:
         path: '/logout/'
         target: '/login/form/'
-        invalidate_session: true
+        invalidate_session: false
         handlers: ['App\Security\LogoutHandler']
       guard:
         authenticators:

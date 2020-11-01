@@ -83,13 +83,6 @@ class LogoutHandler implements LogoutHandlerInterface {
       // logout già eseguito
       return;
     }
-    // la sessione è già invalidata se è settato il parametro 'invalidate_session' in 'security.yml'
-    $request->getSession()->invalidate();
-    // log azione
-    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Logout', __METHOD__, array(
-      'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()
-      ));
     // logout dall'identity provider (solo docenti/staff/preside)
     $id_provider = $this->em->getRepository('App:Configurazione')->getParametro('id_provider');
     if ($id_provider && in_array('ROLE_DOCENTE', $token->getRoles())) {
@@ -102,6 +95,13 @@ class LogoutHandler implements LogoutHandlerInterface {
           ['utente' => $token->getUsername()]);
       }
     }
+    // la sessione è già invalidata se è settato il parametro 'invalidate_session' in 'security.yml'
+    $request->getSession()->invalidate();
+    // log azione
+    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Logout', __METHOD__, array(
+      'Username' => $token->getUsername(),
+      'Ruolo' => $token->getRoles()[0]->getRole()
+      ));
   }
 
 }

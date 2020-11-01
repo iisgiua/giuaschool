@@ -45,6 +45,7 @@ use App\Entity\Genitore;
 use App\Entity\StoricoEsito;
 use App\Entity\StoricoVoto;
 use App\Entity\Documento;
+use App\Entity\Provisioning;
 
 
 /**
@@ -226,6 +227,14 @@ class SistemaController extends BaseController {
           // codifica password
           $password = $encoder->encodePassword($user, $user->getPasswordNonCifrata());
           $user->setPassword($password);
+          // provisioning
+          if (($user instanceOf Docente) || ($user instanceOf Alunno)) {
+            $provisioning = (new Provisioning())
+              ->setUtente($user)
+              ->setFunzione('passwordUtente')
+              ->setDati(['password' => $user->getPasswordNonCifrata()]);
+            $em->persist($provisioning);
+          }
           // memorizza password
           $em->flush();
           // log azione

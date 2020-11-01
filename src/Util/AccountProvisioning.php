@@ -729,10 +729,12 @@ class AccountProvisioning {
     } catch (\Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
-      $errore = '[disconnettiUtente] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
+      $errore = '[disconnetteUtente] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
+      return $errore;
     }
-    // restituisce eventuale errore
-    return $errore;
+    $this->log[] = 'disconnetteUtente: '.$utente;
+    // tutto ok
+    return null;
   }
 
 
