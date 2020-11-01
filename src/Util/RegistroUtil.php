@@ -387,6 +387,12 @@ class RegistroUtil {
       // azione di modifica
       if ($nota) {
         // esiste nota
+        $ora = (new \DateTime())->modify('-30 min');
+        if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
+            $ora <= $nota->getModificato()) {
+          // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
+          return true;
+        }
         if (in_array('ROLE_STAFF', $docente->getRoles())) {
           // solo staff: ok
           return true;
@@ -396,6 +402,12 @@ class RegistroUtil {
       // azione di cancellazione
       if ($nota) {
         // esiste nota
+        $ora = (new \DateTime())->modify('-30 min');
+        if ($docente->getId() == $nota->getDocente()->getId() && !$nota->getDocenteProvvedimento() &&
+            $ora <= $nota->getModificato()) {
+          // stesso docente, no provvedimento, entro 30 minuti da ultima modifica: ok
+          return true;
+        }
         if (in_array('ROLE_STAFF', $docente->getRoles())) {
           // solo staff: ok
           return true;

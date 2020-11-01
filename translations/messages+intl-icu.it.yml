@@ -991,6 +991,7 @@ message.note_classe_alunno_inserito: "Inserimento in data {date}"
 message.note_classe_alunno_trasferito: "Trasferimento/ritiro in data {date}"
 message.note_classe_alunno_sezione: "Cambio sezione in data {date}"
 message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
+message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata nei prossimi 30 minuti. Poi sarà resa definitiva.
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.

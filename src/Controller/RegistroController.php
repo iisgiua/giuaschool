@@ -1245,6 +1245,10 @@ class RegistroController extends AbstractController {
             'Alunni' => $nota_old['alunni']
             ));
         }
+        // messaggio
+        if (!$docente_staff) {
+          $this->addFlash('info', 'message.nota_edit_temporizzato');
+        }
         // redirezione
         return $this->redirectToRoute('lezioni_registro_firme');
       }

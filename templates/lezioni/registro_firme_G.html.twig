@@ -71,6 +71,9 @@
         {% endif %}
   </div>
       {% endif %}
+      {% for msg in app.flashes('info') %}
+  <div class="alert alert-info text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert">{{ msg|trans }}</div>
+      {% endfor %}
   <div class="row gs-mb-2">
     <div class="col-sm-6">
       {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_prec|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
@@ -126,7 +129,7 @@
         <div class="list-group-item">
           <div class="list-group-item-text">
             {% if v.alunni is not empty %}
-              <strong>Destinatari ({% for d in v.avviso.destinatari|filter(f => (f == 'G' or f == 'A')) %}{{ d == 'G' ? 'genitori' : 'alunni' }}{{ not loop.last ? ', ' }}{% endfor %}): 
+              <strong>Destinatari ({% for d in v.avviso.destinatari|filter(f => (f == 'G' or f == 'A')) %}{{ d == 'G' ? 'genitori' : 'alunni' }}{{ not loop.last ? ', ' }}{% endfor %}):
                 {% for al in v.alunni %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
             {% endif %}
             {{ v.testo|raw|nl2br }}<br>
