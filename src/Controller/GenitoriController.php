@@ -1114,7 +1114,7 @@ class GenitoriController extends AbstractController {
         $certificati = array();
       } else {
         // controlla campi
-        $motivazione = $form->get('motivazione')->getData();
+        $motivazione = substr($form->get('motivazione')->getData(), 0, 255);
         $genitoreSesso = $form->get('genitoreSesso')->getData();
         $genitoreNome = strtoupper($form->get('genitoreNome')->getData());
         $genitoreNascita = \DateTime::createFromFormat('d/m/Y', $form->get('genitoreNascita')->getData());
@@ -1314,7 +1314,9 @@ class GenitoriController extends AbstractController {
             ->setGiustificato(null);
         } else {
           // aggiorna dati
-          $entrata->setGiustificato(new \DateTime());
+          $entrata
+            ->setMotivazione(substr($form->get('motivazione')->getData(), 0, 255))
+            ->setGiustificato(new \DateTime());
         }
         // ok: memorizza dati
         $em->flush();

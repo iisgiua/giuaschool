@@ -629,17 +629,17 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function rimuoveCattedra(Docente $docente, Classe $classe, Materia $materia) {
-    $docente = $docente->getEmail();
+    $docente_email = $docente->getEmail();
     $nomeclasse = $classe->getAnno().$classe->getSezione();
     $materia = $materia->getNomeBreve();
     $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     $corso = strtoupper($nomeclasse.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
     // GSuite: rimuove docente da corso
-    if (($errore = $this->rimuoveDocenteCorsoGsuite($docente, $corso))) {
+    if (($errore = $this->rimuoveDocenteCorsoGsuite($docente_email, $corso))) {
       // errore
       return $errore;
     }
-    $this->log[] = 'rimuoveDocenteCorsoGsuite: '.$docente.', '.$corso;
+    $this->log[] = 'rimuoveDocenteCorsoGsuite: '.$docente_email.', '.$corso;
     // MOODLE: rimuove docente da corso
     try {
       $idutente = $this->idUtenteMoodle($docente->getUsername());
