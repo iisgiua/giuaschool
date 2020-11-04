@@ -203,6 +203,16 @@ class AppFixtures extends Fixture {
       ->setParametro('notifica_circolari')
       ->setDescrizione("Ore di notifica giornaliera delle nuove circolari<br>[lista separata da virgola delle ore in formato HH]")
       ->setValore('16,18,20');
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SCUOLA')
+      ->setParametro('assenze_dichiarazione')
+      ->setDescrizione("Indica se le assenze online devono inglobare l'autodichiarazione NO-COVID<br>[booleano, 0 o 1]")
+      ->setValore('0');
+    $this->dati['param'][] = (new Configurazione())
+      ->setCategoria('SCUOLA')
+      ->setParametro('assenze_ore')
+      ->setDescrizione("Indica se le assenze devono essere gestite su base oraria e non giornaliera<br>[booleano, 0 o 1]")
+      ->setValore('0');
     // ACCESSO
     $this->dati['param'][] = (new Configurazione())
       ->setCategoria('ACCESSO')

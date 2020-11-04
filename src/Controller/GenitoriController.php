@@ -1050,54 +1050,58 @@ class GenitoriController extends AbstractController {
         'data' => $info['assenza']['motivazione'],
         'trim' => true,
         'attr' => array('rows' => '3'),
-        'required' => true))
-      // aggiunta COVID
-      ->add('genitoreSesso', ChoiceType::class, array('label' => false,
-        'data' => isset($info['assenza']['dichiarazione']['genitoreSesso']) ?
-          $info['assenza']['dichiarazione']['genitoreSesso'] : (isset($dich['genitoreSesso']) ? $dich['genitoreSesso'] : null),
-        'choices' => ['label.sottoscritto_M' => 'M', 'label.sottoscritto_F' => 'F'],
-        'expanded' => false,
-        'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
-        'required' => true))
-      ->add('genitoreNome', TextType::class, array('label' => false,
-        'data' => isset($info['assenza']['dichiarazione']['genitoreNome']) ?
-          $info['assenza']['dichiarazione']['genitoreNome'] : (isset($dich['genitoreNome']) ? $dich['genitoreNome'] : null),
-        'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
-          'placeholder' => $trans->trans('label.cognome_nome'), ],
-        'required' => true))
-      ->add('genitoreNascita', TextType::class, array('label' => 'label.data_nascita',
-        'data' => (isset($info['assenza']['dichiarazione']['genitoreNascita']) && $info['assenza']['dichiarazione']['genitoreNascita']) ?
-          $info['assenza']['dichiarazione']['genitoreNascita']->format('d/m/Y') :
-          ((isset($dich['genitoreNascita']) && $dich['genitoreNascita']) ? $dich['genitoreNascita']->format('d/m/Y') : null),
-        'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
-          'placeholder' => 'gg/mm/aaaa'],
-        'required' => true))
-      ->add('genitoreCitta', TextType::class, array('label' => false,
-        'data' => isset($info['assenza']['dichiarazione']['genitoreCitta']) ?
-          $info['assenza']['dichiarazione']['genitoreCitta'] : (isset($dich['genitoreCitta']) ? $dich['genitoreCitta'] : null),
-        'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-0 gs-mb-2 gs-text-normal gs-strong',
-          'placeholder' => $trans->trans('label.luogo_nascita'), ],
-        'required' => true))
-      ->add('genitoreRuolo', ChoiceType::class, array('label' => false,
-        'data' => isset($info['assenza']['dichiarazione']['genitoreRuolo']) ?
-          $info['assenza']['dichiarazione']['genitoreRuolo'] : (isset($dich['genitoreRuolo']) ? $dich['genitoreRuolo'] : null),
-        'choices' => ['label.genitore_ruolo_P' => 'P', 'label.genitore_ruolo_M' => 'M',
-          'label.genitore_ruolo_T' => 'T'],
-        'expanded' => false,
-        'multiple' => false,
-        'choice_attr' => function($val, $key, $index) {
-            return ['class' => 'gs-no-placeholder'];
-          },
-        'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
-        'required' => true))
-      ->add('firma', CheckboxType::class, array('label' => 'label.sottoscrizione_dichiarazione_covid',
-        'data' => $assenza->getGiustificato() != null,
-        'label_attr' => ['class' => 'gs-big gs-strong'],
-        'required' => true))
+        'required' => true));
+    if ($session->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
+      // dichiarazione NO-COVID
+      $form = $form
+        ->add('genitoreSesso', ChoiceType::class, array('label' => false,
+          'data' => isset($info['assenza']['dichiarazione']['genitoreSesso']) ?
+            $info['assenza']['dichiarazione']['genitoreSesso'] : (isset($dich['genitoreSesso']) ? $dich['genitoreSesso'] : null),
+          'choices' => ['label.sottoscritto_M' => 'M', 'label.sottoscritto_F' => 'F'],
+          'expanded' => false,
+          'multiple' => false,
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
+          'required' => true))
+        ->add('genitoreNome', TextType::class, array('label' => false,
+          'data' => isset($info['assenza']['dichiarazione']['genitoreNome']) ?
+            $info['assenza']['dichiarazione']['genitoreNome'] : (isset($dich['genitoreNome']) ? $dich['genitoreNome'] : null),
+          'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
+            'placeholder' => $trans->trans('label.cognome_nome'), ],
+          'required' => true))
+        ->add('genitoreNascita', TextType::class, array('label' => 'label.data_nascita',
+          'data' => (isset($info['assenza']['dichiarazione']['genitoreNascita']) && $info['assenza']['dichiarazione']['genitoreNascita']) ?
+            $info['assenza']['dichiarazione']['genitoreNascita']->format('d/m/Y') :
+            ((isset($dich['genitoreNascita']) && $dich['genitoreNascita']) ? $dich['genitoreNascita']->format('d/m/Y') : null),
+          'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-3 gs-mb-2 gs-text-normal gs-strong',
+            'placeholder' => 'gg/mm/aaaa'],
+          'required' => true))
+        ->add('genitoreCitta', TextType::class, array('label' => false,
+          'data' => isset($info['assenza']['dichiarazione']['genitoreCitta']) ?
+            $info['assenza']['dichiarazione']['genitoreCitta'] : (isset($dich['genitoreCitta']) ? $dich['genitoreCitta'] : null),
+          'attr' => ['style' => 'width:auto;display:inline;', 'class' => 'gs-mr-0 gs-mb-2 gs-text-normal gs-strong',
+            'placeholder' => $trans->trans('label.luogo_nascita'), ],
+          'required' => true))
+        ->add('genitoreRuolo', ChoiceType::class, array('label' => false,
+          'data' => isset($info['assenza']['dichiarazione']['genitoreRuolo']) ?
+            $info['assenza']['dichiarazione']['genitoreRuolo'] : (isset($dich['genitoreRuolo']) ? $dich['genitoreRuolo'] : null),
+          'choices' => ['label.genitore_ruolo_P' => 'P', 'label.genitore_ruolo_M' => 'M',
+            'label.genitore_ruolo_T' => 'T'],
+          'expanded' => false,
+          'multiple' => false,
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder gs-mr-3 gs-mb-2', 'style' => 'width:auto;display:inline;'],
+          'required' => true))
+        ->add('firma', CheckboxType::class, array('label' => 'label.sottoscrizione_dichiarazione_covid',
+          'data' => $assenza->getGiustificato() != null,
+          'label_attr' => ['class' => 'gs-big gs-strong'],
+          'required' => true));
+    }
+    $form = $form
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['class' => 'btn-primary']))
       ->add('delete', SubmitType::class, array('label' => 'label.delete',
@@ -1106,15 +1110,15 @@ class GenitoriController extends AbstractController {
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       $errore = false;
+      $motivazione = substr($form->get('motivazione')->getData(), 0, 255);
       if ($form->get('delete')->isClicked()) {
         // cancella dati
         $giustificato = null;
         $motivazione = null;
         $dichiarazione = array();
         $certificati = array();
-      } else {
+      } elseif ($session->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
         // controlla campi
-        $motivazione = substr($form->get('motivazione')->getData(), 0, 255);
         $genitoreSesso = $form->get('genitoreSesso')->getData();
         $genitoreNome = strtoupper($form->get('genitoreNome')->getData());
         $genitoreNascita = \DateTime::createFromFormat('d/m/Y', $form->get('genitoreNascita')->getData());
@@ -1173,6 +1177,11 @@ class GenitoriController extends AbstractController {
           // salva il documento
           $pdf->save($percorso.'/'.$id_documento.'.pdf');
         }
+      } else {
+        // no autodichiarazione
+        $giustificato = new \DateTime();
+        $dichiarazione = array();
+        $certificati = array();
       }
       // aggiorna dati
       $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')

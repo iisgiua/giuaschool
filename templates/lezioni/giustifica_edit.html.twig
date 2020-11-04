@@ -83,7 +83,7 @@ $(document).ready(function() {
         <input type="checkbox" id="{{ child.vars.id }}" name="{{ child.vars.full_name }}" value="{{ child.vars.value }}">
         {{ child.vars.label|raw }}
       </label>
-    {% if child.vars.full_name == 'giustifica_edit[convalida_assenze][]' %}
+    {% if child.vars.full_name == 'giustifica_edit[convalida_assenze][]' and app.session.get('/CONFIG/SCUOLA/assenze_dichiarazione') %}
       <div class="text-center gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('file_certificato', {'tipo': 'D', 'id': child.vars.value}) }}" title="Scarica l'autodichiarazione">Autodichiarazione</a></div>
     {% endif %}
     </div>

@@ -11,9 +11,10 @@
     <div class="form-group gs-pl-4 gs-pr-4">
       {{ form_widget(form.motivazione) }}
     </div>
+  {% if app.session.get('/CONFIG/SCUOLA/assenze_dichiarazione') %}
     <div class="form-group gs-pl-4 gs-pr-4">
       <p class="text-center"><strong>AUTODICHIARAZIONE</strong></p>
-  {% if is_granted('ROLE_GENITORE') %}
+    {% if is_granted('ROLE_GENITORE') %}
       <p><em>
         {{ form_widget(form.genitoreSesso) }} {{ form_widget(form.genitoreNome) }}
         <span id="gs-genitore-nascita">nato</span> il {{ form_widget(form.genitoreNascita) }}
@@ -32,7 +33,7 @@
         <li><em>non è stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</em></li>
         <li><em>non è stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</em></li>
       </ul>
-  {% else %}
+    {% else %}
       <p><em>
         {{ alunno.sesso == 'M' ? 'Il sottoscritto' : 'La sottoscritta' }}
         <strong>{{ alunno.cognome }} {{ alunno.nome }}</strong>
@@ -49,12 +50,13 @@
         <li><em>di non essere stato in quarantena o isolamento domiciliare negli ultimi 14 giorni;</em></li>
         <li><em>di non essere stato a contatto con persone positive, per quanto di loro conoscenza, negli ultimi 14 giorni.</em></li>
       </ul>
-  {% endif %}
+    {% endif %}
       <p><em>La presente autodichiarazione viene rilasciata quale misura di prevenzione correlata con l’emergenza pandemica del COVID-19.</em></p>
       <p><em>Cagliari, {{ date()|date('d/m/Y') }}.</em></p>
       {{ form_widget(form.firma) }}
     </div>
   </div>
+  {% endif %}
   <div class="modal-footer">
     {{ form_widget(form.submit) }}
   {% if info.assenza.giustificato %}
