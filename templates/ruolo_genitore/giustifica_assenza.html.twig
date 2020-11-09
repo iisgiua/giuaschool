@@ -1,7 +1,18 @@
 {{ form_start(form) }}
   <div class="modal-header">
     <h3 class="modal-title gs-h3">{{ info.alunno }} - Classe: {{ info.classe }}</h3>
-    <h4 class="modal-title gs-h4"><em>Giustificazione {% if info.assenza.giorni == 1 %}dell'assenza del giorno: {{ info.assenza.data }}{% else %}del periodo di assenza: dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %}</em></h4>
+  {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+    <h4 class="modal-title text-info gs-h4"><em>Giustificazione dell'assenza del giorno {{ info.assenza.data }}
+    {% if info.assenza.ore|length > 1 %}
+      nelle ore:
+      {% for o in info.assenza.ore %}
+        {{ o }}ª{{ not loop.last ? ',' }}
+      {% endfor %}
+    {% endif %}
+    </em></h4>
+  {% else %}
+    <h4 class="modal-title text-info gs-h4"><em>Giustificazione {% if info.assenza.giorni == 1 %}dell'assenza del giorno: {{ info.assenza.data }}{% else %}del periodo di assenza: dal {{ info.assenza.data }} al {{ info.assenza.data_fine }}{% endif %}</em></h4>
+  {% endif %}
   </div>
   <div class="modal-body">
     <div class="form-group gs-pl-4 gs-pr-4">
@@ -78,7 +89,6 @@ $(document).ready(function() {
     }
   });
   $('#giustifica_assenza_delete').click(function () {
-    $('#giustifica_assenza_tipo').attr('required', false);
     $('#giustifica_assenza_motivazione').attr('required', false);
     return true;
   });

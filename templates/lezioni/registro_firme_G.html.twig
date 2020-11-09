@@ -159,7 +159,7 @@
     <tbody>
       {% for k,v in dati[data].lezioni %}
       <tr>
-        <td><strong>{{ v.inizio }} - {{ v.fine }}</strong></td>
+        <td><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
         <td>{{ v.materia }}</td>
         <td><small><em>{% for v1 in v.docenti %}{{ v1 }}{{ not loop.last ? '<br>' }}{% endfor %}</em></small></td>
         <td>
@@ -197,48 +197,69 @@
     </tbody>
   </table>
   <div class="row gs-mb-3">
+      {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+    <div class="col-sm-12">
+      <table class="table table-bordered table-condensed gs-mt-2">
+        <thead class="bg-success">
+          <tr>
+          {% for ora,ass in assenti.nomi %}
+            <th>Assenti {{ ora}}ª ora</th>
+          {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+          {% for ora,ass in assenti.nomi %}
+            <td><small class="gs-text-normal">{% for a in ass %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small></td>
+          {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+      {% else %}
     <div class="col-sm-4">
-      {% if assenti.assenze is defined  %}
+        {% if assenti.assenze is defined %}
       <div class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
           <strong class="gs-text-normal">Assenti:</strong>
           <small class="gs-text-normal">{% for a in assenti.assenze %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
         </div>
       </div>
-      {% else %}
+        {% else %}
       <div class="panel panel-default">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2"><strong>Assenti:</strong></div>
       </div>
-      {% endif %}
+        {% endif %}
     </div>
     <div class="col-sm-4">
-      {% if assenti.entrate is defined  %}
+        {% if assenti.entrate is defined %}
       <div class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
           <strong class="gs-text-normal">Ritardi:</strong>
           <small class="gs-text-normal">{% for a in assenti.entrate %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
         </div>
       </div>
-      {% else %}
+        {% else %}
       <div class="panel panel-default">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2"><strong>Ritardi:</strong></div>
       </div>
-      {% endif %}
+        {% endif %}
     </div>
     <div class="col-sm-4">
-      {% if assenti.uscite is defined  %}
+        {% if assenti.uscite is defined %}
       <div class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
           <strong class="gs-text-normal">Uscite:</strong>
           <small class="gs-text-normal">{% for a in assenti.uscite %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
         </div>
       </div>
-      {% else %}
+        {% else %}
       <div class="panel panel-default">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2"><strong>Uscite:</strong></div>
       </div>
-      {% endif %}
+        {% endif %}
     </div>
+      {% endif %}
   </div>
       {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
       {% include 'include/modal-info.html.twig' %}

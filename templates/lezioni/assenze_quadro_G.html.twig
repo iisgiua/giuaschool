@@ -78,7 +78,7 @@
       {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data_succ|date('Y-m-d'), 'vista': 'G'}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-2 text-center">
-      {% if dati[data].pulsante_appello is defined %}
+      {% if dati[data].pulsante_appello is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
       <a class="btn btn-success" href="{{ dati[data].pulsante_appello }}" role="button" title="Esegui la procedura dell'appello"><span class="glyphicon glyphicon-hand-up gs-mr-3"></span>Appello</a>
       {% endif %}
     </div>
@@ -112,12 +112,12 @@
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
           <strong>{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})</strong>
-            {% if v.autorizzaEntrata is not empty %}
+              {% if v.autorizzaEntrata is not empty %}
           <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.autorizzaEntrata }}"><span class="glyphicon glyphicon-time"></span></button>
-            {% endif %}
-            {% if v.autorizzaUscita is not empty %}
+              {% endif %}
+              {% if v.autorizzaUscita is not empty %}
           <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
-            {% endif %}
+              {% endif %}
           <div id="alunno-{{ loop.index }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
@@ -134,7 +134,7 @@
                 <p>Profilo <strong>STUDENTE</strong>: {{ v.username }}<br>(ultimo accesso: {{ v.ultimoAccesso ? v.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
               </div>
             </div>
-            {% if v.bes != 'N' %}
+              {% if v.bes != 'N' %}
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
@@ -142,11 +142,20 @@
                 {% if v.noteBes and cattedra %}<p>Descrizione:<br><em>{{ v.noteBes|raw }}</em></p>{% endif %}
               </div>
             </div>
-            {% endif %}
+              {% endif %}
           </div>
         </td>
         <td>
-          {{ v.id_assenza ? '<span class="label label-danger">Assente</span>' }}
+              {% if v.id_assenza %}
+          <span class="label label-danger">Assente</span>
+                {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+                  {% for o,ol in dati[data].ore.id %}
+                    {% if v.id_alunno in ol %}
+                      <span class="label label-default">{{ o }}ª</span>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endif %}
               {% if v.id_entrata %}
           <span class="label label-warning gs-mr-1"{% if v.note_entrata %} title="Note sul ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.note_entrata }}"{% endif %}>Ritardo ({{ v.ora_entrata|date('H:i') }})
                 {% if v.note_entrata %} <span class="glyphicon glyphicon-info-sign"></span>{% endif %}
@@ -170,16 +179,16 @@
               {% endif %}
         </td>
         <td>
-              {% if v.pulsante_presenza is defined %}
+              {% if v.pulsante_presenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
           <a class="btn btn-success btn-xs" href="{{ v.pulsante_presenza }}" role="button" title="Segna la presenza dell'alunno">P</a>
               {% endif %}
-              {% if v.pulsante_assenza is defined %}
+              {% if v.pulsante_assenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
           <a class="btn btn-danger btn-xs" href="{{ v.pulsante_assenza }}" role="button" title="Segna l'assenza dell'alunno">A</a>
               {% endif %}
-              {% if v.pulsante_entrata is defined %}
+              {% if v.pulsante_entrata is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
           <a class="btn btn-warning btn-xs" href="{{ v.pulsante_entrata }}" role="button" title="Segna il ritardo dell'alunno">R</a>
               {% endif %}
-              {% if v.pulsante_uscita is defined %}
+              {% if v.pulsante_uscita is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
           <a class="btn btn-warning btn-xs" href="{{ v.pulsante_uscita }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
               {% endif %}
               {% if v.pulsante_giustifica is defined %}

@@ -1015,7 +1015,13 @@ class GenitoriController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati assenze
-    $dati_assenze = $gen->raggruppaAssenze($alunno);
+    if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+      // modalità assenze orarie
+      $dati_assenze = $gen->raggruppaAssenzeOre($alunno);
+    } else {
+      // modalità assenze giornaliere
+      $dati_assenze = $gen->raggruppaAssenze($alunno);
+    }
     $data_str = $assenza->getData()->format('Y-m-d');
     $dich = null;
     foreach ($dati_assenze['gruppi'] as $per=>$ass) {
@@ -1285,6 +1291,7 @@ class GenitoriController extends AbstractController {
     $info['ora'] =  $entrata->getOra()->format('H:i');
     $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
     $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
+    $info['ritardo'] = $entrata;
     // form
     $entrata_old = clone $entrata;
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_ritardo', FormType::class, $entrata)
@@ -1299,7 +1306,7 @@ class GenitoriController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'mapped' => false,
-        'required' => true))
+        'required' => false))
       ->add('motivazione', TextareaType::class, array('label' => null,
         'trim' => true,
         'attr' => array('rows' => '3'),

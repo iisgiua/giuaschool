@@ -123,7 +123,7 @@
     <tbody>
           {% for k1,v1 in v.lezioni %}
       <tr>
-        <td><small><strong>{{ v1.inizio }} - {{ v1.fine }}</strong></small></td>
+        <td><small><strong>{{ k1 }}ª: <span class="text-info">{{ v1.inizio }} - {{ v1.fine }}</span></strong></small></td>
         <td>
             {{ v1.materia }}
             {% if v1.docenti %}

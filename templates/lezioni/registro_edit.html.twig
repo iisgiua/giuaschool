@@ -35,3 +35,18 @@
   </div>
 </div>
 {% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('label.gs-checkbox-inline input').change(function() {
+    if (this.checked) {
+      $(this).parent().addClass('active');
+    } else {
+      $(this).parent().removeClass('active');
+    }
+  }).change();
+});
+</script>
+{% endblock %}

@@ -14,14 +14,17 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * AssenzaLezione - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\AssenzaLezioneRepository")
- * @ORM\Table(name="gs_assenza_lezione")
+ * @ORM\Table(name="gs_assenza_lezione", uniqueConstraints={@ORM\UniqueConstraint(columns={"alunno_id","lezione_id"})})
  * @ORM\HasLifecycleCallbacks
+ *
+ * @UniqueEntity(fields={"alunno","lezione"}, message="field.unique")
  */
 class AssenzaLezione {
 
@@ -184,4 +187,3 @@ class AssenzaLezione {
   }
 
 }
-

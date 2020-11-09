@@ -443,11 +443,19 @@ class GenitoriUtil {
   public function assenze(Classe $classe, Alunno $alunno) {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->regUtil->infoPeriodi();
-    $dati = array();
+    $dati = array('lista');
     $dati['lista'] = array();
     $dati_periodo = array();
     // raggruppa assenze continuative
-    $dati_assenze = $this->raggruppaAssenze($alunno);
+    if ($this->session->get('/CONFIG/SCUOLA/assenze_ore')) {
+      // gestione assenze orarie, senza raggruppamento
+      $dati_assenze = $this->raggruppaAssenzeOre($alunno);
+    } else {
+      // gestione assenze giornaliere, con raggruppamento
+      $dati_assenze = $this->raggruppaAssenze($alunno);
+    }
+    $dati['evidenza'] = $dati_assenze['evidenza'];
+    $dati['evidenza']['ritardo'] = [];
     $dati_periodo = $dati_assenze['gruppi'];
     // legge ritardi
     $ritardi = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
@@ -484,6 +492,11 @@ class GenitoriUtil {
       $dati_periodo[$numperiodo][$data]['ritardo']['motivazione'] = $r['motivazione'];
       $dati_periodo[$numperiodo][$data]['ritardo']['id'] = $r['id'];
       $dati_periodo[$numperiodo][$data]['ritardo']['permesso'] = $this->azioneGiustifica($r['data'], $alunno);
+      if (!$r['giustificato'] && count($dati['evidenza']['ritardo']) < 5 &&
+          $dati_periodo[$numperiodo][$data]['ritardo']['permesso']) {
+        // ritardo da giustificare in evidenza (i primi 5)
+        $dati['evidenza']['ritardo'][] = $dati_periodo[$numperiodo][$data]['ritardo'];
+      }
     }
     // legge uscite anticipate
     $uscite = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
@@ -1263,6 +1276,7 @@ class GenitoriUtil {
     // init
     $gruppi = array();
     $dati_periodo = array();
+    $da_giustificare = array('assenza' => []);
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->regUtil->infoPeriodi();
     $tot_assenze = 0;
@@ -1321,6 +1335,11 @@ class GenitoriUtil {
             $gruppi[$per][$data_str]['assenza']['certificati'] = $certificati;
             $gruppi[$per][$data_str]['assenza']['ids'] = substr($ids, 1);
             $tot_assenze += $gruppi[$per][$data_str]['assenza']['giorni'];
+            if (!$giustificato && count($da_giustificare['assenza']) < 10 &&
+                $gruppi[$per][$data_str]['assenza']['permesso']) {
+              // assenza da giustificare in evidenza (le prime dieci)
+              $da_giustificare['assenza'][] = $gruppi[$per][$data_str]['assenza'];
+            }
           }
           // inizia nuovo gruppo
           $inizio = $a;
@@ -1352,12 +1371,74 @@ class GenitoriUtil {
         $gruppi[$per][$data_str]['assenza']['certificati'] = $certificati;
         $gruppi[$per][$data_str]['assenza']['ids'] = substr($ids, 1);
         $tot_assenze += $gruppi[$per][$data_str]['assenza']['giorni'];
+        if (!$giustificato && count($da_giustificare['assenza']) < 10 &&
+            $gruppi[$per][$data_str]['assenza']['permesso']) {
+          // assenza da giustificare in evidenza (le prime dieci)
+          $da_giustificare['assenza'][] = $gruppi[$per][$data_str]['assenza'];
+        }
       }
     }
     // restituisce dati come array associativo
     $dati = array();
     $dati['gruppi'] = $gruppi;
-    $dati['num_assenze'] = $tot_assenze;
+    $dati['evidenza'] = $da_giustificare;
+    $dati['num_assenze'] = count($assenze);
+    return $dati;
+  }
+
+  /**
+   * Raggruppa le assenze orarie di un alunno
+   *
+   * @param Alunno $alunno Alunno di cui leggere le assenze
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function raggruppaAssenzeOre(Alunno $alunno) {
+    // init
+    $dati_periodo = array();
+    $da_giustificare = array('assenza' => []);
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    $periodi = $this->regUtil->infoPeriodi();
+    // legge assenze
+    $assenze = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
+      ->join('App:Assenza', 'ass', 'WITH', 'ass.alunno=a.id')
+      ->where('a.id=:alunno AND a.classe=:classe')
+      ->orderBy('ass.data', 'DESC')
+      ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse()])
+      ->getQuery()
+      ->getArrayResult();
+    // imposta array associativo per assenze
+    foreach ($assenze as $a) {
+      $data = $a['data']->format('Y-m-d');
+      $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
+      $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))].' '.substr($data, 0, 4);
+      $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
+      $dati_periodo[$numperiodo][$data]['assenza']['data_fine'] = $data_str;
+      $dati_periodo[$numperiodo][$data]['assenza']['giorni'] = 1;
+      $dati_periodo[$numperiodo][$data]['assenza']['giustificato'] =
+        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
+      $dati_periodo[$numperiodo][$data]['assenza']['motivazione'] = $a['motivazione'];
+      $dati_periodo[$numperiodo][$data]['assenza']['dichiarazione'] =
+        empty($a['dichiarazione']) ? array() : $a['dichiarazione'];
+      $dati_periodo[$numperiodo][$data]['assenza']['certificati'] =
+        empty($a['certificati']) ? array() : $a['certificati'];
+      $dati_periodo[$numperiodo][$data]['assenza']['id'] = $a['id'];
+      $dati_periodo[$numperiodo][$data]['assenza']['ids'] = $a['id'];
+      $dati_periodo[$numperiodo][$data]['assenza']['permesso'] = $this->azioneGiustifica($a['data'], $alunno);
+      $dati_periodo[$numperiodo][$data]['assenza']['ore'] =
+        $this->em->getRepository('App:AssenzaLezione')->alunnoOreAssenze($alunno, $a['data']);
+      if (!$a['giustificato'] && count($da_giustificare['assenza']) < 10 &&
+          $dati_periodo[$numperiodo][$data]['assenza']['permesso']) {
+        // assenza da giustificare in evidenza (le prime dieci)
+        $da_giustificare['assenza'][] = $dati_periodo[$numperiodo][$data]['assenza'];
+      }
+    }
+    // restituisce dati come array associativo
+    $dati = array();
+    $dati['gruppi'] = $dati_periodo;
+    $dati['evidenza'] = $da_giustificare;
+    $dati['num_assenze'] = count($assenze);
     return $dati;
   }
 

@@ -772,6 +772,7 @@ class AssenzeController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
@@ -787,8 +788,8 @@ class AssenzeController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function giustificaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
-                                    LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
+  public function giustificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                   RegistroUtil $reg, LogHandler $dblogger, $cattedra, $classe, $data, $alunno) {
     // inizializza
     $label = array();
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
@@ -828,7 +829,21 @@ class AssenzeController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // assenze da giustificare
-    $giustifica = $reg->assenzeRitardiDaGiustificare($data_obj, $alunno, $classe);
+    if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+      // modalità assenze orarie
+      $giustifica = $reg->assenzeOreDaGiustificare($data_obj, $alunno, $classe);
+      $choice_func = function($value, $key, $index) use($em, $alunno) {
+        $ore = $em->getRepository('App:AssenzaLezione')->alunnoOreAssenze($alunno, $value->data_obj);
+        $ore_str = implode('ª, ', $ore).'ª';
+        return '<strong>'.$value->data.(count($ore) > 0 ? (' - Ore: '.$ore_str) : '').'</strong>'.
+          '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
+    } else {
+      // modalità assenze giornaliere
+      $giustifica = $reg->assenzeRitardiDaGiustificare($data_obj, $alunno, $classe);
+      $choice_func = function ($value, $key, $index) {
+        return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '').
+          '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
+    }
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
@@ -840,10 +855,7 @@ class AssenzeController extends AbstractController {
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_edit', FormType::class)
       ->add('convalida_assenze', ChoiceType::class, array('label' => 'label.convalida_assenze',
         'choices' => $giustifica['convalida_assenze'],
-        'choice_label' => function ($value, $key, $index) {
-            return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '').
-              '<br>Motivazione: <em>'.$value->motivazione.'</em>';
-          },
+        'choice_label' => $choice_func,
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],
         'choice_translation_domain' => false,
@@ -853,8 +865,8 @@ class AssenzeController extends AbstractController {
       ->add('convalida_ritardi', ChoiceType::class, array('label' => 'label.convalida_ritardi',
         'choices' => $giustifica['convalida_ritardi'],
         'choice_label' => function ($value, $key, $index) use ($settimana) {
-            return $settimana[$value->getData()->format('w')].' '.$value->getData()->format('d/m/Y').
-              ' ore '.$value->getOra()->format('H:i').'<br>Motivazione: <em>'.$value->getMotivazione().'</em>';
+            return '<strong>'.$settimana[$value->getData()->format('w')].' '.$value->getData()->format('d/m/Y').
+              ' ore '.$value->getOra()->format('H:i').'</strong><br>Motivazione: <em>'.$value->getMotivazione().'</em>';
           },
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],

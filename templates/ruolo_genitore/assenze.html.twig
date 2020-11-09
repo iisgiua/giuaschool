@@ -9,6 +9,54 @@
   </div>
   {% else %}
     {% include 'include/modal-error.html.twig' %}
+    {% if dati.giustifica and
+      ((dati.evidenza.assenza is defined and dati.evidenza.assenza|length > 0) or
+      (dati.evidenza.ritardo is defined and dati.evidenza.ritardo|length > 0)) %}
+  <table class="table table-bordered table-hover table-striped table-condensed gs-mb-5">
+    <caption class="text-danger text-center gs-big"><strong>Da giustificare</strong></caption>
+    <thead class="bg-warning">
+      <tr>
+        <th>Data</th>
+        <th>Tipo</th>
+        <th>Giustificazione</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tipo,e in dati.evidenza %}
+        {% for v in e %}
+      <tr>
+          {% if tipo == 'assenza' %}
+        <td class="text-danger"><strong>{{ v.data }}{% if v.giorni > 1 %} - {{ v.data_fine }}{% endif %}</strong></td>
+            {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+        <td>
+          <strong>Assenza
+              {% if v.ore|length > 1 %}
+            nelle ore:
+                {% for o in v.ore %}
+                  {{ o }}ª{{ not loop.last ? ',' }}
+                {% endfor %}
+              {% endif %}
+          </strong>
+        </td>
+            {% else %}
+        <td><strong>Assenza{% if v.giorni > 1 %} di {{ v.giorni }} giorni{% endif %}</strong></td>
+            {% endif %}
+        <td>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': v.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+        </td>
+          {% elseif tipo == 'ritardo' %}
+        <td class="text-danger"><strong>{{ v.data }}</strong></td>
+        <td><strong>Ritardo</strong> ({{ v.ora|date('H:i') }})</td>
+        <td>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': v.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+        </td>
+          {% endif %}
+      </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+    {% endif %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>Situazione globale</strong></caption>
     <tbody>
@@ -52,7 +100,20 @@
       <tr>
           {% if tipo == 'assenza' %}
         <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
+            {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
+        <td>
+          <strong>Assenza
+              {% if e.ore|length > 1 %}
+            nelle ore:
+                {% for o in e.ore %}
+                  {{ o }}ª{{ not loop.last ? ',' }}
+                {% endfor %}
+              {% endif %}
+          </strong>
+        </td>
+            {% else %}
         <td><strong>Assenza{% if e.giorni > 1 %} di {{ e.giorni }} giorni{% endif %}</strong></td>
+            {% endif %}
         <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
