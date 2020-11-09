@@ -542,6 +542,10 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function aggiungeCattedra(Cattedra $cattedra) {
+    if ($cattedra->getMateria()->getTipo() == 'S') {
+      // cattedra di SOSTEGNO
+      return $this->aggiungeCattedraSostegno($cattedra);
+    }
     $docente = $cattedra->getDocente()->getEmail();
     $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione();
     $materia = $cattedra->getMateria()->getNomeBreve();
@@ -614,6 +618,53 @@ class AccountProvisioning {
         return $errore;
       }
       $this->log[] = 'aggiungeClasseCorsoMoodle: '.$nomeclasse.', '.$idcorso;
+    }
+    // tutto ok
+    return null;
+  }
+
+  /**
+   * Crea i corsi sui sistemi esterni relativi alla cattedra di sostegno indicata
+   *
+   * @param Cattedra $cattedra Cattedra di sostegno cui creare i corsi
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function aggiungeCattedraSostegno(Cattedra $cattedra) {
+    if ($cattedra->getMateria()->getTipo() != 'S') {
+      // cattedra non di SOSTEGNO
+      return null;
+    }
+    $docente_email = $cattedra->getDocente()->getEmail();
+    $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione();
+    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $docente_username = $cattedra->getDocente()->getUsername();
+    $sede = $cattedra->getClasse()->getSede()->getCitta();
+    $indirizzo = $cattedra->getClasse()->getCorso()->getNomeBreve();
+    // legge cattedre di classe
+    $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      ->join('c.classe', 'cl')
+      ->join('c.docente', 'd')
+      ->join('c.materia', 'm')
+      ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
+      ->setParameters(['attiva' => 1, 'classe' => $cattedra->getClasse(), 'abilitato' => 1, 'sostegno' => 'S'])
+      ->getQuery()
+      ->getResult();
+    foreach ($cattedre as $cat) {
+      // GSuite: crea corso
+      $materia = $cat->getMateria()->getNomeBreve();
+      $corso = strtoupper($nomeclasse.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
+      if (($errore = $this->creaCorsoGsuite($docente_email, $nomeclasse, $materia, $anno) )) {
+        // errore
+        return $errore;
+      }
+      $this->log[] = 'creaCorsoGsuite: '.$docente_email.', '.$nomeclasse.', '.$materia.', '.$anno;
+      // MOODLE: crea corso
+      if (($errore = $this->creaCorsoMoodle($docente_username, $nomeclasse, $sede, $indirizzo, $materia, $anno))) {
+        // errore
+        return $errore;
+      }
+      $this->log[] = 'creaCorsoMoodle: '.$docente_username.', '.$nomeclasse.', '.$sede.', '.$indirizzo.', '.$materia.', '.$anno;
     }
     // tutto ok
     return null;
@@ -1027,10 +1078,24 @@ class AccountProvisioning {
           'courseState' => 'ACTIVE']);
         $corsoObj = $this->serviceGsuite['classroom']->courses->create($course);
       } else {
-        // aggiunge docente
-        $teacher = new GTeacher([
-          'userId' => $docente]);
-        $ris = $this->serviceGsuite['classroom']->courses_teachers->create('d:'.$corso, $teacher);
+        // lista docenti del corso
+        $teachers = $this->serviceGsuite['classroom']->courses_teachers->listCoursesTeachers('d:'.$corso);
+        // controlla se è già docente del corso
+        $user = $this->serviceGsuite['directory']->users->get($docente);
+        $trovato = false;
+        foreach ($teachers->teachers as $t) {
+          if ($t->userId == $user->id) {
+            // trova altro docente
+            $trovato = true;
+            break;
+          }
+        }
+        if (!$trovato) {
+          // aggiunge docente
+          $teacher = new GTeacher([
+            'userId' => $docente]);
+          $ris = $this->serviceGsuite['classroom']->courses_teachers->create('d:'.$corso, $teacher);
+        }
       }
       // aggiunge docente a gruppo docenti-classe
       $errore = $this->aggiungeUtenteGruppoGsuite($docente, 'docenti'.strtolower($classe).'@'.$dominio);
