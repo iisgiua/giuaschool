@@ -84,9 +84,9 @@ class ScansioneOraria {
   private $fine;
 
   /**
-   * @var integer $durata Durata dell'ora di lezione (in minuti)
+   * @var integer $durata Durata dell'ora di lezione (intesa come unità oraria)
    *
-   * @ORM\Column(type="smallint", nullable=false)
+   * @ORM\Column(type="float", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
@@ -222,7 +222,7 @@ class ScansioneOraria {
   }
 
   /**
-   * Restituisce la durata dell'ora di lezione (in minuti)
+   * Restituisce la durata dell'ora di lezione (intesa come unità oraria)
    *
    * @return integer Durata dell'ora di lezione
    */
@@ -231,7 +231,7 @@ class ScansioneOraria {
   }
 
   /**
-   * Modifica la durata dell'ora di lezione (in minuti)
+   * Modifica la durata dell'ora di lezione (intesa come unità oraria)
    *
    * @param integer $durata Durata dell'ora di lezione
    *
@@ -276,4 +276,3 @@ class ScansioneOraria {
   }
 
 }
-

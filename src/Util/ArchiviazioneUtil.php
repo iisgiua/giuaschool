@@ -402,7 +402,7 @@ class ArchiviazioneUtil {
         'sede' => $cattedra->getClasse()->getSede()])
       ->getQuery()
       ->getSingleScalarResult();
-    $ore = rtrim(rtrim(number_format($minuti / 60, 1, ',', ''), '0'), ',');
+    $ore = rtrim(rtrim(number_format($minuti, 1, ',', ''), '0'), ',');
     if ($minuti > 0) {
       // legge lezioni del periodo
       $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
@@ -437,7 +437,7 @@ class ArchiviazioneUtil {
           }
         }
         // aggiorna durata lezioni
-        $dati['lezioni'][$mese][$giorno]['durata'] += $l['durata'] / 60;
+        $dati['lezioni'][$mese][$giorno]['durata'] += $l['durata'];
         // legge assenze
         $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
           ->select('(al.alunno) AS id,al.ore')
@@ -887,7 +887,7 @@ class ArchiviazioneUtil {
           'sede' => $cattedra->getClasse()->getSede()])
         ->getQuery()
         ->getSingleScalarResult();
-      $ore = rtrim(rtrim(number_format($minuti / 60, 1, ',', ''), '0'), ',');
+      $ore = rtrim(rtrim(number_format($minuti, 1, ',', ''), '0'), ',');
       if ($minuti > 0) {
         // legge lezioni del periodo
         $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
@@ -920,7 +920,7 @@ class ArchiviazioneUtil {
             }
           }
           // aggiorna durata lezioni
-          $dati['lezioni'][$mese][$giorno]['durata'] += $l['durata'] / 60;
+          $dati['lezioni'][$mese][$giorno]['durata'] += $l['durata'];
           // legge assenze
           $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
             ->select('SUM(al.ore)')
@@ -1452,8 +1452,8 @@ class ArchiviazioneUtil {
         if ($a->getAvviso()) {
           // legge alunni destinatari
           $ann_alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-            ->join('App:AvvisoIndividuale', 'avi', 'WITH', 'a.id=avi.alunno')
-            ->where('avi.avviso=:avviso')
+            ->join('App:AvvisoUtente', 'au', 'WITH', 'a.id=au.utente')
+            ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $a->getAvviso()])
             ->getQuery()
             ->getResult();

@@ -1465,14 +1465,14 @@ class AppFixtures extends Fixture {
           ->setOra($ora)
           ->setInizio(clone $ora_inizio)
           ->setFine(clone $ora_fine)
-          ->setDurata(60)
+          ->setDurata(1)
           ->setOrario($this->dati['orari']['CA1']);
         $this->dati['scansioni_orarie'][] = (new ScansioneOraria())
           ->setGiorno($giorno)
           ->setOra($ora)
           ->setInizio(clone $ora_inizio)
           ->setFine(clone $ora_fine)
-          ->setDurata(60)
+          ->setDurata(1)
           ->setOrario($this->dati['orari']['AS1']);
         $ora_inizio->modify('+1 hour');
         $ora_fine->modify('+1 hour');
@@ -1488,7 +1488,7 @@ class AppFixtures extends Fixture {
           ->setOra($ora)
           ->setInizio(clone $ora_inizio)
           ->setFine(clone $ora_fine)
-          ->setDurata(60)
+          ->setDurata(1)
           ->setOrario($this->dati['orari']['CA2']);
         $ora_inizio->modify('+1 hour');
         $ora_fine->modify('+1 hour');
@@ -1498,14 +1498,14 @@ class AppFixtures extends Fixture {
         ->setOra(6)
         ->setInizio(clone $ora_inizio)
         ->setFine(\DateTime::createFromFormat('H:i', '13:50'))
-        ->setDurata(30)
+        ->setDurata(0.5)
         ->setOrario($this->dati['orari']['CA2']);
       $this->dati['scansioni_orarie'][] = (new ScansioneOraria())
         ->setGiorno($giorno)
         ->setOra(1)
         ->setInizio(\DateTime::createFromFormat('H:i', '08:20'))
         ->setFine(\DateTime::createFromFormat('H:i', '08:50'))
-        ->setDurata(30)
+        ->setDurata(0.5)
         ->setOrario($this->dati['orari']['AS2']);
       $ora_inizio = \DateTime::createFromFormat('H:i', '08:50');
       $ora_fine = \DateTime::createFromFormat('H:i', '09:50');
@@ -1515,7 +1515,7 @@ class AppFixtures extends Fixture {
           ->setOra($ora)
           ->setInizio(clone $ora_inizio)
           ->setFine(clone $ora_fine)
-          ->setDurata(60)
+          ->setDurata(1)
           ->setOrario($this->dati['orari']['AS2']);
         $ora_inizio->modify('+1 hour');
         $ora_fine->modify('+1 hour');

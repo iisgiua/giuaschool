@@ -1521,7 +1521,7 @@ class RegistroUtil {
         $this->em->getConnection()
           ->prepare('INSERT INTO gs_assenza_lezione (modificato,alunno_id,lezione_id,ore) VALUES (NOW(),:alunno,:lezione,:durata)')
           ->execute(['lezione' => $l['id'], 'alunno' => $alunno->getId(),
-            'durata' => $l['durata'] / 60.0]);
+            'durata' => $l['durata']]);
       }
     } else {
       // aggiunge ore assenza se esiste ritardo/uscita
@@ -1531,16 +1531,17 @@ class RegistroUtil {
         // calcolo periodo in cui è assente
         foreach ($lezioni as $l) {
           $assenza = 0;
+          $durata_ora = ($l['fine']->getTimestamp() - $l['inizio']->getTimestamp()) / $l['durata'];
           if ($entrata && $entrata->getOra() > $l['inizio']) {
             // calcola minuti entrata
-            $assenza = min(($entrata->getOra()->getTimestamp() - $l['inizio']->getTimestamp()) / 60, $l['durata']);
+            $assenza = min(($entrata->getOra()->getTimestamp() - $l['inizio']->getTimestamp()) / $durata_ora, $l['durata']);
           }
           if ($uscita && $uscita->getOra() < $l['fine']) {
             // calcola minuti uscita
-            $assenza = min(($assenza + ($l['fine']->getTimestamp() - $uscita->getOra()->getTimestamp()) / 60), $l['durata']);
+            $assenza = min(($assenza + ($l['fine']->getTimestamp() - $uscita->getOra()->getTimestamp()) / $durata_ora), $l['durata']);
           }
-          // approssimazione per difetto alla mezz'ora (non si danneggia alunno)
-          $oreassenza = intval($assenza / 30) * 0.5;
+          // approssimazione per difetto alla mezza unità didattica (non si danneggia alunno)
+          $oreassenza = intval($assenza / 0.5) * 0.5;
           if ($oreassenza > 0) {
             // aggiunge ore assenza
             $this->em->getConnection()
@@ -1590,20 +1591,21 @@ class RegistroUtil {
         $this->em->getConnection()
           ->prepare('INSERT INTO gs_assenza_lezione (modificato,alunno_id,lezione_id,ore) VALUES (NOW(),:alunno,:lezione,:durata)')
           ->execute(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
-            'durata' => $ora['durata'] / 60.0]);
+            'durata' => $ora['durata']]);
       } elseif ($alu['id_entrata'] || $alu['id_uscita']) {
         // entrata o uscita o entrambi
         $assenza = 0;
+        $durata_ora = ($ora['fine']->getTimestamp() - $ora['inizio']->getTimestamp()) / $ora['durata'];
         if ($alu['id_entrata'] && $alu['ora_entrata'] > $ora['inizio']) {
           // calcola minuti entrata
-          $assenza = min(($alu['ora_entrata']->getTimestamp() - $ora['inizio']->getTimestamp()) / 60, $ora['durata']);
+          $assenza = min(($alu['ora_entrata']->getTimestamp() - $ora['inizio']->getTimestamp()) / $durata_ora, $ora['durata']);
         }
         if ($alu['id_uscita'] && $alu['ora_uscita'] < $ora['fine']) {
           // calcola minuti uscita
-          $assenza = min(($assenza + ($ora['fine']->getTimestamp() - $alu['ora_uscita']->getTimestamp()) / 60), $ora['durata']);
+          $assenza = min(($assenza + ($ora['fine']->getTimestamp() - $alu['ora_uscita']->getTimestamp()) / $durata_ora), $ora['durata']);
         }
         // approssimazione per difetto alla mezz'ora (non si danneggia alunno)
-        $oreassenza = intval($assenza / 30) * 0.5;
+        $oreassenza = intval($assenza / 0.5) * 0.5;
         if ($oreassenza > 0) {
           // aggiunge ore assenza
           $this->em->getConnection()
@@ -1880,7 +1882,7 @@ class RegistroUtil {
         }
       }
       // aggiorna durata lezioni
-      $dati['lista'][$data_str]['durata'] += $l['durata'] / 60;
+      $dati['lista'][$data_str]['durata'] += $l['durata'];
       // legge assenze
       $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
         ->select('(al.alunno) AS id,al.ore')
@@ -1965,7 +1967,7 @@ class RegistroUtil {
         }
       }
       // aggiorna durata lezioni
-      $dati['lista'][$data_str]['durata'] += $l['durata'] / 60;
+      $dati['lista'][$data_str]['durata'] += $l['durata'];
       // legge assenze
       $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
         ->select('al.ore')
@@ -2385,7 +2387,7 @@ class RegistroUtil {
             'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'], 'sede' => $cattedra->getClasse()->getSede()])
           ->getQuery()
           ->getSingleScalarResult();
-        $ore = $lezioni / 60;
+        $ore = $lezioni;
         $dati_periodo[$k]['ore'] = number_format($ore, 1, ',', null);
         // assenze del periodo
         $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
@@ -2554,9 +2556,9 @@ class RegistroUtil {
    * @param array $assenti Lista di alunni assenti alla lezione
    */
   public function inserisceAssentiLezione(Docente $docente, Lezione $lezione, $assenti) {
-    $ore = 1; // una unità oraria, non necessariamente di 60 minuti
+    $scansione_oraria = $this->em->getRepository('App:ScansioneOraria')->oraLezione($lezione);
+    $ore = $scansione_oraria->getDurata();
     // inserisce assenti
-    dump($lezione);
     foreach ($assenti as $alu) {
       $assente = (new AssenzaLezione())
         ->setLezione($lezione)

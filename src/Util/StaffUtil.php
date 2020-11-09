@@ -519,8 +519,10 @@ class StaffUtil {
       // tutti gli scrutini svolti
       $lista = $this->genUtil->pagelleAlunno($alunno);
       foreach ($lista as $d) {
-        $dati['scrutini'][$d[1]->getPeriodo()] =
-          $this->genUtil->pagelle($d[1]->getClasse(), $alunno, $d[1]->getPeriodo());
+        if ($d[0] != 'A') {
+          $dati['scrutini'][$d[1]->getPeriodo()] =
+            $this->genUtil->pagelle($d[1]->getClasse(), $alunno, $d[1]->getPeriodo());          
+        }
       }
     }
     // assenze
@@ -555,7 +557,7 @@ class StaffUtil {
     if ($docente instanceOf Docente) {
       // statistiche di singolo docente
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->select('d AS docente,SUM(so.durata/60) AS ore')
+        ->select('d AS docente,SUM(so.durata) AS ore')
         ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
@@ -571,7 +573,7 @@ class StaffUtil {
     } elseif ($docente == -1) {
       // statistiche di tutti i docenti
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->select('d AS docente,SUM(so.durata/60) AS ore')
+        ->select('d AS docente,SUM(so.durata) AS ore')
         ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
@@ -881,7 +883,7 @@ class StaffUtil {
     if ($docente instanceOf Docente) {
       // statistiche di singolo docente
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->select('d.cognome,d.nome,SUM(so.durata/60) AS ore')
+        ->select('d.cognome,d.nome,SUM(so.durata) AS ore')
         ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
@@ -897,7 +899,7 @@ class StaffUtil {
     } elseif ($docente == -1) {
       // statistiche di tutti i docenti
       $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->select('d.cognome,d.nome,SUM(so.durata/60) AS ore')
+        ->select('d.cognome,d.nome,SUM(so.durata) AS ore')
         ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')

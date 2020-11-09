@@ -15,6 +15,7 @@ namespace App\Repository;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Sede;
 use App\Entity\Docente;
+use App\Entity\Lezione;
 
 
 /**
@@ -89,5 +90,25 @@ class ScansioneOrariaRepository extends EntityRepository {
     return (!empty($ora) ? substr($ora[0]['fine'], 0, 5) : '23:59');
   }
 
-}
+  /**
+   * Restituisce i dati della scansione oraria di una lezione
+   *
+   * @param Lezione $lezione Lezione di cui leggere la scansione oraria
+   *
+   * @return ScansioneOraria Oggetto che rappresenta la scansione oraria
+   */
+  public function oraLezione(Lezione $lezione) {
+    // legge l'ora della lezione
+    $ora = $this->createQueryBuilder('s')
+      ->join('s.orario', 'o')
+      ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
+      ->setParameters(['data' => $lezione->getData()->format('Y-m-d'),
+        'sede' => $lezione->getClasse()->getSede(), 'giorno' => $lezione->getData()->format('w'),
+        'ora' => $lezione->getOra()])
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getOneOrNullResult();
+    return $ora;
+  }
 
+}
