@@ -832,17 +832,23 @@ class AssenzeController extends AbstractController {
     if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
       // modalità assenze orarie
       $giustifica = $reg->assenzeOreDaGiustificare($data_obj, $alunno, $classe);
-      $choice_func = function($value, $key, $index) use($em, $alunno) {
+      $func_convalida = function($value, $key, $index) use($em, $alunno) {
         $ore = $em->getRepository('App:AssenzaLezione')->alunnoOreAssenze($alunno, $value->data_obj);
         $ore_str = implode('ª, ', $ore).'ª';
         return '<strong>'.$value->data.(count($ore) > 0 ? (' - Ore: '.$ore_str) : '').'</strong>'.
           '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
+      $func_assenze = function($value, $key, $index) use($em, $alunno) {
+        $ore = $em->getRepository('App:AssenzaLezione')->alunnoOreAssenze($alunno, $value->data_obj);
+        $ore_str = implode('ª, ', $ore).'ª';
+        return '<strong>'.$value->data.(count($ore) > 0 ? (' - Ore: '.$ore_str) : '').'</strong>'; };
     } else {
       // modalità assenze giornaliere
       $giustifica = $reg->assenzeRitardiDaGiustificare($data_obj, $alunno, $classe);
-      $choice_func = function ($value, $key, $index) {
+      $func_convalida = function ($value, $key, $index) {
         return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '').
           '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
+      $func_assenze = function ($value, $key, $index) {
+        return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : ''); };
     }
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -855,7 +861,7 @@ class AssenzeController extends AbstractController {
     $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_edit', FormType::class)
       ->add('convalida_assenze', ChoiceType::class, array('label' => 'label.convalida_assenze',
         'choices' => $giustifica['convalida_assenze'],
-        'choice_label' => $choice_func,
+        'choice_label' => $func_convalida,
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],
         'choice_translation_domain' => false,
@@ -876,9 +882,7 @@ class AssenzeController extends AbstractController {
         'required' => false))
       ->add('assenze', ChoiceType::class, array('label' => 'label.assenze',
         'choices' => $giustifica['assenze'],
-        'choice_label' => function ($value, $key, $index) use ($settimana) {
-            return $value->data.($value->giorni > 1 ? (' - '.$value->data_fine.' ('.$value->giorni.' giorni)') : '');
-          },
+        'choice_label' => $func_assenze,
         'choice_value' => 'id',
         'label_attr' => ['class' => 'gs-checkbox'],
         'choice_translation_domain' => false,

@@ -3,7 +3,7 @@
     <h3 class="modal-title gs-h3">{{ info.alunno }} - Classe: {{ info.classe }}</h3>
   {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
     <h4 class="modal-title text-info gs-h4"><em>Giustificazione dell'assenza del giorno {{ info.assenza.data }}
-    {% if info.assenza.ore|length > 1 %}
+    {% if info.assenza.ore|length > 0 %}
       nelle ore:
       {% for o in info.assenza.ore %}
         {{ o }}ª{{ not loop.last ? ',' }}

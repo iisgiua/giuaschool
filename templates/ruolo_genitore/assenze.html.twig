@@ -22,7 +22,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for tipo,e in dati.evidenza %}
+      {% for tipo,e in dati.evidenza %} {{ tipo }}
         {% for v in e %}
       <tr>
           {% if tipo == 'assenza' %}
@@ -30,7 +30,7 @@
             {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
         <td>
           <strong>Assenza
-              {% if v.ore|length > 1 %}
+              {% if v.ore|length > 0 %}
             nelle ore:
                 {% for o in v.ore %}
                   {{ o }}ª{{ not loop.last ? ',' }}
@@ -103,7 +103,7 @@
             {% if app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
         <td>
           <strong>Assenza
-              {% if e.ore|length > 1 %}
+              {% if e.ore|length > 0 %}
             nelle ore:
                 {% for o in e.ore %}
                   {{ o }}ª{{ not loop.last ? ',' }}
