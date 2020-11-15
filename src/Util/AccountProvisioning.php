@@ -128,6 +128,138 @@ class AccountProvisioning {
   }
 
   /**
+   * Crea un nuovo utente sui sistemi esterni
+   *
+   * @param Utente $utente Nuovo utente da creare
+   * @param string $password Password in chiaro dell'utente
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function creaUtente(Utente $utente, $password) {
+    $tipo = ($utente instanceOf Docente ? 'D' : 'A');
+    // GSuite: crea utente
+    if (($errore = $this->creaUtenteGsuite($utente->getNome(), $utente->getCognome(), $utente->getSesso(),
+         $utente->getEmail(), $password, $tipo))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'creaUtenteGsuite: '.$utente->getNome().', '.$utente->getCognome().', '.$utente->getSesso().', '.
+      $utente->getEmail().', '.$password.', '.$tipo;
+    // MOODLE: crea utente
+    if (($errore = $this->creaUtenteMoodle($utente->getNome(), $utente->getCognome(), $utente->getUsername(),
+         $utente->getEmail(), $password, $tipo))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'creaUtenteMoodle: '.$utente->getNome().', '.$utente->getCognome().', '.$utente->getUsername().', '.
+      $utente->getEmail().', '.$password.', '.$tipo;
+    // tutto ok
+    return null;
+  }
+
+  /**
+   * Modifica i dati di un utente sui sistemi esterni
+   *
+   * @param Utente $utente Utente da modificare
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function modificaUtente(Utente $utente) {
+    // GSuite: modifica utente
+    if (($errore = $this->modificaUtenteGsuite($utente->getEmail(), $utente->getNome(), $utente->getCognome(),
+         $utente->getSesso()))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'modificaUtenteGsuite: '.$utente->getEmail().', '.$utente->getNome().', '.$utente->getCognome().
+      ', '.$utente->getSesso();
+    // MOODLE: modifica utente
+    try {
+      $idutente = $this->idUtenteMoodle($utente->getUsername());
+      $this->log[] = 'idUtenteMoodle: '.$utente->getUsername().' -> '.$idutente;
+    } catch (\Exception $e) {
+      // errore
+      return $e->getMessage();
+    }
+    if (($errore = $this->modificaUtenteMoodle($idutente, $utente->getNome(), $utente->getCognome()))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'modificaUtenteMoodle: '.$idutente.', '.$utente->getNome().', '.$utente->getCognome();
+    // tutto ok
+    return null;
+  }
+
+  /**
+   * Modifica la password di un utente sui sistemi esterni
+   *
+   * @param Utente $utente Utente da modificare
+   * @param string $password Password in chiaro dell'utente
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function passwordUtente(Utente $utente, $password) {
+    // cambia password solo sull'Identity provider (GSuite)
+    if (($errore = $this->passwordUtenteGsuite($utente->getEmail(), $password))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'passwordUtenteGsuite: '.$utente->getEmail().', '.$password;
+    // tutto ok
+    return null;
+  }
+
+  /**
+   * Disconnette l'utente dal sistema esterno che fa da identity provider.
+   * ATTENZIONE: disconnette da tutti i dispositivi dell'utente
+   *
+   * @param string $utente Email dell'utente da disconnettere
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function disconnetteUtente($utente) {
+    // disconnette dall'identity provider (GSuite)
+    $errore = null;
+    try {
+      $ris = $this->serviceGsuite['directory']->users->signOut($utente);
+    } catch (\Exception $e) {
+      // errore
+      $msg = json_decode($e->getMessage(), true);
+      $errore = '[disconnetteUtente] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
+      return $errore;
+    }
+    $this->log[] = 'disconnetteUtente: '.$utente;
+    // tutto ok
+    return null;
+  }
+
+  /**
+   * Sospende o riattiva un utente sui sistemi esterni
+   *
+   * @param Utente $utente Utente da modificare
+   * @param boolean $sospeso Vero per sospendere l'utente, falso per riattivarlo
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function sospendeUtente(Utente $utente, $sospeso) {
+    $tipo = ($utente instanceOf Docente ? 'D' : 'A');
+    // GSuite: sospende utente
+    if (($errore = $this->sospendeUtenteGsuite($utente->getEmail(), $tipo, $sospeso))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'sospendeUtenteGsuite: '.$utente->getEmail().', '.$sospeso;
+    // MOODLE: sospende utente
+    if (($errore = $this->sospendeUtenteMoodle($utente->getUsername(), $tipo, $sospeso))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'sospendeUtenteMoodle: '.$utente->getUsername().', '.$tipo.', '.$sospeso;
+    // tutto ok
+    return null;
+  }
+
+  /**
    * Aggiunge un alunno alla classe indicata e ai relativi corsi
    *
    * @param Alunno $alunno Alunno da aggiungere
@@ -257,421 +389,120 @@ class AccountProvisioning {
   }
 
   /**
-   * Crea tutti gli alunni sui sistemi esterni (usa password fittizie)
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function creaAlunni() {
-    // legge alunni
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->join('a.classe', 'c')
-      ->where('a.abilitato=:abilitato')
-      ->setParameters(['abilitato' => 1])
-      ->getQuery()
-      ->getResult();
-    foreach ($alunni as $alu) {
-      // password fittizia
-      $password = 'e23.NJ8&wuer27;-1';
-      // GSuite: crea alunno
-      if (($errore = $this->creaUtenteGsuite($alu->getNome(), $alu->getCognome(), $alu->getSesso(),
-           $alu->getEmail(), $password, 'A'))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'creaUtenteGsuite: '.$alu->getNome().', '.$alu->getCognome().', '.$alu->getSesso().', '.
-        $alu->getEmail().', '.$password.', A';
-      // MOODLE: crea alunno
-      if (($errore = $this->creaUtenteMoodle($alu->getNome(), $alu->getCognome(), $alu->getUsername(),
-           $alu->getEmail(), $password, 'A'))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'creaUtenteMoodle: '.$alu->getNome().', '.$alu->getCognome().', '.$alu->getUsername().', '.
-        $alu->getEmail().', '.$password.', A';
-    }
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Crea tutti i docenti sui sistemi esterni (usa password fittizie)
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function creaDocenti() {
-    // legge docenti
-    $docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-      ->where('d.abilitato=:abilitato')
-      ->setParameters(['abilitato' => 1])
-      ->getQuery()
-      ->getResult();
-    foreach ($docenti as $doc) {
-      // password fittizia
-      $password = 'e23.NJ8&wuer27;-1';
-      // GSuite: crea docente
-      if (($errore = $this->creaUtenteGsuite($doc->getNome(), $doc->getCognome(), $doc->getSesso(),
-           $doc->getEmail(), $password, 'D'))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'creaUtenteGsuite: '.$doc->getNome().', '.$doc->getCognome().', '.$doc->getSesso().', '.
-        $doc->getEmail().', '.$password.', D';
-      // MOODLE: crea docente
-      if (($errore = $this->creaUtenteMoodle($doc->getNome(), $doc->getCognome(), $doc->getUsername(),
-           $doc->getEmail(), $password, 'D'))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'creaUtenteMoodle: '.$doc->getNome().', '.$doc->getCognome().', '.$doc->getUsername().', '.
-        $doc->getEmail().', '.$password.', D';
-    }
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Inserisce gli alunni nei gruppi classe dei sistemi esterni
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function creaClassi() {
-    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
-    // legge alunni
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->join('a.classe', 'c')
-      ->where('a.abilitato=:abilitato')
-      ->setParameters(['abilitato' => 1])
-      ->getQuery()
-      ->getResult();
-    foreach ($alunni as $alu) {
-      // GSuite: aggiunge a gruppo classe
-      $nomeclasse = $alu->getClasse()->getAnno().$alu->getClasse()->getSezione();
-      $gruppo = 'studenti'.strtolower($nomeclasse).'@'.$dominio;
-      if (($errore = $this->aggiungeUtenteGruppoGsuite($alu->getEmail(), $gruppo))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'aggiungeUtenteGruppoGsuite: '.$alu->getEmail().', '.$gruppo;
-      // MOODLE: aggiunge a gruppo classe
-      $gruppo = strtoupper($nomeclasse);
-      if (($errore = $this->aggiungeUtenteGruppoMoodle($alu->getUsername(), $gruppo))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'aggiungeUtenteGruppoMoodle: '.$alu->getUsername().', '.$gruppo;
-    }
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Crea corsi sui sistemi esterni relativi alle cattedre dei docenti
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function creaCattedre() {
-    // crea nuovi corsi da cattedre (esclusi ITP/potenziamento/sostegno)
-    $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->join('c.classe', 'cl')
-      ->join('c.docente', 'd')
-      ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.tipo=:tipo AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
-      ->setParameters(['attiva' => 1, 'tipo' => 'N', 'abilitato' => 1, 'sostegno' => 'S'])
-      ->getQuery()
-      ->getResult();
-    foreach ($cattedre as $cat) {
-      if (($errore = $this->aggiungeCattedra($cat))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'aggiungeCattedra: '.$cat->getId();
-    }
-    // crea corsi in compresenza da cattedre (solo ITP/potenziamento)
-    $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->join('c.classe', 'cl')
-      ->join('c.docente', 'd')
-      ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.tipo IN (:tipi) AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
-      ->setParameters(['attiva' => 1, 'tipi' => ['I', 'P'], 'abilitato' => 1, 'sostegno' => 'S'])
-      ->getQuery()
-      ->getResult();
-    foreach ($cattedre as $cat) {
-      if (($errore = $this->aggiungeCattedra($cat))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'aggiungeCattedra: '.$cat->getId();
-    }
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Crea un nuovo utente sui sistemi esterni
-   *
-   * @param Utente $utente Nuovo utente da creare
-   * @param string $password Password in chiaro dell'utente
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function creaUtente(Utente $utente, $password) {
-    $tipo = ($utente instanceOf Docente ? 'D' : 'A');
-    // GSuite: crea utente
-    if (($errore = $this->creaUtenteGsuite($utente->getNome(), $utente->getCognome(), $utente->getSesso(),
-         $utente->getEmail(), $password, $tipo))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'creaUtenteGsuite: '.$utente->getNome().', '.$utente->getCognome().', '.$utente->getSesso().', '.
-      $utente->getEmail().', '.$password.', '.$tipo;
-    // MOODLE: crea utente
-    if (($errore = $this->creaUtenteMoodle($utente->getNome(), $utente->getCognome(), $utente->getUsername(),
-         $utente->getEmail(), $password, $tipo))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'creaUtenteMoodle: '.$utente->getNome().', '.$utente->getCognome().', '.$utente->getUsername().', '.
-      $utente->getEmail().', '.$password.', '.$tipo;
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Modifica i dati di un utente sui sistemi esterni
-   *
-   * @param Utente $utente Utente da modificare
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function modificaUtente(Utente $utente) {
-    // GSuite: modifica utente
-    if (($errore = $this->modificaUtenteGsuite($utente->getEmail(), $utente->getNome(), $utente->getCognome(),
-         $utente->getSesso()))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'modificaUtenteGsuite: '.$utente->getEmail().', '.$utente->getNome().', '.$utente->getCognome().
-      ', '.$utente->getSesso();
-    // MOODLE: modifica utente
-    try {
-      $idutente = $this->idUtenteMoodle($utente->getUsername());
-      $this->log[] = 'idUtenteMoodle: '.$utente->getUsername().' -> '.$idutente;
-    } catch (\Exception $e) {
-      // errore
-      return $e->getMessage();
-    }
-    if (($errore = $this->modificaUtenteMoodle($idutente, $utente->getNome(), $utente->getCognome()))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'modificaUtenteMoodle: '.$idutente.', '.$utente->getNome().', '.$utente->getCognome();
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Modifica la password di un utente sui sistemi esterni
-   *
-   * @param Utente $utente Utente da modificare
-   * @param string $password Password in chiaro dell'utente
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function passwordUtente(Utente $utente, $password) {
-    // GSuite: password
-    if (($errore = $this->passwordUtenteGsuite($utente->getEmail(), $password))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'passwordUtenteGsuite: '.$utente->getEmail().', '.$password;
-    // MOODLE: password
-    try {
-      $idutente = $this->idUtenteMoodle($utente->getUsername());
-      $this->log[] = 'idUtenteMoodle: '.$utente->getUsername().' -> '.$idutente;
-    } catch (\Exception $e) {
-      // errore
-      return $e->getMessage();
-    }
-    if (($errore = $this->passwordUtenteMoodle($idutente, $password))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'passwordUtenteMoodle: '.$idutente.', '.$password;
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Sospende o riattiva un utente sui sistemi esterni
-   *
-   * @param Utente $utente Utente da modificare
-   * @param boolean $sospeso Vero per sospendere l'utente, falso per riattivarlo
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function sospendeUtente(Utente $utente, $sospeso) {
-    $tipo = ($utente instanceOf Docente ? 'D' : 'A');
-    // GSuite: sospende utente
-    if (($errore = $this->sospendeUtenteGsuite($utente->getEmail(), $tipo, $sospeso))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'sospendeUtenteGsuite: '.$utente->getEmail().', '.$sospeso;
-    // MOODLE: sospende utente
-    try {
-      $idutente = $this->idUtenteMoodle($utente->getUsername());
-      $this->log[] = 'idUtenteMoodle: '.$utente->getUsername().' -> '.$idutente;
-    } catch (\Exception $e) {
-      // errore
-      return $e->getMessage();
-    }
-    if (($errore = $this->sospendeUtenteMoodle($idutente, $sospeso))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'sospendeUtenteMoodle: '.$idutente.', '.$sospeso;
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Crea un corso sui sistemi esterni relativo alla cattedra indicata
+   * Crea un corso sui sistemi esterni relativo alla cattedra indicata.
+   * Aggiunge docente a CdC.
    *
    * @param Cattedra $cattedra Cattedra di cui creare il corso
    *
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function aggiungeCattedra(Cattedra $cattedra) {
-    if ($cattedra->getMateria()->getTipo() == 'S') {
-      // cattedra di SOSTEGNO
-      return $this->aggiungeCattedraSostegno($cattedra);
-    }
     $docente = $cattedra->getDocente()->getEmail();
     $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione();
-    $materia = $cattedra->getMateria()->getNomeBreve();
     $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
-    $corso = strtoupper($nomeclasse.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
-    // GSuite: crea corso
-    if (($errore = $this->creaCorsoGsuite($docente, $nomeclasse, $materia, $anno) )) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'creaCorsoGsuite: '.$docente.', '.$nomeclasse.', '.$materia.', '.$anno;
-    // GSuite: controlla se ci sono studenti nel $corso
-    try {
-      // lista studenti
-      $students = $this->serviceGsuite['classroom']->courses_students->listCoursesStudents('d:'.$corso);
-    } catch (\Exception $e) {
-      // errore
-      $msg = json_decode($e->getMessage(), true);
-      $errore = '[aggiungeCattedra] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
-      return $errore;
-    }
-    if (count($students['students']) == 0) {
-      // GSuite: aggiunge studenti al corso
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-        ->select('a.email')
-        ->where('a.abilitato=:abilitato AND a.classe=:classe')
-        ->setParameters(['abilitato' => 1, 'classe' => $cattedra->getClasse()])
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($alunni as $alu) {
-        if (($errore = $this->aggiungeAlunnoCorsoGsuite($alu['email'], $corso))) {
-          // errore
-          return $errore;
-        }
-        $this->log[] = 'aggiungeAlunnoCorsoGsuite: '.$alu['email'].', '.$corso;
-      }
-    }
-    // MOODLE: crea corso
-    $docente = $cattedra->getDocente()->getUsername();
-    $sede = $cattedra->getClasse()->getSede()->getCitta();
-    $indirizzo = $cattedra->getClasse()->getCorso()->getNomeBreve();
-    if (($errore = $this->creaCorsoMoodle($docente, $nomeclasse, $sede, $indirizzo, $materia, $anno))) {
-      // errore
-      return $errore;
-    }
-    $this->log[] = 'creaCorsoMoodle: '.$docente.', '.$nomeclasse.', '.$sede.', '.$indirizzo.', '.$materia.', '.$anno;
-    // MOODLE: controlla se ci sono gruppi classe nel $corso
-    try {
-      $functionname = 'core_course_get_courses_by_field';
-      $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
-        '&moodlewsrestformat=json';
-      $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
-        'value' => $corso]]);
-      $msg = json_decode($ris->getBody());
-      if (isset($msg->exception)) {
-        // errore
-        $errore = '[aggiungeCattedra] '.$msg->message;
-        return $errore;
-      }
-    } catch (\Exception $e) {
-      // errore
-      $errore = '[aggiungeCattedra] '.$e->getMessage();
-      return $errore;
-    }
-    if (!in_array('cohort', $msg->courses[0]->enrollmentmethods)) {
-      // MOODLE: aggiunge gruppo classe
-      $idcorso = $msg->courses[0]->id;
-      if (($errore = $this->aggiungeClasseCorsoMoodle($nomeclasse, $idcorso))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'aggiungeClasseCorsoMoodle: '.$nomeclasse.', '.$idcorso;
-    }
-    // tutto ok
-    return null;
-  }
-
-  /**
-   * Crea i corsi sui sistemi esterni relativi alla cattedra di sostegno indicata
-   *
-   * @param Cattedra $cattedra Cattedra di sostegno cui creare i corsi
-   *
-   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
-   */
-  public function aggiungeCattedraSostegno(Cattedra $cattedra) {
-    if ($cattedra->getMateria()->getTipo() != 'S') {
-      // cattedra non di SOSTEGNO
-      return null;
-    }
-    $docente_email = $cattedra->getDocente()->getEmail();
-    $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione();
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $coordinatore = ($cattedra->getClasse()->getCoordinatore() == $cattedra->getDocente()) ||
+      ($cattedra->getClasse()->getSegretario() == $cattedra->getDocente());
     $docente_username = $cattedra->getDocente()->getUsername();
     $sede = $cattedra->getClasse()->getSede()->getCitta();
     $indirizzo = $cattedra->getClasse()->getCorso()->getNomeBreve();
-    // legge cattedre di classe
-    $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->join('c.classe', 'cl')
-      ->join('c.docente', 'd')
-      ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
-      ->setParameters(['attiva' => 1, 'classe' => $cattedra->getClasse(), 'abilitato' => 1, 'sostegno' => 'S'])
-      ->getQuery()
-      ->getResult();
+    // gestione cattedra di sostegno
+    if ($cattedra->getMateria()->getTipo() == 'S') {
+      // cattedra di SOSTEGNO: tutte le materie
+      $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+        ->join('c.classe', 'cl')
+        ->join('c.docente', 'd')
+        ->join('c.materia', 'm')
+        ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
+        ->setParameters(['attiva' => 1, 'classe' => $cattedra->getClasse(), 'abilitato' => 1, 'sostegno' => 'S'])
+        ->getQuery()
+        ->getResult();
+    } else {
+      // cattedra curricolare
+      $cattedre = [$cattedra];
+    }
+    // crea corsi
     foreach ($cattedre as $cat) {
-      // GSuite: crea corso
       $materia = $cat->getMateria()->getNomeBreve();
       $corso = strtoupper($nomeclasse.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
-      if (($errore = $this->creaCorsoGsuite($docente_email, $nomeclasse, $materia, $anno) )) {
+      // GSuite: crea corso
+      if (($errore = $this->creaCorsoGsuite($docente, $nomeclasse, $materia, $anno) )) {
         // errore
         return $errore;
       }
-      $this->log[] = 'creaCorsoGsuite: '.$docente_email.', '.$nomeclasse.', '.$materia.', '.$anno;
+      $this->log[] = 'creaCorsoGsuite: '.$docente.', '.$nomeclasse.', '.$materia.', '.$anno;
+      // GSuite: controlla se ci sono studenti nel $corso
+      try {
+        // lista studenti
+        $students = $this->serviceGsuite['classroom']->courses_students->listCoursesStudents('d:'.$corso);
+      } catch (\Exception $e) {
+        // errore
+        $msg = json_decode($e->getMessage(), true);
+        $errore = '[aggiungeCattedra] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
+        return $errore;
+      }
+      if (count($students['students']) == 0) {
+        // GSuite: aggiunge studenti al corso
+        $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+          ->select('a.email')
+          ->where('a.abilitato=:abilitato AND a.classe=:classe')
+          ->setParameters(['abilitato' => 1, 'classe' => $cattedra->getClasse()])
+          ->getQuery()
+          ->getArrayResult();
+        foreach ($alunni as $alu) {
+          if (($errore = $this->aggiungeAlunnoCorsoGsuite($alu['email'], $corso))) {
+            // errore
+            return $errore;
+          }
+          $this->log[] = 'aggiungeAlunnoCorsoGsuite: '.$alu['email'].', '.$corso;
+        }
+      }
       // MOODLE: crea corso
       if (($errore = $this->creaCorsoMoodle($docente_username, $nomeclasse, $sede, $indirizzo, $materia, $anno))) {
         // errore
         return $errore;
       }
       $this->log[] = 'creaCorsoMoodle: '.$docente_username.', '.$nomeclasse.', '.$sede.', '.$indirizzo.', '.$materia.', '.$anno;
+      // MOODLE: controlla se ci sono gruppi classe nel $corso
+      try {
+        $functionname = 'core_course_get_courses_by_field';
+        $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
+          '&moodlewsrestformat=json';
+        $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['field' => 'shortname',
+          'value' => $corso]]);
+        $msg = json_decode($ris->getBody());
+        if (isset($msg->exception)) {
+          // errore
+          $errore = '[aggiungeCattedra] '.$msg->message;
+          return $errore;
+        }
+      } catch (\Exception $e) {
+        // errore
+        $errore = '[aggiungeCattedra] '.$e->getMessage();
+        return $errore;
+      }
+      if (!in_array('cohort', $msg->courses[0]->enrollmentmethods)) {
+        // MOODLE: aggiunge gruppo classe
+        $idcorso = $msg->courses[0]->id;
+        if (($errore = $this->aggiungeClasseCorsoMoodle($nomeclasse, $idcorso))) {
+          // errore
+          return $errore;
+        }
+        $this->log[] = 'aggiungeClasseCorsoMoodle: '.$nomeclasse.', '.$idcorso;
+      }
     }
+    // GSuite: aggiunge docente a CdC
+    if (($errore = $this->aggiungeDocenteCdcGsuite($docente, $nomeclasse, $anno, $coordinatore))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'aggiungeDocenteCdcGsuite: '.$docente.', '.$nomeclasse.', '.$anno.', '.$coordinatore;
     // tutto ok
     return null;
   }
 
   /**
-   * Disabilita un corso sui sistemi esterni relativo alla cattedra indicata
+   * Disabilita un corso sui sistemi esterni relativo alla cattedra indicata.
+   * Rimuove docente da CdC.
    *
    * @param Docente $docente Dodente del corso da rimuovere
    * @param Classe $classe Classe del corso da rimuovere
@@ -681,31 +512,71 @@ class AccountProvisioning {
    */
   public function rimuoveCattedra(Docente $docente, Classe $classe, Materia $materia) {
     $docente_email = $docente->getEmail();
+    $docente_username = $docente->getUsername();
     $nomeclasse = $classe->getAnno().$classe->getSezione();
-    $materia = $materia->getNomeBreve();
     $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
-    $corso = strtoupper($nomeclasse.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
-    // GSuite: rimuove docente da corso
-    if (($errore = $this->rimuoveDocenteCorsoGsuite($docente_email, $corso))) {
-      // errore
-      return $errore;
+    // controlla se ha altre materie nella classe
+    $altre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      ->select('COUNT(c.id)')
+      ->join('c.classe', 'cl')
+      ->join('c.docente', 'd')
+      ->join('c.materia', 'm')
+      ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND d.id=:docente AND m.id!=:materia')
+      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'docente' => $docente,
+        'materia' => $materia])
+      ->getQuery()
+      ->getSingleScalarResult();
+    // gestione cattedra di sostegno
+    if ($materia->getTipo() == 'S') {
+      // cattedra di SOSTEGNO: tutte le materie (anche cattedre/docenti disabilitati)
+      $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+        ->select('DISTINCT m.nomeBreve')
+        ->join('c.classe', 'cl')
+        ->join('c.docente', 'd')
+        ->join('c.materia', 'm')
+        ->where('cl.id=:classe AND m.tipo!=:sostegno')
+        ->setParameters(['classe' => $classe, 'sostegno' => 'S'])
+        ->getQuery()
+        ->getArrayResult();
+    } else {
+      // cattedra curricolare
+      $cattedre = array(['nomeBreve' => $materia->getNomeBreve()]);
     }
-    $this->log[] = 'rimuoveDocenteCorsoGsuite: '.$docente_email.', '.$corso;
-    // MOODLE: rimuove docente da corso
-    try {
-      $idutente = $this->idUtenteMoodle($docente->getUsername());
-      $this->log[] = 'idUtenteMoodle: '.$docente->getUsername().' -> '.$idutente;
-      $idcorso = $this->idCorsoMoodle($corso);
-      $this->log[] = 'idCorsoMoodle: '.$corso.' -> '.$idcorso;
-    } catch (\Exception $e) {
-      // errore
-      return $e->getMessage();
+    // rimuove docente da corsi
+    foreach ($cattedre as $cat) {
+      $materia = $cat['nomeBreve'];
+      $corso = strtoupper($nomeclasse.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
+      // GSuite: rimuove docente da corso
+      if (($errore = $this->rimuoveDocenteCorsoGsuite($docente_email, $corso, ($altre == 0)))) {
+        // errore
+        return $errore;
+      }
+      $this->log[] = 'rimuoveDocenteCorsoGsuite: '.$docente_email.', '.$corso.', '.($altre == 0);
+      // MOODLE: rimuove docente da corso
+      try {
+        $idutente = $this->idUtenteMoodle($docente_username);
+        $this->log[] = 'idUtenteMoodle: '.$docente_username.' -> '.$idutente;
+        $idcorso = $this->idCorsoMoodle($corso);
+        $this->log[] = 'idCorsoMoodle: '.$corso.' -> '.$idcorso;
+      } catch (\Exception $e) {
+        // errore
+        return $e->getMessage();
+      }
+      if (($errore = $this->rimuoveDocenteCorsoMoodle($idutente, $idcorso))) {
+        // errore
+        return $errore;
+      }
+      $this->log[] = 'rimuoveDocenteCorsoMoodle: '.$idutente.', '.$idcorso;
     }
-    if (($errore = $this->rimuoveDocenteCorsoMoodle($idutente, $idcorso))) {
-      // errore
-      return $errore;
+    // rimuove docente da CdC
+    if ($altre == 0) {
+      // GSuite: rimuove docente da CdC
+      if (($errore = $this->rimuoveDocenteCdcGsuite($docente_email, $nomeclasse, $anno))) {
+        // errore
+        return $errore;
+      }
+      $this->log[] = 'rimuoveDocenteCdcGsuite: '.$docente_email.', '.$nomeclasse.', '.$anno;
     }
-    $this->log[] = 'rimuoveDocenteCorsoMoodle: '.$idutente.', '.$idcorso;
     // tutto ok
     return null;
   }
@@ -738,52 +609,73 @@ class AccountProvisioning {
   }
 
   /**
-   * Crea i corsi sui sistemi esterni relativi alle cattedre del docente indicato
+   * Aggiunge coordinatore/segretario a CdC.
    *
-   * @param Docente $docente Docente di cui creare i corsi
+   * @param Docente $docente Docente da aggiungere
+   * @param Classe $classe Classe del CdC
    *
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
-  public function creaCattedreDocente(Docente $docente) {
-    // crea nuovi corsi da cattedre (escluso sostegno)
-    $cattedre = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->join('c.classe', 'cl')
-      ->join('c.docente', 'd')
-      ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.docente=:docente AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
-      ->setParameters(['attiva' => 1, 'docente' => $docente, 'abilitato' => 1, 'sostegno' => 'S'])
-      ->getQuery()
-      ->getResult();
-    foreach ($cattedre as $cat) {
-      if (($errore = $this->aggiungeCattedra($cat))) {
-        // errore
-        return $errore;
-      }
-      $this->log[] = 'aggiungeCattedra: '.$cat->getId();
+  public function aggiungeCoordinatore(Docente $docente, Classe $classe) {
+    $docente_email = $docente->getEmail();
+    $nomeclasse = $classe->getAnno().$classe->getSezione();
+    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    // GSuite: aggiunge docente a CdC come coordinatore/segretario
+    if (($errore = $this->aggiungeDocenteCdcGsuite($docente_email, $nomeclasse, $anno, true))) {
+      // errore
+      return $errore;
     }
+    $this->log[] = 'aggiungeDocenteCdcGsuite: '.$docente_email.', '.$nomeclasse.', '.$anno.', '.(true);
     // tutto ok
     return null;
   }
 
   /**
-   * Disconnette l'utente dal sistema esterno che fa da identity provider
+   * Rimuove coordinatore/segretario da CdC (non rimuove docente da CdC).
    *
-   * @param string $utente Email dell'utente da disconnettere
+   * @param Docente $docente Docente coordinatore da rimuovere
+   * @param Classe $classe Classe del CdC
    *
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
-  public function disconnetteUtente($utente) {
-    // disconnette da GSuite
-    $errore = null;
-    try {
-      $ris = $this->serviceGsuite['directory']->users->signOut($utente);
-    } catch (\Exception $e) {
+  public function rimuoveCoordinatore(Docente $docente, Classe $classe) {
+    $docente_email = $docente->getEmail();
+    $nomeclasse = $classe->getAnno().$classe->getSezione();
+    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    // GSuite: aggiunge docente a CdC
+    if (($errore = $this->aggiungeDocenteCdcGsuite($docente_email, $nomeclasse, $anno, false))) {
       // errore
-      $msg = json_decode($e->getMessage(), true);
-      $errore = '[disconnetteUtente] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
       return $errore;
     }
-    $this->log[] = 'disconnetteUtente: '.$utente;
+    $this->log[] = 'aggiungeDocenteCdcGsuite: '.$docente_email.', '.$nomeclasse.', '.$anno.', '.(false);
+    // tutto ok
+    return null;
+  }
+
+  /**
+   * Sposta coordinatore/segretario da un CdC ad un altro.
+   *
+   * @param Docente $docente Docente da inserire nel CdC
+   * @param Classe $classe Classe del CdC in cui inserire docente
+   * @param Docente $docente_prec Docente precedente del CdC
+   * @param Classe $classe_prec Classe precedente del CdC
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  public function modificaCoordinatore(Docente $docente, Classe $classe, Docente $docente_prec,
+                                     Classe $classe_prec) {
+    // rimuove da CdC precedente
+    if (($errore = $this->rimuoveCoordinatore($docente_prec, $classe_prec))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'rimuoveCoordinatore: ['.$docente_prec.'], ['.$classe_prec.']';
+    // aggiunge a nuovo CdC
+    if (($errore = $this->aggiungeCoordinatore($docente, $classe))) {
+      // errore
+      return $errore;
+    }
+    $this->log[] = 'aggiungeCoordinatore: ['.$docente.'], ['.$classe.']';
     // tutto ok
     return null;
   }
@@ -880,7 +772,8 @@ class AccountProvisioning {
   }
 
   /**
-   * Crea un utente della GSuite
+   * Crea un utente della GSuite. Aggiunge utente a gruppo (studenti/docenti).
+   * I docenti sono aggiunti anche al corso del Collegio dei Docenti.
    *
    * @param string $nome Nome dell'utente
    * @param string $cognome Cognome dell'utente
@@ -935,7 +828,7 @@ class AccountProvisioning {
       sleep(3);
       // aggiunge a gruppo
       $errore = $this->aggiungeUtenteGruppoGsuite($email, $gruppo);
-      if (!$errore) {
+      if (!$errore && $tipo == 'D') {
         // aggiunge docente a corso COLLEGIO DEI DOCENTI
         $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DEI-DOCENTI-'.$anno);
       }
@@ -1003,7 +896,8 @@ class AccountProvisioning {
   }
 
   /**
-   * Sospende un utente della GSuite
+   * Sospende/riattiva un utente della GSuite. Toglie/aggiunge utente da gruppo (studenti/docenti).
+   * I docenti sono tolti/aggiunti anche dal corso del Collegio dei Docenti.
    *
    * @param string $email Email dell'utente (appartente al dominio GSuite)
    * @param string $tipo Tipo di utente [D=docente/staff/preside, A=alunno]
@@ -1015,6 +909,7 @@ class AccountProvisioning {
     // init
     $errore = null;
     $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     try {
       if ($tipo == 'D') {
         // docenti/staff/preside
@@ -1033,9 +928,17 @@ class AccountProvisioning {
       if ($sospeso) {
         // rimuove da gruppo
         $errore = $this->rimuoveUtenteGruppoGsuite($email, $gruppo);
+        if (!$errore && $tipo == 'D') {
+          // toglie docente da corso COLLEGIO DEI DOCENTI
+          $errore = $this->rimuoveAlunnoCorsoGsuite($email, 'COLLEGIO-DEI-DOCENTI-'.$anno);
+        }
       } else {
         // aggiunge a gruppo
         $errore = $this->aggiungeUtenteGruppoGsuite($email, $gruppo);
+        if (!$errore && $tipo == 'D') {
+          // aggiunge docente a corso COLLEGIO DEI DOCENTI
+          $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DEI-DOCENTI-'.$anno);
+        }
       }
     } catch (\Exception $e) {
       // errore
@@ -1047,7 +950,7 @@ class AccountProvisioning {
   }
 
   /**
-   * Crea nuovo corso o aggiunge docente a corso esistente su GSuite
+   * Crea nuovo corso o aggiunge docente a corso esistente su GSuite. Aggiunge docente a gruppo classe.
    *
    * @param string $docente Email del docente del corso (utente già esistente)
    * @param string $classe Nome della classe
@@ -1078,26 +981,22 @@ class AccountProvisioning {
           'courseState' => 'ACTIVE']);
         $corsoObj = $this->serviceGsuite['classroom']->courses->create($course);
       } else {
-        // lista docenti del corso
-        $teachers = $this->serviceGsuite['classroom']->courses_teachers->listCoursesTeachers('d:'.$corso);
         // controlla se è già docente del corso
-        $user = $this->serviceGsuite['directory']->users->get($docente);
-        $trovato = false;
-        foreach ($teachers->teachers as $t) {
-          if ($t->userId == $user->id) {
-            // trova altro docente
-            $trovato = true;
-            break;
-          }
+        $presente = true;
+        try {
+          $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
+        } catch (\Exception $e) {
+          // docente non presente
+          $presente = false;
         }
-        if (!$trovato) {
+        if (!$presente) {
           // aggiunge docente
           $teacher = new GTeacher([
             'userId' => $docente]);
           $ris = $this->serviceGsuite['classroom']->courses_teachers->create('d:'.$corso, $teacher);
         }
       }
-      // aggiunge docente a gruppo docenti-classe
+      // aggiunge docente a gruppo classe
       $errore = $this->aggiungeUtenteGruppoGsuite($docente, 'docenti'.strtolower($classe).'@'.$dominio);
     } catch (\Exception $e) {
       // errore
@@ -1177,16 +1076,19 @@ class AccountProvisioning {
   }
 
   /**
-   * Rimuove un docente da un corso della GSuite
+   * Rimuove un docente da un corso della GSuite. Toglie docente da gruppo classe.
    *
    * @param string $docente Email del docente (già esistente nel sistema)
    * @param string $corso Nome breve del corso (già esistente nel sistema)
+   * @param boolean $cancellagruppo Vero per cancellare docente da gruppo classe.
    *
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
-  private function rimuoveDocenteCorsoGsuite($docente, $corso) {
+  private function rimuoveDocenteCorsoGsuite($docente, $corso, $cancellagruppo) {
     // init
     $errore = null;
+    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $classe = substr($corso, 0, 2);
     try {
       // lista docenti del corso
       $teachers = $this->serviceGsuite['classroom']->courses_teachers->listCoursesTeachers('d:'.$corso);
@@ -1211,10 +1113,125 @@ class AccountProvisioning {
         // rimuove docente da corso
         $ris = $this->serviceGsuite['classroom']->courses_teachers->delete('d:'.$corso, $docente);
       }
+      if ($cancellagruppo) {
+        // rimuove docente da gruppo classe
+        $errore = $this->rimuoveUtenteGruppoGsuite($docente, 'docenti'.strtolower($classe).'@'.$dominio);
+      }
     } catch (\Exception $e) {
       // errore
       $msg = json_decode($e->getMessage(), true);
       $errore = '[rimuoveDocenteCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
+    }
+    // restituisce eventuale errore
+    return $errore;
+  }
+
+  /**
+   * Aggiunge un docente al Consiglio di Classe su GSuite.
+   *
+   * @param string $docente Email del docente del corso (utente già esistente)
+   * @param string $classe Nome della classe
+   * @param string $anno Anno scolastico
+   * @param boolean $coordinatore Vero per inserire docente come coordinatore/segretario
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  private function aggiungeDocenteCdcGsuite($docente, $classe, $anno, $coordinatore) {
+    // init
+    $errore = null;
+    $corso = strtoupper('CONSIGLIO-'.$classe.'-'.$anno);
+    try {
+      // controlla se è presente come coordinatore/segretario
+      $presente = true;
+      try {
+        $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
+      } catch (\Exception $e) {
+        // docente non presente
+        $presente = false;
+      }
+      if ($presente && !$coordinatore) {
+        // docente rimosso da coordinatore/segretario
+        $ris = $this->serviceGsuite['classroom']->courses_teachers->delete('d:'.$corso, $docente);
+        $presente = false;
+      } elseif (!$presente) {
+        // controlla se è presente come docente
+        $presente = true;
+        try {
+          $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $docente);
+        } catch (\Exception $e) {
+          // docente non presente
+          $presente = false;
+        }
+        if ($presente && $coordinatore) {
+          // docente rimosso
+          $ris = $this->serviceGsuite['classroom']->courses_students->delete('d:'.$corso, $docente);
+          $presente = false;
+        }
+      }
+      // inserisce se non presente
+      if (!$presente && $coordinatore) {
+        // aggiunge coordinatore/segretario
+        $teacher = new GTeacher([
+          'userId' => $docente]);
+        $ris = $this->serviceGsuite['classroom']->courses_teachers->create('d:'.$corso, $teacher);
+      } elseif (!$presente && !$coordinatore) {
+        // aggiunge docente
+        $student = new GStudent([
+          'userId' => $docente]);
+        $ris = $this->serviceGsuite['classroom']->courses_students->create('d:'.$corso, $student);
+      }
+    } catch (\Exception $e) {
+      // errore
+      $msg = json_decode($e->getMessage(), true);
+      $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
+    }
+    // restituisce eventuale errore
+    return $errore;
+  }
+
+  /**
+   * Rimuove un docente dal Consiglio di Classe su GSuite.
+   *
+   * @param string $docente Email del docente del corso (utente già esistente)
+   * @param string $classe Nome della classe
+   * @param string $anno Anno scolastico
+   *
+   * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
+   */
+  private function rimuoveDocenteCdcGsuite($docente, $classe, $anno) {
+    // init
+    $errore = null;
+    $corso = strtoupper('CONSIGLIO-'.$classe.'-'.$anno);
+    try {
+      // controlla se è presente come coordinatore/segretario
+      $presente = true;
+      try {
+        $ris = $this->serviceGsuite['classroom']->courses_teachers->get('d:'.$corso, $docente);
+      } catch (\Exception $e) {
+        // docente non presente
+        $presente = false;
+      }
+      if ($presente) {
+        // docente rimosso da coordinatore/segretario
+        $ris = $this->serviceGsuite['classroom']->courses_teachers->delete('d:'.$corso, $docente);
+      } else {
+        // controlla se è presente come docente
+        $presente = true;
+        try {
+          $ris = $this->serviceGsuite['classroom']->courses_students->get('d:'.$corso, $docente);
+        } catch (\Exception $e) {
+          // docente non presente
+          $presente = false;
+        }
+        if ($presente) {
+          // docente rimosso
+          $ris = $this->serviceGsuite['classroom']->courses_students->delete('d:'.$corso, $docente);
+        }
+      }
+    } catch (\Exception $e) {
+      // errore
+      $msg = json_decode($e->getMessage(), true);
+      $errore = '[creaCorsoGsuite] '.(isset($msg['error']) ? $msg['error']['message'] : $e->getMessage());
     }
     // restituisce eventuale errore
     return $errore;
@@ -1260,7 +1277,7 @@ class AccountProvisioning {
     $msg = json_decode($ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception($msg->message);
+      throw new \Exception('[idUtenteMoodle] '.$msg->message);
     }
     // restituisce id utente
     return $msg[0]->id;
@@ -1284,7 +1301,7 @@ class AccountProvisioning {
     $msg = json_decode($ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception($msg->message);
+      throw new \Exception('[idGruppoMoodle] '.$msg->message);
     }
     // restituisce id gruppo
     return $msg->cohorts[0]->id;
@@ -1319,7 +1336,7 @@ class AccountProvisioning {
     $msg = json_decode($ris->getBody());
     if (isset($msg->exception)) {
       // esce con errore
-      throw new \Exception($msg->message);
+      throw new \Exception('[idCategoriaMoodle] '.$msg->message);
     }
     // restituisce id categoria
     return $msg[0]->id;
@@ -1394,7 +1411,7 @@ class AccountProvisioning {
   }
 
   /**
-   * Crea un utente di MOODLE
+   * Crea un utente di MOODLE e lo aggiunge al gruppo (Docenti/Studenti)
    *
    * @param string $nome Nome dell'utente
    * @param string $cognome Cognome dell'utente
@@ -1513,17 +1530,28 @@ class AccountProvisioning {
   }
 
   /**
-   * Sospende un utente di MOODLE
+   * Sospende/riattiva un utente di MOODLE e lo toglie/aggiunge dal gruppo (Docenti/Studenti)
    *
-   * @param int $idutente ID dell'utente (già esistente nel sistema)
+   * @param string $utente Username dell'utente (già esistente nel sistema)
+   * @param string $tipo Tipo di utente [D=docente/staff/preside, A=alunno]
    * @param boolean $sospeso Vero per sospendere, falso per riattivare
    *
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
-  private function sospendeUtenteMoodle($idutente, $sospeso) {
+  private function sospendeUtenteMoodle($utente, $tipo, $sospeso) {
     // init
     $errore = null;
     try {
+      if ($tipo == 'D') {
+        // docenti/staff/preside
+        $gruppo = 'Docenti';
+      } else {
+        // alunni
+        $gruppo = 'Studenti';
+      }
+      // ricava id utente
+      $idutente = $this->idUtenteMoodle($utente);
+      // sospende/riattiva utente
       $functionname = 'core_user_update_users';
       $url = '/webservice/rest/server.php?wstoken='.$this->serviceMoodle['config']->token.'&wsfunction='.$functionname.
         '&moodlewsrestformat=json';
@@ -1535,6 +1563,16 @@ class AccountProvisioning {
       if (isset($msg->exception)) {
         // errore
         $errore = '[sospendeUtenteMoodle] '.$msg->message;
+      } else {
+        if ($sospeso) {
+          // ricava id gruppo
+          $idgruppo = $this->idGruppoMoodle($gruppo);
+          // toglie da gruppo
+          $errore = $this->rimuoveUtenteGruppoMoodle($idutente, $idgruppo);
+        } else {
+          // aggiunge a gruppo
+          $errore = $this->aggiungeUtenteGruppoMoodle($utente, $gruppo);
+        }
       }
     } catch (\Exception $e) {
       // errore
@@ -1670,7 +1708,7 @@ class AccountProvisioning {
   }
 
   /**
-   * Aggiunge un gruppo classe ad un corso di MOODLE
+   * Rimuove un docente da un corso di MOODLE
    *
    * @param int $idutente ID dell'utente (già esistente nel sistema)
    * @param int $idcorso ID del corso (già esistente nel sistema)
@@ -1717,9 +1755,8 @@ class AccountProvisioning {
       'value' => $corso]]);
     $msg = json_decode($ris->getBody());
     if (isset($msg->exception)) {
-      // errore
-      $errore = '[idCorsoMoodle] '.$msg->message;
-      return $errore;
+      // esce con errore
+      throw new \Exception('[idCorsoMoodle] '.$msg->message);
     }
     // restituisce id corso
     return $msg->courses[0]->id;

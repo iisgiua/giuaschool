@@ -64,18 +64,20 @@ class ProvisioningRepository extends EntityRepository {
       foreach ($dati['provisioning']->getDati() as $nm=>$dt) {
         switch ($nm) {
           case 'cattedra':
-            $dati['cattedra'] = $this->_em->getRepository('App:Cattedra')->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App:Cattedra')->find($dt);
             break;
           case 'docente':
-            $dati['docente'] = $this->_em->getRepository('App:Docente')->find($dt);
+          case 'docente_prec':
+            $dati[$nm] = $this->_em->getRepository('App:Docente')->find($dt);
             break;
           case 'classe':
+          case 'classe_prec':
           case 'classe_origine':
           case 'classe_destinazione':
             $dati[$nm] = $this->_em->getRepository('App:Classe')->find($dt);
             break;
           case 'materia':
-            $dati['materia'] = $this->_em->getRepository('App:Materia')->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App:Materia')->find($dt);
             break;
         }
       }
@@ -105,15 +107,21 @@ class ProvisioningRepository extends EntityRepository {
    * Porta nello stato da cancellare il comando eseguito
    *
    * @param int $id ID del comandi
+   * @param array $log Lista delle operazioni eseguite correttamente
    */
-  public function provisioningEseguito($id) {
+  public function provisioningEseguito($id, $log) {
+    $comando = $this->find($id);
+    $dati = $comando->getDati();
+    $dati['log'] = $log;
     // cambia stato ai comandi
     $this->createQueryBuilder('p')
       ->update()
       ->set('p.modificato', ':ora')
       ->set('p.stato', ':cancellare')
+      ->set('p.dati', ':dati')
       ->where('p.id=:id AND p.stato=:processato')
-      ->setParameters(['ora' => new \DateTime(), 'cancellare' => 'C', 'id' => $id, 'processato' => 'P'])
+      ->setParameters(['ora' => new \DateTime(), 'cancellare' => 'C', 'dati' => serialize($dati),
+        'id' => $id, 'processato' => 'P'])
       ->getQuery()
       ->getResult();
   }

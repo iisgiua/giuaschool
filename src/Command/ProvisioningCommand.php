@@ -174,6 +174,15 @@ class ProvisioningCommand extends Command {
         case 'modificaCattedra':
           $errore = $this->prov->modificaCattedra($dati['cattedra'], $dati['docente'], $dati['classe'], $dati['materia']);
           break;
+        case 'aggiungeCoordinatore':
+          $errore = $this->prov->aggiungeCoordinatore($dati['docente'], $dati['classe']);
+          break;
+        case 'rimuoveCoordinatore':
+          $errore = $this->prov->rimuoveCoordinatore($dati['docente'], $dati['classe']);
+          break;
+        case 'modificaCoordinatore':
+          $errore = $this->prov->modificaCoordinatore($dati['docente'], $dati['classe'], $dati['docente_prec'], $dati['classe_prec']);
+          break;
       }
       // log provisioning
       $log = $this->prov->log();
@@ -183,7 +192,7 @@ class ProvisioningCommand extends Command {
         // messaggio d'errore
         $this->logger->error('provisioning-esegue: ERRORE - '.$errore, ['id' => $id]);
       } else {
-        $this->em->getRepository('App:Provisioning')->provisioningEseguito($id);
+        $this->em->getRepository('App:Provisioning')->provisioningEseguito($id, $log);
         // conta comandi eseguiti
         $num++;
       }

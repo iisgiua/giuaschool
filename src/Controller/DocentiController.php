@@ -637,6 +637,8 @@ class DocentiController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       $docente = $classe->getCoordinatore();
+      $classe_old = $classe->getId();
+      $docente_old = $docente->getId();
     } else {
       // azione add
       $classe = null;
@@ -647,10 +649,27 @@ class DocentiController extends BaseController {
       'returnUrl' => $this->generateUrl('docenti_coordinatori'), 'dati' => [$classe, $docente] ]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // memorizza
       $classe = $form->get('classe')->getData();
       $docente = $form->get('docente')->getData();
       $classe->setCoordinatore($docente);
+      // provisioning
+      if (!$id) {
+        // aggiunge coordinatore
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('aggiungeCoordinatore')
+          ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId()]);
+        $em->persist($provisioning);
+      } elseif ($docente->getId() != $docente_old || $classe->getId() != $classe_old) {
+        // modifica dati docente
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('modificaCoordinatore')
+          ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId(),
+            'docente_prec' => $docente_old, 'classe_prec' => $classe_old]);
+        $em->persist($provisioning);
+      }
+      // memorizza
       $em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
@@ -682,7 +701,15 @@ class DocentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // toglie coordinatore
+    $docente_old = $classe->getCoordinatore();
     $classe->setCoordinatore(null);
+    // provisioning
+    $provisioning = (new Provisioning())
+      ->setUtente($docente_old)
+      ->setFunzione('rimuoveCoordinatore')
+      ->setDati(['docente' => $docente_old->getId(), 'classe' => $classe->getId()]);
+    $em->persist($provisioning);
+    // memorizza
     $em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
@@ -775,6 +802,8 @@ class DocentiController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
       $docente = $classe->getSegretario();
+      $classe_old = $classe->getId();
+      $docente_old = $docente->getId();
     } else {
       // azione add
       $classe = null;
@@ -785,10 +814,27 @@ class DocentiController extends BaseController {
       'returnUrl' => $this->generateUrl('docenti_segretari'), 'dati' => [$classe, $docente] ]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // memorizza
       $classe = $form->get('classe')->getData();
       $docente = $form->get('docente')->getData();
       $classe->setSegretario($docente);
+      // provisioning
+      if (!$id) {
+        // aggiunge coordinatore
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('aggiungeCoordinatore')
+          ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId()]);
+        $em->persist($provisioning);
+      } elseif ($docente->getId() != $docente_old || $classe->getId() != $classe_old) {
+        // modifica dati docente
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('modificaCoordinatore')
+          ->setDati(['docente' => $docente->getId(), 'classe' => $classe->getId(),
+            'docente_prec' => $docente_old, 'classe_prec' => $classe_old]);
+        $em->persist($provisioning);
+      }
+      // memorizza
       $em->flush();
       // messaggio
       $this->addFlash('success', 'message.update_ok');
@@ -821,7 +867,15 @@ class DocentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // toglie coordinatore
+    $docente_old = $classe->getSegretario();
     $classe->setSegretario(null);
+    // provisioning
+    $provisioning = (new Provisioning())
+      ->setUtente($docente_old)
+      ->setFunzione('rimuoveCoordinatore')
+      ->setDati(['docente' => $docente_old->getId(), 'classe' => $classe->getId()]);
+    $em->persist($provisioning);
+    // memorizza
     $em->flush();
     // messaggio
     $this->addFlash('success', 'message.update_ok');
