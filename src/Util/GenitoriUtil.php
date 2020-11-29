@@ -1036,7 +1036,7 @@ class GenitoriUtil {
       $this->em->getRepository('App:Configurazione')->findOneByParametro('anno_fine')->getValore().' 00:00:00');
     $fine->modify('-30 days');
     // controllo fine
-    $inizio = new \DateTime('today');
+    $inizio = new \DateTime('tomorrow');
     if ($inizio > $fine) {
       // visualizza errore
       $dati['errore'] = 'exception.colloqui_sospesi';
@@ -1051,7 +1051,7 @@ class GenitoriUtil {
     $freq = ' '.$settimana_en[$colloquio->getGiorno()].' of this month';
     $ora_str = ', dalle '.$ora[0]->getInizio()->format('G:i').' alle '.$ora[0]->getFine()->format('G:i');
     $ora_durata = $ora[0]->getFine()->diff($ora[0]->getInizio())->i;
-    $giorno = new \DateTime('today');
+    $giorno = new \DateTime('tomorrow');
     while ($giorno <= $fine) {
       if (!in_array($giorno->format('n'), $mesi_colloqui)) {
         // prima settimana
@@ -1172,7 +1172,7 @@ class GenitoriUtil {
         break;
     }
     // ore aggiuntive
-    $oggi = new \DateTime('today');
+    $oggi = new \DateTime('tomorrow');
     foreach ($colloquio->getExtra() as $k=>$o) {
       if (substr($k, 0, 4) == 'date') {
         $dt = \DateTime::createFromFormat('d/m/Y H:i', $o.' 00:00');
