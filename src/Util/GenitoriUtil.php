@@ -567,6 +567,7 @@ class GenitoriUtil {
     $dati['stat']['uscite_valide'] = $num_uscite_valide[$numperiodo];
     $dati['stat']['ore'] = 0 + $totale;
     $dati['stat']['ore_perc'] = $perc;
+    $dati['stat']['livello'] = ($perc < 20 ? 'default' : ($perc < 25 ? 'warning' : 'danger'));
     // restituisce dati come array associativo
     return $dati;
   }

@@ -78,7 +78,7 @@
       </tr>
       <tr>
         <th class="gs-big">Totale ore di assenza</th>
-        <td><span class="label label-{{ dati.stat.ore_perc >= 25 ? 'danger' : (dati.stat.ore_perc >= 20 ? 'warning' : 'default') }} gs-big">{{ dati.stat.ore }}</span></td>
+        <td><span class="label label-{{ dati.stat.livello }} gs-big">{{ dati.stat.ore|number_format(1, ',') }}</span></td>
       </tr>
     </tbody>
   </table>

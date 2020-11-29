@@ -102,7 +102,7 @@
         <td>
       {% if dati.statistiche[alunno].ore is defined %}
           <strong>{{ dati.statistiche[alunno].ore }}</strong>
-          <span class="label label-{{ dati.statistiche[alunno].perc < 20 ? 'default' : (dati.statistiche[alunno].perc < 25 ? 'warning' : 'danger') }} gs-ml-3">{{ dati.statistiche[alunno].perc }}%</span>
+          <span class="label label-{{ dati.statistiche[alunno].livello }} gs-ml-3">{{ dati.statistiche[alunno].perc }}%</span>
       {% else %}
           <strong>0</strong>
       {% endif %}

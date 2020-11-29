@@ -323,7 +323,9 @@ class StaffUtil {
     $dati['monte'] = $classe->getOreSettimanali() * 33;
     foreach ($ore as $id=>$o) {
       $dati['statistiche'][$id]['ore'] = number_format($o, 1, ',', null);
-      $dati['statistiche'][$id]['perc'] = number_format($o / $dati['monte'] * 100, 2, ',', null);
+      $perc = $o / $dati['monte'] * 100;
+      $dati['statistiche'][$id]['perc'] = number_format($perc, 2, ',', null);
+      $dati['statistiche'][$id]['livello'] = ($perc < 20 ? 'default' : ($perc < 25 ? 'warning' : 'danger'));
     }
     // dati alunni
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
@@ -521,7 +523,7 @@ class StaffUtil {
       foreach ($lista as $d) {
         if ($d[0] != 'A') {
           $dati['scrutini'][$d[1]->getPeriodo()] =
-            $this->genUtil->pagelle($d[1]->getClasse(), $alunno, $d[1]->getPeriodo());          
+            $this->genUtil->pagelle($d[1]->getClasse(), $alunno, $d[1]->getPeriodo());
         }
       }
     }
