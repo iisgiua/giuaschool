@@ -10,7 +10,7 @@
 {% for c in dati.colloqui %}
   <div class="alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2" role="alert">
     <strong class="gs-text-normal gs-big">Prof.{{ c.sesso == 'F' ? 'ssa' }} {{ c.cognome }} {{ c.nome }}</strong><br>
-    <span class="gs-text-normal">Dalle {{ c.inizio|date('G:i') }} alle {{ c.fine|date('G:i') }}</span>
+    <span class="gs-text-normal">Dalle {{ c.appuntamento|date('G:i') }} alle {{ c.appuntamento|date_modify('+'~c.durata~' minutes')|date('G:i') }}</span>
   {% if c.messaggio is not empty %}
     <br><span class="gs-text-normal">Messaggio del docente: <em>{{ c.messaggio }}</em></span>
   {% endif %}

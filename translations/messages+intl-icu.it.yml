@@ -408,6 +408,15 @@ label.genitore_ruolo_P: padre
 label.genitore_ruolo_M: madre
 label.genitore_ruolo_T: tutore
 label.assenti: Assenti
+label.frequenza_colloquio_S: Settimanale
+label.frequenza_colloquio_1: Prima settimana del mese
+label.frequenza_colloquio_2: Seconda settimana del mese
+label.frequenza_colloquio_3: Terza settimana del mese
+label.frequenza_colloquio_4: Ultima settimana del mese
+label.colloqui_frequenza: Frequenza
+label.colloqui_note: Informazioni per i genitori
+label.colloqui_ore_extra: Ore aggiuntive
+label.colloqui_codice: Codice riunione per Meet
 
 
 ##### PAGINE #####
@@ -459,9 +468,9 @@ title.docenti.segretari_edit: Modifica i dati del segretario del Consiglio di Cl
 page.docenti.cattedre: Configura Cattedre
 title.docenti.cattedre: Configura le cattedre dei docenti
 title.docenti.cattedre_edit: Modifica i dati di una cattedra
-page.docenti.colloqui: Configura Colloqui
-title.docenti.colloqui: Configura i colloqui dei docenti
-title.docenti.colloqui_edit: Modifica i dati dei colloqui
+page.docenti.colloqui: Richieste Colloqui
+title.docenti.colloqui: Richieste di colloquio
+title.docenti.colloqui_edit: Rispondi alla richiesta di colloquio
 page.alunni.importa: Importa Alunni
 title.alunni.importa: Importa i dati degli alunni e dei genitori
 page.alunni.modifica: Modifica Alunni
@@ -582,6 +591,7 @@ page.utenti_notifiche: Gestione Notifiche
 page.utenti_otp: Abilita OTP
 page.utenti_password: Cambia Password
 page.utenti_profilo: Profilo Utente
+page.gestione_colloqui: Gestione Colloqui
 
 title.agenda_eventi: Agenda degli eventi per il docente
 title.alias_exit: Esci dall'alias
@@ -612,7 +622,7 @@ title.coordinatore_voti: Medie dei voti della classe
 title.coordinatore: Aggiungi o modifica un coordinatore del Consiglio di Classe
 title.deroghe: Inserimento deroghe e annotazioni sugli alunni
 title.docenti_colloqui_importa: Importa le ore di colloquio individuale dei docenti da file
-title.docenti_colloqui: Gestione dei colloqui individuali
+title.docenti_colloqui: Colloquio individuali
 title.documenti_classi: Visualizza i documenti dei Consigli di Classe
 title.documenti_doc15: Inserimento dei documenti del 15 Maggio
 title.documenti_piani: Inserimento dei piani di lavoro
@@ -731,6 +741,7 @@ title.utenti_profilo: Profilo dell'utente
 title.voti_alunno: Aggiungi o modifica una valutazione per l'alunno
 title.voti_classe: Aggiungi o modifica una valutazione per la classe
 title.piano_integrativo_apprendimenti: Piano di Integrazione degli Apprendimenti
+title.gestione_colloqui: Inserimento delle ore di colloquio
 
 
 ##### MESSAGGI #####
@@ -993,6 +1004,8 @@ message.note_classe_alunno_trasferito: "Trasferimento/ritiro in data {date}"
 message.note_classe_alunno_sezione: "Cambio sezione in data {date}"
 message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
 message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata nei prossimi 30 minuti. Poi sarà resa definitiva.
+message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: \"{codice}\""
+message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: \"{codice}\""
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
@@ -1202,3 +1215,4 @@ exception.provisioning_exec_moodle: Errore nell'esecuzione del provisioning MOOD
 exception.no_firma_dichiarazione: "Errore: devi sottoscrivere la dichiarazione."
 exception.dichiarazione_incompleta: "Errore: devi compilare la dichiarazione e sottoscriverla."
 exception.data_invalida: "Errore: data non valida. Devi inserire una data nel formato gg/mm/aaaa."
+exception.colloquio_ora_invalida: Non hai inserito l'orario dell'appuntamento.

@@ -111,4 +111,27 @@ class ScansioneOrariaRepository extends EntityRepository {
     return $ora;
   }
 
+  /**
+   * Restituisce i dati della scansione oraria di una un giorno e un orario specificato
+   *
+   * @param int $giorno Giorno settimnale (0=domenica, 1=lunedì, ...)
+   * @param Orario $orario Orario a cui fare riferimento; se nullo si prende quello attuale della sede principale
+   *
+   * @return ScansioneOraria Oggetto che rappresenta la scansione oraria
+   */
+  public function orarioGiorno($giorno, Orario $orario=null) {
+    if (!$orario) {
+      $orario = $this->_em->getRepository('App:Orario')->orarioSede(null);
+    }
+    // legge le ore del giorno
+    $ore = $this->createQueryBuilder('s')
+      ->select('s.ora,s.inizio,s.fine')
+      ->where('s.orario=:orario AND s.giorno=:giorno')
+      ->orderBy('s.ora', 'ASC')
+      ->setParameters(['orario' => $orario, 'giorno' => $giorno])
+      ->getQuery()
+      ->getArrayResult();
+    return $ore;
+  }
+
 }

@@ -100,7 +100,7 @@ class NotificheUtil {
         ->getOneOrNullResult();
       if ($alunno) {
         // legge colloqui
-        $dati['colloqui'] = $this->colloquiGenitore($oggi, $ora, $alunno);
+        $dati['colloqui'] = $this->colloquiGenitore($oggi, $alunno);
         // legge avvisi
         $dati['avvisi'] = $this->numeroAvvisi($utente);
         // legge circolari
@@ -127,7 +127,7 @@ class NotificheUtil {
       // notifiche per i docenti
       $richieste = $this->em->getRepository('App:RichiestaColloquio')->colloquiDocente($utente, ['R']);
       $dati['richieste'] = count($richieste);
-      $dati['colloqui'] = $this->colloquiDocente($oggi, $ora, $utente);
+      $dati['colloqui'] = $this->colloquiDocente($oggi, $utente);
       // legge avvisi
       $dati['avvisi'] = $this->numeroAvvisi($utente);
       // legge circolari
@@ -148,34 +148,30 @@ class NotificheUtil {
    * Restituisce gli appuntamenti confermati per i colloqui
    *
    * @param \DateTime $data Data del giorno iniziale
-   * @param \DateTime $ora Ora iniziale
    * @param Alunno $alunno Alunno su cui fare i colloqui
    *
    * @return array Dati restituiti come array associativo
    */
-  public function colloquiGenitore(\DateTime $data, \DateTime $ora, Alunno $alunno) {
+  public function colloquiGenitore(\DateTime $data, Alunno $alunno) {
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
     // legge colloqui esistenti
     $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
-      ->select('rc.data,rc.stato,rc.messaggio,c.giorno,so.inizio,so.fine,d.cognome,d.nome,d.sesso')
+      ->select('rc.appuntamento,rc.durata,rc.stato,rc.messaggio,c.dati,d.cognome,d.nome,d.sesso')
       ->join('rc.colloquio', 'c')
       ->join('c.docente', 'd')
-      ->join('c.orario', 'o')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
-      ->where('rc.alunno=:alunno AND rc.data>=:data AND rc.stato=:stato')
-      ->orderBy('rc.data,c.ora', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'data' => $data->format('Y-m-d'), 'stato' => 'C'])
+      ->where('rc.alunno=:alunno AND rc.appuntamento>=:data AND rc.stato=:stato')
+      ->orderBy('rc.appuntamento,c.ora', 'ASC')
+      ->setParameters(['alunno' => $alunno, 'data' => $data, 'stato' => 'C'])
       ->getQuery()
       ->getArrayResult();
     foreach ($colloqui as $c) {
-      if ($c['data'] > $data || $c['fine'] <= $ora) {
-        $c['data_str'] = $settimana[$c['giorno']].' '.intval($c['data']->format('d')).' '.
-          $mesi[intval($c['data']->format('m'))].' '.$c['data']->format('Y');
-        $c['ora_str'] = 'dalle '.$c['inizio']->format('G:i').' alle '.$c['fine']->format('G:i');
-        $dati[] = $c;
-      }
+      $c['data_str'] = $settimana[$c['appuntamento']->format('w')].' '.intval($c['appuntamento']->format('d')).' '.
+        $mesi[intval($c['appuntamento']->format('m'))].' '.$c['appuntamento']->format('Y');
+      $c['ora_str'] = 'dalle '.$c['appuntamento']->format('G:i').' alle '.
+        $c['appuntamento']->modify('+'.$c['durata'].' minutes')->format('G:i');
+      $dati[] = $c;
     }
     // restituisce dati
     return $dati;
@@ -184,22 +180,22 @@ class NotificheUtil {
   /**
    * Restituisce gli appuntamenti confermati per i colloqui
    *
-   * @param \DateTime $data Data del giorno iniziale
-   * @param \DateTime $ora Ora iniziale
+   * @param \DateTime $data Data e ora del giorno iniziale
    * @param Docente $docente Docente che deve fare i colloqui
    *
    * @return array Dati restituiti come array associativo
    */
-  public function colloquiDocente(\DateTime $data, \DateTime $ora, Docente $docente) {
+  public function colloquiDocente(\DateTime $data, Docente $docente) {
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
     // legge colloqui confermati
-    $colloqui = $this->em->getRepository('App:RichiestaColloquio')->colloquiDocente($docente, ['C'], $data, $ora);
+    $colloqui = $this->em->getRepository('App:RichiestaColloquio')->colloquiDocente($docente, ['C'], $data);
     foreach ($colloqui as $c) {
-      $c['data_str'] = $settimana[$c['giorno']].' '.intval($c['data']->format('d')).' '.
-        $mesi[intval($c['data']->format('m'))].' '.$c['data']->format('Y');
-      $c['ora_str'] = 'dalle '.$c['inizio']->format('G:i').' alle '.$c['fine']->format('G:i');
+      $c['data_str'] = $settimana[$c['appuntamento']->format('w')].' '.intval($c['appuntamento']->format('d')).' '.
+        $mesi[intval($c['appuntamento']->format('m'))].' '.$c['appuntamento']->format('Y');
+      $c['ora_str'] = 'dalle '.$c['appuntamento']->format('G:i').' alle '.
+        $c['appuntamento']->modify('+'.$c['durata'].' minutes')->format('G:i');
       $dati[] = $c;
     }
     // restituisce dati

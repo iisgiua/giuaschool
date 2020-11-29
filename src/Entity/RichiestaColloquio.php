@@ -45,14 +45,23 @@ class RichiestaColloquio {
   private $modificato;
 
   /**
-   * @var \DateTime $data Data del colloquio
+   * @var \DateTime $appuntamento Data e ora del colloquio
    *
-   * @ORM\Column(type="date", nullable=false)
+   * @ORM\Column(type="datetime", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Date(message="field.datetime")
    */
-  private $data;
+  private $appuntamento;
+
+  /**
+   * @var int $durata Durata del colloquio (in minuti)
+   *
+   * @ORM\Column(type="integer", nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   */
+  private $durata;
 
   /**
    * @var Colloquio $colloquio Colloquio richiesto
@@ -127,23 +136,44 @@ class RichiestaColloquio {
   }
 
   /**
-   * Restituisce la data del colloquio
+   * Restituisce la data e l'ora del colloquio
    *
-   * @return \DateTime Data del colloquio
+   * @return \DateTime Data e ora del colloquio
    */
-  public function getData() {
-    return $this->data;
+  public function getAppuntamento() {
+    return $this->appuntamento;
   }
 
   /**
-   * Modifica la data del colloquio
+   * Modifica la data e l'ora del colloquio
    *
-   * @param \DateTime $data Data del colloquio
+   * @param \DateTime $appuntamento Data e ora del colloquio
    *
    * @return RichiestaColloquio Oggetto RichiestaColloquio
    */
-  public function setData($data) {
-    $this->data = $data;
+  public function setAppuntamento($appuntamento) {
+    $this->appuntamento = $appuntamento;
+    return $this;
+  }
+
+  /**
+   * Restituisce la durata del colloquio (in minuti)
+   *
+   * @return \DateTime Durata del colloquio (in minuti)
+   */
+  public function getDurata() {
+    return $this->durata;
+  }
+
+  /**
+   * Modifica la data e l'ora del colloquio (in minuti)
+   *
+   * @param int $durata Durata del colloquio (in minuti)
+   *
+   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   */
+  public function setDurata($durata) {
+    $this->durata = $durata;
     return $this;
   }
 

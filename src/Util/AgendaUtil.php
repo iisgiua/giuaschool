@@ -85,13 +85,13 @@ class AgendaUtil {
     // colloqui confermati con il docente
     $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
       ->join('rc.colloquio', 'c')
-      ->where('rc.stato=:stato AND MONTH(rc.data)=:mese AND c.docente=:docente')
-      ->orderBy('rc.data', 'ASC')
+      ->where('rc.stato=:stato AND MONTH(rc.appuntamento)=:mese AND c.docente=:docente')
+      ->orderBy('rc.appuntamento', 'ASC')
       ->setParameters(['stato' => 'C', 'docente' => $docente, 'mese' => $mese->format('n')])
       ->getQuery()
       ->getResult();
     foreach ($colloqui as $c) {
-      $dati[intval($c->getData()->format('j'))]['colloqui'] = 1;
+      $dati[intval($c->getAppuntamento()->format('j'))]['colloqui'] = 1;
     }
     // attivita che coinvolgono il docente o la classe
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
@@ -189,8 +189,8 @@ class AgendaUtil {
     // restituisce dati
     return $dati;
   }
-
   /**
+
    * Recupera i dettagli degli eventi per il docente indicato relativamente alla data indicata
    *
    * @param Docente $docente Docente a cui sono indirizzati gli eventi
@@ -204,14 +204,12 @@ class AgendaUtil {
     if ($tipo == 'C') {
       // colloqui
       $dati['colloqui'] = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
-        ->select('rc.id,rc.messaggio,c.giorno,so.inizio,so.fine,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione')
+        ->select('rc.id,rc.messaggio,rc.appuntamento,rc.durata,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione')
         ->join('rc.alunno', 'a')
         ->join('a.classe', 'cl')
         ->join('rc.colloquio', 'c')
-        ->join('c.orario', 'o')
-        ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
-        ->where('rc.data=:data AND rc.stato=:stato AND c.docente=:docente')
-        ->orderBy('c.ora,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
+        ->where("DATE_FORMAT(rc.appuntamento,'%Y-%m-%d')=:data AND rc.stato=:stato AND c.docente=:docente")
+        ->orderBy('rc.appuntamento,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
         ->setParameters(['data' => $data->format('Y-m-d'), 'stato' => 'C', 'docente' => $docente])
         ->getQuery()
         ->getArrayResult();
@@ -489,13 +487,13 @@ class AgendaUtil {
     $dati = null;
     // colloqui
     $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
-      ->where('rc.stato=:stato AND rc.alunno=:alunno AND MONTH(rc.data)=:mese')
-      ->orderBy('rc.data', 'ASC')
+      ->where('rc.stato=:stato AND rc.alunno=:alunno AND MONTH(rc.appuntamento)=:mese')
+      ->orderBy('rc.appuntamento', 'ASC')
       ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'mese' => $mese->format('n')])
       ->getQuery()
       ->getResult();
     foreach ($colloqui as $c) {
-      $dati[intval($c->getData()->format('j'))]['colloqui'] = 1;
+      $dati[intval($c->getAppuntamento()->format('j'))]['colloqui'] = 1;
     }
     // attivita
     $attivita = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
@@ -556,12 +554,10 @@ class AgendaUtil {
     if ($tipo == 'C') {
       // colloqui
       $dati['colloqui'] = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
-        ->select('rc.messaggio,so.inizio,so.fine,d.cognome,d.nome,d.sesso')
+        ->select('rc.messaggio,rc.appuntamento,rc.durata,d.cognome,d.nome,d.sesso')
         ->join('rc.colloquio', 'c')
         ->join('c.docente', 'd')
-        ->join('c.orario', 'o')
-        ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
-        ->where('rc.data=:data AND rc.stato=:stato AND rc.alunno=:alunno')
+        ->where("DATE_FORMAT(rc.appuntamento,'%Y-%m-%d')=:data AND rc.stato=:stato AND rc.alunno=:alunno")
         ->orderBy('c.ora', 'ASC')
         ->setParameters(['data' => $data->format('Y-m-d'), 'stato' => 'C', 'alunno' => $alunno])
         ->getQuery()

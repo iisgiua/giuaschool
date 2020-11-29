@@ -2377,7 +2377,7 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_docenti_colloqui/pagina', $pagina);
     }
     // lista colloqui
-    $lista = $em->getRepository('App:Colloquio')->findAll($search, $pagina, $limite);
+    $lista = $em->getRepository('App:Colloquio')->findAllNoSede($search, $pagina);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/docenti_colloqui.html.twig', array(
       'pagina_titolo' => 'page.staff_colloqui',

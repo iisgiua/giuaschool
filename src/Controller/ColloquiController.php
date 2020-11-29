@@ -24,7 +24,16 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Translation\TranslatorInterface;
+use App\Entity\Colloquio;
 use App\Entity\RichiestaColloquio;
+use App\Util\RegistroUtil;
+use App\Form\ColloquioType;
 
 
 /**
@@ -61,7 +70,7 @@ class ColloquiController extends AbstractController {
     } else {
       // legge richieste
       $dati['richieste'] = $em->getRepository('App:RichiestaColloquio')->colloquiDocente($this->getUser());
-      $dati['ore'] = $em->getRepository('App:Colloquio')->ore($this->getUser());
+      $dati['ore'] = $em->getRepository('App:Colloquio')->oreNoSede($this->getUser());
     }
     // visualizza pagina
     return $this->render('colloqui/colloqui.html.twig', array(
@@ -78,6 +87,7 @@ class ColloquiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RichiestaColloquio $richiesta Richiesta di colloquio da modificare
    * @param string $azione Tipo di modifica da effettuare
    *
@@ -89,7 +99,8 @@ class ColloquiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function colloquiEditAction(Request $request, EntityManagerInterface $em, RichiestaColloquio $richiesta, $azione) {
+  public function colloquiEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+                                     RichiestaColloquio $richiesta, $azione) {
     // inizializza variabili
     $label = array();
     // controlla richiesta
@@ -104,16 +115,18 @@ class ColloquiController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // info
-    $label['docente'] = $colloquio->getDocente()->getCognome().' '.$colloquio->getDocente()->getNome();
     $label['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome();
     $label['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $label['data'] = $richiesta->getData()->format('d/m/Y');
+    $label['data'] = $richiesta->getAppuntamento()->format('d/m/Y');
+    $label['ora_inizio'] = $richiesta->getAppuntamento()->format('G:i');
+    $ora = clone $richiesta->getAppuntamento();
+    $label['ora_fine'] = $ora->modify('+'.$richiesta->getDurata().' minutes')->format('G:i');
     // azione
     if ($azione == 'C') {
       // conferma colloquio
-      $msg_required = false;
+      $msg_required = true;
       $stato_disabled = true;
-      $msg = '';
+      $msg = 'L\'appuntamento è alle ore XX:XX; il colloquio avrà la durata di circa 10 minuti, in modo da consentire l\'incontro con diversi genitori.';
       $stato = 'C';
     } elseif ($azione == 'N') {
       // rifiuta colloquio
@@ -148,13 +161,19 @@ class ColloquiController extends AbstractController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      if (strstr($form->get('messaggio')->getData(), 'XX:XX') !== FALSE) {
+        // errore nel messaggio
+        $form->addError(new FormError($trans->trans('exception.colloquio_ora_invalida')));
+      } else {
+        // tutto ok
         $richiesta
           ->setStato($form->get('stato')->getData())
           ->setMessaggio($form->get('messaggio')->getData());
-      // ok: memorizza dati
-      $em->flush();
-      // redirezione
-      return $this->redirectToRoute('colloqui');
+        // memorizza dati
+        $em->flush();
+        // redirezione
+        return $this->redirectToRoute('colloqui');
+      }
     }
     // mostra la pagina di risposta
     return $this->render('colloqui/colloqui_edit.html.twig', array(
@@ -162,6 +181,116 @@ class ColloquiController extends AbstractController {
       'form' => $form->createView(),
       'form_title' => 'title.risposta_colloqui',
       'label' => $label,
+    ));
+  }
+
+  /**
+   * Gestione dell'inserimento dei giorni di colloquio
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/gestione/", name="colloqui_gestione",
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function gestioneAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+                                 RegistroUtil $reg) {
+    $docente = $this->getUser();
+    // determina operazione da eseguire
+    $colloquio = $em->getRepository('App:Colloquio')->findOneByDocente($docente);
+    if ($colloquio) {
+      // modalità modifica
+      $edit = true;
+      $codice = $colloquio->getDato('codice');
+    } else {
+      // modalità inserimento
+      $edit = false;
+      $codice = 'aula-'.str_replace([' ', '\'', 'à', 'è', 'é', 'ì', 'ò', 'ù'], ['', '', 'a', 'e', 'e', 'i', 'o', 'u'],
+        mb_strtolower($docente->getCognome())).'-'.mb_strtolower(substr($docente->getNome(), 0, 1));
+      $colloquio = (new Colloquio())
+        ->addDato('codice', $codice)
+        ->setFrequenza('4')
+        ->setGiorno(1)
+        ->setOra(1)
+        ->setDocente($docente);
+      $em->persist($colloquio);
+    }
+    // determina lista orari
+    $ore = $em->getRepository('App:ScansioneOraria')->orarioGiorno($colloquio->getGiorno(), $colloquio->getOrario());
+    $lista_ore = array();
+    foreach ($ore as $o) {
+      $opzione = $o['ora'].': '.$o['inizio']->format('H:i').' - '.$o['fine']->format('H:i');
+      $lista_ore[$opzione] = $o['ora'];
+    }
+    // determina lista ore aggiuntive
+    $lista_aggiuntiva = array();
+    $oggi = new \DateTime('today');
+    foreach ($colloquio->getExtra() as $k=>$o) {
+      if (substr($k, 0, 4) == 'date') {
+        $dt = \DateTime::createFromFormat('d/m/Y H:i', $o.' 00:00');
+        if ($dt >= $oggi) {
+          $kt = 'time'.substr($k, 4);
+          $lista_aggiuntiva[$k] = $o;
+          $lista_aggiuntiva[$kt] = $colloquio->getExtra()[$kt];
+        }
+      }
+    }
+    // form di inserimento
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'noSede',
+      'returnUrl' => $this->generateUrl('colloqui'), 'dati' => [$codice, $lista_ore, $lista_aggiuntiva]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controlla date aggiuntive
+      $lista_date = array();
+      $dt = '';
+      foreach ($form->get('extra')->getData() as $k=>$v) {
+        if (substr($k, 0, 4) == 'date') {
+          $dt = $v;
+        } else {
+          $dt_obj = \DateTime::createFromFormat('d/m/Y H:i', $dt.' '.$v);
+          if ($dt_obj) {
+            // data corretta
+            $lista_date[$dt_obj->format('YmdHi')] = array($dt, $v, $dt_obj);
+          }
+          $dt = '';
+        }
+      }
+      // ordina date
+      ksort($lista_date);
+      // controlla festivi
+      $date_aggiuntive = array();
+      $n = 0;
+      foreach ($lista_date as $v) {
+        $errore = $reg->controlloData($v[2], null);
+        if ($errore) {
+          // errore: festivo
+          $form->addError(new FormError($trans->trans('exception.data_festiva')));
+          break;
+        }
+        $date_aggiuntive['date'.$n] = $v[0];
+        $date_aggiuntive['time'.$n] = $v[1];
+        $n++;
+      }
+      if ($form->isValid()) {
+        // ok: memorizza dati
+        $colloquio->setExtra($date_aggiuntive);
+        $colloquio->addDato('codice', $form->get('codice')->getData());
+        $em->flush();
+        // redirezione
+        return $this->redirectToRoute('colloqui');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->render('colloqui/gestione.html.twig', array(
+      'pagina_titolo' => 'page.gestione_colloqui',
+      'form' => $form->createView(),
+      'form_title' => 'title.gestione_colloqui',
     ));
   }
 

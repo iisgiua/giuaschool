@@ -57,9 +57,9 @@ class Colloquio {
   /**
    * @var string $note Note informative sul colloquio
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
+   * @ORM\Column(type="string", length=2048, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
+   * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
   private $note;
 
@@ -77,9 +77,7 @@ class Colloquio {
    * @var Orario $orario Orario a cui appartiene il colloquio
    *
    * @ORM\ManyToOne(targetEntity="Orario")
-   * @ORM\JoinColumn(nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
+   * @ORM\JoinColumn(nullable=true)
    */
   private $orario;
 
@@ -101,6 +99,20 @@ class Colloquio {
    * @Assert\NotBlank(message="field.notblank")
    */
   private $ora;
+
+  /**
+   * @var array $extra Liste di ora extra per i colloqui
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $extra;
+
+  /**
+   * @var array $dati Lista di dati aggiuntivi
+   *
+   * @ORM\Column(type="array", nullable=true)
+   */
+  private $dati;
 
 
   //==================== EVENTI ORM ====================
@@ -216,7 +228,7 @@ class Colloquio {
    *
    * @return Colloquio Oggetto Colloquio
    */
-  public function setOrario(Orario $orario) {
+  public function setOrario(Orario $orario=null) {
     $this->orario = $orario;
     return $this;
   }
@@ -263,8 +275,138 @@ class Colloquio {
     return $this;
   }
 
+  /**
+   * Restituisce la lista di ora extra per i colloqui
+   *
+   * @return array Lista di ora extra per i colloqui
+   */
+  public function getExtra() {
+    return $this->extra;
+  }
+
+  /**
+   * Modifica la lista di ora extra per i colloqui
+   *
+   * @param array $extra Lista di ora extra per i colloqui
+   *
+   * @return Colloquio Oggetto Colloquio
+   */
+  public function setExtra($extra) {
+    if ($extra === $this->extra) {
+      // clona array per forzare update su doctrine
+      $extra = unserialize(serialize($extra));
+    }
+    $this->extra = $extra;
+    return $this;
+  }
+
+  /**
+   * Aggiunge un'ora extra per i colloqui
+   *
+   * @param \DateTime $ora Ora per i colloqui
+   *
+   * @return Colloquio Oggetto Colloquio
+   */
+  public function addExtra(\DateTime $ora) {
+    if (!in_array($ora, $this->extra)) {
+      $this->extra[] = $ora;
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove un'ora extra dai colloqui
+   *
+   * @param \DateTime $ora Ora per i colloqui
+   *
+   * @return Colloquio Oggetto Colloquio
+   */
+  public function removeExtra(\DateTime $ora) {
+    if (in_array($ora, $this->extra)) {
+      unset($this->extra[array_search($ora, $this->extra)]);
+    }
+    return $this;
+  }
+
+  /**
+   * Restituisce la lista di dati aggiuntivi
+   *
+   * @return array Lista di dati aggiuntivi
+   */
+  public function getDati() {
+    return $this->dati;
+  }
+
+  /**
+   * Modifica la lista di dati aggiuntivi
+   *
+   * @param array $dati Lista di dati aggiuntivi
+   *
+   * @return Colloquio Oggetto Colloquio
+   */
+  public function setDati($dati) {
+    if ($dati === $this->dati) {
+      // clona array per forzare update su doctrine
+      $dati = unserialize(serialize($dati));
+    }
+    $this->dati = $dati;
+    return $this;
+  }
+
+  /**
+   * Restituisce il valore del dato indicato all'interno della lista dei dati aggiuntivi
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return mixed Valore del dato o null se non esiste
+   */
+  public function getDato($nome) {
+    if (isset($this->dati[$nome])) {
+      return $this->dati[$nome];
+    }
+    return null;
+  }
+
+  /**
+   * Aggiunge/modifica un dato alla lista dei dati aggiuntivi
+   *
+   * @param string $nome Nome identificativo del dato
+   * @param mixed $valore Valore del dato
+   *
+   * @return Colloquio Oggetto Colloquio
+   */
+  public function addDato($nome, $valore) {
+    if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
+      // clona array per forzare update su doctrine
+      $valore = unserialize(serialize($valore));
+    }
+    $this->dati[$nome] = $valore;
+    return $this;
+  }
+
+  /**
+   * Elimina un dato dalla lista dei dati aggiuntivi
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return Colloquio Oggetto Colloquio
+   */
+  public function removeDato($nome) {
+    unset($this->dati[$nome]);
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->extra = array();
+    $this->dati = array();
+  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo
@@ -276,4 +418,3 @@ class Colloquio {
   }
 
 }
-

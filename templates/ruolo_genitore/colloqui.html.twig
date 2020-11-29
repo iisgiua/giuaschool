@@ -17,9 +17,10 @@
     <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ 'title.richieste_colloqui'|trans }}</strong></caption>
     <thead class="bg-success">
       <tr>
-        <th class="col-sm-3">Docente</th>
+        <th class="col-sm-2">Docente</th>
+        <th class="col-sm-2">Materia</th>
         <th class="col-sm-4">Data e ora</th>
-        <th class="col-sm-5">Stato della richiesta</th>
+        <th class="col-sm-4">Stato della richiesta</th>
       </tr>
     </thead>
     <tbody>
@@ -27,6 +28,11 @@
         {% for c1 in c %}
       <tr{{ c1.stato == 'R' ? ' class="bg-warning"' : (c1.stato == 'A' or c1.stato == 'N' ? ' class="text-danger"') }}>
         <td><strong>{{ dati.cattedre[docente][0].cognome }} {{ dati.cattedre[docente][0].nome }}</strong></td>
+        <td>
+          {% for m in dati.cattedre[docente] %}
+            {% if loop.index > 1 %}<br>{% endif %}{{ m.tipo == 'I' ? 'Lab. ' }}{{ m.nomeBreve }}
+          {% endfor %}
+        </td>
         <td><strong>{{ c1.data_str }} {{ c1.ora_str }}</strong></td>
         <td>
           {% if c1.stato == 'R' %}
@@ -36,6 +42,9 @@
           <strong>Appuntamento confermato</strong>
             {% if c1.messaggio %}
           <br>Messaggio del docente:<small><br><em>{{ c1.messaggio }}</em></small>
+            {% endif %}
+            {% if dati.orari[docente].dati.codice is defined %}
+          <br><strong>Codice riunione: <pre>{{ dati.orari[docente].dati.codice }}</pre></strong>
             {% endif %}
           <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio con il docente" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('genitori_colloqui_disdetta', {'richiesta': c1.id}) }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
           {% elseif c1.stato == 'A' %}
@@ -92,6 +101,9 @@
         {% endif %}
             dalle {{ dati.orari[docente].inizio|date('G:i') }} alle {{ dati.orari[docente].fine|date('G:i') }}
           </strong>
+        {% if dati.orari[docente].extra|length > 0 %}
+          <br><em>Sono presenti ore aggiuntive per i colloqui</em>
+        {% endif %}
         {% if dati.orari[docente].note is not empty %}
           <br><span>{{ dati.orari[docente].note }}</span>
         {% endif %}
@@ -121,7 +133,6 @@ $(document).ready(function() {
     var text = $(event.relatedTarget).data('text');
     $(this).find('#gs-modal-confirm-msg').text(text);
   });
-
 });
 </script>
 {% endblock %}

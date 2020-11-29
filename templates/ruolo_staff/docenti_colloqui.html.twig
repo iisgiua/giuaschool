@@ -7,38 +7,45 @@
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <thead class="bg-success">
       <tr>
-        <th>{{ 'label.sede'|trans }}</th>
-        <th>{{ 'label.docente'|trans }}</th>
-        <th>{{ 'label.colloquio'|trans }}</th>
-        <th>{{ 'label.note'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.sede'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.docente'|trans }}</th>
+        <th class="col-sm-4">{{ 'label.colloquio'|trans }}</th>
+        <th class="col-sm-4">{{ 'label.note'|trans }}</th>
       </tr>
     </thead>
     <tbody>
     {% for c in lista %}
       <tr>
-        <td>{{ c.sede }}</td>
+        <td>{{ c.citta is defined ? c.citta : 'A DISTANZA' }}</td>
         <td>{{ c.docente }}</td>
         <td>
           <strong>
-          {% if c.colloquio.frequenza == 'S' %}
+      {% if c.colloquio.frequenza == 'S' %}
             Ogni
-          {% elseif c.colloquio.frequenza == '1' %}
+      {% elseif c.colloquio.frequenza == '1' %}
             Primo
-          {% elseif c.colloquio.frequenza == '2' %}
+      {% elseif c.colloquio.frequenza == '2' %}
             Secondo
-          {% elseif c.colloquio.frequenza == '3' %}
+      {% elseif c.colloquio.frequenza == '3' %}
             Terzo
-          {% elseif c.colloquio.frequenza == '4' %}
+      {% elseif c.colloquio.frequenza == '4' %}
             Ultimo
-          {% endif %}
+      {% endif %}
           {{ giorni_settimana[c.colloquio.giorno] }}
-          {% if c.colloquio.frequenza != 'S' %}
+      {% if c.colloquio.frequenza != 'S' %}
             del mese
-          {% endif %}
+      {% endif %}
             dalle {{ c.inizio|date('H:i') }} alle {{ c.fine|date('H:i') }}
           </strong>
         </td>
-        <td>{{ c.colloquio.note }}</td>
+        <td>
+      {% if c.colloquio.extra|length > 0 %}
+          Ore aggiuntive:<br>
+        {% for k,v in c.colloquio.extra|filter((v1,k1) => k1[:4] == 'date') %}
+          <strong>{{ v }} dalle {{ c.colloquio.extra['time'~(k[4:])] }} alle {{ c.colloquio.extra['time'~(k[4:])]|date_modify('+1 hour')|date('H:i') }}<br>
+        {% endfor %}
+      {% endif %}
+        </td>
       </tr>
     {% endfor %}
     </tbody>

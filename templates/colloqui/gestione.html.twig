@@ -1,0 +1,141 @@
+{% extends 'colloqui/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="panel panel-primary gs-mt-4" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body gs-pt-0 gs-pl-0 gs-pr-0">
+      {{ form_start(form) }}
+      <div class="gs-mt-4 gs-ml-5 gs-mr-5">
+        {{ form_errors(form) }}
+      </div>
+      <div class="bg-info text-center gs-pl-4 gs-pr-4 gs-pt-2 gs-pb-2"><strong class="gs-big">Impostazioni generali</strong></div>
+      {#-- <div class="form-group gs-pl-4 gs-pr-4 gs-mt-2 gs-mb-2"> #}
+        {#-- <label class="col-sm-2 control-label" for="colloquio_note">{{ 'label.colloqui_note'|trans }}</label> #}
+        {#-- <div class="col-sm-10"> #}
+          {#-- {{ form_widget(form.note) }} #}
+        {#-- </div> #}
+      {#-- </div> #}
+      <div class="form-group gs-pl-4 gs-pr-4 gs-mt-2 gs-mb-2">
+        <label class="col-sm-2 control-label required" for="colloquio_codice">{{ 'label.colloqui_codice'|trans }}</label>
+        <div class="col-sm-10">
+          {{ form_widget(form.codice) }}
+        </div>
+      </div>
+      <div class="bg-info text-center gs-pl-4 gs-pr-4 gs-pt-2 gs-pb-2 gs-mt-4"><strong class="gs-big">Colloqui periodici</strong></div>
+      <div class="form-group gs-pl-4 gs-pr-4 gs-mt-2 gs-mb-2">
+        <label class="col-sm-2 control-label required" for="colloquio_frequenza">{{ 'label.colloqui_frequenza'|trans }}</label>
+        <div class="col-sm-4">
+          {{ form_widget(form.frequenza) }}
+        </div>
+        <label class="col-sm-2 control-label">{{ 'label.sede'|trans }}</label>
+        <div class="col-sm-4 gs-mt-2">A distanza</div>
+      </div>
+      <div class="form-group gs-pl-4 gs-pr-4 gs-mt-2 gs-mb-2">
+        <label class="col-sm-2 control-label required" for="colloquio_giorno">{{ 'label.giorno'|trans }}</label>
+        <div class="col-sm-4">
+          {{ form_widget(form.giorno) }}
+        </div>
+        <label class="col-sm-2 control-label required" for="colloquio_ora">{{ 'label.ora'|trans }}</label>
+        <div class="col-sm-4">
+          {{ form_widget(form.ora) }}
+        </div>
+      </div>
+      <div class="bg-info text-center gs-pl-4 gs-pr-4 gs-pt-2 gs-pb-2 gs-mt-4"><strong class="gs-big">Ore aggiuntive per i colloqui</strong></div>
+      <div class="form-group gs-pl-4 gs-pr-4 gs-mt-2 gs-mb-2">
+        <div class="col-sm-10 col-sm-offset-2">
+          {{ form_widget(form.extra) }}
+          <div><button class="btn btn-success btn-sm gs-add-item" type="button" title="Aggiunge un\'ora di colloquio"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><strong class="gs-ml-2">Aggiungi colloquio</strong></button></div>
+        </div>
+      </div>
+      <div class="gs-mt-5 gs-mb-5 gs-pt-3">&nbsp;</div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('#colloquio_extra').on('click', '.gs-remove-item', function(e) {
+    $(this).closest('.gs-collection').remove();
+  });
+  $('#colloquio_extra').parent().on('click', '.gs-add-item', function(e) {
+    var f = '<div class="row gs-collection gs-mb-2">\
+      <div class="col-sm-4"><div class="input-group date"><input type="text" id="colloquio_extra_date___name__" name="colloquio[extra][date__name__]" class="form-control" autocomplete="off" /><span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span></div></div>\
+      <div class="col-sm-4"><div class="input-group time"><input type="text" id="colloquio_extra_time___name__" name="colloquio[extra][time__name__]" class="form-control" autocomplete="off" /><span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-time"></span></span></div></div>\
+      <div class="col-sm-4"><button class="btn btn-danger btn-sm gs-remove-item" type="button" title="Cancella l\'ora di colloquio"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><strong class="gs-ml-2">Cancella</strong></button></div>\
+      </div>';
+    var id = $('#colloquio_extra').find('input').last().attr('id');
+    var re = /\d+$/;
+    var n0 = re.exec(id);
+    var n = (n0 == null ? 0 : parseInt(n0, 10) + 1);
+    f = f.replace(/__name__/g, n);
+    $('#colloquio_extra').append(f);
+    $('#colloquio_extra_time_'+n).val('15:00');
+    aggiungeDTPicker();
+  });
+  /*** init ***/
+  $('#colloquio_extra .form-group input:hidden').each(function(i,o) {
+    var v = $(o).val();
+    if ((i % 2) == 0) {
+      var f = '<div class="row gs-collection gs-mb-2">\
+        <div class="col-sm-4"><div class="input-group date"><input type="text" id="colloquio_extra_date___name__" name="colloquio[extra][date__name__]" class="form-control" autocomplete="off" /><span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span></div></div>\
+        <div class="col-sm-4"><div class="input-group time"><input type="text" id="colloquio_extra_time___name__" name="colloquio[extra][time__name__]" class="form-control" autocomplete="off" /><span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-time"></span></span></div></div>\
+        <div class="col-sm-4"><button class="btn btn-danger btn-sm gs-remove-item" type="button" title="Cancella l\'ora di colloquio"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><strong class="gs-ml-2">Cancella</strong></button></div>\
+        </div>';
+      f = f.replace(/__name__/g, i / 2);
+      $('#colloquio_extra').append(f);
+      $('#colloquio_extra').find('.date input').last().val(v);
+      $(o).parent().parent().remove();
+    } else {
+      $('#colloquio_extra').find('.time input').last().val(v);
+      $(o).parent().parent().remove();
+    }
+  });
+  aggiungeDTPicker();
+  $('#colloquio_extra').removeClass('hide');
+});
+function aggiungeDTPicker() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ date()|date('d/m/Y') }}",
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12 ,13, 14, 15, 16, 17, 18, 19, 20],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+  });
+}
+</script>
+{% endblock %}

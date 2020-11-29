@@ -25,28 +25,23 @@ class RichiestaColloquioRepository extends EntityRepository {
    * Restituisce gli appuntamenti richiesti al docente
    *
    * @param Docente $docente Docente a cui sono inviate le richieste di colloquio
+   * @param array $stato LIsta degli stati della richiesta del colloquio
    * @param \DateTime $data Data del colloquio da cui iniziare la ricerca
-   * @param \DateTime $ora Ora del colloquio da cui iniziare la ricerca
    *
    * @return array Dati restituiti
    */
-  public function colloquiDocente(Docente $docente, $stato=null, \DateTime $data=null, \DateTime $ora=null) {
+  public function colloquiDocente(Docente $docente, $stato=null, \DateTime $data=null) {
     if (!$data) {
       $data = new \DateTime('today');
     }
-    if (!$ora) {
-      $ora = new \DateTime('now');
-    }
     $colloqui = $this->createQueryBuilder('rc')
-      ->select('rc.id,rc.data,rc.stato,rc.messaggio,c.giorno,so.inizio,so.fine,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione')
+      ->select('rc.id,rc.appuntamento,rc.durata,rc.stato,rc.messaggio,c.dati,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione')
       ->join('rc.alunno', 'a')
       ->join('a.classe', 'cl')
       ->join('rc.colloquio', 'c')
-      ->join('c.orario', 'o')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
-      ->where('c.docente=:docente AND rc.data>=:data')
-      ->orderBy('rc.data,c.ora,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
-      ->setParameters(['docente' => $docente, 'data' => $data->format('Y-m-d')]);
+      ->where('c.docente=:docente AND rc.appuntamento>=:data')
+      ->orderBy('rc.appuntamento,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
+      ->setParameters(['docente' => $docente, 'data' => $data]);
     if (!empty($stato)) {
       $colloqui->andWhere('rc.stato IN (:stato)')->setParameter('stato', $stato);
     }

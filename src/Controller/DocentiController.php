@@ -1178,8 +1178,8 @@ class DocentiController extends BaseController {
       $docente = null;
     }
     // form
-    $form = $this->createForm(ColloquioType::class, $colloquio,
-      ['returnUrl' => $this->generateUrl('docenti_colloqui'), 'dati' => [$sede, $docente]]);
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'sede',
+      'returnUrl' => $this->generateUrl('docenti_colloqui'), 'dati' => [$sede, $docente]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta orario di sede

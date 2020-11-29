@@ -21,7 +21,15 @@
     {% endif %}
     {% if dati.colloqui %}
       {% for c in dati.colloqui %}
-      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} (classe {{ c.anno }}ª {{ c.sezione }}): {{ c.data_str }} {{ c.ora_str }}</strong></div>
+      <div class="alert alert-success gs-mb-2" role="alert">
+        <strong class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} (classe {{ c.anno }}ª {{ c.sezione }}): {{ c.data_str }} {{ c.ora_str }}</strong>
+        {% if c.messaggio is not empty %}
+        <br>Messaggio al genitore: <em>{{ c.messaggio }}</em>
+        {% endif %}
+        {% if c.dati.codice is not empty %}
+        <br>Codice riunione: <strong>{{ c.dati.codice }}</strong>
+        {% endif %}
+      </div>
       {% endfor %}
     {% endif %}
     {% if dati.avvisi > 0 %}
@@ -49,6 +57,9 @@
         Colloquio con {{ c.sesso == 'M' ? 'il prof.' : 'la prof.ssa' }} {{ c.cognome }} {{ c.nome }}: <strong>{{ c.data_str }} {{ c.ora_str }}</strong>
         {% if c.messaggio is not empty %}
         <br>Messaggio del docente: <em>{{ c.messaggio }}</em>
+        {% endif %}
+        {% if c.dati.codice is not empty %}
+        <br>Codice riunione: <strong>{{ c.dati.codice }}</strong>
         {% endif %}
       </div>
       {% endfor %}

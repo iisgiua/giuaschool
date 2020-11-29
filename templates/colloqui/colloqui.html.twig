@@ -22,7 +22,7 @@
     <tbody>
       {% for r in dati.richieste %}
       <tr{{ r.stato == 'R' ? ' class="bg-warning"' : (r.stato == 'A' or r.stato == 'N' ? ' class="text-danger"') }}>
-        <td><strong>{{ settimana[r.giorno] }} {{ r.data|date('j') }} {{ mesi[r.data|date('n')] }} dalle {{ r.inizio|date('G:i') }} alle {{ r.fine|date('G:i') }}</strong></td>
+        <td><strong>{{ settimana[r.appuntamento|date('w')] }} {{ r.appuntamento|date('j') }} {{ mesi[r.appuntamento|date('n')] }} dalle {{ r.appuntamento|date('G:i') }} alle {{ r.appuntamento|date_modify('+'~r.durata~' minutes')|date('G:i') }}</strong></td>
         <td><strong>{{ r.anno }}ª {{ r.sezione }}</strong></td>
         <td><strong>{{ r.cognome }} {{ r.nome }}</strong></td>
         <td>
@@ -56,15 +56,15 @@
     <caption class="text-info text-center gs-big gs-pb-0"><strong>{{ 'title.ore_colloqui'|trans }}</strong></caption>
     <thead class="bg-success">
       <tr>
-        <th>{{ 'label.sede'|trans }}</th>
-        <th>{{ 'label.colloquio'|trans }}</th>
-        <th>{{ 'label.note'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.sede'|trans }}</th>
+        <th class="col-sm-4">{{ 'label.colloquio'|trans }}</th>
+        <th class="col-sm-6">{{ 'label.note'|trans }}</th>
       </tr>
     </thead>
     <tbody>
       {% for o in dati.ore %}
       <tr>
-        <td><strong>{{ o.citta }}</strong></td>
+        <td><strong>{{ o.citta is defined ? o.citta : 'A DISTANZA' }}</strong></td>
         <td>
           <strong>
         {% if o.frequenza == 'S' %}
@@ -84,8 +84,16 @@
         {% endif %}
             dalle {{ o.inizio|date('G:i') }} alle {{ o.fine|date('G:i') }}
           </strong>
+        {% if o.extra|length > 0 %}
+          <br>Ore aggiuntive:
+          {% for k,v in o.extra|filter((v1,k1) => k1[:4] == 'date') %}
+            <br><strong>{{ v }} dalle {{ o.extra['time'~(k[4:])] }} alle {{ o.extra['time'~(k[4:])]|date_modify('+1 hour')|date('H:i') }}
+          {% endfor %}
+        {% endif %}
         </td>
-        <td>{{ o.note }}</td>
+        <td>
+          <strong>Informazioni per i genitori:</strong><br><em>{{ 'message.colloqui_genitori'|trans({codice: o.dati.codice}) }}</em><br><br>
+          <strong>Informazioni per i docenti:</strong><br><em>{{ 'message.colloqui_docenti'|trans({codice: o.dati.codice}) }}</em></td>
       </tr>
       {% endfor %}
     </tbody>

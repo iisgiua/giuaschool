@@ -917,13 +917,22 @@ class GenitoriUtil {
       }
     }
     // legge orari
+    //-- $orari = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      //-- ->select('(c.docente) AS docente,co.id AS colloquio,co.frequenza,co.giorno,co.note,co.extra,co.dati,so.inizio,so.fine')
+      //-- ->join('App:Colloquio', 'co', 'WITH', 'co.docente=c.docente')
+      //-- ->join('App:Orario', 'o', 'WITH', 'co.orario=o.id AND o.sede=:sede')
+      //-- ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=co.giorno AND so.ora=co.ora')
+      //-- ->where('c.classe=:classe AND c.attiva=:attiva')
+      //-- ->setParameters(['classe' => $classe, 'attiva' => 1, 'sede' => $classe->getSede()])
+      //-- ->getQuery()
+      //-- ->getArrayResult();
+    $o = $this->em->getRepository('App:Orario')->orarioSede(null);
     $orari = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->select('(c.docente) AS docente,co.id AS colloquio,co.frequenza,co.giorno,co.note,so.inizio,so.fine')
+      ->select('(c.docente) AS docente,co.id AS colloquio,co.frequenza,co.giorno,co.note,co.extra,co.dati,so.inizio,so.fine')
       ->join('App:Colloquio', 'co', 'WITH', 'co.docente=c.docente')
-      ->join('App:Orario', 'o', 'WITH', 'co.orario=o.id AND o.sede=:sede')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=co.giorno AND so.ora=co.ora')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=:orario AND so.giorno=co.giorno AND so.ora=co.ora')
       ->where('c.classe=:classe AND c.attiva=:attiva')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'sede' => $classe->getSede()])
+      ->setParameters(['orario' => $o, 'classe' => $classe, 'attiva' => 1])
       ->getQuery()
       ->getArrayResult();
     foreach ($orari as $doc) {
@@ -932,21 +941,31 @@ class GenitoriUtil {
       }
     }
     // legge colloqui esistenti
+    //-- $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
+      //-- ->select('rc.id,rc.data,rc.stato,rc.messaggio,c.giorno,so.inizio,so.fine,(c.docente) AS docente')
+      //-- ->join('rc.colloquio', 'c')
+      //-- ->join('c.orario', 'o')
+      //-- ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      //-- ->where('rc.alunno=:alunno AND rc.data>=:oggi')
+      //-- ->orderBy('rc.data,c.ora', 'ASC')
+      //-- ->setParameters(['alunno' => $alunno, 'oggi' => (new \DateTime())->format('Y-m-d')])
+      //-- ->getQuery()
+      //-- ->getArrayResult();
+    $oggi = new \DateTime('today');
     $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
-      ->select('rc.id,rc.data,rc.stato,rc.messaggio,c.giorno,so.inizio,so.fine,(c.docente) AS docente')
+      ->select('rc.id,rc.appuntamento,rc.durata,rc.stato,rc.messaggio,(c.docente) AS docente')
       ->join('rc.colloquio', 'c')
-      ->join('c.orario', 'o')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
-      ->where('rc.alunno=:alunno AND rc.data>=:oggi')
-      ->orderBy('rc.data,c.ora', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'oggi' => (new \DateTime())->format('Y-m-d')])
+      ->where('rc.alunno=:alunno AND rc.appuntamento>=:oggi')
+      ->orderBy('rc.appuntamento', 'ASC')
+      ->setParameters(['alunno' => $alunno, 'oggi' => $oggi])
       ->getQuery()
       ->getArrayResult();
     foreach ($colloqui as $c) {
       if (array_key_exists($c['docente'], $dati['orari'])) {
-        $c['data_str'] = $settimana[$c['giorno']].' '.intval($c['data']->format('d')).' '.
-          $mesi[intval($c['data']->format('m'))].' '.$c['data']->format('Y');
-        $c['ora_str'] = 'dalle '.$c['inizio']->format('G:i').' alle '.$c['fine']->format('G:i');
+        $c['data_str'] = $settimana[$c['appuntamento']->format('w')].' '.intval($c['appuntamento']->format('d')).' '.
+          $mesi[intval($c['appuntamento']->format('m'))].' '.$c['appuntamento']->format('Y');
+        $c['ora_str'] = 'dalle '.$c['appuntamento']->format('G:i').' alle '.
+          $c['appuntamento']->modify('+'.$c['durata'].' minutes')->format('G:i');
         $dati['colloqui'][$c['docente']][] = $c;
       }
     }
@@ -1000,9 +1019,11 @@ class GenitoriUtil {
     // inizializza
     $dati['errore'] = null;
     $dati['lista'] = array();
-    $sede = $colloquio->getOrario()->getSede();
     // orario colloquio
-    $ora = $this->em->getRepository('App:ScansioneOraria')->findBy(['orario' => $colloquio->getOrario(),
+    //-- $sede = $colloquio->getOrario()->getSede();
+    $sede = null;
+    $o = $this->em->getRepository('App:Orario')->orarioSede(null);
+    $ora = $this->em->getRepository('App:ScansioneOraria')->findBy(['orario' => $o,
       'giorno' => $colloquio->getGiorno(), 'ora' => $colloquio->getOra()]);
     if (empty($ora) || count($ora) > 1) {
       // visualizza errore
@@ -1027,7 +1048,8 @@ class GenitoriUtil {
     $lista = array();
     $lista_mesi = array();
     $freq = ' '.$settimana_en[$colloquio->getGiorno()].' of this month';
-    $ora_str = ' (dalle '.$ora[0]->getInizio()->format('G:i').' alle '.$ora[0]->getFine()->format('G:i').')';
+    $ora_str = ', dalle '.$ora[0]->getInizio()->format('G:i').' alle '.$ora[0]->getFine()->format('G:i');
+    $ora_durata = $ora[0]->getFine()->diff($ora[0]->getInizio())->i;
     $giorno = new \DateTime('today');
     while ($giorno <= $fine) {
       if (!in_array($giorno->format('n'), $mesi_colloqui)) {
@@ -1036,7 +1058,7 @@ class GenitoriUtil {
         if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
           $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
             $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-          $lista[1][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista[1][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d').' '.$ora[0]->getInizio()->format('G:i').'|'.$ora_durata];
           $lista_mesi[intval($giorno->format('m'))] = true;
         }
         // seconda settimana
@@ -1044,7 +1066,7 @@ class GenitoriUtil {
         if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
           $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
             $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-          $lista[2][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista[2][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d').' '.$ora[0]->getInizio()->format('G:i').'|'.$ora_durata];
           $lista_mesi[intval($giorno->format('m'))] = true;
         }
         // terza settimana
@@ -1052,7 +1074,7 @@ class GenitoriUtil {
         if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
           $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
             $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-          $lista[3][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista[3][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d').' '.$ora[0]->getInizio()->format('G:i').'|'.$ora_durata];
           $lista_mesi[intval($giorno->format('m'))] = true;
         }
         // ultima settimana
@@ -1060,7 +1082,7 @@ class GenitoriUtil {
         if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
           $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
             $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-          $lista[5][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+          $lista[5][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d').' '.$ora[0]->getInizio()->format('G:i').'|'.$ora_durata];
           $lista_mesi[intval($giorno->format('m'))] = true;
         }
         // quarta settimana (può coincidere con ultima)
@@ -1068,7 +1090,7 @@ class GenitoriUtil {
           if ($giorno >= $inizio && $giorno <= $fine && $this->regUtil->controlloData($giorno, $sede) === null) {
             $giorno_str = $settimana[$colloquio->getGiorno()].' '.intval($giorno->format('d')).' '.
               $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').$ora_str;
-            $lista[4][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d')];
+            $lista[4][intval($giorno->format('m'))] = [$giorno_str => $giorno->format('Y-m-d').' '.$ora[0]->getInizio()->format('G:i').'|'.$ora_durata];
             $lista_mesi[intval($giorno->format('m'))] = true;
           }
         }
@@ -1148,6 +1170,25 @@ class GenitoriUtil {
         }
         break;
     }
+    // ore aggiuntive
+    $oggi = new \DateTime('today');
+    foreach ($colloquio->getExtra() as $k=>$o) {
+      if (substr($k, 0, 4) == 'date') {
+        $dt = \DateTime::createFromFormat('d/m/Y H:i', $o.' 00:00');
+        if ($dt >= $oggi) {
+          $kt = 'time'.substr($k, 4);
+          $t = $colloquio->getExtra()[$kt];
+          $giorno = \DateTime::createFromFormat('d/m/Y H:i', $o.' '.$t);
+          $giorno_fine = clone $giorno;
+          $giorno_str = $settimana[$giorno->format('w')].' '.intval($giorno->format('d')).' '.
+            $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').', dalle '.$t.' alle '.
+            $giorno_fine->modify('+1 hour')->format('H:i');
+          $dati['lista'][] = [$giorno_str => $giorno->format('Y-m-d H:i').'|60'];
+        }
+      }
+    }
+    // ordina date
+    uasort($dati['lista'], function($a, $b) { return (array_values($a)[0] < array_values($b)[0] ? -1 : 1); });
     // restituisce dati
     return $dati;
   }

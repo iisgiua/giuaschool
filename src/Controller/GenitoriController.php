@@ -659,10 +659,11 @@ class GenitoriController extends AbstractController {
       ->getForm();
     $form->handleRequest($request);
     if (!$dati['errore'] && $form->isSubmitted() && $form->isValid()) {
+      $data = explode('|', $form->get('data')->getData());
       $richiesta = $em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
-        ->where('rc.colloquio=:colloquio AND rc.alunno=:alunno AND rc.data=:data AND rc.stato!=:stato')
+        ->where('rc.colloquio=:colloquio AND rc.alunno=:alunno AND rc.appuntamento=:appuntamento AND rc.stato!=:stato')
         ->setParameters(['colloquio' => $colloquio, 'alunno' => $alunno,
-          'data' => $form->get('data')->getData(), 'stato' => 'A'])
+          'appuntamento' => $data[0], 'stato' => 'A'])
         ->getQuery()
         ->getArrayResult();
       if (!empty($richiesta)) {
@@ -671,7 +672,8 @@ class GenitoriController extends AbstractController {
       } else {
         // nuova richiesta
         $richiesta = (new RichiestaColloquio)
-          ->setData(\DateTime::createFromFormat('Y-m-d', $form->get('data')->getData()))
+          ->setAppuntamento(\DateTime::createFromFormat('Y-m-d H:i', $data[0]))
+          ->setDurata($data[1])
           ->setColloquio($colloquio)
           ->setAlunno($alunno)
           ->setStato('R');
