@@ -605,6 +605,7 @@ class GenitoriController extends AbstractController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
    *
@@ -615,7 +616,7 @@ class GenitoriController extends AbstractController {
    * @IsGranted("ROLE_GENITORE")
    */
   public function colloquiPrenotaAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                        GenitoriUtil $gen, $colloquio) {
+                                        GenitoriUtil $gen, LogHandler $dblogger, $colloquio) {
     // inizializza variabili
     $dati['errore'] = null;
     $dati['lista'] = array();
@@ -680,6 +681,9 @@ class GenitoriController extends AbstractController {
         $em->persist($richiesta);
         // ok: memorizza dati
         $em->flush();
+        // log azione
+        $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Richiesta colloquio', __METHOD__, array(
+          'ID' => $richiesta->getId()));
         // redirezione
         return $this->redirectToRoute('genitori_colloqui');
       }
@@ -697,8 +701,10 @@ class GenitoriController extends AbstractController {
   /**
    * Invia la disdetta per la richiesta di colloquio con un docente.
    *
+   * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
    *
@@ -708,7 +714,8 @@ class GenitoriController extends AbstractController {
    *
    * @IsGranted("ROLE_GENITORE")
    */
-  public function colloquiDisdettaAction(EntityManagerInterface $em, GenitoriUtil $gen, $richiesta) {
+  public function colloquiDisdettaAction(Request $request, EntityManagerInterface $em, GenitoriUtil $gen,
+                                         LogHandler $dblogger, $richiesta) {
     // legge l'alunno
     $alunno = $gen->alunno($this->getUser());
     if (!$alunno) {
@@ -722,17 +729,23 @@ class GenitoriController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla richiesta
-    $richiesta = $em->getRepository('App:RichiestaColloquio')->findBy(['id' => $richiesta, 'alunno' => $alunno]);
-    if (empty($richiesta)) {
+    $richiesta = $em->getRepository('App:RichiestaColloquio')->findOneBy(['id' => $richiesta, 'alunno' => $alunno]);
+    if (!$richiesta) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // cancella richiesta
-    $richiesta[0]
+    $richiesta_old = clone $richiesta;
+    $richiesta
       ->setStato('A')
       ->setMessaggio(null);
     // ok: memorizza dati
     $em->flush();
+    // log azione
+    $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Disdetta colloquio', __METHOD__, array(
+      'ID' => $richiesta->getId(),
+      'Stato' => $richiesta_old->getStato(),
+      'Messaggio' => $richiesta_old->getMessaggio()));
     // redirezione
     return $this->redirectToRoute('genitori_colloqui');
   }

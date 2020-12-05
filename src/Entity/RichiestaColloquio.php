@@ -77,19 +77,17 @@ class RichiestaColloquio {
    * @var Alunno $alunno Alunno al quale si riferisce il colloquio
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
+   * @ORM\JoinColumn(nullable=true)
    */
   private $alunno;
 
   /**
-   * @var string $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
+   * @var string $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"R","A","C","N"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"R","A","C","N","X"}, strict=true, message="field.choice")
    */
   private $stato;
 

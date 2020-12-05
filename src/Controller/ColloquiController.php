@@ -33,6 +33,7 @@ use Symfony\Component\Translation\TranslatorInterface;
 use App\Entity\Colloquio;
 use App\Entity\RichiestaColloquio;
 use App\Util\RegistroUtil;
+use App\Util\LogHandler;
 use App\Form\ColloquioType;
 
 
@@ -42,7 +43,7 @@ use App\Form\ColloquioType;
 class ColloquiController extends AbstractController {
 
   /**
-   * Gestione delle richieste di colloquio
+   * Visualizza le richieste di colloquio
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
@@ -71,6 +72,7 @@ class ColloquiController extends AbstractController {
       // legge richieste
       $dati['richieste'] = $em->getRepository('App:RichiestaColloquio')->colloquiDocente($this->getUser());
       $dati['ore'] = $em->getRepository('App:Colloquio')->oreNoSede($this->getUser());
+      $dati['appuntamenti'] = $em->getRepository('App:RichiestaColloquio')->infoAppuntamenti($this->getUser());
     }
     // visualizza pagina
     return $this->render('colloqui/colloqui.html.twig', array(
@@ -88,6 +90,7 @@ class ColloquiController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param LogHandler $dblogger Gestore dei log su database
    * @param RichiestaColloquio $richiesta Richiesta di colloquio da modificare
    * @param string $azione Tipo di modifica da effettuare
    *
@@ -100,7 +103,7 @@ class ColloquiController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function colloquiEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                     RichiestaColloquio $richiesta, $azione) {
+                                     LogHandler $dblogger, RichiestaColloquio $richiesta, $azione) {
     // inizializza variabili
     $label = array();
     // controlla richiesta
@@ -109,6 +112,7 @@ class ColloquiController extends AbstractController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    $richiesta_old = array($richiesta->getStato(), $richiesta->getMessaggio());
     $colloquio = $richiesta->getColloquio();
     if ($colloquio->getDocente() != $this->getUser()) {
       // errore
@@ -171,6 +175,11 @@ class ColloquiController extends AbstractController {
           ->setMessaggio($form->get('messaggio')->getData());
         // memorizza dati
         $em->flush();
+        // log azione
+        $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Risposta a richiesta', __METHOD__, array(
+          'RichiestaColloquio' => $richiesta->getId(),
+          'Stato' => $richiesta_old[0],
+          'Messaggio' => $richiesta_old[1]));
         // redirezione
         return $this->redirectToRoute('colloqui');
       }
@@ -191,6 +200,7 @@ class ColloquiController extends AbstractController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
    *
@@ -200,7 +210,7 @@ class ColloquiController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function gestioneAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                 RegistroUtil $reg) {
+                                 RegistroUtil $reg, LogHandler $dblogger) {
     $docente = $this->getUser();
     // determina operazione da eseguire
     $colloquio = $em->getRepository('App:Colloquio')->findOneByDocente($docente);
@@ -208,6 +218,7 @@ class ColloquiController extends AbstractController {
       // modalità modifica
       $edit = true;
       $codice = $colloquio->getDato('codice');
+      $old_colloquio = clone $colloquio;
     } else {
       // modalità inserimento
       $edit = false;
@@ -282,6 +293,22 @@ class ColloquiController extends AbstractController {
         $colloquio->setExtra($date_aggiuntive);
         $colloquio->addDato('codice', $form->get('codice')->getData());
         $em->flush();
+        // log azione
+        if ($edit) {
+          // azione modifica
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Modifica colloquio', __METHOD__, array(
+            'Colloquio' => $colloquio->getId(),
+            'Frequenza' => $old_colloquio->getFrequenza(),
+            'Giorno' => $old_colloquio->getGiorno(),
+            'Ora' => $old_colloquio->getOra(),
+            'Extra' => $colloquio->getExtra(),
+            'Dati' => $colloquio->getDati(),
+            'Note' => $old_colloquio->getNote()));
+        } else {
+          // azione inserimento
+          $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Inserimento colloquio', __METHOD__, array(
+            'Colloquio' => $colloquio->getId()));
+        }
         // redirezione
         return $this->redirectToRoute('colloqui');
       }
@@ -292,6 +319,57 @@ class ColloquiController extends AbstractController {
       'form' => $form->createView(),
       'form_title' => 'title.gestione_colloqui',
     ));
+  }
+
+  /**
+   * Blocca/sblocca le richieste di colloauo segnalando che non ci sono/ci sono posti disponibili
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param string $appuntamento Data e ora dell'appuntamento da bloccare/sbloccare
+   * @param boolean $blocca Vero per bloccare le richieste di colloquio, falso altrimenti
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/blocca/{colloquio}/{appuntamento}/{blocca}", name="colloqui_blocca",
+   *    requirements={"appuntamento": "\d+-\d+-\d+-\d+-\d+", "blocca": "0|1"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function bloccaAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
+                               Colloquio $colloquio, $appuntamento, $blocca) {
+    // controlla richiesta
+    $data = \DateTime::createFromFormat('Y-m-d-G-i', $appuntamento);
+    $richiesta = $em->getRepository('App:RichiestaColloquio')->findOneBy(['colloquio' => $colloquio,
+      'appuntamento' => $data, 'stato' => ($blocca ? 'C' : 'X')]);
+    if (!$richiesta) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if ($blocca) {
+      // aggiunge blocco
+      $richiesta = (new RichiestaColloquio())
+        ->setColloquio($colloquio)
+        ->setAppuntamento($richiesta->getAppuntamento())
+        ->setDurata($richiesta->getDurata())
+        ->setStato('X');
+      $em->persist($richiesta);
+    } else {
+      // rimuove blocco
+      $em->remove($richiesta);
+    }
+    // memorizza modifica
+    $em->flush();
+    // log azione
+    $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Blocca richieste', __METHOD__, array(
+      'Colloquio' => $richiesta->getColloquio()->getId(),
+      'Appuntamento' => $richiesta->getAppuntamento()->format('d/m/Y G:i'),
+      'Durata' => $richiesta->getDurata(),
+      'Blocca' => $blocca));
+    // redirezione
+    return $this->redirectToRoute('colloqui');
   }
 
 }

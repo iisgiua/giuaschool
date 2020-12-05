@@ -1,5 +1,7 @@
 {% extends 'ruolo_genitore/index.html.twig' %}
 
+{% form_theme form _self %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid">
   {% if errore %}
@@ -47,6 +49,7 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
+  $('.radio label').removeClass('required');
   $('label input[name="colloqui_prenota[data]"]').change(function() {
     $('label input[name="colloqui_prenota[data]"]:not(:checked)').parent().attr('style', 'font-weight:normal');
     $('label input[name="colloqui_prenota[data]"]:checked').parent().attr('style', 'font-weight:bold');
@@ -55,3 +58,16 @@ $(document).ready(function() {
 </script>
 {% endblock %}
 
+{% block _colloqui_prenota_data_widget %}
+<div id="colloqui_prenota_data">
+  {% for item in choices %}
+    {% if item.choices[loop.index0].data == -1 %}
+  <div class="radio">
+    <em class="">{{ item.choices[loop.index0].label }}</em><span class="badge gs-ml-3">Posti esauriti</span>
+  </div>
+    {% else %}
+      {{ form_widget(form[loop.index0]) }}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

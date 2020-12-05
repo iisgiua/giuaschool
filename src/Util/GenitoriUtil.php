@@ -1005,11 +1005,9 @@ class GenitoriUtil {
     }
 
   /**
-   * Restituisce le materie che il docente insegna nella classe.
+   * Restituisce le date dei colloqui per un certo docente
    *
-   * @param Doccente $docente Docente di cui si vogliono sapere le materie insegnate
-   * @param Classe $classe Classe desiderata
-   * @param Alunno $alunno Alunno per la cattedra di sostegno
+   * @param Colloquio $colloquio Colloquio di cui ricavare le date
    *
    * @return array Dati restituiti come array associativo
    */
@@ -1190,6 +1188,18 @@ class GenitoriUtil {
     }
     // ordina date
     uasort($dati['lista'], function($a, $b) { return (array_values($a)[0] < array_values($b)[0] ? -1 : 1); });
+    // segna date al completo
+    $esauriti = $this->em->getRepository('App:RichiestaColloquio')->postiEsauriti($colloquio);
+    foreach ($esauriti as $e) {
+      $value = $e['appuntamento']->format('Y-m-d H:i').'|'.$e['durata'];
+      foreach ($dati['lista'] as $k=>$v) {
+        if (array_values($v)[0] == $value) {
+          // data al completp
+          $dati['lista'][$k][array_keys($v)[0]] = -1;
+          break;
+        }
+      }
+    }
     // restituisce dati
     return $dati;
   }

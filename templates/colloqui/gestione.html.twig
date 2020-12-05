@@ -86,6 +86,7 @@ $(document).ready(function() {
     var n = (n0 == null ? 0 : parseInt(n0, 10) + 1);
     f = f.replace(/__name__/g, n);
     $('#colloquio_extra').append(f);
+    $('#colloquio_extra_date_'+n).val('{{ "tomorrow"|date("d/m/Y") }}');
     $('#colloquio_extra_time_'+n).val('15:00');
     aggiungeDTPicker();
   });

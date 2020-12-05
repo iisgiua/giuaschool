@@ -14,6 +14,7 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Docente;
+use App\Entity\Colloquio;
 
 
 /**
@@ -49,6 +50,63 @@ class RichiestaColloquioRepository extends EntityRepository {
       ->getQuery()
       ->getArrayResult();
     return $colloqui;
+  }
+
+  /**
+   * Restituisce gli appuntamenti confermati dal docente e altre informazioni
+   *
+   * @param Docente $docente Docente a cui sono inviate le richieste di colloquio
+   *
+   * @return array Dati restituiti
+   */
+  public function infoAppuntamenti(Docente $docente) {
+    $data = new \DateTime('today');
+    $colloqui = $this->createQueryBuilder('rc')
+      ->select('COUNT(rc.id) AS tot,c.id,rc.appuntamento,rc.durata,rc.stato')
+      ->join('rc.colloquio', 'c')
+      ->where('c.docente=:docente AND rc.appuntamento>=:data AND rc.stato IN (:stati)')
+      ->groupBy('c.id,rc.appuntamento,rc.durata,rc.stato')
+      ->orderBy('rc.appuntamento,rc.stato', 'ASC')
+      ->setParameters(['docente' => $docente, 'data' => $data, 'stati' => ['C', 'X']])
+      ->getQuery()
+      ->getArrayResult();
+    // imposta appuntamenti
+    $appuntamenti = array();
+    foreach ($colloqui as $c) {
+      $dt = $c['appuntamento']->format('YmdHi');
+      if ($c['stato'] == 'X') {
+        // appuntamento al completo
+        $appuntamenti[$dt]['completo'] = 1;
+      } else {
+        // numero appuntamenti
+        $appuntamenti[$dt]['numero'] = $c['tot'];
+        $appuntamenti[$dt]['colloquio'] = $c['id'];
+        $appuntamenti[$dt]['inizio'] = $c['appuntamento'];
+        $appuntamenti[$dt]['fine'] = (clone $c['appuntamento'])->modify('+'.$c['durata'].' minutes');
+      }
+    }
+    // restituisce gli appuntamenti
+    return $appuntamenti;
+  }
+
+  /**
+   * Restituisce le date al completo per i colloqui del docente indicato
+   *
+   * @param Colloquio $colloquio Colloquio di cui ricavare le date al completo
+   *
+   * @return array Dati restituiti
+   */
+  public function postiEsauriti(Colloquio $colloquio) {
+    $data = new \DateTime('today');
+    $esauriti = $this->createQueryBuilder('rc')
+      ->select('rc.appuntamento,rc.durata')
+      ->where('rc.colloquio=:colloquio AND rc.appuntamento>=:data AND rc.stato=:completo')
+      ->orderBy('rc.appuntamento', 'ASC')
+      ->setParameters(['colloquio' => $colloquio, 'data' => $data, 'completo' => 'X'])
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce gli appuntamenti al completo
+    return $esauriti;
   }
 
 }

@@ -417,6 +417,7 @@ label.colloqui_frequenza: Frequenza
 label.colloqui_note: Informazioni per i genitori
 label.colloqui_ore_extra: Ore aggiuntive
 label.colloqui_codice: Codice riunione per Meet
+label.numero_genitori: Genitori prenotati
 
 
 ##### PAGINE #####
@@ -742,6 +743,7 @@ title.voti_alunno: Aggiungi o modifica una valutazione per l'alunno
 title.voti_classe: Aggiungi o modifica una valutazione per la classe
 title.piano_integrativo_apprendimenti: Piano di Integrazione degli Apprendimenti
 title.gestione_colloqui: Inserimento delle ore di colloquio
+title.date_colloqui: Date confermate
 
 
 ##### MESSAGGI #####
@@ -1004,8 +1006,8 @@ message.note_classe_alunno_trasferito: "Trasferimento/ritiro in data {date}"
 message.note_classe_alunno_sezione: "Cambio sezione in data {date}"
 message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
 message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata nei prossimi 30 minuti. Poi sarà resa definitiva.
-message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: \"{codice}\""
-message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: \"{codice}\""
+message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: <strong>{codice}</strong>"
+message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.

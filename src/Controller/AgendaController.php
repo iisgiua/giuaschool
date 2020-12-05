@@ -224,6 +224,10 @@ class AgendaController extends AbstractController {
     }
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
+      if (!in_array($form->get('filtroTipo')->getData(), ['T', 'U'])) {
+        // errore: tipo filtro non valido
+        $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
+      }
       if ($form->get('filtroTipo')->getData() == 'U' && empty(implode(',', $form->get('filtro')->getData()))) {
         // errore: filtro vuoto
         $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
@@ -602,6 +606,10 @@ class AgendaController extends AbstractController {
     }
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
+      if (!in_array($form->get('filtroTipo')->getData(), ['T', 'U'])) {
+        // errore: tipo filtro non valido
+        $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
+      }      
       if ($form->get('filtroTipo')->getData() == 'U' && empty(implode(',', $form->get('filtro')->getData()))) {
         // errore: filtro vuoto
         $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
