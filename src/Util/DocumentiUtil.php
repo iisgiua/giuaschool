@@ -198,15 +198,15 @@ class DocumentiUtil {
     $ext = $file->guessExtension();
     if ($ext != 'pdf') {
       // conversione
-      $nomefile = $file->getRealPath();
-      $proc = new Process(['/usr/bin/unoconv',  '-f', 'pdf', '-d', 'document', $nomefile],
+      $nomefile = substr($file->getRealPath(), 0, -strlen($ext));
+      $proc = new Process(['/usr/bin/unoconv',  '-f', 'pdf', '-d', 'document', $nomefile.$ext],
         $file->getPath());
       $proc->run();
-      if ($proc->isSuccessful() && file_exists($nomefile.'.pdf')) {
+      if ($proc->isSuccessful() && file_exists($nomefile.'pdf')) {
         // conversione ok
         $fs = new FileSystem();
         $fs->remove($file);
-        $fl = new File($nomefile.'.pdf');
+        $fl = new File($nomefile.'pdf');
       }
     }
     // restituisce estensione di nuovo file
