@@ -1191,11 +1191,12 @@ class GenitoriUtil {
     // segna date al completo
     $esauriti = $this->em->getRepository('App:RichiestaColloquio')->postiEsauriti($colloquio);
     foreach ($esauriti as $e) {
-      $value = $e['appuntamento']->format('Y-m-d H:i').'|'.$e['durata'];
+      $value = $e['appuntamento']->format('Y-m-d G:i').'|'.$e['durata'];
       foreach ($dati['lista'] as $k=>$v) {
-        if (array_values($v)[0] == $value) {
+        $keyval = array_keys($v)[0];
+        if ($v[$keyval] == $value) {
           // data al completp
-          $dati['lista'][$k][array_keys($v)[0]] = -1;
+          $dati['lista'][$k][$keyval] = -1;
           break;
         }
       }
