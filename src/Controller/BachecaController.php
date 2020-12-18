@@ -54,7 +54,7 @@ class BachecaController extends AbstractController {
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'D');
+    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'T');
     $cerca['oggetto'] = $session->get('/APP/ROUTE/bacheca_avvisi/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -230,7 +230,7 @@ class BachecaController extends AbstractController {
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'D');
+    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'T');
     $cerca['oggetto'] = $session->get('/APP/ROUTE/bacheca_avvisi_ata/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione

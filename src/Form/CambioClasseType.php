@@ -46,7 +46,6 @@ class CambioClasseType extends AbstractType {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')'; },
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('a')
-              ->where("a.abilitato=1")
               ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC'); },
           'placeholder' => 'label.choose_option',
           'attr' => ['widget' => 'search'],

@@ -32,11 +32,10 @@ class CambioClasseRepository extends BaseRepository {
       ->select('cc AS cambio,a.cognome,a.nome,a.dataNascita,cl.anno,cl.sezione')
       ->join('cc.alunno', 'a')
       ->leftJoin('cc.classe', 'cl')
-      ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome and a.abilitato=:abilitato')
+      ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome,a.nome,a.dataNascita,cc.inizio', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
-      ->setParameter('cognome', $criteri['cognome'].'%')
-      ->setParameter('abilitato', 1);
+      ->setParameter('cognome', $criteri['cognome'].'%');
     if ($criteri['classe'] > 0) {
       $query->andwhere('cl.id=:classe')->setParameter('classe', $criteri['classe']);
     } elseif ($criteri['classe'] == -1) {

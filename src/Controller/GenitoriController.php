@@ -773,7 +773,7 @@ class GenitoriController extends AbstractController {
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/genitori_avvisi/visualizza', 'D');
+    $cerca['visualizza'] = $session->get('/APP/ROUTE/genitori_avvisi/visualizza', 'T');
     $cerca['oggetto'] = $session->get('/APP/ROUTE/genitori_avvisi/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione

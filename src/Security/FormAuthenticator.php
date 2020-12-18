@@ -306,17 +306,19 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     $tipo_accesso = (($token->getUser() instanceof Docente) && $token->getUser()->getOtp()) ? 'form/OTP' : 'form';
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
     // ultimo accesso dell'utente
+    $adesso = new \DateTime();
     $last_login = $token->getUser()->getUltimoAccesso();
     if ($last_login || !($token->getUser() instanceOf Genitore)) {
       // ha già effettuato altri login
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso',
         $last_login ? $last_login->format('d/m/Y H:i:s') : '');
-      $token->getUser()->setUltimoAccesso(new \DateTime());
     } else {
       // primo accesso
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso', '');
-      $request->getSession()->set('/APP/UTENTE/primo_accesso', (new \DateTime())->format('d/m/Y H:i:s'));
+      $request->getSession()->set('/APP/UTENTE/primo_accesso', $adesso->format('d/m/Y H:i:s'));
     }
+    // memorizza nuovo accesso
+    $token->getUser()->setUltimoAccesso($adesso);
     if ($tipo_accesso != 'form') {
       // memorizza ultimo codice OTP usato
       $token->getUser()->setUltimoOtp($request->request->get('_otp'));
