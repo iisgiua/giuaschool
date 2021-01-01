@@ -106,7 +106,7 @@ class Sede {
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
-   * @Assert\Regex(pattern="/^[0-9\(][0-9\.\-\(\) ]*[0-9]$/",message="field.phone")
+   * @Assert\Regex(pattern="/^\+?[0-9\(][0-9\.\-\(\) ]*[0-9]$/",message="field.phone")
    */
   private $telefono;
 
@@ -114,6 +114,9 @@ class Sede {
    * @var integer $ordinamento Numero d'ordine per la visualizzazione delle sedi
    *
    * @ORM\Column(type="smallint", nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\PositiveOrZero(message="field.zeropositive")
    */
   private $ordinamento;
 

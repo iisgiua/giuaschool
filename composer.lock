@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "afc821d0b4be2ed4fe65021e1ee3ed39",
+    "content-hash": "19f5d2e2ba48299d41cd0724ffa46b0e",
     "packages": [
         {
             "name": "composer/package-versions-deprecated",
@@ -1243,6 +1243,7 @@
                 "reflection",
                 "static"
             ],
+            "abandoned": "roave/better-reflection",
             "time": "2020-03-27T11:06:43+00:00"
         },
         {
@@ -1408,16 +1409,16 @@
         },
         {
             "name": "google/apiclient",
-            "version": "v2.8.1",
+            "version": "v2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client.git",
-                "reference": "c8f6d09f50f859fa9457104bb0fb72c893804ede"
+                "reference": "48ec94577b51bde415270116118b07a294e07c43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/c8f6d09f50f859fa9457104bb0fb72c893804ede",
-                "reference": "c8f6d09f50f859fa9457104bb0fb72c893804ede",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/48ec94577b51bde415270116118b07a294e07c43",
+                "reference": "48ec94577b51bde415270116118b07a294e07c43",
                 "shasum": ""
             },
             "require": {
@@ -1433,7 +1434,7 @@
             "require-dev": {
                 "cache/filesystem-adapter": "^0.3.2",
                 "composer/composer": "^1.10",
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
                 "phpcompatibility/php-compatibility": "^9.2",
                 "phpunit/phpunit": "^4.8.36|^5.0",
                 "squizlabs/php_codesniffer": "~2.3",
@@ -1441,7 +1442,7 @@
                 "symfony/dom-crawler": "~2.1"
             },
             "suggest": {
-                "cache/filesystem-adapter": "For caching certs and tokens (using Google\\Client::setCache)"
+                "cache/filesystem-adapter": "For caching certs and tokens (using Google_Client::setCache)"
             },
             "type": "library",
             "extra": {
@@ -1450,14 +1451,11 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Google\\": "src/"
+                "psr-0": {
+                    "Google_": "src/"
                 },
-                "files": [
-                    "src/aliases.php"
-                ],
                 "classmap": [
-                    "src/aliases.php"
+                    "src/Google/Service/"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1469,20 +1467,20 @@
             "keywords": [
                 "google"
             ],
-            "time": "2020-10-27T23:20:13+00:00"
+            "time": "2020-07-23T21:37:43+00:00"
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.152",
+            "version": "v0.142",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "e1cc05269e852d62677387f831271ad984b245f8"
+                "reference": "3baf0a665cd08975314214b075f28765c97282ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/e1cc05269e852d62677387f831271ad984b245f8",
-                "reference": "e1cc05269e852d62677387f831271ad984b245f8",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/3baf0a665cd08975314214b075f28765c97282ae",
+                "reference": "3baf0a665cd08975314214b075f28765c97282ae",
                 "shasum": ""
             },
             "require": {
@@ -1506,20 +1504,20 @@
             "keywords": [
                 "google"
             ],
-            "time": "2020-10-25T00:25:04+00:00"
+            "time": "2020-07-28T00:24:58+00:00"
         },
         {
             "name": "google/auth",
-            "version": "v1.14.3",
+            "version": "v1.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-auth-library-php.git",
-                "reference": "c1503299c779af0cbc99b43788f75930988852cf"
+                "reference": "bb959e91bd8ffbd352ab76cbf11d656ce6435088"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/c1503299c779af0cbc99b43788f75930988852cf",
-                "reference": "c1503299c779af0cbc99b43788f75930988852cf",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/bb959e91bd8ffbd352ab76cbf11d656ce6435088",
+                "reference": "bb959e91bd8ffbd352ab76cbf11d656ce6435088",
                 "shasum": ""
             },
             "require": {
@@ -1558,7 +1556,7 @@
                 "google",
                 "oauth2"
             ],
-            "time": "2020-10-16T21:33:48+00:00"
+            "time": "2020-07-27T18:33:35+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -8349,12 +8347,12 @@
             "version": "1.1.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/whiteoctober/WhiteOctoberTCPDFBundle.git",
+                "url": "https://github.com/sampart/WhiteOctoberTCPDFBundle.git",
                 "reference": "33e57940af790c0c8ee6a200a1f0661e415d0a5c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/whiteoctober/WhiteOctoberTCPDFBundle/zipball/33e57940af790c0c8ee6a200a1f0661e415d0a5c",
+                "url": "https://api.github.com/repos/sampart/WhiteOctoberTCPDFBundle/zipball/33e57940af790c0c8ee6a200a1f0661e415d0a5c",
                 "reference": "33e57940af790c0c8ee6a200a1f0661e415d0a5c",
                 "shasum": ""
             },
@@ -8385,6 +8383,7 @@
                 "TCPDF",
                 "pdf"
             ],
+            "abandoned": "qipsius/tcpdf-bundle",
             "time": "2019-01-14T13:51:20+00:00"
         },
         {
@@ -8673,6 +8672,54 @@
             "time": "2020-04-02T16:40:37+00:00"
         },
         {
+            "name": "fakerphp/faker",
+            "version": "v1.13.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/FakerPHP/Faker.git",
+                "reference": "ab3f5364d01f2c2c16113442fb987d26e4004913"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/FakerPHP/Faker/zipball/ab3f5364d01f2c2c16113442fb987d26e4004913",
+                "reference": "ab3f5364d01f2c2c16113442fb987d26e4004913",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0"
+            },
+            "conflict": {
+                "fzaninotto/faker": "*"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4.1",
+                "ext-intl": "*",
+                "phpunit/phpunit": "^7.5.20 || ^8.5.8 || ^9.4.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Faker\\": "src/Faker/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "François Zaninotto"
+                }
+            ],
+            "description": "Faker is a PHP library that generates fake data for you.",
+            "keywords": [
+                "data",
+                "faker",
+                "fixtures"
+            ],
+            "time": "2020-12-18T16:50:48+00:00"
+        },
+        {
             "name": "friendsofphp/php-cs-fixer",
             "version": "v2.16.4",
             "source": {
@@ -8865,6 +8912,72 @@
                 "diff"
             ],
             "time": "2018-02-15T16:58:55+00:00"
+        },
+        {
+            "name": "phpmyadmin/sql-parser",
+            "version": "5.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpmyadmin/sql-parser.git",
+                "reference": "32175ee13bde3aef7bdff492ce2d0f0c9cb5cbf4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpmyadmin/sql-parser/zipball/32175ee13bde3aef7bdff492ce2d0f0c9cb5cbf4",
+                "reference": "32175ee13bde3aef7bdff492ce2d0f0c9cb5cbf4",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1",
+                "symfony/polyfill-mbstring": "^1.3"
+            },
+            "conflict": {
+                "phpmyadmin/motranslator": "<3.0"
+            },
+            "require-dev": {
+                "phpmyadmin/coding-standard": "^2.0",
+                "phpmyadmin/motranslator": "^4.0 || ^5.0",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12.40",
+                "phpstan/phpstan-phpunit": "^0.12.16",
+                "phpunit/php-code-coverage": "*",
+                "phpunit/phpunit": "^7.4 || ^8 || ^9"
+            },
+            "suggest": {
+                "ext-mbstring": "For best performance",
+                "phpmyadmin/motranslator": "Translate messages to your favorite locale"
+            },
+            "bin": [
+                "bin/highlight-query",
+                "bin/lint-query",
+                "bin/tokenize-query"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PhpMyAdmin\\SqlParser\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "The phpMyAdmin Team",
+                    "email": "developers@phpmyadmin.net",
+                    "homepage": "https://www.phpmyadmin.net/team/"
+                }
+            ],
+            "description": "A validating SQL lexer and parser with a focus on MySQL dialect.",
+            "homepage": "https://github.com/phpmyadmin/sql-parser",
+            "keywords": [
+                "analysis",
+                "lexer",
+                "parser",
+                "sql"
+            ],
+            "time": "2020-10-15T15:19:46+00:00"
         },
         {
             "name": "symfony/browser-kit",
@@ -9275,16 +9388,16 @@
         },
         {
             "name": "symfony/phpunit-bridge",
-            "version": "v5.1.3",
+            "version": "v5.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/phpunit-bridge.git",
-                "reference": "964bd57046dfa48687e1412fe5f8006adfcb9675"
+                "reference": "235823f6d215c9bd930a47a496e62c1354cde55b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/964bd57046dfa48687e1412fe5f8006adfcb9675",
-                "reference": "964bd57046dfa48687e1412fe5f8006adfcb9675",
+                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/235823f6d215c9bd930a47a496e62c1354cde55b",
+                "reference": "235823f6d215c9bd930a47a496e62c1354cde55b",
                 "shasum": ""
             },
             "require": {
@@ -9292,6 +9405,10 @@
             },
             "conflict": {
                 "phpunit/phpunit": "<4.8.35|<5.4.3,>=5.0|<6.4,>=6.0|9.1.2"
+            },
+            "require-dev": {
+                "symfony/deprecation-contracts": "^2.1",
+                "symfony/error-handler": "^4.4|^5.0"
             },
             "suggest": {
                 "symfony/error-handler": "For tracking deprecated interfaces usages at runtime with DebugClassLoader"
@@ -9301,9 +9418,6 @@
             ],
             "type": "symfony-bridge",
             "extra": {
-                "branch-alias": {
-                    "dev-master": "5.1-dev"
-                },
                 "thanks": {
                     "name": "phpunit/phpunit",
                     "url": "https://github.com/sebastianbergmann/phpunit"
@@ -9350,7 +9464,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-07-23T09:26:24+00:00"
+            "time": "2020-12-14T22:27:17+00:00"
         },
         {
             "name": "symfony/profiler-pack",
@@ -9490,16 +9604,16 @@
         },
         {
             "name": "symfony/web-server-bundle",
-            "version": "v4.4.13",
+            "version": "v4.4.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/web-server-bundle.git",
-                "reference": "d617765de8a65d4d42f1b2843c7df36645936216"
+                "reference": "d1eb905afca7d4957420c4b6809e2275d3e5e85d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/web-server-bundle/zipball/d617765de8a65d4d42f1b2843c7df36645936216",
-                "reference": "d617765de8a65d4d42f1b2843c7df36645936216",
+                "url": "https://api.github.com/repos/symfony/web-server-bundle/zipball/d1eb905afca7d4957420c4b6809e2275d3e5e85d",
+                "reference": "d1eb905afca7d4957420c4b6809e2275d3e5e85d",
                 "shasum": ""
             },
             "require": {
@@ -9516,11 +9630,6 @@
                 "symfony/monolog-bridge": "For using the log server."
             },
             "type": "symfony-bundle",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.4-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Symfony\\Bundle\\WebServerBundle\\": ""
@@ -9545,7 +9654,21 @@
             ],
             "description": "Symfony WebServerBundle",
             "homepage": "https://symfony.com",
-            "time": "2020-05-30T18:50:54+00:00"
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-12-08T16:59:59+00:00"
         }
     ],
     "aliases": [],

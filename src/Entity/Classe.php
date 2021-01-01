@@ -63,7 +63,7 @@ class Classe {
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"A","B","C","D","E","F","G","H","I","L","M","N","O","P","Q","R","S","T","U","V","Z"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"}, strict=true, message="field.choice")
    */
   private $sezione;
 
@@ -73,6 +73,7 @@ class Classe {
    * @ORM\Column(name="ore_settimanali", type="smallint", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Positive(message="field.positive")
    */
   private $oreSettimanali;
 
@@ -307,4 +308,3 @@ class Classe {
   }
 
 }
-

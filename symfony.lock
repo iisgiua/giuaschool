@@ -102,6 +102,9 @@
     "egulias/email-validator": {
         "version": "2.1.10"
     },
+    "fakerphp/faker": {
+        "version": "v1.13.0"
+    },
     "firebase/php-jwt": {
         "version": "v5.2.0"
     },
@@ -156,12 +159,6 @@
             "config/packages/knpu_oauth2_client.yaml"
         ]
     },
-    "laminas/laminas-code": {
-        "version": "3.4.1"
-    },
-    "laminas/laminas-eventmanager": {
-        "version": "3.2.1"
-    },
     "laminas/laminas-zendframework-bridge": {
         "version": "1.0.4"
     },
@@ -203,6 +200,9 @@
     },
     "phpdocumentor/type-resolver": {
         "version": "0.4.0"
+    },
+    "phpmyadmin/sql-parser": {
+        "version": "5.4.1"
     },
     "phpoffice/common": {
         "version": "0.2.9"
