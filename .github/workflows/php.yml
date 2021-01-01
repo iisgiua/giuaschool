@@ -7,8 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-
-  symfony:
+  tests:
     name: Symfony 4.4 (PHP ${{ matrix.php-versions }})
     runs-on: ubuntu-20.04
     
@@ -48,7 +47,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
   
       - name: Cache composer dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v1
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           # Use composer.json for key, if composer.lock is not committed.
