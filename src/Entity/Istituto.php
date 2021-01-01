@@ -91,6 +91,7 @@ class Istituto {
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
+   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
@@ -101,6 +102,7 @@ class Istituto {
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
+   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
@@ -111,6 +113,7 @@ class Istituto {
    *
    * @ORM\Column(name="url_sito", type="string", length=255, nullable=false)
    *
+   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Url(message="field.url")
    */
@@ -121,6 +124,7 @@ class Istituto {
    *
    * @ORM\Column(name="url_registro", type="string", length=255, nullable=false)
    *
+   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Url(message="field.url")
    */
@@ -131,6 +135,7 @@ class Istituto {
    *
    * @ORM\Column(name="firma_preside", type="string", length=255, nullable=false)
    *
+   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
   private $firmaPreside;
@@ -140,6 +145,7 @@ class Istituto {
    *
    * @ORM\Column(name="email_amministratore", type="string", length=255, nullable=false)
    *
+   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
@@ -150,6 +156,7 @@ class Istituto {
    *
    * @ORM\Column(name="email_notifiche", type="string", length=255, nullable=false)
    *
+   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
