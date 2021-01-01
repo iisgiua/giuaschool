@@ -60,7 +60,7 @@ jobs:
         run: |
           composer require --dev symfony/orm-pack symfony/phpunit-bridge
           composer install --no-progress --prefer-dist --optimize-autoloader
-          php bin/phpunit install
+          php vendor/bin/phpunit install
       
       #- name: Run Migration
       #  run: |
@@ -70,6 +70,6 @@ jobs:
       #    DATABASE_URL: mysql://root:symfony@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/symfony
       
       - name: Run Tests
-        run: php bin/phpunit
+        run: php vendor/bin/phpunit
         #run: php bin/phpunit --coverage-text
 
