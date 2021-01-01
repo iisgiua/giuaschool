@@ -38,6 +38,7 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
           #, JSON, PCRE, Session, SimpleXML, and Tokenizer;
           #coverage: xdebug
+          tools: composer:v1  
   
       - name: Start mysql service
         run: sudo /etc/init.d/mysql start
