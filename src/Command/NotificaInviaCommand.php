@@ -99,8 +99,6 @@ class NotificaInviaCommand extends Command {
     $this->bac = $bac;
     $this->config = $config;
     $this->logger = $logger;
-    // carica configurazione
-    $this->config->carica();
   }
 
   /**
@@ -145,6 +143,8 @@ class NotificaInviaCommand extends Command {
    * @return null|int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    // carica configurazione
+    $this->config->carica();
     // inizio
     $this->logger->notice('notifica-invia: Inizio procedura di notifica');
     // invia messaggi
