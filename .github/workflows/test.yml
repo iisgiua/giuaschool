@@ -64,5 +64,8 @@ jobs:
           php bin/console doctrine:database:create -e test
           php bin/console doctrine:schema:update -f -e test
 
+      - name: Install PHPUnit
+        run: ./vendor/bin/simple-phpunit --version
+
       - name: Run Tests
-        run: php vendor/bin/simple-phpunit --coverage-text
+        run: php -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-text

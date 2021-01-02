@@ -57,8 +57,8 @@ class SedeTest extends UnitTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'nome' ? $this->faker->sentence(3, false) :
-          ($field == 'nomeBreve' ? $this->faker->sentence(1, false) :
+          $field == 'nome' ? implode(' ', array_map('ucfirst', $this->faker->unique()->words(3))) :
+          ($field == 'nomeBreve' ? ucfirst($this->faker->unique()->words(1, true)) :
           ($field == 'citta' ? $this->faker->city() :
           ($field == 'indirizzo1' ? $this->faker->streetAddress() :
           ($field == 'indirizzo2' ? $this->faker->postcode().' - '.$this->faker->state().' ('.$this->faker->stateAbbr().')' :

@@ -61,7 +61,7 @@ class ClasseTest extends UnitTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'anno' ? $this->faker->numberBetween(1, 5) :
+          $field == 'anno' ? ($i + 1) :
           ($field == 'sezione' ? 'X' :
           ($field == 'oreSettimanali' ? $this->faker->numberBetween(27, 34) :
           ($field == 'sede' ? $this->getReference('sede_'.$this->faker->randomElement(['1', '2'])) :
