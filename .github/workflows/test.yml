@@ -1,4 +1,4 @@
-name: Testing giua@school (Symfony application with MySQL)
+name: Test giua@school
 
 on:
   push:
@@ -8,9 +8,9 @@ on:
 
 jobs:
   tests:
-    name: Symfony 4.4 (PHP ${{ matrix.php-versions }})
+    name: Test on Symfony 4.4 (PHP ${{ matrix.php-versions }})
     runs-on: ubuntu-20.04
-    
+
     services:
       mysql:
         image: mysql:5.7
@@ -21,7 +21,7 @@ jobs:
         ports:
           - 3306/tcp
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-    
+
     strategy:
       fail-fast: false
       matrix:
@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Setup PHP, with composer and extensions
         uses: shivammathur/setup-php@v2   #https://github.com/shivammathur/setup-php
         with:
@@ -38,38 +38,38 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql
           #, JSON, PCRE, Session, SimpleXML, and Tokenizer;
           #coverage: xdebug
-          tools: composer:v1  
-  
-      - name: Start mysql service
-        run: sudo /etc/init.d/mysql start
-        
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-  
-      - name: Cache composer dependencies
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          # Use composer.json for key, if composer.lock is not committed.
-          # key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-      
-      - name: Install Composer dependencies
-        run: |
-          composer require --dev symfony/orm-pack symfony/phpunit-bridge
-          composer install --no-progress --prefer-dist --optimize-autoloader
-          #php vendor/bin/phpunit install
-      
+          tools: composer:v1
+
+      - name: Check PHP
+        run: php -r "phpInfo();"
+
+
+      #-- - name: Get composer cache directory
+        #-- id: composer-cache
+        #-- run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+ #--
+      #-- - name: Cache composer dependencies
+        #-- uses: actions/cache@v2
+        #-- with:
+          #-- path: ${{ steps.composer-cache.outputs.dir }}
+          #-- # Use composer.json for key, if composer.lock is not committed.
+          #-- # key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          #-- key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          #-- restore-keys: ${{ runner.os }}-composer-
+     #--
+      #-- - name: Install Composer dependencies
+        #-- run: |
+          #-- composer require --dev symfony/orm-pack symfony/phpunit-bridge
+          #-- composer install --no-progress --prefer-dist --optimize-autoloader
+          #-- #php vendor/bin/phpunit install
+     #--
       #- name: Run Migration
       #  run: |
       #    php bin/console doctrine:schema:update --force || echo "No migrations found or schema update failed"
       #    php bin/console doctrine:migrations:migrate || echo "No migrations found or migration failed"
       #  env:
       #    DATABASE_URL: mysql://root:symfony@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/symfony
-      
-      - name: Run Tests
-        run: php vendor/bin/simple-phpunit
-        #run: php bin/phpunit --coverage-text
 
+      #-- - name: Run Tests
+        #-- run: php vendor/bin/simple-phpunit
+        #-- #run: php bin/phpunit --coverage-text
