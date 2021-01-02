@@ -57,15 +57,13 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: |
-          #-- composer require --dev symfony/orm-pack symfony/phpunit-bridge
-          composer install --no-progress --prefer-dist --optimize-autoloader
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-     #--
-      #- name: Run Migration
-      #  run: |
-      #    php bin/console doctrine:schema:update --force || echo "No migrations found or schema update failed"
-      #    php bin/console doctrine:migrations:migrate || echo "No migrations found or migration failed"
+      - name: Create database
+        run: |
+          php bin/console doctrine:database:create -e test
+          php bin/console doctrine:schema:update -f -e test
+
       #  env:
       #    DATABASE_URL: mysql://root:symfony@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/symfony
 
