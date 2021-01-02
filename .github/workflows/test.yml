@@ -64,9 +64,5 @@ jobs:
           php bin/console doctrine:database:create -e test
           php bin/console doctrine:schema:update -f -e test
 
-      #  env:
-      #    DATABASE_URL: mysql://root:symfony@127.0.0.1:${{ job.services.mysql.ports['3306'] }}/symfony
-
-      #-- - name: Run Tests
-        #-- run: php vendor/bin/simple-phpunit
-        #-- #run: php bin/phpunit --coverage-text
+      - name: Run Tests
+        run: php vendor/bin/simple-phpunit --coverage-text
