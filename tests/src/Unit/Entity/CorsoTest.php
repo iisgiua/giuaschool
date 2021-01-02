@@ -56,7 +56,7 @@ class CorsoTest extends UnitTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           $field == 'nome' ? implode(' ', array_map('ucfirst', $this->faker->unique()->words(3))) :
-          ucfirst($this->faker->unique()->words(1, true);
+          ucfirst($this->faker->unique()->words(1, true));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
