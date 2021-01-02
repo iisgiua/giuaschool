@@ -42,25 +42,25 @@ jobs:
       - name: Check PHP
         run: php -r "phpInfo();"
 
+      - name: Start mysql service
+        run: sudo /etc/init.d/mysql start
 
-      #-- - name: Get composer cache directory
-        #-- id: composer-cache
-        #-- run: echo "::set-output name=dir::$(composer config cache-files-dir)"
- #--
-      #-- - name: Cache composer dependencies
-        #-- uses: actions/cache@v2
-        #-- with:
-          #-- path: ${{ steps.composer-cache.outputs.dir }}
-          #-- # Use composer.json for key, if composer.lock is not committed.
-          #-- # key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          #-- key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          #-- restore-keys: ${{ runner.os }}-composer-
-     #--
-      #-- - name: Install Composer dependencies
-        #-- run: |
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: |
           #-- composer require --dev symfony/orm-pack symfony/phpunit-bridge
-          #-- composer install --no-progress --prefer-dist --optimize-autoloader
-          #-- #php vendor/bin/phpunit install
+          composer install --no-progress --prefer-dist --optimize-autoloader
+
      #--
       #- name: Run Migration
       #  run: |
