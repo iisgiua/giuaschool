@@ -8,16 +8,14 @@ ENV LOCALE="it_IT.UTF-8"
 RUN \
 # Source repositories
   echo "deb http://deb.debian.org/debian/ buster main contrib non-free" > /etc/apt/sources.list && \
-  echo "deb-src http://deb.debian.org/debian/ buster main contrib non-free" >> /etc/apt/sources.list && \
   echo "deb http://deb.debian.org/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list && \
-  echo "deb-src http://deb.debian.org/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list && \
 # Update APT source list
-  apt-get update && apt-get upgrade -y && apt-get install -y \
+  apt-get -qq update && apt-get -qqy upgrade && \
 # Install dev tools
-  apt-utils build-essential debconf-utils debconf default-mysql-client \
+  apt-get -y install \
+  apt-utils build-essential debconf-utils lsb-release \
   curl wget unzip rsync git \
-  vim nano \
-  openssh-client \
+  apt-transport-https openssh-client ca-certificates \
   locales && \
 # Set locale
   sed -i -e "s/# $LOCALE/$LOCALE/" /etc/locale.gen && \
@@ -28,19 +26,31 @@ RUN \
 
 # Install Apache, MariaDB, Composer
 RUN apt-get install -y \
-  apache2 \
-  mariadb-common mariadb-server mariadb-client \
-  composer=1.*
+  apache2='2\.4\..*' \
+  mariadb-common='10\.3\..*' mariadb-server='10\.3\..*' mariadb-client='10\.3\..*' \
+  composer='1\..*'
 
-# Test Apache version
-RUN apachectl -v && \
+# Install PHP 7.4
+RUN \
+  wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
+  echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
+  apt-get  update && \
+  apt-get -y install \
+  php7.4
+
+
+# Check software version
+RUN \
+  cat /etc/debian_version && \
+  cat /etc/os-release && \
+  apachectl -v && \
+  mysql -V && \
+  composer -V && \
+  php -v
+
+# Start services
+RUN \
   service apache2 start && \
-  service apache2 status
-
-# Test MariaDB version
-RUN mysql -V && \
   service mysql start && \
+  service apache2 status && \
   service mysql status
-
-# Test Composer version
-RUN composer -V
