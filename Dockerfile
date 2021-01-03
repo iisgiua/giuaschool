@@ -14,7 +14,7 @@ RUN \
 # Update APT source list
   apt-get -qq update && apt-get -qqy upgrade && \
 # Install dev tools
-  apt-get -y install \
+  apt-get -qqy install \
   apt-utils debconf-utils lsb-release \
   curl wget unzip rsync git \
   apt-transport-https openssh-client ca-certificates \
@@ -26,11 +26,6 @@ RUN \
   update-locale LANG=$LOCALE
 
 
-# Install Apache, MariaDB, Composer
-RUN apt-get install -y \
-  apache2=2.4.* \
-  mariadb-common=10.3.* mariadb-server=10.3.* mariadb-client=10.3.* \
-  composer=1.*
 
 # Install PHP 7.4
 RUN \
@@ -39,6 +34,14 @@ RUN \
   apt-get  update && \
   apt-get -y install \
   php7.4
+
+
+# Install Apache, MariaDB, Composer
+RUN apt-get install -y \
+  apache2=2.4.* \
+  mariadb-common=10.3* mariadb-server=10.3* mariadb-client=10.3* \
+  composer=1.*
+
 
 
 # Check software version
