@@ -1,9 +1,8 @@
 # Install Debian
 FROM debian:10.7
 
+# System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
-
-# System environments
 ENV LOCALE="it_IT.UTF-8"
 
 # Install software
@@ -23,10 +22,9 @@ RUN \
   sed -i -e "s/# $LOCALE/$LOCALE/" /etc/locale.gen && \
   echo "LANG=$LOCALE">/etc/default/locale && \
   dpkg-reconfigure --frontend=noninteractive locales && \
-  update-locale LANG=$LOCALE
-
+  update-locale LANG=$LOCALE && \
 # Install Apache, MariaDB, Composer
-RUN apt-get install -y \
+  apt-get install -yqq \
   apache2=2.4.* \
   mariadb-common=1:10.3.* mariadb-server=1:10.3.* mariadb-client=1:10.3.* \
   composer=1.*
@@ -39,14 +37,15 @@ RUN \
   echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
   apt-get  update && \
   apt-get -y install \
-  php7.4
+  php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip
+
+  ##ctype iconv pcre, session, tokenizer
 
 
 
 # Check software version
 RUN \
   cat /etc/debian_version && \
-  cat /etc/os-release && \
   apachectl -v && \
   mysql -V && \
   composer -V && \
