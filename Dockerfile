@@ -1,6 +1,8 @@
 # Install Debian
 FROM debian:10.7
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # System environments
 ENV LOCALE="it_IT.UTF-8"
 
@@ -13,7 +15,7 @@ RUN \
   apt-get -qq update && apt-get -qqy upgrade && \
 # Install dev tools
   apt-get -y install \
-  apt-utils build-essential debconf-utils lsb-release \
+  apt-utils debconf-utils lsb-release \
   curl wget unzip rsync git \
   apt-transport-https openssh-client ca-certificates \
   locales && \
@@ -26,9 +28,9 @@ RUN \
 
 # Install Apache, MariaDB, Composer
 RUN apt-get install -y \
-  apache2='2\.4\..*' \
-  mariadb-common='10\.3\..*' mariadb-server='10\.3\..*' mariadb-client='10\.3\..*' \
-  composer='1\..*'
+  apache2=2.4.* \
+  mariadb-common=10.3.* mariadb-server=10.3.* mariadb-client=10.3.* \
+  composer=1.*
 
 # Install PHP 7.4
 RUN \
