@@ -53,5 +53,5 @@ RUN \
 
 ### Run init script
 RUN \
-  chmod 755 docker/entrypoint.sh &&
+  chmod 755 docker/entrypoint.sh && \
   docker/entrypoint.sh
