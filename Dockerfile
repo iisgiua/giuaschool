@@ -12,9 +12,9 @@ RUN \
   echo "deb http://deb.debian.org/debian/ buster main contrib non-free" > /etc/apt/sources.list && \
   echo "deb http://deb.debian.org/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list && \
 # Update APT source list
-  apt-get -qq update && apt-get -qqy upgrade && \
+  apt-get -qq update && apt-get -yqq upgrade && \
 # Install dev tools
-  apt-get -qqy install \
+  apt-get -yqq install \
   apt-utils debconf-utils lsb-release \
   curl wget unzip rsync git \
   apt-transport-https openssh-client ca-certificates \
@@ -25,6 +25,12 @@ RUN \
   dpkg-reconfigure --frontend=noninteractive locales && \
   update-locale LANG=$LOCALE
 
+# Install Apache, MariaDB, Composer
+RUN apt-get install -y \
+  apache2=2.4.* \
+  mariadb-common=1:10.3.* mariadb-server=1:10.3.* mariadb-client=1:10.3.* \
+  composer=1.*
+
 
 
 # Install PHP 7.4
@@ -34,13 +40,6 @@ RUN \
   apt-get  update && \
   apt-get -y install \
   php7.4
-
-
-# Install Apache, MariaDB, Composer
-RUN apt-get install -y \
-  apache2=2.4.* \
-  mariadb-common=10.3* mariadb-server=10.3* mariadb-client=10.3* \
-  composer=1.*
 
 
 
