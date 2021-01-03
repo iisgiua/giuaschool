@@ -52,4 +52,6 @@ RUN \
   ./vendor/bin/simple-phpunit --version
 
 ### Run init script
-RUN docker/entrypoint.sh
+RUN \
+  chmod 755 docker/entrypoint.sh &&
+  docker/entrypoint.sh
