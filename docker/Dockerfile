@@ -4,6 +4,8 @@ FROM debian:10.7
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
 ENV LOCALE="it_IT.UTF-8"
+WORKDIR /var/www/giuaschool
+COPY * ./
 
 ### Install software
 RUN \
