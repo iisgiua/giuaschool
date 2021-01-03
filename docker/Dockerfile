@@ -64,7 +64,7 @@ RUN \
 
 # Create database
 RUN \
-  php bin/console doctrine:database:create -e test &&
+  php bin/console doctrine:database:create -e test && \
   php bin/console doctrine:schema:update -f -e test
 
 # Install PHPUnit
