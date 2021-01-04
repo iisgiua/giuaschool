@@ -10,7 +10,7 @@
  */
 
 
-namespace App\Tests\Unit\Entity;
+namespace App\Tests\UnitTest\Entity;
 
 use App\DataFixtures\ClasseFixtures;
 use App\DataFixtures\DocenteFixtures;
