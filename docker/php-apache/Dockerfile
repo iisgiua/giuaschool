@@ -1,0 +1,9 @@
+FROM php:7.4-apache-buster
+
+#RUN docker-php-ext-install pdo pdo_mysql mysqli
+
+RUN php -m && \
+  php -i && \
+  php composer -V
+
+  
