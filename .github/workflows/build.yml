@@ -20,5 +20,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: my-org/my-repo/my-image
+          repository: trinko/giuaschool/giuaschool-test
           tag_with_ref: true
