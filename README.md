@@ -1,6 +1,7 @@
 # giua@school
-
 *il Registro Elettronico dell'Istituto di Istruzione Superiore "Michele Giua"*
+
+![Test](https://github.com/trinko/giuaschool/workflows/Test/badge.svg?branch=master)
 
 
 ## IL PROGETTO
