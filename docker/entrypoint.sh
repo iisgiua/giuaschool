@@ -9,6 +9,6 @@ service mysql start
 ### Configure PHP
 
 ### Configure Mysql
-#mysqladmin -u root password root
+mysqladmin -u root password root
 php bin/console doctrine:database:create -e test
 php bin/console doctrine:schema:update -f -e test
