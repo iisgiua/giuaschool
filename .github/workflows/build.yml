@@ -13,12 +13,20 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v1
-        with:
-          dockerfile: ./docker/docker-compose.yml
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: trinko/giuaschool/giuaschool-test
-          tag_with_ref: true
+ #     - name: Push to GitHub Packages
+ #       uses: docker/build-push-action@v1
+ #       with:
+ #         dockerfile: ./docker/Dockerfile
+ #         username: ${{ github.actor }}
+ #         password: ${{ secrets.GITHUB_TOKEN }}
+ #         registry: docker.pkg.github.com
+ #         repository: trinko/giuaschool/giuaschool-test
+ #         tag_with_ref: true
+
+      - name: Login
+        run: docker login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+      - name: Build 
+        run: docker build -t docker.pkg.github.com/trinko/giuaschool/giuaschool-test .
+      - name: Push 
+        run: docker push docker.pkg.github.com/trinko/giuaschool/giuaschool-test
+               
