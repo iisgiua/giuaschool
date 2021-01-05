@@ -1,14 +1,19 @@
 FROM php:7.4-apache-buster
 
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+#WORKDIR /var/www/giuaschool
+#COPY ./ ./
 
-RUN curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x /usr/bin/composer
+#RUN docker-php-ext-install pdo pdo_mysql mysqli
 
-RUN composer -V
+#RUN curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x /usr/bin/composer
 
-ENV COMPOSER_ALLOW_SUPERUSER 1
 
-RUN composer install --no-dev --prefer-dist --optimize-autoloader
+
+#RUN composer -V
+
+#ENV COMPOSER_ALLOW_SUPERUSER 1
+
+#RUN composer install --no-dev --prefer-dist --optimize-autoloader
 
 # Set timezone
 #RUN rm /etc/localtime
