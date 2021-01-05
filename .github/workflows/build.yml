@@ -15,7 +15,7 @@ jobs:
 
       - name: Login
         uses: docker/login-action@v1
-    	  with:
+        with:
           registry: docker.pkg.github.com
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
