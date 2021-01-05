@@ -13,12 +13,26 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v2
-        with:
-          file: ./docker/Dockerfile
+      - name: Login
+        uses: docker/login-action@v1
+    	  with:
+          registry: docker.pkg.github.com
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: trinko/giuaschool/giuaschool-test
-          tag_with_ref: true
+             
+      - name: Push to GitHub Packages
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with: 
+          file: ./docker/Dockerfile
+          push: true
+          tags: trinko/giuaschool:latest 
+          #username: ${{ github.actor }}
+          #password: ${{ secrets.GITHUB_TOKEN }}
+          #registry: docker.pkg.github.com
+          #repository: trinko/giuaschool/giuaschool-test
+          #tag_with_ref: true
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+        
