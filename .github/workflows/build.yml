@@ -25,7 +25,7 @@ jobs:
         uses: docker/build-push-action@v1
         with: 
           dockerfile: ./docker/Dockerfile
-          tags: trinko/giuaschool:latest 
+          #tags: trinko/giuaschool:latest 
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
