@@ -4,6 +4,7 @@ FROM debian:10.7
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
 ENV LOCALE="it_IT.UTF-8"
+ENV COMPOSER_ALLOW_SUPERUSER="1"
 WORKDIR /var/www/giuaschool
 COPY . .
 
@@ -35,13 +36,11 @@ RUN \
   echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
   apt-get -qq update && \
   apt-get -yqq install \
-  php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip
-  ##&&
-
+  php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip && \
 # Install Symfony
-#  composer -q install --no-progress --prefer-dist --optimize-autoloader &&
+  composer -q install --no-progress --prefer-dist --optimize-autoloader --no-plugins && \
 # Install PHPUnit
-#  ./vendor/bin/simple-phpunit --version
+  ./vendor/bin/simple-phpunit --version
 
 ### Check software version
 RUN \
@@ -49,10 +48,9 @@ RUN \
   apachectl -v && \
   mysql -V && \
   composer -V && \
-  php -v
-#&& 
-#  php bin/console -V && \
-#  ./vendor/bin/simple-phpunit --version
+  php -v && \
+  php bin/console -V && \
+  ./vendor/bin/simple-phpunit --version
 
 ### Run init script
 #RUN \
