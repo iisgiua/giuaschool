@@ -530,6 +530,8 @@ class RegistroController extends AbstractController {
     $dati = $reg->lezioneOreConsecutive($data_obj, $ora, $this->getUser(), $classe, $materia);
     $label['inizio'] = $dati['inizio'];
     $ora_fine =  $dati['fine'];
+    // lista altre materie
+    $altre_materie = $em->getRepository('App:Cattedra')->listaAltreMaterie($cattedra, $firme);
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('registro_edit', FormType::class)
       ->add('fine', ChoiceType::class, array('label' => 'label.ora_fine',
@@ -547,6 +549,15 @@ class RegistroController extends AbstractController {
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
         'required' => false));
+    if (count($altre_materie) > 1) {
+      $form = $form
+        ->add('materia', ChoiceType::class, array('label' => 'label.materia',
+          'data' => $cattedra->getMAteria()->getId(),
+          'choices'  => $altre_materie,
+          'choice_translation_domain' => false,
+          'disabled' => false,
+          'required' => true));
+    }
     if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
       // alunni assenti nell'ora
       $assenti_precedenti = $em->getRepository('App:AssenzaLezione')->assentiLezione($lezione);
@@ -577,6 +588,16 @@ class RegistroController extends AbstractController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      $old_materia = $materia->getId();
+      if (count($altre_materie) > 1) {
+        // legge input
+        $cattedra = $em->getRepository('App:Cattedra')->find($form->get('materia')->getData());
+        if (!$cattedra || !in_array($form->get('materia')->getData(), array_values($altre_materie))) {
+          // errore: cattedra non prevista
+          throw $this->createNotFoundException('exception.invalid_params');
+        }
+        $materia = $cattedra->getMateria();
+      }
       if ($materia->getTipo() == 'S') {
         // sostegno
         if (!$firma_docente) {
@@ -640,6 +661,7 @@ class RegistroController extends AbstractController {
           }
           // log azione
           $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica lezione', __METHOD__, array(
+            'Materia' => $old_materia,
             'Lezione' => $lezione->getId(),
             'Firma' => $firma->getId(),
             'Argomento' => $argomenti_old,
