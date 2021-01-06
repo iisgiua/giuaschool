@@ -40,7 +40,7 @@ RUN \
   ##&& \
 
 # Install Symfony
-RUN composer  install --no-progress --prefer-dist --optimize-autoloader --no-plugins
+RUN composer -vvv install --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts
   ##&& \
 # Install PHPUnit
 RUN ./vendor/bin/simple-phpunit --version
