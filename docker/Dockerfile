@@ -6,8 +6,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV LANG="it_IT.UTF-8"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 WORKDIR /var/www/giuaschool
-COPY --chown=www-data:www-data . .
-EXPOSE 80
 
 ### Install software
 RUN \
@@ -43,7 +41,22 @@ RUN \
 # Install PHPUnit
   ./vendor/bin/simple-phpunit --version
 
-### Run init script
+### Configure software
 RUN \
-  chmod 755 docker/entrypoint.sh && \
-  docker/entrypoint.sh
+# Configure Apache
+  a2enmod rewrite && \
+  sed -r -i -e "s/^;date\.timezone\s*=.*$/date.timezone = Europe\/Rome/" /etc/php/7.4/apache2/php.ini && \
+  sed -r -i -e "s/;opcache.enable=1.*$/opcache.enable=1/" /etc/php/7.4/apache2/php.ini && \
+  sed -r -i -e "s/^;date\.timezone\s*=.*$/date.timezone = Europe\/Rome/" /etc/php/7.4/cli/php.ini && \
+
+
+
+COPY --chown=www-data:www-data . .
+COPY ./docker/apache2.site /etc/apache2/sites-available/000-default.conf
+EXPOSE 80
+
+
+### Run init script
+#RUN \
+#  chmod 755 docker/entrypoint.sh && \
+#  docker/entrypoint.sh
