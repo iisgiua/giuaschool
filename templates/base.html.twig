@@ -10,8 +10,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ pagina_titolo|trans }}</title>
-    <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/nome') }}">
-    <meta name="keywords" content="scuola,istituto,istruzione,superiore,tecnico,liceo,scientifico,scienze,applicate,giua,cagliari,assemini,registro,elettronico">
+    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_citta')|lower }}{% endfor %}">
+    <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
     <meta name="author" content="Antonello Dessì">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap-theme.min.css') }}" rel="stylesheet">
@@ -102,17 +102,17 @@
             <div class="row">
               <div class="col-sm-6 hidden-xs text-center small">
                 <div class="row">
-                  <strong>Istituto di Istruzione Superiore<br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em></strong>
+                  <strong>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}<br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em></strong>
                 </div>
                 <div class="row">
                   <div class="col-sm-6">
                     <address class="text-center pull-right">
-                      <strong>Sede Centrale</strong><br>Via Montecassino 41<br>09134 - CAGLIARI (Pirri)<br>Telefono: 070 500786
+                      <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_0_telefono') }}
                     </address>
                   </div>
                   <div class="col-sm-6">
                     <address class="text-center pull-left">
-                      <strong>Sede Staccata</strong><br>Via Bacaredda 27<br>09032 - ASSEMINI<br>Telefono: 070 941763
+                      <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_1_telefono') }}
                     </address>
                   </div>
                 </div>
