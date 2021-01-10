@@ -35,11 +35,7 @@ RUN \
   echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
   apt-get -qq update && \
   apt-get -yqq install \
-  php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip && \
-# Install Symfony
-  composer -q install --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
-# Install PHPUnit
-  ./vendor/bin/simple-phpunit --version
+  php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip
 
 ### Configure software
 RUN \
@@ -47,12 +43,16 @@ RUN \
   a2enmod rewrite && \
   sed -r -i -e "s/^;date\.timezone\s*=.*$/date.timezone = Europe\/Rome/" /etc/php/7.4/apache2/php.ini && \
   sed -r -i -e "s/;opcache.enable=1.*$/opcache.enable=1/" /etc/php/7.4/apache2/php.ini && \
-  sed -r -i -e "s/^;date\.timezone\s*=.*$/date.timezone = Europe\/Rome/" /etc/php/7.4/cli/php.ini && \
+  sed -r -i -e "s/^;date\.timezone\s*=.*$/date.timezone = Europe\/Rome/" /etc/php/7.4/cli/php.ini
 
 
 
 COPY --chown=www-data:www-data . .
 COPY ./docker/apache2.site /etc/apache2/sites-available/000-default.conf
+
+# Install Symfony
+#  composer -q install --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
+
 EXPOSE 80
 
 
