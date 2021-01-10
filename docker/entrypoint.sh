@@ -1,19 +1,8 @@
 #!/bin/sh
 
+# Start Mysql service in background
+service mysql start
 
+# Start Apache service in foreground
+/usr/sbin/apache2ctl -D FOREGROUND
 
-
-### Start services
-service apache2 start
-#service mysql start
-
-
-### Configure PHP
-
-### Configure Mysql
-#mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';"
-
-#php bin/console doctrine:database:create -e dev
-#php bin/console doctrine:schema:update -f -e dev
-
-exit 0
