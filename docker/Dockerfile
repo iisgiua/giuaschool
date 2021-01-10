@@ -14,17 +14,17 @@ RUN \
   echo "deb http://deb.debian.org/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list && \
 # Update APT source list
   apt-get -qq update && apt-get -yqq upgrade && \
-# Install dev tools
-  apt-get -yqq install \
-  apt-utils debconf-utils lsb-release \
-  curl wget unzip rsync git \
-  apt-transport-https openssh-client ca-certificates \
-  locales && \
 # Set locale
+  apt-get -yqq install locales && \
   sed -i -e "s/# $LANG/$LANG/" /etc/locale.gen && \
   echo "LANG=$LANG">/etc/default/locale && \
   dpkg-reconfigure --frontend=noninteractive locales && \
   update-locale LANG=$LANG && \
+# Install dev tools
+  apt-get -yqq install \
+  apt-utils debconf-utils lsb-release \
+  curl wget unzip rsync git \
+  apt-transport-https openssh-client ca-certificates && \
 # Install Apache, MariaDB, Composer
   apt-get install -yqq \
   apache2=2.4.* \
@@ -48,7 +48,7 @@ RUN \
 
 
 COPY --chown=www-data:www-data . .
-COPY ./docker/apache2.site /etc/apache2/sites-available/000-default.conf
+COPY ./docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
 
 # Install Symfony
 #  composer -q install --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
