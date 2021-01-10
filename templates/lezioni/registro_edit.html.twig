@@ -16,10 +16,13 @@
       <div class="row bg-success gs-mb-3">
         <div class="col-sm-2 text-right"><strong class="gs-big">Docente:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.docente }}</span></div>
+      {% if form.materia is not defined %}
         <div class="col-sm-2 text-right"><strong class="gs-big">Materia:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.materia }}</span></div>
+      {% endif %}
       </div>
       {{ form_start(form) }}
+      {% if form.materia is defined %}{{ form_row(form.materia) }}{% endif %}
       <div class="form-group">
         <label class="col-sm-2 control-label" for="registro_add_fine">Ora</label>
         <div class="col-sm-5">

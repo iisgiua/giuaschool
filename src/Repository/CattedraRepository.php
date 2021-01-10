@@ -14,6 +14,8 @@ namespace App\Repository;
 
 use App\Entity\Docente;
 use App\Entity\Classe;
+use App\Entity\Cattedra;
+use App\Entity\FirmaSostegno;
 
 
 /**
@@ -234,6 +236,61 @@ class CattedraRepository extends BaseRepository {
     }
     // crea lista con pagine
     return $this->paginazione($query->getQuery(), $pagina);
+  }
+
+  /**
+   * Restituisce la lista delle materie nella stessa classe per il docente di una lezione
+   * Considera solo cattedre analoghe (curricolari o sostegno)
+   *
+   * @param Cattedra $cattedra Cattedra del docente
+   * @param array $firme Lista di firme alla lezione del docente
+   *
+   * @return array Dati formattati in un array associativo
+   */
+  public function listaAltreMaterie(Cattedra $cattedra, array $firme): array {
+    $dati = array();
+    if ($cattedra) {
+      // lista cattedre
+      $cattedre = $this->createQueryBuilder('c')
+        ->join('c.materia', 'm')
+        ->leftJoin('c.alunno', 'a')
+        ->where('c.docente=:docente AND c.classe=:classe AND c.attiva=:attiva')
+        ->orderBy('m.nomeBreve,a.cognome,a.nome', 'ASC')
+        ->setParameters(['docente' => $cattedra->getDocente(), 'classe' => $cattedra->getClasse(),
+          'attiva' => 1])
+        ->getQuery()
+        ->getResult();
+      // dati materie
+      $sostegno = ($cattedra->getMateria()->getTipo() == 'S');
+      foreach ($cattedre as $cat) {
+        $mat = $cat->getMateria()->getNomeBreve();
+        if ($sostegno && $cat->getMateria()->getTipo() == 'S') {
+          // sostegno
+          $mat .= $cat->getAlunno() ? (' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')') : '';
+          $dati[$mat] = $cat->getId();
+        } elseif (!$sostegno && $cat->getMateria()->getTipo() != 'S') {
+          // materia curricolare
+          $dati[$mat] = $cat->getId();
+          // controlla cattedre in compresenza
+          foreach ($firme as $f) {
+            if ($f instanceOf FirmaSostegno) {
+              // se sostegno: ok
+              continue;
+            } elseif ($f->getDocente()->getId() != $cattedra->getDocente()->getId()) {
+              // docente curricolare in compresenza: controlla cattedra
+              $compresenza = $this->findOneBy(['docente' => $f->getDocente(),
+                'classe' => $cat->getClasse(), 'materia' => $cat->getMateria(), 'attiva' => 1]);
+              if (!$compresenza) {
+                // non esiste compresenza sulla materia:la esclude dalla lista
+                unset($dati[$mat]);
+              }
+            }
+          }
+        }
+      }
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

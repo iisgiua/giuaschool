@@ -552,7 +552,7 @@ class RegistroController extends AbstractController {
     if (count($altre_materie) > 1) {
       $form = $form
         ->add('materia', ChoiceType::class, array('label' => 'label.materia',
-          'data' => $cattedra->getMAteria()->getId(),
+          'data' => $cattedra->getId(),
           'choices'  => $altre_materie,
           'choice_translation_domain' => false,
           'disabled' => false,
@@ -815,7 +815,7 @@ class RegistroController extends AbstractController {
     // ok: memorizza dati
     $em->flush();
     // log azione
-    if ($lezione_cancellata) {
+    if (count($lista_firme) == 1) {
       // intera lezione
       $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella firma e lezione', __METHOD__, array(
         'Lezione' => $lezione_id,
