@@ -26,6 +26,9 @@ jobs:
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=dhub_image::${DHUB_IMAGE}
           echo ::set-output name=ghub_image::${GHUB_IMAGE}
+          
+      - name: test
+        run: echo "${{ steps.prep.outputs.version }}"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
