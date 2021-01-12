@@ -19,7 +19,7 @@ jobs:
         run: |
           DHUB_IMAGE=trinkodok/giuaschool
           GHUB_IMAGE=docker.pkg.github.com/trinko/giuaschool
-          VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION=${GITHUB_REF#refs/tags/}
           TAGS="${DHUB_IMAGE}:${VERSION},${DHUB_IMAGE}:latest"
           TAGS="${TAGS},${GH_IMAGE}:${VERSION},${GH_IMAGE}:latest"
           echo ::set-output name=tags::${TAGS}
