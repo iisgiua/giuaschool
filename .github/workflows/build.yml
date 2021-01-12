@@ -1,45 +1,61 @@
 name: Build
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Push Docker image to GitHub Packages
+    name: Build and push Docker image
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      #- name: Login
-      #  uses: docker/login-action@v1
-      #  with:
-      #    registry: docker.pkg.github.com
-      #    username: ${{ github.actor }}
-      #    password: ${{ secrets.GITHUB_TOKEN }}
-             
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v1
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Login to GitHub Package Registry
+        uses: docker/login-action@v1
         with:
-          dockerfile: ./docker/Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: trinkodok/giuaschool
-          tag_with_ref: true
-                       
-      - name: Push to GitHub Packages
-        #id: docker_build
-        uses: docker/build-push-action@v1
-        with: 
-          dockerfile: ./docker/Dockerfile
-          #tags: trinko/giuaschool:latest 
+          registry: docker.pkg.github.com
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: trinko/giuaschool/giuaschool-test
-          tag_with_ref: true
+      
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          file: ./docker/Dockerfile
+          push: true
+          tags: trinko/giuaschool:latest
+      
+      
+      #- name: Push to Docker Hub
+      #  uses: docker/build-push-action@v1
+      #  with:
+      #    dockerfile: ./docker/Dockerfile
+      #    username: ${{ secrets.DOCKER_USERNAME }}
+      #    password: ${{ secrets.DOCKER_PASSWORD }}
+      #    repository: trinkodok/giuaschool
+      #    tag_with_ref: true
+                       
+      #- name: Push to GitHub Packages
+      #  #id: docker_build
+      #  uses: docker/build-push-action@v1
+      #  with: 
+      #    dockerfile: ./docker/Dockerfile
+          #tags: trinko/giuaschool:latest 
+      #    username: ${{ github.actor }}
+      #    password: ${{ secrets.GITHUB_TOKEN }}
+      #    registry: docker.pkg.github.com
+      #    repository: trinko/giuaschool/giuaschool-test
+      #    tag_with_ref: true
 
       #- name: Image digest
       #  run: echo ${{ steps.docker_build.outputs.digest }}
