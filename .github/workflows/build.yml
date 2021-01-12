@@ -14,8 +14,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
       
-
-      - name: Build & push image on 
+      - name: Build & push image on DockerHub
         uses: mr-smithers-excellent/docker-build-push@v4
         with:
           image: trinkodok/giuaschool
@@ -24,6 +23,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           
+      - name: Build & push image on GitHub
+        uses: mr-smithers-excellent/docker-build-push@v4
+        with:
+          image: trinko/giuaschool
+          registry: docker.pkg.github.com
+          dockerfile: ./docker/Dockerfile
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      
       
       #- name: Push to Docker Hub
       #  uses: docker/build-push-action@v1
