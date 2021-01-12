@@ -19,21 +19,11 @@ jobs:
         run: |
           DHUB_IMAGE=trinkodok/giuaschool
           GHUB_IMAGE=docker.pkg.github.com/trinko/giuaschool
-          VERSION=${GITHUB_REF#refs/tags/}
-          TAGS="${DHUB_IMAGE}:${VERSION},${DHUB_IMAGE}:latest"
-          TAGS="${TAGS},${GH_IMAGE}:${VERSION},${GH_IMAGE}:latest"
+          TAGS="${DHUB_IMAGE}:latest,${GHUB_IMAGE}:latest"
           echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=version::${VERSION}
           echo ::set-output name=dhub_image::${DHUB_IMAGE}
           echo ::set-output name=ghub_image::${GHUB_IMAGE}
           
-      - name: test
-        run: |
-          echo "${GITHUB_REF}"
-          echo "${GITHUB_REF#refs/}"
-          echo "${GITHUB_REF#/refs/}"
-          echo "${GITHUB_REF#refs/tags/}"
- 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       
@@ -62,7 +52,7 @@ jobs:
           file: ./docker/Dockerfile
           push: true
           tags: ${{ steps.prep.outputs.tags }}
-          labels: org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+  
       
       #- name: Push to Docker Hub
       #  uses: docker/build-push-action@v1
