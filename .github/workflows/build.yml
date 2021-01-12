@@ -18,7 +18,7 @@ jobs:
         id: prep
         run: |
           DHUB_IMAGE=trinkodok/giuaschool
-          GHUB_IMAGE=docker.pkg.github.com/trinko/giuaschool
+          GHUB_IMAGE=ghcr.io/trinko/giuaschool
           TAGS="${DHUB_IMAGE}:latest,${GHUB_IMAGE}:latest"
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=dhub_image::${DHUB_IMAGE}
