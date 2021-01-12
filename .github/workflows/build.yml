@@ -17,7 +17,7 @@ jobs:
       - name: Build & push image on DockerHub
         uses: mr-smithers-excellent/docker-build-push@v4
         with:
-          image: trinkodok/giuaschool
+          image: giuaschool/giuaschool
           registry: docker.io
           dockerfile: ./docker/Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -26,7 +26,7 @@ jobs:
       - name: Build & push image on GitHub
         uses: mr-smithers-excellent/docker-build-push@v4
         with:
-          image: trinko/giuaschool
+          image: giuaschool/giuaschool
           registry: docker.pkg.github.com
           dockerfile: ./docker/Dockerfile
           username: ${{ github.actor }}
