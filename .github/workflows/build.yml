@@ -28,8 +28,12 @@ jobs:
           echo ::set-output name=ghub_image::${GHUB_IMAGE}
           
       - name: test
-        run: echo "${{ steps.prep.outputs.version }}"
-
+        run: |
+          echo "${GITHUB_REF}"
+          echo "${GITHUB_REF#refs/}"
+          echo "${GITHUB_REF#/refs/}"
+          echo "${GITHUB_REF#refs/tags/}"
+ 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       
