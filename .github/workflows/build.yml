@@ -14,45 +14,16 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
       
-      - name: Prepare
-        id: prep
-        run: |
-          DHUB_IMAGE=trinkodok/giuaschool
-          GHUB_IMAGE=ghcr.io/trinko/giuaschool
-          TAGS="${DHUB_IMAGE}:latest,${GHUB_IMAGE}:latest"
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=dhub_image::${DHUB_IMAGE}
-          echo ::set-output name=ghub_image::${GHUB_IMAGE}
-          
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
-      
-      - name: Login to GitHub Package
-        uses: docker/login-action@v1
+
+      - name: Build & push image on 
+        uses: mr-smithers-excellent/docker-build-push@v4
         with:
-          registry: docker.pkg.github.com
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Login to DockerHub
-        uses: docker/login-action@v1 
-        with:
+          image: trinkodok/giuaschool
+          registry: docker.io
+          dockerfile: ./docker/Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          file: ./docker/Dockerfile
-          push: true
-          tags: ${{ steps.prep.outputs.tags }}
-  
+          
       
       #- name: Push to Docker Hub
       #  uses: docker/build-push-action@v1
