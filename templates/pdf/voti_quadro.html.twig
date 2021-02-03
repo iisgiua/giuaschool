@@ -11,7 +11,7 @@
   <strong>Valutazioni della classe {{ classe.anno }}ª {{ classe.sezione }}</strong><br>
   <strong>{{ info.materia }} - {{ info.periodo.nome }}</strong>
 </p>
-{% for alunno,a in dati.alunni %}
+{% for alunno,a in dati.alunni|filter(a => not info.religione or a.religione == info.religione) %}
   {% if dati.voti[alunno] is defined %}
 <br>
   {% endif %}

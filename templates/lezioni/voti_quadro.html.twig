@@ -108,8 +108,9 @@
       </tr>
     </thead>
     <tbody>
+    {% set tipo_rel = (cattedra and cattedra.materia.tipo == 'R' and cattedra.tipo == 'A') ? 'A' : (cattedra and cattedra.materia.tipo == 'R' ? 'S' : '') %}
     {% for k,a in dati.alunni %}
-      {% if cattedra.materia.tipo != 'R' or a.religione == 'S' %}
+      {% if cattedra.materia.tipo != 'R' or a.religione == tipo_rel %}
       <tr>
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>

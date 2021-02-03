@@ -302,9 +302,9 @@ class StaffUtil {
       ->join('al.alunno', 'a')
       ->join('l.materia', 'm')
       ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('al.alunno IN (:lista) AND a.religione=:religione AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
+      ->where('al.alunno IN (:lista) AND a.religione IN (:religione) AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
-      ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'religione' => 'S', 'tipo' => 'R'])
+      ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'religione' => ['S', 'A'], 'tipo' => 'R'])
       ->getQuery()
       ->getArrayResult();
     // ore di assenza totali

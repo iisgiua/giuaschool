@@ -220,7 +220,7 @@ class OsservazioniController extends AbstractController {
       $osservazione = (new OsservazioneAlunno())
         ->setData($data_obj)
         ->setCattedra($cattedra);
-      if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
+      if ($cattedra->getMateria()->getTipo() == 'S') {
         // cattedra di sostegno
         if ($cattedra->getAlunno()) {
           $osservazione->setAlunno($cattedra->getAlunno());
@@ -240,16 +240,18 @@ class OsservazioniController extends AbstractController {
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = $cattedra->getClasse()->getAnno()."ª ".$cattedra->getClasse()->getSezione();
     // form di inserimento
+    $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
+      ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_edit', FormType::class, $osservazione)
       ->add('alunno', EntityType::class, array('label' => 'label.alunno',
         'class' => 'App:Alunno',
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
-        'query_builder' => function (EntityRepository $er) use ($cattedra) {
+        'query_builder' => function (EntityRepository $er) use ($cattedra,$religione) {
             return $er->createQueryBuilder('a')
               ->where('a.classe=:classe and a.abilitato=:abilitato'.
-                ($cattedra->getMateria()->getTipo() == 'R' ? " and a.religione='S'" : ''))
+                ($religione ? " and a.religione='".$religione."'" : ''))
               ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
               ->setParameters(['classe' => $cattedra->getClasse(), 'abilitato' => 1]);
           },

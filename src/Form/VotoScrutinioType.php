@@ -63,10 +63,31 @@ class VotoScrutinioType extends AbstractType {
           ->add('contrari', TextType::class, array('label' => false,
             'property_path' => 'dati[contrari]',
             'trim' => true,
+            'required' => false));
+          //-- ->add('contrari_motivazione', TextareaType::class, array('label' => false,
+            //-- 'property_path' => 'dati[contrari_motivazione]',
+            //-- 'trim' => true,
+            //-- 'required' => false));
+      } elseif ($options['attr']['subType'] == 'edcivica') {
+        // voto di ed.civica
+        $builder
+          ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
+          ->add('unico', HiddenType::class)
+          ->add('recupero', ChoiceType::class, array('label' => false,
+            'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
+              'label.recupero_S' => 'S', 'label.recupero_C' => 'C', 'label.recupero_I' => 'I',
+              'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
+            'placeholder' => 'label.scegli_recupero',
+            'expanded' => false,
+            'multiple' => false,
+            'choice_attr' => function($val, $key, $index) {
+                return ['class' => 'gs-no-placeholder'];
+              },
+            'attr' => ['class' => 'gs-placeholder'],
             'required' => false))
-          ->add('contrari_motivazione', TextareaType::class, array('label' => false,
-            'property_path' => 'dati[contrari_motivazione]',
+          ->add('debito', TextareaType::class, array('label' => false,
             'trim' => true,
+            'attr' => array('rows' => '3'),
             'required' => false));
       } elseif ($options['attr']['subType'] == 'esito') {
         // esito
@@ -76,26 +97,29 @@ class VotoScrutinioType extends AbstractType {
       } elseif ($options['attr']['subType'] == 'debiti') {
         // debiti
         $builder
-        //-- ->add('recupero', ChoiceType::class, array('label' => false,
-          //-- 'choices' => ['label.recupero_A' => 'A', 'label.recupero_S' => 'S', 'label.recupero_C' => 'C',
-            //-- 'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
-          //-- 'placeholder' => 'label.scegli_recupero',
-          //-- 'expanded' => false,
-          //-- 'multiple' => false,
-          //-- 'choice_attr' => function($val, $key, $index) {
-              //-- return ['class' => 'gs-no-placeholder'];
-            //-- },
-          //-- 'attr' => ['class' => 'gs-placeholder'],
-          //-- 'required' => false))
+        ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
+        ->add('unico', HiddenType::class)
+        ->add('recupero', ChoiceType::class, array('label' => false,
+          'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
+            'label.recupero_S' => 'S', 'label.recupero_C' => 'C', 'label.recupero_I' => 'I',
+              'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
+          'placeholder' => 'label.scegli_recupero',
+          'expanded' => false,
+          'multiple' => false,
+          'choice_attr' => function($val, $key, $index) {
+              return ['class' => 'gs-no-placeholder'];
+            },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false))
         ->add('debito', TextareaType::class, array('label' => false,
           'trim' => true,
           'attr' => array('rows' => '3'),
-          'required' => false))
-        ->add('strategie', TextareaType::class, array('label' => false,
-          'trim' => true,
-          'attr' => array('rows' => '3'),
-          'required' => false,
-          'property_path' => 'dati[strategie]'));
+          'required' => false));
+        //-- ->add('strategie', TextareaType::class, array('label' => false,
+          //-- 'trim' => true,
+          //-- 'attr' => array('rows' => '3'),
+          //-- 'required' => false,
+          //-- 'property_path' => 'dati[strategie]'));
       } elseif ($options['attr']['subType'] == 'carenze') {
         // carenze
         $builder
@@ -109,7 +133,8 @@ class VotoScrutinioType extends AbstractType {
         ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
         ->add('unico', HiddenType::class)
         ->add('recupero', ChoiceType::class, array('label' => false,
-          'choices' => ['label.recupero_A' => 'A', 'label.recupero_S' => 'S', 'label.recupero_C' => 'C',
+          'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
+            'label.recupero_S' => 'S', 'label.recupero_C' => 'C', 'label.recupero_I' => 'I',
             'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
           'placeholder' => 'label.scegli_recupero',
           'expanded' => false,

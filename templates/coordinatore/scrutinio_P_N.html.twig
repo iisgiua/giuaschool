@@ -48,7 +48,7 @@
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'R' %}
-          {% if a.religione != 'S' %}
+          {% if a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
           {% elseif dati.proposte[alunno][materia].unico is not defined %}
             <span>--</span>
@@ -74,7 +74,7 @@
     {% if dati.errori is not defined or min(dati.errori) > 1 %}
   <div class="alert alert-info text-center gs-mt-4" role="alert">
     <strong class="gs-big">
-      Con l'apertura dello scrutinio verranno bloccate tutte le modifiche ai dati del Primo Trimestre e saranno calcolate le ore di assenza.<br>
+      Con l'apertura dello scrutinio verranno bloccate tutte le modifiche ai dati del Primo Quadrimestre e saranno calcolate le ore di assenza.<br>
       Le modifiche alle proposte di voto inserite saranno possibili durante l'esecuzione dello scrutinio.
     </strong>
   </div>
@@ -107,7 +107,7 @@ $(document).ready(function() {
   });
   $('#gs-modal-remote').on('shown.bs.modal', function (event) {
     window.dispatchEvent(new Event('resize'));
-  });    
+  });
   $(".gs-button-remote").click(function(e) {
     e.preventDefault();
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');

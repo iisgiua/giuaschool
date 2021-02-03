@@ -59,6 +59,11 @@ class PagelleUtil {
    */
   private $root;
 
+  /**
+   * @var array $directory Lista delle directory relative ai diversi scrutini
+   */
+  private $directory;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -80,6 +85,12 @@ class PagelleUtil {
     $this->tpl = $tpl;
     $this->pdf = $pdf;
     $this->root = $root;
+    // imposta directory er gli scrutini
+    $this->directory = array(
+      'P' => 'primo',
+      'S' => 'secondo',
+      'F' => 'finale',
+      'I' => 'integrativo');
   }
 
   /**
@@ -158,6 +169,28 @@ class PagelleUtil {
       }
       // data scrutinio
       $dati['scrutinio']['data'] = $scrutinio->getData()->format('d/m/Y');
+      // docenti
+      $docenti = $scrutinio->getDato('docenti');
+      $docenti_presenti = $scrutinio->getDato('presenze');
+      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+        ->select('d.id,d.cognome,d.nome,d.sesso')
+        ->where('d.id IN (:lista)')
+        ->orderBy('d.cognome,d.nome', 'ASC')
+        ->setParameter('lista', array_keys($docenti))
+        ->getQuery()
+        ->getArrayResult();
+      // dati per materia
+      foreach ($dati_docenti as $doc) {
+        if ($docenti_presenti[$doc['id']]->getPresenza()) {
+          // dati docente
+          $dati['docenti'][$doc['id']] = ($doc['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ').
+            $doc['cognome'].' '.$doc['nome'];
+        } else {
+          // dati sostituto
+          $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ').
+            ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+        }
+      }
     } elseif ($periodo == 'F') {
       // scrutinio finale
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
@@ -318,19 +351,18 @@ class PagelleUtil {
   public function riepilogoVoti(Classe $classe, $periodo) {
     // inizializza
     $fs = new Filesystem();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    if (!$fs->exists($percorso)) {
+      // crea directory
+      $fs->mkdir($percorso, 0775);
+    }
     if ($periodo == 'P') {
-      // primo trimestre
-      $percorso = $this->root.'/trimestre/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-riepilogo-voti.pdf';
+      // primo trimestre/quadrimestre
+      $nomefile = $classe->getAnno().$classe->getSezione().'-riepilogo-voti-primo-quadrimestre.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Primo Trimestre - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+          'Scrutinio Primo Quadrimestre - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -451,7 +483,7 @@ class PagelleUtil {
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 0, 5, 0, 0, 'PRIMO TRIMESTRE', 0, 'R', 'B');
+    $this->cella($pdf, 0, 5, 0, 0, 'PRIMO QUADRIMESTRE', 0, 'R', 'B');
     $this->acapo($pdf, 5);
     // intestazione tabella
     $pdf->SetFont('helvetica', 'B', 8);
@@ -470,6 +502,7 @@ class PagelleUtil {
         $this->cella($pdf, 30, 6, -30, $last_width, $text, 1, 'L', 'M');
         $last_width = 6;
       } else {
+        $text = str_replace('/ ', "/\n", $text);
         $etichetterot[] = array('nome' => $text, 'dim' => 12);
         $this->cella($pdf, 30, 12, -30, $last_width, $text, 1, 'L', 'M');
         $last_width = 12;
@@ -501,7 +534,7 @@ class PagelleUtil {
         $assenze = '';
         if ($mat['tipo'] == 'R') {
           // religione
-          if ($alu['religione'] != 'S') {
+          if ($alu['religione'] != 'S' && $alu['religione'] != 'A') {
             $voto = '///';
             $assenze = '';
           } else {
@@ -520,12 +553,15 @@ class PagelleUtil {
                 $voto = 'Suff.';
                 break;
               case 23:
-                $voto = 'Buono';
+                $voto = 'Discreto';
                 break;
               case 24:
-                $voto = 'Distinto';
+                $voto = 'Buono';
                 break;
               case 25:
+                $voto = 'Distinto';
+                break;
+              case 26:
                 $voto = 'Ottimo';
                 break;
             }
@@ -584,11 +620,38 @@ class PagelleUtil {
         $this->acapo($pdf, 5.50, $next_height);
       }
     }
-    // data e firma
-    $pdf->SetFont('helvetica', '', 12);
+    // firme docenti
+    $this->acapo($pdf, 5);
+    $next_height = 24;
+    $cont = 0;
+    foreach ($dati['docenti'] as $iddoc=>$doc) {
+      if ($cont % 3 == 0) {
+        $html = '<table border="0" cellpadding="0" style="font-family:helvetica;font-size:9pt"><tr>';
+      }
+      $html .= '<td width="33%" align="center">(<em>'.$doc.'</em>)<br><br>______________________________<br></td>';
+      $cont++;
+      if ($cont % 3 == 0) {
+        $html .= '</tr></table>';
+        $this->acapo($pdf, 0, $next_height);
+        $pdf->writeHTML($html, true, false, false, false, 'C');
+      }
+    }
+    if ($cont % 3 > 0) {
+      while ($cont % 3 > 0) {
+        $html .= '<td width="33%"></td>';
+        $cont++;
+      }
+      $html .= '</tr></table>';
+      $this->acapo($pdf, 0, $next_height);
+      $pdf->writeHTML($html, true, false, false, false, 'C');
+    }
+    // data e firma DS
+    $this->acapo($pdf, 10, 30);
+    $pdf->SetFont('helvetica', '', 11);
     $this->cella($pdf, 30, 15, 0, 0, 'Data', 0, 'R', 'B');
     $this->cella($pdf, 30, 15, 0, 0, $dati['scrutinio']['data'], 'B', 'C', 'B');
     $pdf->SetXY(-80, $pdf->GetY());
+    $pdf->SetFont('helvetica', 'I', 11);
     $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
     $text = '(Il Dirigente Scolastico)'."\n".$preside;
     $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
@@ -606,41 +669,47 @@ class PagelleUtil {
     $dati = array();
     if ($periodo == 'P') {
       // dati scrutinio
+      $dati['periodo'] = 'PRIMO QUADRIMESTRE';
       $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
+      $dati['scrutinio'] = $scrutinio;
+      $dati['classe'] = $classe;
       // legge materie
       $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
-        ->select('m.id,m.nome')
+        ->select('m.id,m.nome,m.tipo')
         ->where('m.tipo NOT IN (:tipi)')
-        ->setParameter('tipi', ['U', 'C'])
+        ->setParameter('tipi', ['U', 'C', 'E'])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
+      $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
       // legge docenti del CdC
-      $docenti = $scrutinio->getDato('docenti');
+      $docenti = $dati['scrutinio']->getDato('docenti');
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
       $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
-        ->select('d.id,d.cognome,d.nome')
+        ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->setParameter('lista', array_keys($docenti))
         ->getQuery()
         ->getArrayResult();
-      // dati per la visualizzazione della pagina
+      // dati per materia
       foreach ($dati_materie as $mat) {
         foreach ($dati_docenti as $doc) {
           if (isset($docenti[$doc['id']][$mat['id']])) {
-            $dati['materie'][$mat['id']][$doc['id']] = array(
-              'cognome' => $doc['cognome'],
-              'nome' => $doc['nome'],
-              'nome_materia' => $mat['nome'],
-            );
+            $dati['materie'][$mat['id']]['nome'] = $mat['nome'].
+              ($mat['tipo'] != 'S' ? (', '.$edcivica->getNome()) : '');
+            if ($docenti_presenti[$doc['id']]->getPresenza()) {
+              // dati docente
+              $dati['materie'][$mat['id']]['docenti'][$doc['id']] = $doc['cognome'].' '.$doc['nome'];
+            } else {
+              // dati sostituto
+              $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
+                ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+            }
           }
         }
       }
-      // coordinatore
-      $dati['coordinatore'] = $classe->getCoordinatore()->getCognome().' '.$classe->getCoordinatore()->getNome();
-      $dati['scrutinio']['data'] = $scrutinio->getData()->format('d/m/Y');
-      $dati['scrutinio']['presenze'] = $scrutinio->getDato('presenze');
     } elseif ($periodo == 'F') {
       // scrutinio finale
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
@@ -716,7 +785,7 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->creaFirmeVerbale_P($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        $this->creaFirmeVerbale($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
         // salva il documento
         $this->pdf->save($percorso.'/'.$nomefile);
       }
@@ -866,24 +935,40 @@ class PagelleUtil {
   public function firmeRegistro(Classe $classe, $periodo) {
     // inizializza
     $fs = new Filesystem();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    if (!$fs->exists($percorso)) {
+      // crea directory
+      $fs->mkdir($percorso, 0775);
+    }
     if ($periodo == 'P') {
-      // primo trimestre
-      $percorso = $this->root.'/trimestre/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-firme-registro.pdf';
+      // primo trimestre/quadrimestre
+      $nomefile = $classe->getAnno().$classe->getSezione().'-firme-registro-primo-quadrimestre.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Primo Trimestre - Foglio firme Registro - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
-        $dati = $this->firmeVerbaleDati($classe, $periodo);
-        // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->creaFirmeRegistro_P($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio Primo Quadrimestre - Foglio firme Registro '.$nome_classe);
+        $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
+        $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
+        $this->pdf->getHandler()->setPrintHeader(false);
+        $this->pdf->getHandler()->setPrintFooter(false);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
+        $dati = $this->firmeVerbaleDati($classe, $periodo);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_firme_'.$periodo.'.html.twig',
+          array('dati' => $dati));
+        $this->pdf->getHandler()->AddPage('L');
+        $this->pdf->getHandler()->writeHTML($html);
         // salva il documento
         $this->pdf->save($percorso.'/'.$nomefile);
       }
@@ -964,70 +1049,6 @@ class PagelleUtil {
   }
 
   /**
-   * Crea il foglio firme del registro dei voti come documento PDF
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   */
-  public function creaFirmeRegistro_P($pdf, $classe, $classe_completa, $dati) {
-    // set margins
-    $pdf->SetMargins(10, 10, 10, true);
-    // set auto page breaks
-    $pdf->SetAutoPageBreak(false, 10);
-    // set font
-    $pdf->SetFont('helvetica', '', 10);
-    // inizio pagina
-    $pdf->setPrintHeader(false);
-    $pdf->setPrintFooter(false);
-    $pdf->AddPage('L');
-    // intestazione pagina
-    $pdf->SetFont('helvetica', 'B', 8);
-    $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME REGISTRO', 0, 'L', 'T');
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $this->cella($pdf, 0, 4, 0, 0, 'CLASSE '.$classe.' - A.S. '.$as, 0, 'R', 'T');
-    $this->acapo($pdf, 5);
-    $pdf->SetFont('helvetica', 'B', 16);
-    $this->cella($pdf, 70, 10, 0, 0, 'CONSIGLIO DI CLASSE:', 0, 'L', 'B');
-    $this->cella($pdf, 145, 10, 0, 0, $classe_completa, 0, 'L', 'B');
-    $this->cella($pdf, 0, 10, 0, 0, 'PRIMO TRIMESTRE', 0, 'R', 'B');
-    $this->acapo($pdf, 11);
-    // intestazione tabella
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 90, 5, 0, 0, 'MATERIA', 1, 'C', 'B');
-    $this->cella($pdf, 60, 5, 0, 0, 'DOCENTI', 1, 'C', 'B');
-    $this->cella($pdf, 0, 5, 0, 0, 'FIRME', 1, 'C', 'B');
-    $this->acapo($pdf, 5);
-    // dati materie
-    foreach ($dati['materie'] as $idmateria=>$m) {
-      $lista = '';
-      foreach ($m as $iddocente=>$mat) {
-        $nome_materia = $mat['nome_materia'];
-        if ($dati['scrutinio']['presenze'][$iddocente]->getPresenza()) {
-          $lista .= ', '.$mat['cognome'].' '.$mat['nome'];
-        } else {
-          $lista .= ', '.ucwords(strtolower($dati['scrutinio']['presenze'][$iddocente]->getSostituto()));
-        }
-      }
-      $pdf->SetFont('helvetica', 'B', 10);
-      $this->cella($pdf, 90, 11, 0, 0, $nome_materia, 1, 'L', 'B');
-      $pdf->SetFont('helvetica', '', 10);
-      $this->cella($pdf, 60, 11, 0, 0, substr($lista, 2), 1, 'L', 'B');
-      $this->cella($pdf, 0, 11, 0, 0, '', 1, 'C', 'B');
-      $this->acapo($pdf, 11);
-    }
-    // fine pagina
-    $pdf->SetFont('helvetica', '', 12);
-    $this->cella($pdf, 15, 12, 0, 0, 'DATA:', 0, 'R', 'B');
-    $this->cella($pdf, 25, 12, 0, 0, $dati['scrutinio']['data'], 'B', 'C', 'B');
-    $this->cella($pdf, 50, 12, 0, 0, 'SEGRETARIO:', 0, 'R', 'B');
-    $this->cella($pdf, 68, 12, 0, 0, '', 'B', 'C', 'B');
-    $this->cella($pdf, 50, 12, 0, 0, 'PRESIDENTE:', 0, 'R', 'B');
-    $this->cella($pdf, 68, 12, 0, 0, '', 'B', 'C', 'B');
-  }
-
-  /**
    * Restituisce i dati per creare il verbale
    *
    * @param Classe $classe Classe dello scrutinio
@@ -1037,16 +1058,17 @@ class PagelleUtil {
    */
   public function verbaleDati(Classe $classe, $periodo) {
     $dati = array();
+    // nomi mesi
+    $dati['nomi_mesi'] = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    // scrutinio finale
+    $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      'periodo' => $periodo, 'stato' => 'C']);
+    // definizione scrutinio
+    $dati['definizione'] = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    // legge classe
+    $dati['classe'] = $classe;
+    // legge dati di periodo
     if ($periodo == 'P') {
-      // dati scrutinio
-      $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
-        'periodo' => $periodo, 'stato' => 'C']);
-      $dati['scrutinio'] = $scrutinio;
-      // definizione scrutinio
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
-      $dati['definizione'] = $def;
-      // legge classe
-      $dati['classe'] = $classe;
       // legge materie
       $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome')
@@ -1056,7 +1078,7 @@ class PagelleUtil {
         ->getQuery()
         ->getArrayResult();
       // legge docenti del CdC
-      $docenti = $scrutinio->getDato('docenti');
+      $docenti = $dati['scrutinio']->getDato('docenti');
       $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -1082,51 +1104,74 @@ class PagelleUtil {
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.credito3,a.credito4')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $scrutinio->getDato('alunni')])
+        ->setParameters(['lista' => $dati['scrutinio']->getDato('alunni')])
         ->getQuery()
         ->getArrayResult();
       $dati['alunni_noreligione'] = array();
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
+        if ($alu['religione'] != 'S' && $alu['religione'] != 'A') {
+          $dati['alunni_noreligione'][] = $alu['cognome'].' '.$alu['nome'];
+        }
       }
       // legge condotta
       $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.materia','m')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista) AND m.tipo=:tipo')
-        ->setParameters(['scrutinio' => $scrutinio, 'lista' => $scrutinio->getDato('alunni'), 'tipo' => 'C'])
+        ->setParameters(['scrutinio' => $dati['scrutinio'], 'lista' => $dati['scrutinio']->getDato('alunni'), 'tipo' => 'C'])
         ->getQuery()
         ->getResult();
       foreach ($voti as $v) {
         // inserisce voti
         $dati['voti'][$v->getAlunno()->getId()] = $v;
       }
-    } elseif ($periodo == 'F') {
-      // nomi mesi
-      $dati['nomi_mesi'] = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-      // scrutinio finale
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
-        'periodo' => $periodo, 'stato' => 'C']);
-      // definizione scrutinio
-      $dati['definizione'] = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
-      // legge classe
-      $dati['classe'] = $classe;
-      // legge docenti del CdC (esclusi potenziamento)
-      $docenti = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
-        ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nome AS nome_materia,m.tipo,m.id AS materia_id,c.supplenza,c.tipo AS doc_tipo')
-        ->join('c.materia', 'm')
-        ->join('c.docente', 'd')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
-        ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P'])
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($docenti as $doc) {
-        // dati per la visualizzazione della pagina
-        $dati['docenti'][$doc['id']][] = $doc;
-        if ($doc['tipo'] == 'R') {
-          $doc_religione = $doc['id'];
+      // presidente
+      if ($dati['scrutinio']->getDato('presiede_ds')) {
+        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
+      } else {
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
+        $d = $dati['docenti'][$id_presidente];
+        if ($dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza()) {
+          $dati['presidente_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'];
+          $dati['presidente'] = 'il Coordinatore della classe, '.$dati['presidente_nome'].', '.
+            'delegat'.($d['sesso'] == 'M' ? 'o' : 'a').' dal Dirigente Scolastico';
+        } else {
+          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
+          $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['presidente_nome'].', '.
+            'delegat'.($s->getSessoSostituto() == 'M' ? 'o' : 'a').' dal Dirigente Scolastico';
         }
       }
+      // segretario
+      $id_segretario = $dati['scrutinio']->getDato('segretario');
+      $d = $dati['docenti'][$id_segretario];
+      if ($dati['scrutinio']->getDato('presenze')[$id_segretario]->getPresenza()) {
+        $dati['segretario_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'];
+        $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
+      } else {
+        $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
+        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
+        $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
+      }
+    } elseif ($periodo == 'F') {
+      //-- // legge docenti del CdC (esclusi potenziamento)
+      //-- $docenti = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+        //-- ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nome AS nome_materia,m.tipo,m.id AS materia_id,c.supplenza,c.tipo AS doc_tipo')
+        //-- ->join('c.materia', 'm')
+        //-- ->join('c.docente', 'd')
+        //-- ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
+        //-- ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
+        //-- ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P'])
+        //-- ->getQuery()
+        //-- ->getArrayResult();
+      //-- foreach ($docenti as $doc) {
+        //-- // dati per la visualizzazione della pagina
+        //-- $dati['docenti'][$doc['id']][] = $doc;
+        //-- if ($doc['tipo'] == 'R') {
+          //-- $doc_religione = $doc['id'];
+        //-- }
+      //-- }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
         $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
@@ -1327,473 +1372,6 @@ class PagelleUtil {
   }
 
   /**
-   * Crea il verbale
-   *
-   * @param Classe $classe Classe dello scrutinio
-   * @param string $periodo Periodo dello scrutinio
-   *
-   * @return Percorso completo del file da inviare
-   */
-  public function verbale(Classe $classe, $periodo) {
-    // inizializza
-    $fs = new Filesystem();
-    if ($periodo == 'P') {
-      // primo trimestre
-      $percorso = $this->root.'/trimestre/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-verbale.pdf';
-      if (!$fs->exists($percorso.'/'.$nomefile)) {
-        // crea il documento
-        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Primo Trimestre - Verbale classe '.$nome_classe);
-        $dati = $this->verbaleDati($classe, $periodo);
-        // crea il documento
-        $this->creaVerbale_P($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
-        // salva il documento
-        $this->pdf->save($percorso.'/'.$nomefile);
-      }
-      // restituisce nome del file
-      return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'F') {
-      // scrutinio finale
-      $percorso = $this->root.'/finale/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-verbale.pdf';
-      if (!$fs->exists($percorso.'/'.$nomefile)) {
-        // crea il documento
-        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Finale - Verbale classe '.$nome_classe);
-        $dati = $this->verbaleDati($classe, $periodo);
-        // crea il documento
-        $this->creaVerbale_F($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
-        // salva il documento
-        $this->pdf->save($percorso.'/'.$nomefile);
-      }
-      // restituisce nome del file
-      return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // scrutinio integrativo
-      $percorso = $this->root.'/integrativo/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-integrativo-verbale.pdf';
-      if (!$fs->exists($percorso.'/'.$nomefile)) {
-        // crea il documento
-        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Integrativo - Verbale classe '.$nome_classe);
-        $dati = $this->verbaleDati($classe, $periodo);
-        // crea il documento
-        $this->creaVerbale_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
-        // salva il documento
-        $this->pdf->save($percorso.'/'.$nomefile);
-      }
-      // restituisce nome del file
-      return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'X') {
-      // scrutinio integrativo
-      $percorso = $this->root.'/rinviato/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-verbale.pdf';
-      if (!$fs->exists($percorso.'/'.$nomefile)) {
-        // crea il documento
-        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Integrativo - Verbale classe '.$nome_classe);
-        $dati = $this->verbaleDati($classe, $periodo);
-        // crea il documento
-        $this->creaVerbale_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
-        // salva il documento
-        $this->pdf->save($percorso.'/'.$nomefile);
-      }
-      // restituisce nome del file
-      return $percorso.'/'.$nomefile;
-    }
-    // errore
-    return null;
-  }
-
-  /**
-   * Crea il verbale come documento PDF
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   */
-  public function creaVerbale_P($pdf, $classe, $classe_completa, $dati) {
-    // set margins
-    $pdf->SetMargins(10, 15, 10, true);
-    // set auto page breaks
-    $pdf->SetAutoPageBreak(true, 15);
-    // set font
-    $pdf->SetFont('times', '', 12);
-    // inizio pagina
-    $pdf->setPrintHeader(false);
-    $pdf->SetFooterMargin(15);
-    $pdf->setFooterFont(Array('helvetica', '', 9));
-    $pdf->setFooterData(array(0,0,0), array(255,255,255));
-    $pdf->setPrintFooter(true);
-    $pdf->AddPage('P');
-    // logo
-    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
-    $pdf->writeHTML($html, true, false, false, false, 'C');
-    // struttura
-    foreach ($dati['definizione']->getStruttura() as $step=>$args) {
-      $func = 'CreaVerbale_P_'.$args[0];
-      $this->$func($pdf, $classe, $classe_completa, $dati, $step, $args);
-    }
-  }
-
-  /**
-   * Crea il verbale come documento PDF: parte iniziale
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   * @param int $step Passo della struttura del verbale
-   * @param array $args Argomenti della struttura del verbale
-   */
-  public function creaVerbale_P_ScrutinioInizio($pdf, $classe, $classe_completa, $dati, $step, $args) {
-    // inizializzazione
-    $nome_mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $pdf->Ln(5);
-    $pdf->SetFont('times', '', 12);
-    $html = '<p align="center"><strong>VERBALE DELLO SCRUTINIO DEL PRIMO TRIMESTE<br>'.
-      'CLASSE '.$classe_completa.'</strong></p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(5);
-    // inizio seduta
-    $pdf->SetFont('times', '', 11);
-    $datascrutinio_giorno = intval($dati['scrutinio']->getData()->format('d'));
-    $datascrutinio_mese = $nome_mesi[intval($dati['scrutinio']->getData()->format('m'))];
-    $datascrutinio_anno = $dati['scrutinio']->getData()->format('Y');
-    $orascrutinio_inizio = $dati['scrutinio']->getInizio()->format('H:i');
-    $html = '<p align="justify">Il giorno '.$datascrutinio_giorno.' del mese di '.$datascrutinio_mese.', dell\'anno '.
-      $datascrutinio_anno.', alle ore '.$orascrutinio_inizio.', nei locali dell\'<em>'.$this->session->get('/CONFIG/ISTITUTO/intestazione').'</em> di Cagliari, con sede staccata in Assemini, si è riunito, a seguito di regolare convocazione, il Consiglio della Classe '.
-      $classe.' per discutere il seguente ordine del giorno:</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $html = '<ol>';
-    foreach ($dati['definizione']->getArgomenti() as $num=>$arg) {
-      $html .='<li align="justify"><strong>'.$arg.(isset($dati['definizione']->getArgomenti()[$num + 1]) ? ';' : '.').'</strong></li>';
-    }
-    $html .='</ol>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    if ($dati['scrutinio']->getDato('presiede_ds')) {
-      $pres_nome = 'il Dirigente Scolastico';
-    } else {
-      $d_id = $dati['scrutinio']->getDato('presiede_docente');
-      if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
-        $d = $dati['docenti'][$d_id];
-        $pres_nome = 'per delega '.($d['sesso'] == 'M' ? 'il Prof.' : 'la Prof.ssa').' '.
-          $d['cognome'].' '.$d['nome'];
-      } else {
-        $pres_nome = 'per delega '.
-          ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'il Prof.' : 'la Prof.ssa').
-          ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
-      }
-    }
-    $d_id = $dati['scrutinio']->getDato('segretario');
-    $d = $dati['docenti'][$d_id];
-    if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
-      $segr_nome = ($d['sesso'] == 'M' ? 'il Prof.' : 'la Prof.ssa').' '.
-        $d['cognome'].' '.$d['nome'];
-    } else {
-      $segr_nome = ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'il Prof.' : 'la Prof.ssa').
-        ' '.ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
-    }
-    $html = '<p align="justify">Presiede la riunione '.$pres_nome.', funge da segretario verbalizzante '.$segr_nome.'.</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $html = '<p align="justify">Sono presenti i professori:</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $pdf->SetFont('helvetica', '', 10);
-    $html = '<table border="1" cellpadding="2">
-      <tr nobr="true"><td width="40%" align="center"><strong>DOCENTE</strong></td><td width="60%" align="center"><strong>MATERIA</strong></td></tr>';
-    $assenti = 0;
-    foreach ($dati['scrutinio']->getDato('presenze') as $iddocente=>$doc) {
-      if ($doc->getPresenza()) {
-        $d = $dati['docenti'][$iddocente];
-        $nome = $d['cognome'].' '.$d['nome'];
-        $materie = '';
-        foreach ($dati['docenti'][$iddocente]['materie'] as $km=>$vm) {
-          $materie .= '<br>&bull; '.($vm['tipo_cattedra'] == 'I' ? 'Lab. ' : '').$vm['nome_materia'];
-        }
-        $html .= '<tr><td>'.$nome.'</td><td>'.substr($materie, 4).'</td></tr>';
-      } else {
-        $assenti++;
-      }
-    }
-    $html .= '</table>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $pdf->SetFont('times', '', 11);
-    if ($assenti > 0) {
-      $html = '<p align="justify">Sono assenti giustificati i seguenti docenti, surrogati con atto formale del Dirigente Scolastico:</p>';
-      $pdf->writeHTML($html, true, false, false, true);
-      $html = '<ul>';
-      foreach ($dati['scrutinio']->getDato('presenze') as $iddocente=>$doc) {
-        if (!$doc->getPresenza()) {
-          $assenti--;
-          $d = $dati['docenti'][$iddocente];
-          $nome = $d['cognome'].' '.$d['nome'];
-          $materie = '';
-          foreach ($dati['docenti'][$iddocente]['materie'] as $km=>$vm) {
-            $materie .= '; '.($vm['tipo_cattedra'] == 'I' ? 'Lab. ' : '').$vm['nome_materia'];
-          }
-          $text = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$nome.' ('.substr($materie,2).'), '.
-            'sostituit'.($d['sesso'] == 'M' ? 'o' : 'a').' dal'.
-            ($doc->getSessoSostituto() == 'M' ? ' Prof.' : 'la Prof.ssa').
-            ' '.ucwords(strtolower($doc->getSostituto()));
-          $html .= '<li align="justify">'.$text.($assenti > 0 ? ';' : '.').'</li>';
-        }
-      }
-      $html .= '</ul>';
-      $pdf->writeHTML($html, true, false, false, true);
-    } else {
-      $html = '<p align="justify">Nessuno è assente.</p>';
-      $pdf->writeHTML($html, true, false, false, true);
-    }
-    $pdf->Ln(1);
-    $html = '<p align="justify">Accertata la legalità della seduta, il presidente dà avvio alle operazioni.</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(5);
-  }
-
-  /**
-   * Crea il verbale come documento PDF: argomento all'ordine del giorno
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   * @param int $step Passo della struttura del verbale
-   * @param array $args Argomenti della struttura del verbale
-   */
-  public function CreaVerbale_P_Argomento($pdf, $classe, $classe_completa, $dati, $step, $args) {
-    $pdf->SetFont('times', '', 11);
-    $num_arg = $args[2]['argomento'];
-    $argomento = $dati['definizione']->getArgomenti()[$num_arg];
-    $html = '<p align="justify"><strong>'.$args[2]['sezione'].'. '.$argomento.'.</strong></p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $testo = $dati['scrutinio']->getDato('argomento')[$num_arg];
-    $html = '<p align="justify">'.nl2br(htmlentities($testo)).'</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(5);
-  }
-
-  /**
-   * Crea il verbale come documento PDF: svolgimento scrutinio
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   * @param int $step Passo della struttura del verbale
-   * @param array $args Argomenti della struttura del verbale
-   */
-  public function CreaVerbale_P_ScrutinioSvolgimento($pdf, $classe, $classe_completa, $dati, $step, $args) {
-    $pdf->SetFont('times', '', 11);
-    $num_arg = $args[2]['argomento'];
-    $argomento = $dati['definizione']->getArgomenti()[$num_arg];
-    $html = '<p align="justify"><strong>'.$args[2]['sezione'].'. '.$argomento.'.</strong></p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    // indicazioni
-    $html = '<p align="justify">Prima di dare inizio alle operazioni di scrutinio, in ottemperanza a quanto previsto dalle norme vigenti e in base ai criteri di valutazione stabiliti dal Collegio dei Docenti e inseriti nel PTOF, il presidente ricorda che:</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $html = '<ul>
-      <li align="justify">tutti i presenti sono tenuti all\'obbligo della stretta osservanza del segreto d\'ufficio e che l\'eventuale violazione comporta sanzioni disciplinari;</li>
-      <li align="justify">il voto di condotta è proposto dal Coordinatore di classe (o, in sua assenza, dal docente con maggior numero di ore di lezione) ed assegnato dal Consiglio di Classe. Per l\'attribuzione si terrà conto di: interesse e partecipazione attiva e regolare alla vita della scuola, comportamento corretto con i docenti e i compagni, provvedimenti disciplinari;</li>
-      <li align="justify">i voti di profitto sono proposti dagli insegnanti delle rispettive materie ed assegnati dal Consiglio di Classe.</li>
-      </ul>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $html = '<p align="justify">In merito alle proposte di voto che vengono formulate, i singoli docenti dichiarano:</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $html = '<ul>
-      <li align="justify">che le proposte di voto ed i giudizi sono stati determinati sulla base delle verifiche sistematiche effettuate nel corso dell\'anno scolastico, sulla base dell\'impegno allo studio, alla partecipazione, all\'interesse al lavoro scolastico, in relazione alle effettive possibilità ed al progresso rispetto alla situazione di partenza di ciascun alunno;</li>
-      <li align="justify">che i giudizi proposti tengono conto delle attività di sostegno e di recupero proposte alla classe e delle loro risultanze.</li>
-      </ul>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    // condotta
-    $html = '<p align="justify">Il coordinatore propone il voto di condotta, che viene approvato dal Consiglio di Classe secondo quanto segue:</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $pdf->SetFont('helvetica', '', 10);
-    $html = '<table border="1" cellpadding="2">
-      <tr nobr="true"><td width="40%" align="center"><strong>ALUNNO</strong></td><td width="6%" align="center"><strong>Voto</strong></td><td width="38%" align="center"><strong>Giudizio</strong></td><td width="16%" align="center"><strong>Votazione</strong></td></tr>';
-    foreach ($dati['alunni'] as $idalunno=>$alu) {
-      $nome = $alu['cognome'].' '.$alu['nome'];
-      $condotta_voto = $dati['voti'][$idalunno]->getUnico() == 4 ? 'NC' : $dati['voti'][$idalunno]->getUnico();
-      $condotta_motivazione = htmlentities(str_replace(array("\r", "\n"), ' ',
-        $dati['voti'][$idalunno]->getDato('motivazione')));
-      $condotta_unanimita = $dati['voti'][$idalunno]->getDato('unanimita');
-      $condotta_contrari = intval($dati['voti'][$idalunno]->getDato('contrari'));
-      if ($condotta_unanimita) {
-        $condotta_approvazione = 'UNANIMITÀ';
-      } else {
-        $condotta_approvazione = "MAGGIORANZA<br>Contrari: $condotta_contrari";
-      }
-      $html .= '<tr nobr="true"><td>'.$nome.'</td><td>'.$condotta_voto.'</td><td style="font-size:9pt">'.
-        $condotta_motivazione.'</td><td style="font-size:9pt">'.$condotta_approvazione.'</td></tr>';
-    }
-    $html .= '</table>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    // valutazione
-    $pdf->SetFont('times', '', 11);
-    $html = '<p align="justify">Si passa, quindi, seguendo l\'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto degli indicatori precedentemente espressi.</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $html = '<p align="justify">Per ciascuna disciplina il docente competente esprime il proprio giudizio complessivo sull\'alunno. Ciascun giudizio è tradotto coerentemente in un voto, che viene proposto al Consiglio di Classe.</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $html = '<p align="justify">Il Consiglio di Classe discute esaurientemente le proposte espresse dai docenti e, tenuti ben presenti i parametri di valutazione deliberati, procede alla definizione e all\'approvazione dei voti per ciascun alunno e per ciascuna disciplina.</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    $html = '<p align="justify">Terminata la fase deliberativa, si procede alla stampa dei tabelloni e alla firma del Registro Generale, nonché alla predisposizione delle comunicazioni per le famiglie degli alunni con debito formativo.</p>'.
-      '<p>Il riepilogo dei voti deliberati per ciascun alunno viene allegato al presente verbale, di cui fa parte integrante.</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(5);
-  }
-
-  /**
-   * Crea il verbale come documento PDF: assegnamento nuovi crediti
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   * @param int $step Passo della struttura del verbale
-   * @param array $args Argomenti della struttura del verbale
-   */
-  public function CreaVerbale_P_NuoviCrediti($pdf, $classe, $classe_completa, $dati, $step, $args) {
-    $pdf->SetFont('times', '', 11);
-    $num_arg = $args[2]['argomento'];
-    $argomento = $dati['definizione']->getArgomenti()[$num_arg];
-    $html = '<p align="justify"><strong>'.$args[2]['sezione'].'. '.$argomento.'.</strong></p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(1);
-    if ($dati['classe']->getAnno() < 4) {
-      // nessun adeguamento
-      $html = '<p align="justify">Il punto all\'ordine del giorno non riguarda la classe.</p>';
-      $pdf->writeHTML($html, true, false, false, true);
-    } else {
-      // adeguamento dei crediti
-      $nuovicrediti = $dati['scrutinio']->getDato('nuovicrediti');
-      $html = '<p align="justify">Il Consiglio di Classe esamina il credito scolastico conseguito dagli alunni '.
-        ($dati['classe']->getAnno() == 5 ? 'nelle classi terza e quarta' : 'nella classe terza').
-        ' per procedere all\'adeguamento del punteggio secondo quanto previsto per il nuovo Esame di Stato'.
-        ' (d.lgs. 62/2017 e circolare MIUR 3050.04-10-2018). Di seguito viene riportato il nuovo credito scolastico risultante:</p>';
-      $pdf->writeHTML($html, true, false, false, true);
-      $pdf->Ln(1);
-      $pdf->SetFont('helvetica', '', 10);
-      $html = '<table border="1" cellpadding="2">'.
-        '<tr nobr="true"><td width="30%" align="center"><strong>ALUNNO</strong></td><td width="15%" align="center"><strong>Credito<br>Terza</strong></td>'.
-        ($dati['classe']->getAnno() == 5 ? '<td width="15%" align="center"><strong>Credito<br>Quarta</strong></td><td width="40%" align="center">' : '<td width="55%" align="center">').
-        '<strong>Nuovo Credito</strong></td></tr>';
-      foreach ($dati['alunni'] as $idalunno=>$alu) {
-        $nome = $alu['cognome'].' '.$alu['nome'];
-        if ($alu['credito3'] == 0 || ($dati['classe']->getAnno() == 5 && $alu['credito4'] == 0)) {
-          // credito con motivazione
-          $motivazione = htmlentities(str_replace(array("\r", "\n"), ' ', $nuovicrediti[$idalunno][1]));
-          $html .= '<tr nobr="true"><td rowspan="2">'.$nome.'</td>'.
-            '<td>'.($alu['credito3'] > 0 ? $alu['credito3'] : '-').'</td>'.
-            ($dati['classe']->getAnno() == 5 ? '<td>'.($alu['credito4'] > 0 ? $alu['credito4'] : '-').'</td>' : '').
-            '<td><strong>'.($nuovicrediti[$idalunno][0] > 0 ? $nuovicrediti[$idalunno][0] : 'NON ASSEGNATO').'</strong></td>'.
-            '</tr>'.
-            '<tr nobr="true"><td style="font-size:9pt" colspan="'.($dati['classe']->getAnno() == 5 ? 3 : 2).'"><em>'.$motivazione.'</em></td></tr>';
-        } else {
-          // credito modificato in automatico
-          $html .= '<tr nobr="true"><td>'.$nome.'</td><td>'.$alu['credito3'].'</td>'.
-            ($dati['classe']->getAnno() == 5 ? '<td>'.$alu['credito4'].'</td>' : '').
-            '<td><strong>'.$nuovicrediti[$idalunno].'</strong></td></tr>';
-        }
-      }
-      $html .= '</table>';
-      $pdf->writeHTML($html, true, false, false, true);
-      $pdf->Ln(1);
-      $html = '<p align="justify">L\'esito dell\'operazione di conversione del credito sarà riportato nella pagella del trimestre, al fine di rendere consapevole ciascun alunno della nuova situazione.</p>';
-      $pdf->writeHTML($html, true, false, false, true);
-    }
-    $pdf->Ln(5);
-  }
-
-  /**
-   * Crea il verbale come documento PDF: fine scrutinio
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   * @param int $step Passo della struttura del verbale
-   * @param array $args Argomenti della struttura del verbale
-   */
-  public function CreaVerbale_P_ScrutinioFine($pdf, $classe, $classe_completa, $dati, $step, $args) {
-    $pdf->Ln(5);
-    $pdf->SetFont('times', '', 11);
-    $orascrutinio_fine = $dati['scrutinio']->getFine()->format('H:i');
-    $html = '<p align="justify">Alle ore '.$orascrutinio_fine.', terminate tutte le operazioni, la seduta è tolta.</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(10);
-    // firma
-    if ($dati['scrutinio']->getDato('presiede_ds')) {
-      $presidente_nome = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
-    } else {
-      $d_id = $dati['scrutinio']->getDato('presiede_docente');
-      if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
-        $d = $dati['docenti'][$d_id];
-        $presidente_nome = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.
-          $d['cognome'].' '.$d['nome'];
-      } else {
-        $presidente_nome = ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').
-          ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
-      }
-    }
-    $d_id = $dati['scrutinio']->getDato('segretario');
-    $d = $dati['docenti'][$d_id];
-    if ($dati['scrutinio']->getDato('presenze')[$d_id]->getPresenza()) {
-      $segretario_nome = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.
-        $d['cognome'].' '.$d['nome'];
-    } else {
-      $segretario_nome = ($dati['scrutinio']->getDato('presenze')[$d_id]->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').
-        ' '.ucwords(strtolower($dati['scrutinio']->getDato('presenze')[$d_id]->getSostituto()));
-    }
-    $html = '<table border="0" cellpadding="3" nobr="true">
-      <tr nobr="true"><td width="45%" align="center">Il Segretario</td><td width="10%">&nbsp;</td><td width="45%" align="center">Il Presidente</td></tr>
-      <tr nobr="true"><td align="center"><em>'.$segretario_nome.'</em></td><td>&nbsp;</td><td align="center"><em>'.$presidente_nome.'</em></td></tr>
-      </table>';
-    $pdf->writeHTML($html, true, false, false, true);
-  }
-
-  /**
    * Restituisce i dati per creare la pagella
    *
    * @param Classe $classe Classe dello scrutinio
@@ -1815,9 +1393,9 @@ class PagelleUtil {
     $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.tipo')
       ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo IN (:tipo) AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => ['N', 'A'], 'sostegno' => 'S'])
       ->getQuery()
       ->getArrayResult();
     foreach ($materie as $mat) {
@@ -1870,24 +1448,39 @@ class PagelleUtil {
   public function pagella(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
     $fs = new Filesystem();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    if (!$fs->exists($percorso)) {
+      // crea directory
+      $fs->mkdir($percorso, 0775);
+    }
     if ($periodo == 'P') {
-      // primo trimestre
-      $percorso = $this->root.'/trimestre/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-pagella-'.$alunno->getId().'.pdf';
+      // primo trimestre/quadrimestre
+      $nomefile = $classe->getAnno().$classe->getSezione().'-pagella-primo-quadrimestre-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
-        // crea documento
+        // crea documento PDF
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Primo Trimestre - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+          'Scrutinio Primo Quadrimestre - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
         $dati = $this->pagellaDati($classe, $alunno, $periodo);
-        // crea il documento
-        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->creaPagella_P($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_pagella_'.$periodo.'.html.twig',
+          array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
         // salva il documento
         $this->pdf->save($percorso.'/'.$nomefile);
       }
@@ -2011,115 +1604,6 @@ class PagelleUtil {
   }
 
   /**
-   * Crea la pagella come documento PDF
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   */
-  public function creaPagella_P($pdf, $classe, $classe_completa, $dati) {
-    // set margins
-    $pdf->SetMargins(10, 15, 10, true);
-    // set auto page breaks
-    $pdf->SetAutoPageBreak(true, 15);
-    // set font
-    $pdf->SetFont('times', '', 12);
-    // inizio pagina
-    $pdf->setPrintHeader(false);
-    $pdf->SetFooterMargin(15);
-    $pdf->setFooterFont(Array('helvetica', '', 9));
-    $pdf->setFooterData(array(0,0,0), array(255,255,255));
-    $pdf->setPrintFooter(true);
-    $pdf->AddPage('P');
-    // logo
-    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
-    $pdf->writeHTML($html, true, false, false, false, 'C');
-    // intestazione
-    $alunno = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
-    $alunno_sesso = $dati['alunno']->getSesso();
-    $pdf->Ln(10);
-    $pdf->SetFont('times', 'I', 12);
-    $text = 'Ai genitori dell\'alunn'.($alunno_sesso == 'M' ? 'o' : 'a');
-    $this->cella($pdf, 0, 0, 100, 0, $text, 0, 'L', 'T');
-    $pdf->Ln();
-    $pdf->SetFont('times', '', 12);
-    $text = strtoupper($alunno);
-    $this->cella($pdf, 0, 0, 100, 0, $text, 0, 'L', 'T');
-    $pdf->Ln();
-    $text = 'Classe '.$classe;
-    $this->cella($pdf, 0, 0, 100, 0, $text, 0, 'L', 'T');
-    $pdf->Ln(15);
-    // oggetto
-    $pdf->SetFont('times', 'B', 12);
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $text = 'OGGETTO: Scrutinio del primo trimestre A.S. '.$as.' - Comunicazione dei voti';
-    $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
-    $pdf->Ln(10);
-    // contenuto
-    $pdf->SetFont('times', '', 12);
-    $sex = ($alunno_sesso == 'M' ? 'o' : 'a');
-    $html = '<p align="justify">Il Consiglio di Classe, nella seduta dello scrutinio del primo trimestre dell’anno scolastico '.$as.
-            ', tenutasi il giorno '.$dati['scrutinio']->getData()->format('d/m/Y').', ha attribuito all\'alunn'.$sex.' '.
-            'le valutazioni che vengono riportate di seguito:</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(2);
-    // voti
-    $html = '<table border="1" cellpadding="3">';
-    $html .= '<tr><td width="60%"><strong>MATERIA</strong></td><td width="20%"><strong>VOTO</strong></td><td width="20%"><strong>ORE DI ASSENZA</strong></td></tr>';
-    foreach ($dati['materie'] as $idmateria=>$mat) {
-      $html .= '<tr><td align="left"><strong>'.$mat['nome'].'</strong></td><td>';
-      if ($mat['tipo'] == 'R' && $dati['alunno']->getReligione() == 'S') {
-        // religione
-        switch ($dati['voti'][$idmateria]['unico']) {
-          case 20:
-            $html .= 'Non classificato';
-            break;
-          case 21:
-            $html .= 'Insufficiente';
-            break;
-          case 22:
-            $html .= 'Sufficiente';
-            break;
-          case 23:
-            $html .= 'Buono';
-            break;
-          case 24:
-            $html .= 'Distinto';
-            break;
-          case 25:
-            $html .= 'Ottimo';
-            break;
-        }
-        $html .= '</td><td>'.$dati['voti'][$idmateria]['assenze'].'</td></tr>';
-      } elseif ($mat['tipo'] == 'R') {
-        // NA
-        $html .= '///';
-        $html .= '</td><td></td></tr>';
-      } elseif ($mat['tipo'] == 'C') {
-        $html .= ($dati['voti'][$idmateria]['unico'] == 4 ? 'Non classificato' : $dati['voti'][$idmateria]['unico']);
-        $html .= '</td><td></td></tr>';
-      } else {
-        // altre materie
-        $html .= ($dati['voti'][$idmateria]['unico'] == 0 ? 'Non classificato' : $dati['voti'][$idmateria]['unico']);
-        $html .= '</td><td>'.$dati['voti'][$idmateria]['assenze'].'</td></tr>';
-      }
-    }
-    $html .= '</table><br>';
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->writeHTML($html, true, false, false, true, 'C');
-    // firma
-    $pdf->SetFont('times', '', 12);
-    $html = '<p>Distinti Saluti.<br></p>';
-    $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
-    $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
-    $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
-    $html = 'Il Dirigente Scolastico<br><em>'.$preside.'</em>';
-    $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
-  }
-
-  /**
    * Crea la valutazione intermedia come documento PDF
    *
    * @param TCPDF $pdf Gestore del documento PDF
@@ -2222,6 +1706,8 @@ class PagelleUtil {
   public function debitiDati(Classe $classe, Alunno $alunno, $periodo) {
     $dati = array();
     if ($periodo == 'P') {
+      // dati classe
+      $dati['classe'] = $classe;
       // dati alunno
       $dati['alunno'] = $alunno;
       // dati scrutinio
@@ -2231,9 +1717,9 @@ class PagelleUtil {
       $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.tipo')
         ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
-        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
+        ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo IN (:tipo) AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
-        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
+        ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => ['N', 'A'], 'sostegno' => 'S'])
         ->getQuery()
         ->getArrayResult();
       foreach ($materie as $mat) {
@@ -2244,8 +1730,9 @@ class PagelleUtil {
         ->join('vs.scrutinio', 's')
         ->join('vs.materia', 'm')
         ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno '.
-          'AND m.tipo=:tipo AND vs.unico IS NOT NULL AND vs.unico < 6')
-        ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno, 'tipo' => 'N'])
+          'AND m.tipo IN (:tipo) AND vs.unico IS NOT NULL AND vs.unico < 6')
+        ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno,
+          'tipo' => ['N', 'E']])
         ->getQuery()
         ->getResult();
       foreach ($debiti as $d) {
@@ -2310,24 +1797,39 @@ class PagelleUtil {
   public function debiti(Classe $classe, Alunno $alunno, $periodo) {
     // inizializza
     $fs = new Filesystem();
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    if (!$fs->exists($percorso)) {
+      // crea directory
+      $fs->mkdir($percorso, 0775);
+    }
     if ($periodo == 'P') {
-      // primo trimestre
-      $percorso = $this->root.'/trimestre/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
-      }
-      // nome documento
-      $nomefile = $classe->getAnno().$classe->getSezione().'-primo-trimestre-debiti-'.$alunno->getId().'.pdf';
+      // primo trimestre/quadrimestre
+      $nomefile = $classe->getAnno().$classe->getSezione().'-debiti-primo-quadrimestre-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
-        // crea documento
+        // crea documento PDF
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Scrutinio Primo Trimestre - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+          'Scrutinio Primo Quadrimestre - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
         $dati = $this->debitiDati($classe, $alunno, $periodo);
-        // crea il documento
-        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->creaDebiti_P($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_debiti_'.$periodo.'.html.twig',
+          array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
         // salva il documento
         $this->pdf->save($percorso.'/'.$nomefile);
       }
@@ -2367,103 +1869,6 @@ class PagelleUtil {
     }
     // errore
     return null;
-  }
-
-  /**
-   * Crea il foglio dei debiti come documento PDF
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   */
-  public function creaDebiti_P($pdf, $classe, $classe_completa, $dati) {
-    // set margins
-    $pdf->SetMargins(10, 15, 10, true);
-    // set auto page breaks
-    $pdf->SetAutoPageBreak(true, 15);
-    // set font
-    $pdf->SetFont('times', '', 12);
-    // inizio pagina
-    $pdf->setPrintHeader(false);
-    $pdf->SetFooterMargin(15);
-    $pdf->setFooterFont(Array('helvetica', '', 9));
-    $pdf->setFooterData(array(0,0,0), array(255,255,255));
-    $pdf->setPrintFooter(true);
-    $pdf->AddPage('P');
-    // logo
-    $html = '<img src="/img/'.getenv('LOCAL_PATH').'intestazione-documenti.jpg" width="540">';
-    $pdf->writeHTML($html, true, false, false, false, 'C');
-    // intestazione
-    $alunno = $dati['alunno']->getCognome().' '.$dati['alunno']->getNome();
-    $alunno_sesso = $dati['alunno']->getSesso();
-    $pdf->Ln(10);
-    $pdf->SetFont('times', 'I', 12);
-    $text = 'Ai genitori dell\'alunn'.($alunno_sesso == 'M' ? 'o' : 'a');
-    $this->cella($pdf, 0, 0, 100, 0, $text, 0, 'L', 'T');
-    $pdf->Ln();
-    $pdf->SetFont('times', '', 12);
-    $text = strtoupper($alunno);
-    $this->cella($pdf, 0, 0, 100, 0, $text, 0, 'L', 'T');
-    $pdf->Ln();
-    $text = 'Classe '.$classe;
-    $this->cella($pdf, 0, 0, 100, 0, $text, 0, 'L', 'T');
-    $pdf->Ln(15);
-    // oggetto
-    $pdf->SetFont('times', 'B', 12);
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $text = 'OGGETTO: Scrutinio del primo trimestre A.S. '.$as.' - Indicazioni per il recupero';
-    $this->cella($pdf, 0, 0, 0, 0, $text, 0, 'L', 'T');
-    $pdf->Ln(15);
-    // contenuto
-    $pdf->SetFont('times', '', 12);
-    $sex = ($alunno_sesso == 'M' ? 'o' : 'a');
-    $html = '<p align="justify">Il Consiglio di Classe, nella seduta dello scrutinio del primo trimestre dell’anno scolastico '.$as.
-            ', tenutasi il giorno '.$dati['scrutinio']->getData()->format('d/m/Y').
-            ', ha rilevato la presenza di una o più insufficienze. La tabella seguente illustra le modalità e gli argomenti per il recupero:</p>';
-    $pdf->writeHTML($html, true, false, false, true);
-    $pdf->Ln(2);
-    $html = '<table border="1" cellpadding="3">';
-    $html .= '<tr><td width="30%"><strong>MATERIA</strong></td><td width="7%"><strong>VOTO</strong></td><td width="50%"><strong>Argomenti da recuperare</strong></td><td width="13%"><strong>Modalità di recupero</strong></td></tr>';
-    foreach ($dati['materie'] as $idmateria=>$mat) {
-      if (isset($dati['debiti'][$idmateria]['unico'])) {
-        $html .= '<tr><td align="left"><strong>'.$mat['nome'].'</strong></td><td>';
-        if ($dati['debiti'][$idmateria]['unico'] == 0) {
-          $html .= 'NC';
-        } else {
-          $html .= $dati['debiti'][$idmateria]['unico'];
-        }
-        $html .= '</td><td align="left" style="font-size:9pt">'.nl2br(htmlentities($dati['debiti'][$idmateria]['debito'])).'</td><td>';
-        if ($dati['debiti'][$idmateria]['recupero'] == 'A') {
-          $html .= 'Recupero autonomo';
-        } elseif ($dati['debiti'][$idmateria]['recupero'] == 'S') {
-          $html .= 'Sportello didattico';
-        } elseif ($dati['debiti'][$idmateria]['recupero'] == 'C') {
-          $html .= 'Corso di recupero';
-        }
-        $html .= '</td></tr>';
-      }
-    }
-    $html .= '</table><br>';
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->writeHTML($html, true, false, false, true, 'C');
-    // altre comunicazioni
-    $pdf->SetFont('times', '', 12);
-    $html = '<p align="justify">Qualora le famiglie non intendano far frequentare ai propri figli i corsi sopra indicati, dovranno dichiarare che provvederanno personalmente agli interventi di recupero, sollevando l\'Istituto da ogni responsabilità in merito.</p>';
-    $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
-    $html = '<p align="justify">In ogni caso gli studenti saranno chiamati a sottoporsi alle prove di verifica del superamento del debito formativo per quanto si riferisce a quelli comunicati con la presente nota.</p>';
-    $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY()+2, $html, 0, 1);
-    $html = '<p align="justify">Si ribadisce che, ai sensi della normativa vigente, al termine del corrente anno scolastico non sarà consentita l\'ammissione alla classe successiva nel caso persista il debito formativo sopra evidenziato.<br></p>';
-    $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY()+2, $html, 0, 1);
-    // firma
-    $pdf->SetFont('times', '', 12);
-    $html = '<p>Distinti Saluti.<br></p>';
-    $pdf->writeHTMLCell(0, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1);
-    $html = 'Cagliari, '.$dati['scrutinio']->getData()->format('d/m/Y').'.';
-    $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 0);
-    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
-    $html = 'Il Dirigente Scolastico<br><em>'.$preside.'</em>';
-    $pdf->writeHTMLCell(100, 0, $pdf->GetX(), $pdf->GetY(), $html, 0, 1, false, true, 'C');
   }
 
   /**
@@ -6639,17 +6044,50 @@ class PagelleUtil {
    *
    * @return Percorso completo del file da inviare
    */
-  public function verbale2(Classe $classe, $periodo) {
+  public function verbale(Classe $classe, $periodo) {
     // inizializza
     $fs = new Filesystem();
-    if ($periodo == 'F') {
-      // scrutinio finale
-      $percorso = $this->root.'/finale/'.$classe->getAnno().$classe->getSezione();
-      if (!$fs->exists($percorso)) {
-        // crea directory
-        $fs->mkdir($percorso, 0775);
+    $percorso = $this->root.'/'.$this->directory[$periodo].'/'.$classe->getAnno().$classe->getSezione();
+    if (!$fs->exists($percorso)) {
+      // crea directory
+      $fs->mkdir($percorso, 0775);
+    }
+    if ($periodo == 'P') {
+      // primo trimestre/quadrimestre
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-primo-quadrimestre.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio Primo Quadrimestre - Verbale classe '.$nome_classe);
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
+        $dati = $this->verbaleDati($classe, $periodo);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_verbale_'.$periodo.'.html.twig',
+          array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
       }
-      // nome documento
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'F') {
+      // scrutinio finale
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
@@ -7064,6 +6502,136 @@ class PagelleUtil {
       $text = '(Il Dirigente Scolastico)'."\n".$preside;
       $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
     }
+  }
+
+  /**
+   * Crea il foglio firme del registro dei voti come documento PDF
+   *
+   * @param TCPDF $pdf Gestore del documento PDF
+   * @param string $classe Nome della classe
+   * @param string $classe_completa Nome della classe con corso e sede
+   * @param array $dati Dati dello scrutinio
+   */
+  public function creaFirmeRegistro($pdf, $classe, $classe_completa, $dati) {
+    // set margins
+    $pdf->SetMargins(10, 10, 10, true);
+    // set auto page breaks
+    $pdf->SetAutoPageBreak(false, 10);
+    // set font
+    $pdf->SetFont('helvetica', '', 10);
+    // inizio pagina
+    $pdf->setPrintHeader(false);
+    $pdf->setPrintFooter(false);
+    $pdf->AddPage('L');
+    // intestazione pagina
+    $pdf->SetFont('helvetica', 'B', 8);
+    $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME REGISTRO', 0, 'L', 'T');
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $this->cella($pdf, 0, 4, 0, 0, $classe.' - A.S. '.$as, 0, 'R', 'T');
+    $this->acapo($pdf, 5);
+    $pdf->SetFont('helvetica', 'B', 16);
+    $this->cella($pdf, 70, 10, 0, 0, 'CONSIGLIO DI CLASSE:', 0, 'L', 'B');
+    $this->cella($pdf, 145, 10, 0, 0, $classe_completa, 0, 'L', 'B');
+    $this->cella($pdf, 0, 10, 0, 0, $dati['periodo'], 0, 'R', 'B');
+    $this->acapo($pdf, 11);
+    // intestazione tabella
+    $pdf->SetFont('helvetica', 'B', 10);
+    $this->cella($pdf, 90, 5, 0, 0, 'MATERIA', 1, 'C', 'B');
+    $this->cella($pdf, 60, 5, 0, 0, 'DOCENTI', 1, 'C', 'B');
+    $this->cella($pdf, 0, 5, 0, 0, 'FIRME', 1, 'C', 'B');
+    $this->acapo($pdf, 5);
+    // dati materie
+    foreach ($dati['materie'] as $idmateria=>$mat) {
+      $lista = '';
+      foreach ($mat as $iddocente=>$doc) {
+        $nome_materia = $doc['nome_materia'];
+        if ($dati['scrutinio']->getDato('presenze')[$iddocente]->getPresenza()) {
+          $lista .= ', '.$doc['cognome'].' '.$doc['nome'];
+        } else {
+          $lista .= ', '.$dati['scrutinio']->getDato('presenze')[$iddocente]->getSostituto();
+        }
+      }
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 90, 11, 0, 0, $nome_materia, 1, 'L', 'B');
+      $pdf->SetFont('helvetica', '', 10);
+      $this->cella($pdf, 60, 11, 0, 0, substr($lista, 2), 1, 'L', 'B');
+      $this->cella($pdf, 0, 11, 0, 0, '', 1, 'C', 'B');
+      $this->acapo($pdf, 11);
+    }
+    // fine pagina
+    $datascrutinio = $dati['scrutinio']->getData()->format('d/m/Y');
+    $pdf->SetFont('helvetica', '', 12);
+    $this->cella($pdf, 15, 12, 0, 0, 'DATA:', 0, 'R', 'B');
+    $this->cella($pdf, 25, 12, 0, 0, $datascrutinio, 'B', 'C', 'B');
+    $this->cella($pdf, 50, 12, 0, 0, 'SEGRETARIO:', 0, 'R', 'B');
+    $this->cella($pdf, 68, 12, 0, 0, '', 'B', 'C', 'B');
+    $this->cella($pdf, 50, 12, 0, 0, 'PRESIDENTE:', 0, 'R', 'B');
+    $this->cella($pdf, 68, 12, 0, 0, '', 'B', 'C', 'B');
+  }
+
+  /**
+   * Crea il foglio firme del verbale come documento PDF
+   *
+   * @param TCPDF $pdf Gestore del documento PDF
+   * @param string $classe Nome della classe
+   * @param string $classe_completa Nome della classe con corso e sede
+   * @param array $dati Dati dello scrutinio
+   */
+  public function creaFirmeVerbale($pdf, $classe, $classe_completa, $dati) {
+    // set margins
+    $pdf->SetMargins(10, 10, 10, true);
+    // set auto page breaks
+    $pdf->SetAutoPageBreak(false, 10);
+    // set font
+    $pdf->SetFont('helvetica', '', 10);
+    // inizio pagina
+    $pdf->setPrintHeader(false);
+    $pdf->setPrintFooter(false);
+    $pdf->AddPage('L');
+    // intestazione pagina
+    $coordinatore = $dati['classe']->getCoordinatore()->getCognome().' '.$dati['classe']->getCoordinatore()->getNome();
+    $pdf->SetFont('helvetica', 'B', 8);
+    $this->cella($pdf, 100, 4, 0, 0, 'FOGLIO FIRME VERBALE', 0, 'L', 'T');
+    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $this->cella($pdf, 0, 4, 0, 0, $classe.' - A.S. '.$as, 0, 'R', 'T');
+    $this->acapo($pdf, 5);
+    $pdf->SetFont('helvetica', 'B', 16);
+    $this->cella($pdf, 70, 10, 0, 0, 'CONSIGLIO DI CLASSE:', 0, 'L', 'B');
+    $this->cella($pdf, 0, 10, 0, 0, $classe_completa, 0, 'L', 'B');
+    $this->acapo($pdf, 10);
+    $pdf->SetFont('helvetica', 'B', 10);
+    $this->cella($pdf, 40, 6, 0, 0, 'Docente Coordinatore:', 0, 'L', 'T');
+    $this->cella($pdf, 0, 6, 0, 0, $coordinatore, 0, 'L', 'T');
+    $this->acapo($pdf, 6);
+    // intestazione tabella
+    $pdf->SetFont('helvetica', 'B', 10);
+    $this->cella($pdf, 90, 5, 0, 0, 'MATERIA', 1, 'C', 'B');
+    $this->cella($pdf, 60, 5, 0, 0, 'DOCENTI', 1, 'C', 'B');
+    $this->cella($pdf, 0, 5, 0, 0, 'FIRME', 1, 'C', 'B');
+    $this->acapo($pdf, 5);
+    // dati materie
+    foreach ($dati['materie'] as $idmateria=>$mat) {
+      $lista = '';
+      foreach ($mat as $iddocente=>$doc) {
+        $nome_materia = $doc['nome_materia'];
+        if ($dati['scrutinio']->getDato('presenze')[$iddocente]->getPresenza()) {
+          $lista .= ', '.$doc['cognome'].' '.$doc['nome'];
+        } else {
+          $lista .= ', '.$dati['scrutinio']->getDato('presenze')[$iddocente]->getSostituto();
+        }
+      }
+      $pdf->SetFont('helvetica', 'B', 10);
+      $this->cella($pdf, 90, 11, 0, 0, $nome_materia, 1, 'L', 'B');
+      $pdf->SetFont('helvetica', '', 10);
+      $this->cella($pdf, 60, 11, 0, 0, substr($lista, 2), 1, 'L', 'B');
+      $this->cella($pdf, 0, 11, 0, 0, '', 1, 'C', 'B');
+      $this->acapo($pdf, 11);
+    }
+    // fine pagina
+    $datascrutinio = $dati['scrutinio']->getData()->format('d/m/Y');
+    $pdf->SetFont('helvetica', '', 12);
+    $this->cella($pdf, 15, 9, 0, 0, 'DATA:', 0, 'R', 'B');
+    $this->cella($pdf, 25, 9, 0, 0, $datascrutinio, 'B', 'C', 'B');
   }
 
 }

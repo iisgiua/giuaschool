@@ -68,12 +68,12 @@ class Materia {
   private $nomeBreve;
 
   /**
-   * @var string $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, U=supplenza]
+   * @var string $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","R","S","C","U"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","R","S","C","E","U"}, strict=true, message="field.choice")
    */
   private $tipo;
 
@@ -179,7 +179,7 @@ class Materia {
   }
 
   /**
-   * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, U=supplenza]
+   * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
    *
    * @return string Tipo della materia
    */
@@ -188,7 +188,7 @@ class Materia {
   }
 
   /**
-   * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, U=supplenza]
+   * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
    *
    * @param string $tipo Tipo della materia
    *
@@ -284,4 +284,3 @@ class Materia {
   }
 
 }
-

@@ -27,7 +27,7 @@
         <div id="row_{{ prop.recupero.vars.id }}" class="row"{{ prop.unico.vars.value is empty ? ' style="display:none"' }}>
           <label class="control-label col-sm-2" for="{{ prop.recupero.vars.id }}">Recupero</label>
           <div class="col-sm-10">
-            {{ form_widget(prop.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [prop.recupero.vars.choices[0],prop.recupero.vars.choices[1],prop.recupero.vars.choices[2]] }) }}
+            {{ form_widget(prop.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [prop.recupero.vars.choices[0],prop.recupero.vars.choices[1],prop.recupero.vars.choices[2],prop.recupero.vars.choices[3],prop.recupero.vars.choices[4]] }) }}
           </div>
         </div>
         <div id="row_{{ prop.debito.vars.id }}" class="row"{{ prop.unico.vars.value is empty ? ' style="display:none"' }}>

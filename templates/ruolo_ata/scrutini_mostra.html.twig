@@ -73,13 +73,9 @@
       <tr>
         <td><strong>Verbale dello scrutinio</strong></td>
         <td>
-      {% if dati.verbale %}
           <div class="gs-mb-2">
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'V', 'periodo': 'P'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </div>
-      {% else %}
-          <em>Documento non disponibile</em>
-      {% endif %}
         </td>
       </tr>
       <tr>

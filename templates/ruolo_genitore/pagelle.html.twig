@@ -67,7 +67,7 @@
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
           {% if m.tipo == 'R' %}
-            {% if alunno.religione != 'S' %}
+            {% if alunno.religione != 'S' and alunno.religione != 'A' %}
         <td><strong>--</strong></td>
         <td></td>
             {% else %}
@@ -99,7 +99,7 @@
         {% if dati.debiti is defined %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-2">
-      <strong>Indicazioni per il recupero</strong>
+      <strong>Recupero dei debiti formativi</strong>
       <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'D', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con le indicazioni del recupero"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei debiti</strong></a>
     </caption>
     <thead class="bg-success">

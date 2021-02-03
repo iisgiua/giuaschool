@@ -98,8 +98,9 @@
       </tr>
     </thead>
     <tbody>
+      {% set tipo_rel = (cattedra and cattedra.materia.tipo == 'R' and cattedra.tipo == 'A') ? 'A' : (cattedra and cattedra.materia.tipo == 'R' ? 'S' : '') %}
       {% for ka,va in dati.alunni %}
-        {% if not cattedra or cattedra.materia.tipo != 'R' or va.religione == 'S' %}
+        {% if not cattedra or cattedra.materia.tipo != 'R' or va.religione == tipo_rel %}
       <tr>
         <td class=" gs-pt-1 gs-pb-1">
           <small><strong>{{ va.cognome }} {{ va.nome }} ({{ va.dataNascita|date('d/m/Y') }})</strong></small>

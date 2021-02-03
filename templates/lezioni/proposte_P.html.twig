@@ -5,12 +5,18 @@
   {% if not cattedra and not classe %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_proposte'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
-    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
+    <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>ok
   </div>
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_proposte'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.voti_supplenza'|trans }}</strong>
+  </div>
+  {% elseif cattedra.materia.tipo == 'E' %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_proposte'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <div class="alert alert-info gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.proposte_no_edcivica'|trans }}</strong>
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_proposte'|trans }} {{ classe.anno~'ª '~classe.sezione }}</h1>
@@ -251,7 +257,7 @@ $(document).ready(function() {
     <div id="row_{{ form.recupero.vars.id }}" class="row"{{ form.parent.vars.attr.no_recupero is defined or form.unico.vars.value is empty or form.unico.vars.value >= 6 ? ' style="display:none"' }}>
       <label class="control-label col-sm-2" for="{{ form.recupero.vars.id }}">Recupero</label>
       <div class="col-sm-10">
-        {{ form_widget(form.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [form.recupero.vars.choices[0],form.recupero.vars.choices[1],form.recupero.vars.choices[2]] }) }}
+        {{ form_widget(form.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [form.recupero.vars.choices[0],form.recupero.vars.choices[1],form.recupero.vars.choices[2],form.recupero.vars.choices[3],form.recupero.vars.choices[4]] }) }}
       </div>
     </div>
     <div id="row_{{ form.debito.vars.id }}" class="row"{{ form.parent.vars.attr.no_recupero is defined or form.unico.vars.value is empty or form.unico.vars.value >= 6 ? ' style="display:none"' }}>

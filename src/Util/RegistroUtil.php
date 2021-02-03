@@ -317,10 +317,10 @@ class RegistroUtil {
    */
   public function azioneAnnotazione($azione, \DateTime $data, Docente $docente, Classe $classe=null,
                                      Annotazione $annotazione=null) {
-    if ($this->bloccoScrutinio($data, $classe)) {
-      // blocco scrutinio
-      return false;
-    }
+    //-- if ($this->bloccoScrutinio($data, $classe)) {
+      //-- // blocco scrutinio
+      //-- return false;
+    //-- }
     if ($azione == 'add') {
       // azione di creazione
       if (!$annotazione) {
@@ -1110,7 +1110,7 @@ class RegistroUtil {
    *
    * @param \DateTime $data Data del giorno in cui si giustifica
    * @param Classe $classe Classe della lezione
-   * @param boolean $religione Vero se cattedra di religione, falso altrimenti
+   * @param string $religione Tipo di cattedra di religione, nullo altrimenti
    *
    * @return array Lista degli alunni come istanze della classe Appello
    */
@@ -1131,7 +1131,7 @@ class RegistroUtil {
     $elenco = array();
     $orario = $this->orarioInData($data, $classe->getSede());
     foreach ($lista as $elemento) {
-      if (!$religione || $elemento['religione'] == 'S') {
+      if (!$religione || $elemento['religione'] == $religione) {
         $appello = (new Appello())
           ->setId($elemento['id'])
           ->setAlunno($elemento['cognome'].' '.$elemento['nome'].' ('.$elemento['dataNascita']->format('d/m/Y').')')
@@ -1231,13 +1231,14 @@ class RegistroUtil {
    * @param Classe $classe Classe in cui si attribuisce il voto
    * @param Materia $materia Materia per cui si attribuisce il voto
    * @param string $tipo Tipo di voto (S,O,P)
+   * @param string $religione Tipo di cattedra di religione, o nulla se altra materia
    * @param string $argomento Argomenti o descrizione della prova (valore restituito)
    * @param bool $visibile Se è visibile ai genitori (valore restituito)
    *
    * @return array Lista degli alunni come istanze della classe VotoClasse
    */
   public function elencoVoti(\DateTime $data, Docente $docente, Classe $classe, Materia $materia,
-                              $tipo, &$argomento, &$visibile) {
+                              $tipo, $religione, &$argomento, &$visibile) {
     $elenco = array();
     $argomento = null;
     $visibile = null;
@@ -1257,7 +1258,7 @@ class RegistroUtil {
       ->getArrayResult();
     $alunno_prec = 0;
     foreach ($voti as $v) {
-      if ($materia->getTipo() != 'R' || $v['religione'] == 'S') {
+      if ($materia->getTipo() != 'R' || $v['religione'] == $religione) {
         if ($v['voto'] > 0) {
           $voto_int = intval($v['voto'] + 0.25);
           $voto_dec = $v['voto'] - intval($v['voto']);

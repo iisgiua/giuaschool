@@ -85,12 +85,12 @@ class Alunno extends Utente {
   private $frequenzaEstero;
 
   /**
-   * @var string $religione Indica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, M=materia alternativa]
+   * @var string $religione Indica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"S","U","I","D","M"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"S","U","I","D","A"}, strict=true, message="field.choice")
    */
   private $religione;
 
@@ -266,7 +266,7 @@ class Alunno extends Utente {
   }
 
   /**
-   * Restituisce se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, M=materia alternativa]
+   * Restituisce se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
    * @return string Indica se l'alunno si avvale della religione
    */
@@ -275,7 +275,7 @@ class Alunno extends Utente {
   }
 
   /**
-   * Modifica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, M=materia alternativa]
+   * Modifica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
    * @param string $religione Indica se l'alunno si avvale della religione
    *

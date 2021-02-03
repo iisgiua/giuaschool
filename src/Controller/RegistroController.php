@@ -331,7 +331,9 @@ class RegistroController extends AbstractController {
     if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
       // alunni assenti nell'ora
       $assenti_precedenti = $em->getRepository('App:AssenzaLezione')->assentiLezionePrecedente($classe, $data_obj, $ora);
-      $religione = ($materia->getTipo() == 'R');
+      // religione/att.alt. o altra materia
+      $religione = ($materia->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
+        ($materia->getTipo() == 'R' ? 'S' : '');
       $form = $form
         ->add('assenti', EntityType::class, array('label' => 'label.assenti',
           'data' => $assenti_precedenti,
@@ -341,7 +343,7 @@ class RegistroController extends AbstractController {
             },
           'query_builder' => function (EntityRepository $er) use ($classe, $religione) {
               return $er->createQueryBuilder('a')
-                ->where('a.classe=:classe AND a.abilitato=:abilitato'.($religione ? " AND a.religione='S'" : ''))
+                ->where('a.classe=:classe AND a.abilitato=:abilitato'.($religione ? " AND a.religione='".$religione."'" : ''))
                 ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
                 ->setParameters(['classe' => $classe, 'abilitato' => 1]);
             },
@@ -561,7 +563,8 @@ class RegistroController extends AbstractController {
     if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
       // alunni assenti nell'ora
       $assenti_precedenti = $em->getRepository('App:AssenzaLezione')->assentiLezione($lezione);
-      $religione = ($materia->getTipo() == 'R');
+      $religione = ($materia->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
+        ($materia->getTipo() == 'R' ? 'S' : '');
       $form = $form
         ->add('assenti', EntityType::class, array('label' => 'label.assenti',
           'data' => $assenti_precedenti,
@@ -571,7 +574,7 @@ class RegistroController extends AbstractController {
             },
           'query_builder' => function (EntityRepository $er) use ($classe, $religione) {
               return $er->createQueryBuilder('a')
-                ->where('a.classe=:classe and a.abilitato=:abilitato'.($religione ? " AND a.religione='S'" : ''))
+                ->where('a.classe=:classe AND a.abilitato=:abilitato'.($religione ? " AND a.religione='".$religione."'" : ''))
                 ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
                 ->setParameters(['classe' => $classe, 'abilitato' => 1]);
             },

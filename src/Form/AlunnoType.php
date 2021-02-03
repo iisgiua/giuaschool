@@ -89,7 +89,7 @@ class AlunnoType extends AbstractType {
         'required' => false))
       ->add('religione', ChoiceType::class, array('label' => 'label.religione',
         'choices' => array('label.religione_S' => 'S', 'label.religione_U' => 'U', 'label.religione_I' => 'I',
-          'label.religione_D' => 'D', 'label.religione_M' => 'M'),
+          'label.religione_D' => 'D', 'label.religione_A' => 'A'),
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('bes', ChoiceType::class, array('label' => 'label.bes',

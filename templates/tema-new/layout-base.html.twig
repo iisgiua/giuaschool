@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_citta')|lower }}{% endfor %}">
     <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
     <meta name="author" content="Antonello Dessì">

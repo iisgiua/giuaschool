@@ -21,8 +21,9 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere l'alunno">{{ info.alunno_scelto }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
+    {% set tipo_rel = (cattedra and cattedra.materia.tipo == 'R' and cattedra.tipo == 'A') ? 'A' : (cattedra and cattedra.materia.tipo == 'R' ? 'S' : '') %}
     {% for k,v in alunni %}
-      {% if cattedra.materia.tipo != 'R' or v.religione == 'S' %}
+      {% if cattedra.materia.tipo != 'R' or v.religione == tipo_rel %}
           <li{{ v.id == idalunno ? ' class="active"' }}><a href="{{ path('lezioni_voti_dettagli', {'cattedra': cattedra.id, 'classe': classe.id, 'alunno': v.id}) }}">{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})</a></li>
       {% endif %}
     {% endfor %}

@@ -253,19 +253,12 @@ class SegreteriaUtil {
     if (in_array($alunno->getId(), $alunni)) {
       // alunno in scrutinio
       if ($scrutinio->getPeriodo() == 'P') {
-        $dati['verbale'] = true;
-        // controlla verbale
-        foreach ($dati_scrutinio['verbale'] as $step=>$args) {
-          if ($args['validazione']) {
-            $dati['verbale'] = ($dati['verbale'] && $args['validato']);
-          }
-        }
         // legge i debiti
         $dati['debiti'] = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
           ->join('vs.materia', 'm')
-          ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND m.tipo=:tipo AND vs.unico IS NOT NULL AND vs.unico<:suff')
+          ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND m.tipo IN (:tipo) AND vs.unico IS NOT NULL AND vs.unico<:suff')
           ->orderBy('m.ordinamento', 'ASC')
-          ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'tipo' => 'N', 'suff' => 6])
+          ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'tipo' => ['N', 'E'], 'suff' => 6])
           ->getQuery()
           ->getArrayResult();
       } elseif ($scrutinio->getPeriodo() == '1') {
@@ -346,8 +339,9 @@ class SegreteriaUtil {
   public function scrutinioPrecedenteAlunno(Alunno $alunno, StoricoEsito $storico) {
     // inizializza
     $dati = array();
+    $dati['documenti'] = array();
     $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
-    $fs = new Filesystem();    
+    $fs = new Filesystem();
     // riepilogo voti
     $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf';
     if ($fs->exists($documento)) {

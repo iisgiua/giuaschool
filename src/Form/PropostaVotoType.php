@@ -38,22 +38,27 @@ class PropostaVotoType extends AbstractType {
       ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
       ->add('unico', HiddenType::class)
       ->add('recupero', ChoiceType::class, array('label' => false,
-        'choices' => ['label.recupero_A' => 'A', 'label.recupero_S' => 'S', 'label.recupero_C' => 'C',
+        'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
+          'label.recupero_S' => 'S', 'label.recupero_C' => 'C', 'label.recupero_I' => 'I',
           'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
         'placeholder' => 'label.scegli_recupero',
         'expanded' => false,
         'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
         'required' => false))
       ->add('debito', TextareaType::class, array('label' => false,
         'trim' => true,
         'attr' => array('rows' => '3'),
-        'required' => false))
-      // aggiunta COVID
-      ->add('strategie', TextareaType::class, array('label' => false,
-        'trim' => true,
-        'attr' => array('rows' => '3'),
-        'required' => false,
-        'property_path' => 'dati[strategie]'));
+        'required' => false));
+      //-- // aggiunta COVID
+      //-- ->add('strategie', TextareaType::class, array('label' => false,
+        //-- 'trim' => true,
+        //-- 'attr' => array('rows' => '3'),
+        //-- 'required' => false,
+        //-- 'property_path' => 'dati[strategie]'));
   }
 
   /**

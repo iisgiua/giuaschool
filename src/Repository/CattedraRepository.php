@@ -108,22 +108,25 @@ class CattedraRepository extends BaseRepository {
    * @return array Dati formattati come un array associativo
    */
   public function docentiScrutinio(Classe $classe) {
-    // legge docenti del CdC (esclusi potenziamento)
+    // docenti del CdC (esclusi potenziamento e ed.civica)
     $docenti = $this->createQueryBuilder('c')
-      ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nomeBreve,m.id AS materia_id,c.tipo,c.supplenza')
+      ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,c.tipo,c.supplenza')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
+      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo AND m.tipo!=:edcivica AND d.abilitato=:abilitato')
       ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P'])
+      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P', 'edcivica' => 'E', 'abilitato' => 1])
       ->getQuery()
       ->getArrayResult();
-    // elimina docente titolare se esiste supplente
-    // problemi con SOSTEGNO
+    // elimina docenti in più
     $mat = array();
     foreach ($docenti as $k=>$doc) {
+      if ($doc['tipo_materia'] == 'S') {
+        // non modifica cattedre di SOSTEGNO
+        continue;
+      }
       if (!isset($mat[$doc['materia_id']][$doc['tipo']])) {
-        // memorizza docente di materia
+        // memorizza materia e tipo di docente
         $mat[$doc['materia_id']][$doc['tipo']]['id'] = $k;
         $mat[$doc['materia_id']][$doc['tipo']]['supplenza'] = $doc['supplenza'];
       } else {
@@ -149,6 +152,7 @@ class CattedraRepository extends BaseRepository {
    *
    * @return Array Dati formattati in un array associativo
    */
+
   public function cattedreOrarioDocente(Docente $docente) {
     $dati = array();
     // lista cattedre

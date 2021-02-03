@@ -209,7 +209,10 @@ class VotiController extends AbstractController {
       $data = \DateTime::createFromFormat('Y-m-d', $data);
     }
     // elenco di alunni
-    $elenco = $reg->elencoVoti($data, $this->getUser(), $classe, $cattedra->getMateria(), $tipo, $argomento, $visibile);
+    $religione = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
+      ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
+    $elenco = $reg->elencoVoti($data, $this->getUser(), $classe, $cattedra->getMateria(),
+      $tipo, $religione, $argomento, $visibile);
     $elenco_precedente = unserialize(serialize($elenco)); // clona oggetti
     // dati in formato stringa
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
@@ -866,7 +869,8 @@ class VotiController extends AbstractController {
     // informazioni necessarie
     $classe = $cattedra->getClasse();
     $info['materia'] = $cattedra->getMateria()->getNomeBreve();
-    $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
+    $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
+      ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
     // recupera dati
     $info['periodo'] = $reg->periodo($data_obj);
     $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);

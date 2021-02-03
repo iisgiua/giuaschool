@@ -1026,7 +1026,9 @@ class AssenzeController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // elenco di alunni per l'appello
-    $elenco = $reg->elencoAppello($data_obj, $classe, ($cattedra && $cattedra->getMateria()->getTipo() == 'R'));
+    $religione = ($cattedra && $cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
+      ($cattedra && $cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
+    $elenco = $reg->elencoAppello($data_obj, $classe, $religione);
     // dati in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');

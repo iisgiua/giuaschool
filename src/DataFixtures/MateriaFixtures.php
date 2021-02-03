@@ -50,7 +50,7 @@ class MateriaFixtures extends Fixture implements FixtureGroupInterface {
     $em->persist($materia_SUPPLENZA);
     $materia_RELIGIONE = (new Materia())
       ->setNome('Religione Cattolica o attività alternative')
-      ->setNomeBreve('Religione')
+      ->setNomeBreve('Religione / Att. alt.')
       ->setTipo('R')
       ->setValutazione('G')
       ->setMedia(false)
@@ -307,7 +307,7 @@ class MateriaFixtures extends Fixture implements FixtureGroupInterface {
     $materia_ED_CIVICA = (new Materia())
       ->setNome('Educazione civica')
       ->setNomeBreve('Ed. civica')
-      ->setTipo('N')
+      ->setTipo('E')
       ->setValutazione('N')
       ->setMedia(true)
       ->setOrdinamento(800);

@@ -146,9 +146,9 @@ class ScrutinioController extends AbstractController {
         // periodo indicato non valido
         $periodo = null;
       }
-      if ($periodo) {
+      if ($periodo && $cattedra->getMateria()->getTipo() != 'E') {
         // elenco proposte/alunni
-        $elenco = $scr->elencoProposte($this->getUser(), $classe, $cattedra->getMateria(), $periodo);
+        $elenco = $scr->elencoProposte($this->getUser(), $classe, $cattedra->getMateria(), $cattedra->getTipo(), $periodo);
         if ($lista_periodi[$periodo] == 'N') {
           // è possibile inserire le proposte
           $proposte_prec = unserialize(serialize($elenco['proposte'])); // clona oggetti
@@ -174,11 +174,11 @@ class ScrutinioController extends AbstractController {
               //-- $form_title = 'message.proposte_quinte';
             //-- }
           }
-          if ($periodo == 'F' && $classe->getAnno() == 5) {
-            // scrutinio finale di una quinta: no recupero
-            $opzioni['attr'] = ['no_recupero' => false];
-            $form_title = 'message.proposte_quinte';
-          }
+          //-- if ($periodo == 'F' && $classe->getAnno() == 5) {
+            //-- // scrutinio finale di una quinta: no recupero
+            //-- $opzioni['attr'] = ['no_recupero' => false];
+            //-- $form_title = 'message.proposte_quinte';
+          //-- }
           // form di inserimento
           $form = $this->container->get('form.factory')->createNamedBuilder('proposte', FormType::class)
             ->add('lista', CollectionType::class, $opzioni)
@@ -212,34 +212,34 @@ class ScrutinioController extends AbstractController {
                 $errori[1] = 'exception.voto_errato';
                 $prop = $proposte_prec[$key];
                 continue;
-              //-- } elseif ($prop->getUnico() < 6 && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
-                //-- // manca tipo recupero
-                //-- $errori[2] = 'exception.no_recupero';
-              //-- } elseif ($prop->getUnico() < 6 && empty($prop->getDebito()) && !isset($opzioni['attr']['no_recupero'])) {
-                //-- // manca argomenti debito
-                //-- $errori[3] = 'exception.no_debito';
-              } elseif ($prop->getUnico() == 0 || $prop->getUnico() == 20) {
-                // mancano obiettivi recupero
-                $errori[2] = 'exception.no_valutazione_NC';
-              } elseif (($prop->getUnico() < 6 || ($prop->getUnico() >= 20 && $prop->getUnico() < 22)) && $prop->getDebito() === null && !isset($opzioni['attr']['no_recupero'])) {
-                // mancano obiettivi recupero
-                $errori[3] = 'exception.no_obiettivi_recupero';
-              } elseif (($prop->getUnico() < 6 || ($prop->getUnico() >= 20 && $prop->getUnico() < 22)) && $prop->getDato('strategie') === null && !isset($opzioni['attr']['no_recupero'])) {
-                // mancano strategie recupero
-                $errori[4] = 'exception.no_strategie_recupero';
+              } elseif ($prop->getUnico() < 6 && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
+                // manca tipo recupero
+                $errori[2] = 'exception.no_recupero';
+              } elseif ($prop->getUnico() < 6 && empty($prop->getDebito()) && !isset($opzioni['attr']['no_recupero'])) {
+                // manca argomenti debito
+                $errori[3] = 'exception.no_debito';
+              //-- } elseif ($prop->getUnico() == 0 || $prop->getUnico() == 20) {
+                //-- // mancano obiettivi recupero
+                //-- $errori[2] = 'exception.no_valutazione_NC';
+              //-- } elseif (($prop->getUnico() < 6 || ($prop->getUnico() >= 20 && $prop->getUnico() < 22)) && $prop->getDebito() === null && !isset($opzioni['attr']['no_recupero'])) {
+                //-- // mancano obiettivi recupero
+                //-- $errori[3] = 'exception.no_obiettivi_recupero';
+              //-- } elseif (($prop->getUnico() < 6 || ($prop->getUnico() >= 20 && $prop->getUnico() < 22)) && $prop->getDato('strategie') === null && !isset($opzioni['attr']['no_recupero'])) {
+                //-- // mancano strategie recupero
+                //-- $errori[4] = 'exception.no_strategie_recupero';
               //-- } elseif ($prop->getUnico() >= 30 && $prop->getRecupero() === null &&
                         //-- isset($elenco['debiti'][$alunno->getId()])) {
                 //-- // periodo 1: manca indicazione sul recupero
                 //-- $errori[2] = 'exception.no_recupero_eseguito';
-              } else {
-                // controllo su obiettivi
-                $o = preg_replace('/\b(il|del|nel)\b/',' ', strtolower($prop->getDebito()));
-                $o = preg_replace('/\W+/','', $o);
-                if (in_array($o, ['programmasvolto', 'programmasvoltopentamestre', 'tuttoprogramma',
-                    'tuttoprogrammasvolto', 'programmapentamestre', 'tuttoprogrammapentamestre'])) {
-                  // testo non valido
-                  $errori[5] = 'exception.invalidi_obiettivi_recupero';
-                }
+              //-- } else {
+                //-- // controllo su obiettivi
+                //-- $o = preg_replace('/\b(il|del|nel)\b/',' ', strtolower($prop->getDebito()));
+                //-- $o = preg_replace('/\W+/','', $o);
+                //-- if (in_array($o, ['programmasvolto', 'programmasvoltopentamestre', 'tuttoprogramma',
+                    //-- 'tuttoprogrammasvolto', 'programmapentamestre', 'tuttoprogrammapentamestre'])) {
+                  //-- // testo non valido
+                  //-- $errori[5] = 'exception.invalidi_obiettivi_recupero';
+                //-- }
               }
               if ($proposte_prec[$key]->getUnico() === null && $prop->getUnico() !== null) {
                 // proposta aggiunta
@@ -253,22 +253,22 @@ class ScrutinioController extends AbstractController {
                 // aggiorna docente proposta
                 $prop->setDocente($this->getUser());
               }
-              if (($prop->getUnico() >= 6 && $prop->getUnico() <= 10) || $prop->getUnico() >= 22 || isset($opzioni['attr']['no_recupero'])) {
-                // svuota campi inutili
-                $prop->setDebito('');
-                $prop->addDato('strategie', '');
-              }
+              //-- if (($prop->getUnico() >= 6 && $prop->getUnico() <= 10) || $prop->getUnico() >= 22 || isset($opzioni['attr']['no_recupero'])) {
+                //-- // svuota campi inutili
+                //-- $prop->setDebito('');
+                //-- $prop->addDato('strategie', '');
+              //-- }
             }
-            if ($classe->getAnno() != 5) {
-              // legge PIA
-              $documento = $em->getRepository('App:DocumentoInterno')->findOneBy(['tipo' => 'A',
-                'classe' => $classe, 'materia' => $cattedra->getMateria()]);
-              if (!$documento || ($documento->getDato('necessario') &&
-                  (empty($documento->getDato('obiettivi')) || empty($documento->getDato('strategie'))))) {
-                // documento da compilare
-                $errori[10] = 'exception.invalido_piano_integrazione_scrutinio';
-              }
-            }
+            //-- if ($classe->getAnno() != 5) {
+              //-- // legge PIA
+              //-- $documento = $em->getRepository('App:DocumentoInterno')->findOneBy(['tipo' => 'A',
+                //-- 'classe' => $classe, 'materia' => $cattedra->getMateria()]);
+              //-- if (!$documento || ($documento->getDato('necessario') &&
+                  //-- (empty($documento->getDato('obiettivi')) || empty($documento->getDato('strategie'))))) {
+                //-- // documento da compilare
+                //-- $errori[10] = 'exception.invalido_piano_integrazione_scrutinio';
+              //-- }
+            //-- }
             // ok: memorizza dati
             $em->flush();
             // log azione
@@ -518,34 +518,20 @@ class ScrutinioController extends AbstractController {
       $info['no_recupero'] = true;
     }
     // elenco proposte/alunni
-    $elenco = $scr->elencoProposte($this->getUser(), $classe, $materia, $periodo);
+    $elenco = $scr->elencoProposte($this->getUser(), $classe, $materia, '', $periodo);
     foreach ($elenco['proposte'] as $k=>$p) {
-      //-- if ($materia->getTipo() == 'R') {
-        //-- // religione
-        //-- if ($p->getUnico() !== null) {
-          //-- // ok, non modificabile
-          //-- unset($elenco['proposte'][$k]);
-        //-- }
-      //-- } else {
-        //-- // altre materie
-        //-- if ($p->getUnico() >= 6) {
-          //-- // ok, non modificabile
-          //-- unset($elenco['proposte'][$k]);
-        //-- } elseif ($p->getUnico() >= 6 ||
-            //-- (!$info['no_recupero'] && $p->getUnico() !== null && $p->getRecupero() !== null && $p->getDebito() !== null) ||
-            //-- ($info['no_recupero'] && $p->getUnico() !== null)) {
-          //-- // ok, non modificabile
-          //-- unset($elenco['proposte'][$k]);
-        //-- }
-      //-- }
-      if (($p->getUnico() >= 6 && $p->getUnico() <= 10) || $p->getUnico() >= 22) {
+      if ($materia->getTipo() == 'R' && $p->getUnico() !== null) {
+        // Religione/att.alt.: ok, non modificabile
+        unset($elenco['proposte'][$k]);
+      }
+      if ($p->getUnico() >= 6 && $p->getUnico() <= 10) {
         // voto sufficiente, non modificabile
         unset($elenco['proposte'][$k]);
       } elseif ($p->getUnico() !== null && $info['no_recupero']) {
         // voto qualsiasi di quinte, non modificabile
         unset($elenco['proposte'][$k]);
       } elseif (!$info['no_recupero'] && $p->getUnico() !== null && $p->getDebito() !== null &&
-                $p->getDato('strategie') !== null) {
+                $p->getRecupero() !== null) {
         // voto insuff. con oiettivi e strategie, non modificabile
         unset($elenco['proposte'][$k]);
       }
@@ -646,7 +632,7 @@ class ScrutinioController extends AbstractController {
                                            TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
-    $info['valutazioni'] = ['min' => 4, 'max' => 10, 'start' => 6, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
+    $info['valutazioni'] = ['min' => 4, 'max' => 10, 'start' => 8, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
     $dati = array();
     $dati['alunni'] = array();
     // controllo classe
@@ -708,7 +694,7 @@ class ScrutinioController extends AbstractController {
           // alunno non esiste, salta
           $em->detach($voto);
           continue;
-        } elseif ($voto->getUnico() < $info['valutazioni']['min'] || $voto->getUnico() > $info['valutazioni']['max']) {
+        } elseif ($voto->getUnico() === null || $voto->getUnico() < $info['valutazioni']['min'] || $voto->getUnico() > $info['valutazioni']['max']) {
           // voto non ammesso
           $em->detach($voto);
           $errore['exception.voto_condotta'] = true;
@@ -722,9 +708,9 @@ class ScrutinioController extends AbstractController {
         } elseif ($voto->getDato('unanimita') === false && empty($voto->getDato('contrari'))) {
           // mancano contrari
           $errore['exception.contrari_condotta'] = true;
-        } elseif ($voto->getDato('unanimita') === false && empty($voto->getDato('contrari_motivazione'))) {
-          // mancano contrari
-          $errore['exception.contrari_motivazione_condotta'] = true;
+        //-- } elseif ($voto->getDato('unanimita') === false && empty($voto->getDato('contrari_motivazione'))) {
+          //-- // mancano contrari
+          //-- $errore['exception.contrari_motivazione_condotta'] = true;
         }
       }
       foreach ($errore as $msg=>$v) {
@@ -845,13 +831,14 @@ class ScrutinioController extends AbstractController {
       }
     }
     // form di inserimento
+    $tipoForm = 'debiti';
     $form = $this->container->get('form.factory')->createNamedBuilder('voti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_voti', ['classe' => $classe->getId(),
         'materia' => $materia->getId(), 'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => 'esito'] )))
+        'entry_options' => array('label' => false, 'attr' => ['subType' => $tipoForm] )))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -870,16 +857,16 @@ class ScrutinioController extends AbstractController {
           // voto non ammesso o non presente
           $em->detach($voto);
           $errore['exception.no_voto_scrutinio'] = true;
-        //-- } elseif ($voto->getUnico() < 6 && !$voto->getRecupero() && $periodo != 'I' && $periodo != 'X') {
-          //-- // manca indicazione recupero
-          //-- $errore['exception.no_recupero_scrutinio'] = true;
-        //-- } elseif ($voto->getUnico() < 6 && !$voto->getDebito() && $periodo != 'I' && $periodo != 'X') {
-          //-- // manca indicazione argomenti
-          //-- $errore['exception.no_debito_scrutinio'] = true;
-        } elseif ($voto->getUnico() >= 30 && $voto->getRecupero() === null &&
-                  isset($dati['debiti'][$alunno->getId()])) {
-          // manca indicazione sul recupero
-          $errore['exception.no_recupero_debito_scrutinio'] = true;
+        } elseif ($voto->getUnico() < 6 && !$voto->getRecupero() && $periodo != 'I' && $periodo != 'X') {
+          // manca indicazione recupero
+          $errore['exception.no_recupero_scrutinio'] = true;
+        } elseif ($voto->getUnico() < 6 && !$voto->getDebito() && $periodo != 'I' && $periodo != 'X') {
+          // manca indicazione argomenti
+          $errore['exception.no_debito_scrutinio'] = true;
+        //-- } elseif ($voto->getUnico() >= 30 && $voto->getRecupero() === null &&
+                  //-- isset($dati['debiti'][$alunno->getId()])) {
+          //-- // manca indicazione sul recupero
+          //-- $errore['exception.no_recupero_debito_scrutinio'] = true;
         }
       }
       foreach ($errore as $msg=>$v) {
@@ -1995,17 +1982,11 @@ class ScrutinioController extends AbstractController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controllo periodo
-    $scrutinio_chiuso = $scr->scrutinioChiuso($classe);
-    if ($periodo != $scrutinio_chiuso['periodo']) {
-      // errore
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
     // legge definizione scrutinio e scrutinio
     $def = $em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
     $scrutinio = $em->getRepository('App:Scrutinio')->findOneBy(['periodo' => $periodo,
-      'classe' => $classe, 'stato' => 'C']);
-    if (!$def || !$scrutinio) {
+      'classe' => $classe]);
+    if (!$def || !$scrutinio || in_array($scrutinio->getStato(), ['N', 'C'])) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -2037,8 +2018,18 @@ class ScrutinioController extends AbstractController {
     if ($form->isSubmitted()) {
       // validazione
       $scr->$func_valida($this->getUser(), $request, $scrutinio, $form, $step, $passo_verbale);
+      // se errori indica non validato
+      if ($session->getFlashBag()->has('errore')) {
+        // modifica validazione
+        $scrutinio_dati = $scrutinio->getDati();
+        $scrutinio_dati['verbale'][$step]['validato'] = false;
+        // memorizza dati
+        $scrutinio->setDati($scrutinio_dati);
+        $em->flush();
+      }
       // redirezione
-      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'stato' => 'C']);
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(),
+        'stato' => $scrutinio->getStato()]);
     }
     // visualizza pagina
     return $this->render('coordinatore/verbale_'.strtolower($passo_verbale[0]).'.html.twig', array(
@@ -2623,6 +2614,132 @@ class ScrutinioController extends AbstractController {
     return $this->render('coordinatore/PAI.html.twig', array(
       'classe' => $classe,
       'alunno' => $alunno,
+      'dati' => $dati,
+      'form' => $form->createView(),
+    ));
+  }
+
+  /**
+   * Gestione dei voti di ed. civica durante lo scrutinio
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
+   * @param int $classe Identificativo della classe
+   * @param string $periodo Periodo relativo allo scrutinio
+   * @param int $alunno ID del singolo alunno o zero per l'intera classe
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/coordinatore/scrutinio/edcivica/{classe}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_edcivica",
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function scrutinioEdcivicaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                           TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
+    // inizializza variabili
+    $info = array();
+    $info['valutazioni'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
+    $dati = array();
+    $dati['alunni'] = array();
+    // controllo classe
+    $classe = $em->getRepository('App:Classe')->find($classe);
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controllo periodo
+    $scrutinio = $scr->scrutinioAttivo($classe);
+    if ($periodo != $scrutinio['periodo']) {
+      // errore
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // legge ed civica
+    $edcivica = $em->getRepository('App:Materia')->findOneByTipo('E');
+    if (!$edcivica) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // elenco voti/alunni
+    $dati = $scr->elencoVoti($this->getUser(), $classe, $edcivica, $periodo);
+    if ($alunno > 0) {
+      // singolo alunno
+      foreach ($dati['voti'] as $key=>$val) {
+        if ($key != $alunno) {
+          // toglie altri alunni
+          unset($dati['voti'][$key]);
+        }
+      }
+    }
+    // form di inserimento
+    $form = $this->container->get('form.factory')->createNamedBuilder('edcivica', FormType::class)
+      ->setAction($this->generateUrl('coordinatore_scrutinio_edcivica', ['classe' => $classe->getId(),
+        'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
+      ->add('lista', CollectionType::class, array('label' => false,
+        'data' => $dati['voti'],
+        'entry_type' => VotoScrutinioType::class,
+        'entry_options' => array('label' => false, 'attr' => ['subType' => 'edcivica'])))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' =>['class' => 'btn-primary']))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controlla errori
+      $errore = array();
+      foreach ($form->get('lista')->getData() as $key=>$voto) {
+        // controllo alunno
+        $alunno = $em->getRepository('App:Alunno')->find($voto->getAlunno()->getId());
+        if (!$alunno || !in_array($alunno->getId(), array_keys($dati['voti']))) {
+          // alunno non esiste, salta
+          $em->detach($voto);
+          continue;
+        } elseif ($voto->getUnico() === null || $voto->getUnico() < $info['valutazioni']['min'] || $voto->getUnico() > $info['valutazioni']['max']) {
+          // voto non ammesso
+          $em->detach($voto);
+          $errore['exception.voto_edcivica'] = true;
+        } elseif ($voto->getUnico() < 6 && !$voto->getRecupero() && $periodo != 'I' && $periodo != 'X') {
+          // manca indicazione recupero
+          $errore['exception.no_recupero_scrutinio'] = true;
+        } elseif ($voto->getUnico() < 6 && !$voto->getDebito() && $periodo != 'I' && $periodo != 'X') {
+          // manca indicazione argomenti
+          $errore['exception.no_debito_scrutinio'] = true;
+        }
+      }
+      foreach ($errore as $msg=>$v) {
+        $session->getFlashBag()->add('errore',
+          $trans->trans($msg, ['materia' => $edcivica->getNomeBreve()]));
+      }
+      // ok: memorizza dati (anche errati)
+      $em->flush();
+      // redirect
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
+    } elseif ($form->isSubmitted() && !$form->isValid()) {
+      // mostra altri errori
+      foreach ($form->getErrors() as $error) {
+        $session->getFlashBag()->add('errore', $error->getMessage());
+      }
+      // redirect
+      return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
+    }
+    // visualizza pagina
+    return $this->render('coordinatore/edcivica_'.$periodo.'.html.twig', array(
+      'classe' => $classe,
+      'info' => $info,
       'dati' => $dati,
       'form' => $form->createView(),
     ));

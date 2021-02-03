@@ -89,6 +89,7 @@
       <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'M'}) }}" role="button" title="Visualizza le assenze del mese"><span class="glyphicon glyphicon-th"></span></a>
     </div>
   </div>
+      {% set tipo_rel = (cattedra and cattedra.materia.tipo == 'R' and cattedra.tipo == 'A') ? 'A' : (cattedra and cattedra.materia.tipo == 'R' ? 'S' : '') %}
       {% for tab in ['N','R'] %}
         {% if tab == 'N' or (cattedra and cattedra.materia.tipo == 'R') %}
   <table class="table table-bordered table-hover table-striped">
@@ -106,7 +107,7 @@
     </thead>
     <tbody>
           {% for k,v in dati[data].lista %}
-            {% if (tab == 'N' and (not cattedra or cattedra.materia.tipo != 'R' or v.religione == 'S')) or (tab == 'R' and v.religione != 'S') %}
+            {% if (tab == 'N' and (not cattedra or cattedra.materia.tipo != 'R' or v.religione == tipo_rel)) or (tab == 'R' and v.religione != tipo_rel) %}
       <tr>
         <td>{{ loop.index }}</td>
         <td>

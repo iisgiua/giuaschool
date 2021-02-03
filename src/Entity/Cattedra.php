@@ -59,12 +59,12 @@ class Cattedra {
   private $supplenza;
 
   /**
-   * @var string $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento]
+   * @var string $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","I","P"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","I","P","A"}, strict=true, message="field.choice")
    */
   private $tipo;
 
@@ -184,7 +184,7 @@ class Cattedra {
   }
 
   /**
-   * Restituisce il tipo della cattedra [N=normale, I=ITP, P=potenziamento]
+   * Restituisce il tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
    * @return string Tipo della cattedra
    */
@@ -193,7 +193,7 @@ class Cattedra {
   }
 
   /**
-   * Modifica il tipo della cattedra [N=normale, I=ITP, P=potenziamento]
+   * Modifica il tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
    * @param string $tipo Tipo della cattedra
    *
@@ -310,4 +310,3 @@ class Cattedra {
   }
 
 }
-

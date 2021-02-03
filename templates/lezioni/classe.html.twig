@@ -25,7 +25,9 @@
           <td>
     {% for k1,v1 in v %}
             <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': v1.id, 'classe': 0}) }}" role="button" title="{{ v1.classe.anno }}{{ v1.classe.sezione }} - {{ v1.materia.nome }}"><strong>{{ v1.classe.anno }}ª {{ v1.classe.sezione }} - {{ v1.materia.nomeBreve }}{% if v1.materia.tipo == 'S' and v1.alunno %} {{ loop.index }}{% endif %}</strong></a>
-            {% if v1.materia.tipo == 'S' and v1.alunno %}<button type="button" class="btn btn-xs btn-default gs-mr-5" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v1.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}
+      {% if v1.materia.tipo == 'S' and v1.alunno %}
+            <button type="button" class="btn btn-xs btn-default gs-mr-5" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v1.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+      {% endif %}
     {% endfor %}
           </td>
         </tr>

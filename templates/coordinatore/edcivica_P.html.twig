@@ -1,7 +1,7 @@
 {{ form_start(form) }}
   <div class="modal-header">
     <h3 class="modal-title gs-h3">Scrutinio della classe {{ classe.anno~'ª '~classe.sezione }}</h3>
-    <h4 class="modal-title gs-h4"><em>{{ info.materia }}</em></h4>
+    <h4 class="modal-title gs-h4"><em>Educazione civica</em></h4>
   </div>
   <div class="modal-body">
     <ul id="gs-form-collection" class="list-group">
@@ -15,7 +15,7 @@
           <label class="control-label col-sm-2" for="{{ voto.unico.vars.id }}">Voto</label>
           <div class="col-sm-10">
     {% if voto.unico.vars.value is not empty %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : (voto.unico.vars.value <= 10 ? 'success' : (voto.unico.vars.value < 22 ? 'danger' : 'success'))) }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 6 ? 'danger' : (voto.unico.vars.value <= 10 ? 'success' : (voto.unico.vars.value < 22 ? 'danger' : 'success')) }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
             <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Modifica la valutazione per la materia"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
@@ -43,7 +43,7 @@
     </ul>
   </div>
   <div class="modal-footer">
-    {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
+    {{ form_widget(form.submit) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
@@ -94,18 +94,18 @@ $(document).ready(function() {
     var d = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
       null, null, null, null, null, null, null, null, null,
       'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
-    var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
-      (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
+    var c = (e.value.newValue < 6 ? 'label-danger' :
+      (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success')));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
-    var id = this.id.slice(11,-6);
+    var id = this.id.slice(15,-6);
     if (e.value.newValue < 6) {
-      $('#row_voti_lista_'+id+'_recupero').fadeIn(300);
-      $('#row_voti_lista_'+id+'_debito').fadeIn(300);
+      $('#row_edcivica_lista_'+id+'_recupero').fadeIn(300);
+      $('#row_edcivica_lista_'+id+'_debito').fadeIn(300);
     } else {
-      $('#voti_lista_'+id+'_recupero').val('');
-      $('#voti_lista_'+id+'_debito').val('');
-      $('#row_voti_lista_'+id+'_recupero').fadeOut(300);
-      $('#row_voti_lista_'+id+'_debito').fadeOut(300);
+      $('#edcivica_lista_'+id+'_recupero').val('');
+      $('#edcivica_lista_'+id+'_debito').val('');
+      $('#row_edcivica_lista_'+id+'_recupero').fadeOut(300);
+      $('#row_edcivica_lista_'+id+'_debito').fadeOut(300);
     }
   });
 });

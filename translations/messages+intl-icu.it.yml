@@ -165,6 +165,7 @@ label.giustifica_famiglia: Esigenze di famiglia
 label.giustifica_salute: Motivi di salute
 label.giustifica_sport: Attività sportiva
 label.giustifica_trasporto: Problemi di trasporto
+label.giustifica_connessione: Problemi di connessione nella modalità a distanza
 label.giustificazione: Giustificato?
 label.impostazioni: Impostazioni
 label.indietro: Indietro
@@ -222,7 +223,7 @@ label.periodo_2: ~
 label.periodo_A: A.S. Precedente
 label.periodo_F: Scrutinio Finale
 label.periodo_I: Scrutinio Integrativo
-label.periodo_P: Primo Trimestre
+label.periodo_P: Primo Quadrimestre
 label.periodo_S: ~
 label.periodo_X: Scrutinio Rinviato
 label.piani: Piani di lavoro
@@ -239,19 +240,21 @@ label.qualsiasi_sede: Qualsiasi sede
 label.rappresentante_classe: Rappresentante di classe
 label.rappresentante_consulta: Consulta Provinciale
 label.rappresentante_istituto: Rappresentante di Istituto
-label.recupero_A: Recupero autonomo
+label.recupero_A: Studio individuale
 label.recupero_C: Corso di recupero
 label.recupero_N: Non recuperato
 label.recupero_R: Recuperato
 label.recupero_S: Sportello didattico
+label.recupero_P: Pausa didattica
+label.recupero_I: Iscola (biennio)
 label.registro_classe: Registro di classe
 label.registro_docente: Registro del docente
 label.registro_sostegno: Registro di sostegno
-label.religione_D: No, studio con docente
-label.religione_I: No, studio individuale
-label.religione_M: No, materia alternativa
+label.religione_D: No (studio con docente)
+label.religione_I: No (studio individuale)
+label.religione_A: Attività alternativa
 label.religione_S: Si avvale
-label.religione_U: No, uscita
+label.religione_U: No (uscita)
 label.religione: Religione
 label.reset_otp: Reset OTP
 label.ritardi: Ritardi
@@ -316,6 +319,7 @@ label.tipo_N: Normale
 label.tipo_nota: Tipo di nota
 label.tipo_P: Potenziamento
 label.tipo_S: Sostegno
+label.tipo_A: Attività alternativa
 label.tipo: Tipo
 label.tutte_classi: Tutte le classi
 label.tutti_destinatari: Tutti i destinatari
@@ -770,96 +774,55 @@ message.proposte_covid: "Inserisci la proposta di voto, compilando anche il <em>
 message.proposte_religione_covid: "Inserisci la proposta di voto, compilando anche il <em>Piano di Apprendimento Individualizzato</em> e il <em>Piano di Integrazione degli Apprendimenti</em>."
 message.proposte_intermedia: Inserisci la valutazione intermedia, indicando anche se si è recuperato l'eventuale debito formativo.
 message.proposte_no: Le proposte di voto non sono più modificabili.
+message.proposte_no_edcivica: "Non è previsto l'inserimento di proposte di voto per la materia. Si provvederà durante lo scrutinio a dare la valutazione."
 message.proposte_non_previste: Non è previsto l'inserimento di proposte di voto.
 message.classe_mancante: Devi prima scegliere la classe per poter visualizzare questa pagina.
 message.scrutinio_non_presente: Non sono presenti dati sugli scrutini.
 message.scrutinio_non_attivo: Non è possibile inserire o modificare i dati dello scrutinio.
 message.giudizio_condotta_NC: "Non ci sono elementi di valutazione."
-message.giudizio_condotta_5: " Ha assunto comportamenti di particolare gravità riconducibili alle fattispecie per le quali lo Statuto delle studentesse e degli studenti, nonché il regolamento di Istituto prevedano l’irrogazione di sanzioni disciplinari che comportino l’allontanamento temporaneo dello studente dalla comunità scolastica per periodi superiori a 15 giorni
-e qualora lo studente non abbia dimostrato apprezzabili e concreti cambiamenti nel comportamento, tali da evidenziare un sufficiente livello di miglioramento nel suo percorso di crescita e di maturazione in ordine alle finalità educative della scuola.\\n
-Durante la Didattica a Distanza:\\n
-* NON entra MAI con puntualità nell’aula virtuale;\\n
-* NON si presenta e si esprime MAI in maniera adeguata all’ambiente;\\n
-* NON entra MAI nelle discussioni per aggiungere valore;\\n
-* NON si collega MAI alla piattaforma, NON lavora, NON scarica materiale e compiti;\\n
-* NON conosce e NON rispetta MAI le regole della condivisione e pubblicazione digitale;\\n
-* NON aiuta MAI i compagni dimostrando solidarietà e senso di responsabilità;\\n
-* NON coglie il valore delle regole che NON rispetta MAI con convinzione, NON esprimendo una buona sensibilità etica riguardo alla vita sociale."
+message.giudizio_condotta_5: "Ha assunto comportamenti di particolare gravità
+riconducibili alle fattispecie per le quali lo Statuto delle studentesse e degli
+studenti, nonché il regolamento di Istituto, prevedano l’irrogazione di sanzioni
+disciplinari che comportino l’allontanamento temporaneo dello studente dalla
+comunità scolastica per periodi superiori a 15 giorni e qualora lo studente non
+abbia dimostrato apprezzabili e concreti cambiamenti nel comportamento, tali da
+evidenziare un sufficiente livello di miglioramento nel suo percorso di crescita
+e di maturazione in ordine alle finalità educative della scuola."
 message.giudizio_condotta_6: " * Mantiene un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento poco rispettoso nei confronti dei docenti e/o del personale d’Istituto;\\n
 * non è puntuale nello svolgimento degli impegni scolastici;\\n
 * non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento;\\n
 * spesso ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, opportunamente rilevato e sanzionato;\\n
 * ha scarso rispetto dell’integrità delle strutture e degli spazi dell’Istituto;\\n
 * non partecipa al dialogo educativo, spesso non mostra interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
-* non sempre rispetta le norme di sicurezza.\\n
-Durante la Didattica a Distanza:\\n
-* entra A VOLTE con puntualità nell’aula virtuale;\\n
-* si presenta e si esprime A VOLTE in maniera adeguata all’ambiente;\\n
-* entra nelle discussioni A VOLTE per aggiungere valore;\\n
-* si collega A VOLTE alla piattaforma, lavora, scarica materiale e compiti;\\n
-* conosce e rispetta A VOLTE le regole della condivisione e pubblicazione digitale;\\n
-* aiuta A VOLTE i compagni dimostrando solidarietà e senso di responsabilità;\\n
-* coglie il valore delle regole che rispetta A VOLTE con convinzione, esprimendo una buona sensibilità etica riguardo alla vita sociale."
+* non sempre rispetta le norme di sicurezza."
 message.giudizio_condotta_7: " * Mantiene un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento non sempre rispettoso nei confronti dei docenti e/o del personale dell’Istituto;\\n
 * non è sempre costante nell’espletamento degli impegni scolastici;\\n
 * la frequenza all’attività didattica non è sempre continua, non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento,\\n
 * talvolta ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, anche rilevato;\\n
 * talvolta non rispetta le consegne, i regolamenti e le cose comuni;\\n
 * non partecipa al dialogo educativo, spesso non mostrando interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
-* non sempre rispetta le norme di sicurezza.\\n
-Durante la Didattica a Distanza:\\n
-* entra SPESSO con puntualità nell’aula virtuale;\\n
-* si presenta e si esprime SPESSO in maniera adeguata all’ambiente;\\n
-* entra nelle discussioni SPESSO per aggiungere valore;\\n
-* si collega SPESSO alla piattaforma, lavora, scarica materiale e compiti;\\n
-* conosce e rispetta SPESSO le regole della condivisione e pubblicazione digitale;\\n
-* aiuta SPESSO i compagni dimostrando solidarietà e senso di responsabilità;\\n
-* coglie il valore delle regole che rispetta SPESSO con convinzione, esprimendo una buona sensibilità etica riguardo alla vita sociale."
+* non sempre rispetta le norme di sicurezza."
 message.giudizio_condotta_8: " * Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
 * ha un atteggiamento responsabile durante le attività didattiche, svolte anche al di fuori dell’istituto;\\n
 * è puntuale nell’adempimento degli impegni scolastici, rispetta l’integrità delle strutture e degli spazi contribuendo alla qualità della vita scolastica;\\n
 * frequenta le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
 * partecipa all’attività educativo-didattica, è interessato all’apprendimento, ma non sempre esegue i compiti assegnati;\\n
 * è spesso disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
-* rispetta le norme di sicurezza.\\n
-Durante la Didattica a Distanza:\\n
-* entra SPESSO con puntualità nell’aula virtuale;\\n
-* si presenta e si esprime SPESSO in maniera adeguata all’ambiente;\\n
-* entra nelle discussioni SPESSO per aggiungere valore;\\n
-* si collega SPESSO alla piattaforma, lavora, scarica materiale e compiti;\\n
-* conosce e rispetta SPESSO le regole della condivisione e pubblicazione digitale;\\n
-* aiuta SPESSO i compagni dimostrando solidarietà e senso di responsabilità;\\n
-* coglie il valore delle regole che rispetta SPESSO con convinzione, esprimendo una buona sensibilità etica riguardo alla vita sociale."
+* rispetta le norme di sicurezza."
 message.giudizio_condotta_9: " * Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
 * dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’istituto;\\n
 * rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
 * frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
 * partecipa in modo costruttivo all’attività educativo-didattica, è interessato e motivato all’apprendimento, esegue i compiti assegnati;\\n
 * è disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
-* rispetta le norme di sicurezza.\\n
-Durante la Didattica a Distanza:\\n
-* entra SEMPRE con puntualità nell’aula virtuale;\\n
-* si presenta e si esprime SEMPRE in maniera adeguata all’ambiente;\\n
-* entra nelle discussioni SEMPRE per aggiungere valore;\\n
-* si collega SEMPRE alla piattaforma, lavora, scarica materiale e compiti;\\n
-* conosce e rispetta SEMPRE le regole della condivisione e pubblicazione digitale;\\n
-* aiuta SEMPRE i compagni dimostrando solidarietà e senso di responsabilità;\\n
-* coglie il valore delle regole che rispetta SEMPRE con convinzione, esprimendo una buona sensibilità etica riguardo alla vita sociale."
+* rispetta le norme di sicurezza."
 message.giudizio_condotta_10: " * Si relaziona sempre correttamente con i docenti, i collaboratori scolastici e i compagni, dimostra maturità a partire dal rispetto per la propria persona;\\n
 * dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’istituto;\\n
 * rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
 * è sempre puntuale e frequenta assiduamente le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
 * mostra interesse costruttivo per il mondo della scuola, ha un ruolo propositivo all’interno della classe, mostrando solidarietà e collaborazione nei confronti dei compagni;\\n
 * è interessato e motivato all’apprendimento, esegue sempre i compiti assegnati;\\n
-* rispetta le norme di sicurezza.\\n
-Durante la Didattica a Distanza:\\n
-* entra SEMPRE con puntualità nell’aula virtuale;\\n
-* si presenta e si esprime SEMPRE in maniera adeguata all’ambiente;\\n
-* entra nelle discussioni SEMPRE per aggiungere valore;\\n
-* si collega SEMPRE alla piattaforma, lavora, scarica materiale e compiti;\\n
-* conosce e rispetta SEMPRE le regole della condivisione e pubblicazione digitale;\\n
-* aiuta SEMPRE i compagni dimostrando solidarietà e senso di responsabilità;\\n
-* coglie il valore delle regole che rispetta SEMPRE con convinzione, esprimendo una buona sensibilità etica riguardo alla vita sociale."
+* rispetta le norme di sicurezza."
 message.no_scrutini_svolti: Non esistono ancora scrutini svolti.
 message.docenti_colloqui_importa: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
   \"Docente, Username, Sede, Giorno, Ora, Frequenza, Note\".
@@ -1144,8 +1107,10 @@ exception.upload_tipo: Questo tipo di file non è permesso!
 exception.user_card: Utente non abilitato all'uso di questa modalità di accesso.
 exception.utente_cambio_password: Il cambio password è permesso solo agli utenti che hanno inserito la propria email.<br>In questo modo sarà possibile utilizzare la funzione di recupero password.
 exception.verbale_argomento_vuoto: Non si può lasciare l'argomento vuoto.
+exception.verbale_argomento_mancante: "Devi inserire o confermare il {sezione} dell'ordine del giorno."
 exception.voto_condotta_esito: Il voto insufficiente della condotta non è coerente con l'esito dell'alunn{sex} {alunno}.
 exception.voto_condotta: Manca il voto di condotta per uno o più alunni.
+exception.voto_edcivica: Manca il voto di Ed. civica per uno o più alunni.
 exception.voto_errato: Sono presenti uno o più voti con valori non ammessi.
 exception.voto_religione_esito: Il voto insufficiente di religione non è coerente con l'esito dell'alunn{sex} {alunno}.
 exception.voto_vuoto: Hai lasciato in bianco sia il voto che il giudizio.

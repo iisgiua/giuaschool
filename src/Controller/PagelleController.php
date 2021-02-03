@@ -85,10 +85,10 @@ class PagelleController extends AbstractController {
     if ($periodo == 'P') {
       // primo trimestre
       switch ($tipo) {
-        case 'F':
-          // firme verbale
-          $nomefile = $pag->firmeVerbale($classe, $periodo);
-          break;
+        //-- case 'F':
+          //-- // firme verbale
+          //-- $nomefile = $pag->firmeVerbale($classe, $periodo);
+          //-- break;
         case 'I':
           // firme registro voti
           $nomefile = $pag->firmeRegistro($classe, $periodo);

@@ -83,11 +83,11 @@ class VotoScrutinio {
   private $debito;
 
   /**
-   * @var string $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, R=recuperato, N=non recuperato]
+   * @var string $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
    *
    * @ORM\Column(type="string", length=1, nullable=true)
    *
-   * @Assert\Choice(choices={"A","C","S","R","N"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"A","C","S","P","I","R","N"}, strict=true, message="field.choice")
    */
   private $recupero;
 
@@ -278,7 +278,7 @@ class VotoScrutinio {
   }
 
   /**
-   * Restituisce la modalità di recupero del debito [A=autonomo, C=corso, S=sportello]
+   * Restituisce la modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
    *
    * @return string Modalità di recupero del debito
    */
@@ -287,7 +287,7 @@ class VotoScrutinio {
   }
 
   /**
-   * Modifica la modalità di recupero del debito [A=autonomo, C=corso, S=sportello]
+   * Modifica la modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
    *
    * @param string $recupero Modalità di recupero del debito
    *

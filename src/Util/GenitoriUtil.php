@@ -538,7 +538,7 @@ class GenitoriUtil {
       ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'N'])
       ->getQuery()
       ->getSingleScalarResult();
-    if ($alunno->getReligione() == 'S') {
+    if ($alunno->getReligione() == 'S' || $alunno->getReligione() == 'A') {
       // aggiunge assenze di religione
       $ass_rel = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
         ->select('SUM(al.ore)')
@@ -772,7 +772,7 @@ class GenitoriUtil {
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
-    $dati['PAI'] = false;
+    //-- $dati['PAI'] = false;
     foreach ($voti as $v) {
       // inserisce voti/debiti
       $dati['voti'][$v->getMateria()->getId()] = array(
@@ -781,14 +781,14 @@ class GenitoriUtil {
       // inserisce voti/debiti
       if ($periodo == 'P') {
         // primo trimestre
-        if ($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) {
+        if (in_array($v->getMateria()->getTipo(), ['N', 'E']) && $v->getUnico() < 6) {
           $dati['debiti'][$v->getMateria()->getId()] = array(
             'recupero' => $v->getRecupero(),
             'debito' => $v->getDebito());
         }
-        // nuovi crediti
-        $nuovicrediti = $scrutinio->getDato('nuovicrediti')[$alunno->getId()];
-        $dati['nuovicrediti'] = (is_array($nuovicrediti) ? $nuovicrediti[0] : $nuovicrediti);
+        //-- // nuovi crediti
+        //-- $nuovicrediti = $scrutinio->getDato('nuovicrediti')[$alunno->getId()];
+        //-- $dati['nuovicrediti'] = (is_array($nuovicrediti) ? $nuovicrediti[0] : $nuovicrediti);
       } elseif ($periodo == '1') {
         // valutazione intermedia
         $dati['voti'][$v->getMateria()->getId()]['recupero'] = $v->getRecupero();

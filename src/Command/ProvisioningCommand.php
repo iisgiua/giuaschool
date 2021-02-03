@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Util\AccountProvisioning;
+use App\Util\ConfigLoader;
 
 
 /**
@@ -32,6 +33,11 @@ class ProvisioningCommand extends Command {
    * @var EntityManagerInterface $em Gestore delle entità
    */
   private $em;
+
+  /**
+   * @var ConfigLoader $config Gestore della configurazione su database
+   */
+  private $config;
 
   /**
   * @var LoggerInterface $logger Gestore dei log su file
@@ -50,12 +56,15 @@ class ProvisioningCommand extends Command {
    * Construttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param ConfigLoader $config Gestore della configurazione su database
    * @param LoggerInterface $logger Gestore dei log su file
    * @param AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
    */
-  public function __construct(EntityManagerInterface $em, LoggerInterface $logger, AccountProvisioning $prov) {
+  public function __construct(EntityManagerInterface $em, ConfigLoader $config,
+                              LoggerInterface $logger, AccountProvisioning $prov) {
     parent::__construct();
     $this->em = $em;
+    $this->config = $config;
     $this->logger = $logger;
     $this->prov = $prov;
   }
@@ -102,6 +111,8 @@ class ProvisioningCommand extends Command {
    * @return null|int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    // carica configurazione
+    $this->config->carica();
     // inizio
     $this->logger->notice('provisioning-esegue: Inizio procedura di esecuzione del provisioning');
     // esegue provisioning
