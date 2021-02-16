@@ -133,7 +133,7 @@ class SedeTest extends UnitTestCase {
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::citta - MAX LENGTH');
     $existent->setCitta('12345678901234567890123456789012');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nomeBreve - VALID MAX LENGTH');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::citta - VALID MAX LENGTH');
     // indirizzo1
     $existent->setIndirizzo1(null);
     $err = $this->val->validate($existent);

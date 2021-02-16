@@ -15,6 +15,7 @@ namespace App\DataFixtures;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use App\Entity\Festivita;
 
 
@@ -27,7 +28,7 @@ use App\Entity\Festivita;
  *    $tipo: tipo di festività [F=festivo, A=assemblea di Istituto]
  *    $sede: sede interessata (default: nullo, indica che riguarda l'intero istituto)
  */
-class FestivitaFixtures extends Fixture implements FixtureGroupInterface {
+class FestivitaFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface {
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -107,6 +108,17 @@ class FestivitaFixtures extends Fixture implements FixtureGroupInterface {
     }
     // memorizza dati
     $em->flush();
+  }
+
+  /**
+   * Restituisce la lista delle classi da cui dipendono i dati inseriti
+   *
+   * @return array Lista delle classi da cui dipende
+   */
+  public function getDependencies() {
+    return array(
+      SedeFixtures::class,
+    );
   }
 
   /**

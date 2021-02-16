@@ -124,7 +124,7 @@ class IstitutoTest extends UnitTestCase {
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::tipo - MAX LENGTH');
     $existent->setTipo('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::tipo - VALID MAX LENGTH');
     // tipoSigla
     $existent->setTipoSigla(null);
     $err = $this->val->validate($existent);
@@ -133,7 +133,7 @@ class IstitutoTest extends UnitTestCase {
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::tipoSigla - MAX LENGTH');
     $existent->setTipoSigla('1234567890123456');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::tipoSigla - VALID MAX LENGTH');
     // nome
     $existent->setNome(null);
     $err = $this->val->validate($existent);

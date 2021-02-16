@@ -108,7 +108,7 @@ class RicercaType extends AbstractType {
           'choice_label' => 'nome',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('c')
-              ->where("c.tipo IN ('N','R','S')")
+              ->where("c.tipo IN ('N','R','S','E')")
               ->orderBy('c.nome', 'ASC'); },
           'placeholder' => 'label.qualsiasi_materia',
           'choice_translation_domain' => false,

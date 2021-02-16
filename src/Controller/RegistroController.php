@@ -533,7 +533,13 @@ class RegistroController extends AbstractController {
     $label['inizio'] = $dati['inizio'];
     $ora_fine =  $dati['fine'];
     // lista altre materie
-    $altre_materie = $em->getRepository('App:Cattedra')->listaAltreMaterie($cattedra, $firme);
+    if ($cattedra) {
+      // cattedra normale
+      $altre_materie = $em->getRepository('App:Cattedra')->listaAltreMaterie($cattedra, $firme);
+    } else {
+      // supplenza
+      $altre_materie = array();
+    }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('registro_edit', FormType::class)
       ->add('fine', ChoiceType::class, array('label' => 'label.ora_fine',

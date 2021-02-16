@@ -85,7 +85,7 @@ class PagelleUtil {
     $this->tpl = $tpl;
     $this->pdf = $pdf;
     $this->root = $root;
-    // imposta directory er gli scrutini
+    // imposta directory per gli scrutini
     $this->directory = array(
       'P' => 'primo',
       'S' => 'secondo',
