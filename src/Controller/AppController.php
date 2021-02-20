@@ -181,9 +181,9 @@ class AppController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // file
-    $file = new File($this->getParameter('kernel.project_dir').'/public/app/app-'.$app->getToken().$app->getDownload());
+    $file = new File($this->getParameter('kernel.project_dir').'/public/app/app-'.$app->getToken());
     // nome da visualizzare
-    $nome = $app->getNome().$app->getDownload();
+    $nome = $app->getDownload();
     // invia il documento
     return $this->file($file, $nome);
   }

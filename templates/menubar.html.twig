@@ -25,8 +25,8 @@
   <li role="presentation"{{ app.request.attributes.get('_route') == 'login_recovery' ? ' class="active"' }}>
     <a href="{{ path('login_recovery') }}" title="Recupera la password di accesso tramite l'email"><span class="glyphicon glyphicon-repeat gs-mr-2"></span>Recupero Password</a>
   </li>
-  {#-- <li role="presentation"{{ app.request.attributes.get('_route') == 'app_info' ? ' class="active"' }}> #}
-    {#-- <a href="{{ path('app_info') }}" title="Informazioni su app e servizi disponibili"><span class="glyphicon glyphicon-phone gs-mr-2"></span>App e Servizi</a> #}
-  {#-- </li> #}
+  <li role="presentation"{{ app.request.attributes.get('_route') == 'app_info' ? ' class="active"' }}>
+    <a href="{{ path('app_info') }}" title="Informazioni su app e servizi disponibili"><span class="glyphicon glyphicon-phone gs-mr-2"></span>App e Servizi</a>
+  </li>
 </ul>
 {% endif %}
