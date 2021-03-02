@@ -71,8 +71,10 @@
         {% endif %}
   </div>
       {% endif %}
-      {% for msg in app.flashes('info') %}
-  <div class="alert alert-info text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert">{{ msg|trans }}</div>
+      {% for type,msgs in app.flashes %}
+        {% for msg in msgs %}
+  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert">{{ msg|trans }}</div>
+        {% endfor %}
       {% endfor %}
   <div class="row gs-mb-2">
     <div class="col-sm-6">

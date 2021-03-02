@@ -1355,7 +1355,7 @@ class RegistroController extends AbstractController {
         }
         // messaggio
         if (!$docente_staff) {
-          $this->addFlash('info', 'message.nota_edit_temporizzato');
+          $this->addFlash('danger', 'message.nota_edit_temporizzato');
         }
         // redirezione
         return $this->redirectToRoute('lezioni_registro_firme');
