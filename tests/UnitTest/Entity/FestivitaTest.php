@@ -39,7 +39,7 @@ class FestivitaTest extends UnitTestCase {
       'gs_festivita' => ['id', 'modificato', 'data', 'descrizione', 'tipo', 'sede_id'],
       'gs_sede' => '*',];
     // SQL write
-    $this->canWrite = ['gs_festivita' => '*'];
+    $this->canWrite = ['gs_festivita' => ['id', 'modificato', 'data', 'descrizione', 'tipo', 'sede_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }

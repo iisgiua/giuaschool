@@ -43,7 +43,9 @@ class ClasseTest extends UnitTestCase {
       'gs_corso' => '*',
       'gs_utente' => '*',];
     // SQL write
-    $this->canWrite = ['gs_classe' => '*'];
+    $this->canWrite = [
+      'gs_classe' => ['id', 'modificato', 'anno', 'sezione', 'ore_settimanali',
+        'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }

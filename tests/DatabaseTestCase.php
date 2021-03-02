@@ -394,7 +394,9 @@ class DatabaseTestCase extends KernelTestCase {
   private function isValidSqlInsert(InsertStatement $stmt): bool {
     $doWrite = [];
     // tabella modificata
-    $doWrite[$stmt->into->dest->table] = '*';
+    $db = $this->em->getConnection()->getDatabase();
+    $cols = $this->tableFields($db, $stmt->into->dest->table);
+    $doWrite[$stmt->into->dest->table] = $cols;
     // controlla ammissibilità
     return $this->sqlCanWrite($doWrite);
   }
@@ -451,8 +453,10 @@ class DatabaseTestCase extends KernelTestCase {
   private function isValidSqlDelete(DeleteStatement $stmt): bool {
     $doWrite = [];
     // tabelle modificate
+    $db = $this->em->getConnection()->getDatabase();
     foreach ($stmt->from as $tab) {
-      $doWrite[$tab->table] = '*';
+      $cols = $this->tableFields($db, $tab->table);
+      $doWrite[$tab->table] = $cols;
     }
     // controlla ammissibilità
     return $this->sqlCanWrite($doWrite);
@@ -633,6 +637,22 @@ class DatabaseTestCase extends KernelTestCase {
       // tutti i comandi eseguiti sono ammessi: ok
       return true;
     }
+  }
+
+  /**
+   * Restituisce la lista dei nomi dei campi di una tabella specificata
+   *
+   * @param string $db Nome del database
+   * @param string $table Nome della tabella
+   *
+   * @return array Lista dei nomi dei campi
+   */
+  private function tableFields($db, $table): array {
+    $sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=:db AND TABLE_NAME=:table";
+    $stmt = $this->em->getConnection()->prepare($sql);
+    $stmt->execute(['db' => $db, 'table' => $table]);
+    $cols = array_column($stmt->fetchAll(), 'COLUMN_NAME');
+    return $cols;
   }
 
 }

@@ -39,7 +39,9 @@ class SedeTest extends UnitTestCase {
       'gs_sede' => ['id', 'modificato', 'nome', 'nome_breve', 'citta',
         'indirizzo1', 'indirizzo2', 'telefono', 'ordinamento']];
     // SQL write
-    $this->canWrite = ['gs_sede' => '*'];
+    $this->canWrite = [
+      'gs_sede' => ['id', 'modificato', 'nome', 'nome_breve', 'citta',
+        'indirizzo1', 'indirizzo2', 'telefono', 'ordinamento']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }

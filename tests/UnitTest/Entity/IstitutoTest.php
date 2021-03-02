@@ -40,7 +40,9 @@ class IstitutoTest extends UnitTestCase {
       'gs_istituto' => ['id', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email',
         'pec', 'url_sito', 'url_registro', 'firma_preside', 'email_amministratore', 'email_notifiche']];
     // SQL write
-    $this->canWrite = ['gs_istituto' => '*'];
+    $this->canWrite = [
+      'gs_istituto' => ['id', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email',
+        'pec', 'url_sito', 'url_registro', 'firma_preside', 'email_amministratore', 'email_notifiche']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }

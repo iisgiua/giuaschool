@@ -37,7 +37,7 @@ class CorsoTest extends UnitTestCase {
     // SQL read
     $this->canRead = ['gs_corso' => ['id', 'modificato', 'nome', 'nome_breve']];
     // SQL write
-    $this->canWrite = ['gs_corso' => '*'];
+    $this->canWrite = ['gs_corso' => ['id', 'modificato', 'nome', 'nome_breve']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
