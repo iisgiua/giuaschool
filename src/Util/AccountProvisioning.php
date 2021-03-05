@@ -283,8 +283,8 @@ class AccountProvisioning {
       ->select('DISTINCT m.nomeBreve')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno AND m.tipo!=:civica')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'sostegno' => 'S', 'civica' => 'E'])
+      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo NOT IN (:materie)')
+      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'materie' => ['S', 'E', 'R']])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
