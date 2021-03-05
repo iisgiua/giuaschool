@@ -283,8 +283,8 @@ class AccountProvisioning {
       ->select('DISTINCT m.nomeBreve')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'sostegno' => 'S'])
+      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno AND m.tipo!=:civica')
+      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'sostegno' => 'S', 'civica' => 'E'])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -330,8 +330,8 @@ class AccountProvisioning {
       ->select('DISTINCT m.nomeBreve')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'sostegno' => 'S'])
+      ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno AND m.tipo!=:civica')
+      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'sostegno' => 'S', 'civica' => 'E'])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
