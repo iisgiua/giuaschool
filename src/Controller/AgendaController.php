@@ -2,11 +2,11 @@
 /**
  * giua@school
  *
- * Copyright (c) 2017-2020 Antonello Dessì
+ * Copyright (c) 2017-2021 Antonello Dessì
  *
  * @author    Antonello Dessì
  * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2020
+ * @copyright Antonello Dessì 2017-2021
  */
 
 
@@ -609,7 +609,7 @@ class AgendaController extends AbstractController {
       if (!in_array($form->get('filtroTipo')->getData(), ['T', 'U'])) {
         // errore: tipo filtro non valido
         $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
-      }      
+      }
       if ($form->get('filtroTipo')->getData() == 'U' && empty(implode(',', $form->get('filtro')->getData()))) {
         // errore: filtro vuoto
         $form->addError(new FormError($trans->trans('exception.filtro_utente_nullo')));
