@@ -21,9 +21,6 @@
     <link href="{{ asset('css/tema.css?v='~(filedate('css/tema.css')|date('U'))) }}" rel="stylesheet">
 {% block pagina_css %}
 {% endblock %}
-{% if app.session.get('/APP/APP/css') %}
-    <link href="{{ asset('app/'~app.session.get('/APP/APP/css')~'.css?v='~(filedate('css/'~app.session.get('/APP/APP/css')~'.css')|date('U'))) }}" rel="stylesheet">
-{% endif %}
     <!--[if lt IE 9]>
     <script src="{{ asset('vendor/html5shiv.min.js') }}"></script>
     <script src="{{ asset('vendor/respond.min.js') }}"></script>

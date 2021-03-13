@@ -41,6 +41,25 @@ class OAuth2Controller extends AbstractController {
 	}
 
   /**
+   * Avvia l'autenticazione su provider esterno GSuite per le app.
+   *
+   * @param ClientRegistry $clientRegistry Client che richiede il servizio
+   * @param string $email Email dell'utente di cui effettuare il login
+   *
+   * @return ClientRegistry Impostazioni client per il servizio richiesto
+   *
+   * @Route("/login/gsuite/app/{email}", name="login_gsuite_app")
+   */
+  public function connectAppAction(ClientRegistry $clientRegistry, $email) {
+    $options = array();
+    $options['login_hint'] = $email;
+    // redirezione alla GSuite
+    return $clientRegistry
+      ->getClient('gsuite')
+      ->redirect([], $options);
+	}
+
+  /**
    * Esegue autenticazione su Gsuite tramite GsuiteAuthenticator
    *
    * @param Request $request Pagina richiesta

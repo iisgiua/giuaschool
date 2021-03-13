@@ -1045,7 +1045,7 @@ exception.giudizio_esito: Non è stato inserito il giudizio di non ammissione de
 exception.id_notfound: Oggetto non trovato.
 exception.insufficienze_ammissione_esito: Sono presenti insufficienze con un esito di ammissione per l'alunn{sex} {alunno}.
 exception.insufficienze_ammissione_quinta: E' presente più di una insufficienza con un esito di ammissione per l'alunn{sex} {alunno}.
-exception.invalid_app: Applicazione non riconosciuta.
+exception.invalid_app: Applicazione non riconosciuta. Controllare l'esistenza di una nuova versione.
 exception.invalid_card: Certificato non valido.
 exception.invalid_credentials: Le credenziali di accesso non sono valide.
 exception.invalid_csrf: Pagina scaduta. Reinserisci le credenziali di accesso.

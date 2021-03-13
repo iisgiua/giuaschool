@@ -6,46 +6,45 @@
   <p class="gs-big">In questa pagina sono elencate le applicazioni e i servizi per smartphone disponibili per il Registro Elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}.</p>
   <p class="gs-big"><em>Attenzione: applicazioni scaricate da altre fonti sono da considerarsi non ufficiali e il oro uso espone al rischio di una violazione della privacy e di una potenziale diffusione non autorizzata dei dati degli utenti.</em></p>
 
-  {#-- {% if applist['GiuaReg'] is defined %} #}
-  {#-- <div class="alert alert-info gs-mt-5" role="alert"> #}
-    {#-- <div class="row text-center"><strong class="gs-big">GiuaReg</strong></div> #}
-    {#-- <hr class="gs-mt-2 gs-mb-2"> #}
-    {#-- <div class="row text-center"> #}
-      {#-- <p class="gs-big"><strong>Semplice applicazione che ha il solo scopo di permettere la memorizzazione del nome utente e della password, in modo da evitarne l'inserimento ad ogni accesso.</strong></p> #}
-    {#-- </div> #}
-    {#-- <div class="row gs-text-normal"> #}
-      {#-- <div class="col-sm-6"> #}
-        {#-- <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso. L'applicazione utilizza un visualizzatore interno, ma in caso di problemi si consiglia di configurarla per l'utilizzo del browser predefinito dello smartphone.</p> #}
-        {#-- <p>Per poter utilizzare questa applicazione è necessario attivare sul proprio smartphone l'opzione per l'<em>installazione da fonti sconosciute</em>.</p> #}
-      {#-- </div> #}
-      {#-- <div class="col-sm-6"> #}
-        {#-- <table class="table gs-big "> #}
-          {#-- <tbody> #}
-            {#-- <tr> #}
-              {#-- <td style="width:50%" class="text-right gs-noborder"><strong>Utenti abilitati:</strong></td> #}
-              {#-- <td style="width:50%" class="gs-noborder">Genitori e Alunni</td> #}
-            {#-- </tr> #}
-            {#-- <tr> #}
-              {#-- <td style="vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td> #}
-              {#-- <td class="gs-noborder"> #}
-                {#-- <img src="{{ asset('img/android.png') }}" class="img-thumbnail" alt="Android" title="Android"> #}
-              {#-- </td> #}
-            {#-- </tr> #}
-          {#-- </tbody> #}
-        {#-- </table> #}
-        {#-- <div class="row text-center"> #}
-          {#-- <a class="btn btn-primary btn-sm" href="{{ path('app_download', {'id': applist['GiuaReg'].id}) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a> #}
-        {#-- </div> #}
-      {#-- </div> #}
-    {#-- </div> #}
-  {#-- </div> #}
-  {#-- {% endif %} #}
+  {% if applist['GiuaReg'] is defined %}
+  <div class="alert alert-success gs-mt-5" role="alert">
+    <div class="row text-center"><strong class="gs-big">GiuaReg v2.0</strong></div>
+    <hr class="gs-mt-2 gs-mb-2">
+    <div class="row text-center">
+    </div>
+    <div class="row gs-text-normal">
+      <div class="col-sm-6">
+        <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso.</p>
+        <p><strong>Come si installa?</strong></p>
+        <p>Prima di scaricare l'app, attiva sul tuo smartphone l'opzione per l'<em>installazione da fonti sconosciute</em>.<br>
+          Succesivamente, cliccando sul pulsante che trovi di seguito verrà scaricata e installata sul tuo smartphone l'app <em>GiuaReg</em>.<br>
+          Al termine dell'installazione ricordati di disabilitare nuovamente sul tuo smartphone l'opzione per l'<em>installazione da fonti sconosciute</em>.
+        </p>
+      </div>
+      <div class="col-sm-6">
+        <table class="table gs-big ">
+          <tbody>
+            <tr>
+              <td style="width:50%;vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
+              <td style="width:50%" class="gs-noborder">
+                <img src="{{ asset('img/android.png') }}" class="img-thumbnail" alt="Android" title="Android">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="row text-center">
+          <a class="btn btn-primary btn-sm" href="{{ path('app_download', {'id': applist['GiuaReg'].id}) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
+  {% if applist['RegistroIOS'] is defined %}
   <div class="alert alert-info gs-mt-5" role="alert">
     <div class="row text-center"><strong class="gs-big">Web App per iOS</strong></div>
     <hr class="gs-mt-2 gs-mb-2">
     <div class="row text-center">
-
     </div>
     <div class="row gs-text-normal">
       <div class="col-sm-6">
@@ -74,11 +73,11 @@
           <tbody>
             <tr>
               <td style="width:50%" class="text-right gs-noborder"><strong>Autore:</strong></td>
-              <td style="width:50%" class="gs-noborder"><em>Claudio Pani</em></td>
+              <td style="width:50%" class="gs-noborder"><em>Claudio Pani (classe 4ª O)</em></td>
             </tr>
             <tr>
-              <td style="vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
-              <td class="gs-noborder">
+              <td style="width:50%;vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
+              <td style="width:50%" class="gs-noborder">
                 <img src="{{ asset('img/ios.png') }}" class="img-thumbnail" alt="iOS" title="iOS">
               </td>
             </tr>
@@ -90,6 +89,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
 </div>
 {% endblock %}

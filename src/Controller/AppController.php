@@ -70,7 +70,8 @@ class AppController extends AbstractController {
    *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
    *    methods={"GET"})
    */
-  public function loginAction(SessionInterface $session,  AuthenticationUtils $auth, ConfigLoader $config, $codice, $lusr, $lpsw, $lapp) {
+  public function loginAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config,
+                              $codice, $lusr, $lpsw, $lapp) {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
@@ -106,6 +107,8 @@ class AppController extends AbstractController {
    */
   public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder) {
     $risposta = array();
+    $risposta['errore'] = 0;
+    $risposta['token'] = null;
     // legge dati
     $codice = $request->request->get('codice');
     $lusr = intval($request->request->get('lusr'));
@@ -113,19 +116,39 @@ class AppController extends AbstractController {
     $lapp = intval($request->request->get('lapp'));
     // decodifica credenziali
     $testo = base64_decode(str_replace(array('-', '_'), array('+', '/'), $codice));
-    $username = substr($testo, 0, $lusr);
+    $profilo = substr($testo, 0, 1);
+    $username = substr($testo, 1, $lusr - 1);
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     // controlla utente
     $user = $em->getRepository('App:Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
-    if ($user && $encoder->isPasswordValid($user, $password)) {
-      // utente autenticato
-      $token = (new UriSafeTokenGenerator())->generateToken();
-      $risposta['risposta'] = rtrim(strtr(base64_encode($username.$password.$appId.$token), '+/', '-_'), '=');
-      // salva codice di pre-login
-      $user->setPrelogin($risposta['risposta']);
-      $user->setPreloginCreato(new \DateTime());
-      $em->flush();
+    if ($user) {
+      // utente esistente
+      if (($profilo == 'G' && $user instanceOf Genitore) || ($profilo == 'A' && $user instanceOf Alunno) ||
+          ($profilo == 'D' && $user instanceOf Docente) || ($profilo == 'T' && $user instanceOf Ata)) {
+        // profilo corrispondente
+        if (($profilo == 'A' || $profilo == 'D') && empty($password)) {
+          // credenziali corrette: genera token fittizio
+          $risposta['token'] = 'OK';
+        } elseif (($profilo == 'G' || $profilo == 'T') && $encoder->isPasswordValid($user, $password)) {
+          // credenziali corrette: genera token
+          $token = (new UriSafeTokenGenerator())->generateToken();
+          $risposta['token'] = rtrim(strtr(base64_encode($profilo.$username.$password.$appId.$token), '+/', '-_'), '=');
+          // memorizza codice di pre-login
+          $user->setPrelogin($risposta['token']);
+          $user->setPreloginCreato(new \DateTime());
+          $em->flush();
+        } else {
+          // errore: credenziali non corrispondono
+          $risposta['errore'] = 3;
+        }
+      } else {
+        // errore: profilo non corrisponde
+        $risposta['errore'] = 2;
+      }
+    } else {
+      // errore: utente non esiste
+      $risposta['errore'] = 1;
     }
     // restituisce risposta
     return new JsonResponse($risposta);
@@ -207,7 +230,7 @@ class AppController extends AbstractController {
     $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if ($app) {
       $dati_app = $app->getDati();
-    if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
+      if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
         // controlla ora
         $adesso = new \DateTime();
         $oggi = $adesso->format('Y-m-d');
@@ -234,6 +257,33 @@ class AppController extends AbstractController {
       ));
     $risposta->headers->set('Content-Type', 'application/xml; charset=utf-8');
     return $risposta;
+  }
+
+  /**
+   * Restituisce la versione corrente dell'app indicata
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   *
+   * @return JsonResponse Informazioni di risposta
+   *
+   * @Route("/app/versione/", name="app_versione",
+   *    methods={"POST"})
+   */
+  public function versioneAction(Request $request, EntityManagerInterface $em) {
+    $risposta = array();
+    // legge dati
+    $token = $request->request->get('token');
+    // controllo app
+    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    if (!$app) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // legge versione
+    $risposta['versione'] = isset($app->getDati()['versione']) ? $app->getDati()['versione'] : '0.0';
+    // restituisce la risposta
+    return new JsonResponse($risposta);
   }
 
 }

@@ -126,27 +126,19 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    * @return mixed|null Le credenziali dell'autenticazione o null
    */
   public function getCredentials(Request $request) {
-    // legge configurazione: id_provider
-    $id_provider = $this->em->getRepository('App:Configurazione')->findOneByParametro('id_provider');
-    // se id_provider controlla tipo utente
-    if ($id_provider && $id_provider->getValore()) {
-      // errore: servizio non compatibile
-      $this->logger->error('Servizio non compatibile nella richiesta di login da app.', array(
-        'username' => $credentials['username'],
-        'ip' => $credentials['ip']));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_service_idprovider');
-    }
     // decodifica le credenziali
     $codice = $request->get('codice');
-    $lusr = $request->get('lusr');
-    $lpsw = $request->get('lpsw');
-    $lapp = $request->get('lapp');
+    $lusr = intval($request->get('lusr'));
+    $lpsw = intval($request->get('lpsw'));
+    $lapp = intval($request->get('lapp'));
     $testo = base64_decode(str_replace(array('-', '_'), array('+', '/'), $codice));
-    $username = substr($testo, 0, $lusr);
+    $profilo = substr($testo, 0, 1);
+    $username = substr($testo, 1, $lusr - 1);
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     $prelogin = $codice;
     return array(
+      'profilo' => $profilo,
       'username' => $username,
       'password' => $password,
       'appId' => $appId,
@@ -163,11 +155,23 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    * @return UserInterface|null L'utente trovato o null
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
+    // controlla appId
+    $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
+    if (!$app) {
+      // app non esiste o non attiva
+      $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', array(
+        'profilo' => $credentials['profilo'],
+        'username' => $credentials['username'],
+        'appId' =>  $credentials['appId'],
+        'ip' => $credentials['ip']));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_app');
+    }
     // restituisce l'utente o null
     $user = $this->em->getRepository('App:Utente')->findOneByUsername($credentials['username']);
     if (!$user) {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login da app.', array(
+        'profilo' => $credentials['profilo'],
         'username' => $credentials['username'],
         'appId' =>  $credentials['appId'],
         'ip' => $credentials['ip'],
@@ -189,10 +193,22 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    * @return bool Vero se le credenziali sono valide, falso altrimenti
    */
   public function checkCredentials($credentials, UserInterface $user) {
+    // controlla appId
+    $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
+    if (!$app) {
+      // app non esiste o non attiva
+      $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', array(
+        'profilo' => $credentials['profilo'],
+        'username' => $credentials['username'],
+        'appId' =>  $credentials['appId'],
+        'ip' => $credentials['ip']));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_app');
+    }
     // controllo se l'utente è abilitato
     if (!$user->getAbilitato()) {
       // utente disabilitato
       $this->logger->error('Utente disabilitato nella richiesta di login da app.', array(
+        'profilo' => $credentials['profilo'],
         'username' => $credentials['username'],
         'appId' =>  $credentials['appId'],
         'ip' => $credentials['ip'],
@@ -202,21 +218,11 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
     // controllo username/password
     $plainPassword = $credentials['password'];
     if ($this->encoder->isPasswordValid($user, $plainPassword)) {
-      // password ok, controlla appId
-      $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
-      if (!$app) {
-        // app non esiste o non attiva
-        $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', array(
-          'username' => $credentials['username'],
-          'appId' =>  $credentials['appId'],
-          'ip' => $credentials['ip'],
-          ));
-        throw new CustomUserMessageAuthenticationException('exception.invalid_app');
-      }
-      // controllo codice pre-login
+      // password ok, controlla codice pre-login
       if ($user->getPrelogin() != $credentials['prelogin']) {
         // codice pre-login errato
         $this->logger->error('Codice di pre-login errato nella richiesta di login da app.', array(
+          'profilo' => $credentials['profilo'],
           'username' => $credentials['username'],
           'appId' =>  $credentials['appId'],
           'pre-login' =>  $credentials['prelogin'],
@@ -224,9 +230,10 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
           ));
         throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
       }
-      if (!$user->getPreloginCreato() || (time() - $user->getPreloginCreato()->format('U')) > 300) {
-        // codice pre-login generato oltre 5 minuti prima
+      if (!$user->getPreloginCreato() || (time() - $user->getPreloginCreato()->format('U')) > 60) {
+        // codice pre-login generato oltre 1 minuto prima
         $this->logger->error('Codice di pre-login scaduto nella richiesta di login da app.', array(
+          'profilo' => $credentials['profilo'],
           'username' => $credentials['username'],
           'appId' =>  $credentials['appId'],
           'pre-login' =>  $credentials['prelogin'],
@@ -235,25 +242,26 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
         throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
       }
       // controllo tipo di utente
-      if ((($user instanceof Alunno) && strpos($app->getAbilitati(), 'A') !== false) ||
-          (($user instanceof Genitore) && strpos($app->getAbilitati(), 'G') !== false) ||
-          (($user instanceof Docente) && strpos($app->getAbilitati(), 'D') !== false) ||
-          (($user instanceof Ata) && strpos($app->getAbilitati(), 'T') !== false)) {
+      if ((($user instanceOf Alunno) && strpos($app->getAbilitati(), 'A') !== false && $credentials['profilo'] == 'A') ||
+          (($user instanceOf Genitore) && strpos($app->getAbilitati(), 'G') !== false && $credentials['profilo'] == 'G') ||
+          (($user instanceOf Docente) && strpos($app->getAbilitati(), 'D') !== false && $credentials['profilo'] == 'D') ||
+          (($user instanceOf Ata) && strpos($app->getAbilitati(), 'T') !== false && $credentials['profilo'] == 'T')) {
         // validazione corretta
         return true;
       } else {
-        // tipo di utente non ammesso
-        $this->logger->error('Tipo di utente non ammesso nella richiesta di login da app.', array(
+        // tipo di utente non valido
+        $this->logger->error('Tipo di utente non valido nella richiesta di login da app.', array(
+          'profilo' => $credentials['profilo'],
           'username' => $credentials['username'],
           'appId' =>  $credentials['appId'],
           'ip' => $credentials['ip'],
-          'ruolo' => $user->getRoles()[0],
-          ));
+          'ruolo' => $user->getRoles()[0]));
         throw new CustomUserMessageAuthenticationException('exception.invalid_user_type');
       }
     }
     // validazione fallita
     $this->logger->error('Password errata nella richiesta di login da app.', array(
+      'profilo' => $credentials['profilo'],
       'username' => $credentials['username'],
       'appId' =>  $credentials['appId'],
       'ip' => $credentials['ip'],
@@ -278,37 +286,18 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       $url = $this->router->generate('login_home');
     }
     // tipo di login
-    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'app-1');
+    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'app');
     // ultimo accesso dell'utente
     $last_login = $token->getUser()->getUltimoAccesso();
     $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($last_login ? $last_login->format('d/m/Y H:i:s') : null));
     $token->getUser()->setUltimoAccesso(new \DateTime());
     $token->getUser()->setPrelogin(null);
     $this->em->flush();
-    // dati app
-    $codice = $request->get('codice');
-    $lusr = $request->get('lusr');
-    $lpsw = $request->get('lpsw');
-    $lapp = $request->get('lapp');
-    $testo = base64_decode(str_replace(array('-', '_'), array('+', '/'), $codice));
-    $appId = substr($testo, $lusr + $lpsw, $lapp);
-    $app = $this->em->getRepository('App:App')->findOneBy(['token' => $appId, 'attiva' => 1]);
-    $request->getSession()->set('/APP/APP/token', $app->getToken());
-    $request->getSession()->set('/APP/APP/notifica', $app->getNotifica());
-    if ($app->getCss()) {
-      // imposta CSS da caricare
-      $request->getSession()->set('/APP/APP/css', 'app-'.$app->getToken());
-    }
     // log azione
-    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'App-1', __METHOD__, array(
-      'Login' => 'app-1',
+    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'App', __METHOD__, array(
+      'Login' => 'app',
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole(),
-      ));
-    // log su file per fini statistici
-    $this->logger->info('LOGIN APP-1', array(
-      'username' => $token->getUsername(),
-      'appId' => $appId,
       ));
     // carica configurazione
     $this->config->carica();
