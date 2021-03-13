@@ -164,7 +164,7 @@
         <td><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
         <td>{{ v.materia }}</td>
         <td><small><em>{% for v1 in v.docenti %}{{ v1 }}{{ not loop.last ? '<br>' }}{% endfor %}</em></small></td>
-        <td>
+        <td style="word-wrap:anywhere">
           {% if v.sostegno is defined %}
             {% for sk,sv in v.sostegno.argomento %}
               {% if sv is not empty %}
