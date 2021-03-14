@@ -162,11 +162,13 @@ class RegistroUtil {
    * @param Materia $materia Materia della lezione
    * @param Lezione $lezione Lezione esistente
    * @param array $firme Lista di firme di lezione, con id del docente
+   * @param Lezione $altra Altra lezione già inserita in altra classe
    *
    * @return null|bool Restituisce vero se l'azione è permessa (null se sovrapposizione lezione)
    */
   public function azioneLezione($azione, \DateTime $data, $ora, Docente $docente, Classe $classe, Materia $materia,
-                                 Lezione $lezione=null, $firme=null) {
+                                Lezione $lezione=null, $firme=null, Lezione &$altra=null) {
+    $altra = null;
     if ($this->bloccoScrutinio($data, $classe)) {
       // blocco scrutinio
       return false;
@@ -190,6 +192,7 @@ class RegistroUtil {
             return true;
           } else {
             // esiste lezione in sovrapposizione
+            $altra = $altra_lezione;
             return null;
           }
         }
@@ -208,6 +211,10 @@ class RegistroUtil {
           ->getOneOrNullResult();
         if ($altra_lezione) {
           // esiste altra lezione in sovrapposizione
+          if ($materia->getId() == $lezione->getMateria()->getId() ||
+              $materia->getTipo() == 'S' || $lezione->getMateria()->getTipo() == 'S') {
+            $altra = $altra_lezione;
+          }
           return null;
         } else {
           // non esiste lezione in sovrapposizione
@@ -501,17 +508,23 @@ class RegistroUtil {
           $docenti = array();
         }
         // azioni
-        if ($this->azioneLezione('add', $data, $ora, $docente, $classe, $materia, $lezione, $docenti)) {
+        if ($this->azioneLezione('add', $data, $ora, $docente, $classe, $materia, $lezione, $docenti, $altra)) {
           // pulsante add
           $dati_lezioni[$ora]['add'] = $this->router->generate('lezioni_registro_add', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
+        } elseif ($altra) {
+          // esiste ora firmata in contemporanea
+          $dati_lezioni[$ora]['addAltra'] = $altra;
         }
-        if ($this->azioneLezione('edit', $data, $ora, $docente, $classe, $materia, $lezione, $docenti)) {
+        if ($this->azioneLezione('edit', $data, $ora, $docente, $classe, $materia, $lezione, $docenti, $altra)) {
           // pulsante edit
           $dati_lezioni[$ora]['edit'] = $this->router->generate('lezioni_registro_edit', array(
             'cattedra' => ($cattedra ? $cattedra->getId() : 0),
             'classe' => $classe->getId(), 'data' =>$data->format('Y-m-d'), 'ora' => $ora));
+        } elseif ($altra) {
+          // esiste ora firmata in contemporanea
+          $dati_lezioni[$ora]['editAltra'] = $altra;
         }
         if ($this->azioneLezione('delete', $data, $ora, $docente, $classe, $materia, $lezione, $docenti)) {
           // pulsante delete

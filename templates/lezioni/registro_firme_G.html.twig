@@ -186,9 +186,19 @@
         <td>
           {% if v.add is defined  %}
           <a class="btn btn-primary btn-xs" href="{{ v.add }}" role="button" title="Aggiungi una lezione"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+          {% elseif v.addAltra is defined %}
+          <button class="btn btn-warning btn-xs" title="Aggiungi una lezione" data-toggle="modal" data-target="#gs-modal-info" data-title="ATTENZIONE!" data-body="add-avviso-{{ v.addAltra.id }}"><span class="glyphicon glyphicon-plus gs-mr-2" aria-hidden="true"></span>Aggiungi</button>
+          <div id="add-avviso-{{ v.addAltra.id }}" style="display:none">
+            <p class="gs-big">{{ 'message.lezione_esiste_altra'|trans({classe: v.addAltra.classe})|raw }}</p>
+          </div>
           {% endif %}
           {% if v.edit is defined  %}
           <a class="btn btn-primary btn-xs" href="{{ v.edit }}" role="button" title="Modifica la lezione"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
+          {% elseif v.editAltra is defined %}
+          <button class="btn btn-warning btn-xs" title="Modifica una lezione" data-toggle="modal" data-target="#gs-modal-info" data-title="ATTENZIONE!" data-body="edit-avviso-{{ v.editAltra.id }}"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span>Modifica</button>
+          <div id="edit-avviso-{{ v.editAltra.id }}" style="display:none">
+            <p class="gs-big">{{ 'message.lezione_esiste_altra'|trans({classe: v.editAltra.classe})|raw }}</p>
+          </div>
           {% endif %}
           {% if v.delete is defined  %}
           <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la lezione" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_lezione'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>

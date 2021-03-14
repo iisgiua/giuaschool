@@ -971,6 +971,7 @@ message.presenti_assenze_ingiustificate: Sono presenti assenze da giustificare
 message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modificata nei prossimi 30 minuti. Poi sarà resa definitiva.
 message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
+message.lezione_esiste_altra: "Non è possibile firmare la lezione indicata.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
