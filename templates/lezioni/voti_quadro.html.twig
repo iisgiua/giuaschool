@@ -32,6 +32,7 @@
     </div>
     <div class="col-sm-4 text-right">
     {% if periodo %}
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_esporta', {'cattedra': cattedra.id, 'classe': classe.id, 'data': lista_periodi[periodo].fine}) }}" role="button" title="Esporta i dati in formato CSV"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>{{ 'label.esporta'|trans }}</strong></a>
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_stampa', {'cattedra': cattedra.id, 'classe': classe.id, 'data': lista_periodi[periodo].fine}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_dettagli', {'cattedra': cattedra.id, 'classe': classe.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Dettagli</strong></a>
     {% endif %}

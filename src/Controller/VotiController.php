@@ -29,6 +29,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\GenitoriUtil;
@@ -824,7 +826,7 @@ class VotiController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function votiStampaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
-                                    PdfManager $pdf, $cattedra, $classe, $data) {
+                                   PdfManager $pdf, $cattedra, $classe, $data) {
     // inizializza variabili
     $dati = null;
     // parametri cattedra/classe
@@ -887,6 +889,92 @@ class VotiController extends AbstractController {
     $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'-'.
       strtoupper(str_replace(' ', '-', $info['materia'])).'.pdf';
     return $pdf->send($nomefile);
+  }
+
+  /**
+   * Esporta voti in formato CSV
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
+   * @param int $classe Identificativo della classe
+   * @param string $data Data del giorno (AAAA-MM-GG)
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/lezioni/voti/esporta/{cattedra}/{classe}/{data}", name="lezioni_voti_esporta",
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "data": "\d\d\d\d-\d\d-\d\d"},
+   *    defaults={"cattedra": 0, "classe": 0, "data": "0000-00-00"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function votiEsportaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+                                    $cattedra, $classe, $data) {
+    // inizializza variabili
+    $dati = null;
+    // parametri cattedra/classe
+    if ($cattedra == 0 && $classe == 0) {
+      // recupera parametri da sessione
+      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+    } else {
+      // memorizza su sessione
+      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+    }
+    // parametro data
+    if ($data == '0000-00-00') {
+      // data non specificata
+      if ($session->get('/APP/DOCENTE/data_lezione')) {
+        // recupera data da sessione
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+      } else {
+        // imposta data odierna
+        $data_obj = new \DateTime();
+      }
+    } else {
+      // imposta data indicata
+      $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
+    }
+    // data in formato stringa
+    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter->setPattern('EEEE d MMMM yyyy');
+    $info['data_label'] =  $formatter->format($data_obj);
+    // controllo cattedra
+    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      'docente' => $this->getUser(), 'attiva' => 1]);
+    if (!$cattedra) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if ($cattedra->getTipo() == 'S' || $cattedra->getMateria()->getTipo() == 'S') {
+      // cattedra di sostegno: errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // informazioni necessarie
+    $classe = $cattedra->getClasse();
+    $info['materia'] = $cattedra->getMateria()->getNomeBreve();
+    $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
+      ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
+    // recupera dati
+    $info['periodo'] = $reg->periodo($data_obj);
+    $dati = $reg->quadroVoti($info['periodo']['inizio'], $info['periodo']['fine'], $this->getUser(), $cattedra);
+    // crea documento CSV
+    $csv = $this->renderView('lezioni/voti_quadro.csv.twig', array(
+      'classe' => $classe,
+      'info' => $info,
+      'dati' => $dati));
+    // invia il documento
+    $nomefile = 'voti-'.$classe->getAnno().$classe->getSezione().'-'.
+      strtoupper(str_replace(' ', '-', $info['materia'])).'.csv';
+    $response = new Response($csv);
+    $disposition = HeaderUtils::makeDisposition(
+        HeaderUtils::DISPOSITION_ATTACHMENT,
+        $nomefile);
+    $response->headers->set('Content-Disposition', $disposition);
+    return $response;
   }
 
 }
