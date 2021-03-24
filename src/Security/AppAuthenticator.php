@@ -218,25 +218,25 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
     // controllo username/password
     $plainPassword = $credentials['password'];
     if ($this->encoder->isPasswordValid($user, $plainPassword)) {
-      // password ok, controlla codice pre-login
+      // password ok, controlla codice prelogin
       if ($user->getPrelogin() != $credentials['prelogin']) {
-        // codice pre-login errato
-        $this->logger->error('Codice di pre-login errato nella richiesta di login da app.', array(
+        // codice prelogin errato
+        $this->logger->error('Codice di prelogin errato nella richiesta di login da app.', array(
           'profilo' => $credentials['profilo'],
           'username' => $credentials['username'],
           'appId' =>  $credentials['appId'],
-          'pre-login' =>  $credentials['prelogin'],
+          'prelogin' =>  $credentials['prelogin'],
           'ip' => $credentials['ip'],
           ));
         throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
       }
       if (!$user->getPreloginCreato() || (time() - $user->getPreloginCreato()->format('U')) > 60) {
-        // codice pre-login generato oltre 1 minuto prima
-        $this->logger->error('Codice di pre-login scaduto nella richiesta di login da app.', array(
+        // codice prelogin generato oltre 1 minuto prima
+        $this->logger->error('Codice di prelogin scaduto nella richiesta di login da app.', array(
           'profilo' => $credentials['profilo'],
           'username' => $credentials['username'],
           'appId' =>  $credentials['appId'],
-          'pre-login' =>  $credentials['prelogin'],
+          'prelogin' =>  $credentials['prelogin'],
           'ip' => $credentials['ip'],
           ));
         throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
