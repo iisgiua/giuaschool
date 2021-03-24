@@ -329,18 +329,6 @@ class Utente implements UserInterface, \Serializable {
   }
 
   /**
-   * Modifica l'identificativo univoco per l'utente
-   *
-   * @param integer $id Identificativo univoco per l'utente
-   *
-   * @return Utente Oggetto Utente
-   */
-  public function setId($id) {
-    $this->id = $id;
-    return $this;
-  }
-
-  /**
    * Restituisce la data/ora dell'ultima modifica dei dati dell'utente
    *
    * @return \DateTime Data/ora dell'ultima modifica
@@ -425,12 +413,36 @@ class Utente implements UserInterface, \Serializable {
   }
 
   /**
+   * Modifica il token generato per la procedura di attivazione o di recupero password
+   *
+   * @param string Token generato
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setToken($token) {
+    $this->token = $token;
+    return $this;
+  }
+
+  /**
    * Restituisce la data/ora di creazione del token, usato per la procedura di attivazione o di recupero password
    *
-   * @return \DateTime Data/ora di creazione del token
+   * @return DateTime Data/ora di creazione del token
    */
   public function getTokenCreato() {
     return $this->tokenCreato;
+  }
+
+  /**
+   * Modifica la data/ora di creazione del token
+   *
+   * @param DateTime $tokenCreato Data/ora di creazione del token
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setTokenCreato(\DateTime $tokenCreato=null) {
+    $this->tokenCreato = $tokenCreato;
+    return $this;
   }
 
   /**
@@ -466,11 +478,11 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Modifica la data/ora di creazione del codice di pre-login
    *
-   * @param string $preloginCreato Data/ora di creazione del codice di pre-login
+   * @param DateTime $preloginCreato Data/ora di creazione del codice di pre-login
    *
    * @return Utente Oggetto Utente
    */
-  public function setPreloginCreato($preloginCreato) {
+  public function setPreloginCreato(\DateTime $preloginCreato=null) {
     $this->preloginCreato = $preloginCreato;
     return $this;
   }
