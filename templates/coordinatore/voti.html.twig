@@ -62,7 +62,8 @@
       {% for materia,m in dati.materie %}
         <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if dati.medie[alunno][materia] is defined %}
-          <span class="label label-{{ dati.medie[alunno][materia] < 5 ? 'danger' : (dati.medie[alunno][materia] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno][materia] }}</span>
+          {% set m = dati.medie[alunno][materia]|replace({',': '.'}) %}
+          <span class="label label-{{ m  < 5.0 ? 'danger' : (m < 6.0 ? 'warning' : 'success')}}">{{ dati.medie[alunno][materia] }}</span>
         {% else %}
           <span>--</span>
         {% endif %}
@@ -70,7 +71,8 @@
       {% endfor %}
         <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
       {% if dati.medie[alunno][0] is defined %}
-          <span class="gs-big"><span class="label label-{{ dati.medie[alunno][0] < 5 ? 'danger' : (dati.medie[alunno][0] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno][0] }}</span></span>
+          {% set m = dati.medie[alunno][0]|replace({',': '.'}) %}
+          <span class="gs-big"><span class="label label-{{ m < 5.0 ? 'danger' : (m < 6.0 ? 'warning' : 'success')}}">{{ dati.medie[alunno][0] }}</span></span>
       {% else %}
           <span>--</span>
       {% endif %}
