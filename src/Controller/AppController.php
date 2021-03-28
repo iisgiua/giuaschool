@@ -35,6 +35,9 @@ use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Entity\App;
 use App\Entity\Utente;
 use App\Entity\Alunno;
@@ -207,8 +210,16 @@ class AppController extends AbstractController {
     $file = new File($this->getParameter('kernel.project_dir').'/public/app/app-'.$app->getToken());
     // nome da visualizzare
     $nome = $app->getDownload();
-    // invia il documento
-    return $this->file($file, $nome);
+    // imposta il download
+    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nome);
+    $response = new BinaryFileResponse($file);
+    $response->headers->set('Content-Disposition', $disposition);
+    if (substr($nome, -4) == '.apk') {
+      // imposta il content-type per le applicazioni android
+      $response->headers->set('Content-Type', 'application/vnd.android.package-archive');
+    }
+    // invia il file
+    return $response;
   }
 
   /**
