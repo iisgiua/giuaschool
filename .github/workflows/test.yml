@@ -69,6 +69,12 @@ jobs:
       - name: Run Tests
         run: php -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-clover clover.xml
 
+      - name: Publish code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ github.workspace }}
+          name: clover.xml
+        
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2
         with:
