@@ -1,0 +1,19 @@
+name: Codacy coverage reporter
+
+on: 
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  codacy-coverage-reporter:
+    runs-on: ubuntu-latest
+    name: codacy-coverage-reporter
+    steps:
+      - uses: actions/checkout@master
+      - name: Run codacy-coverage-reporter
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: clover.xml
+          
