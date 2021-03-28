@@ -3,8 +3,7 @@ name: Test
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -68,4 +67,4 @@ jobs:
         run: ./vendor/bin/simple-phpunit --version
 
       - name: Run Tests
-        run: php -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-text
+        run: php -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-clover clover.xml
