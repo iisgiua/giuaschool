@@ -69,16 +69,9 @@ jobs:
       - name: Run Tests
         run: php -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-clover clover.xml
 
-
       - name: Run codacy-coverage-reporter
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
-       
-#      - name: Publish code coverage results
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: clover.xml
-#          path: clover.xml
         
