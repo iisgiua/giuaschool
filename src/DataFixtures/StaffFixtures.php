@@ -99,6 +99,7 @@ class StaffFixtures extends Fixture implements DependentFixtureInterface, Fixtur
   public static function getGroups(): array {
     return array(
       'App', // dati iniziali dell'applicazione
+      'Test', // dati per i test dell'applicazione
     );
   }
 

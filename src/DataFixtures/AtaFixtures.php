@@ -101,6 +101,7 @@ class AtaFixtures extends Fixture implements DependentFixtureInterface, FixtureG
   public static function getGroups(): array {
     return array(
       'App', // dati iniziali dell'applicazione
+      'Test', // dati per i test dell'applicazione
     );
   }
 

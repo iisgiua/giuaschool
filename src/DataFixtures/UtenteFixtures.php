@@ -13,6 +13,7 @@
 namespace App\DataFixtures;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Faker\Factory;
@@ -24,7 +25,7 @@ use App\Entity\Utente;
  * UtenteFixtures - dati iniziali di test
  *
  */
-class UtenteFixtures extends Fixture {
+class UtenteFixtures extends Fixture implements FixtureGroupInterface {
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
@@ -84,6 +85,17 @@ class UtenteFixtures extends Fixture {
     }
     // memorizza dati
     $em->flush();
+  }
+
+  /**
+   * Restituisce la lista dei gruppi a cui appartiene la fixture
+   *
+   * @return array Lista dei gruppi di fixture
+   */
+  public static function getGroups(): array {
+    return array(
+      'Test', // dati per i test dell'applicazione
+    );
   }
 
 }
