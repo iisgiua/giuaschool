@@ -1,4 +1,7 @@
 # giua@school
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b63b4e6967ea42dbaf98a2d87c57cc67)](https://app.codacy.com/gh/trinko/giuaschool?utm_source=github.com&utm_medium=referral&utm_content=trinko/giuaschool&utm_campaign=Badge_Grade_Settings)
+
 *il Registro Elettronico dell'Istituto di Istruzione Superiore "Michele Giua"*
 
 ![Test](https://github.com/trinko/giuaschool/workflows/Test/badge.svg?branch=master)
