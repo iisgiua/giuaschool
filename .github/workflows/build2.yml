@@ -38,6 +38,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           registry: docker.io
-          image_name: giuaschool
+          image_name: trinkodok/giuaschool
           image_tag: latest
           dockerfile: ./docker/Dockerfile
