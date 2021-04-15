@@ -2,7 +2,7 @@
 
 framework:
   profiler:
-    enabled: true
+    enabled: false
     collect: false
 web_profiler:
   toolbar: false

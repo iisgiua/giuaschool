@@ -38,8 +38,13 @@
         "whiteoctober/tcpdf-bundle": "^1.1"
     },
     "require-dev": {
+        "dmore/chrome-mink-driver": "^2.7",
         "doctrine/doctrine-fixtures-bundle": "^3.0",
         "fakerphp/faker": "^1.13",
+        "friends-of-behat/mink": "^1.9",
+        "friends-of-behat/mink-browserkit-driver": "^1.5",
+        "friends-of-behat/mink-extension": "^2.5",
+        "friends-of-behat/symfony-extension": "^2.0",
         "friendsofphp/php-cs-fixer": "^2.12",
         "phpmyadmin/sql-parser": "^5.4",
         "symfony/debug-pack": "^1.0",

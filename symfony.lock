@@ -1,9 +1,21 @@
 {
+    "behat/behat": {
+        "version": "v3.8.1"
+    },
+    "behat/gherkin": {
+        "version": "v4.8.0"
+    },
+    "behat/transliterator": {
+        "version": "v1.3.0"
+    },
     "composer/semver": {
         "version": "1.5.0"
     },
     "composer/xdebug-handler": {
         "version": "1.3.3"
+    },
+    "dmore/chrome-mink-driver": {
+        "version": "2.7.0"
     },
     "doctrine/annotations": {
         "version": "1.0",
@@ -107,6 +119,30 @@
     },
     "firebase/php-jwt": {
         "version": "v5.2.0"
+    },
+    "friends-of-behat/mink": {
+        "version": "v1.9.0"
+    },
+    "friends-of-behat/mink-browserkit-driver": {
+        "version": "v1.5.0"
+    },
+    "friends-of-behat/mink-extension": {
+        "version": "v2.5.0"
+    },
+    "friends-of-behat/symfony-extension": {
+        "version": "2.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "2.0",
+            "ref": "3d21344765fd3440a85bdd27d4cada186ec628bd"
+        },
+        "files": [
+            "behat.yml.dist",
+            "config/services_test.yaml",
+            "features/demo.feature",
+            "tests/Behat/DemoContext.php"
+        ]
     },
     "friendsofphp/php-cs-fixer": {
         "version": "2.2",
@@ -479,6 +515,9 @@
     "symfony/property-info": {
         "version": "v4.3.3"
     },
+    "symfony/proxy-manager-bridge": {
+        "version": "v4.4.18"
+    },
     "symfony/routing": {
         "version": "4.2",
         "recipe": {
@@ -630,6 +669,9 @@
     },
     "tecnickcom/tcpdf": {
         "version": "6.2.26"
+    },
+    "textalk/websocket": {
+        "version": "1.5.2"
     },
     "twig/extra-bundle": {
         "version": "v3.0.5"

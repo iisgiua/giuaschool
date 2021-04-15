@@ -14,14 +14,13 @@ namespace App\Tests\UnitTest\Entity;
 
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Filesystem\Filesystem;
-use App\DataFixtures\AlunnoFixtures;
-use App\Tests\UnitTestCase;
+use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class AlunnoTest extends UnitTestCase {
+class AlunnoTest extends DatabaseTestCase {
 
   /**
    * Costruttore
@@ -39,7 +38,7 @@ class AlunnoTest extends UnitTestCase {
       'bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero',
       'religione', 'credito3', 'credito4', 'giustificaOnline', 'foto', 'classe'];
     // fixture da caricare
-    $this->fixtures = [[AlunnoFixtures::class, 'encoder']];
+    $this->fixtures = ['g:Test'];
     // SQL read
     $this->canRead = [
       'gs_utente' => ['id', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
@@ -69,8 +68,8 @@ class AlunnoTest extends UnitTestCase {
    */
   public function testAttributi() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $this->assertNotEmpty($existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
@@ -78,6 +77,9 @@ class AlunnoTest extends UnitTestCase {
       list($nome, $cognome, $username) = $this->faker->unique()->utente($sesso);
       $email = $username.'.u@lovelace.edu.it';
       foreach ($this->fields as $field) {
+        $classe = $this->em->getRepository('App:Classe')->findOneBy([
+          'anno' => $this->faker->randomElement(['1', '2', '3', '4', '5']),
+          'sezione' => $this->faker->randomElement(['A', 'B', 'C', 'D', 'E'])]);
         $data[$i][$field] =
           $field == 'username' ? $username.'.u' :
           ($field == 'password' ? $this->encoder->encodePassword($o[$i], $username.'.u') :
@@ -109,7 +111,7 @@ class AlunnoTest extends UnitTestCase {
           ($field == 'credito4' ? $this->faker->optional(0.5, null)->numberBetween(5, 10) :
           ($field == 'giustificaOnline' ? $this->faker->randomElement([false, true]) :
           ($field == 'foto' ? $this->faker->randomElement([null, new File(__DIR__.'/../../data/'.$this->faker->file('tests', 'tests/data', false))]) :
-          $this->getReference('classe_'.$this->faker->randomElement(['1', '2', '3', '4', '5']).$this->faker->randomElement(['A', 'B', 'C', 'D', 'E'])))))))))))))))))))))))))))))));
+          $classe)))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
@@ -158,7 +160,7 @@ class AlunnoTest extends UnitTestCase {
    */
   public function testMetodi() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // getRoles
     $this->assertSame(['ROLE_ALUNNO', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // toString
@@ -187,7 +189,7 @@ class AlunnoTest extends UnitTestCase {
    */
   public function testValidazione() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
     // bes
     $existent->setBes(null);

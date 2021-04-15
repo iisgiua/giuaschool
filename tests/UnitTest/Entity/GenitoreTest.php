@@ -13,13 +13,13 @@
 namespace App\Tests\UnitTest\Entity;
 
 use App\DataFixtures\AlunnoFixtures;
-use App\Tests\UnitTestCase;
+use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class GenitoreTest extends UnitTestCase {
+class GenitoreTest extends DatabaseTestCase {
 
   /**
    * Costruttore
@@ -36,7 +36,7 @@ class GenitoreTest extends UnitTestCase {
       'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica',
       'giustificaOnline', 'alunno'];
     // fixture da caricare
-    $this->fixtures = [[AlunnoFixtures::class, 'encoder']];
+    $this->fixtures = ['g:Test'];
     // SQL read
     $this->canRead = [
       'gs_utente' => ['id', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',

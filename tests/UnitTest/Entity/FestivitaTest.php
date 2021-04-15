@@ -13,13 +13,13 @@
 namespace App\Tests\UnitTest\Entity;
 
 use App\DataFixtures\FestivitaFixtures;
-use App\Tests\UnitTestCase;
+use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class FestivitaTest extends UnitTestCase {
+class FestivitaTest extends DatabaseTestCase {
 
   /**
    * Costruttore

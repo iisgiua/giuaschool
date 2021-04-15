@@ -14,13 +14,13 @@ namespace App\Tests\UnitTest\Entity;
 
 use App\DataFixtures\ClasseFixtures;
 use App\DataFixtures\DocenteFixtures;
-use App\Tests\UnitTestCase;
+use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class ClasseTest extends UnitTestCase {
+class ClasseTest extends DatabaseTestCase {
 
   /**
    * Costruttore
@@ -34,7 +34,7 @@ class ClasseTest extends UnitTestCase {
     // campi da testare
     $this->fields = ['anno', 'sezione', 'oreSettimanali', 'sede', 'corso', 'coordinatore', 'segretario'];
     // fixture da caricare
-    $this->fixtures = [ClasseFixtures::class, [DocenteFixtures::class, 'encoder']];
+    $this->fixtures = ['g:Test'];
     // SQL read
     $this->canRead = [
       'gs_classe' => ['id', 'modificato', 'anno', 'sezione', 'ore_settimanali',
@@ -62,14 +62,17 @@ class ClasseTest extends UnitTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
+        $sede = $this->em->getRepository('App:Sede')->find($this->faker->randomElement(['1', '2']));
+        $corso = $this->em->getRepository('App:Corso')->find($this->faker->numberBetween(1, 6));
+        $docenti = $this->em->getRepository('App:Docente')->findBy([]);
         $data[$i][$field] =
           $field == 'anno' ? ($i + 1) :
           ($field == 'sezione' ? 'X' :
           ($field == 'oreSettimanali' ? $this->faker->numberBetween(27, 34) :
-          ($field == 'sede' ? $this->getReference('sede_'.$this->faker->randomElement(['1', '2'])) :
-          ($field == 'corso' ? $this->getReference('corso_'.$this->faker->randomElement(['BIN', 'BCH', 'INF', 'CHM', 'CBA', 'LSA'])) :
-          ($field == 'coordinatore' ? $this->getReference('docente_'.$this->faker->numberBetween(0, 4)) :
-          $this->getReference('docente_'.$this->faker->numberBetween(5, 9)))))));
+          ($field == 'sede' ? $sede :
+          ($field == 'corso' ? $corso :
+          ($field == 'coordinatore' ? $this->faker->randomElement(array_slice($docenti, 0, 5)) :
+          $this->faker->randomElement(array_slice($docenti, 5)))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
@@ -151,14 +154,14 @@ class ClasseTest extends UnitTestCase {
     $obj_sede->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sede - NOT BLANK');
-    $existent->setSede($this->getReference('sede_1'));
+    $existent->setSede($this->em->getRepository('App:Sede')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sede - VALID');
     // corso
     $obj_corso = $this->getPrivateProperty($this->entity, 'corso');
     $obj_corso->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::corso - NOT BLANK');
-    $existent->setCorso($this->getReference('corso_BIN'));
+    $existent->setCorso($this->em->getRepository('App:Corso')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::corso - VALID');
     // unique - anno-sezione
     $this->em->flush();

@@ -19,7 +19,10 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\ValidatorBuilder;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Logging\DebugStack;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Component\VarDumper\Cloner\Data;
+use Symfony\Component\Filesystem\Filesystem;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statements\InsertStatement;
 use PhpMyAdmin\SqlParser\Statements\UpdateStatement;
@@ -64,8 +67,8 @@ class DatabaseTestCase extends KernelTestCase {
   /**
    * Tabelle e campi che possono essere letti nel database (SELECT)
    * La lista ha la seguente sintassi:
-   *    [*] = tutte le tabelle sono ammesse
-   *    [!] = nessuna tabella è ammessa
+   *    ['*'] = tutte le tabelle sono ammesse
+   *    ['!'] = nessuna tabella è ammessa
    *    [tab1 => '*', tab2 => '*', tab3 => '*'] = solo tab1,tab2,tab3 sono ammesse con tutti i loro campi
    *    [tab1 => [f1], tab2 => [f2, f3]] = solo campi tab1.f1,tab2.f2,tab2.f3 sono ammessi
    *
@@ -76,8 +79,8 @@ class DatabaseTestCase extends KernelTestCase {
   /**
    * Tabelle e campi che possono essere modificati nel database (INSERT, UPDATE, DELETE)
    * La lista ha la seguente sintassi:
-   *    [*] = tutte le tabelle sono ammesse
-   *    [!] = nessuna tabella è ammessa
+   *    ['*'] = tutte le tabelle sono ammesse
+   *    ['!'] = nessuna tabella è ammessa
    *    [tab1 => '*', tab2 => '*', tab3 => '*'] = solo tab1,tab2,tab3 sono ammesse con tutti i loro campi
    *    [tab1 => [f1], tab2 => [f2, f3]] = solo campi tab1.f1,tab2.f2,tab2.f3 sono ammessi
    *
@@ -88,13 +91,38 @@ class DatabaseTestCase extends KernelTestCase {
   /**
    * Altri comandi che possono essere eseguiti nel database
    * La lista ha la seguente sintassi:
-   *    [*] = tutti i comandi sono ammessi
-   *    [!] = nessun comando è ammesso
+   *    ['*'] = tutti i comandi sono ammessi
+   *    ['!'] = nessun comando è ammesso
    *    [com1, com2, com3] = solo comandi com1,com2,com3 sono ammessi
    *
    * @var array $canExecute Lista di altri comandi che possono essere eseguiti
    */
   protected $canExecute;
+
+  /**
+   * Nome dell'entità da testare
+   *
+   * @var string $entity Nome dell'entità
+   */
+  protected $entity;
+
+  /**
+   * Lista degli attributi dell'entità da testare
+   *
+   * @var array $fields Lista degli attributi dell'entità
+   */
+  protected $fields;
+
+  /**
+   * Lista degli insiemi di dati fissi (fixture) da caricare nell'ambiente di test
+   * La lista ha la seguente sintassi:
+   *    ['g:nome'] = carica le fixtures del gruppo indicato
+   *    [nome::class] = istanzia e carica la fixtures indicata
+   *    [[nome::class, 'parametro']] = istanzia la fixture con il parametro e la carica
+   *
+   * @var array $fixtures Lista delle fixtures da caricare
+   */
+  protected $fixtures;
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
@@ -134,6 +162,10 @@ class DatabaseTestCase extends KernelTestCase {
     $this->faker = Factory::create('it_IT');
     $this->faker->addProvider(new FakerPerson($this->faker));
     $this->faker->seed(9999);
+    // svuota database e carica dati fissi
+    $this->addFixtures();
+    // inizia tracciamento SQL
+    $this->startSqlTrace();
   }
 
   /**
@@ -141,9 +173,13 @@ class DatabaseTestCase extends KernelTestCase {
    *
    */
   protected function tearDown() {
+    // termina traccianto SQL
+    $this->stopSqlTrace();
+    // chiude l'ambiente di test standard
     parent::tearDown();
+    // chiude connessione
     $this->em->close();
-    // libera memoria variabili
+    // libera memoria
     $this->em = null;
     $this->encoder = null;
     $this->val = null;
@@ -152,14 +188,16 @@ class DatabaseTestCase extends KernelTestCase {
     $this->canWrite = null;
     $this->canExecute = null;
     $this->sqlTrace = null;
+    $this->entity = null;
+    $this->fields = null;
+    $this->fixtures = null;
   }
 
   /**
    * Predispone il database iniziale per i test
    *
-   * @param array $fixtures Lista delle fixture con i dati da inserire nel database
    */
-  protected function addFixtures(array $fixtures): void {
+  protected function addFixtures(): void {
     // gestore di servizi
     $loader = new ContainerAwareLoader(static::$kernel->getContainer());
     // servizio per l'inserimento dei dati
@@ -172,37 +210,71 @@ class DatabaseTestCase extends KernelTestCase {
     $purger->purge();
     $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
     // carica i dati
-    if (count($fixtures) > 0) {
+    $container = static::$kernel->getContainer();
+    $db_name = $container->getParameter('database_name');
+    $db_user = $container->getParameter('database_user');
+    $db_pass = $container->getParameter('database_password');
+    $fs = new Filesystem();
+    if (count($this->fixtures) > 0) {
       // carica i dati
-      foreach ($fixtures as $fix) {
+      $fixture_caricate = false;
+      foreach ($this->fixtures as $fix) {
         if (is_array($fix)) {
           // fixture con parametri
           $obj = new $fix[0]($this->{$fix[1]});
-        } else {
+          $loader->addFixture($obj);
+          $fixture_caricate = true;
+        } elseif (substr($fix, 0, 2) !== 'g:') {
           // fixture senza parametri
           $obj = new $fix();
+          $loader->addFixture($obj);
+          $fixture_caricate = true;
+        } else {
+          // gruppo di fixtures
+          $gruppo = substr($fix, 2);
+          if ($fs->exists('tests/data/'.$gruppo.'.fixtures')) {
+            // carica da file
+            $file = file('tests/data/'.$gruppo.'.fixtures', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
+            foreach ($file as $sql) {
+              $connection->exec($sql);
+            }
+            $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
+            $this->em->flush();
+          } else {
+            // carica dati di gruppo definito
+            $process = new Process(['php', 'bin/console', 'doctrine:fixtures:load',
+              '--append', '--env=test', '--group='.$gruppo]);
+            $process->setTimeout(0);
+            $process->run();
+            if (!$process->isSuccessful()) {
+              throw new ProcessFailedException($process);
+            }
+            // memorizza su file i dati
+            $process = new Process(['mysqldump', '-u'.$db_user, '-p'.$db_pass, $db_name,
+            '-t', '-n', '--compact', '--result-file=tests/data/'.$gruppo.'.fixtures']);
+            $process->setTimeout(0);
+            $process->run();
+            if (!$process->isSuccessful()) {
+              throw new ProcessFailedException($process);
+            }
+          }
         }
-        $loader->addFixture($obj);
       }
-      // inserisce i dati nel database
-      $executor->execute($loader->getFixtures(), true);
-      // conserva gestore dei riferimenti usati nelle fixture
-      $this->references = $executor->getReferenceRepository();
+      if ($fixture_caricate) {
+        // inserisce i dati nel database
+        $executor->execute($loader->getFixtures(), true);
+        // conserva gestore dei riferimenti usati nelle fixture
+        $this->references = $executor->getReferenceRepository();
+      }
     }
   }
 
   /**
    * Inizia il tracciamento dei comandi SQL, specificando la configurazione dei comandi ammissibili
    *
-   * @param array $canRead Lista delle tabelle e campi che possono essere letti
-   * @param array $canWrite Lista delle tabelle e campi che possono essere modificati
-   * @param array $canExecute Lista degli altri comandi che possono essere eseguiti
    */
-  protected function startSqlTrace(array $canRead, array $canWrite, array $canExecute): void {
-    // memorizza la Configurazione
-    $this->canRead = $canRead;
-    $this->canWrite = $canWrite;
-    $this->canExecute = $canExecute;
+  protected function startSqlTrace(): void {
     // inizializza classe per memorizzare i comandi SQL
     $this->sqlTrace = new DebugStack();
     // inizia il tracciamento

@@ -12,17 +12,13 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\DataFixtures\DocenteFixtures;
-use App\DataFixtures\AlunnoFixtures;
-use App\DataFixtures\FirmaFixtures;
-use App\DataFixtures\FirmaSostegnoFixtures;
-use App\Tests\UnitTestCase;
+use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class FirmaSostegnoTest extends UnitTestCase {
+class FirmaSostegnoTest extends DatabaseTestCase {
 
   /**
    * Costruttore
@@ -36,8 +32,7 @@ class FirmaSostegnoTest extends UnitTestCase {
     // campi da testare
     $this->fields = ['lezione', 'docente', 'argomento', 'attivita', 'alunno'];
     // fixture da caricare
-    $this->fixtures = [[DocenteFixtures::class, 'encoder'], [AlunnoFixtures::class, 'encoder'],
-      FirmaSostegnoFixtures::class];
+    $this->fixtures = ['g:Test'];
     // SQL read
     $this->canRead = [
       'gs_firma' => ['id', 'modificato', 'lezione_id', 'docente_id', 'tipo', 'argomento', 'attivita', 'alunno_id'],
@@ -61,9 +56,10 @@ class FirmaSostegnoTest extends UnitTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertTrue($existent->getId() != null, 'Oggetto esistente');
     // legge lezioni
-    $lezioni = $this->em->getRepository('App:Lezione')->findByClasse($this->getReference('classe_2A'));
+    $classe = $this->em->getRepository('App:Classe')->findOneBy(['anno' => '2', 'sezione' => 'A']);
+    $lezioni = $this->em->getRepository('App:Lezione')->findByClasse($classe);
     $docenti = $this->em->getRepository('App:Docente')->findBy([]);
-    $alunni = $this->em->getRepository('App:Alunno')->findByClasse($this->getReference('classe_2A'));
+    $alunni = $this->em->getRepository('App:Alunno')->findByClasse($classe);
     // crea nuovi oggetti
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();

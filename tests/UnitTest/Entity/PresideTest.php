@@ -13,13 +13,13 @@
 namespace App\Tests\UnitTest\Entity;
 
 use App\DataFixtures\PresideFixtures;
-use App\Tests\UnitTestCase;
+use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class PresideTest extends UnitTestCase {
+class PresideTest extends DatabaseTestCase {
 
   /**
    * Costruttore

@@ -13,13 +13,13 @@
 namespace App\Tests\UnitTest\Entity;
 
 use App\DataFixtures\DocenteFixtures;
-use App\Tests\UnitTestCase;
+use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class DocenteTest extends UnitTestCase {
+class DocenteTest extends DatabaseTestCase {
 
   /**
    * Costruttore
