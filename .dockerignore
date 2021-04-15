@@ -2,8 +2,8 @@
 /.github/
 /DEV/
 /docker/*
-!/docker/apache2-site.conf
-!/docker/entrypoint.sh
+!/docker/*.conf
+!/docker/*.sh
 /FILES/archivio/classi/*
 !/FILES/archivio/classi/.gitkeep
 /FILES/archivio/registri/*
