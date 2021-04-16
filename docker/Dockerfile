@@ -1,5 +1,5 @@
 ########## First Step - Build system
-FROM debian:10.7 as SystemBuilder
+FROM debian:10.7 as systembuilder
 
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
@@ -51,7 +51,7 @@ COPY ./docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
 
 
 ########## Second Step - Build Synfony framework
-FROM SystemBuilder as Symfonybuilder
+FROM systembuilder as symfonybuilder
 
 ### Install Symfony
 WORKDIR /var/www/giuaschool
@@ -62,7 +62,7 @@ RUN \
 
 
 ########## Third Step - Build Application
-FROM Symfonybuilder as ApplicationBuilder
+FROM symfonybuilder as applicationbuilder
 
 ### Configure application
 WORKDIR /var/www/giuaschool
