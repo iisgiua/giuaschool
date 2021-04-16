@@ -1,4 +1,4 @@
-FROM giuaschool:latest
+FROM trinko/giuaschool:latest
 
 ### Unit test environment
 ARG DEBIAN_FRONTEND=noninteractive
