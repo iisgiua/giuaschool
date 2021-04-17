@@ -1,77 +1,32 @@
 name: Test
 
 on:
-  push:
-    branches: [ master ]
-  workflow_dispatch:
+  workflow_run:
+    workflows: [ "Build" ]
+    types:
+      - completed
 
 jobs:
-  tests:
-    name: Test on Symfony 4.4 (PHP ${{ matrix.php-versions }})
-    runs-on: ubuntu-20.04
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: false
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: giuaschool
-        ports:
-          - 3306/tcp
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php-versions: ['7.4']
-
+  test:
+    name: Build test environment and run tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Checkout
+
+      - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Setup PHP, with composer and extensions
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, pcre, session, tokenizer
-          coverage: xdebug
-          tools: composer:v1
+      - name: Build image for testing
+        run: docker build -t giuaschool:test -f docker/DockerfileTest .
 
-      - name: Check PHP
-        run: php -r "phpInfo();"
-
-      - name: Start mysql service
-        run: sudo /etc/init.d/mysql start
-
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - name: Cache composer dependencies
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: Create database
+      - name: Run tests
         run: |
-          php bin/console doctrine:database:create -e test
-          php bin/console doctrine:schema:update -f -e test
+          docker run --name "gs_test" giuaschool:test
+          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
-      - name: Install PHPUnit
-        run: ./vendor/bin/simple-phpunit --version
-
-      - name: Run Tests
-        run: php -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-clover clover.xml
-
-      - name: Run codacy-coverage-reporter
+      - name: Codacy coverage reporter
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
-        

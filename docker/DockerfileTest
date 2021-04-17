@@ -1,4 +1,4 @@
-FROM trinko/giuaschool:latest
+FROM ghcr.io/trinko/giuaschool:latest
 
 ### Unit test environment
 ARG DEBIAN_FRONTEND=noninteractive
@@ -15,13 +15,9 @@ RUN \
   php bin/console doctrine:database:create -n -q -e test && \
   php bin/console doctrine:schema:update -f -q -e test && \
 # Install PHPUnit
-  cp phpunit.xml.dist phpunit.xml.TEMP && \
-  sed -r -i -e 's|<directory>tests.*</directory>| |' phpunit.xml.dist && \
   vendor/bin/simple-phpunit --version && \
   composer clear-cache && \
-  chown -R www-data:www-data . && \
-  rm phpunit.xml.dist && \
-  mv phpunit.xml.TEMP phpunit.xml.dist
+  chown -R www-data:www-data .
 
 ### Run Unit tests
 RUN chmod 755 docker/entrypoint-test.sh
@@ -29,8 +25,6 @@ CMD docker/entrypoint-test.sh
 
 
 
-## docker run --name "gs_shell" giuaschool:test
-#docker cp gs_shell:/var/www/giuaschool/clover.xml clover.xml
 
 
 
