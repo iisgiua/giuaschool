@@ -1,11 +1,10 @@
 name: Build
 
 on:
-  #-- push:
-    #-- branches: [ master ]
+  push:
+    branches: [ master ]
   release:
     types: [published]
-  workflow_dispatch:
   
 jobs:
 
@@ -36,7 +35,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and publish image on push event
         uses: docker/build-push-action@v2
         if: github.event_name == 'push'
         with:
@@ -46,3 +45,16 @@ jobs:
           tags: |
             trinkodok/giuaschool:latest
             ghcr.io/trinko/giuaschool:latest
+
+      - name: Build and publish image on release event
+        uses: docker/build-push-action@v2
+        if: github.event_name == 'release'
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            trinkodok/giuaschool:latest
+            trinkodok/giuaschool:${{ github.event.release.tag_name }}
+            ghcr.io/trinko/giuaschool:latest
+            ghcr.io/trinko/giuaschool:${{ github.event.release.tag_name }}
