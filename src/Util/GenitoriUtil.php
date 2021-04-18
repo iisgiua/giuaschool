@@ -1182,7 +1182,7 @@ class GenitoriUtil {
           $giorno_str = $settimana[$giorno->format('w')].' '.intval($giorno->format('d')).' '.
             $mesi[intval($giorno->format('m'))].' '.$giorno->format('Y').', dalle '.$t.' alle '.
             $giorno_fine->modify('+1 hour')->format('H:i');
-          $dati['lista'][] = [$giorno_str => $giorno->format('Y-m-d H:i').'|60'];
+          $dati['lista'][] = [$giorno_str => $giorno->format('Y-m-d G:i').'|60'];
         }
       }
     }
@@ -1191,10 +1191,10 @@ class GenitoriUtil {
     // segna date al completo
     $esauriti = $this->em->getRepository('App:RichiestaColloquio')->postiEsauriti($colloquio);
     foreach ($esauriti as $e) {
-      $value = $e['appuntamento']->format('Y-m-d G:i').'|'.$e['durata'];
+      $value = $e['appuntamento']->format('Y-m-d G:i');
       foreach ($dati['lista'] as $k=>$v) {
         $keyval = array_keys($v)[0];
-        if ($v[$keyval] == $value) {
+        if (substr($v[$keyval], 0, -3) == $value) {
           // data al completp
           $dati['lista'][$k][$keyval] = -1;
           break;
