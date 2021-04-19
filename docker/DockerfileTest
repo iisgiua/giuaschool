@@ -10,10 +10,11 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
   echo "xdebug.mode=coverage" >> /etc/php/7.4/mods-available/xdebug.ini && \
-# Create database for testing
+# Create test environment
   service mysql start && \
+  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
   php bin/console doctrine:database:create -n -q -e test && \
-  php bin/console doctrine:schema:update -f -q -e test && \
+  php bin/console doctrine:schema:update -f -q -e test && \  
 # Install PHPUnit
   vendor/bin/simple-phpunit --version && \
   composer clear-cache && \

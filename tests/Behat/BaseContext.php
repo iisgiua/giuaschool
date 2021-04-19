@@ -88,17 +88,15 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RouterInterface $router Gestore delle URL
-   * @param Session $session Gestore della sessione di navigazione HTTP
    */
-  public function __construct(KernelInterface $kernel, EntityManagerInterface $em,
-                              RouterInterface $router, Session $session) {
+  public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router) {
     $this->faker = Factory::create('it_IT');
     $this->faker->addProvider(new FakerPerson($this->faker));
     $this->faker->seed(6666);
     $this->kernel = $kernel;
     $this->em = $em;
     $this->router = $router;
-    $this->session = new Session(new ChromeDriver('http://localhost:9222', null, 'http://localhost:8000',
+    $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'http://giuaschool_test',
       ['downloadBehavior' => 'allow', 'downloadPath' => __DIR__.'/../data/behat',
       'socketTimeout' => 30, 'domWaitTimeout' => 10000]));
     // gruppo fixtures per i test
@@ -163,9 +161,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
 protected function goToPage($page)
 {
   $this->session->visit($this->getMinkParameter('base_url') . $this->router->generate($page));
-  //-- $driver = $this->session->getDriver();
+  $driver = $this->session->getDriver();
   //-- $driver->printToPdf('./page.pdf');;
-  //-- $driver->captureScreenshot('./tests/data/behat/'.$page.'.jpg');;
+  $driver->captureScreenshot('./tests/data/behat/'.$page.'.png');;
 dump( "Status code: ". $this->session->getStatusCode());
 dump( "Current URL: ". $this->session->getCurrentUrl());
 
