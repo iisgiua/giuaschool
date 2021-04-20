@@ -1,6 +1,3 @@
-chrome:
-  api_url: http://localhost:9222
-
 default:
   extensions:
     FriendsOfBehat\SymfonyExtension:

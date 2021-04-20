@@ -14,7 +14,7 @@ RUN \
   service mysql start && \
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
   php bin/console doctrine:database:create -n -q -e test && \
-  php bin/console doctrine:schema:update -f -q -e test && \  
+  php bin/console doctrine:schema:update -f -q -e test && \
 # Install PHPUnit
   vendor/bin/simple-phpunit --version && \
   composer clear-cache && \
@@ -24,25 +24,3 @@ RUN \
 RUN chmod 755 docker/entrypoint-test.sh
 EXPOSE 80
 CMD docker/entrypoint-test.sh
-
-
-
-
-
-
-### Run Behat tests
-#RUN \
-# Install Chrome browser
-#  apt-get -qq update && \
-#  apt-get -yqq --no-install-recommends install gnupg && \
-#  wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-#  echo "deb http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
-#  apt-get -qq update && \
-#  apt-get -yqq --no-install-recommends install google-chrome-stable && \
-#  apt-get clean && \
-#  rm -rf /var/lib/apt/lists/* && \
-# Run Behat
-#  service apache2 start && \
-#  service mysql start && \
-#(google-chrome-stable --disable-gpu --headless --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080" --disable-extensions --no-sandbox --user-data-dir &) && \
-#  php -d memory_limit=-1 vendor/bin/behat

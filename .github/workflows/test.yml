@@ -20,13 +20,19 @@ jobs:
       - name: Build image for testing
         run: docker build -t giuaschool:test -f docker/DockerfileTest .
 
-      - name: Run tests
+      - name: Run PHPUnit tests
         run: |
-          docker run --name "gs_test" giuaschool:test
-          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+          docker run --rm --name "giuaschool_test" giuaschool:test
+          docker cp giuaschool_test:/var/www/giuaschool/clover.xml clover.xml
 
       - name: Codacy coverage reporter
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
+
+      - name: Run Behat tests
+        run: |
+          docker network create gsnet
+          docker run -d --rm --name "chrome_headless" --net gsnet zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080"
+          docker run -d --rm --name "giuaschool_test" --net gsnet giuaschool:test docker/entrypoint-behat.sh
