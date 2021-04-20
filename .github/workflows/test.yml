@@ -22,8 +22,8 @@ jobs:
 
       - name: Run PHPUnit tests
         run: |
-          docker run --rm --name "gs_test" giuaschool:test
-          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+          docker run --name "giuaschool_test" giuaschool:test
+          docker cp giuaschool_test:/var/www/giuaschool/clover.xml clover.xml
 
       - name: Codacy coverage reporter
         uses: codacy/codacy-coverage-reporter-action@master
