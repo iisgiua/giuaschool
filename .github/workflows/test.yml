@@ -20,16 +20,16 @@ jobs:
       - name: Build image for testing
         run: docker build -t giuaschool:test -f docker/DockerfileTest .
 
-#      - name: Run PHPUnit tests
-#        run: |
-#          docker run --name "gs_test" giuaschool:test
-#          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+      - name: Run PHPUnit tests
+        run: |
+          docker run --name "gs_test" giuaschool:test
+          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
-#      - name: Codacy coverage reporter
-#        uses: codacy/codacy-coverage-reporter-action@master
-#        with:
-#          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-#          coverage-reports: clover.xml
+      - name: Codacy coverage reporter
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: clover.xml
 
       - name: Run Behat tests
         run: |
