@@ -20,24 +20,21 @@ jobs:
       - name: Build image for testing
         run: docker build -t giuaschool:test -f docker/DockerfileTest .
 
-      - name: Run PHPUnit tests
-        run: |
-          docker run --name "gs_test" giuaschool:test
-          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+#      - name: Run PHPUnit tests
+#        run: |
+#          docker run --name "gs_test" giuaschool:test
+#          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
-      - name: Codacy coverage reporter
-        uses: codacy/codacy-coverage-reporter-action@master
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: clover.xml
+#      - name: Codacy coverage reporter
+#        uses: codacy/codacy-coverage-reporter-action@master
+#        with:
+#          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+#          coverage-reports: clover.xml
 
       - name: Run Behat tests
         run: |
           docker network create gs_net
-          docker run -d --rm --name "chrome_headless" --net gs_net zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080"
-          docker run -d --rm --name "giuaschool_test" --net gs_net giuaschool:test docker/entrypoint-behat.sh
+          docker run -d --name "chrome_headless" --net gs_net zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080"
+          docker run -d --name "giuaschool_test" --net gs_net giuaschool:test docker/entrypoint-behat.sh
+          docker exec -t giuaschool_test ls -lar tests/data
 
-      - name: Check
-        run: |
-          ls -la tests/data
-          ls -la tests/data/behat
