@@ -36,4 +36,3 @@ jobs:
           docker network create gs_net
           docker run -d --name "chrome_headless" --net gs_net zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080"
           docker run --name "giuaschool_test" --net gs_net giuaschool:test docker/entrypoint-behat.sh
-          docker exec -t giuaschool_test ls -lar tests/data
