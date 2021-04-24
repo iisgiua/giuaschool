@@ -43,243 +43,102 @@ Il progetto **giua@school** è basato sull'uso di:
   - [Symfony](https://symfony.com/) per la gestione generale del sistema e in particolare della sicurezza;
   - [Doctrine](http://www.doctrine-project.org/) per la gestione del livello di astrazione del database;
   - [Twig](https://twig.symfony.com/) per la gestione dei *template*;
-  - [Jquery](https://jquery.com/) e [Bootstrap](https://getbootstrap.com/) per l'interfaccia grafica.
+  - [Jquery](https://jquery.com/), [Bootstrap](https://getbootstrap.com/)
+    e [Bootstrap Italia](https://italia.github.io/bootstrap-italia/) per l'interfaccia grafica.
 
 
 ## REQUISITI DI SISTEMA
 
-I requisiti minimi per l'installazione sono quelli richiesti da *Symfony 4.3*:
+I requisiti minimi per l'installazione sono:
   - web server **Apache 2.x** o superiore;
-  - database server **MySQL 5.5** o superiore, o versioni equivalenti di
-    **MariaDB** (sono supportate anche altre piattaforme, ma non sono state
-    testate con *giua@school*)
-  - **PHP 7.1** o superiore;
-  - ulteriori requisiti minori.
+  - database server **MySQL 5.5** o superiore, o versioni equivalenti di **MariaDB**;
+  - **PHP 7.4**;
+  - framework **Symfony 4.4**.
 
-Per semplificare le cose, *Symfony* mette a disposizione uno strumento di
-verifica dei requisiti, come meglio specificato nella sezione
-dell'installazione.
+Ci sono ulteriori requisiti minori che sono richiesti dal framework **Symfony**.
 
 
-## INSTALLAZIONE
+## INSTALLAZIONE DI PROVA
 
-Per provare *giua@school* si consiglia l'installazione in locale, sul proprio
-computer, seguendo i passi descritti di seguito.
+### 1. Uso dei docker
 
+Per provare *giua@school* si consiglia l'installazione in locale, tramite l'uso di un contenitore **docker**
+([cosa sono i docker?](https://it.wikipedia.org/wiki/Docker)).
+L'uso dei **docker** semplifica notevolmente la gestione delle dipendenze richieste dai diversi componenti
+dell'applicazione, creando un ambiente virtuale in cui eseguire l'installazione completa di tutto
+quanto necessario.
 
-### 1. Installazione del web server e del database server
+Se non è già presente la gestione dei **docker** nel proprio computer, è necessario procedere alla sua installazione:
+  - [installazione per Windows](https://docs.docker.com/docker-for-windows/install/)
+  - [installazione per MacOs](https://docs.docker.com/docker-for-mac/install/)
+  - [installazione per Linux Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+  - [installazione per Linux Debian](https://docs.docker.com/engine/install/debian/)
 
-#### 1.1 Su Windows
-Scaricare [XAMPP](https://www.apachefriends.org/it/download.html), facendo
-attenzione a scegliere la versione per il proprio sistema operativo che
-includa il **PHP 7.x**.
+Esistono in rete diverse guide in italiano che forniscono maggiori dettagli sull'installazion e sull'uso dei **docker**,
+come, ad esempio, quella di [HTML.IT](https://www.html.it/guide/docker/).
 
-Installare XAMPP sul proprio computer; in caso di difficoltà consultare la
-sezione delle FAQ presente sul loro sito.
+### 2. Avvio del server
 
-È sufficente installare i seguenti componenti:
-  - Apache
-  - MySQL/MariaDB
-  - PHP
+Il comando seguente scarica l'immagine dell'applicazione ed avvia il server in un contenitore **docker**:
+```docker run -d --name gs_test -p 80:80 ghcr.io/trinko/giuaschool:latest
 
-Al termine dell'installazione avviare il server database **MySQL/MariaDB** usando il *Control Panel* di
-XAMPP.
+L'immagine verrà scaricata dal repository di **GitHub**, ma se si preferisce usare **Docker Hub**, allora
+si può modificare il comando nel modo seguente:
+```docker run -d --name gs_test -p 80:80 trinkodok/giuaschool:latest
 
-#### 1.2 Su Linux
-Esistono molte guide sull'installazione di server LAMP (Apache, Mysql e Php su Linux).
-In seguito è presente una breve guida riguardante l'installazione su Ubuntu (qualsiasi versione dalla 16.04).
-Aprire una finestra di terminale ed eseguire il seguente comando.
-```bash
-sudo apt-get install apache2 mysql-server curl php7.3 php7.3-mysql php7.3-initl -y
-```
-A questo punto, dovrebbe partire l'installazione dei software necessari.
-Verranno effettuate alcune domande, tra cui la password da utilizzare per MySql: scegliere una password e scriverla in un posto sicuro.
-Alla fine dell'esecuzione del comando precedentemente indicato, verificare la corretta esecuzione del server web aprendo un broser e andando su `http://localhost/` oppure, utilizzando il terminale, scrivere il comando
-```bash
-curl --silent http://localhost -o /dev/null -w "%{http_code}"
-```
-Se viene visualizzata una pagina web (dal browser) o se viene visualizzato il numero 200 (da terminale), la prima parte dell'installazione è avvenuta con successo.
-Aprire nuovamente il terminale per inserire gli ultimi comandi necessari all'installazione del server web.
-```bash
-printf "<IfModule mod_dir.c>\nDirectoryIndex index.php index.html index.htm index.cgi index.pl\n</IfModule>" | sudo tee /etc/apache2/mods-enabled/dir.conf
-sudo systemctl restart apache2
-sudo rm /var/www/html/index.*
-echo "<?php echo('fun'); echo('ziona'); ?>" | sudo tee /var/www/html/index.php
-curl --silent http://localhost
-sudo rm /var/www/html/index.php
-```
-Se viene visualizzata la scritta "funziona" nel terminale, significa che il web server è stato installato con successo
+Nel caso il comando riporti un errore di rete del tipo
+**"listen tcp4 0.0.0.0:80: bind: address already in use"**,
+significa che la porta 80 è già utilizzata da un altro servizio del proprio computer.
+Si può quindi impostare una porta differente, ad esempio 8080, modificando il comando come indicato di seguito:
+```docker run -d --name gs_test -p 8080:80 ghcr.io/trinko/giuaschool:latest
 
-### 2. Installazione di giua@school
+### 3. Uso dell'applicazione
 
-Scaricare sul proprio computer l'ultima versione disponibile di *giua@school* dal sito https://github.com/trinko/giuaschool/releases/latest,
-quindi estrarre i file nella cartella usata dal server web.
-Normalmente il percorso di questa cartella è simile a quanto segue:
-```
-### SISTEMI WINDOWS
-C:\xampp\htdocs
+Una volta avviato il server, usare l'indirizzo seguente nel proprio browser per visualizzare la pagina di accesso:
+  - [http://localhost](http://localhost)
 
-### SISTEMI LINUX
-/var/www/html
-```
+Nel caso sia stato modificato il numero di porta, è necessario specificarlo nell'indirizzo.
+Ad esempio, se è stata impostata la porta 8080, l'indirizzo da utilizzare sarà:
+  - [http://localhost:8080](http://localhost:8080)
 
-**ATTENZIONE UTENTI LINUX:** Dopo aver copiato/scaricato i files nella cartella /var/www/html è necessario aprire il terminale e scrivere
-```bash
-sudo find /var/www/ -type d -exec chmod 755 {} \;
-sudo find /var/www/ -type f -exec chmod 644 {} \;
-sudo chown -R www-data:www-data /var/www/
-```
+Accedere all'applicazione utilizzando le seguenti credenziali per l'utente amministratore:
+  - nome utente: *admin*
+  - password: *admin*
 
-Aprire una finestra di terminale (o *Prompt dei comandi* per
-i sistemi Windows) e posizionarsi all'interno della cartella dove si sono
-estratti i file di *giua@school*.
-Ad esempio, il comando per posizionarsi nella cartella "giuaschool", dove si trovano i file
-dell'applicazione, sarà il seguente:
-```
-### SISTEMI WINDOWS
-cd <percorso_installazione_xampp>\xampp\htdocs\giuaschool
+Se si desidera accedere all'applicazione con un altro utente, è necessario anzi tutto
+visualizzare il nome utente del profilo desiderato: la password predefinita sarà identica al nome utente.
+Si può, quindi, uscire dall'applicazione (pulsante ESCI in alto a destra) e effettuare l'accesso con le
+credenziali del nuovo utente.
+In alternativa, si può utilizzare la funzione Alias (menu SISTEMA -> ALIAS), che
+permette all'amministratore di impersonare un altro utente, senza necessità di inserire password.
 
-### SISTEMI LINUX
-cd /var/www/html/giuaschool
-```
+### 4. Chiusura del server
 
-Sempre dalla finestra di terminale, eseguire il seguente comando per verificare che i requisiti di sistema siano
-corretti:
-```
-### SISTEMI WINDOWS
-<percorso_installazione_xampp>\xampp\php\php bin\symfony_requirements
-
-### SISTEMI LINUX
-php bin/symfony_requirements
-```
-Nel caso siano mostrati degli errori, sarà necessario
-installare i componenti mancanti prima di continuare.
-
-In particolare, se si usa Windows e risulta non installata l'estensione **intl**, aprire con un
-editor di testo il file:
-```
-<percorso_installazione_xampp>\xampp\php\php.ini
-```
-Quindi cercare la riga seguente, rimuovere il punto e virgola iniziale (carattere ";") e salvare il file:
-```
-;extension=php_intl.dll
-```
-
-**ATTENZIONE:** se anziché una nuova installazione di XAMPP si è scelto di utilizzare
-un'installazione pre-esistente di MySQL/MariaDB, sarà necessario
-modificare i parametri di connessione al database, che si trovano nel file:
-```
-### SISTEMI WINDOWS
-<percorso_installazione_giua-school>\.env
-
-### SISTEMI LINUX
-<percorso_installazione_giua-school>/.env
-```
+Per chiudere il server e liberare le risorse occupate, eseguire i comandi seguenti:
+``` docker container stop gs_test
+``` docker container rm gs_test
 
 
-### 3. Creazione del database di giua@school
+## INSTALLAZIONE IN UN SERVER DI PRODUZIONE
 
-Per creare il database di *giua@school* eseguire i seguenti comandi dalla
-finestra di terminale:
-```
-### SISTEMI WINDOWS
-<percorso_installazione_xampp>\xampp\php\php bin\console doctrine:database:create
-<percorso_installazione_xampp>\xampp\php\php bin\console doctrine:schema:create
+Per installare l'applicazione in un server di produzione, seguire i seguenti passi:
+  - installare i software necessari indicati nella sezione dei REQUISITI DI SISTEMA;
+  - installare **Symfony** attraverso l'uso di **Composer**;
+  - creare il database attraverso gli appositi comandi della console di **Symfony**;
+  - inserire i dati iniziali attraverso l'uso delle Fixtures.
 
-### SISTEMI LINUX
-php bin/console doctrine:database:create
-php bin/console doctrine:schema:create
-```
+**Si consiglia di seguire i passi utilizzati per la creazione dell'immagine del docker, presenti
+nel file "docker/Dockerfile", adattando i comandi a quelli del proprio sistema operativo.**
 
-A questo punto, inserire i dati iniziali del sistema, eseguendo il seguente comando
-dalla finestra di terminale:
-```
-### SISTEMI WINDOWS
-<percorso_installazione_xampp>\xampp\php\php bin\console doctrine:fixtures:load
-
-### SISTEMI LINUX
-php bin/console doctrine:fixtures:load
-```
-
-
-### 4. Utilizzo dell'applicazione giua@school
-
-### 4.1 Avviare il database server
-### SISTEMI WINDOWS
-Per prima cosa, tramite il *Control Panel* di XAMPP, assicurarsi che sia attivo il database server *MySQL/MariaDB*.
-
-### SISTEMI LINUX
-Il database server dovrebbe essersi avviato automaticamente durante l'installazione. Per verificarne il funzionamento, aprire il terminale e scrivere (se si usa Ubuntu):
-```bash
-sudo service mysql status
-```
-
-### 4.2 Avviare il server Web di prova
-
-Per provare l'applicazione è conveniente usare il server di sviluppo di Symfony al posto di *Apache*.
-
-**ATTENZIONE:** il server di sviluppo **NON** deve essere usato normalmente per eseguire il registro sul server scolastico, dato che può contenere bug e vulnerabilità e che le performance sono ridotte. Una volta provato il funzionamento di giua@school è consigliabile l'utilizzo di Webserver veri e propri, come Apache o Nginx. Per ulteriori informazioni, leggi il paragrafo *4.3*.
-
-Dalla finestra di terminale, inserire i seguente comandi:
-```
-### SISTEMI WINDOWS
-cd <percorso_installazione_xampp>\xampp\htdocs\giuaschool
-<percorso_installazione_xampp>\xampp\php\php bin\console server:run
-
-### SISTEMI LINUX
-cd /var/www/html/giuaschool
-php bin/console server:run
-```
-
-Una volta eseguito il comando, senza chiudere la finestra di terminale, aprire il browser, 
-andando all'indirizzo: [http://127.0.0.1:8000](http://127.0.0.1:8000)  
-Chiudendo la finestra di terminale, verrà disattivato il server di prova.  
-
-### 4.3 Avviare il server Web
-Per eseguire giua@school in sicurezza e con ottime performance, è necessario utilizzare un Webserver come Apache o Nginx.  
-Attualmente è consigliato l'uso di **Apache**, dato che non richiede configurazione ed è gia stato installato nello step 3. Per avviare Apache, seguire i seguenti passaggi:
-- SISTEMI WINDOWS
-  1. Aprire nuovamente *Control Panel* di XAMPP (usato precedentemente per avviare il server database)
-  2. Premere su *start* nella riga di *Apache*
-- SISTEMI LINUX
-  1. Apache dovrebbe essersi avviato automaticamente durante l'installazione.
-
-Per aumentare le preformance e rimuovere le opzioni di debug e sviluppo, aprire il file ```.env``` e modificare l'opzione ```APP_ENV=dev``` (seconda linea) in ```APP_ENV=prod```.  
-Una volta avviato il web server, aprire il browser, 
-andando all'indirizzo: [http://127.0.0.1](http://127.0.0.1)
-
-Per poter provare l'applicazione, sono stati configurati alcuni utenti:
-  - **admin**: amministratore di sistema
-  - **preside**: preside
-
-La password è uguale per tutti gli utenti ed è la seguente:
-  - **12345678**
-
-Per terminare l'applicazione:
-### SISTEMI WINDOWS
-Riaprire il *Control Panel* di XAMPP, e premere *stop* nelle righe di *MySQL/MariaDB* e di *Apache*.
-
-### SISTEMI LINUX
-Aprire il terminale e scrivere:
-```bash
-sudo systemctl stop apache
-sudo systemctl disable apache
-sudo systemctl stop mysql
-sudo systemctl disable mysql
-```
 
 ## CREDITS
 
-Si desidera ringraziare, per il loro importante contributo, tutti i membri della comunità dell'Open Source, e in particolare gli sviluppatori coinvolti nei seguenti progetti:
+Si desidera ringraziare, per il loro importante contributo, tutti i membri della comunità dell'**Open Source**, e
+in particolare gli sviluppatori coinvolti nei seguenti progetti:
 - [Lampschool](http://www.lampschool.it/)
 - [Symfony](https://symfony.com/)
 - [Doctrine](http://www.doctrine-project.org/)
 - [Twig](https://twig.symfony.com/)
 - [Jquery](https://jquery.com/)
 - [Bootstrap](https://getbootstrap.com/)
-
-
-## DOWNLOAD
-
-Scarica l'ultima versione disponibile:
-- [giua@school](https://github.com/trinko/giua-school/releases/latest)
+- [Bootstrap Italia](https://italia.github.io/bootstrap-italia/)
