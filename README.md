@@ -55,42 +55,48 @@ I requisiti minimi per l'installazione sono:
   - **PHP 7.4**;
   - framework **Symfony 4.4**.
 
-Ci sono ulteriori requisiti minori che sono richiesti dal framework **Symfony**.
+Ci sono ulteriori requisiti minori che sono richiesti dal framework *Symfony*.
 
 
 ## INSTALLAZIONE DI PROVA
 
 ### 1. Uso dei docker
 
-Per provare *giua@school* si consiglia l'installazione in locale, tramite l'uso di un contenitore **docker**
+Per provare *giua@school* si consiglia l'installazione in locale, tramite l'uso di un contenitore *docker*
 ([cosa sono i docker?](https://it.wikipedia.org/wiki/Docker)).
-L'uso dei **docker** semplifica notevolmente la gestione delle dipendenze richieste dai diversi componenti
+L'uso dei *docker* semplifica notevolmente la gestione delle dipendenze richieste dai diversi componenti
 dell'applicazione, creando un ambiente virtuale in cui eseguire l'installazione completa di tutto
 quanto necessario.
 
-Se non è già presente la gestione dei **docker** nel proprio computer, è necessario procedere alla sua installazione:
+Se non è già presente la gestione dei *docker* nel proprio computer, è necessario procedere alla sua installazione:
   - [installazione per Windows](https://docs.docker.com/docker-for-windows/install/)
   - [installazione per MacOs](https://docs.docker.com/docker-for-mac/install/)
   - [installazione per Linux Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
   - [installazione per Linux Debian](https://docs.docker.com/engine/install/debian/)
 
-Esistono in rete diverse guide in italiano che forniscono maggiori dettagli sull'installazion e sull'uso dei **docker**,
+Esistono in rete diverse guide in italiano che forniscono maggiori dettagli sull'installazion e sull'uso dei *docker*,
 come, ad esempio, quella di [HTML.IT](https://www.html.it/guide/docker/).
 
 ### 2. Avvio del server
 
-Il comando seguente scarica l'immagine dell'applicazione ed avvia il server in un contenitore **docker**:
-```docker run -d --name gs_test -p 80:80 ghcr.io/trinko/giuaschool:latest
+Il comando seguente scarica l'immagine dell'applicazione ed avvia il server in un contenitore *docker*:
+```
+docker run -d --name gs_test -p 80:80 ghcr.io/trinko/giuaschool:latest
+```
 
-L'immagine verrà scaricata dal repository di **GitHub**, ma se si preferisce usare **Docker Hub**, allora
+L'immagine verrà scaricata dal repository di *GitHub*, ma se si preferisce usare *Docker Hub*, allora
 si può modificare il comando nel modo seguente:
-```docker run -d --name gs_test -p 80:80 trinkodok/giuaschool:latest
+```
+docker run -d --name gs_test -p 80:80 trinkodok/giuaschool:latest
+```
 
 Nel caso il comando riporti un errore di rete del tipo
-**"listen tcp4 0.0.0.0:80: bind: address already in use"**,
+*"listen tcp4 0.0.0.0:80: bind: address already in use"*,
 significa che la porta 80 è già utilizzata da un altro servizio del proprio computer.
 Si può quindi impostare una porta differente, ad esempio 8080, modificando il comando come indicato di seguito:
-```docker run -d --name gs_test -p 8080:80 ghcr.io/trinko/giuaschool:latest
+```
+docker run -d --name gs_test -p 8080:80 ghcr.io/trinko/giuaschool:latest
+```
 
 ### 3. Uso dell'applicazione
 
@@ -102,38 +108,41 @@ Ad esempio, se è stata impostata la porta 8080, l'indirizzo da utilizzare sarà
   - [http://localhost:8080](http://localhost:8080)
 
 Accedere all'applicazione utilizzando le seguenti credenziali per l'utente amministratore:
-  - nome utente: *admin*
-  - password: *admin*
+  - nome utente: **admin**
+  - password: **admin**
 
 Se si desidera accedere all'applicazione con un altro utente, è necessario anzi tutto
 visualizzare il nome utente del profilo desiderato: la password predefinita sarà identica al nome utente.
-Si può, quindi, uscire dall'applicazione (pulsante ESCI in alto a destra) e effettuare l'accesso con le
+Si può, quindi, uscire dall'applicazione (pulsante ESCI in alto a destra) ed effettuare l'accesso con le
 credenziali del nuovo utente.
+
 In alternativa, si può utilizzare la funzione Alias (menu SISTEMA -> ALIAS), che
 permette all'amministratore di impersonare un altro utente, senza necessità di inserire password.
 
 ### 4. Chiusura del server
 
 Per chiudere il server e liberare le risorse occupate, eseguire i comandi seguenti:
-``` docker container stop gs_test
-``` docker container rm gs_test
+``` 
+docker container stop gs_test
+docker container rm gs_test
+```
 
 
 ## INSTALLAZIONE IN UN SERVER DI PRODUZIONE
 
 Per installare l'applicazione in un server di produzione, seguire i seguenti passi:
   - installare i software necessari indicati nella sezione dei REQUISITI DI SISTEMA;
-  - installare **Symfony** attraverso l'uso di **Composer**;
-  - creare il database attraverso gli appositi comandi della console di **Symfony**;
+  - installare *Symfony* attraverso l'uso di *Composer*;
+  - creare il database attraverso gli appositi comandi della console di *Symfony*;
   - inserire i dati iniziali attraverso l'uso delle Fixtures.
 
-**Si consiglia di seguire i passi utilizzati per la creazione dell'immagine del docker, presenti
-nel file "docker/Dockerfile", adattando i comandi a quelli del proprio sistema operativo.**
+*Si consiglia di seguire i passi utilizzati per la creazione dell'immagine del docker, presenti
+nel file "docker/Dockerfile", adattando i comandi a quelli del proprio sistema operativo.*
 
 
 ## CREDITS
 
-Si desidera ringraziare, per il loro importante contributo, tutti i membri della comunità dell'**Open Source**, e
+Si desidera ringraziare, per il loro importante contributo, tutti i membri della comunità *open source*, e
 in particolare gli sviluppatori coinvolti nei seguenti progetti:
 - [Lampschool](http://www.lampschool.it/)
 - [Symfony](https://symfony.com/)
