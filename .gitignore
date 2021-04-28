@@ -51,6 +51,7 @@
 /src/DataFixtures/AppLocalFixtures.php
 /templates/argo/
 /tests/temp/
+!/tests/temp/.gitkeep
 ###< trinko/giuaschool ###
 
 ###> symfony/web-server-bundle ###
