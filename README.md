@@ -81,13 +81,13 @@ come, ad esempio, quella di [HTML.IT](https://www.html.it/guide/docker/).
 
 Il comando seguente scarica l'immagine dell'applicazione ed avvia il server in un contenitore *docker*:
 ```
-docker run -d --name gs_test -p 80:80 ghcr.io/trinko/giuaschool:latest
+docker run -d --rm --name gs_test -p 80:80 ghcr.io/trinko/giuaschool:latest
 ```
 
 L'immagine verrà scaricata dal repository di *GitHub*, ma se si preferisce usare *Docker Hub*, allora
 si può modificare il comando nel modo seguente:
 ```
-docker run -d --name gs_test -p 80:80 trinkodok/giuaschool:latest
+docker run -d --rm --name gs_test -p 80:80 trinkodok/giuaschool:latest
 ```
 
 Nel caso il comando riporti un errore di rete del tipo
@@ -95,7 +95,7 @@ Nel caso il comando riporti un errore di rete del tipo
 significa che la porta 80 è già utilizzata da un altro servizio del proprio computer.
 Si può quindi impostare una porta differente, ad esempio 8080, modificando il comando come indicato di seguito:
 ```
-docker run -d --name gs_test -p 8080:80 ghcr.io/trinko/giuaschool:latest
+docker run -d --rm --name gs_test -p 8080:80 ghcr.io/trinko/giuaschool:latest
 ```
 
 ### 3. Uso dell'applicazione
@@ -122,9 +122,8 @@ permette all'amministratore di impersonare un altro utente, senza necessità di 
 ### 4. Chiusura del server
 
 Per chiudere il server e liberare le risorse occupate, eseguire i comandi seguenti:
-``` 
+```
 docker container stop gs_test
-docker container rm gs_test
 ```
 
 

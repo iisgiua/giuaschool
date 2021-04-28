@@ -13,4 +13,4 @@ default:
   suites:
     default:
       contexts:
-        - App\Tests\Behat\CovidStaffContext
+        - App\Tests\Behat\BrowserContext
