@@ -50,6 +50,7 @@
 /src/Controller/TestController.php
 /src/DataFixtures/AppLocalFixtures.php
 /templates/argo/
+/tests/temp/
 ###< trinko/giuaschool ###
 
 ###> symfony/web-server-bundle ###
