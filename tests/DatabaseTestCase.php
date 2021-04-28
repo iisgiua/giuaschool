@@ -232,9 +232,9 @@ class DatabaseTestCase extends KernelTestCase {
         } else {
           // gruppo di fixtures
           $gruppo = substr($fix, 2);
-          if ($fs->exists('tests/data/'.$gruppo.'.fixtures')) {
+          if ($fs->exists('tests/temp/'.$gruppo.'.fixtures')) {
             // carica da file
-            $file = file('tests/data/'.$gruppo.'.fixtures', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $file = file('tests/temp/'.$gruppo.'.fixtures', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
             foreach ($file as $sql) {
               $connection->exec($sql);
@@ -252,7 +252,7 @@ class DatabaseTestCase extends KernelTestCase {
             }
             // memorizza su file i dati
             $process = new Process(['mysqldump', '-u'.$db_user, '-p'.$db_pass, $db_name,
-            '-t', '-n', '--compact', '--result-file=tests/data/'.$gruppo.'.fixtures']);
+            '-t', '-n', '--compact', '--result-file=tests/temp/'.$gruppo.'.fixtures']);
             $process->setTimeout(0);
             $process->run();
             if (!$process->isSuccessful()) {
