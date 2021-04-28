@@ -50,7 +50,7 @@
 /src/Controller/TestController.php
 /src/DataFixtures/AppLocalFixtures.php
 /templates/argo/
-/tests/temp/
+/tests/temp/*
 !/tests/temp/.gitkeep
 ###< trinko/giuaschool ###
 
