@@ -12,14 +12,14 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\DataFixtures\OrarioFixtures;
+use App\DataFixtures\ScansioneOrariaFixtures;
 use App\Tests\DatabaseTestCase;
 
 
 /**
  * Unit test della classe
  */
-class OrarioTest extends DatabaseTestCase {
+class ScansioneOrariaTest extends DatabaseTestCase {
 
   /**
    * Costruttore
@@ -29,18 +29,18 @@ class OrarioTest extends DatabaseTestCase {
   public function __construct() {
     parent::__construct();
     // nome dell'entità
-    $this->entity = '\App\Entity\Orario';
+    $this->entity = '\App\Entity\ScansioneOraria';
     // campi da testare
-    $this->fields = ['nome', 'inizio', 'fine', 'sede'];
+    $this->fields = ['giorno', 'ora', 'inizio', 'fine', 'durata', 'orario'];
     // fixture da caricare
-    $this->fixtures = [OrarioFixtures::class];
+    $this->fixtures = [ScansioneOrariaFixtures::class];
     // SQL read
     $this->canRead = [
-      'gs_orario' => ['id', 'modificato', 'nome', 'inizio', 'fine', 'sede_id'],
-      'gs_sede' => '*'];
+      'gs_scansione_oraria' => ['id', 'modificato', 'giorno', 'ora', 'inizio', 'fine', 'durata', 'orario_id'],
+      'gs_orario' => '*'];
     // SQL write
     $this->canWrite = [
-      'gs_orario' => ['id', 'modificato', 'nome', 'inizio', 'fine', 'sede_id']];
+      'gs_scansione_oraria' => ['id', 'modificato', 'giorno', 'ora', 'inizio', 'fine', 'durata', 'orario_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -57,12 +57,14 @@ class OrarioTest extends DatabaseTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $sede = $this->em->getRepository('App:Sede')->find($this->faker->randomElement(['1', '2']));
+        $orario = $this->faker->randomElement($this->em->getRepository('App:Orario')->findBy([]));
         $data[$i][$field] =
-          $field == 'nome' ? implode(' ', array_map('ucfirst', $this->faker->words(3))) :
-          ($field == 'inizio' ? $this->faker->dateTimeBetween('-3 month', 'now') :
-          ($field == 'fine' ? $this->faker->dateTimeBetween('now', '+3 month') :
-          $sede));
+          $field == 'giorno' ? $this->faker->randomElement([1, 2, 3, 4, 5, 6]):
+          ($field == 'ora' ? $this->faker->randomElement([1, 2, 3, 4]):
+          ($field == 'inizio' ? new \DateTime($this->faker->time()):
+          ($field == 'fine' ? new \DateTime($this->faker->time()):
+          ($field == 'durata' ? $this->faker->randomFloat(1, 0.5, 1.5):
+          $orario))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
@@ -96,7 +98,7 @@ class OrarioTest extends DatabaseTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->find(1);
     // toString
-    $this->assertSame($existent->getNome(), (string) $existent, $this->entity.'::toString');
+    $this->assertSame($existent->getGiorno().':'.$existent->getOra(), (string) $existent, $this->entity.'::toString');
   }
 
   /**
@@ -106,22 +108,29 @@ class OrarioTest extends DatabaseTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->find(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
-    // nome
-    $existent->setNome(null);
+    // giorno
+    $existent->setGiorno(null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::nome - NOT BLANK');
-    $existent->setNome('12345678901234567890123456789012345678901234567890123456789012345');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::giorno - NOT BLANK');
+    $existent->setGiorno(9);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::nome - MAX LENGTH');
-    $existent->setNome('1234567890123456789012345678901234567890123456789012345678901234');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::giorno - CHOICE');
+    $existent->setGiorno(1);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::giorno - VALID CHOICE');
+    // ora
+    $existent->setOra(null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ora - NOT BLANK');
+    $existent->setOra(2);
+    $err = $this->val->validate($existent);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ora - VALID CHOICE');
     // inizio
     $existent->setInizio(null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::inizio - NOT BLANK');
-    $existent->setInizio('13/33/2012');
+    $existent->setInizio('32:88:99');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.date', $this->entity.'::inizio - DATE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.time', $this->entity.'::inizio - TIME');
     $existent->setInizio(new \DateTime());
     $err = $this->val->validate($existent);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::inizio - VALID');
@@ -129,19 +138,26 @@ class OrarioTest extends DatabaseTestCase {
     $existent->setFine(null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::fine - NOT BLANK');
-    $existent->setFine('13/33/2012');
+    $existent->setFine('32:88:99');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.date', $this->entity.'::fine - DATE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.time', $this->entity.'::fine - TIME');
     $existent->setFine(new \DateTime());
     $err = $this->val->validate($existent);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::fine - VALID');
-    // sede
-    $obj_sede = $this->getPrivateProperty($this->entity, 'sede');
-    $obj_sede->setValue($existent, null);
+    // durata
+    $existent->setDurata(null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sede - NOT BLANK');
-    $existent->setSede($this->em->getRepository('App:Sede')->find(1));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sede - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::durata - NOT BLANK');
+    $existent->setDurata(1.5);
+    $err = $this->val->validate($existent);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::durata - VALID CHOICE');
+    // orario
+    $obj_orario = $this->getPrivateProperty($this->entity, 'orario');
+    $obj_orario->setValue($existent, null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::orario - NOT BLANK');
+    $existent->setOrario($this->em->getRepository('App:Orario')->find(1));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::orario - VALID');
   }
 
 }

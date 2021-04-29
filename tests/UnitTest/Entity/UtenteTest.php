@@ -123,6 +123,16 @@ class UtenteTest extends DatabaseTestCase {
           $created->removeNumeriTelefono('2222');
           $this->assertEquals(array_values(['3333','070.333.333']), array_values($created->getNumeriTelefono()),
             $this->entity.'::removeNumeriTelefono');
+        } elseif ($field == 'notifica') {
+          // test modifica array
+          $obj = new \stdClass();
+          $obj->var = 1;
+          $array = ['obj' => $obj];
+          $created->setNotifica($array);
+          $this->assertTrue($created->getNotifica() === $array, $this->entity.'::setNotifica');
+          $obj->var = 0;
+          $created->setNotifica($array);
+          $this->assertFalse($created->getNotifica() === $array, $this->entity.'::setNotifica - confronto');
         }
       }
     }
