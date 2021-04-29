@@ -54,6 +54,7 @@ class Menu {
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
   private $selettore;
 
@@ -61,6 +62,8 @@ class Menu {
    * @var string $nome Nome del menu (nullo se sottomenu)
    *
    * @ORM\Column(type="string", length=64, nullable=true)
+   *
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
   private $nome;
 
@@ -68,6 +71,8 @@ class Menu {
    * @var string $descrizione Descrizione del menu (nulla se sottomenu)
    *
    * @ORM\Column(type="string", length=255, nullable=true)
+   *
+   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
    private $descrizione;
 
@@ -75,8 +80,6 @@ class Menu {
    * @var boolean $mega Indica se utilizza la modalità mega menu
    *
    * @ORM\Column(type="boolean", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
    private $mega;
 

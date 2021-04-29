@@ -65,7 +65,7 @@ class FirmaTest extends DatabaseTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           $field == 'lezione' ? $this->faker->randomElement($lezioni) :
-          $this->faker->randomElement($docenti);
+          $this->faker->unique()->randomElement($docenti);
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
