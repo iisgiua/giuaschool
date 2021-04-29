@@ -93,7 +93,7 @@ class UtenteTest extends DatabaseTestCase {
           ($field == 'citta' ?  $this->faker->city() :
           ($field == 'indirizzo' ? $this->faker->streetAddress() :
           ($field == 'numeriTelefono' ? $this->faker->telefono($this->faker->numberBetween(0, 3)) :
-          null)))))))))))))))));
+          array($this->faker->words(1, true) => $this->faker->words(1, true)))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');

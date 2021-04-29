@@ -184,10 +184,7 @@ class NotificaInviaCommand extends Command {
     // invio dei messaggi
     foreach (array_merge($notifiche1, $notifiche2)  as $not) {
       // invia un messaggio alla volta
-      if ($not->getApp()->getNotifica() == 'T') {
-        // notifica via Telegram
-        $num += $this->inviaTelegram($not);
-      } elseif ($not->getApp()->getNotifica() == 'E') {
+      if ($not->getApp()->getNotifica() == 'E') {
         // notifica via email
         $num += $this->inviaEmail($not);
       }
@@ -196,61 +193,6 @@ class NotificaInviaCommand extends Command {
     }
     // restituisce numero messaggi inviati
     return $num;
-  }
-
-  /**
-   * Utilizza Telegram per inviare la notifica
-   *
-   * @param NotificaInvio $notifica Notifica da inviare
-   *
-   * @return int Numero di messaggi inviati
-   */
-  private function inviaTelegram(NotificaInvio $notifica) {
-    $telegram_opts = array(
-      CURLOPT_URL => '',
-      CURLOPT_POSTFIELDS => '',
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_POST => true,
-      CURLOPT_HEADER => false,
-      CURLOPT_HTTPHEADER => ['Content-Type' => 'application/x-www-form-urlencoded', 'charset' => 'utf-8'],
-      CURLOPT_CONNECTTIMEOUT => 20,
-      CURLOPT_TIMEOUT => 30);
-    $errore = false;
-    // invia il messaggio
-    $telegram_opts[CURLOPT_URL] = 'https://api.telegram.org/bot'.$notifica->getApp()->getDati()['bot'].'/sendMessage';
-    $telegram_opts[CURLOPT_POSTFIELDS] = http_build_query(array(
-      'chat_id' => $notifica->getDati()['chat'],
-      'text' => $notifica->getMessaggio(),
-      'parse_mode' => 'HTML'), null, '&');
-    $cu = \curl_init();
-    $errore = !\curl_setopt_array($cu, $telegram_opts);
-    if (!$errore) {
-      // esegue chiamata per invio
-      $risposta = json_decode(\curl_exec($cu), true);
-      $errore = (!isset($risposta['ok']) || !$risposta['ok']);
-      if ($errore) {
-        // setta errore telegram
-        $errore_desc = (isset($risposta['description']) ? $risposta['description'] : 'Telegram');
-      }
-    } else {
-      // setta errore CURL
-      $errore_desc = 'CURL';
-    }
-    \curl_close($cu);
-    // cambia stato
-    if ($errore) {
-      // segnala errore
-      $notifica->setStato('E');
-      $dati = $notifica->getDati();
-      $dati['errore'] = $errore_desc;
-      $notifica->setDati($dati);
-      $this->logger->notice('notifica-invia: Errore di spedizione', [$errore_desc]);
-    } else {
-      // tutto ok
-      $notifica->setStato('S');
-    }
-    // restituisce messaggi inviati
-    return ($errore ? 0 : 1);
   }
 
   /**

@@ -217,9 +217,8 @@ class Docente extends Utente {
   public function recuperaChiavi() {
     if ($this->chiave1 == null || $this->chiave2 == null || $this->chiave3 == null) {
       return null;
-    } else {
-      return array($this->chiave1, $this->chiave2, $this->chiave3);
     }
+    return array($this->chiave1, $this->chiave2, $this->chiave3);
   }
 
 }
