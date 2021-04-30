@@ -419,8 +419,8 @@ class NotificaPreparaCommand extends Command {
             // solo destinatari con notifica attivata
             $voto = '';
             if ($valutazione->getVoto()) {
-              $voto_int = intval($valutazione->getVoto() + 0.25);
-              $voto_dec = $valutazione->getVoto() - intval($valutazione->getVoto());
+              $voto_int = (int) ($valutazione->getVoto() + 0.25);
+              $voto_dec = $valutazione->getVoto() - (int) ($valutazione->getVoto());
               $voto = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
             }
             $testo = $this->trans->trans('message.notifica_valutazione', [
