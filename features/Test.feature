@@ -12,7 +12,7 @@ Funzionalità: Procedura di test Behat
 
   Scenario: Test2 - utente staff
     Dato login utente con ruolo esatto "staff"
-    E pagina attiva "login_form" con parametri:
+    E pagina attiva "agenda_eventi" con parametri:
       |nomeParam  |valoreParam|
       |mese       |2021-02   |
     Quando vai al link "Privacy"

@@ -71,6 +71,7 @@ class MenuOpzione {
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=64, maxMessage="field.maxlength")
    */
   private $nome;
 
@@ -80,6 +81,7 @@ class MenuOpzione {
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
    private $descrizione;
 
@@ -87,6 +89,8 @@ class MenuOpzione {
    * @var string $url Indirizzo url (codificato internamente)
    *
    * @ORM\Column(type="string", length=255, nullable=true)
+   *
+   * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
    private $url;
 
@@ -103,8 +107,6 @@ class MenuOpzione {
    * @var boolean $disabilitato Indica se l'opzione è disabilitata o meno
    *
    * @ORM\Column(type="boolean", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
    private $disabilitato;
 
@@ -112,6 +114,8 @@ class MenuOpzione {
    * @var string $icona Nome dell'eventuale icona dell'opzione
    *
    * @ORM\Column(type="string", length=64, nullable=true)
+   *
+   * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
    private $icona;
 
@@ -120,6 +124,8 @@ class MenuOpzione {
    *
    * @ORM\ManyToOne(targetEntity="Menu", inversedBy="opzioni")
    * @ORM\JoinColumn(nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
    */
   private $menu;
 
