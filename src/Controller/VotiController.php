@@ -264,7 +264,8 @@ class VotiController extends AbstractController {
         $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controlla lezione
-      $lezione = $reg->lezioneCattedra($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria());
+      $lezione = $em->getRepository('App:Lezione')->lezioneVoto($form->get('data')->getData(),
+        $this->getUser(), $classe, $cattedra->getMateria());
       if (!$lezione) {
         // lezione non esiste
         $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',
@@ -526,7 +527,8 @@ class VotiController extends AbstractController {
           $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
         // controlla lezione
-        $lezione = $reg->lezioneCattedra($form->get('data')->getData(), $this->getUser(), $classe, $cattedra->getMateria());
+        $lezione = $em->getRepository('App:Lezione')->lezioneVoto($form->get('data')->getData(),
+          $this->getUser(), $classe, $cattedra->getMateria());
         if (!$lezione) {
           // lezione non esiste
           $form->get('data')->addError(new FormError($trans->trans('exception.lezione_non_esiste',

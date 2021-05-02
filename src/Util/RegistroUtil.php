@@ -1214,29 +1214,6 @@ class RegistroUtil {
   }
 
   /**
-   * Restituisce la lezione del docente nella data e cattedra definita (escluso sostegno)
-   *
-   * @param \DateTime $data Data della lezione
-   * @param Docente $docente Docente della lezione
-   * @param Classe $classe Classe della lezione
-   * @param Materia $materia Materia della lezione
-   *
-   * @return int|null Restituisce l'identificatore della lezione o null se non trovata
-   */
-  public function lezioneCattedra(\DateTime $data, Docente $docente, Classe $classe, Materia $materia) {
-    $lezione = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
-      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
-      ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
-      ->setParameters(['data' => $data->format('Y-m-d'), 'docente' => $docente, 'classe' => $classe,
-        'materia' => $materia])
-      ->orderBy('l.ora', 'ASC')
-      ->setMaxResults(1)
-      ->getQuery()
-      ->getOneOrNullResult();
-    return $lezione;
-  }
-
-  /**
    * Restituisce l'elenco dei voti e degli alunni per una valutazione di classe
    *
    * @param \DateTime $data Data del giorno in cui si fa la verifica
@@ -1436,14 +1413,14 @@ class RegistroUtil {
         $dati['classe'][$v['tipo']][$data]['cont']++;
       }
     }
-    // elimina date con un solo voto per la classe
-    foreach ($dati['classe'] as $tp=>$d) {
-      foreach ($d as $dt=>$v) {
-        if ($v['cont'] < 2) {
-          unset($dati['classe'][$tp][$dt]);
-        }
-      }
-    }
+    //-- // elimina date con un solo voto per la classe
+    //-- foreach ($dati['classe'] as $tp=>$d) {
+      //-- foreach ($d as $dt=>$v) {
+        //-- if ($v['cont'] < 2) {
+          //-- unset($dati['classe'][$tp][$dt]);
+        //-- }
+      //-- }
+    //-- }
     // restituisce dati
     return $dati;
   }
