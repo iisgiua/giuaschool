@@ -3456,4 +3456,39 @@ class StaffController extends AbstractController {
     ));
   }
 
+  /**
+   * Gestione delle richieste dei certificati medici
+   *
+   //-- * @param Request $request Pagina richiesta
+   //-- * @param EntityManagerInterface $em Gestore delle entità
+   //-- * @param SessionInterface $session Gestore delle sessioni
+   //-- * @param RegistroUtil $reg Funzioni di utilità per il registro
+   //-- * @param LogHandler $dblogger Gestore dei log su database
+   //-- * @param string $data Data per la gestione delle assenze (AAAA-MM-GG)
+   //-- * @param int $classe Identificativo della classe
+   *
+   //-- * @return Response Pagina di risposta
+   *
+   * @Route("/staff/studenti/certificato", name="staff_studenti_certificato",
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function studentiCertificatoAction(Request $request, EntityManagerInterface $em
+  //-- , SessionInterface $session,
+                                         //-- RegistroUtil $reg, LogHandler $dblogger, $data, $classe
+) {
+    // init
+    $dati = array();
+    // legge alunni con richiesta certificato
+    $dati = $em->getRepository('App:Alunno')->richiestaCertificato($this->getUser()->getSede());
+
+
+    // mostra la pagina di risposta
+    return $this->render('ruolo_staff/studenti_certificato.html.twig', array(
+      'pagina_titolo' => 'page.staff_certificato',
+      'dati' => $dati,
+    ));
+ }
+
 }

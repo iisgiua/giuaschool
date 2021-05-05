@@ -574,6 +574,7 @@ page.segreteria_scrutini_mostra: Scrutinio Alunno
 page.segreteria_scrutini: Scrutini
 page.sistema: Configurazione globale
 page.staff_annotazioni: Annotazioni sul Registro
+page.staff_certificato: Richieste Certificato Medico
 page.staff_assenze: Gestione Assenze
 page.staff_autorizza: Ritardi e Uscite
 page.staff_avvisi_attivita: Avvisi Attività
@@ -728,6 +729,7 @@ title.segretario: Aggiungi o modifica un segretario del Consiglio di Classe
 title.segreteria_assenze: Visualizza la frequenza
 title.segreteria_scrutini_mostra: Documenti dello scrutinio
 title.segreteria_scrutini: Visualizza gli scrutini
+title.staff_certificato: Richieste del certificato medico
 title.staff_assenze: Gestione assenze della classe
 title.staff_avvisi_attivita: Avvisi per lo svolgimento di attività per le classi
 title.staff_avvisi_entrate: Avvisi per l'ingresso posticipato delle classi

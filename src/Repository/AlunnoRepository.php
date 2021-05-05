@@ -311,4 +311,30 @@ class AlunnoRepository extends BaseRepository {
     return $this->paginazione($query->getQuery(), $pagina);
   }
 
+  /**
+   * Restituisce la lista degli alunni con richiesta di certificato
+   *
+   * @param Sede $sede Sede delle classi
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function richiestaCertificato(Sede $sede=null) {
+    // crea query base
+    $alunni = $this->createQueryBuilder('a')
+      ->join('a.classe', 'c')
+      ->join('c.sede', 's')
+      ->where('a.abilitato=:vero AND a.richiestaCertificato=:vero')
+      ->orderBy('s.ordinamento,c.anno,c.sezione,a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->setParameters(['vero' => 1]);
+    if ($sede) {
+      // filtra per sede
+      $alunni->andwhere('s.id=:sede')->setParameter('sede', $sede);
+    }
+    $alunni = $alunni
+      ->getQuery()
+      ->getResult();
+    // restituisce i dati
+    return $alunni;
+  }
+
 }

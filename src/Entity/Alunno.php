@@ -116,6 +116,13 @@ class Alunno extends Utente {
   private $giustificaOnline;
 
   /**
+   * @var boolean $richiestaCertificato Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
+   *
+   * @ORM\Column(name="richiesta_certificato", type="boolean", nullable=false)
+   */
+  private $richiestaCertificato;
+
+  /**
    * @var string $foto Fotografia dell'alunno
    *
    * @ORM\Column(type="string", length=255, nullable=true)
@@ -350,6 +357,27 @@ class Alunno extends Utente {
   }
 
   /**
+   * Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
+   *
+   * @return boolean Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
+   */
+  public function getRichiestaCertificato() {
+    return $this->richiestaCertificato;
+  }
+
+  /**
+   * Imposta se all'alunno è stata richiesta la consegna del certificato medico oppure no
+   *
+   * @param boolean $richiestaCertificato Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
+   *
+   * @return Alunno Oggetto Alunno
+   */
+  public function setRichiestaCertificato($richiestaCertificato) {
+    $this->richiestaCertificato = ($richiestaCertificato == true);
+    return $this;
+  }
+
+  /**
    * Restituisce la fotografia dell'alunno
    *
    * @return string|File Fotografia dell'alunno
@@ -404,6 +432,7 @@ class Alunno extends Utente {
     $this->frequenzaEstero = false;
     $this->religione = 'S';
     $this->giustificaOnline = true;
+    $this->richiestaCertificato = false;
   }
 
   /**

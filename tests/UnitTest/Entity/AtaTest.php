@@ -43,7 +43,7 @@ class AtaTest extends DatabaseTestCase {
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'foto', 'sede_id',
+        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
         'classe_id', 'alunno_id'],
       'gs_sede' => '*'];
     // SQL write
@@ -53,7 +53,7 @@ class AtaTest extends DatabaseTestCase {
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'foto', 'sede_id',
+        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
         'classe_id', 'alunno_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];

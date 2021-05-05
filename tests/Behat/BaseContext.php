@@ -25,6 +25,7 @@ use Behat\Behat\Hook\Scope\AfterStepScope;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Mink\Exception\ExpectationException;
 use Behat\Mink\Session;
+use Behat\Gherkin\Node\TableNode;
 use DMore\ChromeDriver\ChromeDriver;
 use Faker\Factory;
 use App\Tests\FakerPerson;
@@ -71,6 +72,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @var Session $session Gestore della sessione di navigazione HTTP
    */
   protected $session;
+
+  /**
+   * Lista di variabili definite nell'esecuzione degli step
+   *
+   * @var array $vars Lista di variabili
+   */
+  protected $vars;
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
@@ -120,6 +128,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     // inizializza variabili
     $this->cmdOutput = [];
     $this->cmdStatus = 0;
+    $this->vars = [];
   }
 
   /**
@@ -153,6 +162,91 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // salva screenshot
       $this->screenshot($filename, 1);
     }
+  }
+
+  /**
+   * Trasforma una tabella in un array associativo per i parametri
+   *    $tableParams: tabella con campi <nomeParam> e <valoreParam> e relativi valori
+   *
+   * @Transform table:nomeParam,valoreParam
+   */
+  public function trasformaArray(TableNode $tableParams): array {
+    $params = array();
+    foreach ($tableParams->getHash() as $row) {
+      $params[$row['nomeParam']] = $this->convertText($row['valoreParam']);
+    }
+    return $params;
+  }
+
+  /**
+   * Trasforma testo in valore corrispondente
+   *  I possibili valori contenuti nel testo sono:
+   *    $nome -> valore della variabile di esecuzione (vedi funzione getVar)
+   *    si|no|null -> valori booleani true|false o valore null
+   *    [+-]?\d+(\.\d+)? -> valori numerici interi o float
+   *    altro -> stringa di testo
+   *
+   * @Transform  :valore
+   */
+  public function trasformaValore($valore) {
+    return $this->convertText($valore);
+  }
+
+  /**
+   * Trasforma testo da ricercare in espressione regolare.
+   *  I possibili valori contenuti nel testo sono:
+   *    $nome -> valore della variabile di esecuzione (vedi funzione getVar)
+   *    /regex/ -> espressione regolare
+   *    altro -> stringa di testo
+   *
+   * @Transform  :ricerca
+   */
+  public function trasformaRicerca($ricerca) {
+    return $this->convertSearch($ricerca);
+  }
+
+  /**
+   * Trasforma testo in valore numerico intero.
+   *
+   * @Transform  /^([+-]?\d+)$/
+   */
+  public function trasformaIntero($numero) {
+    return (int) $numero;
+  }
+
+  /**
+   * Trasforma testo in valore numerico decimale.
+   *
+   * @Transform  /^([+-]?\d+\.\d+)$/
+   */
+  public function trasformaDecimale($numero) {
+    return (float) $numero;
+  }
+
+  /**
+   * Estrae dal database in modo casuale le istanze della classe indicata (incluse sottoclassi) e
+   * le memorizza nelle variabili di esecuzione.
+   * Se presenti altri parametri nella tabella, imposta i valori indicati.
+   *  $classe: nome classe
+   *  $tabella: il campo <id> indica il nome assegnato alla variabile, preceduto da '$'
+   *            altri campi corrispondono ai valori da impostare nell'istanza
+   *
+   * @Given istanze di tipo :classe con parametri:
+   */
+  public function istanzeDiTipoConParametri($classe, TableNode $tabella) {
+    $oggetti = $this->em->getRepository('App:'.$classe)->findBy([]);
+    $this->assertNotEmpty($oggetti);
+    foreach ($tabella->getHash() as $row) {
+      $this->assertTrue($row['id'][0] == '$');
+      $istanza = $this->faker->unique->randomElement($oggetti);
+      $this->vars[trim(substr($row['id'], 1))] = $istanza;
+      foreach ($row as $key=>$val) {
+        if ($key != 'id') {
+          $istanza->{'set'.ucfirst(strtolower($key))}($this->convertText($val));
+        }
+      }
+    }
+    $this->em->flush();
   }
 
 
@@ -543,6 +637,112 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected function getCommandStatus(): int {
     // restituisce stato
     return $this->cmdStatus;
+  }
+
+  /**
+   * Restituisce il valore della variabile di esecuzione
+   * Il testo per specificare la variabile ha la sintassi:
+   *  "$nome": restituisce l'intera variabile <nome>
+   *  "$nome:attr": restituisce solo l'attributo <attr> della variabile <nome>
+   *  "$nome:attr1,attr2": restituisce il vettore con gli atributi indicati della variabile <nome>
+   *    nel formato [attr1 => val1, attr2 => val2]
+   *
+   * @param string $var Testo che indica la variabile o i suoi attributi
+   *
+   * @return mixed Valore della variabile indicata
+   */
+  protected function getVar($var) {
+    $var = trim(substr($var, 1));
+    $var_parts = explode(':', $var);
+    if (count($var_parts) == 1) {
+      // restituisce intera variabile
+      $this->assertTrue(isset($this->vars[$var]));
+      return $this->vars[$var];
+    }
+    $var_name = trim($var_parts[0]);
+    $this->assertTrue(isset($this->vars[$var_name]) && is_object($this->vars[$var_name]));
+    $var_attrs = explode(',', $var_parts[1]);
+    $attrs = array();
+    foreach ($var_attrs as $attr) {
+      // restituisce attributi
+      $var_subs = explode('.', $attr);
+      if (count($var_subs) == 1) {
+        // no sottoattributi
+        $attr_name = trim($attr);
+        $attrs[$attr_name] = $this->vars[$var_name]->{'get'.ucfirst(strtolower($attr_name))}();
+      } else {
+        // uno o più sottoattributi
+        $attrs[$attr_name] = $this->vars[$var_name];
+        foreach ($var_subs as $sub) {
+          $sub_name = trim($sub);
+          $attrs[$attr_name] = $attrs[$attr_name]->{'get'.ucfirst(strtolower($sub_name))}();
+        }
+      }
+    }
+    // restiruisce valori degli attributi
+    return count($attrs) > 1 ? $attrs : array_values($attrs)[0];
+  }
+
+  /**
+   * Converte il testo di un parametro nel valore corrispondente.
+   *  I possibili valori contenuti nel testo sono:
+   *    $nome -> valore della variabile di esecuzione (vedi funzione getVar)
+   *    si|no|null -> valori booleani true|false o valore null
+   *    [+-]?\d+(\.\d+)? -> valori numerici interi o float
+   *    altro -> stringa di testo
+   *
+   * @param string $text Testo del parametro da convertire
+   *
+   * @return mixed Valore convertito del parametro
+   */
+  protected function convertText($text) {
+    if ($text[0] == '$') {
+      // valore della variabile di esecuzione
+      return $this->getVar($text);
+    } elseif (preg_match('/^(si|no|null)$/i', $text)) {
+      // valore booleano o null
+      return strtolower($text) == 'si' ? true : (strtolower($text) == 'no' ? false : null);
+    } elseif (preg_match('/^[+-]?\d+(\.\d+)?$/', $text)) {
+      // valore numerico
+      return strpos($text, '.') === false ? (int) $text : (float) $text;
+    } else {
+      // stringa di testo
+      return (string) $text;
+    }
+  }
+
+  /**
+   * Converte il testo di un parametro di ricerca in una espressione regolare.
+   *  I possibili valori contenuti nel testo sono:
+   *    $nome -> valore della variabile di esecuzione (vedi funzione getVar)
+   *    /regex/ -> espressione regolare
+   *    altro -> stringa di testo
+   *
+   * @param string $search Testo del parametro di ricerca
+   *
+   * @return mixed Valore convertito del parametro
+   */
+  protected function convertSearch($search) {
+    if ($search[0] == '$') {
+      // valore della variabile di esecuzione
+      $value = $this->getVar($search);
+      $value = is_array($value) ? $value : [$value];
+      $regex = '';
+      $first = true;
+      foreach ($value as $val) {
+        $regex .= (!$first ? '\s+' : '').preg_quote($val, '/');
+        $first = false;
+      }
+      $regex = '/'.$regex.'/ui';
+    } elseif (preg_match('#^(/.+/\w*)$#', $search)) {
+      // espressione regolare
+      $regex = $search;
+    } else {
+      // stringa di testo
+      $regex = '/'.($search ? preg_quote($search, '/') : '^$').'/ui';
+    }
+    // restiruisce valore di espressione regolare
+    return $regex;
   }
 
   /**

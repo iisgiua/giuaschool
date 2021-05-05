@@ -57,7 +57,7 @@ class StaffFixtures extends Fixture implements DependentFixtureInterface, Fixtur
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(8282);
     // carica dati
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 12; $i++) {
       $sesso = $faker->randomElement(['M', 'F']);
       list($nome, $cognome, $username) = $faker->unique()->utente($sesso);
       $email = $username.'@lovelace.edu.it';
@@ -69,7 +69,7 @@ class StaffFixtures extends Fixture implements DependentFixtureInterface, Fixtur
         ->setCognome($cognome)
         ->setSesso($sesso)
         ->setUltimoAccesso($faker->dateTimeBetween('-1 week', 'now'))
-        ->setSede($i == 0 ? null : $this->getReference('sede_'.$i));
+        ->setSede($i % 3 == 0 ? null : $this->getReference('sede_'.($i % 3)));
       $em->persist($staff[$i]);
       $password = $this->encoder->encodePassword($staff[$i], $username);
       $staff[$i]->setPassword($password);

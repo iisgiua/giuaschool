@@ -36,7 +36,7 @@ class AlunnoTest extends DatabaseTestCase {
       'abilitato', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
       'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica',
       'bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero',
-      'religione', 'credito3', 'credito4', 'giustificaOnline', 'foto', 'classe'];
+      'religione', 'credito3', 'credito4', 'giustificaOnline', 'richiestaCertificato', 'foto', 'classe'];
     // fixture da caricare
     $this->fixtures = ['g:Test'];
     // SQL read
@@ -46,8 +46,8 @@ class AlunnoTest extends DatabaseTestCase {
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'foto', 'sede_id',
-        'classe_id', 'alunno_id'],
+        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto',
+        'sede_id', 'classe_id', 'alunno_id'],
       'gs_classe' => '*'];
     // SQL write
     $this->canWrite = [
@@ -56,8 +56,8 @@ class AlunnoTest extends DatabaseTestCase {
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'foto', 'sede_id',
-        'classe_id', 'alunno_id']];
+        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto',
+        'sede_id', 'classe_id', 'alunno_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -110,8 +110,9 @@ class AlunnoTest extends DatabaseTestCase {
           ($field == 'credito3' ? $this->faker->optional(0.5, null)->numberBetween(5, 10) :
           ($field == 'credito4' ? $this->faker->optional(0.5, null)->numberBetween(5, 10) :
           ($field == 'giustificaOnline' ? $this->faker->randomElement([false, true]) :
+          ($field == 'richiestaCertificato' ? $this->faker->randomElement([false, true]) :
           ($field == 'foto' ? $this->faker->randomElement([null, new File(__DIR__.'/../../data/'.$this->faker->file('tests', 'tests/data', false))]) :
-          $classe)))))))))))))))))))))))))))));
+          $classe))))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
@@ -125,10 +126,12 @@ class AlunnoTest extends DatabaseTestCase {
       $data[$i]['modificato'] = $o[$i]->getModificato();
     }
     // controlla gli attributi
+    $rc = new \ReflectionClass($this->entity);
     $fs = new Filesystem();
     for ($i = 0; $i < 3; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
       foreach (array_merge(['id', 'modificato'], $this->fields) as $field) {
+        // funzione get/is
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
         if ($field == 'numeriTelefono') {
@@ -146,7 +149,6 @@ class AlunnoTest extends DatabaseTestCase {
       }
     }
     // controlla metodi setId e setModificato
-    $rc = new \ReflectionClass($this->entity);
     $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
     $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
     // rimuove file temporanei
