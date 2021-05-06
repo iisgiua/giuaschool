@@ -672,6 +672,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
         $attrs[$attr_name] = $this->vars[$var_name]->{'get'.ucfirst(strtolower($attr_name))}();
       } else {
         // uno o più sottoattributi
+        $attr_name = trim($attr);
         $attrs[$attr_name] = $this->vars[$var_name];
         foreach ($var_subs as $sub) {
           $sub_name = trim($sub);
