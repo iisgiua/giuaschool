@@ -45,7 +45,7 @@ class BrowserContext extends BaseContext {
    */
   public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router) {
     parent::__construct($kernel, $em, $router);
-    $this->$loggedUser = null;
+    $this->loggedUser = null;
   }
 
   /**
