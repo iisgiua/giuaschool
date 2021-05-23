@@ -18,7 +18,7 @@
           <div>
             <label class="control-label col-sm-2" for="{{ voto.recupero.vars.id }}">Recupero</label>
             <div class="col-sm-10">
-              {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[2]] }) }}
+              {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[3]] }) }}
             </div>
           </div>
           <div>
@@ -38,4 +38,3 @@
   </div>
   {{ form_widget(form._token) }}
 {{ form_end(form, {'render_rest': false}) }}
-

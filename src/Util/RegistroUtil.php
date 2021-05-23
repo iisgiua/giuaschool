@@ -2691,4 +2691,53 @@ class RegistroUtil {
     return $dati;
   }
 
+  /**
+   * Restituisce i dettagli dei voti di Ed.Civica per l'alunno indicato.
+   *
+   * @param Docente $docente Docente della lezione
+   * @param Cattedra $cattedra Cattedra del docente
+   * @param Alunno $alunno Alunno selezionato
+   *
+   * @return array Dati restituiti come array associativo
+   */
+  public function dettagliVotiEdCivica(Docente $docente, Cattedra $cattedra, Alunno $alunno) {
+    $dati = array();
+    $dati['lista'] = array();
+    $dati['media'] = array();
+    $periodi = $this->infoPeriodi();
+    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    // legge i voti dell'alunno
+    $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+      ->select('v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,m.nomeBreve AS materia,0 AS docente_id')
+      ->join('v.docente', 'd')
+      ->join('v.lezione', 'l')
+      ->join('l.materia', 'm')
+      ->where('v.alunno=:alunno AND v.docente=:docente AND l.classe=:classe')
+      ->orderBy('v.tipo,l.data', 'ASC')
+      ->setParameters(['alunno' => $alunno, 'docente' => $docente, 'classe' => $cattedra->getClasse()])
+      ->getQuery()
+      ->getArrayResult();
+    // formatta i dati nell'array associativo
+    foreach ($voti as $v) {
+      $data = $v['data']->format('Y-m-d');
+      $periodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
+      $v['data_str'] = ((int) substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
+      if ($v['voto'] > 0) {
+        $voto_int = (int) ($v['voto'] + 0.25);
+        $voto_dec = $v['voto'] - ((int) $v['voto']);
+        $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
+      }
+      // memorizza dati
+      $dati_periodo[$periodo][$v['tipo']][$data][] = $v;
+    }
+    // riordina periodi
+    for ($k = 3; $k >= 1; $k--) {
+      if (isset($dati_periodo[$k])) {
+        $dati['lista'][$periodi[$k]['nome']] = $dati_periodo[$k];
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }

@@ -56,6 +56,7 @@ class SchedaController extends AbstractController {
     $classe = $cattedra->getClasse();
     $info['materia'] = $cattedra->getMateria()->getNomeBreve();
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
+    $info['edcivica'] = ($cattedra->getMateria()->getTipo() == 'E');
     // controllo alunno
     $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
@@ -67,7 +68,9 @@ class SchedaController extends AbstractController {
         $alunno->getDataNascita()->format('d/m/Y').')';
     $info['sesso'] = $alunno->getSesso();
     // recupera dati
-    $dati = $reg->dettagliVoti($this->getUser(), $cattedra, $alunno);
+    $dati = $cattedra->getMateria()->getTipo() == 'E' ?
+      $reg->dettagliVotiEdCivica($this->getUser(), $cattedra, $alunno) :
+      $reg->dettagliVoti($this->getUser(), $cattedra, $alunno);
     $dati['lezioni'] = $reg->assenzeMateria($cattedra, $alunno);
     $periodi = $reg->infoPeriodi();
     if ($periodo == 'P') {
@@ -77,29 +80,6 @@ class SchedaController extends AbstractController {
           unset($dati['media'][$per]);
           unset($dati['lezioni'][$per]);
         }
-      }
-    } elseif ($periodo == '1') {
-      foreach ($dati['lista'] as $per=>$d) {
-        if ($per != $periodi[2]['nome']) {
-          unset($dati['lista'][$per]);
-          unset($dati['media'][$per]);
-          unset($dati['lezioni'][$per]);
-        }
-      }
-      // voto primo trimestre
-      $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
-      $dati['precedente'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
-      $voto = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
-        ->join('vs.scrutinio', 's')
-        ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
-        ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'periodo' => 'P', 'stato' => 'C'])
-        ->getQuery()
-        ->getOneOrNullResult();
-      if ($voto) {
-        $dati['precedente'][0]['voto'] = ($voto->getUnico() == 0 ? 'NC' : ($voto->getUnico() >= 20 ? $giudizi[$voto->getUnico()] : $voto->getUnico()));
-      } else {
-        $dati['precedente'][0]['voto'] = null;
       }
     } elseif ($periodo == 'F') {
       // scrutinio finale
@@ -111,7 +91,7 @@ class SchedaController extends AbstractController {
         }
       }
       // voto primo trimestre
-      $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Buono', 24 => 'Distinto', 25 => 'Ottimo'];
+      $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono',  25 => 'Distinto', 26 => 'Ottimo'];
       $dati['precedente'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
       $voto = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
@@ -121,24 +101,11 @@ class SchedaController extends AbstractController {
         ->getQuery()
         ->getOneOrNullResult();
       if ($voto) {
-        $dati['precedente'][0]['voto'] = ($voto->getUnico() == 0 ? 'NC' : ($voto->getUnico() >= 20 ? $giudizi[$voto->getUnico()] : $voto->getUnico()));
+        $dati['precedente'][0]['voto'] = ($voto->getUnico() == 0 ? 'NC' :
+          ($voto->getUnico() >= 20 ? $giudizi[$voto->getUnico()] :
+          ($voto->getUnico() == 3 && $cattedra->getMateria()->getTipo() == 'E' ? 'NC' : $voto->getUnico())));
       } else {
         $dati['precedente'][0]['voto'] = null;
-      }
-      // valutazione intermedia
-      $giudizi = [30 => 'NC', 31 => 'Scarso', 32 => 'Insuff.', 33 => 'Mediocre', 34 => 'Suff.', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
-      $dati['precedente'][1]['nome'] = 'Valutazione intermedia';
-      $voto = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
-        ->join('vs.scrutinio', 's')
-        ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
-        ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'periodo' => '1', 'stato' => 'C'])
-        ->getQuery()
-        ->getOneOrNullResult();
-      if ($voto) {
-        $dati['precedente'][1]['voto'] = $giudizi[$voto->getUnico()];
-      } else {
-        $dati['precedente'][1]['voto'] = null;
       }
     }
     // visualizza pagina

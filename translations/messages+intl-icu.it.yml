@@ -423,6 +423,9 @@ label.colloqui_ore_extra: Ore aggiuntive
 label.colloqui_codice: Codice riunione per Meet
 label.numero_genitori: Genitori prenotati
 label.esporta: Esporta
+label.credito_integrativo: Credito integrativo
+label.credito_integrativo_si: SI (ha recuperato quanto previsto nel PAI)
+label.credito_integrativo_no: NO (non ha recuperato quanto previsto nel PAI)
 
 
 ##### PAGINE #####

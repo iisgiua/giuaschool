@@ -34,8 +34,8 @@
     {% if alunno.classe.anno == 5 %}
         {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1]]}) }}
     {% else %}
-        {#-- {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1],form.esito.vars.choices[2]]}) }} #}
-        {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1]]}) }}
+        {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1],form.esito.vars.choices[2]]}) }}
+        {#-- {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1]]}) }} #}
     {% endif %}
       </div>
     </div>

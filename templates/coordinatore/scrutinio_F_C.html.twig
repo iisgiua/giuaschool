@@ -132,54 +132,8 @@
     {% endfor %}
           </td>
         </tr>
-        {#-- <tr> #}
-          {#-- <td><strong>Comunicazione Debiti</strong></td> #}
-          {#-- <td> #}
-            {#-- Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br> #}
-            {#-- <strong><em>Controllare che non ci siano errori.</em></strong><br> #}
-            {#-- <br> #}
-            {#-- Formato del documento: <em>PDF</em> #}
-          {#-- </td> #}
-          {#-- <td> #}
-    {#-- {% for a in dati.debiti %} #}
-            {#-- <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'D', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div> #}
-    {#-- {% else %} #}
-            {#-- <span class="label label-warning">NESSUNA COMUNICAZIONE</span> #}
-    {#-- {% endfor %} #}
-          {#-- </td> #}
-        {#-- </tr> #}
-        {#-- <tr> #}
-          {#-- <td><strong>Comunicazione Carenze</strong></td> #}
-          {#-- <td> #}
-            {#-- Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br> #}
-            {#-- <strong><em>Controllare che non ci siano errori.</em></strong><br> #}
-            {#-- <br> #}
-            {#-- Formato del documento: <em>PDF</em> #}
-          {#-- </td> #}
-          {#-- <td> #}
-    {#-- {% for a in dati.carenze %} #}
-            {#-- <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'C', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div> #}
-    {#-- {% else %} #}
-            {#-- <span class="label label-warning">NESSUNA COMUNICAZIONE</span> #}
-    {#-- {% endfor %} #}
-          {#-- </td> #}
-        {#-- </tr> #}
-
-    {% if classe.anno != 5 %}
         <tr>
-          <td><strong>Piano di Integrazione degli Apprendimenti</strong></td>
-          <td>
-            Da conservare agli atti.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
-          </td>
-          <td>
-            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'X', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a></div>
-          </td>
-        </tr>
-        <tr>
-          <td><strong>Piano di Apprendimento Individualizzato</strong></td>
+          <td><strong>Comunicazione Debiti</strong></td>
           <td>
             Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
@@ -187,21 +141,67 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-    {% for a in dati.PAI %}
-            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'X', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+    {% for a in dati.debiti %}
+            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'D', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
     {% else %}
-            <span class="label label-warning">NESSUN DOCUMENTO</span>
+            <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
     {% endfor %}
           </td>
         </tr>
-    {% endif %}
+        <tr>
+          <td><strong>Comunicazione Carenze</strong></td>
+          <td>
+            Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br>
+            <strong><em>Controllare che non ci siano errori.</em></strong><br>
+            <br>
+            Formato del documento: <em>PDF</em>
+          </td>
+          <td>
+    {% for a in dati.carenze %}
+            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'C', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+    {% else %}
+            <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
+    {% endfor %}
+          </td>
+        </tr>
+
+    {#-- {% if classe.anno != 5 %} #}
+        {#-- <tr> #}
+          {#-- <td><strong>Piano di Integrazione degli Apprendimenti</strong></td> #}
+          {#-- <td> #}
+            {#-- Da conservare agli atti.<br> #}
+            {#-- <strong><em>Controllare che non ci siano errori.</em></strong><br> #}
+            {#-- <br> #}
+            {#-- Formato del documento: <em>PDF</em> #}
+          {#-- </td> #}
+          {#-- <td> #}
+            {#-- <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'X', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a></div> #}
+          {#-- </td> #}
+        {#-- </tr> #}
+        {#-- <tr> #}
+          {#-- <td><strong>Piano di Apprendimento Individualizzato</strong></td> #}
+          {#-- <td> #}
+            {#-- Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br> #}
+            {#-- <strong><em>Controllare che non ci siano errori.</em></strong><br> #}
+            {#-- <br> #}
+            {#-- Formato del documento: <em>PDF</em> #}
+          {#-- </td> #}
+          {#-- <td> #}
+    {#-- {% for a in dati.PAI %} #}
+            {#-- <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'X', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div> #}
+    {#-- {% else %} #}
+            {#-- <span class="label label-warning">NESSUN DOCUMENTO</span> #}
+    {#-- {% endfor %} #}
+          {#-- </td> #}
+        {#-- </tr> #}
+    {#-- {% endif %} #}
 
       </tbody>
     </table>
   </div>
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
-    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '7'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
+    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '8'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
   </div>
     {% endif %}
     {% include 'include/modal-remote.html.twig' %}

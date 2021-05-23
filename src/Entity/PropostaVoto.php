@@ -21,10 +21,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * PropostaVoto - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\PropostaVotoRepository")
- * @ORM\Table(name="gs_proposta_voto", uniqueConstraints={@ORM\UniqueConstraint(columns={"periodo","alunno_id","materia_id"})})
+ * @ORM\Table(name="gs_proposta_voto")
  * @ORM\HasLifecycleCallbacks
- *
- * @UniqueEntity(fields={"periodo","alunno","materia"}, message="field.unique")
  */
 class PropostaVoto {
 

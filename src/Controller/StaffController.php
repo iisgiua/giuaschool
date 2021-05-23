@@ -58,7 +58,6 @@ use App\Util\PdfManager;
 use App\Util\BachecaUtil;
 use App\Form\EntrataType;
 use App\Form\UscitaType;
-use App\Form\AppelloType;
 use App\Form\MessageType;
 use App\Form\AvvisoType;
 

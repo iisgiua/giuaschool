@@ -45,7 +45,6 @@ use App\Form\ScrutinioPresenza;
 use App\Form\ScrutinioPresenzaType;
 use App\Form\ScrutinioAssenza;
 use App\Form\ScrutinioAssenzaType;
-use App\Form\AlunnoType;
 
 
 /**
@@ -140,7 +139,7 @@ class ScrutinioUtil {
    * @param Docente $docente Docente che inserisce le proposte di voto
    * @param Classe $classe Classe relativa alle proposte di voto
    * @param Materia $materia Materia relativa alle proposte di voto
-   * @param string $tipo Tipo della cattedra (N=religione, A=att.alt, NULL=entrambe)
+   * @param string $tipo Tipo della cattedra di religione (N=religione, A=att.alt, NULL=entrambe)
    * @param string $periodo Periodo relativo allo scrutinio
    *
    * @return array Dati formattati come un array associativo
@@ -180,7 +179,14 @@ class ScrutinioUtil {
     // legge le proposte di voto
     $proposte = $this->em->getRepository('App:PropostaVoto')->createQueryBuilder('pv')
       ->where('pv.alunno IN (:alunni) AND pv.classe=:classe AND pv.materia=:materia AND pv.periodo=:periodo')
-      ->setParameters(['alunni' => $lista_alunni, 'classe' => $classe, 'materia' => $materia, 'periodo' => $periodo])
+      ->setParameters(['alunni' => $lista_alunni, 'classe' => $classe, 'materia' => $materia, 'periodo' => $periodo]);
+    if ($materia->getTipo() == 'E') {
+      // ed.civica: proposta differente per docente
+      $proposte = $proposte
+        ->andWhere('pv.docente=:docente')
+        ->setParameter('docente', $docente);
+    }
+    $proposte = $proposte
       ->getQuery()
       ->getResult();
     foreach ($proposte as $p) {
@@ -199,20 +205,20 @@ class ScrutinioUtil {
         $this->em->persist($elenco['proposte'][$alu->getId()]);
       }
     }
-    // debito formativo esistente
-    if ($periodo == '1') {
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
-        ->join('vs.scrutinio', 's')
-        ->where('vs.unico<:suff AND vs.alunno IN (:alunni) AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
-        ->setParameters(['suff' => 6, 'alunni' => $lista_alunni, 'classe' => $classe, 'materia' => $materia,
-          'periodo' => 'P', 'stato' => 'C'])
-        ->getQuery()
-        ->getResult();
-      foreach ($voti as $v) {
-        // inserisce proposte trovate
-        $elenco['debiti'][$v->getAlunno()->getId()] = $v;
-      }
-    }
+    //-- // debito formativo esistente
+    //-- if ($periodo == '1') {
+      //-- $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+        //-- ->join('vs.scrutinio', 's')
+        //-- ->where('vs.unico<:suff AND vs.alunno IN (:alunni) AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
+        //-- ->setParameters(['suff' => 6, 'alunni' => $lista_alunni, 'classe' => $classe, 'materia' => $materia,
+          //-- 'periodo' => 'P', 'stato' => 'C'])
+        //-- ->getQuery()
+        //-- ->getResult();
+      //-- foreach ($voti as $v) {
+        //-- // inserisce proposte trovate
+        //-- $elenco['debiti'][$v->getAlunno()->getId()] = $v;
+      //-- }
+    //-- }
     // restituisce elenco
     return $elenco;
   }
@@ -345,19 +351,23 @@ class ScrutinioUtil {
           // presenze docenti
           $dati = $this->presenzeDocenti($docente, $classe, $periodo);
           break;
-        //-- case '2':
-          //-- // controllo assenze
-          //-- $dati = $this->controlloAssenze($docente, $classe, $periodo);
-          //-- break;
+        case '2':
+          // controllo assenze
+          $dati = $this->controlloAssenze($docente, $classe, $periodo);
+          break;
         case '3':
-          // condotta
+          // ed.civica
           $dati = $this->quadroVoti($docente, $classe, $periodo);
           break;
         case '4':
+          // condotta
+          $dati = $this->quadroVoti($docente, $classe, $periodo);
+          break;
+        case '5':
           // esito
           $dati = $this->quadroEsiti($docente, $classe, $periodo);
           break;
-        case '5':
+        case '6':
           // credito o competenze
           if ($classe->getAnno() == 2) {
             // competenze
@@ -367,21 +377,22 @@ class ScrutinioUtil {
             $dati = $this->quadroCrediti($docente, $classe, $periodo);
           }
           break;
-        case '6':
+        case '7':
           // debiti e carenze
           // <5: PAI e PIA, 5: conversione crediti
           if ($classe->getAnno() != 5) {
             // escluse le quinte
-            //-- $dati = $this->quadroComunicazioni($docente, $classe, $periodo);
-            $dati = $this->pianiApprendimento($docente, $classe, $periodo);
+            $dati = $this->quadroComunicazioni($docente, $classe, $periodo);
+            //-- $dati = $this->pianiApprendimento($docente, $classe, $periodo);
           } else {
             // crediti convertiti
             $dati = $this->quadroCrediti($docente, $classe, $periodo);
           }
           break;
-        case '7':
-          // riepilogo
-          $dati = $this->riepilogo($docente, $classe, $periodo);
+        case '8':
+          // verbale e fine
+          //-- $dati = $this->riepilogo($docente, $classe, $periodo);
+          $dati = $this->verbale($docente, $classe, $periodo);
           break;
         case 'C':
           // chiusura
@@ -510,34 +521,40 @@ class ScrutinioUtil {
           // presenze docenti
           $form = $this->presenzeDocentiForm($classe, $periodo, $form, $dati);
           break;
-        //-- case '2':
-          //-- // controllo assenze
-          //-- $form = $this->controlloAssenzeForm($classe, $periodo, $form, $dati);
-          //-- break;
+        case '2':
+          // controllo assenze
+          $form = $this->controlloAssenzeForm($classe, $periodo, $form, $dati);
+          break;
         case '3':
-          // condotta
+          // ed.civica
           $form->setAction($this->router->generate('coordinatore_scrutinio',
               ['classe' => $classe->getId(), 'stato' => '4']));
           break;
         case '4':
-          // esito
+          // condotta
           $form->setAction($this->router->generate('coordinatore_scrutinio',
               ['classe' => $classe->getId(), 'stato' => '5']));
           break;
         case '5':
-          // credito o competenze
+          // esito
           $form->setAction($this->router->generate('coordinatore_scrutinio',
               ['classe' => $classe->getId(), 'stato' => '6']));
           break;
         case '6':
-          // debiti e carenze
-          // <5: PAI e PIA, 5: conversione crediti
+          // credito o competenze
           $form->setAction($this->router->generate('coordinatore_scrutinio',
               ['classe' => $classe->getId(), 'stato' => '7']));
           break;
         case '7':
-          // riepilogo
-          $form = $this->riepilogoForm($classe, $periodo, $form, $dati);
+          // debiti e carenze
+          // <5: PAI e PIA, 5: conversione crediti
+          $form->setAction($this->router->generate('coordinatore_scrutinio',
+              ['classe' => $classe->getId(), 'stato' => '8']));
+          break;
+        case '8':
+          // verbale e fine
+          //-- $form = $this->riepilogoForm($classe, $periodo, $form, $dati);
+          $form = $this->verbaleForm($classe, $periodo, $form, $dati);
           break;
       }
     } elseif ($periodo == 'I' || $periodo == 'X') {
@@ -2588,7 +2605,7 @@ class ScrutinioUtil {
     $this->session->getFlashBag()->clear();
     // cancella assenze e voti
     $this->em->getConnection()
-      ->prepare("DELETE FROM gs_voto_scrutinio WHERE scrutinio_id=:scrutinio AND materia_id NOT IN (SELECT id FROM gs_materia WHERE tipo='C')")
+      ->prepare("DELETE FROM gs_voto_scrutinio WHERE scrutinio_id=:scrutinio AND materia_id NOT IN (SELECT id FROM gs_materia WHERE tipo IN ('C', 'E'))")
       ->execute(['scrutinio' => $scrutinio->getId()]);
     // aggiorna stato
     $scrutinio->setStato('N');
@@ -2816,39 +2833,39 @@ class ScrutinioUtil {
     foreach ($alunni as $a) {
       // percentuale assenze
       $perc = $a['ore'] / $dati['monteore'] * 100;
-      //-- if ($a['ore'] <= $dati['maxassenze']) {
+      if ($a['ore'] <= $dati['maxassenze']) {
         // assenze entro limite
         $dati['alunni'][$a['id']] = $a;
         $dati['alunni'][$a['id']]['percentuale'] = $perc;
-      //-- } else {
-        //-- // assenze oltre il limite: non scrutinabile
-        //-- $dati['no_scrutinabili']['alunni'][$a['id']] = $a;
-        //-- $dati['no_scrutinabili']['alunni'][$a['id']]['percentuale'] = $perc;
-        //-- // controlla presenze
-        //-- $presenze = $this->presenzeDal15Marzo($a['id'], $giorni_lezione);
-        //-- if ($presenze['stato'] == 0) {
-          //-- // cessata frequenza
-          //-- $dati['cessata_frequenza'][$a['id']] = $a;
-        //-- } else {
-          //-- // superamento 25% assenze
-          //-- $dati['no_scrutinabili']['alunni'][$a['id']]['giorni_presenza'] = $presenze['giorni'];
-          //-- // crea oggetto per form
-          //-- $dati['no_scrutinabili']['form'][$a['id']] = (new ScrutinioAssenza())
-            //-- ->setAlunno($a['id'])
-            //-- ->setSesso($a['sesso']);
-          //-- // recupera dati esistenti
-          //-- if (isset($scrutinio_dati['no_scrutinabili'][$a['id']]['deroga'])) {
-            //-- // scrutinabile in deroga
-            //-- $dati['no_scrutinabili']['form'][$a['id']]
-              //-- ->setScrutinabile('D')
-              //-- ->setMotivazione($scrutinio_dati['no_scrutinabili'][$a['id']]['deroga']);
-          //-- } elseif (isset($scrutinio_dati['no_scrutinabili'][$a['id']])) {
-            //-- // non scrutinabile
-            //-- $dati['no_scrutinabili']['form'][$a['id']]
-              //-- ->setScrutinabile('A');
-          //-- }
-        //-- }
-      //-- }
+      } else {
+        // assenze oltre il limite: non scrutinabile
+        $dati['no_scrutinabili']['alunni'][$a['id']] = $a;
+        $dati['no_scrutinabili']['alunni'][$a['id']]['percentuale'] = $perc;
+        // controlla presenze
+        $presenze = $this->presenzeDal15Marzo($a['id'], $giorni_lezione);
+        if ($presenze['stato'] == 0) {
+          // cessata frequenza
+          $dati['cessata_frequenza'][$a['id']] = $a;
+        } else {
+          // superamento 25% assenze
+          $dati['no_scrutinabili']['alunni'][$a['id']]['giorni_presenza'] = $presenze['giorni'];
+          // crea oggetto per form
+          $dati['no_scrutinabili']['form'][$a['id']] = (new ScrutinioAssenza())
+            ->setAlunno($a['id'])
+            ->setSesso($a['sesso']);
+          // recupera dati esistenti
+          if (isset($scrutinio_dati['no_scrutinabili'][$a['id']]['deroga'])) {
+            // scrutinabile in deroga
+            $dati['no_scrutinabili']['form'][$a['id']]
+              ->setScrutinabile('D')
+              ->setMotivazione($scrutinio_dati['no_scrutinabili'][$a['id']]['deroga']);
+          } elseif (isset($scrutinio_dati['no_scrutinabili'][$a['id']])) {
+            // non scrutinabile
+            $dati['no_scrutinabili']['form'][$a['id']]
+              ->setScrutinabile('A');
+          }
+        }
+      }
     }
     // alunni ritirati/trasferiti/all'estero
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
@@ -2856,7 +2873,7 @@ class ScrutinioUtil {
       ->join('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
       ->where('a.classe IS NULL AND a.abilitato=:abilitato AND cc.classe=:classe')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['abilitato' => 1, 'classe' => $classe])
+      ->setParameters(['abilitato' => 0, 'classe' => $classe])
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $a) {
@@ -3128,7 +3145,7 @@ class ScrutinioUtil {
   }
 
   /**
-   * Esegue il passaggio di stato 3->1 per lo scrutinio del periodo F
+   * Esegue il passaggio di stato 3->4 per lo scrutinio del periodo F
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
@@ -3138,12 +3155,12 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_3_1(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_3_4(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
     // aggiorna stato
-    $scrutinio->setStato('1');
+    $scrutinio->setStato('4');
     $this->em->flush();
     // log
     $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
@@ -3151,7 +3168,7 @@ class ScrutinioUtil {
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
       'Stato iniziale' => '3',
-      'Stato finale' => '1',
+      'Stato finale' => '4',
       ));
     // ok
     return true;
@@ -3168,7 +3185,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_3_4(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_4_5(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $this->session->getFlashBag()->clear();
@@ -3200,15 +3217,15 @@ class ScrutinioUtil {
     }
     if (empty($errore)) {
       // aggiorna stato
-      $scrutinio->setStato('4');
+      $scrutinio->setStato('5');
       $this->em->flush();
       // log
       $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
-        'Stato iniziale' => '3',
-        'Stato finale' => '4',
+        'Stato iniziale' => '4',
+        'Stato finale' => '5',
         ));
       // ok
       return true;
@@ -3383,13 +3400,14 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_4_5(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_5_6(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $this->session->getFlashBag()->clear();
     $errore = array();
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['C'] = ['min' => 4, 'max' => 10, 'start' => 6, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
+    $valutazioni['F']['E'] = ['min' => 4, 'max' => 10, 'start' => 6, 'ticks' => '4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     // alunni della classe
     $lista_id = $this->alunniInScrutinio($classe, 'F');
@@ -3487,6 +3505,7 @@ class ScrutinioUtil {
         // ammissione con NC
         $errore[] = $this->trans->trans('exception.ammissione_con_NC', ['sex' => $sesso, 'alunno' => $nome]);
       }
+/*...
       // controllo eccezioni su non ammissione
       $classi_sblocca = $this->em->getRepository('App:Configurazione')->findOneByParametro('scrutinio_classi_sblocca');
       $classi_sblocca = ($classi_sblocca ? explode(',', $classi_sblocca->getValore()) : []);
@@ -3523,26 +3542,27 @@ class ScrutinioUtil {
           $errore[] = $this->trans->trans('exception.non_ammissione_con_voti', ['sex' => $sesso, 'alunno' => $nome]);
         }
       }
+..*/
     }
-    if (empty($errore)) {
+    //-- if (empty($errore)) {
       // aggiorna stato
-      $scrutinio->setStato('5');
+      $scrutinio->setStato('6');
       $this->em->flush();
       // log
       $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
-        'Stato iniziale' => '4',
-        'Stato finale' => '5',
+        'Stato iniziale' => '5',
+        'Stato finale' => '6',
         ));
       // ok
       return true;
-    }
-    // imposta messaggi di errore
-    foreach ($errore as $msg) {
-      $this->session->getFlashBag()->add('errore', $msg);
-    }
+    //-- }
+    //-- // imposta messaggi di errore
+    //-- foreach ($errore as $msg) {
+      //-- $this->session->getFlashBag()->add('errore', $msg);
+    //-- }
     // errori presenti
     return false;
   }
@@ -3574,6 +3594,38 @@ class ScrutinioUtil {
       'Periodo' => 'F',
       'Stato iniziale' => '5',
       'Stato finale' => '4',
+      ));
+    // ok
+    return true;
+  }
+
+  /**
+   * Esegue il passaggio di stato 6->5 per lo scrutinio del periodo F
+   *
+   * @param Docente $docente Docente che inserisce i dati dello scrutinio
+   * @param Request $request Pagina richiesta
+   * @param Form $form Form per lo scrutinio
+   * @param Classe $classe Classe di cui leggere i dati dello scrutinio
+   * @param Scrutinio $scrutinio Scrutinio da modificare
+   *
+   * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
+   */
+  public function passaggioStato_F_6_5(Docente $docente, Request $request, Form $form,
+                                        Classe $classe, Scrutinio $scrutinio) {
+    // cancella medie
+    $this->em->getConnection()
+      ->prepare("UPDATE gs_esito SET media=NULL,credito=NULL WHERE scrutinio_id=:scrutinio")
+      ->execute(['scrutinio' => $scrutinio->getId()]);
+    // aggiorna stato
+    $scrutinio->setStato('5');
+    $this->em->flush();
+    // log
+    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      'Scrutinio' => $scrutinio->getId(),
+      'Classe' => $classe->getId(),
+      'Periodo' => 'F',
+      'Stato iniziale' => '6',
+      'Stato finale' => '5',
       ));
     // ok
     return true;
@@ -3682,7 +3734,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_5_6(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_6_7(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $errore = array();
@@ -3724,13 +3776,14 @@ class ScrutinioUtil {
       }
     }
     if (empty($errore)) {
-      // azzera stato piani
-      $scrutinio->removeDato('statoPIA');
-      $scrutinio->removeDato('statoPAI');
+      //-- // azzera stato piani
+      //-- $scrutinio->removeDato('statoPIA');
+      //-- $scrutinio->removeDato('statoPAI');
       // converte crediti quinta
       if ($classe->getAnno() == 5) {
         $conversione[3] = [7 => 11, 8 => 12, 9 => 14, 10 => 15, 11 => 17, 12 => 18];
-        $conversione[4] = [8 => 12, 9 => 14, 10 => 15, 11 => 17, 12 => 18, 13 => 20];
+        $conversione[4] = [6=> 6,7=>7,
+            8 => 12, 9 => 14, 10 => 15, 11 => 17, 12 => 18, 13 => 20];
         $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
           ->where('a.id in (:lista)')
           ->setParameters(['lista' => $lista_id])
@@ -3750,15 +3803,15 @@ class ScrutinioUtil {
         }
       }
       // aggiorna stato
-      $scrutinio->setStato('6');
+      $scrutinio->setStato('7');
       $this->em->flush();
       // log
       $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
-        'Stato iniziale' => '5',
-        'Stato finale' => '6',
+        'Stato iniziale' => '6',
+        'Stato finale' => '7',
         ));
       // ok
       return true;
@@ -3840,7 +3893,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_6_5(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_7_6(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, 'F');
@@ -3851,22 +3904,22 @@ class ScrutinioUtil {
       ->getQuery()
       ->getResult();
     // cancella conferme comunicazioni
-    foreach ($esiti as $e) {
-      $valori = $e->getDati();
-      $valori['debiti'] = false;
-      $valori['carenze'] = false;
-      $e->setDati($valori);
-    }
+    //-- foreach ($esiti as $e) {
+      //-- $valori = $e->getDati();
+      //-- $valori['debiti'] = false;
+      //-- $valori['carenze'] = false;
+      //-- $e->setDati($valori);
+    //-- }
     // aggiorna stato
-    $scrutinio->setStato('5');
+    $scrutinio->setStato('6');
     $this->em->flush();
     // log
     $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
-      'Stato iniziale' => '6',
-      'Stato finale' => '5',
+      'Stato iniziale' => '7',
+      'Stato finale' => '6',
       ));
     // ok
     return true;
@@ -3959,7 +4012,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_6_7(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_7_8(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza
     $errore = array();
@@ -3992,31 +4045,31 @@ class ScrutinioUtil {
           //-- }
         //-- }
       //-- }
-      // controlla piani
-      $dati = $this->pianiApprendimento($docente, $classe, 'F');
-      foreach ($dati['stato']['PAI'] as $alu=>$stato) {
-        if ($stato != -1) {
-          // errore PAI
-          $errore[] = $this->trans->trans('exception.invalido_piano_recupero_scrutinio',
-            ['%alunno%' => $dati['alunni'][$alu]['cognome'].' '.$dati['alunni'][$alu]['nome']]);
-        }
-      }
-      if ($dati['stato']['PIA'] != -1) {
-        // errore PIA
-        $errore[] = $this->trans->trans('exception.invalido_piano_integrazione_scrutinio');
-      }
+      //-- // controlla piani
+      //-- $dati = $this->pianiApprendimento($docente, $classe, 'F');
+      //-- foreach ($dati['stato']['PAI'] as $alu=>$stato) {
+        //-- if ($stato != -1) {
+          //-- // errore PAI
+          //-- $errore[] = $this->trans->trans('exception.invalido_piano_recupero_scrutinio',
+            //-- ['%alunno%' => $dati['alunni'][$alu]['cognome'].' '.$dati['alunni'][$alu]['nome']]);
+        //-- }
+      //-- }
+      //-- if ($dati['stato']['PIA'] != -1) {
+        //-- // errore PIA
+        //-- $errore[] = $this->trans->trans('exception.invalido_piano_integrazione_scrutinio');
+      //-- }
     }
     if (empty($errore)) {
       // aggiorna stato
-      $scrutinio->setStato('7');
+      $scrutinio->setStato('8');
       $this->em->flush();
       // log
       $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
-        'Stato iniziale' => '6',
-        'Stato finale' => '7',
+        'Stato iniziale' => '7',
+        'Stato finale' => '8',
         ));
       // ok
       return true;
@@ -4040,18 +4093,18 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_7_6(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_8_7(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // aggiorna stato
-    $scrutinio->setStato('6');
+    $scrutinio->setStato('7');
     $this->em->flush();
     // log
     $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
-      'Stato iniziale' => '7',
-      'Stato finale' => '6',
+      'Stato iniziale' => '8',
+      'Stato finale' => '7',
       ));
     // ok
     return true;
@@ -4068,7 +4121,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_7_C(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_8_C(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
@@ -4100,7 +4153,7 @@ class ScrutinioUtil {
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'F',
-          'Stato iniziale' => '7',
+          'Stato iniziale' => '8',
           'Stato finale' => 'C',
           ));
         // ok
@@ -4127,7 +4180,7 @@ class ScrutinioUtil {
    *
    * @return boolean Vero se passaggio di stato eseguito correttamente, falso altrimenti
    */
-  public function passaggioStato_F_C_7(Docente $docente, Request $request, Form $form,
+  public function passaggioStato_F_C_8(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // controlla se è possibile riapertura
     if (!($docente instanceOf Staff) || $scrutinio->getSincronizzazione()) {
@@ -4151,7 +4204,7 @@ class ScrutinioUtil {
       $fs->rename($file->getRealPath(), $percorso.'/BACKUP.'.$num.'/'.$file->getBasename());
     }
     // aggiorna stato
-    $scrutinio->setStato('7');
+    $scrutinio->setStato('8');
     $this->em->flush();
     // log
     $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(

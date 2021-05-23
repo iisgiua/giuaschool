@@ -18,6 +18,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\CallbackTransformer;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\PropostaVoto;
 
 
@@ -25,6 +27,25 @@ use App\Entity\PropostaVoto;
  * PropostaVotoType - form per la classe PropostaVoto
  */
 class PropostaVotoType extends AbstractType {
+
+  //==================== ATTRIBUTI DELLA CLASSE  ====================
+
+  /**
+   * @var EntityManagerInterface $em Gestore delle entità
+   */
+  private $em;
+
+
+  //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Costruttore
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   */
+  public function __construct(EntityManagerInterface $em) {
+    $this->em = $em;
+  }
 
   /**
    * Crea il form
@@ -35,7 +56,7 @@ class PropostaVotoType extends AbstractType {
   public function buildForm(FormBuilderInterface $builder, array $options) {
     // aggiunge campi al form
     $builder
-      ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
+      ->add('alunno', HiddenType::class)
       ->add('unico', HiddenType::class)
       ->add('recupero', ChoiceType::class, array('label' => false,
         'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
@@ -53,12 +74,14 @@ class PropostaVotoType extends AbstractType {
         'trim' => true,
         'attr' => array('rows' => '3'),
         'required' => false));
-      //-- // aggiunta COVID
-      //-- ->add('strategie', TextareaType::class, array('label' => false,
-        //-- 'trim' => true,
-        //-- 'attr' => array('rows' => '3'),
-        //-- 'required' => false,
-        //-- 'property_path' => 'dati[strategie]'));
+    // aggiunge data transform
+    $builder->get('alunno')->addModelTransformer(new CallbackTransformer(
+      function ($alunno) {
+        return $alunno->getId();
+      },
+      function ($id) {
+        return $this->em->getRepository('App:Alunno')->find($id);
+      }));
   }
 
   /**

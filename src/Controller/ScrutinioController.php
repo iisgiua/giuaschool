@@ -71,7 +71,8 @@ class ScrutinioController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function proposteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                 TranslatorInterface $trans, ScrutinioUtil $scr, LogHandler $dblogger, $cattedra, $classe, $periodo) {
+                                 TranslatorInterface $trans, ScrutinioUtil $scr, LogHandler $dblogger,
+                                 $cattedra, $classe, $periodo) {
     // inizializza variabili
     $info = array();
     $lista_periodi = null;
@@ -79,27 +80,21 @@ class ScrutinioController extends AbstractController {
     $form_title = null;
     $elenco = array();
     $elenco['alunni'] = array();
-    $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['P']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
-    $valutazioni['1']['N'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
-    $valutazioni['1']['R'] = ['min' => 30, 'max' => 37, 'start' => 34, 'ticks' => '30, 31, 32, 33, 34, 35, 36, 37', 'labels' => '"NC", "Scarso", "", "", "Suff.", "", "", "Ottimo"'];
-    $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
-    $valutazioni['I']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['I']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
-    $valutazioni['X']['N'] = $valutazioni['I']['N'];
-    $valutazioni['X']['R'] = $valutazioni['I']['R'];
+    $valutazioni['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
+    $valutazioni['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"', 'format' => '"Non Classificato", "Insufficiente", "Sufficiente", "Discreto", "Buono", "Distinto", "Ottimo"', 'format2' => '"NC", "Insufficiente", "Sufficiente", "Discreto", "Buono", "Distinto", "Ottimo"'];
+    $valutazioni['E'] = ['min' => 3, 'max' => 10, 'start' => 6, 'ticks' => '3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 4, 5, 6, 7, 8, 9, 10'];
     $title['P']['N'] = 'message.proposte';
     $title['P']['R'] = 'message.proposte_religione';
     $title['1']['N'] = 'message.proposte_intermedia';
     $title['1']['R'] = 'message.proposte_religione';
-    $title['F']['N'] = 'message.proposte_covid';
-    $title['F']['R'] = 'message.proposte_religione_covid';
+    $title['F']['N'] = 'message.proposte';
+    $title['F']['R'] = 'message.proposte_religione';
+    $title['F']['E'] = 'message.proposte';
     $title['I']['N'] = 'message.proposte_non_previste';
     $title['I']['R'] = 'message.proposte_non_previste';
     $title['X']['N'] = 'message.proposte_non_previste';
     $title['X']['R'] = 'message.proposte_non_previste';
-    $info['valutazioni'] = $valutazioni['P']['N'];
+    $info['valutazioni'] = $valutazioni['N'];
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
@@ -146,7 +141,7 @@ class ScrutinioController extends AbstractController {
         // periodo indicato non valido
         $periodo = null;
       }
-      if ($periodo && $cattedra->getMateria()->getTipo() != 'E') {
+      if ($periodo) {
         // elenco proposte/alunni
         $elenco = $scr->elencoProposte($this->getUser(), $classe, $cattedra->getMateria(), $cattedra->getTipo(), $periodo);
         if ($lista_periodi[$periodo] == 'N') {
@@ -156,31 +151,23 @@ class ScrutinioController extends AbstractController {
           $opzioni = ['label' => false,
             'data' => $elenco['proposte'],
             'entry_type' => PropostaVotoType::class,
-            'entry_options' => array('label' => false)
-            ];
+            'entry_options' => array('label' => false)];
+          $info['valutazioni'] = $valutazioni[$cattedra->getMateria()->getTipo()];
+          $form_title = $title[$periodo][$cattedra->getMateria()->getTipo()];
           if ($cattedra->getMateria()->getTipo() == 'R') {
             // religione
-            $form_title = $title[$periodo]['R'];
-            $info['valutazioni'] = $valutazioni[$periodo]['R'];
-            //-- $info['religione'] = true;
-            //-- $opzioni['attr'] = ['no_recupero' => false];
-          } else {
-            // altre materie
-            $form_title = $title[$periodo]['N'];
-            $info['valutazioni'] = $valutazioni[$periodo]['N'];
-            //-- if ($periodo == 'F' && $classe->getAnno() == 5) {
-              //-- // scrutinio finale di una quinta: no recupero
-              //-- $opzioni['attr'] = ['no_recupero' => false];
-              //-- $form_title = 'message.proposte_quinte';
-            //-- }
+            $opzioni['attr'] = ['no_recupero' => true];
           }
-          //-- if ($periodo == 'F' && $classe->getAnno() == 5) {
-            //-- // scrutinio finale di una quinta: no recupero
-            //-- $opzioni['attr'] = ['no_recupero' => false];
-            //-- $form_title = 'message.proposte_quinte';
-          //-- }
+          if ($periodo == 'F' && $classe->getAnno() == 5) {
+            // scrutinio finale di una quinta: no recupero
+            $opzioni['attr'] = ['no_recupero' => true];
+            $form_title = 'message.proposte_quinte';
+          }
           // form di inserimento
           $form = $this->container->get('form.factory')->createNamedBuilder('proposte', FormType::class)
+            ->setAction($this->generateUrl('lezioni_scrutinio_proposte', [
+              'cattedra' => $cattedra->getId(), 'classe' => $classe->getId(),
+              'periodo' => $periodo]))
             ->add('lista', CollectionType::class, $opzioni)
             ->add('submit', SubmitType::class, array('label' => 'label.submit',
               'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']))
@@ -214,61 +201,30 @@ class ScrutinioController extends AbstractController {
                 continue;
               } elseif ($prop->getUnico() < 6 && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
                 // manca tipo recupero
-                $errori[2] = 'exception.no_recupero';
+                  $errori[2] = 'exception.no_recupero';
               } elseif ($prop->getUnico() < 6 && empty($prop->getDebito()) && !isset($opzioni['attr']['no_recupero'])) {
                 // manca argomenti debito
-                $errori[3] = 'exception.no_debito';
-              //-- } elseif ($prop->getUnico() == 0 || $prop->getUnico() == 20) {
-                //-- // mancano obiettivi recupero
-                //-- $errori[2] = 'exception.no_valutazione_NC';
-              //-- } elseif (($prop->getUnico() < 6 || ($prop->getUnico() >= 20 && $prop->getUnico() < 22)) && $prop->getDebito() === null && !isset($opzioni['attr']['no_recupero'])) {
-                //-- // mancano obiettivi recupero
-                //-- $errori[3] = 'exception.no_obiettivi_recupero';
-              //-- } elseif (($prop->getUnico() < 6 || ($prop->getUnico() >= 20 && $prop->getUnico() < 22)) && $prop->getDato('strategie') === null && !isset($opzioni['attr']['no_recupero'])) {
-                //-- // mancano strategie recupero
-                //-- $errori[4] = 'exception.no_strategie_recupero';
-              //-- } elseif ($prop->getUnico() >= 30 && $prop->getRecupero() === null &&
-                        //-- isset($elenco['debiti'][$alunno->getId()])) {
-                //-- // periodo 1: manca indicazione sul recupero
-                //-- $errori[2] = 'exception.no_recupero_eseguito';
-              //-- } else {
-                //-- // controllo su obiettivi
-                //-- $o = preg_replace('/\b(il|del|nel)\b/',' ', strtolower($prop->getDebito()));
-                //-- $o = preg_replace('/\W+/','', $o);
-                //-- if (in_array($o, ['programmasvolto', 'programmasvoltopentamestre', 'tuttoprogramma',
-                    //-- 'tuttoprogrammasvolto', 'programmapentamestre', 'tuttoprogrammapentamestre'])) {
-                  //-- // testo non valido
-                  //-- $errori[5] = 'exception.invalidi_obiettivi_recupero';
-                //-- }
+                if (($cattedra->getMateria()->getTipo() == 'N' && $prop->getUnico() > 0) || $prop->getUnico() > 3) {
+                  // esclude NC da messaggio di errore
+                  $errori[3] = 'exception.no_debito';
+                }
               }
               if ($proposte_prec[$key]->getUnico() === null && $prop->getUnico() !== null) {
                 // proposta aggiunta
                 $log['create'][] = $prop;
               } elseif ($proposte_prec[$key]->getUnico() != $prop->getUnico() ||
                         $proposte_prec[$key]->getRecupero() != $prop->getRecupero() ||
-                        $proposte_prec[$key]->getDebito() != $prop->getDebito() ||
-                        $proposte_prec[$key]->getDato('strategie') != $prop->getDato('strategie')) {
+                        $proposte_prec[$key]->getDebito() != $prop->getDebito()) {
                 // proposta modificata
                 $log['edit'][] = $proposte_prec[$key];
                 // aggiorna docente proposta
                 $prop->setDocente($this->getUser());
               }
-              //-- if (($prop->getUnico() >= 6 && $prop->getUnico() <= 10) || $prop->getUnico() >= 22 || isset($opzioni['attr']['no_recupero'])) {
-                //-- // svuota campi inutili
-                //-- $prop->setDebito('');
-                //-- $prop->addDato('strategie', '');
-              //-- }
+              if (($prop->getUnico() >= 6 && $prop->getUnico() <= 10) || $prop->getUnico() >= 22 || isset($opzioni['attr']['no_recupero'])) {
+                // svuota campi inutili
+                $prop->setDebito('');
+              }
             }
-            //-- if ($classe->getAnno() != 5) {
-              //-- // legge PIA
-              //-- $documento = $em->getRepository('App:DocumentoInterno')->findOneBy(['tipo' => 'A',
-                //-- 'classe' => $classe, 'materia' => $cattedra->getMateria()]);
-              //-- if (!$documento || ($documento->getDato('necessario') &&
-                  //-- (empty($documento->getDato('obiettivi')) || empty($documento->getDato('strategie'))))) {
-                //-- // documento da compilare
-                //-- $errori[10] = 'exception.invalido_piano_integrazione_scrutinio';
-              //-- }
-            //-- }
             // ok: memorizza dati
             $em->flush();
             // log azione
@@ -464,6 +420,7 @@ class ScrutinioController extends AbstractController {
     $valutazioni['P']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
+    $valutazioni['F']['E'] = ['min' => 3, 'max' => 10, 'start' => 6, 'ticks' => '3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 4, 5, 6, 7, 8, 9, 10'];
     $info['valutazioni'] = $valutazioni['P']['N'];
     $elenco = array();
     $elenco['alunni'] = array();
@@ -1181,8 +1138,8 @@ class ScrutinioController extends AbstractController {
       $dati = $scr->elencoVotiAlunno($this->getUser(), $alunno, $periodo);
     }
     // esiti possibili
-    //-- $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
-    $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N');
+    $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
+    //-- $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N');
     if ($periodo == 'I') {
       // integrazione scrutinio finale
       $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_X' => 'X');
@@ -1479,6 +1436,15 @@ class ScrutinioController extends AbstractController {
         'expanded' => true,
         'multiple' => true,
         'required' => false))
+
+      ->add('creditoIntegrativo', ChoiceType::class, array('label' => 'label.credito_integrativo',
+        'data' => isset($valori['creditoIntegrativo']) ? $valori['creditoScolastico'] : null,
+        'choices' => ['label.credito_integrativo_si' => true, 'label.credito_integrativo_no' => false],
+        'placeholder' => null,
+        'expanded' => true,
+        'multiple' => false,
+        'required' => false))
+
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
