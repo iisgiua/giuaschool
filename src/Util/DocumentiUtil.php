@@ -88,10 +88,10 @@ class DocumentiUtil {
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno AND cl.anno!=:quinta')
+      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno AND m.tipo!=:edcivica AND cl.anno!=:quinta')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
-        'documento' => 'P', 'quinta' => 5])
+        'edcivica' => 'E', 'documento' => 'P', 'quinta' => 5])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $k=>$c) {
@@ -231,10 +231,10 @@ class DocumentiUtil {
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno AND cl.anno!=:quinta')
+      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno AND m.tipo!=:edcivica AND cl.anno!=:quinta')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
-        'documento' => 'R', 'quinta' => 5])
+        'edcivica' => 'E', 'documento' => 'R', 'quinta' => 5])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $k=>$c) {
@@ -281,10 +281,10 @@ class DocumentiUtil {
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno')
+      ->where('c.docente=:docente AND c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:sostegno AND m.tipo!=:edcivica')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['docente' => $docente, 'attiva' => 1, 'potenziamento' => 'P', 'sostegno' => 'S',
-        'documento' => 'L'])
+        'edcivica' => 'E', 'documento' => 'L'])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $k=>$c) {

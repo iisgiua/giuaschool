@@ -91,8 +91,9 @@ label.criterio_credito_desc_A: Partecipazione alle attività di Alternanza Scuol
 label.criterio_credito_desc_F: Frequenza assidua
 label.criterio_credito_desc_I: Interesse e impegno
 label.criterio_credito_desc_L: Corsi di lingue certificati da un ente esterno
-label.criterio_credito_desc_O: Rappresentante negli Organi Collegiali scolastici
-label.criterio_credito_desc_P: Proficua partecipazione a progetti e attività organizzate dall'Istituto
+label.criterio_credito_desc_O: Svolgimento attività come rappresentante negli Organi Collegiali scolastici
+label.criterio_credito_desc_P: Proficua partecipazione ai PCTO e alle altre attività organizzate dall'Istituto
+label.criterio_credito_desc_R: Proficua partecipazione alle lezioni della Religione o Materia alternativa
 label.criterio_credito_desc_S: Attività sociali e sportive certificate da un ente esterno
 label.criterio_credito_F: Frequenza
 label.criterio_credito_I: Interesse e impegno
@@ -116,6 +117,7 @@ label.deroga_famiglia: Deroga per gravi situazioni famigliari
 label.deroga_religione: Deroga per religione che considera il sabato come giorno di riposo
 label.deroga_salute: Deroga per motivi di salute
 label.deroga_sport: Deroga per partecipazione ad attività sportive
+label.deroga_lavoratori: Deroga per studenti lavoratori
 label.descrizione_compito: Compiti assegnati
 label.descrizione_verifica: Descrizione o argomenti
 label.destinatari: Destinatari
@@ -424,8 +426,8 @@ label.colloqui_codice: Codice riunione per Meet
 label.numero_genitori: Genitori prenotati
 label.esporta: Esporta
 label.credito_integrativo: Credito integrativo
-label.credito_integrativo_si: SI (ha recuperato quanto previsto nel PAI)
-label.credito_integrativo_no: NO (non ha recuperato quanto previsto nel PAI)
+label.credito_integrativo_si: SI (ha recuperato le carenze dello scorso anno scolastico)
+label.credito_integrativo_no: NO (non ha recuperato le carenze dello scorso anno scolastico)
 
 
 ##### PAGINE #####
@@ -797,38 +799,63 @@ e di maturazione in ordine alle finalità educative della scuola."
 message.giudizio_condotta_6: " * Mantiene un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento poco rispettoso nei confronti dei docenti e/o del personale d’Istituto;\\n
 * non è puntuale nello svolgimento degli impegni scolastici;\\n
 * non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento;\\n
-* spesso ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, opportunamente rilevato e sanzionato;\\n
+* spesso ha un comportamento poco responsabile durante l’attività scolastica in presenza, in DAD/DDI e/o durante le attività didattiche al di fuori dell’Istituto, opportunamente rilevato e sanzionato;\\n
 * ha scarso rispetto dell’integrità delle strutture e degli spazi dell’Istituto;\\n
 * non partecipa al dialogo educativo, spesso non mostra interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
-* non sempre rispetta le norme di sicurezza."
+* non sempre rispetta le norme di sicurezza;\\n
+* partecipa in maniera discontinua alle attività didattiche on line e/o su piattaforma;\\n
+* spesso non entra nell’aula virtuale con puntualità;\\n
+* non partecipa con la videocamera accesa e alla richiesta del docente risponde in maniera polemica;\\n
+* non sempre si presenta e si esprime in modo adeguato;\\n
+* talvolta non rispetta le regole della condivisione e pubblicazione digitale."
 message.giudizio_condotta_7: " * Mantiene un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento non sempre rispettoso nei confronti dei docenti e/o del personale dell’Istituto;\\n
 * non è sempre costante nell’espletamento degli impegni scolastici;\\n
-* la frequenza all’attività didattica non è sempre continua, non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento,\\n
-* talvolta ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, anche rilevato;\\n
+* la frequenza all’attività didattica non è sempre continua, non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento;\\n
+* talvolta ha un comportamento poco responsabile durante l’attività scolastica in presenza, in DAD/DDI e/o durante le attività didattiche al di fuori dell’Istituto, anche rilevato;\\n
 * talvolta non rispetta le consegne, i regolamenti e le cose comuni;\\n
 * non partecipa al dialogo educativo, spesso non mostrando interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
-* non sempre rispetta le norme di sicurezza."
-message.giudizio_condotta_8: " * Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
+* non sempre rispetta le norme di sicurezza;\\n
+* partecipa in maniera discontinua alle attività didattiche on line e/o su piattaforma;\\n
+* non sempre entra nell’aula virtuale con puntualità;\\n
+* non partecipa con la videocamera accesa e alla richiesta del docente adduce a giustificazione problemi di connessione;\\n
+* non sempre si presenta e si esprime in modo adeguato;\\n
+* generalmente rispetta le regole della condivisione e pubblicazione digitale."
+message.giudizio_condotta_8: " * Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona; \\n
 * ha un atteggiamento responsabile durante le attività didattiche, svolte anche al di fuori dell’istituto;\\n
 * è puntuale nell’adempimento degli impegni scolastici, rispetta l’integrità delle strutture e degli spazi contribuendo alla qualità della vita scolastica;\\n
 * frequenta le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
 * partecipa all’attività educativo-didattica, è interessato all’apprendimento, ma non sempre esegue i compiti assegnati;\\n
 * è spesso disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
-* rispetta le norme di sicurezza."
+* rispetta le norme di sicurezza;\\n
+* è presente e partecipa alle attività didattiche on line e/o su piattaforma;\\n
+* generalmente entra nell’aula virtuale con puntualità;\\n
+* partecipa con la videocamera accesa solo dopo richiesta del docente;\\n
+* generalmente si presenta e si esprime in modo adeguato;\\n
+* rispetta le regole della condivisione e pubblicazione digitale."
 message.giudizio_condotta_9: " * Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
 * dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’istituto;\\n
 * rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
 * frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
 * partecipa in modo costruttivo all’attività educativo-didattica, è interessato e motivato all’apprendimento, esegue i compiti assegnati;\\n
 * è disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
-* rispetta le norme di sicurezza."
-message.giudizio_condotta_10: " * Si relaziona sempre correttamente con i docenti, i collaboratori scolastici e i compagni, dimostra maturità a partire dal rispetto per la propria persona;\\n
+* rispetta le norme di sicurezza;\\n
+* partecipa con presenza e interesse costanti alle attività didattiche on line e/o su piattaforma;\\n
+* entra molto spesso nell’aula virtuale con puntualità;\\n
+* partecipa molto spesso con la videocamera accesa;\\n
+* molto spesso si presenta e si esprime in modo adeguato;\\n
+* rispetta sempre le regole della condivisione e pubblicazione digitale."
+message.giudizio_condotta_10: " * Si relaziona sempre correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
 * dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’istituto;\\n
 * rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
 * è sempre puntuale e frequenta assiduamente le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
-* mostra interesse costruttivo per il mondo della scuola, ha un ruolo propositivo all’interno della classe, mostrando solidarietà e collaborazione nei confronti dei compagni;\\n
+* mostra interesse costruttivo per il mondo della scuola, un ruolo propositivo all’interno della classe, solidarietà e collaborazione nei confronti dei compagni;\\n
 * è interessato e motivato all’apprendimento, esegue sempre i compiti assegnati;\\n
-* rispetta le norme di sicurezza."
+* rispetta le norme di sicurezza;\\n
+* partecipa con presenza e interesse costanti alle attività didattiche on line e/o su piattaforma, intervenendo proficuamente nelle discussioni;\\n
+* entra sempre nell’aula virtuale con puntualità;\\n
+* partecipa sempre con la videocamera accesa;\\n
+* si presenta e si esprime sempre in modo adeguato;\\n
+* rispetta sempre le regole della condivisione e pubblicazione digitale."
 message.no_scrutini_svolti: Non esistono ancora scrutini svolti.
 message.docenti_colloqui_importa: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
   \"Docente, Username, Sede, Giorno, Ora, Frequenza, Note\".
@@ -877,10 +904,17 @@ message.motivazione_deroga_S: Vista la situazione di salute, adeguatamente docum
 message.motivazione_deroga_F: Vista la grave situazione famigliare, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.motivazione_deroga_P: Vista la partecipazione ad attività sportive, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.motivazione_deroga_R: Vista l'adesione a una confessione religiosa che considera il sabato come giorno di riposo, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
-message.giudizio_non_ammissione: Esaminati tutti gli elementi valutativi, tenuto conto delle gravi carenze di base nella maggior parte delle discipline, considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrato nel corso dell’anno scolastico, il Consiglio di Classe ritiene che l’alunn{sex} non possieda le competenze e le conoscenze adeguate per affrontare {classe}.
+message.motivazione_deroga_L: Vista la condizione di studente lavoratore, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
+message.giudizio_non_ammissione: "L'alunn{sex},\\n
+ancorché scrutinat{sex} in deroga al limite di assenze,\\n
+con frequenza irregolare e numero elevato di assenze,\\n
+benché siano state svolte attività di recupero in orario curricolare ed extracurricolare,\\n
+pur essendo stata informata la famiglia,\\n
+considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrata nel corso dell’anno scolastico,\\n
+non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e non possiede competenze e conoscenze adeguate per affrontare {classe}."
 message.giudizio_non_ammissione_sospeso: Esaminati tutti gli elementi valutativi, tenuto conto che persistono le gravi carenze segnalate nello scrutinio finale di giugno, il Consiglio di Classe ritiene che l’alunn{sex} non possieda le competenze e le conoscenze adeguate per affrontare la classe successiva.
 message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi.
-message.motivazione_ammissione: "Nonostante permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di Classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
+message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
 message.otp_abilitato: Codice OTP abilitato.
 message.modifica_email: Inserisci il tuo indirizzo di posta elettronica. Ricorda che è importante che sia un indirizzo valido, in caso contrario non sarà possibile utilizzare la funzione di recupero password.
 message.modifica_password: "La password ha una lunghezza minima di 8 caratteri e deve contenere: almeno una lettera maiuscola, almeno una lettera minuscola, almeno una cifra.<br>Si consiglia di utilizzare anche gli altri caratteri presenti sulla tastiera (ad esempio +-#@$&!?.,;:)."
@@ -1052,6 +1086,8 @@ exception.giudizio_esito: Non è stato inserito il giudizio di non ammissione de
 exception.id_notfound: Oggetto non trovato.
 exception.insufficienze_ammissione_esito: Sono presenti insufficienze con un esito di ammissione per l'alunn{sex} {alunno}.
 exception.insufficienze_ammissione_quinta: E' presente più di una insufficienza con un esito di ammissione per l'alunn{sex} {alunno}.
+exception.motivazione_ammissione_quinta: Manca la motivazione dell'ammissione con una insufficienza per l'alunn{sex} {alunno}.
+exception.num_materie_sospeso: E' stato sospeso il giudizio con più di tre materie per l'alunn{sex} {alunno}.
 exception.invalid_app: Applicazione non riconosciuta. Controllare l'esistenza di una nuova versione.
 exception.invalid_card: Certificato non valido.
 exception.invalid_credentials: Le credenziali di accesso non sono valide.

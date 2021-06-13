@@ -30,7 +30,6 @@
         </div>
       </li>
     </ul>
-  {% if alunno.classe.anno == 5 or dati.esito.media >= 6 %}
     <div class="form-group bg-success gs-mb-1">
       <label class="col-sm-4 control-label gs-big">{{ 'label.credito_scolastico'|trans }}</label>
       <div class="col-sm-8">
@@ -39,6 +38,7 @@
   {% endfor %}
       </div>
     </div>
+  {% if (alunno.classe.anno == 4 and alunno.credito3 == 6) or (alunno.classe.anno == 5 and alunno.credito4 == 6) %}
     <div class="form-group bg-success gs-mb-1">
       <label class="col-sm-4 control-label gs-big">{{ 'label.credito_integrativo'|trans }}</label>
       <div class="col-sm-8">
@@ -50,9 +50,7 @@
       <label class="col-sm-4 control-label gs-big">Punteggio attribuito</label>
       <div class="col-sm-8 gs-mt-2">
         <span id="gs-credito-alunno" class="label label-info gs-big">{{ dati.credito }}</span>
-  {% if alunno.classe.anno == 5 or dati.esito.media >= 6 %}
         <strong class="gs-big gs-ml-3">(intervallo: {{ dati.credito }} - {{ dati.credito + 1 }})</strong>
-  {% endif %}
       </div>
     </div>
   </div>
@@ -87,6 +85,5 @@ $(document).ready(function() {
       l.css('font-weight', 'normal');
     }
   }).change();
-
 });
 </script>

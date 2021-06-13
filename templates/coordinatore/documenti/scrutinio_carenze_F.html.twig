@@ -1,0 +1,55 @@
+{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<table style="font-family:times;font-size:12pt" border="0" cellpadding="3" nobr="true">
+  <tr nobr="true">
+    <td width="55%">&nbsp;</td>
+    <td width="45%" align="left">
+      <em>Ai genitori dell'alunn{{ dati.sex }}</em><br>
+      {{ dati.alunno.cognome|upper }} {{ dati.alunno.nome|upper }}<br>
+      Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }}
+    </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<div style="text-align:justify;font-family:times;font-size:11pt">
+  <p><strong>OGGETTO: Scrutinio finale A.S.
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione per il recupero autonomo</strong></p>
+  <br>
+{% if dati.esito.esito == 'A' %}
+  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio finale dell’Anno Scolastico
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
+    {{ dati.scrutinio.data|date('d/m/Y') }},
+    pur avendo ammesso l'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}
+    alla classe successiva, ritiene che vi siano alcune lacune nella sua preparazione
+    e che queste potranno essere colmate attraverso un autonomo ed adeguato
+    studio individuale durante i mesi estivi.
+    <br>Si riporta nel prospetto seguente il dettaglio delle carenze da recuperare autonomamente:
+  </p>
+{% else %}
+  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio finale dell’Anno Scolastico
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
+    {{ dati.scrutinio.data|date('d/m/Y') }},
+    pur avendo sospeso il giudizio per l'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }},
+    ritiene che vi siano ulteriori lacune nella sua preparazione
+    e che queste potranno essere colmate attraverso un autonomo ed adeguato
+    studio individuale durante i mesi estivi.
+    <br>Si riporta nel prospetto seguente il dettaglio delle carenze da recuperare autonomamente:
+  </p>
+{% endif %}
+  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="30%" align="center"><strong>MATERIA</strong></td>
+      <td width="70%" align="center"><strong>Argomenti da recuperare</strong></td>
+    </tr>
+{% for idmat,mat in dati.materie %}
+  {% if dati.carenze[idmat].unico is defined %}
+    <tr>
+      <td align="left"><strong>{{ mat.nome }}</strong></td>
+      <td align="left" style="font-size:9pt">{{ dati.carenze[idmat].debito|nl2br }}</td>
+    </tr>
+  {% endif %}
+{% endfor %}
+  </table>
+  <p>&nbsp;</p>
+  <p>Distinti Saluti.</p>
+{{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}
+</div>

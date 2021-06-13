@@ -9,11 +9,7 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Scrutinio chiuso</h2>
-    {% if not dati.verbale.download %}
-  <h3 class="text-center text-success gs-h3 gs-mt-0 gs-mb-1"><em>E' necessario completare il verbale come prima operazione.</em></h2>
-    {% endif  %}
     {% include 'include/modal-error.html.twig' %}
-  <div>
     <table class="table table-bordered table-hover table-striped gs-mt-4">
       <caption class="text-center text-info"><strong class="gs-big">Scrutinio finale</strong></caption>
       <thead class="bg-success">
@@ -27,86 +23,57 @@
         <tr>
           <td><strong>Verbale</strong></td>
           <td>
-            {#-- Stampare in duplice copia e consegnare in Segreteria Didattica:  #}
-            Una copia sarà inserita nel registro dei verbali e l'altra conservata agli atti.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
+            Stampare in <strong>duplice copia</strong> e consegnare in Segreteria Didattica: una copia sarà inserita nel registro dei verbali e l'altra conservata agli atti.<br>
+            <strong><em>Far firmare al presidente e al segretario della seduta.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           <td>
-    {#-- {% if (not dati.verbale.download) or dati.modifica %} #}
-      {#-- {% for step,s in dati.verbale.step %} #}
-            {#-- <div class="gs-mb-2"> #}
-              {#-- <button type="button" class="btn btn-xs btn-{{ dati.verbale.validato[step] ? 'primary' : 'success' }} gs-button-remote" title="Modifica il contenuto del punto {{ s.argomento }} all'ordine del giorno" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'F', 'step': step}) }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica il punto {{ s.argomento }}</strong></button> #}
-            {#-- </div> #}
-      {#-- {% endfor %} #}
-    {#-- {% endif %} #}
-    {#-- {% if dati.verbale.download %} #}
             <div class="gs-mb-2">
               <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
             </div>
-    {#-- {% endif %} #}
           </td>
         </tr>
         <tr>
           <td><strong>Riepilogo voti</strong></td>
           <td>
-            {#-- Stampare in duplice copia e consegnare in Segreteria Didattica: #}
-             Una copia sarà allegata al verbale e l'altra conservata agli atti.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
+            Stampare in <strong>duplice copia</strong> e consegnare in Segreteria Didattica: una copia sarà allegata al verbale e l'altra conservata agli atti.<br>
+            <strong><em>Far firmare a tutti i docenti e al presidente.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-    {#-- {% if dati.verbale.download %} #}
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-    {#-- {% endif %} #}
           </td>
         </tr>
         <tr>
           <td><strong>Tabellone voti</strong></td>
           <td>
-            {#-- Stampare in duplice copia e consegnare in Segreteria Didattica:  #}
-            Una copia sarà pubblicata e l'altra conservata agli atti.<br>
+            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica: sarà firmata dal Dirigente ed esposta all'albo.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-    {#-- {% if dati.verbale.download %} #}
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-    {#-- {% endif %} #}
           </td>
         </tr>
-        {#-- <tr> #}
-          {#-- <td><strong>Foglio firme Verbale</strong></td> #}
-          {#-- <td> #}
-            {#-- Stampare in duplice copia e consegnare in Segreteria Didattica: una copia sarà allegata al verbale e l'altra conservata agli atti.<br> #}
-            {#-- <strong><em>Far firmare a tutti i docenti entrambe le copie.</em></strong><br> #}
-            {#-- <br> #}
-            {#-- Formato del documento: <em>PDF</em> #}
-          {#-- </td> #}
-          {#-- <td> #}
-            {#-- <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'F', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a> #}
-          {#-- </td> #}
-        {#-- </tr> #}
-        {#-- <tr> #}
-          {#-- <td><strong>Foglio firme Registro dei voti</strong></td> #}
-          {#-- <td> #}
-            {#-- Stampare in un'unica copia e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br> #}
-            {#-- <strong><em>Far firmare a tutti i docenti.</em></strong><br> #}
-            {#-- <br> #}
-            {#-- Formato del documento: <em>PDF</em> #}
-          {#-- </td> #}
-          {#-- <td> #}
-            {#-- <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a> #}
-          {#-- </td> #}
-        {#-- </tr> #}
+        <tr>
+          <td><strong>Foglio firme Registro dei voti</strong></td>
+          <td>
+            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
+            <strong><em>Far firmare a tutti i docenti, al segretario e al presidente.</em></strong><br>
+            <br>
+            Formato del documento: <em>PDF</em>
+          </td>
+          <td>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          </td>
+        </tr>
     {% if classe.anno == 2 %}
         <tr>
           <td><strong>Certificazione competenze</strong></td>
           <td>
-            {#-- Stampare in un'unica copia e consegnare in Segreteria Didattica, dove  #}
-            Sarà conservata agli atti.<br>
+            Sarà stampata conservata agli atti dalla Segreteria Didattica<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
@@ -119,7 +86,7 @@
         <tr>
           <td><strong>Comunicazione Non Ammessi</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br>
+            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
@@ -132,73 +99,42 @@
     {% endfor %}
           </td>
         </tr>
+    {% if classe.anno != 5 %}
         <tr>
           <td><strong>Comunicazione Debiti</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br>
+            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-    {% for a in dati.debiti %}
+      {% for a in dati.debiti %}
             <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'D', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
-    {% else %}
+      {% else %}
             <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
-    {% endfor %}
+      {% endfor %}
           </td>
         </tr>
         <tr>
           <td><strong>Comunicazione Carenze</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br>
+            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-    {% for a in dati.carenze %}
+      {% for a in dati.carenze %}
             <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'C', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
-    {% else %}
+      {% else %}
             <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
-    {% endfor %}
+      {% endfor %}
           </td>
         </tr>
-
-    {#-- {% if classe.anno != 5 %} #}
-        {#-- <tr> #}
-          {#-- <td><strong>Piano di Integrazione degli Apprendimenti</strong></td> #}
-          {#-- <td> #}
-            {#-- Da conservare agli atti.<br> #}
-            {#-- <strong><em>Controllare che non ci siano errori.</em></strong><br> #}
-            {#-- <br> #}
-            {#-- Formato del documento: <em>PDF</em> #}
-          {#-- </td> #}
-          {#-- <td> #}
-            {#-- <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'X', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a></div> #}
-          {#-- </td> #}
-        {#-- </tr> #}
-        {#-- <tr> #}
-          {#-- <td><strong>Piano di Apprendimento Individualizzato</strong></td> #}
-          {#-- <td> #}
-            {#-- Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br> #}
-            {#-- <strong><em>Controllare che non ci siano errori.</em></strong><br> #}
-            {#-- <br> #}
-            {#-- Formato del documento: <em>PDF</em> #}
-          {#-- </td> #}
-          {#-- <td> #}
-    {#-- {% for a in dati.PAI %} #}
-            {#-- <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'X', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div> #}
-    {#-- {% else %} #}
-            {#-- <span class="label label-warning">NESSUN DOCUMENTO</span> #}
-    {#-- {% endfor %} #}
-          {#-- </td> #}
-        {#-- </tr> #}
-    {#-- {% endif %} #}
-
+    {% endif %}
       </tbody>
     </table>
-  </div>
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
     <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '8'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>

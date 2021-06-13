@@ -534,8 +534,8 @@ class GenitoriUtil {
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
       ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('al.alunno=:alunno AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
-      ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => 'N'])
+      ->where('al.alunno=:alunno AND m.tipo IN (:tipo) AND (l.classe=:classe OR l.classe=cc.classe)')
+      ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'tipo' => ['N', 'E']])
       ->getQuery()
       ->getSingleScalarResult();
     if ($alunno->getReligione() == 'S' || $alunno->getReligione() == 'A') {
@@ -772,7 +772,6 @@ class GenitoriUtil {
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
       ->getQuery()
       ->getResult();
-    //-- $dati['PAI'] = false;
     foreach ($voti as $v) {
       // inserisce voti/debiti
       $dati['voti'][$v->getMateria()->getId()] = array(
@@ -786,37 +785,13 @@ class GenitoriUtil {
             'recupero' => $v->getRecupero(),
             'debito' => $v->getDebito());
         }
-        //-- // nuovi crediti
-        //-- $nuovicrediti = $scrutinio->getDato('nuovicrediti')[$alunno->getId()];
-        //-- $dati['nuovicrediti'] = (is_array($nuovicrediti) ? $nuovicrediti[0] : $nuovicrediti);
-      } elseif ($periodo == '1') {
-        // valutazione intermedia
-        $dati['voti'][$v->getMateria()->getId()]['recupero'] = $v->getRecupero();
       } elseif ($periodo == 'F' && $classe->getAnno() != 5) {
         // scrutinio finale
-        //-- if ($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) {
-          //-- $dati['debiti'][$v->getMateria()->getId()] = array(
-            //-- 'recupero' => $v->getRecupero(),
-            //-- 'debito' => $v->getDebito());
-        //-- }
-        // PAI
-        if (($v->getMateria()->getTipo() == 'N' && $v->getUnico() < 6) ||
-            ($v->getMateria()->getTipo() == 'R' && $v->getUnico() < 22)) {
-          $dati['PAI'] = true;
+        if (in_array($v->getMateria()->getTipo(), ['N', 'E']) && $v->getUnico() < 6) {
+          $dati['debiti'][$v->getMateria()->getId()] = array(
+            'recupero' => $v->getRecupero(),
+            'debito' => $v->getDebito());
         }
-      }
-    }
-    // debito formativo esistente
-    if ($periodo == '1') {
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
-        ->join('vs.scrutinio', 's')
-        ->where('vs.unico<6 AND vs.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
-        ->setParameters(['alunno' => $alunno, 'classe' => $classe, 'periodo' => 'P', 'stato' => 'C'])
-        ->getQuery()
-        ->getResult();
-      foreach ($voti as $v) {
-        // inserisce proposte trovate
-        $dati['debiti'][$v->getMateria()->getId()] = $v;
       }
     }
     // esito scrutinio
@@ -845,7 +820,6 @@ class GenitoriUtil {
           // inserisce proposte
           $dati['proposte'][$p->getMateria()->getId()] = array(
             'unico' => $p->getUnico());
-          // inserisce voti/debiti
         }
       } else {
         // non scrutinato

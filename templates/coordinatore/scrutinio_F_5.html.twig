@@ -9,7 +9,7 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 5: esito dello scrutinio</h2>
-  <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-1"><em>Clicca sul pulsante di modifica o sui voti per modificarli, sul pulsante dell'esito per inserire l'ammissione o la non ammissione.</em></h2>
+  <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-1"><em>Clicca sul pulsante dell'esito per inserire o modificare l'esito finale dell'alunno.<br>Puoi anche modificare tutte le valutazioni cliccando sul pulsante di modifica della materia o su un singolo voto.</em></h2>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
   <div id="gs-fixed-header">
@@ -20,7 +20,10 @@
     {% for materia,m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
       {% if m.tipo == 'C' %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni per la condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'F', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni per la Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'F', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <br>
+      {% elseif m.tipo == 'E' %}
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni per Ed. civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': 'F', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
             <br>
       {% else %}
             <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Modifica le valutazioni della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'F', 'alunno': 0}) }}"><span class="glyphicon glyphicon-edit"></span></button>
@@ -49,7 +52,7 @@
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'R' %}
-          {% if a.religione != 'S' %}
+          {% if a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
           {% elseif dati.voti[alunno][materia].unico is not defined %}
             <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci la valutazione della Religione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'F', 'alunno': alunno}) }}"><span class="glyphicon glyphicon-edit"></span></button>
@@ -63,6 +66,14 @@
             <button type="button" class="btn btn-xs btn-danger gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}"><strong>NC</strong></button>
           {% else %}
             <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }} gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}"><strong>{{ dati.voti[alunno][materia].unico }}</strong></button>
+          {% endif %}
+        {% elseif m.tipo == 'E' %}
+          {% if dati.voti[alunno][materia].unico is not defined %}
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci la valutazione di Ed. civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+          {% elseif dati.voti[alunno][materia].unico == 3 %}
+            <button type="button" class="btn btn-xs btn-danger gs-button-remote" title="Modifica la valutazione di Ed. civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}"><strong>NC</strong></button>
+          {% else %}
+            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }} gs-button-remote" title="Modifica la valutazione di Ed. civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {'classe': classe.id, 'periodo': 'F', 'alunno': alunno}) }}"><strong>{{ dati.voti[alunno][materia].unico }}</strong></button>
           {% endif %}
         {% else %}
           {% if dati.voti[alunno][materia].unico is not defined %}

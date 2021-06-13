@@ -22,7 +22,7 @@
             </div>
             <div class="col-sm-6 gs-pl-0">
               <span class="gs-pl-5 gs-mr-3"><strong>Voto deliberato</strong></span>
-              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-success gs-big">{{ valutazioni[voto.vars.value.unico] }}</span>
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-success gs-big">{{ (voto.vars.value.materia.tipo == 'E' and voto.vars.value.unico == 3) ? 'NC' : valutazioni[voto.vars.value.unico] }}</span>
             </div>
           </div>
           <div>
@@ -32,6 +32,8 @@
             </div>
           </div>
         </div>
+        {{ form_widget(voto.alunno) }}
+        {{ form_widget(voto.unico) }}
       </li>
   {% endfor %}
     </ul>
@@ -42,4 +44,3 @@
   </div>
   {{ form_widget(form._token) }}
 {{ form_end(form, {'render_rest': false}) }}
-

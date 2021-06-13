@@ -81,7 +81,7 @@
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
       {% if is_granted('ROLE_STAFF') %}
-      <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': 'N'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': 'N'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Annulla apertura scrutinio</strong></a>
       {% endif %}
     </div>
     <div class="text-right col-sm-6">

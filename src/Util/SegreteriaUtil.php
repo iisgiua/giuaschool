@@ -265,13 +265,6 @@ class SegreteriaUtil {
         // verbale non previsto
         $dati['verbale'] = false;
       } elseif ($scrutinio->getPeriodo() == 'F') {
-        // controlla verbale
-        $dati['verbale'] = true;
-        foreach ($dati_scrutinio['verbale'] as $step=>$args) {
-          if ($args['validazione']) {
-            $dati['verbale'] = ($dati['verbale'] && $args['validato']);
-          }
-        }
         // dati esito
         $scrutinati = ($scrutinio->getDato('scrutinabili') == null ? [] : array_keys($scrutinio->getDato('scrutinabili')));
         $cessata_frequenza = ($scrutinio->getDato('cessata_frequenza') == null ? [] : $scrutinio->getDato('cessata_frequenza'));
@@ -290,26 +283,6 @@ class SegreteriaUtil {
         } else {
           // non scrutinato
           $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
-        }
-        // PAI
-        $dati['PAI'] = false;
-        if ($alunno->getClasse()->getAnno() != 5 && $dati['esito']->getEsito() == 'A') {
-          // legge i voti e PAI (solo ammessi)
-          $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
-            ->join('vs.materia', 'm')
-            ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND m.tipo IN (:materie)')
-            ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'materie' => ['N','R']])
-            ->getQuery()
-            ->getResult();
-          foreach ($voti as $v) {
-            // inserisce voti
-            if (($v->getMateria()->getTipo() == 'R' && $v->getUnico() < 22) ||
-                ($v->getMateria()->getTipo() != 'R' && $v->getUnico() < 6)) {
-              // solo materie insufficienti
-              $dati['PAI'] = true;
-              break;
-            }
-          }
         }
       } elseif ($scrutinio->getPeriodo() == 'I' || $scrutinio->getPeriodo() == 'X') {
         // controlla verbale

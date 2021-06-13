@@ -290,9 +290,9 @@ class StaffUtil {
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
       ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
-      ->where('al.alunno IN (:lista) AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
+      ->where('al.alunno IN (:lista) AND m.tipo IN (:tipo) AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
-      ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'tipo' => 'N'])
+      ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'tipo' => ['N', 'E']])
       ->getQuery()
       ->getArrayResult();
     // ore di assenza di religione (per chi si avvale)

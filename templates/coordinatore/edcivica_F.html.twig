@@ -5,17 +5,36 @@
   </div>
   <div class="modal-body">
     <ul id="gs-form-collection" class="list-group">
-  {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+  {% set valutazioni = [null, null, null, 'NC', 4, 5, 6, 7, 8, 9, 10,
     null, null, null, null, null, null, null, null, null,
     'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
   {% for voto in form.lista %}
       <li class="list-group-item">
         <div class="row gs-pl-2 gs-pr-2"><strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong></div>
-        <div class="form-group gs-mb-2">
+    {% if dati.proposte[voto.alunno.vars.value] is defined %}
+        <div class="row bg-info gs-pl-3 gs-pr-3 gs-pt-2 gs-pb-2">
+          <div class="col-sm-8 col-sm-offset-2 text-center gs-pt-1 gs-pb-2">
+            <strong class="gs-big">
+              <span>Media delle proposte di voto: </span>
+              <span class="label label-{{ dati.proposte[voto.alunno.vars.value].media < 5 ? 'danger' : (dati.proposte[voto.alunno.vars.value].media < 6 ? 'warning' : 'success') }}">{{ dati.proposte[voto.alunno.vars.value].media|number_format(2, ',') }}</span>
+            </strong>
+          </div>
+          <div class="col-sm-2 text-right gs-pt-1 gs-pb-2">
+            <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza le proposte di voto"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
+          </div>
+          <div class="gs-show-hide-item" style="display:none">
+      {% for doc,prop in dati.proposte[voto.alunno.vars.value].proposte %}
+            <div style="border-bottom: solid #000 1px;" class="col-sm-4 col-sm-offset-1 gs-pt-1 gs-pb-0 gs-pl-0">{{ doc }}</div>
+            <div style="border-bottom: solid #000 1px;" class="col-sm-1 text-right gs-pt-1 gs-pb-0 gs-pr-0"><span class="label label-{{ prop < 5 ? 'danger' : (prop < 6 ? 'warning' : 'success') }}">{{ valutazioni[prop] }}</span></div>
+      {% endfor %}
+          </div>
+        </div>
+    {% endif %}
+        <div class="form-group gs-mt-3 gs-mb-2">
           <label class="control-label col-sm-2" for="{{ voto.unico.vars.id }}">Voto</label>
           <div class="col-sm-10">
     {% if voto.unico.vars.value is not empty %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 6 ? 'danger' : (voto.unico.vars.value <= 10 ? 'success' : (voto.unico.vars.value < 22 ? 'danger' : 'success')) }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
             <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Modifica la valutazione per la materia"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
@@ -23,18 +42,6 @@
             <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Modifica la valutazione per la materia"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
             <div style="display:none">{{ form_widget(voto.unico) }}</div>
     {% endif %}
-          </div>
-        </div>
-        <div id="row_{{ voto.recupero.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2" for="{{ voto.recupero.vars.id }}">Recupero</label>
-          <div class="col-sm-10">
-            {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[1],voto.recupero.vars.choices[2],voto.recupero.vars.choices[3],voto.recupero.vars.choices[4]] }) }}
-          </div>
-        </div>
-        <div id="row_{{ voto.debito.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2" for="{{ voto.debito.vars.id }}">Argomenti</label>
-          <div class="col-sm-10">
-            {{ form_widget(voto.debito) }}
           </div>
         </div>
         {{ form_widget(voto.alunno) }}
@@ -60,10 +67,8 @@ $(document).ready(function() {
     ticks_snap_bounds: 0,
     focus: true,
     formatter: function(val) {
-      var d = ['Non Classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-        null, null, null, null, null, null, null, null, null,
-        'Non Classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
-      return d[val];
+      var d = [{{ info.valutazioni.format|raw }}];
+      return d[val - {{ info.valutazioni.min }}];
       },
     natural_arrow_keys: true
   });
@@ -78,10 +83,8 @@ $(document).ready(function() {
         ticks_snap_bounds: 0,
         focus: true,
         formatter: function(val) {
-          var d = ['Non Classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            null, null, null, null, null, null, null, null, null,
-            'Non Classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
-          return d[val];
+          var d = [{{ info.valutazioni.format|raw }}];
+          return d[val - {{ info.valutazioni.min }}];
           },
         natural_arrow_keys: true
       });
@@ -91,21 +94,21 @@ $(document).ready(function() {
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
-    var d = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-      null, null, null, null, null, null, null, null, null,
-      'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
-    var c = (e.value.newValue < 6 ? 'label-danger' :
-      (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success')));
-    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
-    var id = this.id.slice(15,-6);
-    if (e.value.newValue < 6) {
-      $('#row_edcivica_lista_'+id+'_recupero').fadeIn(300);
-      $('#row_edcivica_lista_'+id+'_debito').fadeIn(300);
+    var d = [{{ info.valutazioni.format2|raw }}];
+    var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
+      (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
+    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ info.valutazioni.min }}]);
+  });
+  $('button.gs-show-hide').on('click', function (event) {
+    var el = $(this).parent().siblings('div.gs-show-hide-item');
+    if (el.is(':visible')) {
+      el.fadeOut();
+      $(this).attr('title', 'Visualizza le proposte di voto');
+      $(this).html('<span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza');
     } else {
-      $('#edcivica_lista_'+id+'_recupero').val('');
-      $('#edcivica_lista_'+id+'_debito').val('');
-      $('#row_edcivica_lista_'+id+'_recupero').fadeOut(300);
-      $('#row_edcivica_lista_'+id+'_debito').fadeOut(300);
+      el.fadeIn();
+      $(this).attr('title', 'Nasconde le proposte di voto');
+      $(this).html('<span class="glyphicon glyphicon-resize-small gs-mr-2"></span>Nascondi');
     }
   });
 });

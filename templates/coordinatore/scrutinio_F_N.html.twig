@@ -27,13 +27,16 @@
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
     {% for materia,m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-      {% if dati.errori[materia] is defined and (dati.errori[materia] b-and 15) > 0 %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i dati mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {'classe': classe.id, 'materia': materia, 'periodo': 'F'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+      {% if dati.errori[materia] is defined and dati.errori[materia] == 1 and dati.modifica %}
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i voti mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {'classe': classe.id, 'materia': materia, 'periodo': 'F'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
             <br>
       {% endif %}
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
     {% endfor %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Educazione civica">Ed. civica</span></small>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -48,7 +51,7 @@
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'R' %}
-          {% if a.religione != 'S' %}
+          {% if a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
           {% elseif dati.proposte[alunno][materia].unico is not defined %}
             <span>--</span>
@@ -66,6 +69,26 @@
         {% endif %}
           </td>
       {% endfor %}
+          <td class="text-center gs-pt-2 gs-pb-1 gs-pl-2 gs-pr-2">
+      {% if dati.civica[alunno] is not defined %}
+            <span>--</span>
+      {% else %}
+            <button type="button" class="btn btn-xs btn-primary" title="Visualizza le proposte di voto di Educazione Civica" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            <div id="alunno-{{ loop.index }}" style="display:none">
+              <div class="list-group-item">
+                <div class="list-group-item-text">
+                  <h3 class="gs-h3 text-center gs-mt-1">Proposte di voto di Educazione Civica</h3>
+                  <div class="row bg-info gs-pl-3 gs-pr-3 gs-pt-2 gs-pb-2">
+        {% for v in dati.civica[alunno] %}
+                    <div style="border-bottom: solid #000 1px;" class="col-sm-4 col-sm-offset-1 gs-pt-1 gs-pb-0 gs-pl-0">{{ v.docente }}</div>
+                    <div style="border-bottom: solid #000 1px;" class="col-sm-1 text-right gs-pt-1 gs-pb-0 gs-pr-0"><span class="label label-{{ v.unico < 5 ? 'danger' : (v.unico < 6 ? 'warning' : 'success') }}">{{ v.unico == 3 ? 'NC' : v.unico }}</span></div>
+        {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+      {% endif %}
+          </td>
         </tr>
     {% endfor %}
       </tbody>
@@ -74,8 +97,8 @@
     {% if not dati.blocco %}
   <div class="alert alert-info text-center gs-mt-4" role="alert">
     <strong class="gs-big">
-      Con l'apertura dello scrutinio verranno bloccate le modifiche ai dati del registro e saranno calcolate le ore di assenza.<br>
-      Le modifiche alle proposte di voto, al <em>Piano di Apprendimento Individualizzato</em> e al <em>Piano di Integrazione degli Apprendimenti</em> saranno possibili durante l'esecuzione dello scrutinio.
+      Con l'apertura dello scrutinio verranno bloccate tutte le modifiche ai dati del registro e saranno calcolate le ore di assenza.<br>
+      Le modifiche alle proposte di voto saranno possibili durante l'esecuzione dello scrutinio.
     </strong>
   </div>
   <div class="text-center">
@@ -85,6 +108,7 @@
     {{ form_end(form) }}
     {% include 'include/modal-remote.html.twig' %}
     {% include 'include/modal-waiting.html.twig' %}
+    {% include 'include/modal-info.html.twig' %}
   {% endif %}
 </div>
 {% endblock %}
@@ -124,6 +148,15 @@ $(document).ready(function() {
     } else {
       c.removeClass("bg-info").addClass("bg-success");
     }
+  });
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('title');
+    var body = $('#'+$(e.relatedTarget).data('body')).html();
+    $(this).find('#gs-modal-info-label').html(title);
+    $(this).find('#gs-modal-info-body').html(body);
+  });
+  $('#gs-modal-info').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
   });
   // init
   $('#gs-fixed-header table').floatThead({top: 60});

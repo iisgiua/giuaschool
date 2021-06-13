@@ -12,7 +12,7 @@
           <div class="row gs-mb-2">
             <div class="col-sm-9 gs-pl-5"><strong class="gs-big">{{ voto.vars.value.materia.nome }}</strong></div>
             <div class="col-sm-3 gs-pl-0">
-              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.vars.value.unico < 5 ? 'danger' : 'warning' }} gs-big">{{ valutazioni[voto.vars.value.unico] }}</span>
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.vars.value.unico < 5 ? 'danger' : 'warning' }} gs-big">{{ (voto.vars.value.materia.tipo == 'E' and voto.vars.value.unico == 3) ? 'NC' : valutazioni[voto.vars.value.unico] }}</span>
             </div>
           </div>
           <div>
@@ -28,6 +28,8 @@
             </div>
           </div>
         </div>
+        {{ form_widget(voto.alunno) }}
+        {{ form_widget(voto.unico) }}
       </li>
   {% endfor %}
     </ul>

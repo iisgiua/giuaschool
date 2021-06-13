@@ -24,24 +24,6 @@
             <div style="display:none">{{ form_widget(prop.unico) }}</div>
           </div>
         </div>
-        {#-- <div id="row_{{ prop.recupero.vars.id }}" class="row"{{ (prop.unico.vars.value is empty or info.no_recupero or prop.unico.vars.value >= 6) ? ' style="display:none"' }}> #}
-          {#-- <label class="control-label col-sm-2" for="{{ prop.recupero.vars.id }}">Recupero</label> #}
-          {#-- <div class="col-sm-10"> #}
-            {#-- {{ form_widget(prop.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [prop.recupero.vars.choices[0],prop.recupero.vars.choices[2]] }) }} #}
-          {#-- </div> #}
-        {#-- </div> #}
-        <div id="row_{{ prop.debito.vars.id }}" class="row"{{ (prop.unico.vars.value is empty or info.no_recupero or (prop.unico.vars.value >= 6 and prop.unico.vars.value <= 10) or prop.unico.vars.value >= 22) ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2 text-danger" for="{{ prop.debito.vars.id }}">Obiettivi di apprendimento</label>
-          <div class="col-sm-10">
-            {{ form_widget(prop.debito) }}
-          </div>
-        </div>
-        <div id="row_{{ prop.strategie.vars.id }}" class="row"{{ (prop.unico.vars.value is empty or info.no_recupero or (prop.unico.vars.value >= 6 and prop.unico.vars.value <= 10) or prop.unico.vars.value >= 22) ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2 text-danger" for="{{ prop.strategie.vars.id }}">Strategie per il recupero</label>
-          <div class="col-sm-10">
-            {{ form_widget(prop.strategie) }}
-          </div>
-        </div>
         {{ form_widget(prop.alunno) }}
       </li>
   {% endfor %}
@@ -87,23 +69,6 @@ $(document).ready(function() {
       (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
     var id = this.id.slice(15,-6);
-  {% if not info.no_recupero %}
-    if (e.value.newValue < 6 || (e.value.newValue >= 20 && e.value.newValue < 22)) {
-      {#-- $('#row_proposte_lista_'+id+'_recupero').fadeIn(300); #}
-      $('#row_proposte_lista_'+id+'_debito').fadeIn(300);
-      if ($('#proposte_lista_'+id+'_strategie').val() == '') {
-        $('#proposte_lista_'+id+'_strategie').val("{{ 'message.strategie_PAI'|trans|raw }}");
-      }
-      $('#row_proposte_lista_'+id+'_strategie').fadeIn(300);
-    } else {
-      {#-- $('#proposte_lista_'+id+'_recupero').val(''); #}
-      $('#proposte_lista_'+id+'_debito').val('');
-      $('#proposte_lista_'+id+'_strategie').val('');
-      {#-- $('#row_proposte_lista_'+id+'_recupero').fadeOut(300); #}
-      $('#row_proposte_lista_'+id+'_debito').fadeOut(300);
-      $('#row_proposte_lista_'+id+'_strategie').fadeOut(300);
-    }
-  {% endif %}
   });
 });
 </script>

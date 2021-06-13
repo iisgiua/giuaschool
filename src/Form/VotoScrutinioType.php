@@ -19,6 +19,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\CallbackTransformer;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\VotoScrutinio;
 
 
@@ -26,6 +28,25 @@ use App\Entity\VotoScrutinio;
  * VotoScrutinioType - form per la classe VotoScrutinio
  */
 class VotoScrutinioType extends AbstractType {
+
+  //==================== ATTRIBUTI DELLA CLASSE  ====================
+
+  /**
+   * @var EntityManagerInterface $em Gestore delle entità
+   */
+  private $em;
+
+
+  //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Costruttore
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   */
+  public function __construct(EntityManagerInterface $em) {
+    $this->em = $em;
+  }
 
   /**
    * Crea il form
@@ -39,7 +60,7 @@ class VotoScrutinioType extends AbstractType {
       if ($options['attr']['subType'] == 'condotta') {
         // voto di condotta
         $builder
-          ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
+          ->add('alunno', HiddenType::class)
           ->add('unico', HiddenType::class)
           ->add('motivazione', TextareaType::class, array('label' => false,
             'property_path' => 'dati[motivazione]',
@@ -53,51 +74,24 @@ class VotoScrutinioType extends AbstractType {
             'multiple' => false,
             'label_attr' => ['class' => 'radio-inline gs-mr-4'],
             'required' => false))
-          //-- ->add('contrari', ChoiceType::class, array('label' => false,
-            //-- 'property_path' => 'dati[contrari]',
-            //-- 'choices' => ['1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10],
-            //-- 'expanded' => false,
-            //-- 'multiple' => false,
-            //-- 'choice_translation_domain' => false,
-            //-- 'required' => false));
           ->add('contrari', TextType::class, array('label' => false,
             'property_path' => 'dati[contrari]',
             'trim' => true,
             'required' => false));
-          //-- ->add('contrari_motivazione', TextareaType::class, array('label' => false,
-            //-- 'property_path' => 'dati[contrari_motivazione]',
-            //-- 'trim' => true,
-            //-- 'required' => false));
       } elseif ($options['attr']['subType'] == 'edcivica') {
         // voto di ed.civica
         $builder
-          ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
-          ->add('unico', HiddenType::class)
-          ->add('recupero', ChoiceType::class, array('label' => false,
-            'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
-              'label.recupero_S' => 'S', 'label.recupero_C' => 'C', 'label.recupero_I' => 'I',
-              'label.recupero_R' => 'R', 'label.recupero_N' => 'N'],
-            'placeholder' => 'label.scegli_recupero',
-            'expanded' => false,
-            'multiple' => false,
-            'choice_attr' => function($val, $key, $index) {
-                return ['class' => 'gs-no-placeholder'];
-              },
-            'attr' => ['class' => 'gs-placeholder'],
-            'required' => false))
-          ->add('debito', TextareaType::class, array('label' => false,
-            'trim' => true,
-            'attr' => array('rows' => '3'),
-            'required' => false));
+          ->add('alunno', HiddenType::class)
+          ->add('unico', HiddenType::class);
       } elseif ($options['attr']['subType'] == 'esito') {
         // esito
         $builder
-          ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
+          ->add('alunno', HiddenType::class)
           ->add('unico', HiddenType::class);
       } elseif ($options['attr']['subType'] == 'debiti') {
         // debiti
         $builder
-        ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
+        ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
         ->add('recupero', ChoiceType::class, array('label' => false,
           'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
@@ -115,14 +109,11 @@ class VotoScrutinioType extends AbstractType {
           'trim' => true,
           'attr' => array('rows' => '3'),
           'required' => false));
-        //-- ->add('strategie', TextareaType::class, array('label' => false,
-          //-- 'trim' => true,
-          //-- 'attr' => array('rows' => '3'),
-          //-- 'required' => false,
-          //-- 'property_path' => 'dati[strategie]'));
       } elseif ($options['attr']['subType'] == 'carenze') {
         // carenze
         $builder
+        ->add('alunno', HiddenType::class)
+        ->add('unico', HiddenType::class)
         ->add('debito', TextareaType::class, array('label' => false,
           'trim' => true,
           'required' => false));
@@ -130,7 +121,7 @@ class VotoScrutinioType extends AbstractType {
     } else {
       // form completo
       $builder
-        ->add('alunno', HiddenType::class, array('property_path' => 'alunno.id'))
+        ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
         ->add('recupero', ChoiceType::class, array('label' => false,
           'choices' => ['label.recupero_A' => 'A', 'label.recupero_P' => 'P',
@@ -159,14 +150,19 @@ class VotoScrutinioType extends AbstractType {
           'multiple' => false,
           'label_attr' => ['class' => 'radio-inline gs-mr-4'],
           'required' => false))
-        ->add('contrari', ChoiceType::class, array('label' => false,
+        ->add('contrari', TextType::class, array('label' => false,
           'property_path' => 'dati[contrari]',
-          'choices' => ['1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10],
-          'expanded' => false,
-          'multiple' => false,
-          'choice_translation_domain' => false,
+          'trim' => true,
           'required' => false));
     }
+    // aggiunge data transform
+    $builder->get('alunno')->addModelTransformer(new CallbackTransformer(
+      function ($alunno) {
+        return $alunno->getId();
+      },
+      function ($id) {
+        return $this->em->getRepository('App:Alunno')->find($id);
+      }));
   }
 
   /**

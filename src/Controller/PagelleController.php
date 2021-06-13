@@ -85,10 +85,6 @@ class PagelleController extends AbstractController {
     if ($periodo == 'P') {
       // primo trimestre
       switch ($tipo) {
-        //-- case 'F':
-          //-- // firme verbale
-          //-- $nomefile = $pag->firmeVerbale($classe, $periodo);
-          //-- break;
         case 'I':
           // firme registro voti
           $nomefile = $pag->firmeRegistro($classe, $periodo);
@@ -107,7 +103,7 @@ class PagelleController extends AbstractController {
       switch ($tipo) {
         case 'V':
           // verbale
-          $nomefile = $pag->verbale2($classe, $periodo);
+          $nomefile = $pag->verbale($classe, $periodo);
           break;
         case 'R':
           // riepilogo voti
@@ -117,25 +113,13 @@ class PagelleController extends AbstractController {
           // tabellone voti
           $nomefile = $pag->tabelloneVoti($classe, $periodo);
           break;
-        //-- case 'F':
-          //-- // firme verbale
-          //-- $nomefile = $pag->firmeVerbale($classe, $periodo);
-          //-- break;
-        //-- case 'I':
-          //-- // firme registro voti
-          //-- $nomefile = $pag->firmeRegistro($classe, $periodo);
-          //-- break;
+        case 'I':
+          // firme registro voti
+          $nomefile = $pag->firmeRegistro($classe, $periodo);
+          break;
         case 'C':
           // certificazioni
           $nomefile = $pag->certificazioni($classe, $periodo);
-          break;
-        case 'X':
-          // PIA
-          $nomefile = $pag->PIA($classe, $periodo);
-          break;
-        case 'Y':
-          // PAI di tutti
-          $nomefile = $pag->tuttiPAI($classe, $periodo);
           break;
       }
     } elseif ($periodo == 'I' || $periodo == 'X') {
@@ -242,9 +226,6 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->debiti($classe, $alunno, $periodo);
           break;
       }
-    } elseif ($periodo == '1' && $tipo == 'P') {
-      // valutazione intermedia
-      $nomefile = $pag->pagella($classe, $alunno, $periodo);
     } elseif ($periodo == 'F') {
       // scrutinio finale
       switch ($tipo) {
@@ -252,14 +233,14 @@ class PagelleController extends AbstractController {
           // non ammesso
           $nomefile = $pag->nonAmmesso($classe, $alunno, $periodo);
           break;
-        //-- case 'D':
-          //-- // debiti
-          //-- $nomefile = $pag->debiti($classe, $alunno, $periodo);
-          //-- break;
-        //-- case 'C':
-          //-- // carenze
-          //-- $nomefile = $pag->carenze($classe, $alunno, $periodo);
-          //-- break;
+        case 'D':
+          // debiti
+          $nomefile = $pag->debiti($classe, $alunno, $periodo);
+          break;
+        case 'C':
+          // carenze
+          $nomefile = $pag->carenze($classe, $alunno, $periodo);
+          break;
         case 'E':
           // certificazione
           $nomefile = $pag->certificazione($classe, $alunno, $periodo);
@@ -267,10 +248,6 @@ class PagelleController extends AbstractController {
         case 'P':
           // pagella
           $nomefile = $pag->pagella($classe, $alunno, $periodo);
-          break;
-        case 'X':
-          // PAI
-          $nomefile = $pag->PAI($classe, $alunno, $periodo);
           break;
       }
     } elseif ($periodo == 'I' || $periodo == 'X') {

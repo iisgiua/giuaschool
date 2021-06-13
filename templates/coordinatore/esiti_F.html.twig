@@ -13,13 +13,13 @@
           <label class="control-label col-sm-3 gs-pl-1 gs-pr-1" for="{{ voto.unico.vars.id }}">{{ dati.materie[voto.vars.value.materia.id].nomeBreve }}</label>
           <div class="col-sm-9">
     {% if dati.materie[voto.vars.value.materia.id].tipo == 'R' %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : (voto.unico.vars.value <= 10 ? 'success' : (voto.unico.vars.value < 22 ? 'danger' : 'success'))) }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 22 ? 'danger' : 'success' }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider-giudizi', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% elseif dati.materie[voto.vars.value.materia.id].tipo == 'N' %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : (voto.unico.vars.value <= 10 ? 'success' : (voto.unico.vars.value < 22 ? 'danger' : 'success'))) }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : (voto.unico.vars.value <= 10 ? 'success' : (voto.unico.vars.value < 22 ? 'danger' : 'success'))) }} gs-mr-4 gs-big">{{ voto.unico.vars.value == 4 ? 'NC' : valutazioni[voto.unico.vars.value] }}</span>
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ (dati.materie[voto.vars.value.materia.id].tipo == 'C' and voto.unico.vars.value == 4) or (dati.materie[voto.vars.value.materia.id].tipo == 'E' and voto.unico.vars.value == 3) ? 'NC' : valutazioni[voto.unico.vars.value] }}</span>
             {{ form_widget(voto.unico) }}
     {% endif %}
           </div>
@@ -35,7 +35,6 @@
         {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1]]}) }}
     {% else %}
         {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1],form.esito.vars.choices[2]]}) }}
-        {#-- {{ form_widget(form.esito, {'choices': [form.esito.vars.choices[0],form.esito.vars.choices[1]]}) }} #}
     {% endif %}
       </div>
     </div>
@@ -55,10 +54,6 @@
       <label class="control-label col-sm-2 col-sm-offset-2" for="{{ form.contrari.vars.id }}">Contrari</label>
       <div class="col-sm-8">
         {{ form_widget(form.contrari, {attr: {title: 'Nomi dei docenti contrari'}}) }}
-      </div>
-      <label class="control-label col-sm-2 col-sm-offset-2" for="{{ form.contrari_motivazione.vars.id }}">Motivazione</label>
-      <div class="col-sm-8">
-        {{ form_widget(form.contrari_motivazione, {attr: {rows: 3, title: 'Motivazione del voto contrario'}}) }}
       </div>
     </div>
   </div>
@@ -128,15 +123,15 @@ $(document).ready(function() {
   }).change();
   $('#esito_esito').change(function() {
     if ($(this).val() == 'N') {
-      {#-- if ($('#esito_giudizio').val() == '' || !inizio) { #}
-        {#-- $('#esito_giudizio').val("{{ 'message.giudizio_non_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a'), '%classe%': (alunno.classe.anno == 5 ? 'l\'Esame di Stato' : 'la classe successiva')})|raw }}"); #}
-      {#-- } #}
+      if ($('#esito_giudizio').val() == '' || !inizio) {
+        $('#esito_giudizio').val("{{ 'message.giudizio_non_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a'), '%classe%': (alunno.classe.anno == 5 ? 'l\'Esame di Stato' : 'la classe successiva')})|raw }}");
+      }
       $('#gs-scrutinio-giudizio').fadeIn();
-    {#-- } else if ($(this).val() == 'A' && AmmissioneQuinta())  { #}
-      {#-- if ($('#esito_giudizio').val() == '' || !inizio) { #}
-        {#-- $('#esito_giudizio').val("{{ 'message.motivazione_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')})|raw }}"); #}
-      {#-- } #}
-      {#-- $('#gs-scrutinio-giudizio').fadeIn(); #}
+    } else if ($(this).val() == 'A' && AmmissioneQuinta())  {
+      if ($('#esito_giudizio').val() == '' || !inizio) {
+        $('#esito_giudizio').val("{{ 'message.motivazione_ammissione'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')})|raw }}");
+      }
+      $('#gs-scrutinio-giudizio').fadeIn();
     } else {
       $('#esito_giudizio').val('');
       $('#gs-scrutinio-giudizio').fadeOut();
@@ -144,18 +139,18 @@ $(document).ready(function() {
     inizio = 0;
   }).change();
 });
-{#-- function AmmissioneQuinta() { #}
-  {#-- {% if alunno.classe.anno == 5 %} #}
-  {#-- var ins = 0; #}
-  {#-- $('#gs-form-collection input[name$="[unico]"]').each(function() { #}
-    {#-- if ($(this).val() < 6 || $(this).val() == 20  || $(this).val() == 21) { #}
-      {#-- ins++; #}
-    {#-- } #}
-  {#-- }); #}
-  {#-- if (ins) { #}
-    {#-- return true; #}
-  {#-- } #}
-  {#-- {% endif %} #}
-  {#-- return false; #}
-{#-- } #}
+function AmmissioneQuinta() {
+  {% if alunno.classe.anno == 5 %}
+  var ins = 0;
+  $('#gs-form-collection input[name$="[unico]"]').each(function() {
+    if ($(this).val() < 6 || $(this).val() == 20  || $(this).val() == 21) {
+      ins++;
+    }
+  });
+  if (ins) {
+    return true;
+  }
+  {% endif %}
+  return false;
+}
 </script>

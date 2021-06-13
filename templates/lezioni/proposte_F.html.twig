@@ -80,7 +80,7 @@
     </div>
   </div>
       {% else %}
-        {% if form.vars.data.materia.tipo == 'E' %}
+        {% if cattedra.materia.tipo == 'E' %}
           {% set valutazioni = [null, null, null, 'NC', 4, 5, 6, 7, 8, 9, 10,
             null, null, null, null, null, null, null, null, null,
             'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
@@ -186,8 +186,18 @@ $(document).ready(function() {
         natural_arrow_keys: true
       });
     $(this).hide();
+    $(this).siblings('button.gs-button-delete').show();
     $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.start }}', true, true);
     $(this).siblings('div').find('div').focus();
+    e.preventDefault();
+  });
+  $('#gs-form-collection button.gs-button-delete').on('click', function(e) {
+    $(this).siblings('div').find('input').slider('destroy');
+    $(this).siblings('div').find('input').val('');
+    $(this).siblings('div').attr('style', 'display:none');
+    $(this).siblings('span').removeClass('label-success label-danger label-warning').addClass('label-default').text('--');
+    $(this).hide();
+    $(this).siblings('button.gs-button-add').show();
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
@@ -255,13 +265,19 @@ window.setInterval(function(){
     <div class="row">
       <label class="control-label col-sm-2" for="{{ form.unico.vars.id }}">Voto</label>
       <div class="col-sm-10">
-  {% if form.unico.vars.value is not empty %}
+  {% if (form.vars.data.materia.tipo != 'E' and form.unico.vars.value is not empty) or (form.vars.data.materia.tipo == 'E' and form.unico.vars.value > 0) %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < 5 ? 'label-danger' : (form.unico.vars.value < 6 ? 'label-warning' : (form.unico.vars.value <= 10 ? 'label-success' : (form.unico.vars.value < 22 ? 'label-danger' : 'label-success'))) }} gs-mr-4 gs-big">{{ valutazioni[form.unico.vars.value] }}</span>
         <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+    {% if form.vars.data.materia.tipo == 'E' %}
+        <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+    {% endif %}
         <div style="display:inline"><input id="{{ form.unico.vars.id }}" name="{{ form.unico.vars.full_name }}" class="slider" type="text" value="{{ form.unico.vars.value }}" data-slider-value="{{ form.unico.vars.value }}"></div>
   {% else %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
         <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+    {% if form.vars.data.materia.tipo == 'E' %}
+        <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+    {% endif %}
         <div style="display:none"><input id="{{ form.unico.vars.id }}" name="{{ form.unico.vars.full_name }}" type="text" value=""></div>
   {% endif %}
       </div>

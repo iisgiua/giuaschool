@@ -49,7 +49,7 @@ class ScrutinioAssenzaType extends AbstractType {
         'required' => false))
       ->add('testo', ChoiceType::class, array(
         'choices' => ['label.deroga_salute' => 'S', 'label.deroga_famiglia' => 'F', 'label.deroga_sport' => 'P',
-          'label.deroga_religione' => 'R'],
+          'label.deroga_religione' => 'R', 'label.deroga_lavoratori' => 'L'],
         'placeholder' => 'label.inserisci_motivazione',
         'expanded' => false,
         'multiple' => false,
@@ -71,4 +71,3 @@ class ScrutinioAssenzaType extends AbstractType {
   }
 
 }
-

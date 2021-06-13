@@ -134,6 +134,7 @@ class CattedraRepository extends BaseRepository {
         if ($doc['supplenza']) {
           // cancella titolare e lascia supplente
           unset($docenti[$mat[$doc['materia_id']][$doc['tipo']]['id']]);
+          $mat[$doc['materia_id']][$doc['tipo']]['id'] = $k;
           $mat[$doc['materia_id']][$doc['tipo']]['supplenza'] = $doc['supplenza'];
         } elseif ($mat[$doc['materia_id']][$doc['tipo']]['supplenza'])  {
           // cancella titolare e lascia supplente

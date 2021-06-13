@@ -1,42 +1,40 @@
 {{ include('coordinatore/documenti/intestazione.html.twig') }}
-<p style="text-align:center;font-family:times;font-size:12pt">
+<p style="text-align:center;">
   <strong>VERBALE DELLO SCRUTINIO FINALE</strong> <br>
-  <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
+  <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
     del mese di {{ dati.nomi_mesi[dati.scrutinio.data|date('n')] }} dell'anno {{ dati.scrutinio.data|date('Y') }},
-    alle ore {{ dati.scrutinio.inizio|date('G:i') }}, in seduta telematica, si riunisce, a seguito di regolare convocazione,
-    il Consiglio della Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente ordine del giorno:
+    alle ore {{ dati.scrutinio.inizio|date('G:i') }}, nei locali dell'<em>Istituto di Istruzione Superiore "Michele Giua"</em>
+    di Cagliari, si riunisce in presenza, a seguito di regolare convocazione (circolare n. 358 del 27/05/2021),
+    il Consiglio della Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente
+    ordine del giorno:
   </p>
   <ol>
-    <li><strong>Operazioni di scrutinio finale;</strong></li>
-{% if dati.classe.anno == 2 %}
-    <li><strong>Certificazione delle competenze;</strong></li>
-{% endif %}
-{% if dati.classe.anno != 5 %}
-    <li><strong>Predisposizione del PAI;</strong></li>
-    <li><strong>Predisposizione del PIA (eventuale).</strong></li>
+    <li><strong>Scrutini finali;</strong></li>
+{% if dati.classe.anno == 5 %}
+    <li><strong>Individuazione di situazioni particolari da segnalare.</strong></li>
 {% else %}
-    <li><strong>Conversione del punteggio dei crediti attributi al terzo e quarto anno.</strong></li>
+    <li><strong>Individuazione degli interventi di recupero e di situazioni particolari da segnalare.</strong></li>
 {% endif %}
   </ol>
   <p>Presiede la riunione {{ dati.presidente }}; funge da segretario verbalizzante {{ dati.segretario }}.
     Sono presenti i professori:
   </p>
-  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
     <tr nobr="true">
       <td width="40%" align="center"><strong>DOCENTE</strong></td>
       <td width="60%" align="center"><strong>MATERIA</strong></td>
     </tr>
 {% set assenti=0 %}
-{% for kdoc,doc in dati.scrutinio.dati['presenze'] %}
+{% for kdoc,doc in dati.scrutinio.dati.presenze %}
   {% if doc.presenza %}
     <tr>
-      <td>{{ dati.docenti[doc.docente][0]['cognome'] }} {{ dati.docenti[doc.docente][0]['nome'] }}</td>
-      <td align="left">
-    {% for kv,v in dati.docenti[doc.docente] %}
-        <br>&bull; {{ v['doc_tipo'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}
+      <td>{{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}</td>
+      <td>
+    {% for kv,v in dati.docenti[doc.docente].materie %}
+        <br>&bull; {{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}
     {% endfor %}
       </td>
     </tr>
@@ -44,175 +42,235 @@
     {% set assenti=assenti+1 %}
   {% endif %}
 {% endfor %}
-  </table>
+</table>
 {% if assenti %}
-  <p>Sono assenti i seguenti docenti, sostituiti con apposita nomina del Dirigente Scolastico:</p>
+  <p>Sono assenti i seguenti docenti:</p>
   <ul>
-  {% for kdoc,doc in dati.scrutinio.dati['presenze'] %}
+  {% for kdoc,doc in dati.scrutinio.dati.presenze %}
     {% if not doc.presenza %}
       {% set assenti=assenti-1 %}
-    <li>{{ dati.docenti[doc.docente][0]['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa'}}
-      {{ dati.docenti[doc.docente][0]['cognome'] }} {{ dati.docenti[doc.docente][0]['nome'] }}
-      sostituit{{ dati.docenti[doc.docente][0]['sesso'] == 'M' ? 'o' : 'a'}}
+    <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa'}}
+      {{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}
+      sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a'}}
+      con nomina del Dirigente Scolastico
+      (prot. n. {{ doc.surrogaProtocollo }} del {{ doc.surrogaData|date('d/m/Y') }})
       dal{{ doc.sessoSostituto == 'M' ? ' Prof.' : 'la Prof.ssa' }}
-      {{ doc.sostituto|title }}
-      (prot. n. {{ doc.surrogaProtocollo }} del {{ doc.surrogaData|date('d/m/Y') }}) per
-      {% for kv,v in dati.docenti[doc.docente] %}{{ not loop.first ? ', '}}{{ v['doc_tipo'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
+      {{ doc.sostituto|title }} per
+      {% for kv,v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', '}}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
     </li>
     {% endif %}
   {% endfor %}
   </ul>
 {% else %}
-  <p>Nessun docente è assente.</p>
+  <p>Nessun docente risulta assente.</p>
 {% endif %}
-{% if dati.alunni_noreligione|length > 0 %}
-  <p>{{ dati.religione }}, insegnante di religione cattolica, partecipa alle operazioni di scrutinio di tutti gli studenti
-    tranne che per
-{% for a in dati.alunni_noreligione %}
-    {{ a }}{{ not loop.last ? ',' }}
-{% endfor %}
-    che non si {{ dati.alunni_noreligione|length > 1 ? 'sono avvalsi' : 'è avvalso' }}
-    dell’insegnamento della religione cattolica.
+  <p>Accertata la legalità della seduta, il Presidente richiama le norme in vigore sullo scrutinio
+    (D.P.R. 122/09 e L. 169/08) e in particolare i criteri di valutazione deliberati dal Collegio dei Docenti,
+    dichiarando aperta la seduta.
   </p>
+  <p>&nbsp;</p>
+  <p><strong>Punto primo. Scrutini finali.</strong></p>
+  <p>Il Consiglio di Classe verifica preliminarmente, per ciascun alunno, la frequenza delle lezioni.</p>
+{% if (dati.no_scrutinabili|length + dati.deroga|length) > 0 %}
+  <p>Si esaminano ora gli alunni che presentano un numero di assenze superiore al 25%
+    dell’orario annuale personalizzato, individuati nella seguente tabella:
+  </p>
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="40%" align="center"><strong>ALUNNO</strong></td>
+      <td width="20%" align="center"><strong>Monte ore annuo complessivo personalizzato della classe</strong></td>
+      <td width="20%" align="center"><strong>Numero massimo di ore di assenza consentite per la validità dell'A.S. (25% monte ore)</strong></td>
+      <td width="20%" align="center"><strong>Ore di assenza dell'alunno</strong></td>
+    </tr>
+  {% for idalunno,alu in dati.alunni %}
+    {% if idalunno in dati.no_scrutinabili or idalunno in dati.deroga %}
+    <tr nobr="true">
+      <td>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
+      <td align="center"><strong>{{ dati.scrutinio.dati.monteore }}</strong></td>
+      <td align="center"><strong>{{ dati.scrutinio.dati.maxassenze }}</strong></td>
+      <td align="center"><strong>{{ dati.scrutinio.dati.no_scrutinabili[idalunno].ore }}</strong></td>
+    </tr>
+    {% endif %}
+  {% endfor %}
+  </table>
+  {% if dati.deroga|length > 0 %}
+  <p>Il Consiglio di Classe ammette allo scrutinio, nonostante il superamento del limite di assenze,
+    vista la documentazione prodotta e tenuto conto dei criteri generali di deroga stabiliti dal
+    Collegio dei Docenti, i seguenti alunni (art. 14 comma 7 del D.P.R. 122 del 22 giugno 2009):
+  </p>
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="40%" align="center"><strong>ALUNNO</strong></td>
+      <td width="60%" align="center"><strong>Motivazione della deroga</strong></td>
+    </tr>
+    {% for idalunno,alu in dati.alunni %}
+      {% if idalunno in dati.deroga %}
+    <tr nobr="true">
+      <td>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
+      <td>{{ dati.scrutinio.dati.no_scrutinabili[idalunno].deroga }}</td>
+    </tr>
+      {% endif %}
+    {% endfor %}
+  </table>
+  {% endif %}
+  {% if dati.no_scrutinabili|length > 0 %}
+  <p>Il Consiglio di Classe, avendo constatato il superamento del numero massimo di assenze previsto
+    dalla normativa in vigore (art. 14 comma 7 del D.P.R. 122 del 22 giugno 2009), non accompagnato
+    da una adeguata e documentata motivazione, delibera <strong>l'esclusione dallo scrutinio e la non ammissione
+    {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva'}}</strong>
+    degli alunni seguenti:
+   </p>
+   <ul>
+    {% for idalunno,alu in dati.alunni %}
+      {% if idalunno in dati.no_scrutinabili %}
+      <li align="justify"><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong></li>
+      {% endif %}
+    {% endfor %}
+   </ul>
+  {% endif %}
 {% else %}
-  <p>{{ dati.religione }}, insegnante di religione cattolica, partecipa alle operazioni di scrutinio di tutti gli studenti.</p>
+  <p>Tutti gli alunni rientrano nei limiti di assenze previsti dalla normativa,
+    pari al 25% dell’orario annuale personalizzato.
+  </p>
 {% endif %}
-  <p><strong>Punto primo. Operazioni di scrutinio finale</strong></p>
-  <p>Prima di dare inizio alle operazioni di scrutinio, il Presidente, accertata la validità della seduta e richiamando
-    la vigente normativa riguardante la valutazione e le operazioni di scrutinio, nonché le relative delibere dei
-    competenti organi collegiali, premette che:</p>
-  <ul>
-    <li>tutti i presenti sono tenuti all’obbligo della stretta osservanza del segreto d’ufficio e che l’eventuale violazione comporta sanzioni disciplinari;</li>
-    <li>i voti devono essere assegnati dal Consiglio di Classe, su proposta dei singoli docenti, utilizzando l’intera scala di valutazione in decimi;</li>
-    <li>la proposta di voto deve:
-      <ul>
-        <li>scaturire da un congruo numero di elementi di valutazione e di prove effettuate, corrette e valutate;</li>
-        <li>tener conto delle valutazioni espresse in sede di scrutinio intermedio, degli esiti di eventuali iniziative di sostegno e/o di interventi di recupero effettuati in corso d’anno;</li>
-        <li>tener conto della valutazione complessiva dell’impegno, dell’interesse e della partecipazione dimostrati dallo studente nell’intero percorso formativo, compresa l’attività didattica a distanza;</li>
-      </ul>
-    </li>
-    <li>il voto di comportamento è unico ed è assegnato dal Consiglio di Classe su proposta del Coordinatore in base agli indicatori individuati a livello collegiale;</li>
-    <li>il voto di comportamento concorre, insieme alle valutazioni degli apprendimenti, alla definizione della media finale;</li>
-    <li>in base all’art. 4 co.4 dell’O.M. n. 11 del 16 maggio 2020, nel verbale sono espresse per ciascun alunno le eventuali valutazioni insufficienti relative ad uno o più discipline;
-      per gli alunni ammessi alla classe successiva in presenza di votazioni inferiori a sei decimi il CdC predispone il <strong>piano di apprendimento individualizzato (PAI)</strong> in cui sono indicati, per ciascuna disciplina, gli obiettivi di apprendimento da conseguire nonché le specifiche strategie per il raggiungimento dei relativi livelli di apprendimento;</li>
-    <li>in base all’art. 6 co.2 dell’O.M n.11 del 16 maggio 2020 i docenti individuano le attività didattiche eventualmente non svolte rispetto alla progettazione di inizio anno e i correlati obiettivi di apprendimento e li inseriscono in un <strong>piano di integrazione degli apprendimenti (PIA)</strong>;</li>
-    <li><strong>nei casi in cui i docenti non siano in possesso di alcun elemento valutativo relativo all’alunno, per cause non imputabili alle difficoltà legate alla disponibilità di apparecchiature tecnologiche ovvero alla connettività di rete, bensì a situazioni di mancata o sporadica frequenza delle attività didattiche,
-      perduranti e già opportunamente verbalizzate per il primo periodo didattico, il Consiglio di classe, con <em>motivazione espressa all’unanimità</em>, può non ammetterlo alla classe successiva.</strong></li>
-  </ul>
-  <p>Si passa quindi alle operazioni di scrutinio.<br>Preliminarmente, per ciascun alunno, viene deliberato il voto di comportamento, indicato nel seguente prospetto:</p>
-  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
+{% if dati.estero|length > 0 %}
+  <p>Il Consiglio di Classe segnala inoltre che l'alunn{{ dati.alunni[dati.estero[0]].sesso == 'M' ? 'o' : 'a' }}
+    {{ dati.alunni[dati.estero[0]].cognome }} {{ dati.alunni[dati.estero[0]].nome }} ({{ dati.alunni[dati.estero[0]].dataNascita|date('d/m/Y') }})
+    non viene scrutinat{{ dati.alunni[dati.estero[0]].sesso == 'M' ? 'o' : 'a' }}
+    in quanto frequenta l'anno all'estero, come da documentazione agli atti.
+  </p>
+{% endif %}
+  <p>In sintesi, di {{ dati.scrutinati|length + dati.no_scrutinabili|length + dati.estero|length }}
+    alunni iscritti alla classe, sono da scrutinare {{ dati.scrutinati|length }} alunni.
+  </p>
+  <p>Si passa quindi alle operazioni di scrutinio.
+    Preliminarmente, per ciascun alunno, viene deliberato il voto di Educazione Civica, su proposta del Coordinatore,
+    basata sui criteri di valutazione deliberati dagli Organi Collegiali. I voti proposti sono
+    approvati all'unanimità.
+  </p>
+  <p>Di seguito, su proposta del Coordinatore, viene deliberato il voto di comportamento,
+    indicato nel seguente prospetto:
+  </p>
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
     <tr nobr="true">
       <td width="30%" align="center"><strong>ALUNNO</strong></td>
       <td width="6%" align="center"><strong>Voto</strong></td>
-      <td width="48%" align="center"><strong>Giudizio</strong></td>
+      <td width="48%" align="center"><strong>Descrittori</strong></td>
       <td width="16%" align="center"><strong>Delibera</strong></td>
     </tr>
 {% for kalu in dati.scrutinati %}
     <tr>
-      <td align="left">{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</td>
+      <td>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</td>
       <td align="center">{{ dati.voti[kalu].unico == 4 ? 'NC' : dati.voti[kalu].unico }}</td>
-      <td align="left" style="font-size:9pt">{{ dati.voti[kalu].dati['motivazione']|nl2br }}</td>
-      <td align="left" style="font-size:9pt">
+      <td style="font-size:9pt">{{ dati.voti[kalu].dati['motivazione']|replace({'*': ''}) }}</td>
+      <td style="font-size:9pt">
   {% if dati.voti[kalu].dati['unanimita'] %}
         <strong>UNANIMITÀ</strong>
   {% else %}
-        <strong>MAGGIORANZA</strong><br>
-        <strong>Contrari</strong>:<br>{{ dati.voti[kalu].dati['contrari'] }}<br>
-        <strong>Motivazione</strong>:<br>{{ dati.voti[kalu].dati['contrari_motivazione'] }}
+        <strong>MAGGIORANZA</strong>
+        <br><br><strong>Contrari</strong>: {{ dati.voti[kalu].dati['contrari'] }}
   {% endif %}
       </td>
     </tr>
 {% endfor %}
   </table>
-  <p>Si passa, quindi, seguendo l'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto degli indicatori precedentemente espressi.
-    Per ciascuna disciplina il docente competente esprime il proprio giudizio complessivo sull'alunno.
-    Ciascun giudizio è tradotto coerentemente in un voto, che viene proposto al Consiglio di Classe.
-    Il Consiglio di Classe discute esaurientemente le proposte espresse dai docenti e, tenuti ben presenti i parametri di valutazione deliberati, procede alla definizione e all'approvazione dei voti per ciascun alunno e per ciascuna disciplina.
+  <p>Si passa, quindi, seguendo l'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto
+    delle norme sopra riportate, sulla base di giudizi ampiamente motivati.
+    Il riepilogo dei voti deliberati per ciascun alunno viene allegato al presente verbale,
+    di cui fa parte integrante.
   </p>
-  <p>Sulla scorta delle proposte di voto espresse dagli insegnanti in merito al profitto, alla diligenza, all’impegno, alle capacità ed attitudini di ciascun alunno, agli eventuali esiti delle prove di verifica del recupero delle insufficienze del Primo Trimestre ed ogni altro elemento di valutazione disponibile,
-    <strong>il Consiglio di classe delibera l’ammissione dei seguenti alunni anche con eventuale valutazione insufficiente come da tabellone allegato.</strong>
+{% if (dati.ammessi - dati.insuff5|length) > 0 %}
+  <p>&nbsp;</p>
+  <p>Il Consiglio di Classe dichiara <strong>ammessi
+    {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva'}}</strong>,
+    per avere riportato almeno sei decimi in ciascuna disciplina, i seguenti alunni:
   </p>
-  <p>Risultano <strong>AMMESSI {% if dati.classe.anno == 5 %}ALL'ESAME DI STATO{% else %}ALLA CLASSE SUCCESSIVA{% endif %}:</strong></p>
-  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
     <tr nobr="true">
       <td width="40%" align="center"><strong>ALUNNO</strong></td>
       <td width="60%" align="center"><strong>Delibera</strong></td>
     </tr>
-{% for kalu in dati.scrutinati %}
-  {% if dati.esiti[kalu].esito == 'A' %}
-    <tr nobr="true">
-      <td align="left"><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="left" style="font-size:9pt">
-  {% if dati.esiti[kalu].dati['unanimita'] %}
-        <strong>UNANIMITÀ</strong>
-  {% else %}
-        <strong>MAGGIORANZA</strong><br>
-        <strong>Contrari</strong>:<br>{{ dati.esiti[kalu].dati['contrari'] }}<br>
-        <strong>Motivazione</strong>:<br>{{ dati.esiti[kalu].dati['contrari_motivazione'] }}
-  {% endif %}
-      </td>
-    </tr>
-  {% endif %}
-{% endfor %}
-  </table>
-  <p>Tutte le deliberazioni sopra indicate sono state assunte individualmente per ciascun alunno.</p>
-{% if dati.non_ammessi > 0 %}
-  <p>Risultano <strong>NON AMMESSI {% if dati.classe.anno == 5 %}ALL'ESAME DI STATO{% else %}ALLA CLASSE SUCCESSIVA{% endif %} in base all’art. 4 co. 4 O.M. n.11 del 16/05/2020:</strong></p>
-  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
-    <tr nobr="true">
-      <td width="40%" align="center"><strong>ALUNNO</strong></td>
-      <td width="16%" align="center"><strong>Delibera</strong></td>
-      <td width="44%" align="center"><strong>Motivazione della non ammissione</strong></td>
-    </tr>
   {% for kalu in dati.scrutinati %}
-    {% if dati.esiti[kalu].esito == 'N' %}
+    {% if dati.esiti[kalu].esito == 'A' %}
     <tr nobr="true">
-      <td align="left"><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="center" style="font-size:9pt"><strong>UNANIMITÀ</strong></td>
-      <td align="left" style="font-size:9pt">
-        {{ dati.esiti[kalu].dati['giudizio'] }}
+      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
+      <td style="font-size:9pt">
+      {% if dati.esiti[kalu].dati['unanimita'] %}
+        <strong>UNANIMITÀ</strong>
+      {% else %}
+        <strong>MAGGIORANZA</strong>
+        <br><strong>Contrari</strong>: {{ dati.esiti[kalu].dati['contrari'] }}
+      {% endif %}
       </td>
     </tr>
     {% endif %}
   {% endfor %}
   </table>
 {% endif %}
-{% if dati.classe.anno >= 3 %}
-  <p>Nel passare all’assegnazione del credito scolastico, il Presidente richiama brevemente i criteri stabiliti dal Collegio dei docenti per la determinazione del credito scolastico, nel rispetto di quanto prevede l’art 15 del D.lgs. 62/2017, alla luce di quanto previsto dall’art.4 co.4 dell’O.M. n. 11 del 16 maggio 2020.
-    In pratica, per ciascun allievo, si procederà preliminarmente a calcolare la media dei voti conseguiti nello scrutinio finale, incluso il voto relativo al comportamento, e, quindi, a collocarlo nella fascia di appartenenza;
-    nell’ambito della fascia così individuata il Consiglio valuterà quale punteggio attribuire (minimo o massimo).
-    Per le classi terze e quarte, nel caso di media inferiore a sei decimi è attribuito un credito pari a 6 (art.4 co.4 OM n. 11 del 16 maggio 2020).
-    Per le classi quinte si utilizza la nuova griglia dei punteggi stabilita nell' OM n. 11 del 16 maggio 2020 (Allegato A, Tabella C).
+{% if dati.insuff5|length > 0 %}
+  <p>&nbsp;</p>
+  <p>Il Consiglio di Classe dichiara <strong>ammessi all'Esame di Stato</strong>, pur in presenza di una votazione
+    inferiore a sei decimi in una sola disciplina (D.lgs. 62/2017), i seguenti alunni:
   </p>
-  <p>Il Consiglio passa quindi alle singole delibere per l’attribuzione del credito scolastico che risultano sintetizzate nella seguente tabella.</p>
-  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
-  {% if dati.classe.anno != 4 %}
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
     <tr nobr="true">
       <td width="40%" align="center"><strong>ALUNNO</strong></td>
+      <td width="16%" align="center"><strong>Delibera</strong></td>
+      <td width="44%" align="center"><strong>Motivazione</strong></td>
+    </tr>
+  {% for idalunno,alu in dati.alunni %}
+    {% if idalunno in dati.insuff5 %}
+    <tr nobr="true">
+      <td><strong>{{ dati.alunni[idalunno].cognome }} {{ dati.alunni[idalunno].nome }} ({{ dati.alunni[idalunno].dataNascita|date('d/m/Y') }})</strong></td>
+      <td align="center" style="font-size:9pt">{% if dati.esiti[idalunno].dati.unanimita %}UNANIMITÀ{% else %}MAGGIORANZA<br>Contrari: {{ dati.esiti[idalunno].dati.contrari }}{% endif %}</td>
+      <td style="font-size:9pt">{{ dati.esiti[idalunno].dati.giudizio }}</td>
+    </tr>
+    {% endif %}
+  {% endfor %}
+  </table>
+{% endif %}
+  <p>Tutte le deliberazioni sopra indicate sono state assunte individualmente per ciascun alunno.</p>
+{% if dati.classe.anno == 2 %}
+  <p>Al fine della Certificazione delle Competenze (D.M. 22 agosto 2007 n. 139 e D.M. 27 gennaio 2010 n. 9)
+    in esito all’assolvimento all’obbligo di istruzione, il Consiglio di Classe predispone, per ogni alunno
+    ammesso alla classe successiva, la certificazione delle competenze acquisite, negli assi dei linguaggi,
+    matematico, scientifico e storico sociale, in relazione al percorso formativo effettuato.
+  </p>
+{% endif %}
+{% if dati.classe.anno >= 3 %}
+  <p>Il Consiglio di Classe passa quindi alle singole delibere per l’attribuzione del credito scolastico
+    che risultano sintetizzate nella seguente tabella:
+  </p>
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
+  {% if dati.classe.anno != 4 %}
+    <tr nobr="true">
+      <td width="30%" align="center"><strong>ALUNNO</strong></td>
       <td width="10%" align="center"><strong>Media voti</strong></td>
-      <td width="40%" align="center"><strong>Criteri</strong></td>
+      <td width="50%" align="center"><strong>Criteri</strong></td>
       <td width="10%" align="center"><strong>Credito</strong></td>
     </tr>
   {% else %}
     <tr nobr="true">
-      <td width="40%" align="center"><strong>ALUNNO</strong></td>
-      <td width="10%" align="center"><strong>Media voti</strong></td>
-      <td width="20%" align="center"><strong>Criteri</strong></td>
-      <td width="10%" align="center"><strong>Credito</strong></td>
-      <td width="10%" align="center"><strong>Credito anni prec.</strong></td>
-      <td width="10%" align="center"><strong>Credito totale</strong></td>
+      <td width="30%" align="center"><strong>ALUNNO</strong></td>
+      <td width="8%" align="center"><strong>Media voti</strong></td>
+      <td width="26%" align="center"><strong>Criteri</strong></td>
+      <td width="9%" align="center"><strong>Credito</strong></td>
+      <td width="9%" align="center"><strong>Credito anni prec.</strong></td>
+      <td width="9%" align="center"><strong>Credito integr.</strong></td>
+      <td width="9%" align="center"><strong>Credito totale</strong></td>
     </tr>
   {% endif %}
   {% for kalu in dati.scrutinati %}
     {% if dati.esiti[kalu].esito == 'A' %}
     <tr nobr="true">
-      <td align="left"><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
+      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }}<br>({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
       <td align="center">{{ dati.esiti[kalu].media|number_format(2,',','') }}</td>
-      <td  align="left" style="font-size:9pt">{% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% else %}---{% endfor %}</td>
+      <td style="font-size:9pt">{% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% else %}---{% endfor %}</td>
       <td align="center">{{ dati.esiti[kalu].credito }}</td>
       {% if dati.classe.anno == 4 %}
       <td align="center">{{ dati.esiti[kalu].creditoPrecedente }}</td>
-      <td align="center">{{ dati.esiti[kalu].creditoPrecedente + dati.esiti[kalu].credito }}</td>
+      <td align="center">{{ dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0 }}</td>
+      <td align="center">{{ dati.esiti[kalu].creditoPrecedente + dati.esiti[kalu].credito + (dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0) }}</td>
       {% endif%}
     </tr>
     {% endif %}
@@ -220,85 +278,170 @@
   </table>
   <p>Tutte le decisioni in merito all’attribuzione del credito scolastico dell’anno in corso vengono prese all’unanimità.</p>
 {% endif %}
-{% if dati.classe.anno == 2 %}
-  <p><strong>Punto secondo. Operazioni di scrutinio finale</strong></p>
-  <p>Al fine della Certificazione delle Competenze (DM 22 agosto 2007 n. 139 e DM 27 gennaio 2010 n. 9) in esito all’assolvimento all’obbligo di istruzione, il CdC predispone, per ogni alunno ammesso alla classe successiva, la certificazione delle competenze acquisite,
-    negli assi dei linguaggi, matematico, scientifico e storico sociale, nell’ambito del percorso formativo effettuato.
+{% if dati.debiti|length > 0 %}
+  <p>&nbsp;</p>
+  <p>Il Consiglio di Classe <strong>sospende la formulazione del giudizio finale</strong>, sulla base
+    dell'art. 4 comma 6 del D.P.R. 122 del 2009, per gli alunni che presentano debiti formativi.
+    Tali debiti dovranno essere colmati attraverso interventi educativi organizzati dalla Scuola o
+    mediante lo studio autonomo, con l'obbligo per gli alunni di sottoporsi alle prove di verifica
+    del superamento delle carenze riscontrate.
+    Viene di seguito riportato il dettaglio dei debiti formativi per gli alunni con giudizio sospeso:
   </p>
-{% endif %}
-{% if dati.classe.anno != 5 %}
-  <p><strong>Punto {{ dati.classe.anno == 2 ? 'terzo' : 'secondo' }}. Predisposizione del PAI</strong></p>
-  <p>Per gli alunni che sono stati ammessi alla classe successiva con voti insufficienti in una o più discipline, il Consiglio di classe ritiene che non abbiano raggiunto appieno gli obiettivi educativi e formativi previsti per la classe;
-    pertanto, per ogni studente i docenti preparano il PAI in cui sono indicati, per ogni disciplina, gli obiettivi di apprendimento da conseguire, le strategie per il raggiungimento dei relativi livelli di apprendimento ed i contenuti da recuperare o da consolidare.
-    Il file, contenente il PAI di ogni studente, sarà inviato dai docenti alle famiglie tramite il registro elettronico.
-  </p>
-  <p><strong>Punto {{ dati.classe.anno == 2 ? 'quarto' : 'terzo' }}. Predisposizione del PIA (eventuale)</strong></p>
-  {% if dati.no_piano %}
-  <p>Il Consiglio di Classe dichiara che tutti i contenuti disciplinari ritenuti imprescindibili per affrontare l’anno scolastico successivo
-    sono stati svolti regolarmente, per cui non si ravvisa la necessità di elaborare un piano di integrazione degli apprendimenti.
-  </p>
-  {% else %}
-  <p>I docenti delle seguenti discipline segnalano che non sono stati svolti determinati contenuti ritenuti imprescindibili per affrontare l’anno scolastico successivo:</p>
+  {% for idalunno,deb in dati.debiti %}
+  <br>
   <ul>
-    {% for p in dati.piani %}
-      {% if p.dati.necessario %}
-    <li>{{ p.materia.nome }}</li>
-      {% endif %}
-    {% endfor %}
+    <li><strong>{{ dati.alunni[idalunno].cognome }} {{ dati.alunni[idalunno].nome }} ({{ dati.alunni[idalunno].dataNascita|date('d/m/Y') }})</strong>
+      <br>Delibera {% if dati.esiti[idalunno].dati.unanimita %}all'unanimità{% else %}a maggioranza - Contrari: {{ dati.esiti[idalunno].dati.contrari }}{% endif %}
+    </li>
   </ul>
-  <p>Per questo motivo il CdC predispone il PIA in cui si indicano, per ogni disciplina, i nuclei fondamentali non affrontati o che necessitano di approfondimento.</p>
-  {% endif %}
-{% else %}
-  <p><strong>Punto secondo. Conversione del punteggio dei crediti attributi al terzo e quarto anno</strong></p>
-  <p>Il Consiglio di Classe procede alla conversione del punteggio dei crediti attribuiti al terzo e quarto anno,
-    sulla base di quanto stabilito nell' OM n. 11 del 16 maggio 2020 (Allegato A, Tabella A e B).
-    I risultati di tale conversione sono mostrati nella tabella seguente.
-  </p>
-  <table border="1" cellpadding="3" style="font-fa\mily:helvetica;font-size:10pt">
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
     <tr nobr="true">
-      <td width="40%" align="center" rowspan="2"><strong>ALUNNO</strong></td>
-      <td width="20%" align="center" colspan="2"><strong>Credito TERZA</strong></td>
-      <td width="20%" align="center" colspan="2"><strong>Credito QUARTA</strong></td>
-      <td width="10%" align="center" rowspan="2"><strong>Credito QUINTA</strong></td>
-      <td width="10%" align="center" rowspan="2"><strong>Credito TOTALE</strong></td>
+      <td width="30%" align="center"><strong>MATERIA</strong></td>
+      <td width="7%" align="center"><strong>Voto</strong></td>
+      <td width="50%" align="center"><strong>Debito formativo</strong></td>
+      <td width="13%" align="center"><strong>Modalità di recupero</strong></td>
     </tr>
-    <tr nobr="true" style="font-size:9pt">
-      <td width="10%" align="center"><strong>Assegnato</strong></td>
-      <td width="10%" align="center"><strong>Convertito</strong></td>
-      <td width="10%" align="center"><strong>Assegnato</strong></td>
-      <td width="10%" align="center"><strong>Convertito</strong></td>
+    {% for d in deb %}
+    <tr nobr="true">
+      <td>{{ d.materia }}</td>
+      <td align="center">{{ (d.unico == 0 or (d.tipo == 'E' and d.unico == 3)) ? 'NC' : d.unico }}</td>
+      <td style="font-size:9pt">{{ d.debito }}</td>
+      <td align="center" style="font-size:9pt">{{ ('label.recupero_'~d.recupero)|trans }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endfor %}
+{% endif %}
+{% if dati.non_ammessi > 0 %}
+  <p>&nbsp;</p>
+  <p>Il Consiglio di Classe,</p>
+  <ul>
+    <li>tenuto conto degli obiettivi generali e specifici previsti nella programmazione iniziale;</li>
+    <li>considerati tutti gli elementi che concorrono alla valutazione finale: interesse, partecipazione,
+      metodo di studio, impegno;</li>
+    <li>valutati gli obiettivi minimi previsti per le singole discipline: conoscenze degli argomenti,
+      proprietà espressiva, capacità di analisi, applicazione, capacità di giudizio autonomo;</li>
+    <li>preso atto della gravità delle carenze accertate nelle diverse discipline,</li>
+  </ul>
+  <p>dichiara <strong>non ammessi {% if dati.classe.anno == 5 %}all'Esame di Stato{% else %}alla classe successiva{% endif %}
+    i seguenti alunni:</strong></p>
+  <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="30%" align="center"><strong>ALUNNO</strong></td>
+      <td width="20%" align="center"><strong>Delibera</strong></td>
+      <td width="50%" align="center"><strong>Motivazione della non ammissione</strong></td>
     </tr>
   {% for kalu in dati.scrutinati %}
-    {% if dati.esiti[kalu].esito == 'A' %}
+    {% if dati.esiti[kalu].esito == 'N' %}
     <tr nobr="true">
-      <td align="left"><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="center">{{ dati.alunni[kalu].credito3  }}</td>
-      <td align="center">{{ dati.esiti[kalu].dati.creditoConvertito3  }}</td>
-      <td align="center">{{ dati.alunni[kalu].credito4  }}</td>
-      <td align="center">{{ dati.esiti[kalu].dati.creditoConvertito4 }}</td>
-      <td align="center">{{ dati.esiti[kalu].credito }}</td>
-      <td align="center">{{ dati.esiti[kalu].dati.creditoConvertito3 + dati.esiti[kalu].dati.creditoConvertito4 + dati.esiti[kalu].credito }}</td>
+      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }}<br>({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
+      <td align="center" style="font-size:9pt">{% if dati.esiti[kalu].dati.unanimita %}UNANIMITÀ{% else %}MAGGIORANZA<br>Contrari: {{ dati.esiti[kalu].dati.contrari }}{% endif %}</td>
+      <td style="font-size:9pt">
+        {{ dati.esiti[kalu].dati.giudizio }}
+      </td>
     </tr>
     {% endif %}
   {% endfor %}
   </table>
 {% endif %}
-  <p>Il Dirigente Scolastico fa presente che il Consiglio di Classe, prima della pubblicazione dei risultati, deve dare comunicazione dell’esito di non ammissione alle famiglie degli alunni minorenni, mediante fonogramma registrato.
-    Il Consiglio di Classe predispone quindi le comunicazioni da inviare alle famiglie a riguardo dell'esito dello scrutinio. Le famiglie potranno visualizzare queste comunicazioni direttamente sul registro elettronico.
+  <p>Il Dirigente Scolastico fa presente che il Consiglio di Classe, prima della pubblicazione dei risultati,
+    deve dare comunicazione dell’esito di non ammissione alle famiglie degli alunni minorenni, mediante
+    fonogramma registrato.
+    Il Consiglio di Classe predispone quindi le comunicazioni da inviare alle famiglie a riguardo dell'esito
+    dello scrutinio. Le famiglie potranno visualizzare queste comunicazioni direttamente sul
+    registro elettronico.
   </p>
-  <p>Vengano allegati al presente verbale:</p>
-  <ul>
-    <li>Tabellone finale dei voti</li>
+  <p>I risultati complessivi dello scrutinio della classe vengono così riassunti:</p>
+  <table border="0" cellpadding="3" style="font-family:helvetica;font-size:10pt;border:1px solid #000">
+    <tr nobr="true">
+      <td width="50%" align="right"><strong>Iscritti</strong>:</td>
+      <td width="50%" align="left">{{ dati.scrutinati|length + dati.no_scrutinabili|length + dati.estero|length }}</td>
+    </tr>
+    <tr nobr="true">
+      <td width="50%" align="right"><strong>Scrutinati</strong>:</td>
+      <td width="50%" align="left">{{ dati.scrutinati|length }}</td>
+    </tr>
+    <tr nobr="true">
+      <td width="50%" align="right"><strong>Non scrutinati</strong>:</td>
+      <td width="50%" align="left">{{ dati.no_scrutinabili|length + dati.estero|length }}</td>
+    </tr>
+    <tr nobr="true">
+      <td width="50%" align="right"><strong>AMMESSI</strong>:</td>
+      <td width="50%" align="left">{{ dati.ammessi }}</td>
+    </tr>
+    <tr nobr="true">
+      <td width="50%" align="right"><strong>NON AMMESSI</strong>:</td>
+      <td width="50%" align="left">{{ dati.non_ammessi }}</td>
+    </tr>
 {% if dati.classe.anno != 5 %}
-    <li>PAI - Piano di Apprendimento Individualizzato</li>
-    <li>PIA - Piano di Integrazione degli Apprendimenti (eventuale)</li>
+    <tr nobr="true">
+      <td width="50%" align="right"><strong>GIUDIZIO SOSPESO</strong>:</td>
+      <td width="50%" align="left">{{ dati.debiti|length }}</td>
+    </tr>
 {% endif %}
-{% if dati.classe.anno >= 3 %}
-    <li>Schema riepilogativo delle ore svolte in PCTO</li>
+  </table>
+{% if dati.classe.anno == 5 %}
+  <p>Il Consiglio di Classe procede alla conversione del punteggio dei crediti attribuiti al terzo e
+    quarto anno, sulla base di quanto stabilito nell' OM n. 53 del 3 marzo 2021 (Allegato A, Tabella A e B).
+    I risultati di tale conversione sono mostrati nella tabella seguente:
+  </p>
+  <table border="1" cellpadding="2" style="text-align:left;font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="30%" align="center" rowspan="2"><strong>ALUNNO</strong></td>
+      <td width="22%" align="center" colspan="2"><strong>Credito TERZA</strong></td>
+      <td width="22%" align="center" colspan="2"><strong>Credito QUARTA</strong></td>
+      <td width="8%" align="center" rowspan="2"><strong>Credito Integr.</strong></td>
+      <td width="9%" align="center" rowspan="2"><strong>Credito QUINTA</strong></td>
+      <td width="9%" align="center" rowspan="2"><strong>Credito TOTALE</strong></td>
+    </tr>
+    <tr nobr="true" style="font-size:9pt">
+      <td width="11%" align="center"><strong>Assegnato</strong></td>
+      <td width="11%" align="center"><strong>Convertito</strong></td>
+      <td width="11%" align="center"><strong>Assegnato</strong></td>
+      <td width="11%" align="center"><strong>Convertito</strong></td>
+    </tr>
+  {% for kalu in dati.scrutinati %}
+    {% if dati.esiti[kalu].esito == 'A' %}
+    <tr nobr="true">
+      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }}<br>({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
+      <td align="center" style="font-size:9pt">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].credito3 }}
+        <br>Media: {{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].media3|number_format(2, ',') }}</td>
+      <td align="center">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti3 }}</td>
+      <td align="center" style="font-size:9pt">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].credito4 }}
+        <br>Media: {{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].media4|number_format(2, ',') }}</td>
+      <td align="center">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti4 }}</td>
+      <td align="center">{{ dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0 }}</td>
+      <td align="center">{{ dati.esiti[kalu].credito }}</td>
+      <td align="center">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti3 + dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti4 + (dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0) + dati.esiti[kalu].credito }}</td>
+    </tr>
+    {% endif %}
+  {% endfor %}
+  </table>
 {% endif %}
-  </ul>
-  <p>Alle ore {{ dati.scrutinio.fine|date('G:i') }}, esaurite le operazioni, il Presidente dichiara sciolta la seduta.
-      Il presente verbale viene letto e approvato.
+  <p>&nbsp;</p>
+{% if dati.classe.anno != 5 %}
+  <p><strong>Punto secondo. Individuazione degli interventi di recupero e di situazioni particolari da segnalare.</strong></p>
+  <p>Terminata la fase deliberativa, si procede all'individuazione degli interventi
+    di recupero e alla compilazione delle comunicazioni per le famiglie relative agli alunni
+    con debito formativo.
+  </p>
+{% else %}
+  <p><strong>Punto secondo. Individuazione di situazioni particolari da segnalare.</strong></p>
+{% endif %}
+{% if dati.scrutinio.dati.argomento[2] %}
+  <p>Tra le situazioni particolari si segnala quanto segue:
+    <br><em>{{ dati.scrutinio.dati.argomento[2]|nl2br }}</em>
+  </p>
+{% else %}
+  <p>Non risulta nessuna situazione particolare da segnalare.</p>
+{% endif %}
+  <p>&nbsp;</p>
+  <p>Esaurito l'ordine del giorno, il Presidente rammenta ai presenti l'obbligo della stretta osservanza
+    del segreto d'ufficio.
+  </p>
+  <p>Alle ore {{ dati.scrutinio.fine|date('G:i') }}, la seduta è sciolta.
+    <br>Il presente verbale, composto da {:ptp:} pagine e 1 allegato,
+    viene letto e approvato all'unanimità.
   </p>
   <p>&nbsp;</p>
   <table border="0" cellpadding="3" nobr="true">
