@@ -137,10 +137,6 @@ class PagelleController extends AbstractController {
           // tabellone voti
           $nomefile = $pag->tabelloneVoti($classe, $periodo);
           break;
-        case 'F':
-          // firme verbale
-          $nomefile = $pag->firmeVerbale($classe, $periodo);
-          break;
         case 'I':
           // firme registro voti
           $nomefile = $pag->firmeRegistro($classe, $periodo);
@@ -256,6 +252,10 @@ class PagelleController extends AbstractController {
         case 'N':
           // non ammesso
           $nomefile = $pag->nonAmmesso($classe, $alunno, $periodo);
+          break;
+        case 'E':
+          // certificazione
+          $nomefile = $pag->certificazione($classe, $alunno, $periodo);
           break;
         case 'P':
           // pagella

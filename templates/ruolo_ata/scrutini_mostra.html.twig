@@ -228,8 +228,9 @@
     </tbody>
   </table>
     {% elseif periodo == 'I' or periodo == 'X' %}
+  <div class="text-center text-info"><strong class="gs-big">Integrazione scrutinio finale svolta in data {{ scrutinio.data|date('d/m/Y') }}</strong></div>
   <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Scrutinio svolto in data {{ scrutinio.data|date('d/m/Y') }}</strong></caption>
+    <caption class="text-center text-info"><strong class="gs-big">Documenti della classe</strong></caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-6">Documento</th>
@@ -240,13 +241,9 @@
       <tr>
         <td><strong>Verbale dello scrutinio</strong></td>
         <td>
-      {% if dati.verbale %}
           <div class="gs-mb-2">
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'V', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </div>
-      {% else %}
-          <em>Documento non disponibile</em>
-      {% endif %}
         </td>
       </tr>
       <tr>
@@ -261,7 +258,7 @@
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'T', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
-      {% if scrutinio.classe.anno == 2 and dati.esito.esito == 'A' %}
+      {% if scrutinio.classe.anno == 2 %}
       <tr>
         <td><strong>Certificazione delle competenze</strong></td>
         <td>
@@ -269,6 +266,17 @@
         </td>
       </tr>
       {% endif %}
+    </tbody>
+  </table>
+  <table class="table table-bordered table-hover table-striped gs-mt-4">
+    <caption class="text-center text-info"><strong class="gs-big">Documenti dello studente</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6">Documento</th>
+        <th class="col-sm-6">Azioni</th>
+      </tr>
+    </thead>
+    <tbody>
       {% if dati.esito is defined and dati.esito.esito != 'N' and dati.esito.esito != 'X'  %}
       <tr>
         <td><strong>Comunicazione dei voti</strong></td>
@@ -282,6 +290,14 @@
         <td><strong>Comunicazione di non ammissione</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        </td>
+      </tr>
+      {% endif %}
+      {% if dati.esito.esito == 'A' and scrutinio.classe.anno == 2 %}
+      <tr>
+        <td><strong>Certificazione delle competenze</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'E', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
       {% endif %}

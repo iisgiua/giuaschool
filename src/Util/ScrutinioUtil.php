@@ -368,7 +368,7 @@ class ScrutinioUtil {
         case 'N':
           // riepilogo
           if ($periodo == 'I') {
-            $dati = $this->riepilogriepilogooSospesi($docente, $classe, $periodo);
+            $dati = $this->riepilogoSospesi($docente, $classe, $periodo);
           } else {
             $dati = $this->riepilogoRinviati($docente, $classe, $periodo);
           }
@@ -392,8 +392,9 @@ class ScrutinioUtil {
           }
           break;
         case '4':
-          // riepilogo
-          $dati = $this->riepilogo($docente, $classe, $periodo);
+          // verbale e fine
+          //-- $dati = $this->riepilogo($docente, $classe, $periodo);
+          $dati = $this->verbale($docente, $classe, $periodo);
           break;
         case 'C':
           // chiusura
@@ -519,8 +520,9 @@ class ScrutinioUtil {
               ['classe' => $classe->getId(), 'stato' => '4']));
           break;
         case '4':
-          // riepilogo
-          $form = $this->riepilogoForm($classe, $periodo, $form, $dati);
+          // verbale e fine
+          //-- $form = $this->riepilogoForm($classe, $periodo, $form,   $dati);
+          $form = $this->verbaleForm($classe, $periodo, $form, $dati);
           break;
       }
     }
@@ -1886,19 +1888,6 @@ class ScrutinioUtil {
         ->setParameters(['lista' => $lista, 'esito' => 'N', 'classe' => $classe, 'periodo' => $periodo])
         ->getQuery()
         ->getArrayResult();
-      // verbale
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
-      $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(
-        ['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C']);
-      $dati_scrutinio = $scrutinio->getDati();
-      $dati['verbale']['download'] = true;
-      foreach ($dati_scrutinio['verbale'] as $step=>$args) {
-        if ($args['validazione']) {
-          $dati['verbale']['step'][$step] = $def->getStruttura()[$step][2];
-          $dati['verbale']['validato'][$step] = $args['validato'];
-          $dati['verbale']['download'] = ($dati['verbale']['download'] && $args['validato']);
-        }
-      }
     }
     // controlla se attivare pulsante riapertura o no
     $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
@@ -1922,7 +1911,7 @@ class ScrutinioUtil {
   public function alunniInScrutinio(Classe $classe, $periodo) {
     $alunni = array();
     $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
-    if ($periodo == 'P' || $periodo == '1') {
+    if ($periodo == 'P') {
       // solo gli alunni al momento dello scrutinio
       $alunni = $scrutinio->getDato('alunni');
     } elseif ($periodo == 'F') {
@@ -1964,7 +1953,7 @@ class ScrutinioUtil {
       return false;
     }
     $this->session->getFlashBag()->clear();
-    // alunni con voto  in scrutinio
+    // alunni con voto in scrutinio
     $alunni_esistenti = $this->em->getRepository('App:VotoScrutinio')->alunni($scrutinio);
     // materia ed. civica
     $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
@@ -3627,16 +3616,15 @@ class ScrutinioUtil {
         'assenze' => $v->getAssenze(),
         'dati' => $v->getDati());
       if ($v->getMateria()->getMedia()) {
-        // esclude religione dalla media
+        // calcolo medie
         if (!isset($somma[$v->getAlunno()->getId()])) {
-          $somma[$v->getAlunno()->getId()] =
-            ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4) ? 0 : $v->getUnico();
-          $numero[$v->getAlunno()->getId()] = 1;
-        } else {
-          $somma[$v->getAlunno()->getId()] +=
-            ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4) ? 0 : $v->getUnico();
-          $numero[$v->getAlunno()->getId()]++;
+          $somma[$v->getAlunno()->getId()] = 0;
+          $numero[$v->getAlunno()->getId()] = 0;
         }
+        $somma[$v->getAlunno()->getId()] +=
+          ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4) ? 0 :
+          (($v->getMateria()->getTipo() == 'E' && $v->getUnico() == 3) ? 0 : $v->getUnico());
+        $numero[$v->getAlunno()->getId()]++;
       }
     }
     // calcola medie
@@ -3663,33 +3651,44 @@ class ScrutinioUtil {
     $this->session->getFlashBag()->clear();
     // legge dati
     $dati = $this->riepilogoSospesi($docente, $classe, 'I');
+    // alunni con voto in scrutinio
+    $alunni_esistenti = $this->em->getRepository('App:VotoScrutinio')->alunni($scrutinio);
     // inserimento voti
-    $num = 0;
     foreach ($dati['alunni'] as $alunno=>$alu) {
       $alunno_obj = $this->em->getRepository('App:Alunno')->find($alunno);
       foreach ($dati['materie'] as $materia=>$mat) {
         $materia_obj = $this->em->getRepository('App:Materia')->find($materia);
         // esclude alunni NA per religione
-        if ($mat['tipo'] != 'R' || $alu['religione'] == 'S') {
+        if ($mat['tipo'] != 'R' || in_array($alu['religione'], ['S', 'A'])) {
           // inserisce voti e assenze
-          $vs = (new VotoScrutinio())
-            ->setScrutinio($scrutinio)
-            ->setAlunno($alunno_obj)
-            ->setMateria($materia_obj)
-            ->setUnico($dati['voti'][$alunno][$materia]['unico'])
-            ->setRecupero($dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['recupero'] : null)
-            ->setAssenze($dati['voti'][$alunno][$materia]['assenze'])
-            ->setDati($dati['voti'][$alunno][$materia]['dati']);
-          $this->em->persist($vs);
-          $num++;
-          if ($num % 20 == 0) {
-            $this->em->flush();
+          if (array_key_exists($alunno, $alunni_esistenti) && in_array($materia, $alunni_esistenti[$alunno])) {
+            // aggiorna dati esistenti
+            $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+              ->update()
+              ->set('vs.modificato', ':modificato')
+              ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.materia=:materia')
+              ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'materia' => $materia,
+                'modificato' => new \DateTime()])
+              ->getQuery()
+              ->getResult();
+          } else {
+            // inserisce nuovi dati
+            $this->em->getConnection()
+              ->prepare('INSERT INTO gs_voto_scrutinio '.
+                '(scrutinio_id, alunno_id, materia_id, modificato, unico, debito, recupero, assenze, dati) '.
+                'VALUES (:scrutinio,:alunno,:materia,NOW(),:unico,:debito,:recupero,:assenze,:dati)')
+              ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
+                'unico' => $dati['voti'][$alunno][$materia]['unico'],
+                'debito' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['debito'] : null,
+                'recupero' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['recupero'] : null,
+                'assenze' => $dati['voti'][$alunno][$materia]['assenze'],
+                'dati' => serialize($dati['voti'][$alunno][$materia]['dati'])]);
           }
         }
       }
     }
     $this->em->flush();
-    // legge assenze da scrutinio finale
+    // legge dati da scrutinio finale
     $scrutinio_F = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => 'F']);
     $scrutinabili = $scrutinio_F->getDato('scrutinabili');
     // memorizza dati alunni
@@ -3732,10 +3731,6 @@ class ScrutinioUtil {
     }
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
-    // cancella voti
-    $this->em->getConnection()
-      ->prepare("DELETE FROM gs_voto_scrutinio WHERE scrutinio_id=:scrutinio")
-      ->execute(['scrutinio' => $scrutinio->getId()]);
     // aggiorna stato
     $scrutinio->setStato('N');
     $this->em->flush();
@@ -3793,7 +3788,8 @@ class ScrutinioUtil {
       // controlli sui presenti
       $errore_presenza = false;
       foreach ($form->get('lista')->getData() as $doc=>$val) {
-        if (!$val || (!$val->getPresenza() && !$val->getSostituto())) {
+        if (!$val || (!$val->getPresenza() && (!$val->getSostituto() || !$val->getSurrogaProtocollo() ||
+            !$val->getSurrogaData()))) {
           $errore_presenza = true;
         }
       }
@@ -3803,6 +3799,29 @@ class ScrutinioUtil {
       }
       // se niente errori cambia stato
       if (!$this->session->getFlashBag()->has('errore')) {
+        // dati docenti
+        $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+        // memorizza dati docenti e materie
+        $dati_docenti = array();
+        foreach ($docenti as $doc) {
+          $dati_docenti[$doc['id']][$doc['materia_id']] = $doc['tipo'];
+        }
+        // aggiunge ed.civica alle materie
+        $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+        $sostegno = $this->em->getRepository('App:Materia')->findOneByTipo('S');
+        foreach ($dati_docenti as $iddoc=>$doc) {
+          // controlla se solo su sostegno
+          $cattsost = true;
+          foreach ($doc as $idmat=>$mat) {
+            if ($idmat != $sostegno->getId()) {
+              $cattsost = false;
+            }
+          }
+          if (!$cattsost) {
+            // anche curricolare: aggiunge ed.Civica
+            $dati_docenti[$iddoc][$edcivica->getId()] = 'N';
+          }
+        }
         // imposta dati
         $scrutinio->setData($form->get('data')->getData());
         $scrutinio->setInizio($form->get('inizio')->getData());
@@ -3813,6 +3832,7 @@ class ScrutinioUtil {
         $valori['presiede_ds'] = $form->get('presiede_ds')->getData();
         $valori['presiede_docente'] = $form->get('presiede_docente')->getData();
         $valori['segretario'] = $form->get('segretario')->getData();
+        $valori['docenti'] = $dati_docenti;
         $scrutinio->setDati($valori);
         // aggiorna stato
         $scrutinio->setStato('2');
@@ -4030,10 +4050,6 @@ class ScrutinioUtil {
         // solo sufficienze con non ammissione
         $errore[] = $this->trans->trans('exception.sufficienze_non_ammissione_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
-      if ($dati['esito']->getEsito() == 'S' && $insuff_cont == 0) {
-        // solo sufficienze con sospensione
-        $errore[] = $this->trans->trans('exception.sufficienze_sospensione_esito', ['sex' => $sesso, 'alunno' => $nome]);
-      }
       if ($dati['esito']->getEsito() != 'N' && $insuff_religione) {
         // insuff. religione incoerente con esito
         $errore[] = $this->trans->trans('exception.voto_religione_esito', ['sex' => $sesso, 'alunno' => $nome]);
@@ -4041,10 +4057,6 @@ class ScrutinioUtil {
       if ($dati['esito']->getEsito() != 'N' && $insuff_condotta) {
         // insuff. condotta incoerente con esito
         $errore[] = $this->trans->trans('exception.voto_condotta_esito', ['sex' => $sesso, 'alunno' => $nome]);
-      }
-      if ($dati['esito']->getEsito() == 'S' && $alunno->getClasse()->getAnno() == 5) {
-        // sospensione in quinta
-        $errore[] = $this->trans->trans('exception.exception.quinta_sospeso_esito', ['sex' => $sesso, 'alunno' => $nome]);
       }
     }
     if (empty($errore)) {
@@ -4085,7 +4097,7 @@ class ScrutinioUtil {
                                         Classe $classe, Scrutinio $scrutinio) {
     // cancella medie
     $this->em->getConnection()
-      ->prepare("UPDATE gs_esito SET media=NULL,credito=NULL WHERE scrutinio_id=:scrutinio")
+      ->prepare("UPDATE gs_esito SET media=NULL,credito=NULL,credito_precedente=NULL WHERE scrutinio_id=:scrutinio")
       ->execute(['scrutinio' => $scrutinio->getId()]);
     // aggiorna stato
     $scrutinio->setStato('2');
@@ -4155,6 +4167,17 @@ class ScrutinioUtil {
       }
     }
     if (empty($errore)) {
+      // legge definizione scrutinio e verbale
+      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('I');
+      $scrutinio_dati = $scrutinio->getDati();
+      foreach ($def->getStruttura() as $step=>$args) {
+        if ($args[0] == 'Argomento') {
+          // resetta validazione
+          $scrutinio_dati['verbale'][$step]['validato'] = false;
+        }
+      }
+      // memorizza dati scrutinio
+      $scrutinio->setDati($scrutinio_dati);
       // aggiorna stato
       $scrutinio->setStato('4');
       $this->em->flush();
@@ -4226,20 +4249,22 @@ class ScrutinioUtil {
       // controlli
       if (!$form->get('fine')->getData()) {
         // ora non presente
-        $this->session->getFlashBag()->add('errore', 'exception.scrutinio_fine');
+        $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
+      }
+      // controlla validazione argomenti
+      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('I');
+      foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
+        // solo elementi da validare
+        if (isset($args['validato']) && !$args['validato']) {
+          // errore di validazione
+          $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
+            ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
+        }
       }
       // se niente errori cambia stato
       if (!$this->session->getFlashBag()->has('errore')) {
         // imposta dati
         $scrutinio->setFine($form->get('fine')->getData());
-        // imposta conferma verbale
-        $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('I');
-        $dati_scrutinio = $scrutinio->getDati();
-        foreach ($def->getStruttura() as $step=>$args) {
-          $dati_scrutinio['verbale'][$step]['validazione'] = $args[1];
-          $dati_scrutinio['verbale'][$step]['validato'] = !$args[1];
-        }
-        $scrutinio->setDati($dati_scrutinio);
         // aggiorna stato
         $scrutinio->setStato('C');
         $this->em->flush();

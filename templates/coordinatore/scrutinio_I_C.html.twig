@@ -7,15 +7,11 @@
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio integrativo per la classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Integrazione dello scrutinio finale per la classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Scrutinio chiuso</h2>
-    {% if not dati.verbale.download %}
-  <h3 class="text-center text-success gs-h3 gs-mt-0 gs-mb-1"><em>E' necessario completare il verbale come prima operazione.</em></h2>
-    {% endif  %}
     {% include 'include/modal-error.html.twig' %}
-  <div>
     <table class="table table-bordered table-hover table-striped gs-mt-4">
-      <caption class="text-center text-info"><strong class="gs-big">Scrutinio integrativo</strong></caption>
+      <caption class="text-center text-info"><strong class="gs-big">Integrazione dello scrutinio finale</strong></caption>
       <thead class="bg-success">
         <tr>
           <th class="col-sm-2">Documento</th>
@@ -27,72 +23,45 @@
         <tr>
           <td><strong>Verbale</strong></td>
           <td>
-            Stampare in duplice copia e consegnare in Segreteria Didattica: una copia sarà inserita nel registro dei verbali e l'altra conservata agli atti.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
+            Stampare in <strong>duplice copia</strong> e consegnare in Segreteria Didattica: una copia sarà inserita nel registro dei verbali e l'altra conservata agli atti.<br>
+            <strong><em>Far firmare al presidente e al segretario della seduta.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           <td>
-    {% if (not dati.verbale.download) or dati.modifica %}
-      {% if dati.verbale.step is defined %}
-        {% for step,s in dati.verbale.step %}
-            <div class="gs-mb-2">
-              <button type="button" class="btn btn-xs btn-{{ dati.verbale.validato[step] ? 'primary' : 'success' }} gs-button-remote" title="Modifica il contenuto del punto {{ s.argomento }} all'ordine del giorno" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'I', 'step': step}) }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica il punto {{ s.argomento }}</strong></button>
-            </div>
-        {% endfor %}
-      {% endif %}
-    {% endif %}
-    {% if dati.verbale.download %}
             <div class="gs-mb-2">
               <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
             </div>
-    {% endif %}
           </td>
         </tr>
         <tr>
           <td><strong>Riepilogo voti</strong></td>
           <td>
-            Stampare in duplice copia e consegnare in Segreteria Didattica: una copia sarà allegata al verbale e l'altra conservata agli atti.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
+            Stampare in <strong>duplice copia</strong> e consegnare in Segreteria Didattica: una copia sarà allegata al verbale e l'altra conservata agli atti.<br>
+            <strong><em>Far firmare a tutti i docenti e al presidente.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-    {% if dati.verbale.download %}
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-    {% endif %}
           </td>
         </tr>
         <tr>
           <td><strong>Tabellone voti</strong></td>
           <td>
-            Stampare in duplice copia e consegnare in Segreteria Didattica: una copia sarà pubblicata e l'altra conservata agli atti.<br>
+            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica: sarà firmata dal Dirigente ed esposta all'albo.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-    {% if dati.verbale.download %}
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-    {% endif %}
-          </td>
-        </tr>
-        <tr>
-          <td><strong>Foglio firme Verbale</strong></td>
-          <td>
-            Stampare in duplice copia e consegnare in Segreteria Didattica: una copia sarà allegata al verbale e l'altra conservata agli atti.<br>
-            <strong><em>Far firmare a tutti i docenti entrambe le copie.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
-          </td>
-          <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'F', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
         <tr>
           <td><strong>Foglio firme Registro dei voti</strong></td>
           <td>
-            Stampare in un'unica copia e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
-            <strong><em>Far firmare a tutti i docenti.</em></strong><br>
+            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
+            <strong><em>Far firmare a tutti i docenti, al segretario e al presidente.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
@@ -104,7 +73,7 @@
         <tr>
           <td><strong>Certificazione competenze</strong></td>
           <td>
-            Stampare in un'unica copia e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
+            Sarà stampata conservata agli atti dalla Segreteria Didattica<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
@@ -117,7 +86,7 @@
         <tr>
           <td><strong>Comunicazione Non Ammessi</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico, o stampato e consegnato dalla Segreteria Didattica nel caso di impossibilità di accesso al Registro Elettronico.<br>
+            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
@@ -132,7 +101,6 @@
         </tr>
       </tbody>
     </table>
-  </div>
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
     <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '4'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>

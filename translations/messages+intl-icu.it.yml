@@ -95,6 +95,8 @@ label.criterio_credito_desc_O: Svolgimento attività come rappresentante negli O
 label.criterio_credito_desc_P: Proficua partecipazione ai PCTO e alle altre attività organizzate dall'Istituto
 label.criterio_credito_desc_R: Proficua partecipazione alle lezioni della Religione o Materia alternativa
 label.criterio_credito_desc_S: Attività sociali e sportive certificate da un ente esterno
+label.criterio_credito_sospeso_si: Almeno un voto superiore al 6 nelle materie con debito formativo
+label.criterio_credito_sospeso_no: Nessun voto superiore al 6 nelle materie con debito formativo
 label.criterio_credito_F: Frequenza
 label.criterio_credito_I: Interesse e impegno
 label.criterio_credito_L: Credito formativo (Lingue)
@@ -912,7 +914,14 @@ benché siano state svolte attività di recupero in orario curricolare ed extrac
 pur essendo stata informata la famiglia,\\n
 considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrata nel corso dell’anno scolastico,\\n
 non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e non possiede competenze e conoscenze adeguate per affrontare {classe}."
-message.giudizio_non_ammissione_sospeso: Esaminati tutti gli elementi valutativi, tenuto conto che persistono le gravi carenze segnalate nello scrutinio finale di giugno, il Consiglio di Classe ritiene che l’alunn{sex} non possieda le competenze e le conoscenze adeguate per affrontare la classe successiva.
+message.giudizio_non_ammissione_sospeso: "L'alunn{sex},\\n
+con giudizio sospeso nello scrutinio finale di giugno,\\n
+benché siano stati segnalati alla famiglia i relativi debiti formativi,\\n
+pur essendo state svolte attività di recupero organizzate dalla scuola,\\n
+considerata anche la scarsa partecipazione a tali attività di recupero,\\n
+accertato che persistono le gravi carenze segnalate,\\n
+non ha raggiunto gli obiettivi minimi per le discipline indicate
+e non possiede competenze e conoscenze adeguate per affrontare la classe successiva."
 message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi.
 message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
 message.otp_abilitato: Codice OTP abilitato.

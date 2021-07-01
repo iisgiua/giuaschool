@@ -9,7 +9,7 @@
     'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
   {% for voto in dati.voti %}
       <li class="list-group-item gs-pt-1 gs-pb-1">
-        <div class="form-group gs-mb-0">
+        <div class="form-group gs-mb-0{{ dati.materie[voto.materia.id].tipo != 'R' and voto.recupero is not empty ? ' bg-danger' }}">
           <label class="control-label col-sm-6 gs-pl-1 gs-pr-1">{{ dati.materie[voto.materia.id].nomeBreve }}</label>
           <div class="col-sm-6">
             <span style="display:inline-block;width:7em;" class="label label-success gs-big">{{ valutazioni[voto.unico] }}</span>
@@ -36,8 +36,20 @@
   {% for f in form.creditoScolastico.children %}
         {{ form_widget(f) }}
   {% endfor %}
+        <div class="gs-mt-2 gs-ml-4 gs-pl-2">
+          <p><strong><em>{{ (form.creditoSospeso.vars.value ? 'label.criterio_credito_sospeso_si' : 'label.criterio_credito_sospeso_no')|trans }}</em></strong></p>
+        {{ form_widget(form.creditoSospeso) }}
+        </div>
       </div>
     </div>
+  {% if alunno.classe.anno == 4 and alunno.credito3 == 6 %}
+    <div class="form-group bg-success gs-mb-1">
+      <label class="col-sm-4 control-label gs-big">{{ 'label.credito_integrativo'|trans }}</label>
+      <div class="col-sm-8">
+        {{ form_widget(form.creditoIntegrativo) }}
+      </div>
+    </div>
+  {% endif %}
     <div class="form-group gs-mb-0">
       <label class="col-sm-4 control-label gs-big">Punteggio attribuito</label>
       <div class="col-sm-8 gs-mt-2">
@@ -47,7 +59,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    {{ form_widget(form.submit) }}
+    {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
@@ -62,7 +74,7 @@ $(document).ready(function() {
         c++;
       }
     });
-    if (c>=2) {
+    if (c>=2 && {{ form.creditoSospeso.vars.value ? 'true' : 'false'}}) {
       var v={{ dati.credito }}+1;
       var cl='label-success';
     } else {

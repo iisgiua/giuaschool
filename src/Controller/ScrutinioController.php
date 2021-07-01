@@ -26,6 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
@@ -695,10 +696,10 @@ class ScrutinioController extends AbstractController {
     $info = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['P']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
-    $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
-    $valutazioni['I']['N'] = $valutazioni['F']['N'];
-    $valutazioni['I']['R'] = $valutazioni['F']['R'];
+    $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"', 'format' => '"Non Classificato", "Insufficiente", "Sufficiente", "Discreto", "Buono", "Distinto", "Ottimo"', 'format2' => '"NC", "Insuff.", "Suff.", "Discreto", "Buono", "Distinto", "Ottimo"'];
+    $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
+    $valutazioni['F']['E'] = ['min' => 3, 'max' => 10, 'start' => 6, 'ticks' => '3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 4, 5, 6, 7, 8, 9, 10'];
+    $valutazioni['I'] = $valutazioni['F'];
     $valutazioni['X']['N'] = $valutazioni['F']['N'];
     $valutazioni['X']['R'] = $valutazioni['F']['R'];
     $info['valutazioni'] = $valutazioni['P']['N'];
@@ -739,13 +740,7 @@ class ScrutinioController extends AbstractController {
     }
     // informazioni necessarie
     $info['materia'] = $materia->getNome();
-    if ($materia->getTipo() == 'R') {
-      // religione
-      $info['valutazioni'] = $valutazioni[$periodo]['R'];
-    } else {
-      // altre materie
-      $info['valutazioni'] = $valutazioni[$periodo]['N'];
-    }
+    $info['valutazioni'] = $valutazioni[$periodo][$materia->getTipo()];
     // elenco voti/alunni
     $dati = $scr->elencoVoti($this->getUser(), $classe, $materia, $periodo);
     if ($alunno > 0) {
@@ -1327,6 +1322,15 @@ class ScrutinioController extends AbstractController {
       $m = ceil($dati['esito']->getMedia());
     }
     $dati['credito'] = $credito[$alunno->getClasse()->getAnno()][$m];
+    // credito per sospensione giudizio
+    $creditoSospeso = false;
+    if ($periodo == 'I' || $periodo == 'X') {
+      foreach ($dati['voti'] as $voto) {
+        if (!empty($voto->getRecupero()) && $voto->getUnico() >= 7) {
+          $creditoSospeso = true;
+        }
+      }
+    }
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('credito', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_credito', ['alunno' => $alunno->getId(),
@@ -1339,6 +1343,9 @@ class ScrutinioController extends AbstractController {
         'placeholder' => null,
         'expanded' => true,
         'multiple' => true,
+        'required' => false))
+      ->add('creditoSospeso', HiddenType::class, array('label' => null,
+        'data' => $creditoSospeso,
         'required' => false))
       ->add('creditoIntegrativo', ChoiceType::class, array('label' => 'label.credito_integrativo',
         'data' => isset($valori['creditoIntegrativo']) ? $valori['creditoIntegrativo'] : true,
@@ -1368,7 +1375,7 @@ class ScrutinioController extends AbstractController {
           $criteri_cont++;
         }
       }
-      if ($criteri_cont >= 2) {
+      if ($criteri_cont >= 2 && ($periodo == 'F' || $creditoSospeso)) {
         $dati['esito']->setCredito($dati['credito'] + 1);
       } else {
         $dati['esito']->setCredito($dati['credito']);

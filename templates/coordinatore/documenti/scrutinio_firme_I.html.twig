@@ -1,0 +1,35 @@
+<table border="0" cellpadding="0" style="font-family:helvetica;font-size:8pt">
+  <tr>
+    <td width="50%" align="left"><strong>FOGLIO FIRME REGISTRO</strong></td>
+    <td width="50%" align="right"><strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - A.S. {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong></td>
+  </tr>
+</table>
+<br><br>
+<table border="0" cellpadding="0" style="font-family:helvetica;font-size:14pt">
+  <tr>
+    <td width="65%" align="left"><strong>CONSIGLIO DI CLASSE: {{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong></td>
+    <td width="35%" align="right"><strong>{{ dati.periodo }}</strong></td>
+  </tr>
+</table>
+<table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
+  <tr>
+    <td width="35%" align="center"><strong>MATERIA</strong></td>
+    <td width="20%" align="center"><strong>DOCENTI</strong></td>
+    <td width="45%" align="center"><strong>FIRME</strong></td>
+  </tr>
+{% for idmat,mat in dati.materie %}
+  <tr>
+    <td align="left"><strong>{{ mat.nome }}</strong></td>
+    <td align="left" style="font-size:9pt">{% for iddoc,doc in mat.docenti %}{{ doc }}{{ not loop.last ? ', '}}{% endfor %}</td>
+    <td>&nbsp;<br>&nbsp;</td>
+  </tr>
+{% endfor %}
+</table>
+<br><br>
+<table border="0" cellpadding="0" style="font-family:helvetica;font-size:12pt">
+  <tr>
+    <td width="20%" align="left">DATA: {{ dati.scrutinio.data|date('d/m/Y') }}</td>
+    <td width="40%" align="left">SEGRETARIO: ________________________________</td>
+    <td width="40%" align="right">PRESIDENTE: ________________________________</td>
+  </tr>
+</table>

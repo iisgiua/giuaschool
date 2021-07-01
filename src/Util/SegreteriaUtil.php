@@ -285,13 +285,6 @@ class SegreteriaUtil {
           $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
         }
       } elseif ($scrutinio->getPeriodo() == 'I' || $scrutinio->getPeriodo() == 'X') {
-        // controlla verbale
-        $dati['verbale'] = true;
-        foreach ($dati_scrutinio['verbale'] as $step=>$args) {
-          if ($args['validazione']) {
-            $dati['verbale'] = ($dati['verbale'] && $args['validato']);
-          }
-        }
         // dati esito
         $dati['esito'] = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio,
           'alunno' => $alunno]);
