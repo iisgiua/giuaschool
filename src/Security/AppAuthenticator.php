@@ -193,6 +193,17 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    * @return bool Vero se le credenziali sono valide, falso altrimenti
    */
   public function checkCredentials($credentials, UserInterface $user) {
+    // controlla modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
+      // errore: modalità manutenzione
+      $this->logger->error('Tentativo di accesso da app durante la modalità manutenzione.', array(
+        'username' => $credentials['username'],
+        'ip' => $credentials['ip']));
+      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
+    }
     // controlla appId
     $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
     if (!$app) {

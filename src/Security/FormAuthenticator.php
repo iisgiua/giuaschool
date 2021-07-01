@@ -27,6 +27,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use App\Entity\Amministratore;
 use App\Entity\Docente;
 use App\Entity\Staff;
 use App\Entity\Preside;
@@ -204,6 +205,18 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @return bool Vero se le credenziali sono valide, falso altrimenti
    */
   public function checkCredentials($credentials, UserInterface $user) {
+    // controlla modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine &&
+        !($user instanceOf Amministratore)) {
+      // errore: modalità manutenzione
+      $this->logger->error('Tentativo di accesso da form durante la modalità manutenzione.', array(
+        'username' => $credentials['username'],
+        'ip' => $credentials['ip']));
+      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
+    }
     // legge configurazione: id_provider
     $id_provider = $this->em->getRepository('App:Configurazione')->findOneByParametro('id_provider');
     // se id_provider controlla tipo utente

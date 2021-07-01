@@ -155,6 +155,16 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    * @return bool Vero se le credenziali sono valide, falso altrimenti
    */
   public function checkCredentials($credentials, UserInterface $user): bool {
+    // controlla modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
+      // errore: modalità manutenzione
+      $this->logger->error('Tentativo di accesso da GSuite durante la modalità manutenzione.', array(
+        'email' => $user->getEmail()));
+      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
+    }
     // controllo se l'utente è abilitato
     if (!$user->getAbilitato()) {
       // utente disabilitato

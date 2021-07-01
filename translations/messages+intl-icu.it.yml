@@ -1031,8 +1031,9 @@ exception.attivazione_email_esistente: L'indirizzo di posta elettronica indicato
 exception.attivazione_esistente: L'utente risulta già attivo.
 exception.auth_required: Devi autenticarti per accedere alla pagina richiesta.
 exception.avviso_non_permesso: Spiacente non puoi creare o modificare l'avviso.
+exception.blocked_login: Tentativo di accesso durante una manutenzione programmata del sistema.
 exception.blocked_ip: Accesso da una postazione non autorizzata.
-exception.blocked_time: Accesso in orario non autorizzato (dalle 8 alle 14).
+exception.blocked_time: Accesso in orario non autorizzato.
 exception.campo_data_mancante: Il campo {DATA} non è presente nel testo.
 exception.campo_ora_mancante: Il campo {ORA} non è presente nel testo.
 exception.campo_ora_inizio_mancante: Il campo {INIZIO} non è presente nel testo.

@@ -19,9 +19,9 @@
   <li role="presentation"{{ app.request.attributes.get('_route') == 'login_form' ? ' class="active"' }}>
     <a href="{{ path('login_form') }}" title="Accedi al registro usando utente e password"><span class="glyphicon glyphicon-user gs-mr-2"></span>Accesso al Registro Elettronico</a>
   </li>
-  <li role="presentation"{{ app.request.attributes.get('_route')[:10] == 'login_card' ? ' class="active"' }}>
-    <a href="{{ path('login_cardErrore') }}" title="Accedi al registro usando la Carta Nazionale dei Servizi"><span class="glyphicon glyphicon-credit-card gs-mr-2"></span>Accesso con Tessera Sanitaria</a>
-  </li>
+  {#-- <li role="presentation"{{ app.request.attributes.get('_route')[:10] == 'login_card' ? ' class="active"' }}> #}
+    {#-- <a href="{{ path('login_cardErrore') }}" title="Accedi al registro usando la Carta Nazionale dei Servizi"><span class="glyphicon glyphicon-credit-card gs-mr-2"></span>Accesso con Tessera Sanitaria</a> #}
+  {#-- </li> #}
   <li role="presentation"{{ app.request.attributes.get('_route') == 'login_recovery' ? ' class="active"' }}>
     <a href="{{ path('login_recovery') }}" title="Recupera la password di accesso tramite l'email"><span class="glyphicon glyphicon-repeat gs-mr-2"></span>Recupero Password</a>
   </li>

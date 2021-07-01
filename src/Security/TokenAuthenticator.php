@@ -191,6 +191,17 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
    * @return bool Vero se le credenziali sono valide, falso altrimenti
    */
   public function checkCredentials($credentials, UserInterface $user) {
+    // controlla modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
+      // errore: modalità manutenzione
+      $this->logger->error('Tentativo di accesso da token durante la modalità manutenzione.', array(
+        'username' => $user->getUsername(),
+        'ip' => $credentials['ip']));
+      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
+    }
     // controllo se l'utente è abilitato
     if (!$user->getAbilitato()) {
       // utente disabilitato
