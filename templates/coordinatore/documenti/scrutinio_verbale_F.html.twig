@@ -428,7 +428,7 @@
 {% else %}
   <p><strong>Punto secondo. Individuazione di situazioni particolari da segnalare.</strong></p>
 {% endif %}
-{% if dati.scrutinio.dati.argomento[2] %}
+{% if dati.scrutinio.dati.argomento is defined and dati.scrutinio.dati.argomento[2] %}
   <p>Tra le situazioni particolari si segnala quanto segue:
     <br><em>{{ dati.scrutinio.dati.argomento[2]|nl2br }}</em>
   </p>

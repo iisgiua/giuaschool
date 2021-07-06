@@ -10,6 +10,8 @@
 !/FILES/archivio/registri/.gitkeep
 /FILES/archivio/scrutini/*
 !/FILES/archivio/scrutini/.gitkeep
+/FILES/archivio/circolari/*
+!/FILES/archivio/circolari/.gitkeep
 /FILES/tmp/*
 !/FILES/tmp/.gitkeep
 /FILES/upload/avvisi/*

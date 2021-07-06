@@ -819,7 +819,7 @@ class SistemaController extends BaseController {
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
       ->orderBy('d.cognome,d.nome', 'ASC')
-      ->setParameters(['tipi' => ['N', 'R']])
+      ->setParameters(['tipi' => ['N', 'R', 'E']])
       ->getQuery()
       ->getResult();
     $lista_sostegno = $em->getRepository('App:Docente')->createQueryBuilder('d')
@@ -846,6 +846,7 @@ class SistemaController extends BaseController {
       $sostegno = $form->get('sostegno')->getData();
       $classe = $form->get('classe')->getData();
       $scrutinio = $form->get('scrutinio')->getData();
+      $circolare = ($form->get('circolare')->getData() === true);
       // assicura che lo script non sia interrotto
       ini_set('max_execution_time', 0);
       // registro docenti
@@ -879,6 +880,11 @@ class SistemaController extends BaseController {
       } elseif ($scrutinio === -1) {
         // crea documenti per tutte le classi
         $arch->tuttiScrutiniClasse($lista_classi);
+      }
+      // archivio circolari
+      if ($circolare) {
+        // crea archivio delle circolari
+        $arch->archivioCircolari();
       }
     }
     // mostra la pagina di risposta

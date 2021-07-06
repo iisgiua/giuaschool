@@ -5,6 +5,7 @@ parameters:
   locale_date: 'd/m/Y'
   locale_time: 'H:i'
   locale_datetime: 'd/m/Y H:i'
+  dir_archivio:   '%kernel.project_dir%/FILES/archivio'
   dir_classi:     '%kernel.project_dir%/FILES/archivio/classi'
   dir_registri:   '%kernel.project_dir%/FILES/archivio/registri'
   dir_scrutini:   '%kernel.project_dir%/FILES/archivio/scrutini'
@@ -87,7 +88,9 @@ services:
   # necessario per aggiungere parametro di configurazione
   App\Util\ArchiviazioneUtil:
     arguments:
-      $root: '%dir_registri%'
+      $root: '%dir_archivio%'
+      $dirCircolari: '%dir_circolari%' 
+      $localpath: '%env(LOCAL_PATH)%'
 
   # necessario per aggiungere parametro di configurazione
   App\Util\OtpUtil:

@@ -93,6 +93,7 @@ class ScrutinioController extends AbstractController {
     $title['F']['E'] = 'message.proposte';
     $title['I']['N'] = 'message.proposte_non_previste';
     $title['I']['R'] = 'message.proposte_non_previste';
+    $title['I']['E'] = 'message.proposte_non_previste';
     $title['X']['N'] = 'message.proposte_non_previste';
     $title['X']['R'] = 'message.proposte_non_previste';
     $info['valutazioni'] = $valutazioni['N'];

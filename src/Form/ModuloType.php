@@ -100,7 +100,10 @@ class ModuloType extends AbstractType {
           'placeholder' => 'label.nessuno',
           'choice_translation_domain' => false,
           'attr' => ['widget' => 'search'],
-          'required' => false));
+          'required' => false))
+        ->add('circolare', ChoiceType::class, array('label' => 'label.archivio_circolari',
+          'choices' => ['label.no' => false, 'label.si' => true],
+          'required' => true));
     } elseif ($options['formMode'] == 'staff') {
       $builder
         ->add('docente', EntityType::class, array('label' => 'label.docente',

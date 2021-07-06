@@ -257,16 +257,16 @@ class AlunnoRepository extends BaseRepository {
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni_id1 = $this->createQueryBuilder('a')
         ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato AND NOT EXISTS ('.$cambio->getDQL().')')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'abilitato' => 1])
+        ->where('a.classe=:classe AND NOT EXISTS ('.$cambio->getDQL().')')
+        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getArrayResult();
       // aggiunge altri alunni con cambiamento nella classe in quella data
       $alunni_id2 = $this->createQueryBuilder('a')
         ->select('a.id')
         ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-        ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe AND a.abilitato=:abilitato')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'abilitato' => 1])
+        ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
+        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getArrayResult();
       $alunni_id = array_column(array_merge($alunni_id1, $alunni_id2), 'id');

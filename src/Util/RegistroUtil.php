@@ -906,8 +906,8 @@ class RegistroUtil {
       // data è quella odierna o successiva, legge classe attuale
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato')
-        ->setParameters(['classe' => $classe, 'abilitato' => 1])
+        ->where('a.classe=:classe')
+        ->setParameters(['classe' => $classe])
         ->getQuery()
         ->getScalarResult();
     } else {
@@ -917,16 +917,16 @@ class RegistroUtil {
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->where('a.classe=:classe AND a.abilitato=:abilitato AND NOT EXISTS ('.$cambio->getDQL().')')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'abilitato' => 1])
+        ->where('a.classe=:classe AND NOT EXISTS ('.$cambio->getDQL().')')
+        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getScalarResult();
       // aggiunge altri alunni con cambiamento nella classe in quella data
       $alunni2 = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
         ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-        ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe AND a.abilitato=:abilitato')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'abilitato' => 1])
+        ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
+        ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getScalarResult();
       $alunni = array_merge($alunni, $alunni2);
@@ -2528,9 +2528,9 @@ class RegistroUtil {
       $alunni2 = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id')
         ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
-        ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND a.abilitato=:abilitato AND (a.classe IS NULL OR a.classe!=:classe)')
+        ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
         ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
-          'classe' => $classe, 'abilitato' => 1])
+          'classe' => $classe])
         ->getQuery()
         ->getScalarResult();
       $alunni = array_merge($alunni, $alunni2);
