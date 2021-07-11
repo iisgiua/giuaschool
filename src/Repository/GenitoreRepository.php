@@ -53,7 +53,7 @@ class GenitoreRepository extends UtenteRepository {
   }
 
   /**
-   * Restituisce i dati dei genitori degli alunni indicati
+   * Restituisce i dati dei genitori degli alunni indicati (anche se trasferiti)
    *
    * @param array $alunni Alunni (lista ID di Alunno)
    *
@@ -64,8 +64,8 @@ class GenitoreRepository extends UtenteRepository {
     $genitori = $this->createQueryBuilder('g')
       ->select('a.id,g.username,g.ultimoAccesso')
       ->join('g.alunno', 'a')
-      ->where('g.abilitato=:abilitato AND a.abilitato=:abilitato AND a.id IN (:alunni)')
-      ->setParameters(['abilitato' => 1, 'alunni' => $alunni])
+      ->where('a.id IN (:alunni)')
+      ->setParameters(['alunni' => $alunni])
       ->orderBy('g.ultimoAccesso', 'ASC')
       ->getQuery()
       ->getArrayResult();

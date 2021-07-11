@@ -1325,7 +1325,8 @@ class RegistroUtil {
       $dati['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo1_nome');
       $dati['inizio'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_inizio').' 00:00');
       $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
-    } elseif ($data_str <= $this->session->get('/CONFIG/SCUOLA/periodo2_fine')) {
+    } elseif ($data_str <= $this->session->get('/CONFIG/SCUOLA/periodo2_fine') ||
+              ($data_str > $this->session->get('/CONFIG/SCUOLA/anno_fine') && $this->session->get('/CONFIG/SCUOLA/periodo3_nome') == '')) {
       // secondo periodo
       $dati['periodo'] = 2;
       $dati['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo2_nome');
@@ -1333,8 +1334,7 @@ class RegistroUtil {
       $data->modify('+1 day');
       $dati['inizio'] = $data;
       $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/periodo2_fine').' 00:00');
-    } elseif ($this->session->get('/CONFIG/SCUOLA/periodo3_nome') != '' &&
-              $data_str <= $this->session->get('/CONFIG/SCUOLA/anno_fine')) {
+    } elseif ($this->session->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
       // terzo periodo
       $dati['periodo'] = 3;
       $dati['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo3_nome');
@@ -1343,7 +1343,7 @@ class RegistroUtil {
       $dati['inizio'] = $data;
       $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
     } else {
-      // errore
+      // errore (non deve mai capitare)
       $dati = null;
     }
     // restituisce dati
