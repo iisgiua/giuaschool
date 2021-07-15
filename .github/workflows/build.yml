@@ -40,7 +40,7 @@ jobs:
         if: github.event_name == 'push'
         with:
           context: .
-          file: docker/Dockerfile
+          file: tests/docker/Dockerfile
           push: true
           tags: |
             trinkodok/giuaschool:latest
