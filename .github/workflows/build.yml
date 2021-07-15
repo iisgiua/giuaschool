@@ -5,7 +5,7 @@ on:
     branches: [ master ]
   release:
     types: [ published ]
-  
+
 jobs:
 
   build:
@@ -51,7 +51,7 @@ jobs:
         if: github.event_name == 'release'
         with:
           context: .
-          file: docker/Dockerfile
+          file: tests/docker/Dockerfile
           push: true
           tags: |
             trinkodok/giuaschool:latest
