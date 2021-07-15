@@ -26,6 +26,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 use App\Form\RicercaType;
 use App\Form\DocenteType;
 use App\Form\ModuloType;
@@ -286,7 +289,7 @@ class DocentiController extends BaseController {
    * @param SessionInterface $session Gestore delle sessioni
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
-   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
+   * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
@@ -302,7 +305,7 @@ class DocentiController extends BaseController {
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                 PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla docente
     $docente = $em->getRepository('App:Docente')->find($id);
@@ -342,24 +345,25 @@ class DocentiController extends BaseController {
     $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
       // invia per email
-      $message = (new \Swift_Message())
-        ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
-        ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-        ->setTo([$docente->getEmail()])
-        ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
-        ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
-        ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
-      // invia mail
-      if (!$mailer->send($message)) {
+      $message = (new Email())
+        ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->to($docente->getEmail())
+        ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->text($this->renderView('email/credenziali.txt.twig'))
+        ->html($this->renderView('email/credenziali.html.twig'))
+        ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
+      try {
+        // invia email
+        $mailer->send($message);
+        $this->addFlash('success', 'message.credenziali_inviate');
+      } catch (\Exception $err) {
         // errore di spedizione
         $logger->error('Errore di spedizione email delle credenziali docente.', array(
           'username' => $docente->getUsername(),
           'email' => $docente->getEmail(),
-          'ip' => $request->getClientIp()));
+          'ip' => $request->getClientIp(),
+          'errore' => $err->getMessage()));
         $this->addFlash('danger', 'exception.errore_invio_credenziali');
-      } else {
-        // tutto ok
-        $this->addFlash('success', 'message.credenziali_inviate');
       }
       // redirezione
       return $this->redirectToRoute('docenti_modifica');

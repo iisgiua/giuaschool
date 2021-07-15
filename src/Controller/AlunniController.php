@@ -26,6 +26,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
@@ -327,7 +330,7 @@ class AlunniController extends BaseController {
    * @param SessionInterface $session Gestore delle sessioni
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
-   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
+   * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
@@ -344,7 +347,7 @@ class AlunniController extends BaseController {
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                 PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $genitore, $tipo): Response {
     // controlla alunno
     $alunno = $em->getRepository('App:Alunno')->find($id);
@@ -393,25 +396,26 @@ class AlunniController extends BaseController {
     $pdf->createFromHtml($html);
     $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
-      // invia per email
-      $message = (new \Swift_Message())
-        ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
-        ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-        ->setTo([$utente->getEmail()])
-        ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
-        ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
-        ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
-      // invia mail
-      if (!$mailer->send($message)) {
+      // invia password per email
+      $message = (new Email())
+        ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->to($utente->getEmail())
+        ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->text($this->renderView('email/credenziali.txt.twig'))
+        ->html($this->renderView('email/credenziali.html.twig'))
+        ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
+      try {
+        // invia email
+        $mailer->send($message);
+        $this->addFlash('success', 'message.credenziali_inviate');
+      } catch (\Exception $err) {
         // errore di spedizione
         $logger->error('Errore di spedizione email delle credenziali alunno/genitore.', array(
           'username' => $utente->getUsername(),
           'email' => $utente->getEmail(),
-          'ip' => $request->getClientIp()));
+          'ip' => $request->getClientIp(),
+          'errore' => $err->getMessage()));
         $this->addFlash('danger', 'exception.errore_invio_credenziali');
-      } else {
-        // tutto ok
-        $this->addFlash('success', 'message.credenziali_inviate');
       }
       // redirezione
       return $this->redirectToRoute('alunni_modifica');
@@ -730,7 +734,6 @@ class AlunniController extends BaseController {
    * @param SessionInterface $session Gestore delle sessioni
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
-   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param boolean $genitore Vero se si vuole cambiare la password del genitore, falso per la password dell'alunno
@@ -745,7 +748,7 @@ class AlunniController extends BaseController {
    */
   public function passwordFiltroAction(Request $request, EntityManagerInterface $em,
                                        UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                       PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer,
+                                       PdfManager $pdf, StaffUtil $staff,
                                        LoggerInterface $logger, LogHandler $dblogger, $genitore): Response {
     // recupera criteri dalla sessione
     $criteri = array();

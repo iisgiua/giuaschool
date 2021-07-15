@@ -12,7 +12,7 @@
 
 namespace App\Util;
 
-use WhiteOctober\TCPDFBundle\Controller\TCPDFController;
+use Qipsius\TCPDFBundle\Controller\TCPDFController;
 
 
 /**

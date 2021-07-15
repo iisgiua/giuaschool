@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build image for testing
-        run: docker build -t giuaschool:test -f docker/DockerfileTest .
+        run: docker build -t giuaschool:test -f tests/docker/DockerfileTest .
 
       - name: Run PHPUnit tests
         run: |
@@ -35,4 +35,4 @@ jobs:
         run: |
           docker network create gs_net
           docker run -d --name "chrome_headless" --net gs_net zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080"
-          docker run --name "giuaschool_test" --net gs_net giuaschool:test docker/entrypoint-behat.sh
+          docker run --name "giuaschool_test" --net gs_net giuaschool:test tests/docker/entrypoint-behat.sh

@@ -148,7 +148,7 @@ class DatabaseTestCase extends KernelTestCase {
    * Predispone i servizi per l'ambiente di test
    *
    */
-  protected function setUp() {
+  protected function setUp(): void {
     // esegue il setup standard
     parent::setUp();
     // inizializza le variabili
@@ -172,7 +172,7 @@ class DatabaseTestCase extends KernelTestCase {
    * Chiude l'ambiente di test e termina i servizi
    *
    */
-  protected function tearDown() {
+  protected function tearDown(): void {
     // termina traccianto SQL
     $this->stopSqlTrace();
     // chiude l'ambiente di test standard
@@ -210,10 +210,9 @@ class DatabaseTestCase extends KernelTestCase {
     $purger->purge();
     $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
     // carica i dati
-    $container = static::$kernel->getContainer();
-    $db_name = $container->getParameter('database_name');
-    $db_user = $container->getParameter('database_user');
-    $db_pass = $container->getParameter('database_password');
+    $db_name = $connection->getDatabase();
+    $db_user = $connection->getUsername();
+    $db_pass = $connection->getPassword();
     $fs = new Filesystem();
     if (count($this->fixtures) > 0) {
       // carica i dati

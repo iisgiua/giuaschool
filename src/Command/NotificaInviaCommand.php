@@ -21,6 +21,9 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 use App\Entity\Notifica;
 use App\Entity\NotificaInvio;
 use App\Entity\Utente;
@@ -56,7 +59,7 @@ class NotificaInviaCommand extends Command {
   private $session;
 
   /**
-   * @var Swift_Mailer $mailer Gestore della spedizione delle email
+   * @var MailerInterface $mailer Gestore della spedizione delle email
    */
   private $mailer;
 
@@ -84,13 +87,14 @@ class NotificaInviaCommand extends Command {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param SessionInterface $session Gestore delle sessioni
-   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
+   * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, SessionInterface $session, \Swift_Mailer $mailer,
-                               BachecaUtil $bac, ConfigLoader $config, LoggerInterface $logger) {
+   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, SessionInterface $session,
+                               MailerInterface  $mailer, BachecaUtil $bac, ConfigLoader $config,
+                               LoggerInterface $logger) {
     parent::__construct();
     $this->em = $em;
     $this->trans = $trans;
@@ -207,23 +211,23 @@ class NotificaInviaCommand extends Command {
     $num = 0;
     $dati = $notifica->getDati();
     // crea il messaggio
-    $message = (new \Swift_Message())
-      ->setSubject($dati['oggetto'])
-      ->setFrom([$this->session->get('/CONFIG/ISTITUTO/email_notifiche') => $this->session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-      ->setTo([$dati['email']])
-      ->setBody($notifica->getMessaggio(), 'text/html');
-    // invia mail
-    if (!$this->mailer->send($message)) {
+    $message = (new Email())
+      ->from(new Address($this->session->get('/CONFIG/ISTITUTO/email_notifiche'), $this->session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+      ->to($dati['email'])
+      ->subject($dati['oggetto'])
+      ->html($notifica->getMessaggio());
+    try {
+      // invia email
+      $this->mailer->send($message);
+      $notifica->setStato('S');
+      $num = 1;
+    } catch (\Exception $err) {
       // errore di spedizione
       $notifica->setStato('E');
       $dati = $notifica->getDati();
-      $dati['errore'] = 'Swift Mailer';
+      $dati['errore'] = 'Mailer';
       $notifica->setDati($dati);
       $this->logger->notice('notifica-invia: Errore di spedizione', [$errore_desc]);
-    } else {
-      // tutto ok
-      $notifica->setStato('S');
-      $num = 1;
     }
     // restituisce messaggi inviati
     return $num;

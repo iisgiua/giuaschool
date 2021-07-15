@@ -9,10 +9,10 @@ monolog:
       max_files: 10
       path: '%kernel.logs_dir%/app_%kernel.environment%.log'
       level: debug
-      channels: ['!command','!console','!event']
+      channels: ['!command', '!console', '!event']
     command:
       type: rotating_file
       max_files: 10
       path: '%kernel.logs_dir%/command_%kernel.environment%.log'
       level: debug
-      channels: ['command','console']
+      channels: ['command', 'console']

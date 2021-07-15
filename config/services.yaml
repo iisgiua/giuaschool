@@ -28,7 +28,7 @@ services:
   # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/*'
-    exclude: '../src/{Command,Entity,Migrations,Kernel.php}'
+    exclude: '../src/{Command,Entity,Kernel.php}'
 
   # controllers are imported separately to make sure services can be injected
   # as action arguments even if you don't extend any base controller class
@@ -62,7 +62,7 @@ services:
   # necessario per evitare warning di servizio deprecato
   App\Util\PdfManager:
     arguments:
-      $pdfcontroller: '@white_october.tcpdf'
+      $pdfcontroller: '@qipsius.tcpdf'
 
   # necessario per aggiungere un processor a monolog
   App\Util\LogProcessor:
@@ -89,7 +89,7 @@ services:
   App\Util\ArchiviazioneUtil:
     arguments:
       $root: '%dir_archivio%'
-      $dirCircolari: '%dir_circolari%' 
+      $dirCircolari: '%dir_circolari%'
       $localpath: '%env(LOCAL_PATH)%'
 
   # necessario per aggiungere parametro di configurazione

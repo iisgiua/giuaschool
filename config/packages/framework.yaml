@@ -2,30 +2,27 @@
 
 framework:
   secret: '%env(APP_SECRET)%'
-  http_method_override: true
-  ide: ~
-  disallow_search_engine_index: false
-  trusted_hosts: ~
+  ide: atom
   form:
     enabled: true
   csrf_protection:
     enabled: true
-  esi: false
-  fragments: false
-  #http_client: ~
-  request: ~
   session:
     enabled: true
-    cookie_secure: 'auto'
-    cookie_samesite: 'lax'
+    cookie_samesite: strict
+    cookie_secure: auto
     cookie_httponly: true
-    handler_id: 'session.handler.native_file'
+    sid_length: 64
+    sid_bits_per_character: 5
     save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
-  assets: ~
-  property_access: ~
   property_info:
     enabled: false
-  annotations: ~
-  serializer: ~
+  annotations:
+    enabled: true
+    cache: file
+  serializer:
+    enabled: true
+    enable_annotations: true
   php_errors:
     log: true
+  web_link: true

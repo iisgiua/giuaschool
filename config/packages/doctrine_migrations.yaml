@@ -1,5 +1,0 @@
-# config/package/doctrine_migrations.yaml
-
-doctrine_migrations:
-  migrations_paths:
-    'DoctrineMigrations': '%kernel.project_dir%/src/Migrations'

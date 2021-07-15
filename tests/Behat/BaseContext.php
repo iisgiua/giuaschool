@@ -286,9 +286,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
       // memorizza su file i dati
       $container = $this->kernel->getContainer();
-      $db_name = $container->getParameter('database_name');
-      $db_user = $container->getParameter('database_user');
-      $db_pass = $container->getParameter('database_password');
+      $db_name = $connection->getDatabase();
+      $db_user = $connection->getUsername();
+      $db_pass = $connection->getPassword();
       $process = new Process(['mysqldump', '-u'.$db_user, '-p'.$db_pass, $db_name,
         '-t', '-n', '--compact', '--result-file=tests/temp/'.$this->gruppo.'.fixtures']);
       $process->setTimeout(0);

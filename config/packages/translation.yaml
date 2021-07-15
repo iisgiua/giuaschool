@@ -5,5 +5,3 @@ framework:
   translator:
     enabled: true
     fallbacks: '%locale%'
-    default_path: '%kernel.project_dir%/translations'
-        

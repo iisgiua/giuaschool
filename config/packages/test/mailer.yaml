@@ -1,0 +1,5 @@
+# config/packages/test/mailer.yaml
+
+framework:
+  mailer:
+    dsn: 'null://null'

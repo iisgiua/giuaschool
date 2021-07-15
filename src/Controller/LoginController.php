@@ -32,6 +32,9 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 use App\Util\NotificheUtil;
 use App\Util\LogHandler;
 use App\Util\ConfigLoader;
@@ -243,7 +246,7 @@ class LoginController extends BaseController {
    * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
    * @param OtpUtil $otp Gestione del codice OTP
    * @param StaffUtil $staff Funzioni disponibili allo staff
-   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
+   * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -254,7 +257,7 @@ class LoginController extends BaseController {
    */
   public function recoveryAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                  ConfigLoader $config, UserPasswordEncoderInterface $encoder, OtpUtil $otp,
-                                 StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger) {
     // carica configurazione di sistema
     $config->carica();
@@ -384,40 +387,36 @@ class LoginController extends BaseController {
           'Ruolo' => $utente->getRoles()[0],
           ));
         // crea messaggio
-        $message = (new \Swift_Message())
-          ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
-          ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-          ->setTo([$email])
-          ->setBody($this->renderView($template_html,
+        $message = (new Email())
+          ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+          ->to($email)
+          ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
+          ->text($this->renderView($template_txt,
             array(
               'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
               'utente' => $utente_mail,
               'username' => $utente->getUsername(),
               'password' => $password,
-              'sesso' => $sesso
-            )),
-            'text/html')
-          ->addPart($this->renderView($template_txt,
+              'sesso' => $sesso)))
+          ->html($this->renderView($template_html,
             array(
               'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
               'utente' => $utente_mail,
               'username' => $utente->getUsername(),
               'password' => $password,
-              'sesso' => $sesso
-            )),
-            'text/plain');
-        // invia mail
-        if (!$mailer->send($message)) {
+              'sesso' => $sesso)));
+        try {
+          // invia email
+          $mailer->send($message);
+          $successo = 'message.recovery_ok';
+        } catch (\Exception $err) {
           // errore di spedizione
           $logger->error('Errore di spedizione email nella richiesta di recupero password.', array(
             'username' => $utente->getUsername(),
             'email' => $email,
             'ip' => $request->getClientIp(),
-            ));
+            'errore' => $err->getMessage()));
           $errore = 'exception.error_recovery';
-        } else {
-          // tutto ok
-          $successo = 'message.recovery_ok';
         }
       }
     }

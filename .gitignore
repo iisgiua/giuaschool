@@ -1,42 +1,14 @@
-###> symfony/framework-bundle ###
-/.env.local
-/.env.local.php
-/.env.*.local
-/public/bundles/
-/var/cache/*
-!var/cache/.gitkeep
-/var/log/*
-!var/log/.gitkeep
-/var/sessions/*
-!var/sessions/.gitkeep
-/vendor/*
-!/vendor/.gitkeep
-###< symfony/framework-bundle ###
-
-###> friendsofphp/php-cs-fixer ###
-/.php_cs
-/.php_cs.cache
-###< friendsofphp/php-cs-fixer ###
-
-###> symfony/phpunit-bridge ###
-.phpunit
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
-###> trinko/giuaschool ###
-/last_deploy.date
 /config/secrets/*
 !/config/secrets/.gitkeep
 /DEV/
+/FILES/archivio/circolari/*
+!/FILES/archivio/circolari/.gitkeep
 /FILES/archivio/classi/*
 !/FILES/archivio/classi/.gitkeep
 /FILES/archivio/registri/*
 !/FILES/archivio/registri/.gitkeep
 /FILES/archivio/scrutini/*
 !/FILES/archivio/scrutini/.gitkeep
-/FILES/archivio/circolari/*
-!/FILES/archivio/circolari/.gitkeep
 /FILES/tmp/*
 !/FILES/tmp/.gitkeep
 /FILES/upload/avvisi/*
@@ -47,6 +19,7 @@
 !/FILES/upload/foto/.gitkeep
 /public/app/*
 !/public/app/.gitkeep
+/public/bundles/
 /public/img/.local/
 /src/Command/Argo/
 /src/Controller/TestController.php
@@ -54,8 +27,18 @@
 /templates/argo/
 /tests/temp/*
 !/tests/temp/.gitkeep
-###< trinko/giuaschool ###
-
-###> symfony/web-server-bundle ###
-/.web-server-pid
-###< symfony/web-server-bundle ###
+/var/cache/*
+!var/cache/.gitkeep
+/var/log/*
+!var/log/.gitkeep
+/var/sessions/*
+!var/sessions/.gitkeep
+/vendor/*
+!/vendor/.gitkeep
+/.env.*.local
+/.env.local
+/.env.local.php
+/.phpunit
+/.phpunit.result.cache
+/last_deploy.date
+/phpunit.xml

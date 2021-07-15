@@ -1,7 +1,6 @@
 # config/packages/security.yaml
 
 security:
-  access_denied_url: ~
   encoders:
     App\Entity\Utente:
       algorithm: 'auto'
@@ -26,8 +25,7 @@ security:
         authenticators:
           - 'App\Security\GSuiteAuthenticator'
           - 'App\Security\FormAuthenticator'
-          - 'App\Security\TokenAuthenticator'
-          - 'App\Security\CardAuthenticator'
           - 'App\Security\AppAuthenticator'
+          - 'App\Security\TokenAuthenticator'
           - 'App\Security\EnrollAuthenticator'
         entry_point: 'App\Security\GSuiteAuthenticator'

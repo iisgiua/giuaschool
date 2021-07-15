@@ -1,4 +1,0 @@
-# config/packages/test/swiftmailer.yaml
-
-swiftmailer:
-  disable_delivery: true

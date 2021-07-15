@@ -25,6 +25,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
@@ -239,7 +242,7 @@ class AtaController extends BaseController {
    * @param SessionInterface $session Gestore delle sessioni
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
-   * @param \Swift_Mailer $mailer Gestore della spedizione delle email
+   * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
@@ -255,7 +258,7 @@ class AtaController extends BaseController {
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                 PdfManager $pdf, StaffUtil $staff, \Swift_Mailer $mailer, LoggerInterface $logger,
+                                 PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla ata
     $ata = $em->getRepository('App:Ata')->find($id);
@@ -290,24 +293,25 @@ class AtaController extends BaseController {
     $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
       // invia per email
-      $message = (new \Swift_Message())
-        ->setSubject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
-        ->setFrom([$session->get('/CONFIG/ISTITUTO/email_notifiche') => $session->get('/CONFIG/ISTITUTO/intestazione_breve')])
-        ->setTo([$ata->getEmail()])
-        ->setBody($this->renderView('email/credenziali.html.twig'), 'text/html')
-        ->addPart($this->renderView('email/credenziali.txt.twig'), 'text/plain')
-        ->attach(new \Swift_Attachment($doc, 'credenziali_registro.pdf', 'application/pdf'));
-      // invia mail
-      if (!$mailer->send($message)) {
+      $message = (new Email())
+        ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->to($ata->getEmail())
+        ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->text($this->renderView('email/credenziali.txt.twig'))
+        ->html($this->renderView('email/credenziali.html.twig'))
+        ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
+      try {
+        // invia email
+        $mailer->send($message);
+        $this->addFlash('success', 'message.credenziali_inviate');
+      } catch (\Exception $err) {
         // errore di spedizione
         $logger->error('Errore di spedizione email delle credenziali ata.', array(
           'username' => $ata->getUsername(),
           'email' => $ata->getEmail(),
-          'ip' => $request->getClientIp()));
+          'ip' => $request->getClientIp(),
+          'errore' => $err->getMessage()));
         $this->addFlash('danger', 'exception.errore_invio_credenziali');
-      } else {
-        // tutto ok
-        $this->addFlash('success', 'message.credenziali_inviate');
       }
       // redirezione
       return $this->redirectToRoute('ata_modifica');

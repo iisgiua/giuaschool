@@ -16,11 +16,10 @@ RUN \
   php bin/console doctrine:database:create -n -q -e test && \
   php bin/console doctrine:schema:update -f -q -e test && \
 # Install PHPUnit
-  vendor/bin/simple-phpunit --version && \
   composer clear-cache && \
   chown -R www-data:www-data .
 
 ### Run Unit tests
-RUN chmod 755 docker/*.sh
+RUN chmod 755 tests/docker/*.sh
 EXPOSE 80
-CMD docker/entrypoint-test.sh
+CMD tests/docker/entrypoint-test.sh

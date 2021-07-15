@@ -1,4 +1,0 @@
-# config/packages/dev/swiftmailer.yaml
-
-swiftmailer:
-  delivery_addresses: ['%env(DELIVERY_ADDRESSES)%']
