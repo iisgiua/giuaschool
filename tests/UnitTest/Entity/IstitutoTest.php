@@ -37,11 +37,11 @@ class IstitutoTest extends DatabaseTestCase {
     $this->fixtures = [IstitutoFixtures::class];
     // SQL read
     $this->canRead = [
-      'gs_istituto' => ['id', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email',
+      'gs_istituto' => ['id', 'creato', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email',
         'pec', 'url_sito', 'url_registro', 'firma_preside', 'email_amministratore', 'email_notifiche']];
     // SQL write
     $this->canWrite = [
-      'gs_istituto' => ['id', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email',
+      'gs_istituto' => ['id', 'creato', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email',
         'pec', 'url_sito', 'url_registro', 'firma_preside', 'email_amministratore', 'email_notifiche']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
@@ -74,26 +74,37 @@ class IstitutoTest extends DatabaseTestCase {
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
+      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
       $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
       // memorizza su db
       $this->em->persist($o[$i]);
       $this->em->flush();
       $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
+      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
       $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
       $data[$i]['id'] = $o[$i]->getId();
+      $data[$i]['creato'] = $o[$i]->getCreato();
+      // controlla creato < modificato
+      sleep(1);
+      $o[$i]->{'set'.ucfirst($this->fields[0])}(!$data[$i][$this->fields[0]]);
+      $this->em->flush();
+      $o[$i]->{'set'.ucfirst($this->fields[0])}($data[$i][$this->fields[0]]);
+      $this->em->flush();
+      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
       $data[$i]['modificato'] = $o[$i]->getModificato();
     }
     // controlla gli attributi
     for ($i = 0; $i < 3; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'modificato'], $this->fields) as $field) {
+      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
       }
     }
-    // controlla metodi setId e setModificato
+    // controlla metodi setId, setCreato e setModificato
     $rc = new \ReflectionClass($this->entity);
     $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
+    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
     $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
   }
 

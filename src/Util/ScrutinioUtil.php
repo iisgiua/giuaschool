@@ -765,8 +765,8 @@ class ScrutinioUtil {
             }
             $this->em->getConnection()
               ->prepare('INSERT INTO gs_voto_scrutinio '.
-                '(scrutinio_id, alunno_id, materia_id, modificato, unico, debito, recupero, assenze, dati) '.
-                'VALUES (:scrutinio,:alunno,:materia,NOW(),:unico,:debito,:recupero,:ore,:dati)')
+                '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
+                'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:ore,:dati)')
               ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
                 'unico' => $dati['proposte'][$alunno][$materia]['unico'],
                 'debito' => $dati['proposte'][$alunno][$materia]['debito'],
@@ -1999,8 +1999,8 @@ class ScrutinioUtil {
             }
             $this->em->getConnection()
               ->prepare('INSERT INTO gs_voto_scrutinio '.
-                '(scrutinio_id, alunno_id, materia_id, modificato, unico, debito, recupero, assenze, dati) '.
-                'VALUES (:scrutinio,:alunno,:materia,NOW(),:unico,:debito,:recupero,:assenze,:dati)')
+                '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
+                'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:assenze,:dati)')
               ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
                 'unico' => $dati['proposte'][$alunno][$materia]['unico'],
                 'debito' => $dati['proposte'][$alunno][$materia]['debito'],
@@ -3675,8 +3675,8 @@ class ScrutinioUtil {
             // inserisce nuovi dati
             $this->em->getConnection()
               ->prepare('INSERT INTO gs_voto_scrutinio '.
-                '(scrutinio_id, alunno_id, materia_id, modificato, unico, debito, recupero, assenze, dati) '.
-                'VALUES (:scrutinio,:alunno,:materia,NOW(),:unico,:debito,:recupero,:assenze,:dati)')
+                '(scrutinio_id, alunno_id, materia_id, creato, modificato, unico, debito, recupero, assenze, dati) '.
+                'VALUES (:scrutinio,:alunno,:materia,NOW(),NOW(),:unico,:debito,:recupero,:assenze,:dati)')
               ->execute(['scrutinio' => $scrutinio->getId(), 'alunno' => $alunno, 'materia' => $materia,
                 'unico' => $dati['voti'][$alunno][$materia]['unico'],
                 'debito' => $dati['voti'][$alunno][$materia]['unico'] < 6 ? $dati['voti'][$alunno][$materia]['debito'] : null,

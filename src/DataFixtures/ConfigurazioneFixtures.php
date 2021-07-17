@@ -44,7 +44,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setCategoria('SISTEMA')
       ->setParametro('versione')
       ->setDescrizione("Numero di versione dell'applicazione<br>[testo]")
-      ->setValore('1.3.0')
+      ->setValore('1.4.0')
       ->setGestito(true);
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
@@ -69,7 +69,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
       ->setParametro('id_provider')
-      ->setDescrizione("Se presente indica l'uso di un identity provider esterno (es. SSO su GSuite)<br>[testo]")
+      ->setDescrizione("Se presente, indica l'uso di un identity provider esterno (es. SSO su Google)<br>[testo]")
       ->setGestito(false);
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
@@ -87,17 +87,17 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setCategoria('SCUOLA')
       ->setParametro('anno_scolastico')
       ->setDescrizione("Anno scolastico corrente<br>[formato: 'AAAA/AAAA']")
-      ->setValore('2020/2021');
+      ->setValore('2021/2022');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('anno_inizio')
       ->setDescrizione("Data dell'inizio dell'anno scolastico<br>[formato: 'AAAA-MM-GG']")
-      ->setValore('2020-09-22');
+      ->setValore('2021-09-22');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('anno_fine')
       ->setDescrizione("Data della fine dell'anno scolastico<br>[formato: 'AAAA-MM-GG']")
-      ->setValore('2021-06-12');
+      ->setValore('2022-06-12');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo1_nome')
@@ -107,7 +107,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setCategoria('SCUOLA')
       ->setParametro('periodo1_fine')
       ->setDescrizione("Data della fine del primo periodo, da 'anno_inizio' sino al giorno indicato incluso<br>[formato: 'AAAA-MM-GG']")
-      ->setValore('2021-01-31');
+      ->setValore('2022-01-31');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo2_nome')
@@ -117,7 +117,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setCategoria('SCUOLA')
       ->setParametro('periodo2_fine')
       ->setDescrizione("Data della fine del secondo periodo, da 'periodo1_fine'+1 sino al giorno indicato incluso (se non è usato un terzo periodo, la data dovrà essere uguale a 'anno_fine')<br>[formato 'AAAA-MM-GG']")
-      ->setValore('2021-06-12');
+      ->setValore('2022-06-12');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo3_nome')
@@ -131,7 +131,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('mesi_colloqui')
-      ->setDescrizione("Mesi con i colloqui generali, nei quali non si può prenotare il colloquio individuale<br>[lista separata da virgola dei numeri dei mesi in formato MM]")
+      ->setDescrizione("Mesi con i colloqui generali, nei quali non si può prenotare il colloquio individuale<br>[lista separata da virgola dei numeri dei mesi]")
       ->setValore('12,3');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')

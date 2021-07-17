@@ -41,20 +41,20 @@ class FestivitaFixtures extends Fixture implements DependentFixtureInterface, Fi
     // carica dati
     //--- giorni festivi novembre-dicembre
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '01/11/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '01/11/2021'))
       ->setDescrizione('Tutti i Santi')
       ->setTipo('F');
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '02/11/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '02/11/2021'))
       ->setDescrizione('Commemorazione dei defunti')
       ->setTipo('F');
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '08/12/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '08/12/2021'))
       ->setDescrizione('Immacolata Concezione')
       ->setTipo('F');
     //--- vacanze di Natale
-    $inizio = \DateTime::createFromFormat('d/m/Y', '23/12/2020');
-    $fine = \DateTime::createFromFormat('d/m/Y', '06/01/2021');
+    $inizio = \DateTime::createFromFormat('d/m/Y', '23/12/2021');
+    $fine = \DateTime::createFromFormat('d/m/Y', '06/01/2022');
     for ($giorno = $inizio; $giorno <= $fine; $giorno->modify('+1 day')) {
       $festivi[] = (new Festivita())
         ->setData(clone $giorno)
@@ -63,12 +63,12 @@ class FestivitaFixtures extends Fixture implements DependentFixtureInterface, Fi
     }
     //--- giorni festivi febbraio-marzo
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '16/02/2021'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '16/02/2022'))
       ->setDescrizione('Martedì grasso')
       ->setTipo('F');
     //--- vacanze di Pasqua
-    $inizio = \DateTime::createFromFormat('d/m/Y', '01/04/2021');
-    $fine = \DateTime::createFromFormat('d/m/Y', '06/04/2021');
+    $inizio = \DateTime::createFromFormat('d/m/Y', '01/04/2022');
+    $fine = \DateTime::createFromFormat('d/m/Y', '06/04/2022');
     for ($giorno = $inizio; $giorno <= $fine; $giorno->modify('+1 day')) {
       $festivi[] = (new Festivita())
         ->setData(clone $giorno)
@@ -77,29 +77,29 @@ class FestivitaFixtures extends Fixture implements DependentFixtureInterface, Fi
     }
     //--- giorni festivi aprile-giugno
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '25/04/2021'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '25/04/2022'))
       ->setDescrizione('Anniversario della Liberazione')
       ->setTipo('F');
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '28/04/2021'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '28/04/2022'))
       ->setDescrizione('Sa Die de sa Sardinia')
       ->setTipo('F');
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '01/05/2021'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '01/05/2022'))
       ->setDescrizione('Festa del Lavoro')
       ->setTipo('F');
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '02/06/2021'))
-      ->setDescrizione('Festa nazionale della Repubblica')
+      ->setData(\DateTime::createFromFormat('d/m/Y', '02/06/2022'))
+      ->setDescrizione('Festa della Repubblica')
       ->setTipo('F');
     //--- patrono
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '30/10/2020'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '30/10/2021'))
       ->setDescrizione('Festa del Santo Patrono')
       ->setTipo('F');
     // giorni a disposizione dell'Istituto
     $festivi[] = (new Festivita())
-      ->setData(\DateTime::createFromFormat('d/m/Y', '30/04/2021'))
+      ->setData(\DateTime::createFromFormat('d/m/Y', '30/04/2022'))
       ->setDescrizione('Chiusura stabilita dal Consiglio di Istituto')
       ->setTipo('F');
     // rende persistenti le festività

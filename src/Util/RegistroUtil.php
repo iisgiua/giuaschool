@@ -1510,7 +1510,7 @@ class RegistroUtil {
       // aggiunge ore assenza
       foreach ($lezioni as $l) {
         $this->em->getConnection()
-          ->prepare('INSERT INTO gs_assenza_lezione (modificato,alunno_id,lezione_id,ore) VALUES (NOW(),:alunno,:lezione,:durata)')
+          ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
           ->execute(['lezione' => $l['id'], 'alunno' => $alunno->getId(),
             'durata' => $l['durata']]);
       }
@@ -1536,7 +1536,7 @@ class RegistroUtil {
           if ($oreassenza > 0) {
             // aggiunge ore assenza
             $this->em->getConnection()
-              ->prepare('INSERT INTO gs_assenza_lezione (modificato,alunno_id,lezione_id,ore) VALUES (NOW(),:alunno,:lezione,:durata)')
+              ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
               ->execute(['lezione' => $l['id'], 'alunno' => $alunno->getId(), 'durata' => $oreassenza]);
           }
         }
@@ -1580,7 +1580,7 @@ class RegistroUtil {
       if ($alu['id_assenza']) {
         // assente
         $this->em->getConnection()
-          ->prepare('INSERT INTO gs_assenza_lezione (modificato,alunno_id,lezione_id,ore) VALUES (NOW(),:alunno,:lezione,:durata)')
+          ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
           ->execute(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
             'durata' => $ora['durata']]);
       } elseif ($alu['id_entrata'] || $alu['id_uscita']) {
@@ -1600,7 +1600,7 @@ class RegistroUtil {
         if ($oreassenza > 0) {
           // aggiunge ore assenza
           $this->em->getConnection()
-            ->prepare('INSERT INTO gs_assenza_lezione (modificato,alunno_id,lezione_id,ore) VALUES (NOW(),:alunno,:lezione,:durata)')
+            ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
             ->execute(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
               'durata' => $oreassenza]);
         }

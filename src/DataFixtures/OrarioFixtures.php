@@ -41,26 +41,26 @@ class OrarioFixtures extends Fixture implements DependentFixtureInterface, Fixtu
     // carica dati
     $orario_1_sede1 = (new Orario())
       ->setNome('Orario Provvisorio - '.$this->getReference('sede_1')->getNomeBreve())
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '14/09/2020'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '04/10/2020'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '14/09/2021'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '04/10/2021'))
       ->setSede($this->getReference('sede_1'));
     $em->persist($orario_1_sede1);
     $orario_1_sede2 = (new Orario())
       ->setNome('Orario Provvisorio - '.$this->getReference('sede_2')->getNomeBreve())
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '14/09/2020'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '04/10/2020'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '14/09/2021'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '04/10/2021'))
       ->setSede($this->getReference('sede_2'));
     $em->persist($orario_1_sede2);
     $orario_2_sede1 = (new Orario())
       ->setNome('Orario Definitivo - '.$this->getReference('sede_1')->getNomeBreve())
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '05/10/2020'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '12/06/2021'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '05/10/2021'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '12/06/2022'))
       ->setSede($this->getReference('sede_1'));
     $em->persist($orario_2_sede1);
     $orario_2_sede2 = (new Orario())
       ->setNome('Orario Definitivo - '.$this->getReference('sede_2')->getNomeBreve())
-      ->setInizio(\DateTime::createFromFormat('d/m/Y', '05/10/2020'))
-      ->setFine(\DateTime::createFromFormat('d/m/Y', '12/06/2021'))
+      ->setInizio(\DateTime::createFromFormat('d/m/Y', '05/10/2021'))
+      ->setFine(\DateTime::createFromFormat('d/m/Y', '12/06/2022'))
       ->setSede($this->getReference('sede_2'));
     $em->persist($orario_2_sede2);
     // memorizza dati

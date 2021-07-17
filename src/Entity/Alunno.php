@@ -13,6 +13,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -136,12 +137,19 @@ class Alunno extends Utente {
   private $foto;
 
   /**
-   * @var Classe Classe attuale dell'alunno (se esiste)
+   * @var Classe $classe Classe attuale dell'alunno (se esiste)
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=true)
    */
   private $classe;
+
+  /**
+   * @var ArrayCollection $genitori Genitori dell'alunno (a volte è necessario avere utenti distinti)
+   *
+   * @ORM\OneToMany(targetEntity="Genitore", mappedBy="alunno")
+   */
+  private $genitori;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -419,6 +427,55 @@ class Alunno extends Utente {
     return $this;
   }
 
+  /**
+   * Restituisce i genitori dell'alunno (a volte è necessario avere utenti distinti)
+   *
+   * @return ArrayCollection Lista dei genitori dell'alunno
+   */
+  public function getGenitori() {
+    return $this->genitori;
+  }
+
+  /**
+   * Modifica i genitori dell'alunno (a volte è necessario avere utenti distinti)
+   *
+   * @param ArrayCollection $genitori Lista dei genitori dell'alunno
+   *
+   * @return Alunno Oggetto Alunno
+   */
+  public function setGenitori(ArrayCollection $genitori) {
+    $this->genitori = $genitori;
+    return $this;
+  }
+
+  /**
+   * Aggiunge un genitore dell'alunno
+   *
+   * @param Genitore $genitore Genitore dell'alunno da aggiungere
+   *
+   * @return Alunno Oggetto Alunno
+   */
+  public function addGenitore(Genitore $genitore) {
+    if (!$this->genitori->contains($genitore)) {
+      $this->genitori->add($genitore);
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove un genitore dell'alunno
+   *
+   * @param Genitore $genitore Genitore dell'alunno da rimuovere
+   *
+   * @return Alunno Oggetto Alunno
+   */
+  public function removeGenitore(Genitore $genitore) {
+    if ($this->genitori->contains($genitore)) {
+      $this->genitori->removeElement($genitore);
+    }
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -433,6 +490,7 @@ class Alunno extends Utente {
     $this->religione = 'S';
     $this->giustificaOnline = true;
     $this->richiestaCertificato = false;
+    $this->genitori = new ArrayCollection();
   }
 
   /**

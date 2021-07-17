@@ -35,7 +35,7 @@ class Genitore extends Utente {
   /**
    * @var Alunno L'alunno figlio
    *
-   * @ORM\ManyToOne(targetEntity="Alunno")
+   * @ORM\ManyToOne(targetEntity="Alunno", inversedBy="genitori")
    * @ORM\JoinColumn(nullable=true)
    */
   private $alunno;

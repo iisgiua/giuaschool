@@ -42,7 +42,14 @@ class ListaDistribuzione {
   private $id;
 
   /**
-   * @var \DateTime $modificato Ultima modifica dei dati
+   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   *
+   * @ORM\Column(type="datetime", nullable=false)
+   */
+  private $creato;
+
+  /**
+   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
@@ -102,9 +109,19 @@ class ListaDistribuzione {
   //==================== EVENTI ORM ====================
 
   /**
-   * Simula un trigger onCreate/onUpdate
+   * Simula un trigger onCreate
    *
    * @ORM\PrePersist
+   */
+  public function onCreateTrigger() {
+    // inserisce data/ora di creazione
+    $this->creato = new \DateTime();
+    $this->modificato = $this->creato;
+  }
+
+  /**
+   * Simula un trigger onUpdate
+   *
    * @ORM\PreUpdate
    */
   public function onChangeTrigger() {
@@ -125,7 +142,16 @@ class ListaDistribuzione {
   }
 
   /**
-   * Restituisce la data/ora dell'ultima modifica dei dati
+   * Restituisce la data e ora della creazione dell'istanza
+   *
+   * @return \DateTime Data/ora della creazione
+   */
+  public function getCreato() {
+    return $this->creato;
+  }
+
+  /**
+   * Restituisce la data e ora dell'ultima modifica dei dati
    *
    * @return \DateTime Data/ora dell'ultima modifica
    */
@@ -262,4 +288,3 @@ class ListaDistribuzione {
   }
 
 }
-
