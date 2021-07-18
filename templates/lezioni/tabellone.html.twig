@@ -353,11 +353,6 @@
             <span> --- </span>
         {% endif %}
           </td>
-          <td>
-        {% if a.dati.PAI is defined %}
-            <a href="{{ path('file_download_docenti', {'tipo': 'A', 'id': alunno}) }}" class="btn btn-xs btn-primary" title="Scarica il P.A.I. dell'alunno"><span class="glyphicon glyphicon-download gs-mr-2"></span>P.A.I.</a>
-        {% endif %}
-          </td>
         </tr>
       {% endfor %}
       </tbody>

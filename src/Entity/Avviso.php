@@ -177,16 +177,6 @@ class Avviso {
   private $filtro;
 
   /**
-   * @var ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinato l'avviso
-   *
-   * @ORM\ManyToMany(targetEntity="ListaDistribuzione")
-   * @ORM\JoinTable(name="gs_avviso_lista_distribuzione",
-   *    joinColumns={@ORM\JoinColumn(name="avviso_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="lista_distribuzione_id", nullable=false)})
-   */
-  private $listeDistribuzione;
-
-  /**
    * @var Docente $docente Docente che ha scritto l'avviso
    *
    * @ORM\ManyToOne(targetEntity="Docente")
@@ -694,27 +684,6 @@ class Avviso {
   }
 
   /**
-   * Restituisce le liste di destinatari a cui è destinato l'avviso
-   *
-   * @return ArrayCollection Liste di destinatari a cui è destinato l'avviso
-   */
-  public function getListeDistribuzione() {
-    return $this->listeDistribuzione;
-  }
-
-  /**
-   * Modifica le liste di destinatari a cui è destinato l'avviso
-   *
-   * @param ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinato l'avviso
-   *
-   * @return Avviso Oggetto Avviso
-   */
-  public function setListeDistribuzione(ArrayCollection $listeDistribuzione) {
-    $this->listeDistribuzione = $listeDistribuzione;
-    return $this;
-  }
-
-  /**
    * Restituisce il docente che ha scritto l'avviso
    *
    * @return Docente Docente che ha scritto l'avviso
@@ -797,7 +766,6 @@ class Avviso {
     $this->destinatariAta = array();
     $this->destinatari = array();
     $this->filtro = array();
-    $this->listeDistribuzione = new ArrayCollection();
     $this->annotazioni = new ArrayCollection();
   }
 

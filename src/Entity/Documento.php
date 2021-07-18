@@ -53,12 +53,12 @@ class Documento {
   private $modificato;
 
   /**
-   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, I=PIA]
+   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, G=materiali generici]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"L","P","R","H","D","M","I"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"L","P","R","H","D","M","G"}, strict=true, message="field.choice")
    */
   private $tipo;
 

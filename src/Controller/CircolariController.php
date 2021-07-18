@@ -371,7 +371,6 @@ class CircolariController extends AbstractController {
             'Destinatari Alunni' => $circolare_old->getAlunni(),
             'Filtro Alunni' => $circolare_old->getFiltroAlunni(),
             'Destinatari Altri' => $circolare_old->getAltri(),
-            'Destinatari Liste Distribuzione' => implode(', ', array_map(function ($l) { return $l->getId(); }, $circolare_old->getListeDistribuzione()->toArray())),
             'Firma' => $circolare_old->getFirma(),
             'Pubblicata' => $circolare_old->getPubblicata(),
             ));
@@ -426,7 +425,6 @@ class CircolariController extends AbstractController {
     // cancella circolare
     $circolare_id = $circolare->getId();
     $circolare_sedi = implode(', ', array_map(function ($s) { return $s->getId(); }, $circolare->getSedi()->toArray()));
-    $circolare_liste = implode(', ', array_map(function ($l) { return $l->getId(); }, $circolare->getListeDistribuzione()->toArray()));
     $em->remove($circolare);
     // ok: memorizza dati
     $em->flush();
@@ -458,7 +456,6 @@ class CircolariController extends AbstractController {
       'Destinatari Alunni' => $circolare->getAlunni(),
       'Filtro Alunni' => $circolare->getFiltroAlunni(),
       'Destinatari Altri' => $circolare->getAltri(),
-      'Destinatari Liste Distribuzione' => $circolare_liste,
       'Firma' => $circolare->getFirma(),
       'Pubblicata' => $circolare->getPubblicata(),
       ));

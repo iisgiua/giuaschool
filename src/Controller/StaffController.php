@@ -440,7 +440,6 @@ class StaffController extends AbstractController {
             'Destinatari' => $avviso_old->getDestinatari(),
             'Filtro Tipo' => $avviso_old->getFiltroTipo(),
             'Filtro' => $avviso_old->getFiltro(),
-            'Destinatari Liste Distribuzione' => implode(', ', array_map(function ($l) { return $l->getId(); }, $avviso_old->getListeDistribuzione()->toArray())),
             'Docente' => $avviso_old->getDocente()->getId(),
             'Annotazioni cancellate' => implode(', ', $log_annotazioni['delete']),
             'Annotazioni create' => implode(', ', array_map(function ($a) {
@@ -585,7 +584,6 @@ class StaffController extends AbstractController {
       'Destinatari' => $avviso->getDestinatari(),
       'Filtro Tipo' => $avviso->getFiltroTipo(),
       'Filtro' => $avviso->getFiltro(),
-      'Destinatari Liste Distribuzione' => implode(', ', array_map(function ($l) { return $l->getId(); }, $avviso->getListeDistribuzione()->toArray())),
       'Docente' => $avviso->getDocente()->getId(),
       'Annotazioni' => implode(', ', $log_annotazioni),
       ));

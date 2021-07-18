@@ -370,14 +370,9 @@ class SistemaController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // connessione al database
-      $params = array(
-        'driver' => 'pdo_mysql',
-        'version' => $this->getParameter('database_version'),
-        'host' => $this->getParameter('database_host'),
-        'port' => $this->getParameter('database_port'),
-        'user' => $this->getParameter('database_user'),
-        'password' => $this->getParameter('database_password'),
-        'dbname' => $form->get('database')->getData());
+      $params = $em->getConnection()->getParams();
+      unset($params['url']);
+      $params['dbname'] = $form->get('database')->getData();
       $conn = $connessioneDB->createConnection($params);
       try {
         $conn->connect();
@@ -764,25 +759,6 @@ class SistemaController extends BaseController {
             $percorso_old = $dir.'rinviato/'.$scrutinio['anno'].$scrutinio['sezione'];
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
-            }
-            // PIA
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-piano-di-integrazione-degli-apprendimenti.pdf';
-            $percorso_old = $dir.'finale/'.$scrutinio['anno'].$scrutinio['sezione'];
-            if ($fs->exists($percorso_old.'/'.$documento)) {
-              $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
-              $esito_dati = $esito->getDati();
-              $esito_dati['PIA'] = 'FILES/archivio/scrutini/storico/'.$scrutinio['anno'].$scrutinio['sezione'].'/'.$documento;
-              $esito->setDati($esito_dati);
-            }
-            // PAI
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-piano-di-apprendimento-individualizzato-'.
-              $scrutinio['a_id'].'.pdf';
-            $percorso_old = $dir.'finale/'.$scrutinio['anno'].$scrutinio['sezione'];
-            if ($fs->exists($percorso_old.'/'.$documento)) {
-              $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
-              $esito_dati = $esito->getDati();
-              $esito_dati['PAI'] = 'FILES/archivio/scrutini/storico/'.$scrutinio['anno'].$scrutinio['sezione'].'/'.$documento;
-              $esito->setDati($esito_dati);
             }
           }
           // memorizza dati

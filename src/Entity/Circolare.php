@@ -194,16 +194,6 @@ class Circolare {
   private $filtroDocenti;
 
   /**
-   * @var ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinata la circolare
-   *
-   * @ORM\ManyToMany(targetEntity="ListaDistribuzione")
-   * @ORM\JoinTable(name="gs_circolare_lista_distribuzione",
-   *    joinColumns={@ORM\JoinColumn(name="circolare_id", nullable=false)},
-   *    inverseJoinColumns={@ORM\JoinColumn(name="lista_distribuzione_id", nullable=false)})
-   */
-  private $listeDistribuzione;
-
-  /**
    * @var array $altri Altri destinatari della circolare non riferiti ad utenti sul registro
    *
    * @ORM\Column(type="simple_array", nullable=true)
@@ -792,27 +782,6 @@ class Circolare {
   }
 
   /**
-   * Restituisce le liste di destinatari a cui è destinata la circolare
-   *
-   * @return ArrayCollection Liste di destinatari a cui è destinata la circolare
-   */
-  public function getListeDistribuzione() {
-    return $this->listeDistribuzione;
-  }
-
-  /**
-   * Modifica le liste di destinatari a cui è destinata la circolare
-   *
-   * @param ArrayCollection $listeDistribuzione Liste di destinatari a cui è destinata la circolare
-   *
-   * @return Circolare Oggetto Circolare
-   */
-  public function setListeDistribuzione(ArrayCollection $listeDistribuzione) {
-    $this->listeDistribuzione = $listeDistribuzione;
-    return $this;
-  }
-
-  /**
    * Restituisce gli altri destinatari della circolare non riferiti ad utenti sul registro
    *
    * @return array Altri destinatari della circolare
@@ -938,7 +907,6 @@ class Circolare {
     $this->filtroAlunni = array();
     $this->filtroCoordinatori = array();
     $this->filtroDocenti = array();
-    $this->listeDistribuzione = new ArrayCollection();
     $this->altri = array();
     $this->ata = false;
     $this->dsga = false;

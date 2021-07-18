@@ -570,9 +570,6 @@ class BachecaUtil {
           ->getIdClasse($sedi, $avviso->getFiltroTipo() == 'C' ? $avviso->getFiltro() : null));
       }
     }
-//
-//TODO: listeDistribuzione
-//
     // restituisce destinatari
     $dati['sedi'] = $sedi;
     $dati['utenti'] = array_unique($utenti);

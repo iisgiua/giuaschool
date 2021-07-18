@@ -323,30 +323,7 @@ class DocumentiUtil {
    *
    * @return Array Dati formattati come array associativo
    */
-  public function classi(Docente $docente, $search, $pagina, $limite) {
-    // PIA
-    $dati['pia'] = array();
-    if ($search['tipo'] == '' || $search['tipo'] == 'I') {
-      // legge PIA classi storico
-      $storico = $this->em->getRepository('App:StoricoEsito')->createQueryBuilder('se')
-        ->join('se.alunno', 'a')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.classe=a.classe AND c.docente=:docente')
-        ->where('c.attiva=:attiva')
-        ->setParameters(['docente' => $docente, 'attiva' => 1]);
-      if ($search['classe']) {
-        $storico = $storico
-          ->andWhere('c.classe=:classe')
-          ->setParameter('classe', $search['classe']);
-      }
-      $storico = $storico
-        ->getQuery()
-        ->getResult();
-      foreach ($storico as $s) {
-        if (isset($s->getDati()['PIA']) && !isset($pia[$s->getAlunno()->getClasse()->getId()][$s->getClasse()])) {
-          $dati['pia'][$s->getAlunno()->getClasse()->getId()][$s->getClasse()] = $s;
-        }
-      }
-    }
+  public function classi(Docente $docente, $search, $pagina, $limite) {    
     // lista documenti
     $param = ['tipi' => ['L', 'M'], 'attiva' => 1, 'docente' => $docente];
     $documenti = $this->em->getRepository('App:Documento')->createQueryBuilder('d')

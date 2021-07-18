@@ -34,14 +34,6 @@
       </tr>
     </thead>
     <tbody>
-        {% if 'A' in dati.documenti %}
-      <tr>
-        <td><strong>PAI - Piano di Apprendimento Individualizzato</strong></td>
-        <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('file_download_genitori', {'tipo': 'A', 'id': alunno.id}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-        </td>
-      </tr>
-        {% endif %}
     </tbody>
   </table>
         {% else %}

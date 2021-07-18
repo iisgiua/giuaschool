@@ -233,9 +233,6 @@ class CircolariUtil {
           ->getIdClasse($sedi, $circolare->getAlunni() == 'C' ? $circolare->getFiltroAlunni() : null));
       }
     }
-//
-//TODO: listeDistribuzione
-//
     // restituisce destinatari
     $dati['utenti'] = array_unique($utenti);
     $dati['classi'] = array_unique($classi);
@@ -309,4 +306,3 @@ class CircolariUtil {
   }
 
 }
-

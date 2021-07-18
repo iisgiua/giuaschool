@@ -318,19 +318,6 @@ class SegreteriaUtil {
     if ($fs->exists($documento)) {
       $dati['documenti'][] = 'V';
     }
-    // PIA
-    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-piano-di-integrazione-degli-apprendimenti.pdf';
-    if ($fs->exists($documento)) {
-      $dati['documenti'][] = 'I';
-    }
-    // PAI
-    $storico_dati = $storico->getDati();
-    if (isset($storico_dati['PAI'])) {
-      $documento = $this->dirProgetto.'/'.$storico_dati['PAI'];
-      if ($fs->exists($documento)) {
-        $dati['documenti'][] = 'A';
-      }
-    }
     // restituisce dati come array associativo
     return $dati;
   }

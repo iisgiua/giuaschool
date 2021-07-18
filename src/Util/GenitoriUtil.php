@@ -1280,14 +1280,6 @@ class GenitoriUtil {
     $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
     $fs = new Filesystem();
     $storico = $this->em->getRepository('App:StoricoEsito')->findOneByAlunno($alunno);
-    // PAI
-    $storico_dati = $storico->getDati();
-    if (isset($storico_dati['PAI'])) {
-      $documento = $this->dirProgetto.'/'.$storico_dati['PAI'];
-      if ($fs->exists($documento)) {
-        $dati['documenti'][] = 'A';
-      }
-    }
     // restituisce dati come array associativo
     return $dati;
   }

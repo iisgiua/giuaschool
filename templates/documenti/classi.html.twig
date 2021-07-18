@@ -14,32 +14,10 @@
       </tr>
     </thead>
     <tbody>
-    {% for d in dati.pia %}
-      <tr>
-        <td>
-          {{ 'label.PIA'|trans }}
-        </td>
-        <td>
-      {% for c in d %}
-        {% if loop.first %}
-          <strong>{{ c.alunno.classe.anno }}ª {{ c.alunno.classe.sezione }}</strong> - {{ c.alunno.classe.corso.nomeBreve }} - {{ c.alunno.classe.sede.citta }}
-        {% endif %}
-      {% endfor %}
-        </td>
-        <td>&nbsp;</td>
-        <td>
-      {% for c in d %}
-          <a href="{{ path('file_download_docenti', {'tipo': 'I', 'id': c.alunno.id}) }}" title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-2"></span><strong>{{ c.classe[0:1]~'ª '~c.classe[1:1] }} - {{ 'label.PIA'|trans }}</strong>
-          </a><br>
-      {% endfor %}
-        </td>
-      </tr>
-    {% endfor %}
     {% for d in dati.lista %}
       <tr>
         <td>
-          {{ (d.tipo == 'L' ? 'label.piani' : (d.tipo == 'I' ? 'label.PIA' : 'label.doc15'))|trans }}
+          {{ (d.tipo == 'L' ? 'label.piani' : 'label.doc15')|trans }}
         </td>
         <td>
           <strong>{{ d.classe.anno }}ª {{ d.classe.sezione }}</strong> - {{ d.classe.corso.nomeBreve }} - {{ d.classe.sede.citta }}
