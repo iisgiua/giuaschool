@@ -12,8 +12,6 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\DataFixtures\ClasseFixtures;
-use App\DataFixtures\DocenteFixtures;
 use App\Tests\DatabaseTestCase;
 
 

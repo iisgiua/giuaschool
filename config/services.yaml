@@ -81,11 +81,6 @@ services:
       $root: '%dir_scrutini%'
 
   # necessario per aggiungere parametro di configurazione
-  App\Util\DocumentiUtil:
-    arguments:
-      $root: '%dir_classi%'
-
-  # necessario per aggiungere parametro di configurazione
   App\Util\ArchiviazioneUtil:
     arguments:
       $root: '%dir_archivio%'

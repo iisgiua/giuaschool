@@ -24,16 +24,6 @@ use Behat\Mink\Exception\ExpectationException;
  */
 class BrowserContext extends BaseContext {
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * Utente che ha effettuato il login
-   *
-   * @var Utente $loggedUser Utente che ha effettuato il login
-   */
-  protected $loggedUser;
-
-
   //==================== METODI DELLA CLASSE ====================
 
   /**
@@ -45,11 +35,11 @@ class BrowserContext extends BaseContext {
    */
   public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router) {
     parent::__construct($kernel, $em, $router);
-    $this->loggedUser = null;
+    $this->sysVars['logged'] = null;
   }
 
   /**
-   * Va alla pagina indicata (anche con parametri)
+   * Va alla pagina indicata (anche con parametri) e controlla che sia attiva
    *  $pagina: nome della pagina
    *  $parametri: array associativo dei parametri (presi da trasformazione di tabella)
    *
@@ -61,7 +51,22 @@ class BrowserContext extends BaseContext {
     $this->session->visit($url);
     $this->waitForPage();
     $this->assertPageStatus(200);
-    $this->assertPageUrl($url);
+    $this->log('GOTO', 'Pagina: '.$pagina);
+  }
+
+  /**
+   * Va alla pagina indicata (anche con parametri)
+   *  $pagina: nome della pagina
+   *  $parametri: array associativo dei parametri (presi da trasformazione di tabella)
+   *
+   * @When vai alla pagina :pagina
+   * @When vai alla pagina :pagina con parametri:
+   */
+  public function vaiAllaPagina($pagina, $parametri=[]): void {
+    $url = $this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri);
+    $this->session->visit($url);
+    $this->waitForPage();
+    $this->log('GOTO', 'Pagina: '.$pagina);
   }
 
   /**
@@ -73,10 +78,9 @@ class BrowserContext extends BaseContext {
    * @Given login utente :username con :password
    */
   public function loginUtente($username, $password=null): void {
-    if (!$this->loggedUser) {
-      $this->loggedUser = $this->em->getRepository('App:Utente')->findOneByUsername($username);
-    }
-    $this->assertTrue($this->loggedUser && $this->loggedUser->getUsername() == $username);
+    $this->assertEmpty($this->sysVars['logged']);
+    $user = $this->em->getRepository('App:Utente')->findOneByUsername($username);
+    $this->assertTrue($user && $user->getUsername() == $username);
     $this->paginaAttiva('login_form');
     $this->session->getPage()->fillField('username', $username);
     $this->session->getPage()->fillField('password', $password ? $password : $username);
@@ -84,6 +88,8 @@ class BrowserContext extends BaseContext {
     $this->waitForPage();
     $this->assertPageStatus(200);
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
+    $this->sysVars['logged'] = $user;
+    $this->log('LOGIN', 'Username: '.$username.' - Ruolo: '.$user->getRoles()[0]);
   }
 
   /**
@@ -93,12 +99,10 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo :ruolo
    */
   public function loginUtenteConRuolo($ruolo): void {
-    $this->assertEmpty($this->loggedUser);
     $class_name = ucfirst(strtolower($ruolo));
-    $utente = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy([]));
-    $this->assertNotEmpty($utente);
-    $this->loggedUser = $utente;
-    $this->loginUtente($utente->getUsername());
+    $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy([]));
+    $this->assertNotEmpty($user);
+    $this->loginUtente($user->getUsername());
   }
 
   /**
@@ -108,14 +112,12 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo esatto :ruolo
    */
   public function loginUtenteConRuoloEsatto($ruolo): void {
-    $this->assertEmpty($this->loggedUser);
     $class_name = ucfirst(strtolower($ruolo));
     do {
-      $utente = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy([]));
-      $this->assertNotEmpty($utente);
-    } while (get_class($utente) != 'App\\Entity\\'.$class_name);
-    $this->loggedUser = $utente;
-    $this->loginUtente($utente->getUsername());
+      $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy([]));
+      $this->assertNotEmpty($user);
+    } while (get_class($user) != 'App\\Entity\\'.$class_name);
+    $this->loginUtente($user->getUsername());
   }
 
   /**
@@ -125,11 +127,27 @@ class BrowserContext extends BaseContext {
    * @Given modifica utente attuale con parametri:
    */
   public function modificaUtenteAttualeConParametri($parametri): void {
-    $this->assertNotEmpty($this->loggedUser);
+    $this->assertNotEmpty($this->sysVars['logged']);
     foreach ($parametri as $key=>$val) {
-      $this->loggedUser->{'set'.ucfirst(strtolower($key))}($val);
+      $this->sysVars['logged']->{'set'.ucfirst(strtolower($key))}($val);
     }
     $this->em->flush();
+  }
+
+  /**
+   * Esegue il logout dell'utente connesso
+   *
+   * @Given logout utente
+   */
+  public function logoutUtente(): void {
+    $this->assertNotEmpty($this->sysVars['logged']);
+    $this->paginaAttiva('logout');
+    $this->waitForPage();
+    $this->assertPageStatus(200);
+    $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_form'));
+    $user = $this->sysVars['logged'];
+    $this->sysVars['logged'] = null;
+    $this->log('LOGOUT', 'Username: '.$user->getUsername().' - Ruolo: '.$user->getRoles()[0]);
   }
 
   /**
@@ -185,6 +203,22 @@ class BrowserContext extends BaseContext {
   public function vediPagina($pagina): void {
     $this->assertPageStatus(200);
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate($pagina));
+    $this->log('SHOW', 'Pagina: '.$pagina);
+  }
+
+  /**
+   * Controlla che la pagina attuale sia quella indicata
+   *  $error: codice di errore
+   *
+   * @Then vedi errore pagina
+   * @Then vedi errore pagina :error
+   */
+  public function vediErrorePagina($error=null): void {
+    if ($error) {
+      $this->assertPageStatus($error);
+    } else {
+      $this->assertTrue($this->session->getStatusCode() >= 400);
+    }
   }
 
   /**
@@ -229,8 +263,42 @@ class BrowserContext extends BaseContext {
   }
 
   /**
-   * Controlla che la tabella indicata abbia le intestazioni delle colonne specificate
+   * Controlla che la tabella indicata abbia almeno il numero di righe specificato
+   *  $numero: numero di righe della tabella
    *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *
+   * @Then vedi almeno :numero righe nella tabella :indice
+   * @Then vedi almeno :numero riga nella tabella :indice
+   * @Then vedi almeno :numero righe nella tabella
+   * @Then vedi almeno :numero riga nella tabella
+   */
+  public function vediAlmenoNumeroRigheNellaTabellaIndicata($numero, $indice=1): void {
+    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
+    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
+    $this->assertTrue($numero <= count($righe));
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia al massimo il numero di righe specificato
+   *  $numero: numero di righe della tabella
+   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *
+   * @Then vedi al massimo :numero righe nella tabella :indice
+   * @Then vedi al massimo :numero riga nella tabella :indice
+   * @Then vedi al massimo :numero righe nella tabella
+   * @Then vedi al massimo :numero riga nella tabella
+   */
+  public function vediAlMassimoNumeroRigheNellaTabellaIndicata($numero, $indice=1): void {
+    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
+    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
+    $this->assertTrue($numero >= count($righe));
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia le intestazioni delle colonne specificate
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $colonne: i campi dell'unica riga corrispondono alle intestazioni delle colonne della tabella
    *
    * @Then vedi nella tabella :indice le colonne:
@@ -295,7 +363,9 @@ class BrowserContext extends BaseContext {
       foreach ($dati->getHash()[0] as $key=>$val) {
         $this->assertArrayContains(strtolower($key), $intestazioni_nomi);
         $cella = $colonne[array_search(strtolower($key), $intestazioni_nomi)]->getText();
-        if (!preg_match($this->convertSearch($val), $cella)) {
+        $cerca = $this->convertSearch($val);
+        $this->logDebug('vediInUnaRigaDellaTabellaIndicataIDati -> '.$cerca.' | '.$cella);
+        if (!preg_match($cerca, $cella)) {
           $trovato = false;
           break;
         }
@@ -305,6 +375,32 @@ class BrowserContext extends BaseContext {
       }
     }
     $this->assertTrue($trovato);
+  }
+
+  /**
+   * Controlla che in più righe qualsiasi della tabella indicata i dati corrispondano a quelli specificati
+   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
+   *
+   * @Then vedi in più righe della tabella :indice i dati:
+   * @Then vedi in più righe della tabella i dati:
+   */
+  public function vediInPiuRigaDellaTabellaIndicataIDati($indice=1, TableNode $dati): void {
+    $tab = $dati->getTable();
+    $intestazione = null;
+    foreach ($tab as $num=>$riga) {
+      if (!$intestazione) {
+        // memorizza intestazione
+        $intestazione['num'] = $num;
+        $intestazione['riga'] = $riga;
+      } else {
+        // crea tabella temporanea e cerca valori
+        $matrice = [
+          $intestazione['num'] => $intestazione['riga'],
+          $num => $riga];
+        $this->vediInUnaRigaDellaTabellaIndicataIDati($indice, new TableNode($matrice));
+      }
+    }
   }
 
 

@@ -40,7 +40,6 @@ use App\Entity\Preside;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\DefinizioneScrutinio;
-use App\Entity\DocumentoInterno;
 
 
 /**

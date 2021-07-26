@@ -80,6 +80,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected $vars;
 
+  /**
+   * Lista di variabili di sistema utlizzabili nell'esecuzione degli step
+   *
+   * @var array $sysVars Lista di variabili
+   */
+  protected $sysVars;
+
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
 
@@ -103,6 +110,27 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @var int $cmdStatus Codice di uscita del comando
    */
   private $cmdStatus;
+
+  /**
+   * Log delle azioni da registrare
+   *
+   * @var array $log Lista delle azioni da registrare
+   */
+  private $log;
+
+  /**
+   * Indica se la modalità debug è attiva
+   *
+   * @var bool $debug Vero per attivare la modalità debug
+   */
+  private $debug;
+
+  /**
+   * Indica il numero di screenshot eseguiti
+   *
+   * @var int $numScreenshots Numero di screenshots eseguiti
+   */
+  private $numScreenshots;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -129,16 +157,26 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->cmdOutput = [];
     $this->cmdStatus = 0;
     $this->vars = [];
+    $this->sysVars = [];
+    $this->log = [];
+    $this->debug = false;
+    $this->$numScreenshots = 0;
   }
 
   /**
-   * Inizializzazione del database prima di ogni nuovo scenario
+   * Inizializzazione dei test prima di ogni nuovo scenario
    *
    * @param BeforeScenarioScope $scope Contesto di esecuzione
    *
    * @BeforeScenario
    */
-  public function beforeFeature(BeforeScenarioScope $scope) {
+  public function beforeScenario(BeforeScenarioScope $scope) {
+    $this->debug = false;
+    if (in_array('debug', $scope->getFeature()->getTags()) ||
+        in_array('debug', $scope->getScenario()->getTags())) {
+      // imposta modalità debug
+      $this->debug = true;
+    }
     $this->initDatabase();
   }
 
@@ -149,18 +187,20 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *
    * @AfterStep
    */
-  public function afterStepFailed(AfterStepScope $scope) {
-    if ($scope->getTestResult()->isPassed()) {
-      // nessun errore: esce
-      return;
-    }
-    if ($this->session->getDriver()->isStarted()) {
+  public function afterStep(AfterStepScope $scope) {
+    // scrive file di log
+    $this->logWrite();
+    // screenshot su errore o se in modalità debug
+    if ($this->session->getDriver()->isStarted() &&
+        ($this->debug || !$scope->getTestResult()->isPassed())) {
       // url relativa
       $url = substr($this->session->getCurrentUrl(), strlen($this->getMinkParameter('base_url')));
       // crea nome file da url
       $filename = str_replace('/', '_', trim($url, '/'));
+      $filename = ($filename ?: 'error');
       // salva screenshot
-      $this->screenshot($filename, 1);
+      $this->$numScreenshots++;
+      $this->screenshot($this->$numScreenshots.'-'.$filename, 1);
     }
   }
 
@@ -224,25 +264,127 @@ abstract class BaseContext extends RawMinkContext implements Context {
   }
 
   /**
-   * Estrae dal database in modo casuale le istanze della classe indicata (incluse sottoclassi) e
+   * Estrae dal database le istanze della classe indicata (incluse sottoclassi) e
    * le memorizza nelle variabili di esecuzione.
    * Se presenti altri parametri nella tabella, imposta i valori indicati.
+   * ATTENZIONE: il numero di righe deve essere coerente con le istanze presenti nei test!
    *  $classe: nome classe
-   *  $tabella: il campo <id> indica il nome assegnato alla variabile, preceduto da '$'
-   *            altri campi corrispondono ai valori da impostare nell'istanza
+   *  $tabella: il campo <id> indica il nome assegnato alla variabile, preceduto da '$', che
+   *            conterrà l'instanza; altri campi corrispondono ai valori da impostare nell'istanza
    *
-   * @Given istanze di tipo :classe con parametri:
+   * @Given istanze di tipo :classe:
    */
   public function istanzeDiTipoConParametri($classe, TableNode $tabella) {
     $oggetti = $this->em->getRepository('App:'.$classe)->findBy([]);
     $this->assertNotEmpty($oggetti);
+    $listaId = [];
     foreach ($tabella->getHash() as $row) {
       $this->assertTrue($row['id'][0] == '$');
-      $istanza = $this->faker->unique->randomElement($oggetti);
+      $istanza = null;
+      foreach ($oggetti as $ogg) {
+        if (!in_array($ogg->getId(), $listaId)) {
+          $istanza = $ogg;
+          break;
+        }
+      }
+      $this->assertNotEmpty($istanza);
+      $listaId[] = $istanza->getId();
       $this->vars[trim(substr($row['id'], 1))] = $istanza;
       foreach ($row as $key=>$val) {
-        if ($key != 'id') {
+        if ($key != 'id' && !empty($val)) {
           $istanza->{'set'.ucfirst(strtolower($key))}($this->convertText($val));
+        }
+      }
+    }
+    $this->em->flush();
+  }
+
+  /**
+   * Estrae dal database le istanze della classe indicata, secondo i parametri di ricerca, e
+   * le memorizza nelle variabili di esecuzione.
+   * Se la ricerca restituisce più valori, viene considerato il primo recuperato.
+   *  $classe: nome classe
+   *  $tabella: il campo <id> indica il nome assegnato alla variabile, preceduto da '$', che
+   *            conterrà l'instanza; altri campi corrispondono ai valori di ricerca.
+   *
+   * @Given ricerca istanze di tipo :classe:
+   */
+  public function ricercaIstanzeDiTipo($classe, TableNode $tabella) {
+    $listaId = [];
+    foreach ($tabella->getHash() as $row) {
+      $this->assertTrue($row['id'][0] == '$');
+      $cerca = [];
+      foreach ($row as $key=>$val) {
+        if ($key != 'id' && !empty($val)) {
+          $cerca[$key] = $this->convertText($val);
+        }
+      }
+      $oggetti = $this->em->getRepository('App:'.$classe)->findBy($cerca);
+      $this->assertNotEmpty($oggetti);
+      $istanza = null;
+      foreach ($oggetti as $ogg) {
+        if (!in_array($ogg->getId(), $listaId)) {
+          $istanza = $ogg;
+          break;
+        }
+      }
+      $this->assertNotEmpty($istanza);
+      $listaId[] = $istanza->getId();
+      $this->vars[trim(substr($row['id'], 1))] = $istanza;
+    }
+  }
+
+  /**
+   * Crea nel database le nuove istanze della classe indicata e le memorizza nelle
+   * variabili di esecuzione.
+   * Se presenti altri parametri nella tabella, imposta i valori indicati.
+   *  $classe: nome classe
+   *  $tabella: il campo <id> indica il nome assegnato alla variabile, preceduto da '$', che
+   *            conterrà l'instanza; altri campi corrispondono ai valori da impostare nell'istanza
+   *
+   * @Given crea istanze di tipo :classe con parametri:
+   */
+  public function creaIstanzeDiTipoConParametri($classe, TableNode $tabella) {
+    foreach ($tabella->getHash() as $row) {
+      $this->assertTrue($row['id'][0] == '$');
+      $nomeClasse = "App\\Entity\\".$classe;
+      $istanza = new $nomeClasse();
+      $this->em->persist($istanza);
+      foreach ($row as $key=>$val) {
+        if ($key != 'id' && !empty($val)) {
+          $istanza->{'set'.ucfirst(strtolower($key))}($this->convertText($val));
+        }
+      }
+      $this->assertNotEmpty($istanza);
+      $this->vars[trim(substr($row['id'], 1))] = $istanza;
+    }
+    $this->em->flush();
+  }
+
+  /**
+   * Cerca nel database le istanze della classe secondo i criteri indicati e le modifica
+   * con i valori inseriti.
+   *  $classe: nome classe
+   *  $tabella: i nomi dei campi corrispondono ai valori di ricerca, mentre i nomi dei campi
+   *            preceduti dal simbolo # indicano i campi da modificare.
+   *
+   * @Given modifica istanze di tipo :classe:
+   */
+  public function modificaIstanzeDiTipo($classe, TableNode $tabella) {
+    foreach ($tabella->getHash() as $row) {
+      $cerca = [];
+      $modifica = [];
+      foreach ($row as $key=>$val) {
+        if ($key[0] != '#' && !empty($val)) {
+          $cerca[$key] = $this->convertText($val);
+        } elseif ($key[0] == '#' && !empty($val)) {
+          $modifica[trim(substr($key, 1))] = $this->convertText($val);
+        }
+      }
+      $oggetti = $this->em->getRepository('App:'.$classe)->findBy($cerca);
+      foreach ($oggetti as $istanza) {
+        foreach ($modifica as $key=>$val) {
+          $istanza->{'set'.ucfirst(strtolower($key))}($val);
         }
       }
     }
@@ -646,12 +788,20 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "$nome:attr": restituisce solo l'attributo <attr> della variabile <nome>
    *  "$nome:attr1,attr2": restituisce il vettore con gli atributi indicati della variabile <nome>
    *    nel formato [attr1 => val1, attr2 => val2]
+   *  "#nome": restituisce la variabile di sistema <nome>
    *
    * @param string $var Testo che indica la variabile o i suoi attributi
    *
    * @return mixed Valore della variabile indicata
    */
   protected function getVar($var) {
+    if ($var[0] == '#') {
+      // restituisce variabile di sistema
+      $var = trim(substr($var, 1));
+      $this->assertTrue(isset($this->sysVars[$var]));
+      return $this->sysVars[$var];
+    }
+    // variabili definite negli step
     $var = trim(substr($var, 1));
     $var_parts = explode(':', $var);
     if (count($var_parts) == 1) {
@@ -697,7 +847,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del parametro
    */
   protected function convertText($text) {
-    if ($text[0] == '$') {
+    if ($text[0] == '$' || $text[0] == '#') {
       // valore della variabile di esecuzione
       return $this->getVar($text);
     } elseif (preg_match('/^(si|no|null)$/i', $text)) {
@@ -724,14 +874,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del parametro
    */
   protected function convertSearch($search) {
-    if ($search[0] == '$') {
+    if ($search[0] == '$' || $search[0] == '#') {
       // valore della variabile di esecuzione
       $value = $this->getVar($search);
       $value = is_array($value) ? $value : [$value];
       $regex = '';
       $first = true;
       foreach ($value as $val) {
-        $regex .= (!$first ? '\s+' : '').preg_quote($val, '/');
+        $regex .= (!$first ? '.*' : '').preg_quote($val, '/');
         $first = false;
       }
       $regex = '/'.$regex.'/ui';
@@ -779,6 +929,48 @@ abstract class BaseContext extends RawMinkContext implements Context {
         '+++ Command output: '.var_export($this->cmdOutput, true)."\n";
       throw new ExpectationException($msg, $this->session);
     }
+  }
+
+  /**
+   * Memorizza azione eseguita nel log
+   *
+   * @param string $type Tipo di azione eseguita
+   * @param string $action Descrizione dell'azione
+   */
+  protected function log($type, $action) {
+    $now = new \DateTime();
+    $this->log[] = $now->format('d/m/Y H:i:s.u').' - '.strtoupper(trim($type)).' - '.$action."\n";
+  }
+
+  /**
+   * Memorizza messaggio di debug nel log
+   *
+   * @param string $type Tipo di azione eseguita
+   * @param string $action Descrizione dell'azione
+   */
+  protected function logDebug($message) {
+    if ($this->debug) {
+      // solo se siamo in modalità debug
+      $this->log('DEBUG', $message);
+    }
+  }
+
+  /**
+   * Ripulisce il log delle azioni
+   *
+   */
+  protected function logClear() {
+    $this->log = [];
+  }
+
+  /**
+   * Scrive su file il log delle azioni
+   *
+   */
+  protected function logWrite() {
+    $logFile = dirname(__DIR__).'/temp/behat.log';
+    file_put_contents($logFile, $this->log, FILE_APPEND);
+    $this->logClear();
   }
 
 }

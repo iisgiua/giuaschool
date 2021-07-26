@@ -43,7 +43,7 @@
 <script>
 Dropzone.autoDiscover = false;
 var DZ = new Dropzone(".dropzone", {
-  url: "{{ path('file_upload', {'pagina': 'documenti_piano_edit', 'param': 'files'}) }}",
+  url: "{{ path('file_upload', {'pagina': 'documenti_piani_edit', 'param': 'files'}) }}",
   maxFiles: 1,
   maxFilesize: 10,
   acceptedFiles: ".pdf,.odt,.doc,.docx,.rtf,.txt",
@@ -73,10 +73,10 @@ var DZ = new Dropzone(".dropzone", {
     });
     this.on("removedfile", function(file) {
       if (file.uploaded) {
-        $.post("{{ path('file_remove', {'pagina': 'documenti_piano_edit', 'param': 'files'}) }}", {"files": file.uploaded});
+        $.post("{{ path('file_remove', {'pagina': 'documenti_piani_edit', 'param': 'files'}) }}", {"files": file.uploaded});
         $('#piano_edit_submit').attr('disabled', true);
       } else if (file.existent) {
-        $.post("{{ path('file_remove', {'pagina': 'documenti_piano_edit', 'param': 'files'}) }}", {"files": file.existent});
+        $.post("{{ path('file_remove', {'pagina': 'documenti_piani_edit', 'param': 'files'}) }}", {"files": file.existent});
         this.options.maxFiles++;
         $('#piano_edit_submit').attr('disabled', true);
       }

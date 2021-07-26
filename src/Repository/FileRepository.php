@@ -12,10 +12,12 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\EntityRepository;
+
 
 /**
- * Corso - repository
+ * File - repository
  */
-class DocumentoInternoRepository extends \Doctrine\ORM\EntityRepository {
+class FileRepository extends EntityRepository {
 
 }

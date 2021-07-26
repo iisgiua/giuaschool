@@ -14,7 +14,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\Common\Collections\ArrayCollection;
 
 
 /**
@@ -30,7 +30,7 @@ class Documento {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per il documento
+   * @var integer $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
@@ -53,46 +53,17 @@ class Documento {
   private $modificato;
 
   /**
-   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, G=materiali generici]
+   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"L","P","R","H","D","M","G"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"L","P","R","M","H","D","C","G"}, strict=true, message="field.choice")
    */
   private $tipo;
 
   /**
-   * @var string $file File del documento
-   *
-   * @ORM\Column(type="string", length=255, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\File()
-   */
-  private $file;
-
-  /**
-   * @var integer $dimensione Dimensione del file in byte
-   *
-   * @ORM\Column(type="integer", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   */
-  private $dimensione;
-
-  /**
-   * @var string $mime Tipo del file secondo la codifica MIME
-   *
-   * @ORM\Column(type="string", length=255, nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
-   */
-  private $mime;
-
-  /**
    * @var Docente $docente Docente che carica il documento
-   *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
@@ -101,22 +72,62 @@ class Documento {
   private $docente;
 
   /**
-   * @var Classe $classe Classe a cui è riferito il documento
-   *
-   * @ORM\ManyToOne(targetEntity="Classe")
+   * @var ListaDestinatari $listaDestinatari Lista dei destinatari del documento
+   * @ORM\OneToOne(targetEntity="ListaDestinatari")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private $listaDestinatari;
 
   /**
-   * @var Materia $materia Materia a cui è riferito il documento (può essere NULL)
+   * @var ArrayCollection $allegati Lista dei file allegati al documento
+   * @ORM\ManyToMany(targetEntity="File")
+   * @ORM\JoinTable(name="gs_documento_file",
+   *    joinColumns={@ORM\JoinColumn(name="documento_id", nullable=false)},
+   *    inverseJoinColumns={@ORM\JoinColumn(name="file_id", nullable=false, unique=true)})
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   */
+  private $allegati;
+
+  /**
+   * @var Materia $materia Materia a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @ORM\ManyToOne(targetEntity="Materia")
    * @ORM\JoinColumn(nullable=true)
    */
   private $materia;
+
+  /**
+   * @var Classe $classe Classe a cui è riferito il documento (solo per alcuni tipi di documento)
+   *
+   * @ORM\ManyToOne(targetEntity="Classe")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $classe;
+
+  /**
+   * @var Alunno $alunno Alunno a cui è riferito il documento (solo per alcuni tipi di documento)
+   *
+   * @ORM\ManyToOne(targetEntity="Alunno")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $alunno;
+
+  /**
+   * @var boolean $cifrato Indica se il documento è cifrato
+   *
+   * @ORM\Column(type="boolean", nullable=false)
+   */
+  private $cifrato;
+
+  /**
+   * @var boolean $firma Indica se è richiesta la firma di presa visione
+   *
+   * @ORM\Column(type="boolean", nullable=false)
+   */
+  private $firma;
 
 
   //==================== EVENTI ORM ====================
@@ -173,7 +184,7 @@ class Documento {
   }
 
   /**
-   * Restituisce il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, I=PIA]
+   * Restituisce il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
    *
    * @return string Tipo di documento
    */
@@ -182,77 +193,14 @@ class Documento {
   }
 
   /**
-   * Modifica il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, H=PEI per alunni H, D=PDP per alunni DSA/BES, M=documento 15 maggio, I=PIA]
+   * Modifica il tipo  di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
    *
    * @param string $tipo Tipo di documento
    *
-   * @return Documento Oggetto Documento
+   * @return Documento Oggetto modificato
    */
   public function setTipo($tipo) {
     $this->tipo = $tipo;
-    return $this;
-  }
-
-  /**
-   * Restituisce il file del documento
-   *
-   * @return string File del documento
-   */
-  public function getFile() {
-    return $this->file;
-  }
-
-  /**
-   * Modifica il file del documento
-   *
-   * @param string $file File del documento
-   *
-   * @return Documento Oggetto Documento
-   */
-  public function setFile($file) {
-    $this->file = $file;
-    return $this;
-  }
-
-  /**
-   * Restituisce la dimensione del file in byte
-   *
-   * @return integer Dimensione del file in byte
-   */
-  public function getDimensione() {
-    return $this->dimensione;
-  }
-
-  /**
-   * Modifica la dimensione del file in byte
-   *
-   * @param integer $dimensione Dimensione del file in byte
-   *
-   * @return Documento Oggetto Documento
-   */
-  public function setDimensione($dimensione) {
-    $this->dimensione = $dimensione;
-    return $this;
-  }
-
-  /**
-   * Restituisce il tipo del file secondo la codifica MIME
-   *
-   * @return string Tipo del file secondo la codifica MIME
-   */
-  public function getMime() {
-    return $this->mime;
-  }
-
-  /**
-   * Modifica il tipo del file secondo la codifica MIME
-   *
-   * @param string $mime Tipo del file secondo la codifica MIME
-   *
-   * @return Documento Oggetto Documento
-   */
-  public function setMime($mime) {
-    $this->mime = $mime;
     return $this;
   }
 
@@ -270,7 +218,7 @@ class Documento {
    *
    * @param Docente $docente Docente che carica il documento
    *
-   * @return Documento Oggetto Documento
+   * @return Documento Oggetto modificato
    */
   public function setDocente(Docente $docente) {
     $this->docente = $docente;
@@ -278,28 +226,77 @@ class Documento {
   }
 
   /**
-   * Restituisce la classe a cui è riferito il documento
+   * Restituisce la lista dei destinatari del documento
    *
-   * @return Classe Classe a cui è riferito il documento
+   * @return ListaDestinatari Lista dei destinatari del documento
    */
-  public function getClasse() {
-    return $this->classe;
+  public function getListaDestinatari() {
+    return $this->listaDestinatari;
   }
 
   /**
-   * Modifica la classe a cui è riferito il documento
+   * Modifica la lista dei destinatari del documento
    *
-   * @param Classe $classe Classe a cui è riferito il documento
+   * @param ListaDestinatari $listaDestinatari Lista dei destinatari del documento
    *
-   * @return Documento Oggetto Documento
+   * @return Documento Oggetto modificato
    */
-  public function setClasse(Classe $classe) {
-    $this->classe = $classe;
+  public function setListaDestinatari(ListaDestinatari $listaDestinatari) {
+    $this->listaDestinatari = $listaDestinatari;
     return $this;
   }
 
   /**
-   * Restituisce la materia a cui è riferito il documento (può essere NULL)
+   * Restituisce la lista dei file allegati al documento
+   *
+   * @return ArrayCollection Lista dei file allegati al documento
+   */
+  public function getAllegati() {
+    return $this->allegati;
+  }
+
+  /**
+   * Modifica la lista dei file allegati al documento
+   *
+   * @param ArrayCollection $allegati Lista dei file allegati al documento
+   *
+   * @return Documento Oggetto modificato
+   */
+  public function setAllegati(ArrayCollection $allegati) {
+    $this->allegati = $allegati;
+    return $this;
+  }
+
+  /**
+   * Aggiunge un file allegato al documento
+   *
+   * @param File $file Nuovo file allegato al documento
+   *
+   * @return Documento Oggetto modificato
+   */
+  public function addAllegato(File $file) {
+    if (!$this->allegati->contains($file)) {
+      $this->allegati->add($file);
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove un file allegato al documento
+   *
+   * @param File $file File allegato al documento da rimuovere
+   *
+   * @return Documento Oggetto modificato
+   */
+  public function removeAllegato(File $file) {
+    if ($this->allegati->contains($file)) {
+      $this->allegati->removeElement($file);
+    }
+    return $this;
+  }
+
+  /**
+   * Restituisce la materia a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @return Materia Materia a cui è riferito il documento
    */
@@ -308,14 +305,98 @@ class Documento {
   }
 
   /**
-   * Modifica la materia a cui è riferito il documento (può essere NULL)
+   * Modifica la materia a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @param Materia $materia Materia a cui è riferito il documento
    *
-   * @return Documento Oggetto Documento
+   * @return Documento Oggetto modificato
    */
   public function setMateria(Materia $materia=null) {
     $this->materia = $materia;
+    return $this;
+  }
+
+  /**
+   * Restituisce la classe a cui è riferito il documento (solo per alcuni tipi di documento)
+   *
+   * @return Classe Classe a cui è riferito il documento
+   */
+  public function getClasse() {
+    return $this->classe;
+  }
+
+  /**
+   * Modifica la classe a cui è riferito il documento (solo per alcuni tipi di documento)
+   *
+   * @param Classe $classe Classe a cui è riferito il documento
+   *
+   * @return Documento Oggetto modificato
+   */
+  public function setClasse(Classe $classe=null) {
+    $this->classe = $classe;
+    return $this;
+  }
+
+  /**
+   * Restituisce l'alunno a cui è riferito il documento (solo per alcuni tipi di documento)
+   *
+   * @return Alunno Alunno a cui è riferito il documento
+   */
+  public function getAlunno() {
+    return $this->alunno;
+  }
+
+  /**
+   * Modifica l'alunno a cui è riferito il documento (solo per alcuni tipi di documento)
+   *
+   * @param Alunno $alunno Alunno a cui è riferito il documento
+   *
+   * @return Documento Oggetto modificato
+   */
+  public function setAlunno(Alunno $alunno=null) {
+    $this->alunno = $alunno;
+    return $this;
+  }
+
+  /**
+   * Indica se il documento è cifrato
+   *
+   * @return boolean Vero se il documento è cifrato, falso altrimenti
+   */
+  public function getCifrato() {
+    return $this->cifrato;
+  }
+
+  /**
+   * Modifica l'indicazione se il documento sia cifrato
+   *
+   * @param boolean $cifrato Vero se il documento è cifrato, falso altrimenti
+   *
+   * @return Documento Oggetto modificato
+   */
+  public function setCifrato($cifrato) {
+    $this->cifrato = ($cifrato == true);
+    return $this;
+  }
+
+  /**
+   * Indica se è richiesta la firma di presa visione
+   *
+   * @return boolean Vero se è richiesta la firma di presa visione, falso altrimenti
+   */
+  public function getFirma() {
+    return $this->firma;
+  }
+
+  /**
+   * Modifica l'indicazione se sia richiesta la firma di presa visione
+   *
+   * @param boolean $firma Vero se è richiesta la firma di presa visione, falso altrimenti
+   *
+   * @return Documento Oggetto modificato
+   */
+  public function setFirma($firma) {
+    $this->firma = ($firma == true);
     return $this;
   }
 
@@ -323,12 +404,22 @@ class Documento {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->allegati = new ArrayCollection();
+    $this->cifrato = false;
+    $this->firma = false;
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return $this->file->getBasename();
+    return 'Documento #'.$this->id;
   }
 
 }

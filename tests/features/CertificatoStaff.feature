@@ -15,14 +15,14 @@ Funzionalità: Procedura richiesta certificato
 
 
   Contesto:
-  	Dato login utente con ruolo "staff"
+  	Dato login utente con ruolo "Staff"
 
 
   Scenario: Visualizza alunni con richiesta di certificato per staff di intera scuola
     Data modifica utente attuale con parametri:
       | nomeParam   | valoreParam   |
       | sede        | null          |
-    Date istanze di tipo "Alunno" con parametri:
+    Date istanze di tipo "Alunno":
       | id        | richiestaCertificato  |
       | $1        | si                    |
       | $2        | si                    |
@@ -39,15 +39,15 @@ Funzionalità: Procedura richiesta certificato
       | $2:cognome,nome | $2:classe     | $2:classe.sede  |
 
   Scenario: Visualizza alunni con richiesta di certificato per staff di una sede
-    Date istanze di tipo "Sede" con parametri:
+    Date istanze di tipo "Sede":
       | id        |
       | $s1       |
       | $s2       |
-    Date istanze di tipo "Classe" con parametri:
+    Date istanze di tipo "Classe":
       | id        | sede  |
       | $c1       | $s1   |
       | $c2       | $s2   |
-    Date istanze di tipo "Alunno" con parametri:
+    Date istanze di tipo "Alunno":
       | id        | richiestaCertificato  | classe |
       | $1        | si                    | $c1    |
       | $2        | si                    | $c2    |
