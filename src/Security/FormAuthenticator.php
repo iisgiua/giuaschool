@@ -339,7 +339,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     // memorizza modifiche
     $this->em->flush($token->getUser());
     // log azione
-    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Login', __METHOD__, array(
+    $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => $tipo_accesso,
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole()));

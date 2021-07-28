@@ -420,7 +420,7 @@ class StaffController extends AbstractController {
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso generico', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso generico', array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
                 return $a->getId();
@@ -429,7 +429,7 @@ class StaffController extends AbstractController {
         } else {
           // modifica
           $notifica->setAzione('E');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Modifica avviso generico', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso generico', array(
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Oggetto' => $avviso_old->getOggetto(),
@@ -570,7 +570,7 @@ class StaffController extends AbstractController {
       ->setOggettoId($avviso_id)
       ->setAzione('D');
     $em->persist($notifica);
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Cancella avviso', __METHOD__, array(
+    $dblogger->logAzione('AVVISI', 'Cancella avviso', array(
       'Id' => $avviso_id,
       'Tipo' => $avviso->getTipo(),
       'Data' => $avviso->getData()->format('d/m/Y'),
@@ -910,7 +910,7 @@ class StaffController extends AbstractController {
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
                 return $a->getId();
@@ -919,7 +919,7 @@ class StaffController extends AbstractController {
         } else {
           // modifica
           $notifica->setAzione('E');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Modifica avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso '.($tipo == 'E' ? 'entrata' : 'uscita'), array(
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Ora' => $avviso_old->getOra()->format('H:i'),
@@ -1229,7 +1229,7 @@ class StaffController extends AbstractController {
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso attività', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso attività', array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
                 return $a->getId();
@@ -1238,7 +1238,7 @@ class StaffController extends AbstractController {
         } else {
           // modifica
           $notifica->setAzione('E');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Modifica avviso attività', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso attività', array(
             'Id' => $avviso->getId(),
             'Data' => $avviso_old->getData()->format('d/m/Y'),
             'Ora inizio' => $avviso_old->getOra()->format('H:i'),
@@ -1463,13 +1463,13 @@ class StaffController extends AbstractController {
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso individuale', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso individuale', array(
             'Avviso' => $avviso->getId(),
             ));
         } else {
           // modifica
           $notifica->setAzione('E');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Modifica avviso individuale', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso individuale', array(
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),
             'Sedi' => implode(', ', array_map(function ($s) { return $s->getId(); }, $avviso_sedi_old)),
@@ -1807,7 +1807,7 @@ class StaffController extends AbstractController {
         // log azione
         if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
           // log cancella
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella entrata', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella entrata', array(
             'Entrata' => $id_entrata,
             'Alunno' => $entrata->getAlunno()->getId(),
             'Data' => $entrata->getData()->format('Y-m-d'),
@@ -1820,7 +1820,7 @@ class StaffController extends AbstractController {
             ));
         } elseif (isset($entrata_old)) {
           // log modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Modifica entrata', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Modifica entrata', array(
             'Entrata' => $entrata->getId(),
             'Ora' => $entrata_old->getOra()->format('H:i'),
             'Note' => $entrata_old->getNote(),
@@ -1831,13 +1831,13 @@ class StaffController extends AbstractController {
             ));
         } else {
           // log nuovo
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Crea entrata', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Crea entrata', array(
             'Entrata' => $entrata->getId()
             ));
         }
         if (isset($id_assenza)) {
           // log cancella assenza
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella assenza', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
             'Assenza' => $id_assenza,
             'Alunno' => $assenza->getAlunno()->getId(),
             'Data' => $assenza->getData()->format('Y-m-d'),
@@ -1978,7 +1978,7 @@ class StaffController extends AbstractController {
         // log azione
         if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
           // cancella
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella uscita', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella uscita', array(
             'Uscita' => $id_uscita,
             'Alunno' => $uscita->getAlunno()->getId(),
             'Data' => $uscita->getData()->format('Y-m-d'),
@@ -1989,7 +1989,7 @@ class StaffController extends AbstractController {
             ));
         } elseif (isset($uscita_old)) {
           // modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Modifica uscita', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Modifica uscita', array(
             'Uscita' => $uscita->getId(),
             'Ora' => $uscita_old->getOra()->format('H:i'),
             'Note' => $uscita_old->getNote(),
@@ -1998,13 +1998,13 @@ class StaffController extends AbstractController {
             ));
         } else {
           // nuovo
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Crea uscita', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Crea uscita', array(
             'Uscita' => $uscita->getId()
             ));
         }
         if (isset($id_assenza)) {
           // cancella assenza
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella assenza', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
             'Assenza' => $id_assenza,
             'Alunno' => $assenza->getAlunno()->getId(),
             'Data' => $assenza->getData()->format('Y-m-d'),
@@ -2188,10 +2188,10 @@ class StaffController extends AbstractController {
         // ok: memorizza dati
         $em->flush();
         // log azione
-        $dblogger->write($alunno, $request->getClientIp(), 'ALUNNO', 'Modifica deroghe', __METHOD__, array(
-          'Username esecutore' => $this->getUser()->getUsername(),
-          'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-          'ID esecutore' => $this->getUser()->getId(),
+        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', array(
+          'Username' => $alunno->getUsername(),
+          'Ruolo' => $alunno->getRoles()[0],
+          'ID' => $alunno->getId(),
           'Autorizza entrata' => $alunno_old['autorizzaEntrata'],
           'Autorizza uscita' => $alunno_old['autorizzaUscita'],
           'Note' => $alunno_old['note']
@@ -3067,10 +3067,10 @@ class StaffController extends AbstractController {
     // memorizza su db
     $em->flush();
     // log azione
-    $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
-      'Username esecutore' => $this->getUser()->getUsername(),
-      'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-      'ID esecutore' => $this->getUser()->getId()
+    $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+      'Username' => $utente->getUsername(),
+      'Ruolo' => $utente->getRoles()[0],
+      'ID' => $utente->getId()
       ));
     // crea documento PDF
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
@@ -3271,7 +3271,7 @@ class StaffController extends AbstractController {
             $reg->ricalcolaOreAlunno($data_obj, $alu);
           }
           // log azione
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Gestione assenti', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Gestione assenti', array(
             'Data' => $data,
             'Assenze create' => implode(', ', array_map(function ($e) {
                 return $e->getId();

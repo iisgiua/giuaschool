@@ -381,7 +381,7 @@ class LoginController extends BaseController {
         // memorizza su db
         $em->flush();
         // log azione
-        $dblogger->write(($utente instanceof Genitore) ? $utente->getAlunno() : $utente, $request->getClientIp(), 'SICUREZZA', 'Recupero Password', __METHOD__, array(
+        $logger->warning('Richiesta di recupero Password', array(
           'Username' => $utente->getUsername(),
           'Email' => $email,
           'Ruolo' => $utente->getRoles()[0],

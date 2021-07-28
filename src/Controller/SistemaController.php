@@ -238,10 +238,10 @@ class SistemaController extends BaseController {
           // memorizza password
           $em->flush();
           // log azione
-          $dblogger->write($user, $request->getClientIp(), 'SICUREZZA', 'Cambio Password da Amministrazione', __METHOD__, array(
-            'Username esecutore' => $this->getUser()->getUsername(),
-            'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-            'ID esecutore' => $this->getUser()->getId()
+          $dblogger->logAzione('SICUREZZA', 'Cambio Password', array(
+            'Username' => $user->getUsername(),
+            'Ruolo' => $user->getRoles()[0],
+            'ID' => $user->getId()
             ));
         }
       }
@@ -295,12 +295,9 @@ class SistemaController extends BaseController {
         $session->remove('/APP/ROUTE');
         $session->remove('/APP/DOCENTE');
         // log azione
-        $dblogger->write($user, $request->getClientIp(), 'ACCESSO', 'Alias', __METHOD__, array(
+        $dblogger->logAzione('ACCESSO', 'Alias', array(
           'Username' => $user->getUsername(),
           'Ruolo' => $user->getRoles()[0],
-          'Username reale' => $this->getUser()->getUsername(),
-          'Ruolo reale' => $this->getUser()->getRoles()[0],
-          'ID reale' => $this->getUser()->getId()
           ));
         // impersona l'alias e fa il redirect alla home
         return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => $username));
@@ -324,7 +321,7 @@ class SistemaController extends BaseController {
    */
   public function aliasExitAction(Request $request, SessionInterface $session, LogHandler $dblogger): Response  {
     // log azione
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'ACCESSO', 'Alias Exit', __METHOD__, array(
+    $dblogger->logAzione('ACCESSO', 'Alias Exit', array(
       'Username' => $this->getUser()->getUsername(),
       'Ruolo' => $this->getUser()->getRoles()[0],
       'Username reale' => $session->get('/APP/UTENTE/username_reale'),

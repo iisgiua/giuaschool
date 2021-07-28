@@ -111,6 +111,14 @@ class FileTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     // toString
     $this->assertSame($existent->getTitolo(), (string) $existent, $this->entity.'::toString');
+    // datiVersione
+    $dt = ['titolo' => $existent->getTitolo(), 'nome' => $existent->getNome(),
+      'estensione' => $existent->getEstensione(), 'dimensione' => $existent->getDimensione(),
+      'file' => $existent->getFile()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    $dt['titolo'] .= '#1';
+    $existent->setTitolo($existent->getTitolo().'#1');
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

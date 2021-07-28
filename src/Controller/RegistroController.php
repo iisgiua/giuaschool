@@ -414,7 +414,7 @@ class RegistroController extends AbstractController {
           $reg->ricalcolaOreLezione($data_obj, $lezione);
         }
         // log azione
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea lezione', __METHOD__, array(
+        $dblogger->logAzione('REGISTRO', 'Crea lezione', array(
           'Lezione' => $lezione->getId(),
           'Firma' => $firma->getId(),
           ));
@@ -669,7 +669,7 @@ class RegistroController extends AbstractController {
               $form->get('assenti')->getData());
           }
           // log azione
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica lezione', __METHOD__, array(
+          $dblogger->logAzione('REGISTRO', 'Modifica lezione', array(
             'Materia' => $old_materia,
             'Lezione' => $lezione->getId(),
             'Firma' => $firma->getId(),
@@ -826,7 +826,7 @@ class RegistroController extends AbstractController {
     // log azione
     if (count($lista_firme) == 1) {
       // intera lezione
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella firma e lezione', __METHOD__, array(
+      $dblogger->logAzione('REGISTRO', 'Cancella firma e lezione', array(
         'Lezione' => $lezione_id,
         'Firma' => $firma_docente_id,
         'Classe' => $classe->getId(),
@@ -842,7 +842,7 @@ class RegistroController extends AbstractController {
         ));
     } else {
       // solo firma
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella firma', __METHOD__, array(
+      $dblogger->logAzione('REGISTRO', 'Cancella firma', array(
         'Lezione' => $lezione_id,
         'Firma' => $firma_docente_id,
         'Argomento sostegno' => ($firma_cancellata ? $firma_cancellata['argomento'] : ''),
@@ -1060,7 +1060,7 @@ class RegistroController extends AbstractController {
               ->setOggettoId($annotazione->getAvviso()->getId());
             $em->persist($notifica);
           }
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea annotazione', __METHOD__, array(
+          $dblogger->logAzione('REGISTRO', 'Crea annotazione', array(
             'Annotazione' => $annotazione->getId(),
             'Avviso creato' => ($annotazione->getAvviso() ? $annotazione->getAvviso()->getId() : null),
             ));
@@ -1080,7 +1080,7 @@ class RegistroController extends AbstractController {
               ->setOggettoId($annotazione->getAvviso()->getId());
             $em->persist($notifica);
           }
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica annotazione', __METHOD__, array(
+          $dblogger->logAzione('REGISTRO', 'Modifica annotazione', array(
             'Annotazione' => $annotazione->getId(),
             'Docente' => $annotazione_old->getDocente()->getId(),
             'Testo' => $annotazione_old->getTesto(),
@@ -1173,7 +1173,7 @@ class RegistroController extends AbstractController {
         ->setOggettoId($log_avviso);
       $em->persist($notifica);
     }
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella annotazione', __METHOD__, array(
+    $dblogger->logAzione('REGISTRO', 'Cancella annotazione', array(
       'Annotazione' => $annotazione_id,
       'Classe' => $annotazione->getClasse()->getId(),
       'Docente' => $annotazione->getDocente()->getId(),
@@ -1339,12 +1339,12 @@ class RegistroController extends AbstractController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea nota', __METHOD__, array(
+          $dblogger->logAzione('REGISTRO', 'Crea nota', array(
             'Nota' => $nota->getId()
             ));
         } else {
           // modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica nota', __METHOD__, array(
+          $dblogger->logAzione('REGISTRO', 'Modifica nota', array(
             'Nota' => $nota->getId(),
             'Testo' => $nota_old['testo'],
             'Provvedimento' => $nota_old['provvedimento'],
@@ -1411,7 +1411,7 @@ class RegistroController extends AbstractController {
     // ok: memorizza dati
     $em->flush();
     // log azione
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella nota', __METHOD__, array(
+    $dblogger->logAzione('REGISTRO', 'Cancella nota', array(
         'Nota' => $nota_id,
         'Classe' => $nota->getClasse()->getId(),
         'Docente' => $nota->getDocente()->getId(),

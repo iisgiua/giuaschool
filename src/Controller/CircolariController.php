@@ -347,12 +347,12 @@ class CircolariController extends AbstractController {
         // log azione
         if (!$id) {
           // nuovo
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'CIRCOLARI', 'Crea circolare', __METHOD__, array(
+          $dblogger->logAzione('CIRCOLARI', 'Crea circolare', array(
             'id' => $circolare->getId(),
             ));
         } else {
           // modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'CIRCOLARI', 'Modifica circolare', __METHOD__, array(
+          $dblogger->logAzione('CIRCOLARI', 'Modifica circolare', array(
             'id' => $circolare->getId(),
             'Data' => $circolare_old->getData()->format('d/m/Y'),
             'Numero' => $circolare_old->getNumero(),
@@ -437,7 +437,7 @@ class CircolariController extends AbstractController {
       $fs->remove($f);
     }
     // log azione
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'CIRCOLARI', 'Cancella circolare', __METHOD__, array(
+    $dblogger->logAzione('CIRCOLARI', 'Cancella circolare', array(
       'id' => $circolare_id,
       'Data' => $circolare->getData()->format('d/m/Y'),
       'Numero' => $circolare->getNumero(),
@@ -633,12 +633,12 @@ class CircolariController extends AbstractController {
     if ($pubblica) {
       // pubblicazione
       $notifica->setAzione('A');
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'CIRCOLARI', 'Pubblica circolare', __METHOD__, array(
+      $dblogger->logAzione('CIRCOLARI', 'Pubblica circolare', array(
         'Circolare ID' => $circolare->getId()));
     } else {
       // rimuove pubblicazione
       $notifica->setAzione('D');
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'CIRCOLARI', 'Rimuove pubblicazione circolare', __METHOD__, array(
+      $dblogger->logAzione('CIRCOLARI', 'Rimuove pubblicazione circolare', array(
         'Circolare ID' => $circolare->getId()));
     }
     // redirezione
@@ -1242,7 +1242,7 @@ class CircolariController extends AbstractController {
       $em->persist($a);
       $em->flush();
       // log
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'CIRCOLARI', 'Lettura in classe', __METHOD__, array(
+      $dblogger->logAzione('CIRCOLARI', 'Lettura in classe', array(
         'Annotazione' => $a->getId(),
         'Circolari' => $lista,
         ));

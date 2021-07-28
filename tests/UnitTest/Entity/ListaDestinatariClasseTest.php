@@ -125,7 +125,7 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
     // listaDestinatari
     $obj_lista = $this->getPrivateProperty($this->entity, 'listaDestinatari');
     $obj_lista->setValue($existent, null);
-    $err = $this->val->validate($exiClassestent);
+    $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::listaDestinatari - NOT BLANK');
     $existent->setListaDestinatari($this->em->getRepository('App:ListaDestinatari')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::listaDestinatari - VALID');

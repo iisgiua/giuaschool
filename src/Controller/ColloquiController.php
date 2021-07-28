@@ -175,7 +175,7 @@ class ColloquiController extends AbstractController {
         // memorizza dati
         $em->flush();
         // log azione
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Risposta a richiesta', __METHOD__, array(
+        $dblogger->logAzione('COLLOQUI', 'Risposta a richiesta', array(
           'RichiestaColloquio' => $richiesta->getId(),
           'Stato' => $richiesta_old[0],
           'Messaggio' => $richiesta_old[1]));
@@ -295,7 +295,7 @@ class ColloquiController extends AbstractController {
         // log azione
         if ($edit) {
           // azione modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Modifica colloquio', __METHOD__, array(
+          $dblogger->logAzione('COLLOQUI', 'Modifica colloquio', array(
             'Colloquio' => $colloquio->getId(),
             'Frequenza' => $old_colloquio->getFrequenza(),
             'Giorno' => $old_colloquio->getGiorno(),
@@ -305,7 +305,7 @@ class ColloquiController extends AbstractController {
             'Note' => $old_colloquio->getNote()));
         } else {
           // azione inserimento
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Inserimento colloquio', __METHOD__, array(
+          $dblogger->logAzione('COLLOQUI', 'Inserimento colloquio', array(
             'Colloquio' => $colloquio->getId()));
         }
         // redirezione
@@ -362,7 +362,7 @@ class ColloquiController extends AbstractController {
     // memorizza modifica
     $em->flush();
     // log azione
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Blocca richieste', __METHOD__, array(
+    $dblogger->logAzione('COLLOQUI', 'Blocca richieste', array(
       'Colloquio' => $richiesta->getColloquio()->getId(),
       'Appuntamento' => $richiesta->getAppuntamento()->format('d/m/Y G:i'),
       'Durata' => $richiesta->getDurata(),

@@ -347,7 +347,7 @@ class AgendaController extends AbstractController {
           if (!$id) {
             // nuovo
             $notifica->setAzione('A');
-            $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Crea verifica', __METHOD__, array(
+            $dblogger->logAzione('AGENDA', 'Crea verifica', array(
               'Avviso' => $avviso->getId(),
               'Annotazioni' => implode(', ', array_map(function ($a) {
                   return $a->getId();
@@ -356,7 +356,7 @@ class AgendaController extends AbstractController {
           } else {
             // modifica
             $notifica->setAzione('E');
-            $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Modifica verifica', __METHOD__, array(
+            $dblogger->logAzione('AGENDA', 'Modifica verifica', array(
               'Avviso' => $avviso->getId(),
               'Data' => $avviso_old->getData()->format('d/m/Y'),
               'Cattedra' => $avviso_old->getCattedra()->getId(),
@@ -508,7 +508,7 @@ class AgendaController extends AbstractController {
       ->setOggettoId($avviso_id)
       ->setAzione('D');
     $em->persist($notifica);
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Cancella verifica', __METHOD__, array(
+    $dblogger->logAzione('AGENDA', 'Cancella verifica', array(
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),
@@ -707,13 +707,13 @@ class AgendaController extends AbstractController {
           if (!$id) {
             // nuovo
             $notifica->setAzione('A');
-            $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Crea compito', __METHOD__, array(
+            $dblogger->logAzione('AGENDA', 'Crea compito', array(
               'Avviso' => $avviso->getId(),
             ));
           } else {
             // modifica
             $notifica->setAzione('E');
-            $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Modifica compito', __METHOD__, array(
+            $dblogger->logAzione('AGENDA', 'Modifica compito', array(
               'Avviso' => $avviso->getId(),
               'Data' => $avviso_old->getData()->format('d/m/Y'),
               'Cattedra' => $avviso_old->getCattedra()->getId(),
@@ -789,7 +789,7 @@ class AgendaController extends AbstractController {
       ->setOggettoId($avviso_id)
       ->setAzione('D');
     $em->persist($notifica);
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'AGENDA', 'Cancella compito', __METHOD__, array(
+    $dblogger->logAzione('AGENDA', 'Cancella compito', array(
       'Avviso' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),

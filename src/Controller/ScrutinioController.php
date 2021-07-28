@@ -228,7 +228,7 @@ class ScrutinioController extends AbstractController {
             // ok: memorizza dati
             $em->flush();
             // log azione
-            $dblogger->write($this->getUser(), $request->getClientIp(), 'SCRUTINIO', 'Proposte', __METHOD__, array(
+            $dblogger->logAzione('SCRUTINIO', 'Proposte', array(
               'Periodo' => $periodo,
               'Proposte inserite' => implode(', ', array_map(function ($e) {
                   return $e->getId();
@@ -514,7 +514,7 @@ class ScrutinioController extends AbstractController {
       // ok: memorizza dati
       $em->flush();
       // log azione
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'SCRUTINIO', 'Proposte', __METHOD__, array(
+      $dblogger->logAzione('SCRUTINIO', 'Proposte', array(
         'Periodo' => $periodo,
         'Proposte inserite' => implode(', ', array_map(function ($e) {
             return $e->getId();
@@ -2005,7 +2005,7 @@ class ScrutinioController extends AbstractController {
       $reg->ricalcolaOreAlunno($g, $alunno);
     }
     // log
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Dichiara cessata frequenza', __METHOD__, array(
+    $dblogger->logAzione('ASSENZE', 'Dichiara cessata frequenza', array(
       'Alunno' => $alunno->getId(),
       'Assenze' => implode(', ', $giorni),
       ));
@@ -2078,7 +2078,7 @@ class ScrutinioController extends AbstractController {
       $reg->ricalcolaOreAlunno($g, $alunno);
     }
     // log
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Annulla dichiarazione cessata frequenza', __METHOD__, array(
+    $dblogger->logAzione('ASSENZE', 'Annulla dichiarazione cessata frequenza', array(
       'Alunno' => $alunno->getId(),
       ));
     // redirezione

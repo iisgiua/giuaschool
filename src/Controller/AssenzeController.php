@@ -311,7 +311,7 @@ class AssenzeController extends AbstractController {
     // log azione
     if ($id) {
       // log cancella assenza
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella assenza', __METHOD__, array(
+      $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
         'Assenza' => $id,
         'Alunno' => $assenza->getAlunno()->getId(),
         'Data' => $assenza->getData()->format('Y-m-d'),
@@ -321,12 +321,12 @@ class AssenzeController extends AbstractController {
         ));
     } else {
       // log inserisce assenza
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Crea assenza', __METHOD__, array(
+      $dblogger->logAzione('ASSENZE', 'Crea assenza', array(
         'Assenza' => $assenza->getId()
         ));
       if (isset($id_entrata)) {
         // log cancella ritardo
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella entrata', __METHOD__, array(
+        $dblogger->logAzione('ASSENZE', 'Cancella entrata', array(
           'Entrata' => $id_entrata,
           'Alunno' => $entrata->getAlunno()->getId(),
           'Data' => $entrata->getData()->format('Y-m-d'),
@@ -339,7 +339,7 @@ class AssenzeController extends AbstractController {
       }
       if (isset($id_uscita)) {
         // log cancella uscita
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella uscita', __METHOD__, array(
+        $dblogger->logAzione('ASSENZE', 'Cancella uscita', array(
           'Uscita' => $id_uscita,
           'Alunno' => $uscita->getAlunno()->getId(),
           'Data' => $uscita->getData()->format('Y-m-d'),
@@ -519,7 +519,7 @@ class AssenzeController extends AbstractController {
         // log azione
         if (isset($entrata_old) && $form->get('delete')->isClicked()) {
           // log cancella
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella entrata', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella entrata', array(
             'Entrata' => $id_entrata,
             'Alunno' => $entrata->getAlunno()->getId(),
             'Data' => $entrata->getData()->format('Y-m-d'),
@@ -532,7 +532,7 @@ class AssenzeController extends AbstractController {
             ));
         } elseif (isset($entrata_old)) {
           // log modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Modifica entrata', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Modifica entrata', array(
             'Entrata' => $entrata->getId(),
             'Ora' => $entrata_old['ora']->format('H:i'),
             'Note' => $entrata_old['note'],
@@ -543,13 +543,13 @@ class AssenzeController extends AbstractController {
             ));
         } else {
           // log nuovo
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Crea entrata', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Crea entrata', array(
             'Entrata' => $entrata->getId()
             ));
         }
         if (isset($id_assenza)) {
           // log cancella assenza
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella assenza', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
             'Assenza' => $id_assenza,
             'Alunno' => $assenza->getAlunno()->getId(),
             'Data' => $assenza->getData()->format('Y-m-d'),
@@ -719,7 +719,7 @@ class AssenzeController extends AbstractController {
         // log azione
         if (isset($uscita_old) && $form->get('delete')->isClicked()) {
           // cancella
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella uscita', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella uscita', array(
             'Uscita' => $id_uscita,
             'Alunno' => $uscita->getAlunno()->getId(),
             'Data' => $uscita->getData()->format('Y-m-d'),
@@ -730,7 +730,7 @@ class AssenzeController extends AbstractController {
             ));
         } elseif (isset($uscita_old)) {
           // modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Modifica uscita', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Modifica uscita', array(
             'Uscita' => $uscita->getId(),
             'Ora' => $uscita_old['ora']->format('H:i'),
             'Note' => $uscita_old['note'],
@@ -739,13 +739,13 @@ class AssenzeController extends AbstractController {
             ));
         } else {
           // nuovo
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Crea uscita', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Crea uscita', array(
             'Uscita' => $uscita->getId()
             ));
         }
         if (isset($id_assenza)) {
           // cancella assenza
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Cancella assenza', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Cancella assenza', array(
             'Assenza' => $id_assenza,
             'Alunno' => $assenza->getAlunno()->getId(),
             'Data' => $assenza->getData()->format('Y-m-d'),
@@ -947,12 +947,12 @@ class AssenzeController extends AbstractController {
       $em->flush();
       // log azione
       if (count($form->get('assenze')->getData()) + count($form->get('ritardi')->getData()) > 0) {
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustifica', __METHOD__, array(
+        $dblogger->logAzione('ASSENZE', 'Giustifica', array(
           'Assenze' => implode(', ', array_map(function ($a) { return $a->ids; }, $form->get('assenze')->getData())),
           'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('ritardi')->getData()))));
       }
       if (count($form->get('convalida_assenze')->getData()) + count($form->get('convalida_ritardi')->getData()) > 0) {
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Convalida', __METHOD__, array(
+        $dblogger->logAzione('ASSENZE', 'Convalida', array(
           'Assenze' => implode(', ', array_map(function ($a) { return $a->ids; }, $form->get('convalida_assenze')->getData())),
           'Ritardi' => implode(', ', array_map(function ($r) { return $r->getId(); }, $form->get('convalida_ritardi')->getData()))));
       }
@@ -1190,7 +1190,7 @@ class AssenzeController extends AbstractController {
           $reg->ricalcolaOreAlunno($data_obj, $alu);
         }
         // log azione
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Appello', __METHOD__, array(
+        $dblogger->logAzione('ASSENZE', 'Appello', array(
           'Data' => $data,
           'Assenze create' => implode(', ', array_map(function ($e) {
               return $e->getId();

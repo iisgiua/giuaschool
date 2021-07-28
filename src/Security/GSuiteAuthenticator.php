@@ -199,7 +199,7 @@ class GSuiteAuthenticator extends SocialAuthenticator {
     $token->getUser()->setUltimoAccesso(new \DateTime());
     $this->em->flush();
     // log azione
-    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Login', __METHOD__, array(
+    $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => 'GSuite',
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole()));

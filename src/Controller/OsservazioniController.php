@@ -279,12 +279,12 @@ class OsservazioniController extends AbstractController {
       // log azione
       if (!$id) {
         // nuovo
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea osservazione', __METHOD__, array(
+        $dblogger->logAzione('REGISTRO', 'Crea osservazione', array(
           'Id' => $osservazione->getId()
           ));
       } else {
         // modifica
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica osservazione', __METHOD__, array(
+        $dblogger->logAzione('REGISTRO', 'Modifica osservazione', array(
           'Id' => $osservazione->getId(),
           'Testo' => $osservazione_old['testo'],
           'Alunno' => $osservazione_old['alunno']->getId(),
@@ -341,7 +341,7 @@ class OsservazioniController extends AbstractController {
     // ok: memorizza dati
     $em->flush();
     // log azione
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella osservazione', __METHOD__, array(
+    $dblogger->logAzione('REGISTRO', 'Cancella osservazione', array(
       'Osservazione' => $osservazione_id,
       'Cattedra' => $osservazione->getCattedra()->getId(),
       'Alunno' => $osservazione->getAlunno()->getId(),
@@ -555,12 +555,12 @@ class OsservazioniController extends AbstractController {
       // log azione
       if (!$id) {
         // nuovo
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Crea osservazione personale', __METHOD__, array(
+        $dblogger->logAzione('REGISTRO', 'Crea osservazione personale', array(
           'Id' => $osservazione->getId()
           ));
       } else {
         // modifica
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Modifica osservazione personale', __METHOD__, array(
+        $dblogger->logAzione('REGISTRO', 'Modifica osservazione personale', array(
           'Id' => $osservazione->getId(),
           'Testo' => $osservazione_old['testo'],
           ));
@@ -616,7 +616,7 @@ class OsservazioniController extends AbstractController {
     // ok: memorizza dati
     $em->flush();
     // log azione
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'REGISTRO', 'Cancella osservazione personale', __METHOD__, array(
+    $dblogger->logAzione('REGISTRO', 'Cancella osservazione personale', array(
       'Osservazione' => $osservazione_id,
       'Cattedra' => $osservazione->getCattedra()->getId(),
       'Data' => $osservazione->getData()->format('Y-m-d'),

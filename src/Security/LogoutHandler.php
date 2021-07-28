@@ -86,7 +86,7 @@ class LogoutHandler implements LogoutHandlerInterface {
     // la sessione è già invalidata se è settato il parametro 'invalidate_session' in 'security.yml'
     $request->getSession()->invalidate();
     // log azione
-    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Logout', __METHOD__, array(
+    $this->dblogger->logAzione('ACCESSO', 'Logout', array(
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole()
       ));

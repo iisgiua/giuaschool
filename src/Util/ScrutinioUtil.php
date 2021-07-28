@@ -785,7 +785,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'P',
@@ -815,7 +815,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('N');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'P',
@@ -1049,7 +1049,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('2');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'P',
@@ -1088,7 +1088,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'P',
@@ -1296,7 +1296,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('3');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'P',
@@ -1360,7 +1360,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('4');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
@@ -1397,7 +1397,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('2');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'P',
@@ -1472,7 +1472,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('5');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'P',
@@ -1539,7 +1539,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('3');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'P',
@@ -1581,7 +1581,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('4');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'P',
@@ -1711,7 +1711,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('C');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'P',
@@ -1769,7 +1769,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('5');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'P',
@@ -2020,7 +2020,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -2055,7 +2055,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('N');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -2158,7 +2158,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('2');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'F',
@@ -2195,7 +2195,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -2516,7 +2516,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('3');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'F',
@@ -2553,7 +2553,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('2');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -2601,7 +2601,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('4');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
@@ -2661,7 +2661,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('5');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
@@ -2692,7 +2692,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('3');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -2915,7 +2915,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('6');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
@@ -2946,7 +2946,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('4');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -2978,7 +2978,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('5');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -3141,7 +3141,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('7');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
@@ -3249,7 +3249,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('6');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -3386,7 +3386,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('8');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'F',
@@ -3432,7 +3432,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('7');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -3484,7 +3484,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('C');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'F',
@@ -3542,7 +3542,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('8');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'F',
@@ -3700,7 +3700,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'I',
@@ -3735,7 +3735,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('N');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'I',
@@ -3838,7 +3838,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('2');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'I',
@@ -3877,7 +3877,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'I',
@@ -4064,7 +4064,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('3');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'I',
@@ -4103,7 +4103,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('2');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'I',
@@ -4182,7 +4182,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('4');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'I',
@@ -4217,7 +4217,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('3');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'I',
@@ -4269,7 +4269,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('C');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'I',
@@ -4327,7 +4327,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('4');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'I',
@@ -4423,7 +4423,7 @@ class ScrutinioUtil {
         $scrutinio->setDati($scrutinio_dati);
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Modifica verbale', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Modifica verbale', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $scrutinio->getClasse()->getId(),
           'Periodo' => $scrutinio->getPeriodo(),
@@ -4540,7 +4540,7 @@ class ScrutinioUtil {
       $scrutinio->setDati($scrutinio_dati);
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Modifica verbale', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Modifica verbale', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $scrutinio->getClasse()->getId(),
         'Periodo' => 'F',
@@ -4560,7 +4560,7 @@ class ScrutinioUtil {
         $scrutinio->setDati($scrutinio_dati);
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Modifica verbale', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Modifica verbale', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $scrutinio->getClasse()->getId(),
           'Periodo' => 'F',
@@ -4613,7 +4613,7 @@ class ScrutinioUtil {
           $scrutinio->setDati($scrutinio_dati);
           $this->em->flush();
           // log
-          $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Modifica verbale', __METHOD__, array(
+          $this->dblogger->logAzione('SCRUTINIO', 'Modifica verbale', array(
             'Scrutinio' => $scrutinio->getId(),
             'Classe' => $scrutinio->getClasse()->getId(),
             'Periodo' => 'F',
@@ -4767,7 +4767,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'X',
@@ -4806,7 +4806,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('N');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'X',
@@ -4884,7 +4884,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('2');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'X',
@@ -4923,7 +4923,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('1');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'X',
@@ -5039,7 +5039,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('3');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'X',
@@ -5078,7 +5078,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('2');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'X',
@@ -5146,7 +5146,7 @@ class ScrutinioUtil {
       $scrutinio->setStato('4');
       $this->em->flush();
       // log
-      $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+      $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
         'Periodo' => 'X',
@@ -5181,7 +5181,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('3');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'X',
@@ -5231,7 +5231,7 @@ class ScrutinioUtil {
         $scrutinio->setStato('C');
         $this->em->flush();
         // log
-        $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+        $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
           'Scrutinio' => $scrutinio->getId(),
           'Classe' => $classe->getId(),
           'Periodo' => 'X',
@@ -5289,7 +5289,7 @@ class ScrutinioUtil {
     $scrutinio->setStato('4');
     $this->em->flush();
     // log
-    $this->dblogger->write($docente, $request->getClientIp(), 'SCRUTINIO', 'Cambio stato', __METHOD__, array(
+    $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
       'Scrutinio' => $scrutinio->getId(),
       'Classe' => $classe->getId(),
       'Periodo' => 'X',

@@ -247,7 +247,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
     // tipo di login
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'token');
     // log azione
-    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'Login', __METHOD__, array(
+    $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => 'token',
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole()

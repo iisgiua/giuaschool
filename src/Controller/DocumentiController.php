@@ -229,12 +229,12 @@ class DocumentiController extends AbstractController {
         //-- // log azione
         //-- if (!$id) {
           //-- // nuovo
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Inserisce programma svolto', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- ));
         //-- } else {
           //-- // modifica
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Modifica programma svolto', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- 'File' => $documento_old->getFile(),
             //-- 'Docente' => $documento_old->getDocente()->getId(),
@@ -299,7 +299,7 @@ class DocumentiController extends AbstractController {
     //-- $f = new File($dir.$dir_classe.'/'.$documento->getFile());
     //-- $fs->remove($f);
     //-- // log azione
-    //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Cancella', __METHOD__, array(
+    //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
       //-- 'Id' => $documento_id,
       //-- 'Tipo' => $documento->getTipo(),
       //-- 'File' => $documento->getFile(),
@@ -509,12 +509,12 @@ class DocumentiController extends AbstractController {
         //-- // log azione
         //-- if (!$id) {
           //-- // nuovo
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Inserisce relazione finale', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- ));
         //-- } else {
           //-- // modifica
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Modifica relazione finale', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- 'File' => $documento_old->getFile(),
             //-- 'Docente' => $documento_old->getDocente()->getId(),
@@ -715,12 +715,12 @@ class DocumentiController extends AbstractController {
         //-- // log azione
         //-- if (!$id) {
           //-- // nuovo
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Inserisce piano di lavoro', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- ));
         //-- } else {
           //-- // modifica
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Modifica piano di lavoro', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- 'File' => $documento_old->getFile(),
             //-- 'Docente' => $documento_old->getDocente()->getId(),
@@ -1013,12 +1013,12 @@ class DocumentiController extends AbstractController {
         //-- // log azione
         //-- if (!$id) {
           //-- // nuovo
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Inserisce documento 15 maggio', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- ));
         //-- } else {
           //-- // modifica
-          //-- $dblogger->write($this->getUser(), $request->getClientIp(), 'DOCUMENTI', 'Modifica documento 15 maggio', __METHOD__, array(
+          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
             //-- 'Id' => $documento->getId(),
             //-- 'File' => $documento_old->getFile(),
             //-- 'Docente' => $documento_old->getDocente()->getId(),

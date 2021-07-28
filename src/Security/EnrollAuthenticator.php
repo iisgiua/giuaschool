@@ -238,9 +238,9 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
       $this->session->set('/APP/UTENTE/token2', $token_list[1]);
       $this->session->set('/APP/UTENTE/token3', $token_list[2]);
       // log azione
-      $this->dblogger->write($user, $credentials['ip'], 'ACCESSO', 'Registrazione', __METHOD__, array(
-        'Username' => $user->getUsername(),
-        'Ruolo' => $user->getRoles()[0]
+      $this->logger->warning('Registrazione docente avvenuta correttamente', array(
+        'username' => $user->getUsername(),
+        'ruolo' => $user->getRoles()[0]
         ));
       // invia finto errore per evitare che l'utente possa accedere alle altre pagine del sito
       throw new CustomUserMessageAuthenticationException('exception.enrollment_ok');

@@ -327,10 +327,10 @@ class DocentiController extends BaseController {
     // memorizza su db
     $em->flush();
     // log azione
-    $dblogger->write($docente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
-      'Username esecutore' => $this->getUser()->getUsername(),
-      'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-      'ID esecutore' => $this->getUser()->getId()));
+    $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+      'Username' => $docente->getUsername(),
+      'Ruolo' => $docente->getRoles()[0],
+      'ID' => $docente->getId()));
     // crea documento PDF
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
@@ -405,10 +405,10 @@ class DocentiController extends BaseController {
     $docente->setOtp(null);
     $em->flush();
     // log azione
-    $dblogger->write($docente, $request->getClientIp(), 'SICUREZZA', 'Reset OTP', __METHOD__, array(
-      'Username esecutore' => $this->getUser()->getUsername(),
-      'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-      'ID esecutore' => $this->getUser()->getId()));
+    $dblogger->logAzione('SICUREZZA', 'Reset OTP', array(
+      'Username' => $docente->getUsername(),
+      'Ruolo' => $docente->getRoles()[0],
+      'ID' => $docente->getId()));
     // messaggio ok
     $this->addFlash('success', 'message.credenziali_inviate');
     // redirezione

@@ -680,7 +680,7 @@ class GenitoriController extends AbstractController {
         // ok: memorizza dati
         $em->flush();
         // log azione
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Richiesta colloquio', __METHOD__, array(
+        $dblogger->logAzione('COLLOQUI', 'Richiesta colloquio', array(
           'ID' => $richiesta->getId()));
         // redirezione
         return $this->redirectToRoute('genitori_colloqui');
@@ -740,7 +740,7 @@ class GenitoriController extends AbstractController {
     // ok: memorizza dati
     $em->flush();
     // log azione
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'COLLOQUI', 'Disdetta colloquio', __METHOD__, array(
+    $dblogger->logAzione('COLLOQUI', 'Disdetta colloquio', array(
       'ID' => $richiesta->getId(),
       'Stato' => $richiesta_old->getStato(),
       'Messaggio' => $richiesta_old->getMessaggio()));
@@ -1222,7 +1222,7 @@ class GenitoriController extends AbstractController {
       // log azione
       if ($form->get('delete')->isClicked()) {
         // eliminazione
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Elimina giustificazione online', __METHOD__, array(
+        $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', array(
           'ID' => $info['assenza']['ids'],
           'Giustificato' => $info['assenza']['giustificato'],
           'Motivazione' => $info['assenza']['motivazione'],
@@ -1230,7 +1230,7 @@ class GenitoriController extends AbstractController {
           'Certificati' => $info['assenza']['certificati']));
       } elseif (!$errore) {
         // inserimento o modifica
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustificazione online', __METHOD__, array(
+        $dblogger->logAzione('ASSENZE', 'Giustificazione online', array(
           'ID' => $info['assenza']['ids'],
           'Giustificato' => $info['assenza']['giustificato'],
           'Motivazione' => $info['assenza']['motivazione'],
@@ -1353,14 +1353,14 @@ class GenitoriController extends AbstractController {
         // log azione
         if ($form->get('delete')->isClicked()) {
           // cancella
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Elimina giustificazione online', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', array(
             'Ritardo' => $entrata->getId(),
             'Motivazione' => $entrata_old->getMotivazione(),
             'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null,
             ));
         } else {
           // inserisce o modifica
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'ASSENZE', 'Giustificazione online', __METHOD__, array(
+          $dblogger->logAzione('ASSENZE', 'Giustificazione online', array(
             'Ritardo' => $entrata->getId(),
             'Motivazione' => $entrata_old->getMotivazione(),
             'Giustificato' => $entrata_old->getGiustificato() ? $entrata_old->getGiustificato()->format('Y-m-d') : null,

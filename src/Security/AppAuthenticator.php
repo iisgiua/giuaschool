@@ -305,7 +305,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
     $token->getUser()->setPrelogin(null);
     $this->em->flush();
     // log azione
-    $this->dblogger->write($token->getUser(), $request->getClientIp(), 'ACCESSO', 'App', __METHOD__, array(
+    $this->dblogger->logAzione('ACCESSO', 'App', array(
       'Login' => 'app',
       'Username' => $token->getUsername(),
       'Ruolo' => $token->getRoles()[0]->getRole(),

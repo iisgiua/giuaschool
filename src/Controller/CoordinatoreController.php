@@ -854,7 +854,7 @@ class CoordinatoreController extends AbstractController {
         if (!$id) {
           // nuovo
           $notifica->setAzione('A');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Crea avviso coordinatore', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Crea avviso coordinatore', array(
             'Avviso' => $avviso->getId(),
             'Annotazioni' => implode(', ', array_map(function ($a) {
                 return $a->getId();
@@ -863,7 +863,7 @@ class CoordinatoreController extends AbstractController {
         } else {
           // modifica
           $notifica->setAzione('E');
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Modifica avviso coordinatore', __METHOD__, array(
+          $dblogger->logAzione('AVVISI', 'Modifica avviso coordinatore', array(
             'Id' => $avviso->getId(),
             'Testo' => $avviso_old->getTesto(),
             'Destinatari' => $avviso_old->getDestinatari(),
@@ -1028,7 +1028,7 @@ class CoordinatoreController extends AbstractController {
       ->setOggettoId($avviso_id)
       ->setAzione('D');
     $em->persist($notifica);
-    $dblogger->write($this->getUser(), $request->getClientIp(), 'AVVISI', 'Cancella avviso coordinatore', __METHOD__, array(
+    $dblogger->logAzione('AVVISI', 'Cancella avviso coordinatore', array(
       'Id' => $avviso_id,
       'Data' => $avviso->getData()->format('d/m/Y'),
       'Testo' => $avviso->getTesto(),

@@ -272,4 +272,19 @@ class File {
     return $this->titolo;
   }
 
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'titolo' => $this->titolo,
+      'nome' => $this->nome,
+      'estensione' => $this->estensione,
+      'dimensione' => $this->dimensione,
+      'file' => $this->file];
+    return $dati;
+  }
+
 }

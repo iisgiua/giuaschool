@@ -108,7 +108,7 @@ class UtentiController extends AbstractController {
         $em->flush();
         $success = 'message.update_ok';
         // log azione
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'SICUREZZA', 'Cambio Email', __METHOD__, array(
+        $dblogger->logAzione('SICUREZZA', 'Cambio Email', array(
           'Precedente email' => $vecchia_email
           ));
       }
@@ -232,7 +232,7 @@ class UtentiController extends AbstractController {
           $em->flush();
           $success = 'message.update_ok';
           // log azione
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'SICUREZZA', 'Cambio Password', __METHOD__, array(
+          $dblogger->logAzione('SICUREZZA', 'Cambio Password', array(
             ));
         }
       }
@@ -315,7 +315,7 @@ class UtentiController extends AbstractController {
           // messaggio di successo
           $msg = array('tipo' => 'success', 'messaggio' => 'message.otp_abilitato');
           // log azione
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'SICUREZZA', 'Attivazione OTP', __METHOD__, array(
+          $dblogger->logAzione('SICUREZZA', 'Attivazione OTP', array(
             ));
         } else {
           // errore
@@ -382,7 +382,7 @@ class UtentiController extends AbstractController {
       // messaggio di successo
       $msg = 'message.dato_memorizzato';
       // log azione
-      $dblogger->write($this->getUser(), $request->getClientIp(), 'PROFILO', 'Gestione notifiche', __METHOD__, array(
+      $dblogger->logAzione('PROFILO', 'Gestione notifiche', array(
         'Notitica' => $old));
     }
     // mostra la pagina di risposta

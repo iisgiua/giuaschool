@@ -379,10 +379,10 @@ class AlunniController extends BaseController {
     // memorizza su db
     $em->flush();
     // aggiunge log
-    $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
-      'Username esecutore' => $this->getUser()->getUsername(),
-      'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-      'ID esecutore' => $this->getUser()->getId()));
+    $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+      'Username' => $utente->getUsername(),
+      'Ruolo' => $utente->getRoles()[0],
+      'ID' => $utente->getId()));
     // crea documento PDF
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
@@ -788,10 +788,10 @@ class AlunniController extends BaseController {
       // memorizza su db
       $em->flush();
       // log azione
-      $dblogger->write($utente, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
-        'Username esecutore' => $this->getUser()->getUsername(),
-        'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-        'ID esecutore' => $this->getUser()->getId()));
+      $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+        'Username' => $utente->getUsername(),
+        'Ruolo' => $utente->getRoles()[0],
+        'ID' => $utente->getId()));
       // contenuto in formato HTML
       $html = $this->renderView($genitore ? 'pdf/credenziali_profilo_genitori.html.twig' :
         'pdf/credenziali_profilo_alunni.html.twig', array(

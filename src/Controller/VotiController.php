@@ -361,7 +361,7 @@ class VotiController extends AbstractController {
             ->setAzione('D');
           $em->persist($notifica);
         }
-        $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Voti della classe', __METHOD__, array(
+        $dblogger->logAzione('VOTI', 'Voti della classe', array(
           'Tipo' => $tipo,
           'Voti creati' => implode(', ', array_map(function ($e) {
               return $e->getId();
@@ -563,7 +563,7 @@ class VotiController extends AbstractController {
         if ($valutazione_precedente && $form->get('delete')->isClicked()) {
           // cancellazione
           $notifica->setAzione('D')->setOggettoId($valutazione_precedente[0]);
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Cancella voto', __METHOD__, array(
+          $dblogger->logAzione('VOTI', 'Cancella voto', array(
             'Id' => $valutazione_precedente[0],
             'Tipo' => $tipo,
             'Visibile' => $valutazione_precedente[1],
@@ -582,7 +582,7 @@ class VotiController extends AbstractController {
                   $valutazione_precedente[6] != $valutazione->getMedia())) {
           // modifica
           $notifica->setAzione('E')->setOggettoId($valutazione->getId());
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Modifica voto', __METHOD__, array(
+          $dblogger->logAzione('VOTI', 'Modifica voto', array(
             'Id' => $valutazione_precedente[0],
             'Visibile' => $valutazione_precedente[1],
             'Media' => $valutazione_precedente[6],
@@ -594,7 +594,7 @@ class VotiController extends AbstractController {
         } elseif (!$valutazione_precedente) {
           // creazione
           $notifica->setAzione('A')->setOggettoId($valutazione->getId());
-          $dblogger->write($this->getUser(), $request->getClientIp(), 'VOTI', 'Crea voto', __METHOD__, array(
+          $dblogger->logAzione('VOTI', 'Crea voto', array(
             'Id' => $valutazione->getId()
             ));
         }

@@ -17,10 +17,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 
 /**
- * LogProcessor - classe di utilità per l'aggiunta di informazioni nei log
+ * LogProcessor - classe di utilità per l'aggiunta di informazioni nei log su file
  */
 class LogProcessor {
-
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
@@ -38,9 +37,10 @@ class LogProcessor {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param RequestStack $request Coda delle pagine richieste
+   * @param TokenStorageInterface $token Gestore dei dati di autenticazione
    */
   public function __construct(RequestStack $request, TokenStorageInterface $token) {
     $this->request = $request;
@@ -74,4 +74,3 @@ class LogProcessor {
   }
 
 }
-

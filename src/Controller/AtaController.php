@@ -274,10 +274,10 @@ class AtaController extends BaseController {
     // memorizza su db
     $em->flush();
     // log azione
-    $dblogger->write($ata, $request->getClientIp(), 'SICUREZZA', 'Generazione Password', __METHOD__, array(
-      'Username esecutore' => $this->getUser()->getUsername(),
-      'Ruolo esecutore' => $this->getUser()->getRoles()[0],
-      'ID esecutore' => $this->getUser()->getId()));
+    $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+      'Username' => $ata->getUsername(),
+      'Ruolo' => $ata->getRoles()[0],
+      'ID' => $ata->getId()));
     // crea documento PDF
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');

@@ -69,7 +69,11 @@ class DocumentoTest extends DatabaseTestCase {
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
     $docenti = $this->em->getRepository('App:Docente')->findBy([]);
-    $destinatari = $this->em->getRepository('App:ListaDestinatari')->findBy([]);
+    $destinatari = $this->em->getRepository('App:ListaDestinatari')->createQueryBuilder('ld')
+      ->where('ld.docenti=:nessuno AND ld.genitori=:nessuno')
+      ->setParameters(['nessuno' => 'N'])
+      ->getQuery()
+      ->getResult();
     $materie = $this->em->getRepository('App:Materia')->findBy([]);
     $classi = $this->em->getRepository('App:Classe')->findBy([]);
     $alunni = $this->em->getRepository('App:Alunno')->findBy([]);

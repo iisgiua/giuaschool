@@ -13,6 +13,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
@@ -55,39 +56,92 @@ class Log {
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
    */
   private $utente;
+
+  /**
+   * @var string $username Username dell'utente connesso
+   *
+   * @ORM\Column(type="string", length=255, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=255,maxMessage="field.maxlength")
+   */
+  private $username;
+
+  /**
+   * @var string $ruolo Ruolo dell'utente connesso
+   *
+   * @ORM\Column(type="string", length=32, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=32,maxMessage="field.maxlength")
+   */
+  private $ruolo;
+
+  /**
+   * @var string $alias Username dell'utente reale se l'utente è un alias, altrimenti null
+   *
+   * @ORM\Column(type="string", length=255, nullable=true)
+   *
+   * @Assert\Length(max=255,maxMessage="field.maxlength")
+   */
+  private $alias;
 
   /**
    * @var string $ip Indirizzo IP dell'utente connesso
    *
    * @ORM\Column(type="string", length=64, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
   private $ip;
 
   /**
-   * @var string $categoria Categoria dell'azione dell'utente
-   *
-   * @ORM\Column(type="string", length=64, nullable=false)
-   */
-  private $categoria;
-
-  /**
-   * @var string $azione Azione dell'utente
-   *
-   * @ORM\Column(type="string", length=64, nullable=false)
-   */
-  private $azione;
-
-  /**
-   * @var string $origine Procedura che ha generato il log (namespace/classe/metodo)
+   * @var string $origine Controller che ha generato il log
    *
    * @ORM\Column(type="string", length=255, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
   private $origine;
 
   /**
-   * @var array $dati Lista di dati che descrivono l'azione
+   * @var string $tipo Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
+   *
+   * @ORM\Column(type="string", length=1, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Choice(choices={"A","C","U","D"}, strict=true, message="field.choice")
+   */
+  private $tipo;
+
+  /**
+   * @var string $categoria Categoria dell'azione registrata nel log
+   *
+   * @ORM\Column(type="string", length=32, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=32,maxMessage="field.maxlength")
+   */
+  private $categoria;
+
+  /**
+   * @var string $azione Azione registrata nel log
+   *
+   * @ORM\Column(type="string", length=64, nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
+   */
+  private $azione;
+
+  /**
+   * @var array $dati Lista di dati da memorizzare nel log
    *
    * @ORM\Column(type="array", nullable=true)
    */
@@ -161,10 +215,73 @@ class Log {
    *
    * @param Utente $utente Utente connesso
    *
-   * @return Log Oggetto Log
+   * @return Log Oggetto modificato
    */
   public function setUtente(Utente $utente) {
     $this->utente = $utente;
+    return $this;
+  }
+
+  /**
+   * Restituisce la username dell'utente connesso
+   *
+   * @return string Username dell'utente connesso
+   */
+  public function getUsername() {
+    return $this->username;
+  }
+
+  /**
+   * Modifica la username dell'utente connesso
+   *
+   * @param string $username Username dell'utente connesso
+   *
+   * @return Log Oggetto modificato
+   */
+  public function setUsername($username) {
+    $this->username = $username;
+    return $this;
+  }
+
+  /**
+   * Restituisce il ruolo dell'utente connesso
+   *
+   * @return string Ruolo dell'utente connesso
+   */
+  public function getRuolo() {
+    return $this->ruolo;
+  }
+
+  /**
+   * Modifica il ruolo dell'utente connesso
+   *
+   * @param string $ruolo Ruolo dell'utente connesso
+   *
+   * @return Log Oggetto modificato
+   */
+  public function setRuolo($ruolo) {
+    $this->ruolo = $ruolo;
+    return $this;
+  }
+
+  /**
+   * Restituisce la username dell'utente reale se l'utente è un alias
+   *
+   * @return string|null Username dell'utente reale, o null se l'utente non è un alias
+   */
+  public function getAlias() {
+    return $this->alias;
+  }
+
+  /**
+   * Modifica la username dell'utente reale se l'utente è un alias
+   *
+   * @param string|null $alias Username dell'utente reale, o null se l'utente non è un alias
+   *
+   * @return Log Oggetto modificato
+   */
+  public function setAlias($alias) {
+    $this->alias = $alias;
     return $this;
   }
 
@@ -182,7 +299,7 @@ class Log {
    *
    * @param string $ip Indirizzo IP dell'utente connesso
    *
-   * @return Log Oggetto Log
+   * @return Log Oggetto modificato
    */
   public function setIp($ip) {
     $this->ip = $ip;
@@ -190,62 +307,20 @@ class Log {
   }
 
   /**
-   * Restituisce la categoria dell'azione dell'utente
+   * Restituisce il controller che ha generato il log
    *
-   * @return string Categoria dell'azione dell'utente
-   */
-  public function getCategoria() {
-    return $this->categoria;
-  }
-
-  /**
-   * Modifica la categoria dell'azione dell'utente
-   *
-   * @param string $categoria Categoria dell'azione dell'utente
-   *
-   * @return Log Oggetto Log
-   */
-  public function setCategoria($categoria) {
-    $this->categoria = $categoria;
-    return $this;
-  }
-
-  /**
-   * Restituisce l'azione dell'utente
-   *
-   * @return string Azione dell'utente
-   */
-  public function getAzione() {
-    return $this->azione;
-  }
-
-  /**
-   * Modifica l'azione dell'utente
-   *
-   * @param string $azione Azione dell'utente
-   *
-   * @return Log Oggetto Log
-   */
-  public function setAzione($azione) {
-    $this->azione = $azione;
-    return $this;
-  }
-
-  /**
-   * Restituisce la procedura che ha generato il log (namespace/classe/metodo)
-   *
-   * @return string Procedura che ha generato il log
+   * @return string Controller che ha generato il log
    */
   public function getOrigine() {
     return $this->origine;
   }
 
   /**
-   * Modifica la procedura che ha generato il log (namespace/classe/metodo)
+   * Modifica il controller che ha generato il log
    *
-   * @param string $origine Procedura che ha generato il log
+   * @param string $origine Controller che ha generato il log
    *
-   * @return Log Oggetto Log
+   * @return Log Oggetto modificato
    */
   public function setOrigine($origine) {
     $this->origine = $origine;
@@ -253,20 +328,83 @@ class Log {
   }
 
   /**
-   * Restituisce la lista di dati che descrivono l'azione
+   * Restituisce il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
-   * @return array Lista di dati che descrivono l'azione
+   * @return string Tipo di dati memorizzati
+   */
+  public function getTipo() {
+    return $this->tipo;
+  }
+
+  /**
+   * Modifica il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
+   *
+   * @param string $tipo Tipo di dati memorizzati
+   *
+   * @return Log Oggetto modificato
+   */
+  public function setTipo($tipo) {
+    $this->tipo = $tipo;
+    return $this;
+  }
+
+  /**
+   * Restituisce la categoria dell'azione registrata nel log
+   *
+   * @return string Categoria dell'azione registrata nel log
+   */
+  public function getCategoria() {
+    return $this->categoria;
+  }
+
+  /**
+   * Modifica la categoria dell'azione registrata nel log
+   *
+   * @param string $categoria Categoria dell'azione registrata nel log
+   *
+   * @return Log Oggetto modificato
+   */
+  public function setCategoria($categoria) {
+    $this->categoria = $categoria;
+    return $this;
+  }
+
+  /**
+   * Restituisce l'azione registrata nel log
+   *
+   * @return string Azione registrata nel log
+   */
+  public function getAzione() {
+    return $this->azione;
+  }
+
+  /**
+   * Modifica l'azione registrata nel log
+   *
+   * @param string $azione Azione registrata nel log
+   *
+   * @return Log Oggetto modificato
+   */
+  public function setAzione($azione) {
+    $this->azione = $azione;
+    return $this;
+  }
+
+  /**
+   * Restituisce la lista di dati da memorizzare nel log
+   *
+   * @return array Lista di dati da memorizzare nel log
    */
   public function getDati() {
     return $this->dati;
   }
 
   /**
-   * Modifica la lista di dati che descrivono l'azione
+   * Modifica la lista di dati da memorizzare nel log
    *
-   * @param array $dati Lista di dati che descrivono l'azione
+   * @param array $dati Lista di dati da memorizzare nel log
    *
-   * @return Log Oggetto Log
+   * @return Log Oggetto modificato
    */
   public function setDati($dati) {
     if ($dati === $this->dati) {
@@ -277,36 +415,16 @@ class Log {
     return $this;
   }
 
-  /**
-   * Aggiunge un dato alla lista di dati che descrivono l'azione
-   *
-   * @param string $dato Dato che descrive l'azione
-   *
-   * @return Log Oggetto Log
-   */
-  public function addDato($dato) {
-    if (!in_array($dato, $this->dati)) {
-      $this->dati[] = $dato;
-    }
-    return $this;
-  }
-
-  /**
-   * Elimina un dato dalla lista di dati che descrivono l'azione
-   *
-   * @param string $dato Dato che descrive l'azione
-   *
-   * @return Log Oggetto Log
-   */
-  public function removeDato($dato) {
-    if (in_array($dato, $this->dati)) {
-      unset($this->dati[array_search($dato, $this->dati)]);
-    }
-    return $this;
-  }
-
 
   //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->dati = [];
+  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo
