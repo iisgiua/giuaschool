@@ -160,7 +160,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->sysVars = [];
     $this->log = [];
     $this->debug = false;
-    $this->$numScreenshots = 0;
+    $this->numScreenshots = 0;
   }
 
   /**
@@ -199,8 +199,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $filename = str_replace('/', '_', trim($url, '/'));
       $filename = ($filename ?: 'error');
       // salva screenshot
-      $this->$numScreenshots++;
-      $this->screenshot($this->$numScreenshots.'-'.$filename, 1);
+      $this->numScreenshots++;
+      $this->screenshot($this->numScreenshots.'-'.$filename, 1);
     }
   }
 
