@@ -13,7 +13,7 @@
         <div class="col-sm-2 text-right"><strong class="gs-big">Materia:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.materia }}</span></div>
       </div>
-      <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_programmi'|trans|raw }}</em></div>
+      <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_relazioni'|trans|raw }}</em></div>
       {{ form_start(form) }}
       {{ form_errors(form) }}
       <div class="form-group">
@@ -43,9 +43,9 @@
 <script>
 Dropzone.autoDiscover = false;
 var DZ = new Dropzone(".dropzone", {
-  url: "{{ path('file_upload', {'pagina': 'documenti_programma_edit', 'param': 'files'}) }}",
+  url: "{{ path('file_upload', {'pagina': 'documenti_relazioni_add', 'param': 'files'}) }}",
   maxFiles: 1,
-  maxFilesize: 10,
+  maxFilesize: 50,
   acceptedFiles: ".pdf,.odt,.doc,.docx,.rtf,.txt",
   timeout: 0,
   paramName: "files",
@@ -62,49 +62,25 @@ var DZ = new Dropzone(".dropzone", {
   dictCancelUpload: "{{ 'label.upload_cancella'|trans }}",
   dictCancelUploadConfirmation: "{{ 'message.upload_cancella'|trans }}",
   init: function() {
-    this.on("maxfilesexceeded", function(file) {
-      this.removeFile(file);
-    });
     this.on("successmultiple", function(files, response) {
       $.each(files, function(key,file){
         file.uploaded = response[key];
-        $('#programma_edit_submit').removeAttr('disabled');
+        $('#documento_submit').removeAttr('disabled');
       });
     });
     this.on("removedfile", function(file) {
-      if (file.uploaded) {
-        $.post("{{ path('file_remove', {'pagina': 'documenti_programma_edit', 'param': 'files'}) }}", {"files": file.uploaded});
-        $('#programma_edit_submit').attr('disabled', true);
-      } else if (file.existent) {
-        $.post("{{ path('file_remove', {'pagina': 'documenti_programma_edit', 'param': 'files'}) }}", {"files": file.existent});
-        this.options.maxFiles++;
-        $('#programma_edit_submit').attr('disabled', true);
+      $.post("{{ path('file_remove', {'pagina': 'documenti_relazioni_add', 'param': 'files'}) }}", {"files": file.uploaded});
+      if (file.status == 'success') {
+        $('#documento_submit').attr('disabled', true);
       }
     });
-  {% if allegati is not empty %}
-    var DZ = this;
-    var files = [
-    {% for a in allegati %}
-        ['{{ a.name }}', '{{ a.temp }}', {{ a.size }}],
-    {% endfor %}
-      ];
-    $.each(files, function(key,file) {
-      var obj = {'type': 'existent', 'name': file[0], 'temp': file[1]};
-      var mockFile = {'type': 'existent', 'name': file[0], 'size': file[2], 'accepted': true,  'existent': obj};
-      DZ.emit("addedfile", mockFile);
-      DZ.emit("success", mockFile);
-      DZ.emit("complete", mockFile);
-      DZ.files.push(mockFile);
-      DZ.options.maxFiles--;
-    });
-  {% endif %}
-    $('#programma_edit_submit').attr('disabled', true);
+    $('#documento_submit').attr('disabled', true);
   }
 });
 $(document).ready(function() {
-  $('form[name="programma_edit"]').submit(function(ev) {
+  $('form[name="documento"]').submit(function(ev) {
     var f = DZ.getAcceptedFiles()[0];
-    if (f && f.type != 'existent' && f.type != 'application/pdf') {
+    if (f && f.type != 'application/pdf') {
       $('#gs-modal-waiting-title').html('Attendere: conversione del documento in formato PDF.');
       $('#gs-modal-waiting').modal('show');
     }

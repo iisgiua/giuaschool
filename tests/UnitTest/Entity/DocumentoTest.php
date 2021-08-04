@@ -49,7 +49,8 @@ class DocumentoTest extends DatabaseTestCase {
       'gs_utente' => '*',
       'gs_lista_destinatari' => '*',
       'gs_materia' => '*',
-      'gs_classe' => '*'];
+      'gs_classe' => '*',
+      'gs_sede' => '*'];
     // SQL writedd
     $this->canWrite = [
       'gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id',
@@ -151,6 +152,28 @@ class DocumentoTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     // toString
     $this->assertSame('Documento #'.$existent->getId(), (string) $existent, $this->entity.'::toString');
+    // datiVersione
+    $dt = [
+      'tipo' => $existent->getTipo(),
+      'docente' => $existent->getDocente()->getId(),
+      'listaDestinatari' => $existent->getListaDestinatari()->datiVersione(),
+      'allegati' => array_map(function($ogg) { return $ogg->datiVersione(); }, $existent->getAllegati()->toArray()),
+      'materia' => $existent->getMateria() ? $existent->getMateria()->getId() : null,
+      'classe' => $existent->getClasse() ? $existent->getClasse()->getId() : null,
+      'alunno' => $existent->getAlunno() ? $existent->getAlunno()->getId() : null,
+      'cifrato' => $existent->getCifrato(),
+      'firma' => $existent->getFirma()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    $dt['tipo'] = 'P';
+    $existent->setTipo('P');
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    $materia = $this->em->getRepository('App:Materia')->find(1);
+    $existent->setMateria($materia);
+    $dt['materia'] = $materia->getId();
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    $existent->getListaDestinatari()->setfiltroGenitori([10, 20]);
+    $dt['listaDestinatari']['filtroGenitori'] = [10, 20];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

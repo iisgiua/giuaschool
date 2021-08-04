@@ -8,6 +8,7 @@
     <strong class="gs-big">{{ 'message.no_cattedra_programmi'|trans }}</strong>
   </div>
   {% else %}
+  <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_programmi'|trans|raw }}</em></div>
   <table class="table table-bordered table-hover table-striped gs-mt-5">
     <thead class="bg-success">
       <tr>
@@ -24,25 +25,21 @@
           <strong>{{ d.materia }}</strong>
         </td>
         <td>
-      {% if d.documento_id %}
-          <a class="" href="{{ path('file_documento', {'tipo': 'P', 'id': d.documento_id}) }}" title="Scarica il programma indicato">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.file }}</strong>
+      {% if d.documento %}
+          <a href="{{ path('documenti_download', {'documento': d.documento.id}) }}" title="Scarica il programma indicato">
+          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.documento.allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ d.dimensione }} KB</small>
+          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
       {% else %}
           <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
       {% endif %}
         </td>
         <td>
       {% if d.add is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_programma_edit', {'classe': d.classe_id, 'materia': d.materia_id, 'id': 0}) }}" role="button" title="Inserisci il programma svolto"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
-      {% else %}
-        {% if d.edit is defined %}
-          <a class="btn btn-primary btn-xs gs-mr-2 gs-mb-1" href="{{ path('documenti_programma_edit', {'classe': d.classe_id, 'materia': d.materia_id, 'id': d.documento_id}) }}" role="button" title="Modifica il programma indicato"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
-        {% endif %}
-        {% if d.delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il programma indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'id': d.documento_id, 'tipo': 'P'}) }}" data-text="{{ 'message.cancella_programma'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
-        {% endif %}
+          <a class="btn btn-primary btn-xs" href="{{ path('documenti_programmi_add', {'classe': d.classe_id, 'materia': d.materia_id}) }}" role="button" title="Inserisci il programma svolto"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+      {% endif %}
+      {% if d.delete is defined %}
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il programma indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': d.documento.id}) }}" data-text="{{ 'message.cancella_programma'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
       {% endif %}
         </td>
       </tr>

@@ -54,7 +54,7 @@ class ListaDestinatari {
   private $modificato;
 
   /**
-   * @var ArrayCollection $sedi Sedi scolastiche di destinazione
+   * @var ArrayCollection $sedi Sedi scolastiche di destinazione (usato come filtro principale)
    *
    * @ORM\ManyToMany(targetEntity="Sede")
    * @ORM\JoinTable(name="gs_lista_destinatari_sede",
@@ -73,19 +73,19 @@ class ListaDestinatari {
   private $dsga;
 
   /**
-   * @var boolean $ata Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=filtro sede]
+   * @var boolean $ata Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
   private $ata;
 
   /**
-   * @var string $docenti Indica quali docenti sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, M=filtro materia, U=filtro utente]
+   * @var string $docenti Indica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","S","C","M","U"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
   private $docenti;
 
@@ -97,12 +97,12 @@ class ListaDestinatari {
   private $filtroDocenti;
 
   /**
-   * @var string $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe]
+   * @var string $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","S","C"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
    */
   private $coordinatori;
 
@@ -114,19 +114,19 @@ class ListaDestinatari {
   private $filtroCoordinatori;
 
   /**
-   * @var boolean $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=filtro sede]
+   * @var boolean $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
   private $staff;
 
   /**
-   * @var string $genitori Indica quali genitori sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, U=filtro utente]
+   * @var string $genitori Indica quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","S","C","U"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
   private $genitori;
 
@@ -138,12 +138,12 @@ class ListaDestinatari {
   private $filtroGenitori;
 
   /**
-   * @var string $alunni Indica quali alunni sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, U=filtro utente]
+   * @var string $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"N","S","C","U"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
   private $alunni;
 
@@ -209,7 +209,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Restituisce le sedi scolastiche di destinazione
+   * Restituisce le sedi scolastiche di destinazione (usato come filtro principale)
    *
    * @return ArrayCollection Sedi scolastiche di destinazione
    */
@@ -218,7 +218,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Modifica le sedi scolastiche di destinazione
+   * Modifica le sedi scolastiche di destinazione (usato come filtro principale)
    *
    * @param ArrayCollection $sedi Sedi scolastiche di destinazione
    *
@@ -230,7 +230,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Aggiunge una sede scolastica di destinazione
+   * Aggiunge una sede scolastica di destinazione (usato come filtro principale)
    *
    * @param Sede $sede Sede scolastica di destinazione
    *
@@ -244,7 +244,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Rimuove una sede scolastica di destinazione
+   * Rimuove una sede scolastica di destinazione (usato come filtro principale)
    *
    * @param Sede $sede Sede scolastiche di destinazione da rimuovere
    *
@@ -279,7 +279,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=filtro sede]
+   * Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
    *
    * @return boolean Vero se se il personale ATA è fra i destinatari, falso altrimenti
    */
@@ -288,7 +288,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Modifica l'indicazione se il personale ATA sia fra i destinatari [FALSE=no, TRUE=filtro sede]
+   * Modifica l'indicazione se il personale ATA sia fra i destinatari [FALSE=no, TRUE=si]
    *
    * @param boolean $ata Vero se il personale ATA è fra i destinatari, falso altrimenti
    *
@@ -300,7 +300,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Restituisce quali docenti sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, M=filtro materia, U=filtro utente]
+   * Restituisce quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @return string Indica Indica quali docenti sono tra i destinatari
    */
@@ -309,7 +309,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Modifica quali docenti sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, M=filtro materia, U=filtro utente]
+   * Modifica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @param string $docenti Indica Indica quali docenti sono tra i destinatari
    *
@@ -370,7 +370,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Restituisce quali coordinatori sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe]
+   * Restituisce quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
    * @return string Indica quali coordinatori sono tra i destinatari
    */
@@ -379,7 +379,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Modifica quali coordinatori sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe]
+   * Modifica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
    * @param string $coordinatori Indica quali coordinatori sono tra i destinatari
    *
@@ -440,7 +440,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Indica se lo staff è fra i destinatari [FALSE=no, TRUE=filtro sede]
+   * Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
    *
    * @return boolean Vero se se lo staff è fra i destinatari, falso altrimenti
    */
@@ -449,7 +449,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Modifica l'indicazione se lo staff sia fra i destinatari [FALSE=no, TRUE=filtro sede]
+   * Modifica l'indicazione se lo staff sia fra i destinatari [FALSE=no, TRUE=si]
    *
    * @param boolean $staff Vero se lo staff è fra i destinatari, falso altrimenti
    *
@@ -461,7 +461,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Restituisce quali genitori sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, U=filtro utente]
+   * Restituisce quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @return string Indica quali genitori sono tra i destinatari
    */
@@ -470,7 +470,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Modifica quali genitori siano tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, U=filtro utente]
+   * Modifica quali genitori siano tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @param string $genitori Indica quali genitori sono tra i destinatari
    *
@@ -531,7 +531,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Restituisce quali alunni sono tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, U=filtro utente]
+   * Restituisce quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @return string Indica quali alunni sono tra i destinatari
    */
@@ -540,7 +540,7 @@ class ListaDestinatari {
   }
 
   /**
-   * Modifica quali alunni siano tra i destinatari [N=nessuno, S=filtro sede, C=filtro classe, U=filtro utente]
+   * Modifica quali alunni siano tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @param string $alunni Indica quali alunni sono fra i destinatari
    *
@@ -632,6 +632,28 @@ class ListaDestinatari {
       ($this->docenti != 'N' ? 'Docenti ' : '').($this->coordinatori != 'N' ? 'Coordinatori ' : '').
       ($this->staff ? 'Staff ' : '').($this->genitori != 'N' ? 'Genitori ' : '').
       ($this->alunni != 'N' ? 'Alunni ' : '');
+  }
+
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'sedi' => array_map(function($ogg) { return $ogg->getId(); }, $this->sedi->toArray()),
+      'dsga' => $this->dsga,
+      'ata' => $this->ata,
+      'docenti' => $this->docenti,
+      'filtroDocenti' => $this->filtroDocenti,
+      'coordinatori' => $this->coordinatori,
+      'filtroCoordinatori' => $this->filtroCoordinatori,
+      'staff' => $this->staff,
+      'genitori' => $this->genitori,
+      'filtroGenitori' => $this->filtroGenitori,
+      'alunni' => $this->alunni,
+      'filtroAlunni' => $this->filtroAlunni];
+    return $dati;
   }
 
 }

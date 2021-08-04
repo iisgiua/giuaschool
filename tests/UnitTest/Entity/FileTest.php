@@ -112,8 +112,11 @@ class FileTest extends DatabaseTestCase {
     // toString
     $this->assertSame($existent->getTitolo(), (string) $existent, $this->entity.'::toString');
     // datiVersione
-    $dt = ['titolo' => $existent->getTitolo(), 'nome' => $existent->getNome(),
-      'estensione' => $existent->getEstensione(), 'dimensione' => $existent->getDimensione(),
+    $dt = [
+      'titolo' => $existent->getTitolo(),
+      'nome' => $existent->getNome(),
+      'estensione' => $existent->getEstensione(),
+      'dimensione' => $existent->getDimensione(),
       'file' => $existent->getFile()];
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
     $dt['titolo'] .= '#1';

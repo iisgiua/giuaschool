@@ -2,17 +2,17 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_relazioni'|trans }}</h1>
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_maggio'|trans }}</h1>
   {% if dati is empty %}
   <div class="alert alert-warning" role="alert">
-    <strong class="gs-big">{{ 'message.no_cattedra_relazioni'|trans }}</strong>
+    <strong class="gs-big">{{ 'message.no_cattedra_maggio'|trans }}</strong>
   </div>
   {% else %}
-  <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_relazioni'|trans|raw }}</em></div>
+  <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_maggio'|trans|raw }}</em></div>
   <table class="table table-bordered table-hover table-striped gs-mt-5">
     <thead class="bg-success">
       <tr>
-        <th class="col-sm-5">{{ 'label.cattedra'|trans }}</th>
+        <th class="col-sm-5">{{ 'label.classe'|trans }}</th>
         <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
         <th class="col-sm-2">{{ 'label.action'|trans }}</th>
       </tr>
@@ -21,12 +21,11 @@
     {% for d in dati %}
       <tr>
         <td>
-          <strong>{{ d.anno }}ª {{ d.sezione }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
-          <strong>{{ d.materia }}{% if d.alunno_id %} - {{ d.alunnoCognome }} {{ d.alunnoNome }}{% endif %}</strong>
+          <strong>{{ d.anno }}ª {{ d.sezione }}</strong><br>{{ d.corso }} - {{ d.sede }}
         </td>
         <td>
       {% if d.documento %}
-          <a href="{{ path('documenti_download', {'documento': d.documento.id}) }}" title="Scarica la relazione indicata">
+          <a href="{{ path('documenti_download', {'documento': d.documento.id}) }}" title="Scarica il documento del 15 maggio indicato">
           <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.documento.allegati[0].titolo }}</strong>
           </a><br>
           <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
@@ -36,10 +35,10 @@
         </td>
         <td>
       {% if d.add is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_relazioni_add', {'classe': d.classe_id, 'materia': d.materia_id, 'alunno': d.alunno_id}) }}" role="button" title="Inserisci la relazione finale"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('documenti_maggio_add', {'classe': d.classe_id}) }}" role="button" title="Inserisci il documento del 15 maggio"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
       {% endif %}
       {% if d.delete is defined %}
-        <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la relazione indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': d.documento.id}) }}" data-text="{{ 'message.cancella_relazione'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+        <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il documento del 15 maggio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': d.documento.id}) }}" data-text="{{ 'message.cancella_maggio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
       {% endif %}
         </td>
       </tr>
@@ -47,7 +46,7 @@
     </tbody>
   </table>
   {% endif %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_relazione'} %}
+  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_maggio'} %}
 </div>
 {% endblock %}
 

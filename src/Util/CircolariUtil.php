@@ -202,11 +202,6 @@ class CircolariUtil {
       // aggiunge docenti
       $utenti = array_merge($utenti, $this->em->getRepository('App:Docente')
         ->getIdDocente($sedi, $circolare->getDocenti(), $circolare->getFiltroDocenti()));
-      if ($circolare->getDocenti() == 'U') {
-        // aggiunge eventuale staff senza cattedra
-        $utenti = array_merge($utenti, $this->em->getRepository('App:Staff')
-          ->getIdStaff($circolare->getFiltroDocenti()));
-      }
     }
     // genitori
     if ($circolare->getGenitori() != 'N') {

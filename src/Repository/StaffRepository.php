@@ -19,19 +19,18 @@ namespace App\Repository;
 class StaffRepository extends BaseRepository {
 
   /**
-   * Restituisce gli utenti staff (senza cattedra) secondo il filtro utenti
+   * Restituisce gli utenti staff secondo il filtro di sede
    *
-   * @param array $filtro Lista di ID per gli utenti
+   * @param array $sedi Lista di ID delle sedi
    *
    * @return array Lista di ID degli utenti staff
    */
-  public function getIdStaff($filtro) {
+  public function getIdStaff($sedi) {
     $staff = $this->createQueryBuilder('s')
       ->select('DISTINCT s.id')
-      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.docente=s.id AND c.attiva=:attiva')
-      ->where('s.abilitato=:abilitato AND c.id IS NULL AND NOT s INSTANCE OF App:Preside')
-      ->andWhere('s.id IN (:utenti)')
-      ->setParameters(['attiva' => 1, 'abilitato' => 1, 'utenti' => $filtro])
+      ->where('s.abilitato=:abilitato AND NOT s INSTANCE OF App:Preside')
+      ->andWhere('s.sede IS NULL OR s.sede IN (:sedi)')
+      ->setParameters(['abilitato' => 1, 'sedi' => $sedi])
       ->getQuery()
       ->getArrayResult();
     // restituisce la lista degli ID

@@ -422,4 +422,23 @@ class Documento {
     return 'Documento #'.$this->id;
   }
 
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'tipo' => $this->tipo,
+      'docente' => $this->docente->getId(),
+      'listaDestinatari' => $this->listaDestinatari->datiVersione(),
+      'allegati' => array_map(function($ogg) { return $ogg->datiVersione(); }, $this->allegati->toArray()),
+      'materia' => $this->materia ? $this->materia->getId() : null,
+      'classe' => $this->classe ? $this->classe->getId() : null,
+      'alunno' => $this->alunno ? $this->alunno->getId() : null,
+      'cifrato' => $this->cifrato,
+      'firma' => $this->firma];
+    return $dati;
+  }
+
 }

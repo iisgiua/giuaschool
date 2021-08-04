@@ -3,6 +3,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
   bootstrap="tests/bootstrap.php"
+  cacheResultFile="tests/temp/.phpunit.result.cache"
   colors="true"
   convertDeprecationsToExceptions="false"
 >
@@ -19,12 +20,14 @@
       <directory>tests/UnitTest</directory>
     </testsuite>
   </testsuites>
-  <coverage processUncoveredFiles="true">
+  <coverage cacheDirectory="tests/temp">
     <include>
       <directory suffix=".php">src</directory>
     </include>
     <exclude>
       <directory>src/DataFixtures</directory>
+      <directory>src/Controller</directory>
+      <file>src/Kernel.php</file>
     </exclude>
   </coverage>
   <listeners>

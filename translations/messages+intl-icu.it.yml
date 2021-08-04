@@ -125,7 +125,7 @@ label.descrizione_verifica: Descrizione o argomenti
 label.destinatari: Destinatari
 label.disabilitato: Disabilitato
 label.disable: Disabilita
-label.doc15: Documenti del 15 maggio
+label.maggio: Documenti del 15 maggio
 label.docente: Docente
 label.docenti_classe: Docenti della classe
 label.alunni_classe: Alunni della classe
@@ -526,7 +526,7 @@ page.coordinatore: Ruolo di Coordinatore
 page.docenti_colloqui: Colloqui Docenti
 page.docenti: Gestione Docenti
 page.documenti_classi: Documenti Classi
-page.documenti_doc15: Documenti 15 Maggio
+page.documenti_maggio: Documenti 15 Maggio
 page.documenti_piani: Inserimento Piani
 page.documenti_programmi: Inserimento Programmi
 page.documenti_relazioni: Inserimento Relazioni
@@ -593,7 +593,7 @@ page.staff_avvisi: Avvisi Generici
 page.staff_circolari: Gestione Circolari
 page.staff_colloqui: Ore Colloqui
 page.staff_deroghe: Deroghe Ingressi e Uscite
-page.staff_doc15: Documenti 15 Maggio
+page.staff_maggio: Documenti 15 Maggio
 page.staff_password: Genera Password
 page.staff_piani: Inserimento Piani
 page.staff_programmi: Inserimento Programmi
@@ -639,7 +639,7 @@ title.deroghe: Inserimento deroghe e annotazioni sugli alunni
 title.docenti_colloqui_importa: Importa le ore di colloquio individuale dei docenti da file
 title.docenti_colloqui: Colloquio individuali
 title.documenti_classi: Visualizza i documenti dei Consigli di Classe
-title.documenti_doc15: Inserimento dei documenti del 15 Maggio
+title.documenti_maggio: Inserimento dei documenti del 15 Maggio
 title.documenti_piani: Inserimento dei piani di lavoro
 title.documenti_programmi: Inserimento dei programmi svolti
 title.documenti_relazioni: Inserimento delle relazioni finali
@@ -687,7 +687,7 @@ title.modifica_avviso: Modifica l'avviso
 title.modifica_circolare: Modifica la circolare
 title.modifica_colloquio: Modifica l'orario di colloquio individuale
 title.modifica_compito: Modifica i compiti per casa esistenti nell'agenda
-title.modifica_doc15: Modifica il documento del 15 maggio
+title.modifica_maggio: Modifica il documento del 15 maggio
 title.modifica_docenti: Modifica i dati di un docente
 title.modifica_email: Cambia l'indirizzo di posta elettronica
 title.modifica_entrata: Modifica il ritardo dell'alunno
@@ -723,7 +723,7 @@ title.nuovo_avviso_uscite: Inserisci un nuovo avviso per l'uscita anticipata
 title.nuovo_avviso: Inserisci un nuovo avviso
 title.nuovo_colloquio: Aggiunge un orario di colloquio individuale
 title.nuovo_compito: Inserisci nuovi compiti per casa nell'agenda
-title.nuovo_doc15: Inserisci il documento del 15 maggio
+title.nuovo_maggio: Inserisci il documento del 15 maggio
 title.nuovo_piano: Inserisci il piano di lavoro
 title.nuovo_programma: Inserisci il programma svolto
 title.ore_colloqui: Ore di ricevimento per i colloqui individuali
@@ -744,7 +744,7 @@ title.staff_avvisi_entrate: Avvisi per l'ingresso posticipato delle classi
 title.staff_avvisi_individuali: Avvisi individuali per i genitori
 title.staff_avvisi_uscite: Avvisi per l'uscita anticipata delle classi
 title.staff_avvisi: Avvisi di tipo generico
-title.staff_doc15: Inserimento dei documenti del 15 maggio
+title.staff_maggio: Inserimento dei documenti del 15 maggio
 title.staff_piani: Inserimento dei piani di lavoro
 title.staff_programmi: Inserimento dei programmi svolti
 title.staff_relazioni: Inserimento delle relazioni finali
@@ -896,12 +896,12 @@ message.cancella_verifica: Verrà cancellata la verifica e l'annotazione sul reg
 message.cancella_compito: Verranno cancellati i compiti assegnati per casa. Vuoi continuare?
 message.presenti_verifiche_oggi: "{num, plural, one {È prevista una verifica per oggi} other {Sono previste # verifiche per oggi}}"
 message.presenti_verifiche_prossime: "{num, plural, one {È prevista una verifica per i prossimi giorni} other {Sono previste # verifiche per i prossimi giorni}}"
-message.inserimento_programmi: "Inserire il programma svolto creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire il programma svolto assieme a quello del docente di teoria, in un unico documento."
+message.inserimento_programmi: "Inserire il programma svolto creando un documento distinto per ogni materia e classe; il documento dovrà comprendere anche gli argomenti di Educazione Civica.<br>I docenti di laboratorio dovranno inserire il proprio programma assieme a quello del docente di teoria, in un unico documento.<br><strong>Una volta inserito, il programma sarà visibile anche a genitori e alunni della classe.</strong>"
 message.cancella_programma: Verrà cancellato il documento del programma svolto. Vuoi continuare?
 message.no_cattedra_programmi: Non è previsto il caricamento dei programmi svolti per questa cattedra.
 message.cancella_relazione: Verrà cancellato il documento della relazione finale. Vuoi continuare?
 message.no_cattedra_relazioni: Non è previsto il caricamento delle relazioni finali per questa cattedra.
-message.inserimento_relazioni: "Inserire la relazione finale creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire la relazione finale assieme a quella del docente di teoria, in un unico documento."
+message.inserimento_relazioni: "Inserire la relazione finale creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire la propria relazione assieme a quella del docente di teoria, in un unico documento."
 message.proposte_quinte: Inserisci la proposta di voto.
 message.motivazione_deroga_S: Vista la situazione di salute, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.motivazione_deroga_F: Vista la grave situazione famigliare, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
@@ -930,7 +930,7 @@ message.modifica_email: Inserisci il tuo indirizzo di posta elettronica. Ricorda
 message.modifica_password: "La password ha una lunghezza minima di 8 caratteri e deve contenere: almeno una lettera maiuscola, almeno una lettera minuscola, almeno una cifra.<br>Si consiglia di utilizzare anche gli altri caratteri presenti sulla tastiera (ad esempio +-#@$&!?.,;:)."
 message.no_cattedra_piani: Non è previsto il caricamento dei piani di lavoro per questa cattedra.
 message.cancella_piano: Verrà cancellato il documento del piano di lavoro. Vuoi continuare?
-message.inserimento_piani: "Inserire il piano di lavoro creando un documento distinto per ogni materia e classe.<br>I docenti di laboratorio dovranno inserire il piano di lavoro assieme a quello del docente di teoria, in un unico documento."
+message.inserimento_piani: "Inserire il piano di lavoro creando un documento distinto per ogni materia e classe; il documento dovrà comprendere anche gli argomenti di Educazione Civica.<br>I docenti di laboratorio dovranno inserire il proprio piano di lavoro assieme a quello del docente di teoria, in un unico documento."
 message.autorizza_ritardo: "L'alunn{sex} {alunno} è autorizzat{sex} ad entrare alla seconda ora"
 message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore"
 message.conferma_supplenza: "Confermando la scelta entrerai come SUPPLENTE in una tua classe. Vuoi continuare?"
@@ -991,9 +991,9 @@ message.credenziali_inviate: Le credenziali sono state correttamente inviate all
 message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
 message.gestione_notifiche: "La ricezione via email della notifica delle nuove circolari può essere abilitata o disabilitata da questa pagina. Scegli l'opzione che preferisci e premi il pulsante di conferma."
 message.dato_memorizzato: La modifica è stata memorizzata correttamente.
-message.no_cattedra_doc15: Non è previsto il caricamento del documento del 15 maggio per questa cattedra.
-message.cancella_doc15: Verrà cancellato il documento del 15 maggio indicato. Vuoi continuare?
-message.inserimento_doc15: "Inserire il documento del 15 maggio come un unico documento comprensivo di ogni sezione prevista.<br>E' possibile caricare il documento in formato PDF, Microsoft Word, LibreOffice/OpenOffice."
+message.no_cattedra_maggio: Non è previsto il caricamento del documento del 15 maggio per questa cattedra.
+message.cancella_maggio: Verrà cancellato il documento del 15 maggio indicato. Vuoi continuare?
+message.inserimento_maggio: "Inserire il documento del 15 maggio come un unico documento comprensivo di ogni sezione prevista."
 message.strategie_PAI: "Il Collegio dei Docenti stabilirà come attuare il piano di apprendimento individualizzato, indicando modalità, mezzi e tempi di realizzazione delle attività didattiche, da svolgersi in orario curricolare o extracurricolare. E' comunque da sottolineare l'importanza fondamentale dello studio autonomo da parte dello studente e la sua partecipazione attiva alle proposte educative che saranno programmate."
 message.banner: "Imposta i messaggi che verranno visualizzati nelle pagine principali del registro; lascia la casella vuota per non visualizzare niente.<br>
   Nelle caselle di testo si può inserire anche codice HTML."
@@ -1237,3 +1237,4 @@ exception.no_firma_dichiarazione: "Errore: devi sottoscrivere la dichiarazione."
 exception.dichiarazione_incompleta: "Errore: devi compilare la dichiarazione e sottoscriverla."
 exception.data_invalida: "Errore: data non valida. Devi inserire una data nel formato gg/mm/aaaa."
 exception.colloquio_ora_invalida: Non hai inserito l'orario dell'appuntamento.
+exception.numero_file_allegati: Hai caricato un numero eccessivo di documenti.

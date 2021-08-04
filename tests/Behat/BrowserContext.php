@@ -35,7 +35,7 @@ class BrowserContext extends BaseContext {
    */
   public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router) {
     parent::__construct($kernel, $em, $router);
-    $this->sysVars['logged'] = null;
+    $this->vars['sys']['logged'] = null;
   }
 
   /**
@@ -62,7 +62,7 @@ class BrowserContext extends BaseContext {
    * @When vai alla pagina :pagina
    * @When vai alla pagina :pagina con parametri:
    */
-  public function vaiAllaPagina($pagina, $parametri=[]): void {
+   public function vaiAllaPagina($pagina, $parametri=[]): void {
     $url = $this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri);
     $this->session->visit($url);
     $this->waitForPage();
@@ -78,7 +78,7 @@ class BrowserContext extends BaseContext {
    * @Given login utente :username con :password
    */
   public function loginUtente($username, $password=null): void {
-    $this->assertEmpty($this->sysVars['logged']);
+    $this->assertEmpty($this->vars['sys']['logged']);
     $user = $this->em->getRepository('App:Utente')->findOneByUsername($username);
     $this->assertTrue($user && $user->getUsername() == $username);
     $this->paginaAttiva('login_form');
@@ -88,7 +88,20 @@ class BrowserContext extends BaseContext {
     $this->waitForPage();
     $this->assertPageStatus(200);
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
-    $this->sysVars['logged'] = $user;
+    $this->vars['sys']['logged'] = $user;
+    $others = $this->em->getRepository('App:Utente')->createQueryBuilder('u')
+      ->where('u.username!=:username AND u INSTANCE OF '.get_class($user))
+      ->setParameters(['username' => $user->getUsername()])
+      ->getQuery()
+      ->getResult();
+    $other = null;
+    foreach ($others as $val) {
+      if (get_class($val) == get_class($user)) {
+        $other = $val;
+        break;
+      }
+    }
+    $this->vars['sys']['other'] = $other;
     $this->log('LOGIN', 'Username: '.$username.' - Ruolo: '.$user->getRoles()[0]);
   }
 
@@ -100,7 +113,7 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtenteConRuolo($ruolo): void {
     $class_name = ucfirst(strtolower($ruolo));
-    $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy([]));
+    $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy(['abilitato' => 1]));
     $this->assertNotEmpty($user);
     $this->loginUtente($user->getUsername());
   }
@@ -114,7 +127,7 @@ class BrowserContext extends BaseContext {
   public function loginUtenteConRuoloEsatto($ruolo): void {
     $class_name = ucfirst(strtolower($ruolo));
     do {
-      $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy([]));
+      $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy(['abilitato' => 1]));
       $this->assertNotEmpty($user);
     } while (get_class($user) != 'App\\Entity\\'.$class_name);
     $this->loginUtente($user->getUsername());
@@ -127,9 +140,9 @@ class BrowserContext extends BaseContext {
    * @Given modifica utente attuale con parametri:
    */
   public function modificaUtenteAttualeConParametri($parametri): void {
-    $this->assertNotEmpty($this->sysVars['logged']);
+    $this->assertNotEmpty($this->vars['sys']['logged']);
     foreach ($parametri as $key=>$val) {
-      $this->sysVars['logged']->{'set'.ucfirst(strtolower($key))}($val);
+      $this->vars['sys']['logged']->{'set'.ucfirst(strtolower($key))}($val);
     }
     $this->em->flush();
   }
@@ -140,13 +153,14 @@ class BrowserContext extends BaseContext {
    * @Given logout utente
    */
   public function logoutUtente(): void {
-    $this->assertNotEmpty($this->sysVars['logged']);
+    $this->assertNotEmpty($this->vars['sys']['logged']);
     $this->paginaAttiva('logout');
     $this->waitForPage();
     $this->assertPageStatus(200);
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_form'));
-    $user = $this->sysVars['logged'];
-    $this->sysVars['logged'] = null;
+    $user = $this->vars['sys']['logged'];
+    $this->vars['sys']['logged'] = null;
+    $this->vars['sys']['other'] = null;
     $this->log('LOGOUT', 'Username: '.$user->getUsername().' - Ruolo: '.$user->getRoles()[0]);
   }
 
@@ -195,14 +209,27 @@ class BrowserContext extends BaseContext {
   }
 
   /**
+   * Clicca sul pulsante indicato tramite testo|id|title|name|alt
+   *  $button: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
+   *
+   * @When premi pulsante :button
+   */
+  public function premiPulsante($button): void {
+    $this->session->getPage()->pressButton($button);
+    $this->waitForPage();
+  }
+
+  /**
    * Controlla che la pagina attuale sia quella indicata
    *  $pagina: nome della pagina
+   *  $parametri: array associativo dei parametri (presi da trasformazione di tabella)
    *
    * @Then vedi pagina :pagina
+   * @Then vedi pagina :pagina con parametri:
    */
-  public function vediPagina($pagina): void {
+  public function vediPagina($pagina, $parametri=[]): void {
     $this->assertPageStatus(200);
-    $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate($pagina));
+    $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri));
     $this->log('SHOW', 'Pagina: '.$pagina);
   }
 
@@ -228,7 +255,7 @@ class BrowserContext extends BaseContext {
    *
    * @Then la sezione :selettore contiene :ricerca
    */
-  public function laSezioneIndicataContiene($selettore, $ricerca): void {
+  public function laSezioneContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
     $this->assertTrue($sezione && preg_match($ricerca, $sezione->getText()));
   }
@@ -240,7 +267,7 @@ class BrowserContext extends BaseContext {
    *
    * @Then la sezione :selettore non contiene :ricerca
    */
-  public function laSezioneIndicataNonContiene($selettore, $ricerca): void {
+  public function laSezioneNonContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
     $this->assertFalse($sezione && preg_match($ricerca, $sezione->getText()));
   }
@@ -385,7 +412,7 @@ class BrowserContext extends BaseContext {
    * @Then vedi in più righe della tabella :indice i dati:
    * @Then vedi in più righe della tabella i dati:
    */
-  public function vediInPiuRigaDellaTabellaIndicataIDati($indice=1, TableNode $dati): void {
+  public function vediInPiuRigheDellaTabellaIndicataIDati($indice=1, TableNode $dati): void {
     $tab = $dati->getTable();
     $intestazione = null;
     foreach ($tab as $num=>$riga) {
@@ -401,6 +428,120 @@ class BrowserContext extends BaseContext {
         $this->vediInUnaRigaDellaTabellaIndicataIDati($indice, new TableNode($matrice));
       }
     }
+  }
+
+  /**
+   * Clicca su link o pulsante per scaricare un file
+   *  $file: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
+   *
+   * @When click su :testo
+   */
+  public function clickSu($testo): void {
+    $link = $this->session->getPage()->findLink($testo);
+    if ($link) {
+      $link->click();
+    } else {
+      $button = $this->session->getPage()->findButton($testo);
+      $this->assertNotEmpty($button);
+      $button->press();
+    }
+    $this->waitForPage();
+  }
+
+  /**
+   * Controlla che sia stato scaricato il file indicato
+   *  $nome: nome assegnato al file
+   *  $dimensione: lunghezza del file in byte
+   *
+   * @Then file scaricato con nome :nome e dimensione :dimensione
+   */
+  public function fileScaricatoConNomeEDimensione($nome, $dimensione): void {
+    $this->assertPageStatus(200);
+    $headers = $this->session->getResponseHeaders();
+    $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", $headers['Content-Disposition'], $data));
+    $this->assertTrue($data[1] == $nome && $headers['Content-Length'] == $dimensione);
+    $this->log('DOWNLOAD', 'File: '.$data[1].' ['.$headers['Content-Length'].' byte]');
+  }
+
+  /**
+   * Va alla URL indicata
+   *  $testoParam: url della pagina, può contenere variabili con sintassi {{$nome}} o {{#nome}}
+   *
+   * @When vai alla url :testoParam
+   */
+  public function vaiAllaUrl($testoParam): void {
+    $url = $this->getMinkParameter('base_url').$testoParam;
+    $this->session->visit($url);
+    $this->waitForPage();
+    $this->log('GOTO', 'Url: '.$url);
+  }
+
+  /**
+   * Carica un file tramite dropzone
+   *  $file: nome del file presente nella direcotry tests/data
+   *  $dz: percors CSS per la dropzone
+   *
+   * @When alleghi file :file a dropzone
+   * @When alleghi file :file a dropzone :dz
+   */
+  public function alleghiFileADropzone($file, $dz='.dropzone'): void {
+    $nomefile = $this->kernel->getProjectDir().'/tests/data/'.$file;
+    $this->assertTrue(file_exists($nomefile.'.base64'));
+    $data = file_get_contents($nomefile.'.base64');
+    $js = 'data = "'.$data.'";'.
+      'arrayBuffer = Uint8Array.from(window.atob(data), c => c.charCodeAt(0));'.
+      'file = new File([arrayBuffer], "'.$file.'");'.
+      'Dropzone.forElement("'.$dz.'").addFile(file);';
+    $this->session->executeScript($js);
+    // attesa per completare le modifiche sulla pagina
+    sleep(1);
+    $this->log('UPLOAD', 'File: '.$file);
+  }
+
+  /**
+   * Controlla l'esistenza di un file
+   *  $file: nome del file con percorso relativo alla directory FILES
+   *  $dimensione: dimensione del file in byte
+   *
+   * @Then vedi file :file di dimensione :dimensione
+   */
+  public function vediFileDiDimensione($file, $dimensione): void {
+    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
+    $this->assertTrue(file_exists($nomefile) && filesize($nomefile) == $dimensione);
+    $this->files[] = 'FILES/'.$file;
+  }
+
+  /**
+   * Controlla la non esistenza di un file
+   *  $file: nome del file con percorso relativo alla directory FILES
+   *
+   * @Then non vedi file :file
+   */
+  public function nonVediFile($file): void {
+    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
+    $this->assertFalse(file_exists($nomefile));
+  }
+
+  /**
+   * Controlla che il pulsante indicato sia abiliato
+   *  $button: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
+   *
+   * @Then pulsante :nome attivo
+   */
+  public function pulsanteAttivo($button): void {
+    $element = $this->session->getPage()->findButton($button);
+    $this->assertFalse($element->getAttribute('disabled'));
+  }
+
+  /**
+   * Controlla che il pulsante indicato sia disabiliato
+   *  $button: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
+   *
+   * @Then pulsante :nome inattivo
+   */
+  public function pulsanteInattivo($button): void {
+    $element = $this->session->getPage()->findButton($button);
+    $this->assertTrue($element->getAttribute('disabled'));
   }
 
 

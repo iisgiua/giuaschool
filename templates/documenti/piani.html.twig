@@ -8,6 +8,7 @@
     <strong class="gs-big">{{ 'message.no_cattedra_piani'|trans }}</strong>
   </div>
   {% else %}
+  <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_piani'|trans|raw }}</em></div>
   <table class="table table-bordered table-hover table-striped gs-mt-5">
     <thead class="bg-success">
       <tr>
@@ -25,7 +26,7 @@
         </td>
         <td>
       {% if d.documento %}
-          <a class="" href="{{ path('file_documento', {'tipo': 'L', 'id': d.documento.id}) }}" title="Scarica il piano di lavoro indicato">
+          <a href="{{ path('documenti_download', {'documento': d.documento.id}) }}" title="Scarica il piano di lavoro indicato">
           <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.documento.allegati[0].titolo }}</strong>
           </a><br>
           <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
@@ -35,14 +36,10 @@
         </td>
         <td>
       {% if d.add is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_piani_edit', {'classe': d.classe_id, 'materia': d.materia_id }) }}" role="button" title="Inserisci il piano di lavoro"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
-      {% else %}
-        {% if d.edit is defined %}
-          <a class="btn btn-primary btn-xs gs-mr-2 gs-mb-1" href="{{ path('documenti_piani_edit', {'documento': d.documento.id}) }}" role="button" title="Modifica il piano di lavoro indicato"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
-        {% endif %}
-        {% if d.delete is defined %}
+          <a class="btn btn-primary btn-xs" href="{{ path('documenti_piani_add', {'classe': d.classe_id, 'materia': d.materia_id }) }}" role="button" title="Inserisci il piano di lavoro"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+      {% endif %}
+      {% if d.delete is defined %}
           <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il piano di lavoro indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': d.documento.id}) }}" data-text="{{ 'message.cancella_piano'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
-        {% endif %}
       {% endif %}
         </td>
       </tr>

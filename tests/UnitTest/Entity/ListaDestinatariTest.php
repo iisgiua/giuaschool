@@ -140,6 +140,29 @@ class ListaDestinatariTest extends DatabaseTestCase {
       ($existent->getDocenti() != 'N' ? 'Docenti ' : '').($existent->getCoordinatori() != 'N' ? 'Coordinatori ' : '').
       ($existent->getStaff() ? 'Staff ' : '').($existent->getGenitori() != 'N' ? 'Genitori ' : '').
       ($existent->getAlunni() != 'N' ? 'Alunni ' : ''), (string) $existent, $this->entity.'::toString');
+    // datiVersione
+    $dt = [
+      'sedi' => array_map(function($ogg) { return $ogg->getId(); }, $existent->getSedi()->toArray()),
+      'dsga' => $existent->getDsga(),
+      'ata' => $existent->getAta(),
+      'docenti' => $existent->getDocenti(),
+      'filtroDocenti' => $existent->getFiltroDocenti(),
+      'coordinatori' => $existent->getCoordinatori(),
+      'filtroCoordinatori' => $existent->getFiltroCoordinatori(),
+      'staff' => $existent->getStaff(),
+      'genitori' => $existent->getGenitori(),
+      'filtroGenitori' => $existent->getFiltroGenitori(),
+      'alunni' => $existent->getAlunni(),
+      'filtroAlunni' => $existent->getFiltroAlunni()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    $dt['genitori'] = 'C';
+    $dt['filtroGenitori'] = [1, 2];
+    $existent->setGenitori('C')->setFiltroGenitori([1, 2]);
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    $sedi = $this->em->getRepository('App:Sede')->findBy([]);
+    $existent->setSedi(new ArrayCollection($sedi));
+    $dt['sedi'] = array_map(function($ogg) { return $ogg->getId(); }, $sedi);
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**

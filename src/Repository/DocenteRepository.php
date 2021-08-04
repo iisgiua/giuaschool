@@ -170,7 +170,8 @@ class DocenteRepository extends BaseRepository {
       ->getQuery()
       ->getArrayResult();
     $docenti_id = array_column($docenti, 'id');
-    if ($tipo == 'T') {
+    // docenti senza cattedra
+    if ($tipo == 'T' || $tipo == 'M' || $tipo == 'U') {
       // aggiunge docenti senza cattedra
       $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
         ->select('c.id')
@@ -179,7 +180,13 @@ class DocenteRepository extends BaseRepository {
       $docenti = $this->createQueryBuilder('d')
         ->select('DISTINCT d.id')
         ->where('d NOT INSTANCE OF App:Preside AND d.abilitato=:abilitato AND NOT EXISTS ('.$cattedre.')')
-        ->setParameters(['attiva' => 1, 'abilitato' => 1 ])
+        ->setParameters(['attiva' => 1, 'abilitato' => 1 ]);
+      if ($tipo == 'U') {
+        // filtro utente
+        $docenti
+          ->andWhere('d.id IN (:utenti)')->setParameter('utenti', $filtro);
+      }
+      $docenti = $docenti
         ->getQuery()
         ->getArrayResult();
       $docenti_id = array_merge($docenti_id, array_column($docenti, 'id'));

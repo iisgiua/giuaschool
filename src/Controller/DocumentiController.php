@@ -13,27 +13,21 @@
 namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use App\Entity\Documento;
+use App\Entity\ListaDestinatari;
+use App\Entity\File;
 use App\Entity\Classe;
 use App\Entity\Materia;
+use App\Entity\Alunno;
+use App\Form\DocumentoType;
 use App\Util\LogHandler;
 use App\Util\DocumentiUtil;
 
@@ -44,228 +38,119 @@ use App\Util\DocumentiUtil;
 class DocumentiController extends AbstractController {
 
   /**
-   //-- * Visualizza i programmi svolti dei docenti
-   //-- *
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- *
-   //-- * @return Response Pagina di risposta
-   //-- *
+   * Gestione inserimento dei programmi svolti dei docenti
+   *
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   *
+   * @return Response Pagina di risposta
+   *
    * @Route("/documenti/programmi", name="documenti_programmi",
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
   public function programmiAction(DocumentiUtil $doc) {
-    //-- // inizializza variabili
-    //-- $dati = null;
-    //-- // recupera dati
-    //-- $dati = $doc->programmi($this->getUser());
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/programmi.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_programmi',
-      //-- 'dati' => $dati,
-    //-- ));
+    // recupera dati
+    $dati = $doc->programmiDocente($this->getUser());
+    // mostra la pagina di risposta
+    return $this->render('documenti/programmi.html.twig', array(
+      'pagina_titolo' => 'page.documenti_programmi',
+      'dati' => $dati));
   }
 
   /**
-   //-- * Aggiunge o modifica un programma
-   //-- *
-   //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $em Gestore delle entità
-   //-- * @param SessionInterface $session Gestore delle sessioni
-   //-- * @param TranslatorInterface $trans Gestore delle traduzioni
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- * @param LogHandler $dblogger Gestore dei log su database
-   //-- * @param int $classe Identificativo della classe
-   //-- * @param int $materia Identificativo della materia
-   //-- * @param int $id Identificativo del documento
-   //-- *
+   * Aggiunge un programma svolto
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Classe $classe Classe di riferimento per il documento
+   * @param Materia $materia Materia di riferimento per il documento
+   *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/programmi/edit/{classe}/{materia}/{id}", name="documenti_programma_edit",
-   *    requirements={"classe": "\d+", "materia": "\d+", "id": "\d+"},
-   *    defaults={"id": "0"},
+   * @Route("/documenti/programmi/add/{classe}/{materia}", name="documenti_programmi_add",
+   *    requirements={"classe": "\d+", "materia": "\d+"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function programmaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                       TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
-    //-- // inizializza
-    //-- $var_sessione = '/APP/FILE/documenti_programma_edit/files';
-    //-- $dir = $this->getParameter('dir_classi').'/';
-    //-- $fs = new FileSystem();
-    //-- $info = null;
-    //-- // controlla classe
-    //-- $classe = $em->getRepository('App:Classe')->find($classe);
-    //-- if (!$classe) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- $info['classe'] = $classe->getAnno().'ª '.$classe->getSezione();
-    //-- $dir_classe = $classe->getAnno().$classe->getSezione();
-    //-- // controlla materia
-    //-- $materia = $em->getRepository('App:Materia')->find($materia);
-    //-- if (!$materia) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- $info['materia'] = $materia->getNomeBreve();
-    //-- // controlla azione
-    //-- if ($id > 0) {
-      //-- // azione edit
-      //-- $documento = $em->getRepository('App:Documento')->findOneBy(['id' => $id, 'tipo' => 'P',
-        //-- 'classe' => $classe, 'materia' => $materia]);
-      //-- if (!$documento) {
-        //-- // errore
-        //-- throw $this->createNotFoundException('exception.id_notfound');
-      //-- }
-      //-- $documento_old = clone $documento;
-    //-- } else {
-      //-- // azione add
-      //-- $documento = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'P',
-        //-- 'classe' => $classe, 'materia' => $materia]);
-      //-- if ($documento) {
-        //-- // errore
-        //-- throw $this->createNotFoundException('exception.id_notfound');
-      //-- }
-      //-- $documento = (new Documento())
-        //-- ->setTipo('P')
-        //-- ->setClasse($classe)
-        //-- ->setMateria($materia);
-      //-- $em->persist($documento);
-    //-- }
-    //-- // controllo permessi
-    //-- if (!$doc->azioneDocumento(($id > 0 ? 'edit' : 'add'), new \DateTime(), $this->getUser(), ($id > 0 ? $documento : null))) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- // legge allegati
-    //-- $allegati = array();
-    //-- if ($request->isMethod('POST')) {
-      //-- // pagina inviata
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- // aggiunge allegato
-          //-- $allegati[] = $f;
-        //-- }
-      //-- }
-    //-- } else {
-      //-- // pagina iniziale
-      //-- if ($documento->getFile()) {
-        //-- $f = new File($dir.$dir_classe.'/'.$documento->getFile());
-        //-- $allegati[0]['type'] = 'existent';
-        //-- $allegati[0]['temp'] = $documento->getId().'-0.ID';
-        //-- $allegati[0]['name'] = $documento->getFile();
-        //-- $allegati[0]['size'] = $f->getSize();
-      //-- }
-      //-- // modifica dati sessione
-      //-- $session->remove($var_sessione);
-      //-- $session->set($var_sessione, $allegati);
-      //-- // elimina file temporanei
-      //-- $finder = new Finder();
-      //-- $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
-      //-- foreach ($finder as $f) {
-        //-- $fs->remove($f);
-      //-- }
-    //-- }
-    //-- // imposta docente
-    //-- $documento->setDocente($this->getUser());
-    //-- // form di inserimento
-    //-- $form = $this->container->get('form.factory')->createNamedBuilder('programma_edit', FormType::class)
-      //-- ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        //-- 'attr' => ['widget' => 'gs-button-start']))
-      //-- ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        //-- 'attr' => ['widget' => 'gs-button-end',
-        //-- 'onclick' => "location.href='".$this->generateUrl('documenti_programmi')."'"]))
-      //-- ->getForm();
-    //-- $form->handleRequest($request);
-    //-- if ($form->isSubmitted() && $form->isValid()) {
-      //-- // controllo errori
-      //-- $f_cnt = 0;
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- $f_cnt++;
-        //-- }
-      //-- }
-      //-- if ($f_cnt < 1) {
-        //-- // errore: nessun file allegati
-        //-- $form->addError(new FormError($trans->trans('exception.file_mancante')));
-      //-- }
-      //-- // modifica dati
-      //-- if ($form->isValid()) {
-        //-- // directory allegati
-        //-- if (!$fs->exists($dir.$dir_classe)) {
-          //-- // crea directory
-          //-- $fs->mkdir($dir.$dir_classe);
-        //-- }
-        //-- // rimuove allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'removed') {
-            //-- // rimuove allegato
-            //-- $fs->remove($dir.$dir_classe.'/'.$f['name']);
-          //-- }
-        //-- }
-        //-- // carica nuovi allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'uploaded') {
-            //-- // conversione del documento
-            //-- $fl = $doc->convertiPDF(new File($this->getParameter('dir_tmp').'/'.$f['temp']));
-            //-- $m = strtoupper(preg_replace('/\W+/','-', $materia->getNomeBreve()));
-            //-- if (substr($m, -1) == '-') {
-              //-- $m = substr($m, 0, -1);
-            //-- }
-            //-- $nomefile = 'PROGRAMMA-'.$dir_classe.'-'.$m.'.'.$fl->guessExtension();
-            //-- $documento
-              //-- ->setFile($nomefile)
-              //-- ->setDimensione($fl->getSize())
-              //-- ->setMime($fl->getMimeType());
-            //-- // sposta e rinomina allegato
-            //-- $fs->rename($fl, $dir.$dir_classe.'/'.$nomefile);
-          //-- }
-        //-- }
-        //-- // ok: memorizza dati
-        //-- $em->flush();
-        //-- // log azione
-        //-- if (!$id) {
-          //-- // nuovo
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- ));
-        //-- } else {
-          //-- // modifica
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- 'File' => $documento_old->getFile(),
-            //-- 'Docente' => $documento_old->getDocente()->getId(),
-            //-- 'Classe' => $documento->getClasse()->getId(),
-            //-- 'Materia' => $documento->getMateria()->getId(),
-            //-- ));
-        //-- }
-        //-- // redirezione
-        //-- return $this->redirectToRoute('documenti_programmi');
-      //-- }
-    //-- }
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/programma_edit.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_programmi',
-      //-- 'form' => $form->createView(),
-      //-- 'form_title' => ($id > 0 ? 'title.modifica_programma' : 'title.nuovo_programma'),
-      //-- 'info' => $info,
-      //-- 'allegati' => $allegati,
-    //-- ));
+  public function programmiAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                     TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+                                     Classe $classe, Materia $materia) {
+    // inizializza
+    $info = [];
+    $varSessione = '/APP/FILE/documenti_programmi_add/files';
+    if ($request->isMethod('GET')) {
+      // inizializza sessione per allegati
+      $session->set($varSessione, []);
+    }
+    // controlla azione
+    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'P',
+      'classe' => $classe, 'materia' => $materia]);
+    if ($documentoEsistente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // crea documento
+    $documento = (new Documento())
+      ->setTipo('P')
+      ->setDocente($this->getUser())
+      ->setClasse($classe)
+      ->setMateria($materia)
+      ->setListaDestinatari(new ListaDestinatari());
+    $em->persist($documento);
+    // controllo permessi
+    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // informazioni da visualizzare
+    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
+    $info['materia'] = $documento->getMateria()->getNomeBreve();
+    // form di inserimento
+    $form = $this->createForm(DocumentoType::class, $documento, [
+      'returnUrl' => $this->generateUrl('documenti_programmi'), 'formMode' => 'P']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controllo errori
+      $allegati = $session->get($varSessione, []);
+      if (count($allegati) < 1) {
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
+      } else {
+        // imposta destinatari
+        $doc->impostaDestinatari($documento);
+        // conversione pfd
+        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        // imposta allegato
+        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        // rimuove sessione con gli allegati
+        $session->remove($varSessione);
+        // ok: memorizzazione e log
+        $dblogger->logCreazione('DOCUMENTI', 'Inserimento programma svolto', $documento);
+        // redirezione
+        return $this->redirectToRoute('documenti_programmi');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->render('documenti/programmi_add.html.twig', array(
+      'pagina_titolo' => 'page.documenti_programmi',
+      'form' => $form->createView(),
+      'form_title' => 'title.nuovo_programma',
+      'info' => $info));
   }
 
   /**
-   //-- * Cancella documento del tipo indicato
-   //-- *
-   //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $em Gestore delle entità
-   //-- * @param LogHandler $dblogger Gestore dei log su database
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- * @param string $tipo Tipo dell'avviso
-   //-- * @param int $id Identificativo dell'avviso
-   //-- *
+   * Cancella il documento indicato
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti
+   * @param Documento $documento Documento da cancellare
+   *
    * @return Response Pagina di risposta
    *
    * @Route("/documenti/delete/{documento}", name="documenti_delete",
@@ -274,61 +159,57 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function documentoDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
-                                         DocumentiUtil $doc, /*$tipo,*/ $documento) {
-    //-- $dir = $this->getParameter('dir_classi').'/';
-    //-- $fs = new FileSystem();
-    //-- // controllo documento
-    //-- $documento = $em->getRepository('App:Documento')->findOneBy(['id' => $id, 'tipo' => $tipo]);
-    //-- if (!$documento) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- // controllo permessi
-    //-- if (!$doc->azioneDocumento('delete', new \DateTime(), $this->getUser(), $documento)) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- // cancella documento
-    //-- $documento_id = $documento->getId();
-    //-- $em->remove($documento);
-    //-- // ok: memorizza dati
-    //-- $em->flush();
-    //-- // cancella allegati
-    //-- $dir_classe = $documento->getClasse()->getAnno().$documento->getClasse()->getSezione();
-    //-- $f = new File($dir.$dir_classe.'/'.$documento->getFile());
-    //-- $fs->remove($f);
-    //-- // log azione
-    //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-      //-- 'Id' => $documento_id,
-      //-- 'Tipo' => $documento->getTipo(),
-      //-- 'File' => $documento->getFile(),
-      //-- 'Docente' => $documento->getDocente()->getId(),
-      //-- 'Classe' => $documento->getClasse()->getId(),
-      //-- 'Materia' => ($documento->getMateria() ? $documento->getMateria()->getId() : null),
-      //-- ));
-    //-- // redirezione
-    //-- if ($tipo == 'L') {
-      //-- // piani di lavoro
-      //-- return $this->redirectToRoute('documenti_piani');
-    //-- } elseif ($tipo == 'P') {
-      //-- // programmi
-      //-- return $this->redirectToRoute('documenti_programmi');
-    //-- } elseif ($tipo == 'R') {
-      //-- // relazioni
-      //-- return $this->redirectToRoute('documenti_relazioni');
-    //-- } elseif ($tipo == 'M') {
-      //-- // documento 15 maggio
-      //-- return $this->redirectToRoute('documenti_doc15');
-    //-- }
+  public function deleteAction(EntityManagerInterface $em, LogHandler $dblogger, DocumentiUtil $doc,
+                               Documento $documento) {
+    // controllo permessi
+    if (!$doc->azioneDocumento('delete', $this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // copia per log
+    $vecchioDocumento = clone $documento;
+    // cancella documento
+    $em->remove($documento);
+    // cancella lista destinatari
+    $doc->cancellaDestinatari($documento);
+    // cancella allegati
+    foreach ($documento->getAllegati() as $allegato) {
+      $em->remove($allegato);
+    }
+    // memorizzazione e log
+    $dblogger->logRimozione('DOCUMENTI', 'Cancella documento', $vecchioDocumento);
+    // cancella file
+    $dir = $doc->documentoDir($documento);
+    foreach ($documento->getAllegati() as $allegato) {
+      unlink($dir.'/'.$allegato->getFile().'.'.$allegato->getEstensione());
+    }
+    // redirezione
+    switch ($documento->getTipo()) {
+      case 'P':
+        // programmi finali
+        $pagina = 'documenti_programmi';
+        break;
+      case 'R':
+        // relazioni finali
+        $pagina = 'documenti_relazioni';
+        break;
+      case 'M':
+        // documento 15 maggio
+        $pagina = 'documenti_maggio';
+        break;
+      default:
+        // piani di lavoro
+        $pagina = 'documenti_piani';
+    }
+    return $this->redirectToRoute($pagina);
   }
 
   /**
-   * Visualizza le relazioni finali dei docenti
+   * Gestione inserimento delle relazioni finali dei docenti
    *
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- *
-   //-- * @return Response Pagina di risposta
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   *
+   * @return Response Pagina di risposta
    *
    * @Route("/documenti/relazioni", name="documenti_relazioni",
    *    methods={"GET"})
@@ -336,204 +217,101 @@ class DocumentiController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function relazioniAction(DocumentiUtil $doc) {
-    //-- // inizializza variabili
-    //-- $dati = null;
-    //-- // recupera dati
-    //-- $dati = $doc->relazioni($this->getUser());
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/relazioni.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_relazioni',
-      //-- 'dati' => $dati,
-    //-- ));
+    // recupera dati
+    $dati = $doc->relazioniDocente($this->getUser());
+    // mostra la pagina di risposta
+    return $this->render('documenti/relazioni.html.twig', array(
+      'pagina_titolo' => 'page.documenti_relazioni',
+      'dati' => $dati));
   }
 
   /**
-   //-- * Aggiunge o modifica una relazione
-   //-- *
-   //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $em Gestore delle entità
-   //-- * @param SessionInterface $session Gestore delle sessioni
-   //-- * @param TranslatorInterface $trans Gestore delle traduzioni
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- * @param LogHandler $dblogger Gestore dei log su database
-   //-- * @param int $classe Identificativo della classe
-   //-- * @param int $materia Identificativo della materia
-   //-- * @param int $id Identificativo del documento
-   //-- *
-   //-- * @return Response Pagina di risposta
-   //-- *
-   * @Route("/documenti/relazioni/edit/{classe}/{materia}/{id}", name="documenti_relazione_edit",
-   *    requirements={"classe": "\d+", "materia": "\d+", "id": "\d+"},
-   *    defaults={"id": "0"},
+   * Aggiunge una nuova relazione
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Classe $classe Classe di riferimento per il documento
+   * @param Materia $materia Materia di riferimento per il documento
+   * @param Alunno $alunno Alunno di riferimento per il documento
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/documenti/relazioni/add/{classe}/{materia}/{alunno}", name="documenti_relazioni_add",
+   *    requirements={"classe": "\d+", "materia": "\d+", "alunno": "\d+"},
+   *    defaults={"alunno": "0"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function relazioneEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                       TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $materia, $id) {
-    //-- // inizializza
-    //-- $var_sessione = '/APP/FILE/documenti_relazione_edit/files';
-    //-- $dir = $this->getParameter('dir_classi').'/';
-    //-- $fs = new FileSystem();
-    //-- $info = null;
-    //-- // controlla classe
-    //-- $classe = $em->getRepository('App:Classe')->find($classe);
-    //-- if (!$classe) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- $info['classe'] = $classe->getAnno().'ª '.$classe->getSezione();
-    //-- $dir_classe = $classe->getAnno().$classe->getSezione();
-    //-- // controlla materia
-    //-- $materia = $em->getRepository('App:Materia')->find($materia);
-    //-- if (!$materia) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- $info['materia'] = $materia->getNomeBreve();
-    //-- // controlla azione
-    //-- if ($id > 0) {
-      //-- // azione edit
-      //-- $documento = $em->getRepository('App:Documento')->findOneBy(['id' => $id, 'tipo' => 'R',
-        //-- 'classe' => $classe, 'materia' => $materia]);
-      //-- if (!$documento) {
-        //-- // errore
-        //-- throw $this->createNotFoundException('exception.id_notfound');
-      //-- }
-      //-- $documento_old = clone $documento;
-    //-- } else {
-      //-- // azione add
-      //-- $documento = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'R',
-        //-- 'classe' => $classe, 'materia' => $materia]);
-      //-- if ($documento) {
-        //-- // errore
-        //-- throw $this->createNotFoundException('exception.id_notfound');
-      //-- }
-      //-- $documento = (new Documento())
-        //-- ->setTipo('R')
-        //-- ->setClasse($classe)
-        //-- ->setMateria($materia);
-      //-- $em->persist($documento);
-    //-- }
-    //-- // controllo permessi
-    //-- if (!$doc->azioneDocumento(($id > 0 ? 'edit' : 'add'), new \DateTime(), $this->getUser(), ($id > 0 ? $documento : null))) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- // legge allegati
-    //-- $allegati = array();
-    //-- if ($request->isMethod('POST')) {
-      //-- // pagina inviata
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- // aggiunge allegato
-          //-- $allegati[] = $f;
-        //-- }
-      //-- }
-    //-- } else {
-      //-- // pagina iniziale
-      //-- if ($documento->getFile()) {
-        //-- $f = new File($dir.$dir_classe.'/'.$documento->getFile());
-        //-- $allegati[0]['type'] = 'existent';
-        //-- $allegati[0]['temp'] = $documento->getId().'-0.ID';
-        //-- $allegati[0]['name'] = $documento->getFile();
-        //-- $allegati[0]['size'] = $f->getSize();
-      //-- }
-      //-- // modifica dati sessione
-      //-- $session->remove($var_sessione);
-      //-- $session->set($var_sessione, $allegati);
-      //-- // elimina file temporanei
-      //-- $finder = new Finder();
-      //-- $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
-      //-- foreach ($finder as $f) {
-        //-- $fs->remove($f);
-      //-- }
-    //-- }
-    //-- // imposta docente
-    //-- $documento->setDocente($this->getUser());
-    //-- // form di inserimento
-    //-- $form = $this->container->get('form.factory')->createNamedBuilder('relazione_edit', FormType::class)
-      //-- ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        //-- 'attr' => ['widget' => 'gs-button-start']))
-      //-- ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        //-- 'attr' => ['widget' => 'gs-button-end',
-        //-- 'onclick' => "location.href='".$this->generateUrl('documenti_relazioni')."'"]))
-      //-- ->getForm();
-    //-- $form->handleRequest($request);
-    //-- if ($form->isSubmitted() && $form->isValid()) {
-      //-- // controllo errori
-      //-- $f_cnt = 0;
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- $f_cnt++;
-        //-- }
-      //-- }
-      //-- if ($f_cnt < 1) {
-        //-- // errore: nessun file allegati
-        //-- $form->addError(new FormError($trans->trans('exception.file_mancante')));
-      //-- }
-      //-- // modifica dati
-      //-- if ($form->isValid()) {
-        //-- // directory allegati
-        //-- if (!$fs->exists($dir.$dir_classe)) {
-          //-- // crea directory
-          //-- $fs->mkdir($dir.$dir_classe);
-        //-- }
-        //-- // rimuove allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'removed') {
-            //-- // rimuove allegato
-            //-- $fs->remove($dir.$dir_classe.'/'.$f['name']);
-          //-- }
-        //-- }
-        //-- // carica nuovi allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'uploaded') {
-            //-- // conversione del documento
-            //-- $fl = $doc->convertiPDF(new File($this->getParameter('dir_tmp').'/'.$f['temp']));
-            //-- $m = strtoupper(preg_replace('/\W+/','-', $materia->getNomeBreve()));
-            //-- if (substr($m, -1) == '-') {
-              //-- $m = substr($m, 0, -1);
-            //-- }
-            //-- $nomefile = 'RELAZIONE-'.$dir_classe.'-'.$m.'.'.$fl->guessExtension();
-            //-- $documento
-              //-- ->setFile($nomefile)
-              //-- ->setDimensione($fl->getSize())
-              //-- ->setMime($fl->getMimeType());
-            //-- // sposta e rinomina allegato
-            //-- $fs->rename($fl, $dir.$dir_classe.'/'.$nomefile);
-          //-- }
-        //-- }
-        //-- // ok: memorizza dati
-        //-- $em->flush();
-        //-- // log azione
-        //-- if (!$id) {
-          //-- // nuovo
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- ));
-        //-- } else {
-          //-- // modifica
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- 'File' => $documento_old->getFile(),
-            //-- 'Docente' => $documento_old->getDocente()->getId(),
-            //-- 'Classe' => $documento->getClasse()->getId(),
-            //-- 'Materia' => $documento->getMateria()->getId(),
-            //-- ));
-        //-- }
-        //-- // redirezione
-        //-- return $this->redirectToRoute('documenti_relazioni');
-      //-- }
-    //-- }
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/relazione_edit.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_relazioni',
-      //-- 'form' => $form->createView(),
-      //-- 'form_title' => ($id > 0 ? 'title.modifica_relazione' : 'title.nuova_relazione'),
-      //-- 'info' => $info,
-      //-- 'allegati' => $allegati,
-    //-- ));
+  public function relazioniAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                     TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+                                     Classe $classe, Materia $materia, Alunno $alunno=null) {
+    // inizializza
+    $info = [];
+    $varSessione = '/APP/FILE/documenti_relazioni_add/files';
+    if ($request->isMethod('GET')) {
+      // inizializza sessione per allegati
+      $session->set($varSessione, []);
+    }
+    // controlla azione
+    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'R',
+      'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno]);
+    if ($documentoEsistente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // crea documento
+    $documento = (new Documento())
+      ->setTipo('R')
+      ->setDocente($this->getUser())
+      ->setClasse($classe)
+      ->setMateria($materia)
+      ->setAlunno($alunno)
+      ->setListaDestinatari(new ListaDestinatari());
+    $em->persist($documento);
+    // controllo permessi
+    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // informazioni da visualizzare
+    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
+    $info['materia'] = $documento->getMateria()->getNomeBreve().($documento->getAlunno() ?
+      ' - '.$documento->getAlunno()->getCognome().' '.$documento->getAlunno()->getNome() : '');
+    // form di inserimento
+    $form = $this->createForm(DocumentoType::class, $documento, [
+      'returnUrl' => $this->generateUrl('documenti_relazioni'), 'formMode' => 'R']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controllo errori
+      $allegati = $session->get($varSessione, []);
+      if (count($allegati) < 1) {
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
+      } else {
+        // imposta destinatari
+        $doc->impostaDestinatari($documento);
+        // conversione pfd
+        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        // imposta allegato
+        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        // rimuove sessione con gli allegati
+        $session->remove($varSessione);
+        // ok: memorizzazione e log
+        $dblogger->logCreazione('DOCUMENTI', 'Inserimento relazione finale', $documento);
+        // redirezione
+        return $this->redirectToRoute('documenti_relazioni');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->render('documenti/relazioni_add.html.twig', array(
+      'pagina_titolo' => 'page.documenti_relazioni',
+      'form' => $form->createView(),
+      'form_title' => 'title.nuova_relazione',
+      'info' => $info));
   }
 
   /**
@@ -558,486 +336,232 @@ class DocumentiController extends AbstractController {
   }
 
   /**
-   * Aggiunge o modifica un piano di lavoro
+   * Aggiunge un nuovo piano di lavoro
    *
-   //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $em Gestore delle entità
-   //-- * @param SessionInterface $session Gestore delle sessioni
-   //-- * @param TranslatorInterface $trans Gestore delle traduzioni
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- * @param LogHandler $dblogger Gestore dei log su database
-   * @param Documento|null $documento Documento da modificare, o null se nuovo inserimento
-   * @param Classe|null $classe Classe di riferimento, o null se modifica documento esistente
-   * @param Materia|null $materia Materia di riferimento, o null se modifica documento esistente
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Classe $classe Classe di riferimento per il documento
+   * @param Materia $materia Materia di riferimento per il documento
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/documenti/piani/edit/{documento}/{classe}/{materia}", name="documenti_piani_edit",
-   *    requirements={"documento": "\d+", "classe": "\d+", "materia": "\d+"},
-   *    defaults={"documento": "0", "classe": "0", "materia": "0"},
+   * @Route("/documenti/piani/add/{classe}/{materia}", name="documenti_piani_add",
+   *    requirements={"classe": "\d+", "materia": "\d+"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function pianiEditAction(
-    //-- Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                   //-- TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
-
-                            Documento $documento=null, CLasse $classe=null, Materia $materia=null) {
-
-//-- dump($documento,$classe,$materia);;die;
+  public function pianiAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                 TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+                                 CLasse $classe, Materia $materia) {
     // inizializza
-    $nomeSessione = '/APP/FILE/documenti_piani_edit/files';
-    $dir = $this->getParameter('dir_classi').'/';
-    $fs = new FileSystem();
-    //-- $info = null;
-
-    //-- $info['classe'] = $classe->getAnno().'ª '.$classe->getSezione();
-    //-- $dir_classe = $classe->getAnno().$classe->getSezione();
-    //-- $info['materia'] = $materia->getNomeBreve();
-
-    // controlla azione
-    if ($documento) {
-      // azione edit
-      if ($documento->getTipo() != 'L' || !$documento->getClasse() || !$documento->getMateria()) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      //-- $documento_old = clone $documento;
-    } else {
-      // azione add
-      $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'L',
-        'classe' => $classe, 'materia' => $materia]);
-      if ($documentoEsistente) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      $documento = (new Documento())
-        ->setTipo('L')
-        ->setClasse($classe)
-        ->setMateria($materia);
-      $em->persist($documento);
+    $info = [];
+    $varSessione = '/APP/FILE/documenti_piani_add/files';
+    if ($request->isMethod('GET')) {
+      // inizializza sessione per allegati
+      $session->set($varSessione, []);
     }
-    // imposta docente
-    $documento->setDocente($this->getUser());
-
-    //-- // controllo permessi
-    //-- if (!$doc->azioneDocumento(($id > 0 ? 'edit' : 'add'), new \DateTime(), $this->getUser(), ($id > 0 ? $documento : null))) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- // legge allegati
-    //-- $allegati = array();
-    //-- if ($request->isMethod('POST')) {
-      //-- // pagina inviata
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- // aggiunge allegato
-          //-- $allegati[] = $f;
-        //-- }
-      //-- }
-    //-- } else {
-      //-- // pagina iniziale
-      //-- if ($documento->getFile()) {
-        //-- $f = new File($dir.$dir_classe.'/'.$documento->getFile());
-        //-- $allegati[0]['type'] = 'existent';
-        //-- $allegati[0]['temp'] = $documento->getId().'-0.ID';
-        //-- $allegati[0]['name'] = $documento->getFile();
-        //-- $allegati[0]['size'] = $f->getSize();
-      //-- }
-      //-- // modifica dati sessione
-      //-- $session->remove($var_sessione);
-      //-- $session->set($var_sessione, $allegati);
-      //-- // elimina file temporanei
-      //-- $finder = new Finder();
-      //-- $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
-      //-- foreach ($finder as $f) {
-        //-- $fs->remove($f);
-      //-- }
-    //-- }
-
+    // controlla azione
+    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'L',
+      'classe' => $classe, 'materia' => $materia]);
+    if ($documentoEsistente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // crea documento
+    $documento = (new Documento())
+      ->setTipo('L')
+      ->setDocente($this->getUser())
+      ->setClasse($classe)
+      ->setMateria($materia)
+      ->setListaDestinatari(new ListaDestinatari());
+    $em->persist($documento);
+    // controllo permessi
+    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // informazioni da visualizzare
+    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
+    $info['materia'] = $documento->getMateria()->getNomeBreve();
     // form di inserimento
-    //-- $form = $this->container->get('form.factory')->createNamedBuilder('piano_edit', FormType::class)
-      //-- ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        //-- 'attr' => ['widget' => 'gs-button-start']))
-      //-- ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        //-- 'attr' => ['widget' => 'gs-button-end',
-        //-- 'onclick' => "location.href='".$this->generateUrl('documenti_piani')."'"]))
-      //-- ->getForm();
-
-    //-- $form->handleRequest($request);
-    //-- if ($form->isSubmitted() && $form->isValid()) {
-      //-- // controllo errori
-      //-- $f_cnt = 0;
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- $f_cnt++;
-        //-- }
-      //-- }
-      //-- if ($f_cnt < 1) {
-        //-- // errore: nessun file allegati
-        //-- $form->addError(new FormError($trans->trans('exception.file_mancante')));
-      //-- }
-      //-- // modifica dati
-      //-- if ($form->isValid()) {
-        //-- // directory allegati
-        //-- if (!$fs->exists($dir.$dir_classe)) {
-          //-- // crea directory
-          //-- $fs->mkdir($dir.$dir_classe);
-        //-- }
-        //-- // rimuove allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'removed') {
-            //-- // rimuove allegato
-            //-- $fs->remove($dir.$dir_classe.'/'.$f['name']);
-          //-- }
-        //-- }
-        //-- // carica nuovi allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'uploaded') {
-            //-- // conversione del documento
-            //-- $fl = $doc->convertiPDF(new File($this->getParameter('dir_tmp').'/'.$f['temp']));
-            //-- $m = strtoupper(preg_replace('/\W+/','-', $materia->getNomeBreve()));
-            //-- if (substr($m, -1) == '-') {
-              //-- $m = substr($m, 0, -1);
-            //-- }
-            //-- $nomefile = 'PIANO-DI-LAVORO-'.$dir_classe.'-'.$m.'.'.$fl->guessExtension();
-            //-- $documento
-              //-- ->setFile($nomefile)
-              //-- ->setDimensione($fl->getSize())
-              //-- ->setMime($fl->getMimeType());
-            //-- // sposta e rinomina allegato
-            //-- $fs->rename($fl, $dir.$dir_classe.'/'.$nomefile);
-          //-- }
-        //-- }
-        //-- // ok: memorizza dati
-        //-- $em->flush();
-        //-- // log azione
-        //-- if (!$id) {
-          //-- // nuovo
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- ));
-        //-- } else {
-          //-- // modifica
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- 'File' => $documento_old->getFile(),
-            //-- 'Docente' => $documento_old->getDocente()->getId(),
-            //-- 'Classe' => $documento->getClasse()->getId(),
-            //-- 'Materia' => $documento->getMateria()->getId(),
-            //-- ));
-        //-- }
-        //-- // redirezione
-        //-- return $this->redirectToRoute('documenti_piani');
-      //-- }
-    //-- }
-
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/piani_edit.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_piani',
-      //-- 'form' => $form->createView(),
-      //-- 'form_title' => ($id > 0 ? 'title.modifica_piano' : 'title.nuovo_piano'),
-      //-- 'info' => $info,
-      //-- 'allegati' => $allegati,
-    //-- ));
+    $form = $this->createForm(DocumentoType::class, $documento, [
+      'returnUrl' => $this->generateUrl('documenti_piani'), 'formMode' => 'L']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controllo errori
+      $allegati = $session->get($varSessione, []);
+      if (count($allegati) < 1) {
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
+      } else {
+        // imposta destinatari
+        $doc->impostaDestinatari($documento);
+        // conversione pfd
+        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        // imposta allegato
+        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        // rimuove sessione con gli allegati
+        $session->remove($varSessione);
+        // ok: memorizzazione e log
+        $dblogger->logCreazione('DOCUMENTI', 'Inserimento piano di lavoro', $documento);
+        // redirezione
+        return $this->redirectToRoute('documenti_piani');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->render('documenti/piani_add.html.twig', array(
+      'pagina_titolo' => 'page.documenti_piani',
+      'form' => $form->createView(),
+      'form_title' => 'title.nuovo_piano',
+      'info' => $info));
   }
 
   /**
-   //-- * Visualizza i documenti dei Consigli di Classe
-   //-- *
-   //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $em Gestore delle entità
-   //-- * @param SessionInterface $session Gestore delle sessioni
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- * @param int $pagina Numero di pagina per la lista visualizzata
-   //-- *
-   //-- * @return Response Pagina di risposta
+   * Gestione inserimento dei documenti del 15 maggio
    *
-   * @Route("/documenti/classi/{pagina}", name="documenti_classi",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    *
-   * @IsGranted("ROLE_DOCENTE")
-   */
-  public function classiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                DocumentiUtil $doc, $pagina) {
-    //-- // inizializza variabili
-    //-- $dati = null;
-    //-- $docente = $this->getUser();
-    //-- // recupera criteri dalla sessione
-    //-- $search = array();
-    //-- $search['tipo'] = $session->get('/APP/ROUTE/documenti_classi/tipo', '');
-    //-- $search['classe'] = $session->get('/APP/ROUTE/documenti_classi/classe', 0);
-    //-- $classe = ($search['classe'] > 0 ? $em->getRepository('App:Classe')->find($search['classe']) : 0);
-    //-- if ($pagina == 0) {
-      //-- // pagina non definita: la cerca in sessione
-      //-- $pagina = $session->get('/APP/ROUTE/documenti_classi/pagina', 1);
-    //-- } else {
-      //-- // pagina specificata: la conserva in sessione
-      //-- $session->set('/APP/ROUTE/documenti_classi/pagina', $pagina);
-    //-- }
-    //-- // form di ricerca
-    //-- $limite = 20;
-    //-- $form = $this->container->get('form.factory')->createNamedBuilder('documenti_classi', FormType::class)
-      //-- ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documento',
-        //-- 'data' => $search['tipo'] ? $search['tipo'] : '',
-        //-- 'choices' => ['label.PIA' => 'I', 'label.piani' => 'L', 'label.doc15' => 'M'],
-        //-- 'placeholder' => 'label.tutti_documenti',
-        //-- 'label_attr' => ['class' => 'sr-only'],
-        //-- 'choice_attr' => function($val, $key, $index) {
-            //-- return ['class' => 'gs-no-placeholder'];
-          //-- },
-        //-- 'attr' => ['class' => 'gs-placeholder'],
-        //-- 'required' => false))
-      //-- ->add('classe', EntityType::class, array('label' => 'label.classe',
-        //-- 'data' => $classe,
-        //-- 'class' => 'App:Classe',
-        //-- 'choice_label' => function ($obj) {
-            //-- return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
-          //-- },
-        //-- 'placeholder' => 'label.qualsiasi_classe',
-        //-- 'query_builder' => function (EntityRepository $er) use ($docente) {
-            //-- return $er->createQueryBuilder('c')
-              //-- ->join('App:Cattedra', 'ca', 'WITH', 'ca.classe=c.id')
-              //-- ->where('ca.docente=:docente')
-              //-- ->orderBy('c.anno,c.sezione', 'ASC')
-              //-- ->setParameters(['docente' => $docente]);
-          //-- },
-        //-- 'group_by' => function ($obj) {
-            //-- return $obj->getSede()->getCitta();
-          //-- },
-        //-- 'label_attr' => ['class' => 'sr-only'],
-        //-- 'choice_attr' => function($val, $key, $index) {
-            //-- return ['class' => 'gs-no-placeholder'];
-          //-- },
-        //-- 'attr' => ['class' => 'gs-placeholder'],
-        //-- 'required' => false))
-      //-- ->add('submit', SubmitType::class, array('label' => 'label.filtra'))
-      //-- ->getForm();
-    //-- $form->handleRequest($request);
-    //-- if ($form->isSubmitted() && $form->isValid()) {
-      //-- // imposta criteri di ricerca
-      //-- $search['tipo'] = $form->get('tipo')->getData();
-      //-- $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
-      //-- $pagina = 1;
-      //-- $session->set('/APP/ROUTE/documenti_classi/tipo', $search['tipo']);
-      //-- $session->set('/APP/ROUTE/documenti_classi/classe', $search['classe']);
-      //-- $session->set('/APP/ROUTE/documenti_classi/pagina', $pagina);
-    //-- }
-    //-- // recupera dati
-    //-- $dati = $doc->classi($docente, $search, $pagina, $limite);
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/classi.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_classi',
-      //-- 'form' => $form->createView(),
-      //-- 'form_help' => null,
-      //-- 'form_success' => null,
-      //-- 'page' => $pagina,
-      //-- 'maxPages' => ceil($dati['lista']->count() / $limite),
-      //-- 'dati' => $dati,
-    //-- ));
-  }
-
-  /**
-   * Visualizza i documenti del 15 maggio dei docenti
-   //-- *
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- *
-   //-- * @return Response Pagina di risposta
-   //-- *
-   * @Route("/documenti/doc15", name="documenti_doc15",
+   * @return Response Pagina di risposta
+   *
+   * @Route("/documenti/maggio", name="documenti_maggio",
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function doc15Action(DocumentiUtil $doc) {
-    //-- // inizializza variabili
-    //-- $dati = null;
-    //-- // recupera dati
-    //-- $dati = $doc->doc15($this->getUser());
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/doc15.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_doc15',
-      //-- 'dati' => $dati,
-    //-- ));
+  public function maggioAction(DocumentiUtil $doc) {
+    // recupera dati
+    $dati = $doc->maggioDocente($this->getUser());
+    // mostra la pagina di risposta
+    return $this->render('documenti/maggio.html.twig', array(
+      'pagina_titolo' => 'page.documenti_maggio',
+      'dati' => $dati));
   }
 
   /**
-   //-- * Aggiunge o modifica un documento del 15 maggio
-   //-- *
-   //-- * @param Request $request Pagina richiesta
-   //-- * @param EntityManagerInterface $em Gestore delle entità
-   //-- * @param SessionInterface $session Gestore delle sessioni
-   //-- * @param TranslatorInterface $trans Gestore delle traduzioni
-   //-- * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
-   //-- * @param LogHandler $dblogger Gestore dei log su database
-   //-- * @param int $classe Identificativo della classe
-   //-- * @param int $id Identificativo del documento
-   //-- *
-   //-- * @return Response Pagina di risposta
-   //-- *
-   * @Route("/documenti/doc15/edit/{classe}/{id}", name="documenti_doc15_edit",
-   *    requirements={"classe": "\d+", "id": "\d+"},
-   *    defaults={"id": "0"},
+   * Aggiunge un documento del 15 maggio
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Classe $classe Classe di riferimento per il documento
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/documenti/maggio/add/{classe}", name="documenti_maggio_add",
+   *    requirements={"classe": "\d+"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function doc15EditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                   TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger, $classe, $id) {
-    //-- // inizializza
-    //-- $var_sessione = '/APP/FILE/documenti_doc15_edit/files';
-    //-- $dir = $this->getParameter('dir_classi').'/';
-    //-- $fs = new FileSystem();
-    //-- $info = null;
-    //-- // controlla classe
-    //-- $classe = $em->getRepository('App:Classe')->findOneBy(['id' => $classe, 'coordinatore' => $this->getUser()]);
-    //-- if (!$classe) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- $info['classe'] = $classe->getAnno().'ª '.$classe->getSezione();
-    //-- $dir_classe = $classe->getAnno().$classe->getSezione();
-    //-- // controlla azione
-    //-- if ($id > 0) {
-      //-- // azione edit
-      //-- $documento = $em->getRepository('App:Documento')->findOneBy(['id' => $id, 'tipo' => 'M',
-        //-- 'classe' => $classe]);
-      //-- if (!$documento) {
-        //-- // errore
-        //-- throw $this->createNotFoundException('exception.id_notfound');
-      //-- }
-      //-- $documento_old = clone $documento;
-    //-- } else {
-      //-- // azione add
-      //-- $documento = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'M',
-        //-- 'classe' => $classe]);
-      //-- if ($documento) {
-        //-- // errore
-        //-- throw $this->createNotFoundException('exception.id_notfound');
-      //-- }
-      //-- $documento = (new Documento())
-        //-- ->setTipo('M')
-        //-- ->setClasse($classe);
-      //-- $em->persist($documento);
-    //-- }
-    //-- // controllo permessi
-    //-- if (!$doc->azioneDocumento(($id > 0 ? 'edit' : 'add'), new \DateTime(), $this->getUser(), ($id > 0 ? $documento : null))) {
-      //-- // errore
-      //-- throw $this->createNotFoundException('exception.id_notfound');
-    //-- }
-    //-- // legge allegati
-    //-- $allegati = array();
-    //-- if ($request->isMethod('POST')) {
-      //-- // pagina inviata
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- // aggiunge allegato
-          //-- $allegati[] = $f;
-        //-- }
-      //-- }
-    //-- } else {
-      //-- // pagina iniziale
-      //-- if ($documento->getFile()) {
-        //-- $f = new File($dir.$dir_classe.'/'.$documento->getFile());
-        //-- $allegati[0]['type'] = 'existent';
-        //-- $allegati[0]['temp'] = $documento->getId().'-0.ID';
-        //-- $allegati[0]['name'] = $documento->getFile();
-        //-- $allegati[0]['size'] = $f->getSize();
-      //-- }
-      //-- // modifica dati sessione
-      //-- $session->remove($var_sessione);
-      //-- $session->set($var_sessione, $allegati);
-      //-- // elimina file temporanei
-      //-- $finder = new Finder();
-      //-- $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
-      //-- foreach ($finder as $f) {
-        //-- $fs->remove($f);
-      //-- }
-    //-- }
-    //-- // imposta docente
-    //-- $documento->setDocente($this->getUser());
-    //-- // form di inserimento
-    //-- $form = $this->container->get('form.factory')->createNamedBuilder('doc15_edit', FormType::class)
-      //-- ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        //-- 'attr' => ['widget' => 'gs-button-start']))
-      //-- ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        //-- 'attr' => ['widget' => 'gs-button-end',
-        //-- 'onclick' => "location.href='".$this->generateUrl('documenti_doc15')."'"]))
-      //-- ->getForm();
-    //-- $form->handleRequest($request);
-    //-- if ($form->isSubmitted() && $form->isValid()) {
-      //-- // controllo errori
-      //-- $f_cnt = 0;
-      //-- foreach ($session->get($var_sessione, []) as $f) {
-        //-- if ($f['type'] != 'removed') {
-          //-- $f_cnt++;
-        //-- }
-      //-- }
-      //-- if ($f_cnt < 1) {
-        //-- // errore: nessun file allegato
-        //-- $form->addError(new FormError($trans->trans('exception.file_mancante')));
-      //-- }
-      //-- // modifica dati
-      //-- if ($form->isValid()) {
-        //-- // directory allegati
-        //-- if (!$fs->exists($dir.$dir_classe)) {
-          //-- // crea directory
-          //-- $fs->mkdir($dir.$dir_classe);
-        //-- }
-        //-- // rimuove allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'removed') {
-            //-- // rimuove allegato
-            //-- $fs->remove($dir.$dir_classe.'/'.$f['name']);
-          //-- }
-        //-- }
-        //-- // carica nuovi allegati
-        //-- foreach ($session->get($var_sessione, []) as $f) {
-          //-- if ($f['type'] == 'uploaded') {
-            //-- // conversione del documento
-            //-- $fl = $doc->convertiPDF(new File($this->getParameter('dir_tmp').'/'.$f['temp']));
-            //-- $nomefile = 'DOCUMENTO-15-MAGGIO-'.$dir_classe.'.'.$fl->guessExtension();
-            //-- $documento
-              //-- ->setFile($nomefile)
-              //-- ->setDimensione($fl->getSize())
-              //-- ->setMime($fl->getMimeType());
-            //-- // sposta e rinomina allegato
-            //-- $fs->rename($fl, $dir.$dir_classe.'/'.$nomefile);
-          //-- }
-        //-- }
-        //-- // ok: memorizza dati
-        //-- $em->flush();
-        //-- // log azione
-        //-- if (!$id) {
-          //-- // nuovo
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- ));
-        //-- } else {
-          //-- // modifica
-          //-- $dblogger->logAzione('DOCUMENTI', 'Inserisce programma svolto', array(
-            //-- 'Id' => $documento->getId(),
-            //-- 'File' => $documento_old->getFile(),
-            //-- 'Docente' => $documento_old->getDocente()->getId(),
-            //-- 'Classe' => $documento->getClasse()->getId(),
-            //-- 'Materia' => ($documento->getMateria() ? $documento->getMateria()->getId() : null),
-            //-- ));
-        //-- }
-        //-- // redirezione
-        //-- return $this->redirectToRoute('documenti_doc15');
-      //-- }
-    //-- }
-    //-- // mostra la pagina di risposta
-    //-- return $this->render('documenti/doc15_edit.html.twig', array(
-      //-- 'pagina_titolo' => 'page.documenti_doc15',
-      //-- 'form' => $form->createView(),
-      //-- 'form_title' => ($id > 0 ? 'title.modifica_doc15' : 'title.nuovo_doc15'),
-      //-- 'info' => $info,
-      //-- 'allegati' => $allegati,
-    //-- ));
+  public function maggioAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                  TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+                                  Classe $classe) {
+    // inizializza
+    $info = [];
+    $varSessione = '/APP/FILE/documenti_maggio_add/files';
+    if ($request->isMethod('GET')) {
+      // inizializza sessione per allegati
+      $session->set($varSessione, []);
+    }
+    // controlla azione
+    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'M',
+      'classe' => $classe]);
+    if ($documentoEsistente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // crea documento
+    $documento = (new Documento())
+      ->setTipo('M')
+      ->setDocente($this->getUser())
+      ->setClasse($classe)
+      ->setListaDestinatari(new ListaDestinatari());
+    $em->persist($documento);
+    // controllo permessi
+    if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // informazioni da visualizzare
+    $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
+    // form di inserimento
+    $form = $this->createForm(DocumentoType::class, $documento, [
+      'returnUrl' => $this->generateUrl('documenti_maggio'), 'formMode' => 'M']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controllo errori
+      $allegati = $session->get($varSessione, []);
+      if (count($allegati) < 1) {
+        $form->addError(new FormError($trans->trans('exception.file_mancante')));
+      } else {
+        // imposta destinatari
+        $doc->impostaDestinatari($documento);
+        // conversione pfd
+        list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+        // imposta allegato
+        $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+        // rimuove sessione con gli allegati
+        $session->remove($varSessione);
+        // ok: memorizzazione e log
+        $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento del 15 maggio', $documento);
+        // redirezione
+        return $this->redirectToRoute('documenti_maggio');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->render('documenti/maggio_add.html.twig', array(
+      'pagina_titolo' => 'page.documenti_maggio',
+      'form' => $form->createView(),
+      'form_title' => 'title.nuovo_maggio',
+      'info' => $info));
+  }
+
+  /**
+   * Scarica uno degli allegati al documento indicato
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param Documento $documento Documento a cui appartiene l'allegato
+   * @param File|null $allegato Allegato da scaricare, o null per il primo del documento
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/documenti/download/{documento}/{allegato}", name="documenti_download",
+   *    requirements={"documento": "\d+", "allegato": "\d+"},
+   *    defaults={"allegato": "0"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_UTENTE")
+   */
+  public function downloadAction(EntityManagerInterface $em, DocumentiUtil $doc,
+                                 Documento $documento, File $allegato=null) {
+    // controlla allegato
+    if ($allegato && !$documento->getAllegati()->contains($allegato)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    if (!$allegato) {
+      // prende il primo allegato
+      $allegato = $documento->getAllegati()[0];
+    }
+    // controllo permesso lettura
+    if (!$doc->permessoLettura($this->getUser(), $documento)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db
+    $doc->leggeUtente($this->getUser(), $documento);
+    $em->flush();
+    // invia il file
+    return $this->file($doc->documentoDir($documento).'/'.$allegato->getFile().'.'.$allegato->getEstensione(),
+      $allegato->getNome().'.'.$allegato->getEstensione(), ResponseHeaderBag::DISPOSITION_ATTACHMENT);
   }
 
 }

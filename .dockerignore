@@ -40,7 +40,4 @@
 /.env.*.local
 /.env.local
 /.env.local.php
-/.phpunit
-/.phpunit.result.cache
 /last_deploy.date
-/phpunit.xml
