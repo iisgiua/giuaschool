@@ -103,6 +103,7 @@ class BrowserContext extends BaseContext {
     }
     $this->vars['sys']['other'] = $other;
     $this->log('LOGIN', 'Username: '.$username.' - Ruolo: '.$user->getRoles()[0]);
+    $this->logDebug('Altro utente: '.($other ? $other->getUsername().' - Ruolo: '.$other->getRoles()[0] : null));
   }
 
   /**

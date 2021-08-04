@@ -353,7 +353,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *
    * @Given istanze di tipo :classe:
    */
-  public function istanzeDiTipoConParametri($classe, TableNode $tabella) {
+  public function istanzeDiTipo($classe, TableNode $tabella) {
     $oggetti = $this->em->getRepository('App:'.$classe)->findBy([]);
     $this->assertNotEmpty($oggetti);
     $listaId = [];
@@ -421,9 +421,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  $tabella: il campo <id> indica il nome assegnato alla variabile, preceduto da '$', che
    *            conterrà l'instanza; altri campi corrispondono ai valori da impostare nell'istanza
    *
-   * @Given crea istanze di tipo :classe con parametri:
+   * @Given crea istanze di tipo :classe:
    */
-  public function creaIstanzeDiTipoConParametri($classe, TableNode $tabella) {
+  public function creaIstanzeDiTipo($classe, TableNode $tabella) {
     foreach ($tabella->getHash() as $row) {
       $this->assertTrue($row['id'][0] == '$');
       $nomeClasse = "App\\Entity\\".$classe;

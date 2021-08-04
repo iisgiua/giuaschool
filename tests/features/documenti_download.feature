@@ -29,9 +29,12 @@ Scenario: visualizza errore per scaricamento piano di lavoro senza permesso di l
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
+  E crea istanze di tipo "ListaDestinatari":
+    | id  |
+    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo |
-    | $d1 | $c1:classe | $c1:materia | #other  | L    |
+    | id  | classe     | materia     | docente | tipo | ListaDestinatari |
+    | $d1 | $c1:classe | $c1:materia | #other  | L    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
     | nomeParam | valoreParam |
     | documento | $d1:id      |
@@ -48,9 +51,12 @@ Scenario: visualizza errore per scaricamento programma senza permesso di lettura
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
+  E crea istanze di tipo "ListaDestinatari":
+    | id  |
+    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo |
-    | $d1 | $c1:classe | $c1:materia | #other  | P    |
+    | id  | classe     | materia     | docente | tipo | ListaDestinatari |
+    | $d1 | $c1:classe | $c1:materia | #other  | P    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
     | nomeParam | valoreParam |
     | documento | $d1:id      |
@@ -67,9 +73,12 @@ Scenario: visualizza errore per scaricamento relazione senza permesso di lettura
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
+  E crea istanze di tipo "ListaDestinatari":
+    | id  |
+    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe     | materia     | docente | tipo |
-    | $d1 | $c1:classe | $c1:materia | #other  | R    |
+    | id  | classe     | materia     | docente | tipo | ListaDestinatari |
+    | $d1 | $c1:classe | $c1:materia | #other  | R    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
     | nomeParam | valoreParam |
     | documento | $d1:id      |
@@ -87,9 +96,12 @@ Scenario: visualizza errore per scaricamento documento del 15 maggio senza perme
     | coordinatore | anno | sezione | #coordinatore |
     | #logged      |      |         | null          |
     |              | 5    | A       | #other        |
+  E crea istanze di tipo "ListaDestinatari":
+    | id  |
+    | $ld |
   E istanze di tipo "Documento":
-    | id  | classe | docente | tipo |
-    | $d1 | $c1    | #other  | M    |
+    | id  | classe     | docente | tipo | ListaDestinatari |
+    | $d1 | $c1        | #other  | M    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
     | nomeParam | valoreParam |
     | documento | $d1:id      |
