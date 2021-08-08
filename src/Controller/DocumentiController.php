@@ -588,8 +588,8 @@ class DocumentiController extends AbstractController {
     $criteri = array();
     $criteri['filtro'] = $session->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
     $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
-    $criteri['classe'] = $session->get('/APP/ROUTE/documenti_docenti/classe', null);
-    $classe = $em->getRepository('App:Classe')->find((int) $criteri['classe']);
+    $criteri['classe'] = $em->getRepository('App:Classe')->find(
+      (int) $session->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/documenti_docenti/pagina', 1);
@@ -611,7 +611,7 @@ class DocumentiController extends AbstractController {
       $session->set('/APP/ROUTE/documenti_docenti/filtro', $criteri['filtro']);
       $session->set('/APP/ROUTE/documenti_docenti/tipo', $criteri['tipo']);
       $session->set('/APP/ROUTE/documenti_docenti/classe',
-        is_object($criteri['classe']) ? $criteri['classe']->getId() : 0);
+        is_object($criteri['classe']) ? $criteri['classe']->getId() : null);
       $session->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // recupera dati

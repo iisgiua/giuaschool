@@ -213,6 +213,7 @@ class BrowserContext extends BaseContext {
    * Clicca sul pulsante indicato tramite testo|id|title|name|alt
    *  $button: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
    *
+   * @Given premuto pulsante :button
    * @When premi pulsante :button
    */
   public function premiPulsante($button): void {
@@ -550,20 +551,29 @@ class BrowserContext extends BaseContext {
    *  $valore: testo o valore dell'opzione
    *  $lista: lista identifica tramite attributo id|name|label
    *
+   * @Given selezionata opzione :valore da lista :lista
    * @When selezioni opzione :valore da lista :lista
    */
   public function selezioniOpzioneDaLista($valore, $lista): void {
     $field = $this->session->getPage()->findField($lista);
-    $this->assertNotEmpty($lista);
-    if (strtolower($field->getTagName()) == 'select') {
-      // select
-      $option = $field->find('named', ['option', $valore]);
-      $this->assertNotEmpty($option);
-      $option->click();
-    } else {
-      // radio button
-      $field->selectOption($valore);
-    }
+    $this->assertNotEmpty($field);
+    $option = $field->find('named', [strtolower($field->getTagName()) == 'select' ? 'option' : 'radio', $valore]);
+    $this->assertNotEmpty($option);
+    $option->click();
+  }
+
+  /**
+   * Seleziona opzione da lista di scelta (SELECT o RADIO button)
+   *  $valore: testo o valore dell'opzione
+   *  $lista: lista identifica tramite attributo id|name|label
+   *
+   * @Then vedi selezionata opzione :valore da lista :lista
+   */
+  public function vediSelezionataOpzioneDaLista($valore, $lista): void {
+    $field = $this->session->getPage()->findField($lista);
+    $this->assertNotEmpty($field);
+    $option = $field->find('named', [strtolower($field->getTagName()) == 'select' ? 'option' : 'radio', $valore]);
+    $this->assertTrue($field->getValue() == $option->getValue());
   }
 
 

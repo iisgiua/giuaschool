@@ -5,6 +5,7 @@ Funzionalità: Visualizzazione documenti dei docenti da parte dello staff
   Come utente staff
   Bisogna leggere cattedre e tipo di documento e mostrare lista
   Bisogna controllare filtro di visualizzazione
+  Bisogna controllare memorizzazione dati di sessione
   Bisogna controllare accesso a pagina
 
 
@@ -458,6 +459,46 @@ Schema dello scenario: visualizza filtro classi documenti del 15 maggio
     | classe  | documento              | cattedra |
     | $cl1:id | Documento Excel        | $c1      |
     | $cl2:id | Documento non inserito | $c2      |
+
+
+################################################################################
+# Bisogna controllare memorizzazione dati di sessione
+
+Schema dello scenario: modifica filtri e controlla che siano memorizzati in sessione
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 1    | B       |
+    | $cl2 | 3    | B       |
+  E ricerca istanze di tipo "Materia":
+    | id  | nome        |
+    | $m1 | Informatica |
+    | $m2 | Storia      |
+  E istanze di tipo "Cattedra":
+    | id  | docente | attiva | materia | classe | tipo |
+    | $c1 | #other  | si     | $m1     | $cl1   | N    |
+    | $c2 | #logged | si     | $m2     | $cl2   | N    |
+  E istanze di tipo "Documento":
+    | id  | classe     | materia     | tipo   |
+    | $d1 | $c1:classe | $c1:materia | <tipo> |
+  E pagina attiva "documenti_docenti"
+  E selezionata opzione "<filtro>" da lista "documento_filtro"
+  E selezionata opzione "<nome_tipo>" da lista "documento_tipo"
+  E selezionata opzione "<classe>" da lista "documento_classe"
+  E premuto pulsante "Filtra"
+  Quando vai alla pagina "login_home"
+  E vai alla pagina "documenti_docenti"
+  Allora vedi nella tabella le colonne:
+    | classe e materia | docenti | documento |
+  E vedi "1" riga nella tabella
+  E vedi in una riga della tabella i dati:
+    | classe e materia                                             | docenti                                 | documento   |
+    | <cattedra>:classe,classe.corso,classe.sede,materia.nomeBreve | <cattedra>:docente.nome,docente.cognome | <documento> |
+  Esempi:
+    | tipo | nome_tipo | filtro   | classe  | documento              | cattedra |
+    | P    | Programmi | presenti | $cl1:id | Documento Excel        | $c1      |
+    | P    | Programmi | mancanti | $cl2:id | Documento non inserito | $c2      |
+    | R    | Relazioni | presenti | Tutte   | Documento Excel        | $c1      |
+    | R    | Relazioni | Tutti    | $cl2:id | Documento non inserito | $c2      |
 
 
 ################################################################################
