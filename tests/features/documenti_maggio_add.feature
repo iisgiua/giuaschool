@@ -51,29 +51,26 @@ Scenario: visualizza errore per pagina inserimento documento 15 maggio già inse
     | classe    | $c1:id      |
   Allora vedi errore pagina 404
 
-Scenario: visualizza errore per pagina inserimento di cattedra di coordinatore inesistente
+Schema dello scenario: visualizza errore per pagina inserimento di cattedra di coordinatore inesistente
   Data modifica istanze di tipo "Classe":
     | anno | sezione | #coordinatore |
     | 5    | A       | null          |
+    | 2    | B       | #logged       |
+    | 5    | B       | #other        |
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
-    | $c1  | 5    | A       |
+    | $cl1 | 5    | A       |
+    | $cl2 | 2    | B       |
+    | $cl3 | 5    | B       |
   Quando vai alla pagina "documenti_maggio_add" con parametri:
     | nomeParam | valoreParam |
-    | classe    | $c1:id      |
+    | classe    | <classe>:id |
   Allora vedi errore pagina 404
-
-Scenario: visualizza errore per pagina inserimento di cattedra di coordinatore altrui
-  Data modifica istanze di tipo "Classe":
-    | anno | sezione | #coordinatore |
-    | 5    | A       | #other        |
-  E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $c1  | 5    | A       |
-  Quando vai alla pagina "documenti_maggio_add" con parametri:
-    | nomeParam | valoreParam |
-    | classe    | $c1:id      |
-  Allora vedi errore pagina 404
+  Esempi:
+    | classe |
+    | $cl1   |
+    | $cl2   |
+    | $cl3   |
 
 
 ################################################################################
@@ -162,7 +159,7 @@ Scenario: accesso pagina inserimento documento 15 maggio senza utente
     | nomeParam | valoreParam |
     | classe    | $c1:id      |
   Allora vedi pagina "login_form"
-@debug
+
 Schema dello scenario: accesso pagina inserimento documento 15 maggio con altri utenti
   Data modifica istanze di tipo "Classe":
     | anno | sezione | #coordinatore |

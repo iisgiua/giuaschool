@@ -77,7 +77,7 @@ class DocumentiUtil {
    *
    * @param Docente $docente Docente selezionato
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function pianiDocente(Docente $docente) {
     $dati = [];
@@ -113,7 +113,7 @@ class DocumentiUtil {
    *
    * @param Docente $docente Docente selezionato
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function programmiDocente(Docente $docente) {
     $dati = [];
@@ -165,14 +165,20 @@ class DocumentiUtil {
               'alunno' => $documento->getAlunno()]);
             if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
               // cattedra docente esiste (escluso potenziamento e Ed.Civica)
-              if ($documento->getMateria()->getTipo() != 'S' || $documento->getTipo() == 'R') {
-                // cattedra non di sostegno oppure documento è relazione finale: ok
+              if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
+                // relazione finale di sostegno: ok
+                return true;
+              }
+              if ($documento->getMateria()->getTipo() != 'S' &&
+                  ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
+                // cattedra curricolare, escluso quinte per programmi e relazioni: ok
                 return true;
               }
             }
-          } elseif ($documento->getTipo() == 'M' && $documento->getClasse()->getCoordinatore() &&
+          } elseif ($documento->getTipo() == 'M' && $documento->getClasse()->getAnno() == 5 &&
+                    $documento->getClasse()->getCoordinatore() &&
                     $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
-            // documento 15 maggio e docente coordinatore: ok
+            // documento 15 maggio e docente coordinatore di quinta: ok
             return true;
           } else {
             // altri documenti
@@ -194,12 +200,18 @@ class DocumentiUtil {
               'alunno' => $documento->getAlunno()]);
             if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
               // cattedra docente esiste (escluso potenziamento e Ed.Civica)
-              if ($documento->getMateria()->getTipo() != 'S' || $documento->getTipo() == 'R') {
-                // ok: cattedra non di sostegno oppure documento è relazione finale
+              if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
+                // relazione finale di sostegno: ok
+                return true;
+              }
+              if ($documento->getMateria()->getTipo() != 'S' &&
+                  ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
+                // cattedra curricolare, escluso quinte per programmi e relazioni: ok
                 return true;
               }
             }
-          } elseif ($documento->getTipo() == 'M' && $documento->getClasse()->getCoordinatore() &&
+          } elseif ($documento->getTipo() == 'M' && $documento->getClasse()->getAnno() == 5 &&
+                    $documento->getClasse()->getCoordinatore() &&
                     $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
             // documento 15 maggio e docente coordinatore: ok
             return true;
@@ -306,7 +318,7 @@ class DocumentiUtil {
    *
    * @param Docente $docente Docente selezionato
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function relazioniDocente(Docente $docente) {
     $dati = [];
@@ -344,7 +356,7 @@ class DocumentiUtil {
    *
    * @param Docente $docente Docente selezionato
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
   public function maggioDocente(Docente $docente) {
     $dati = [];
@@ -554,16 +566,16 @@ class DocumentiUtil {
     }
     if (!empty($this->em->getRepository('App:ListaDestinatariUtente')->findOneBy([
         'listaDestinatari' => $documento->getListaDestinatari(), 'utente' => $utente]))) {
-      // utente è destinatario: ok
+      // utente è tra i destinatari: ok
       return true;
     }
     if ($documento->getTipo() == 'R' && ($utente instanceOf Docente)) {
       // documento di tipo relazione e utente docente
       $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
-        'docente' => $utente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
-        'alunno' => $documento->getAlunno()]);
-      if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
-        // cattedra docente esiste (escluso potenziamento e Ed.Civica)
+        'docente' => $utente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria()]);
+      if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E' &&
+          $documento->getMateria()->getTipo() != 'P') {
+        // cattedra docente esiste (escluso potenziamento, Ed.Civica e sostegno)
         return true;
       }
     }
@@ -587,6 +599,54 @@ class DocumentiUtil {
       // imposta lettura
       $ldu->setLetto(new \DateTime());
     }
+  }
+
+  /**
+   * Recupera i documenti dei docenti secondo i criteri indicati
+   *
+   * @param array $criteri Criteri di ricerca
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function docenti($criteri, $pagina) {
+    // legge cattedre
+    $dati = $this->em->getRepository('App:Documento')->docenti($criteri, $pagina);
+    if ($criteri['tipo'] == 'M') {
+      // documento del 15 maggio: niente da aggiungere
+      return $dati;
+    }
+    // aggiunge info
+    foreach ($dati['lista'] as $i=>$cattedra) {
+      // query base docenti
+      $docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+        ->select('d.cognome,d.nome')
+        ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.materia=:materia')
+        ->where('c.attiva=:attiva AND c.tipo!=:potenziamento')
+        ->orderBy('d.cognome,d.nome', 'ASC')
+        ->setParameters(['classe' => $cattedra['classe_id'], 'materia' => $cattedra['materia_id'],
+          'attiva' => 1, 'potenziamento' => 'P']);
+      if ($criteri['tipo'] == 'R' && $cattedra['alunno_id']) {
+        // relazioni di sostegno
+        $docenti
+          ->andWhere('c.alunno=:alunno')
+          ->setParameter('alunno', $cattedra['alunno_id']);
+        $dati['documenti'][$i] = $this->em->getRepository('App:Documento')->createQueryBuilder('d')
+          ->join('d.docente', 'doc')
+          ->where('d.tipo=:documento AND d.classe=:classe AND d.materia=:materia AND d.alunno=:alunno')
+          ->orderBy('doc.cognome,doc.nome', 'ASC')
+          ->setParameters(['documento' => 'R', 'classe' => $cattedra['classe_id'],
+            'materia' => $cattedra['materia_id'], 'alunno' => $cattedra['alunno_id']])
+          ->getQuery()
+          ->getResult();
+      }
+      // dati docenti
+      $dati['docenti'][$i] = $docenti
+        ->getQuery()
+        ->getArrayResult();
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

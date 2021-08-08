@@ -24,15 +24,19 @@ Scenario: visualizza solo lista cattedre utili per inserimento
     | $m2 | E    |             |
     | $m3 | S    |             |
     | $m4 |      | Informatica |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno |
+    | $cl1 | 5    |
   E istanze di tipo "Cattedra":
-    | id  | docente | attiva | materia | tipo |
-    | $c1 | #logged | si     | $m1     | A    |
-    | $c2 | #logged | si     | $m4     | I    |
-    | $c3 | #logged | si     | $m4     | N    |
-    | $c4 | #logged | si     | $m2     | N    |
-    | $c5 | #logged | si     | $m4     | P    |
-    | $c6 | #logged | si     | $m3     | N    |
-    | $c7 | #logged | no     | $m4     | N    |
+    | id  | docente | attiva | materia | classe | tipo |
+    | $c1 | #logged | si     | $m1     |        | A    |
+    | $c2 | #logged | si     | $m4     |        | I    |
+    | $c3 | #logged | si     | $m4     |        | N    |
+    | $c4 | #logged | si     | $m2     |        | N    |
+    | $c5 | #logged | si     | $m4     |        | P    |
+    | $c6 | #logged | si     | $m3     |        | N    |
+    | $c7 | #logged | no     | $m4     |        | N    |
+    | $c8 | #logged | si     | $m4     | $cl1   | I    |
   Quando pagina attiva "documenti_programmi"
   Allora vedi nella tabella le colonne:
     | classe e materia | documento | azione |

@@ -70,37 +70,33 @@ Scenario: visualizza errore per pagina inserimento di programma già inserito da
     | materia   | $m1:id        |
   Allora vedi errore pagina 404
 
-Scenario: visualizza errore per pagina inserimento di cattedra inesistente
+Schema dello scenario: visualizza errore per pagina inserimento di cattedra inesistente
   Data ricerca istanze di tipo "Materia":
-    | id  | nome        |
-    | $m1 | Informatica |
+    | id  | nome        | tipo |
+    | $m1 | Informatica |      |
+    | $m2 |             | S    |
+    | $m3 |             | E    |
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
-  E modifica istanze di tipo "Cattedra":
-    | classe  | materia | #abilitata |
-    | $cl1    | $m1     | no         |
+    | $cl2 | 2    | B       |
+    | $cl3 | 5    | B       |
+  E crea istanze di tipo "Cattedra":
+    | id  | docente   | classe   | materia   | tipo   | attiva   |
+    | $c1 | <docente> | <classe> | <materia> | <tipo> | <attiva> |
   Quando vai alla pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam |
-    | classe    | $cl1:id     |
-    | materia   | $m1:id      |
+    | nomeParam | valoreParam    |
+    | classe    | $c1:classe.id  |
+    | materia   | $c1:materia.id |
   Allora vedi errore pagina 404
-
-Scenario: visualizza errore per pagina inserimento di cattedra altrui
-  Data ricerca istanze di tipo "Materia":
-    | id  | nome        |
-    | $m1 | Informatica |
-  E ricerca istanze di tipo "Classe":
-    | id   | anno | sezione |
-    | $cl1 | 1    | B       |
-  E istanze di tipo "Cattedra":
-    | id  | docente | attiva | materia | classe | tipo |
-    | $c1 | #other  | si     | $m1     | $cl1   | N    |
-  Quando vai alla pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
-  Allora vedi errore pagina 404
+  Esempi:
+    | docente | classe | materia | tipo | attiva |
+    | #logged | $cl1   | $m1     | N    | no     |
+    | #logged | $cl1   | $m2     | N    | si     |
+    | #logged | $cl1   | $m3     | N    | si     |
+    | #logged | $cl1   | $m1     | P    | si     |
+    | #logged | $cl3   | $m1     | I    | si     |
+    | #other  | $cl2   | $m1     | N    | si     |
 
 
 ################################################################################

@@ -171,37 +171,6 @@ class FileController extends AbstractController {
   }
 
   /**
-   * Esegue il download del documento del tipo indicato.
-   *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param string $tipo Tipo del documento da scaricare
-   * @param int $id ID del documento da scaricare
-   *
-   * @return Response Documento inviato in risposta
-   *
-   * @Route("/file/documento/{tipo}/{id}", name="file_documento",
-   *    requirements={"tipo": "L|P|R|M|I", "id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_DOCENTE")
-   */
-  public function documentoAction(EntityManagerInterface $em, $tipo, $id) {
-    // controllo documento
-    $documento = $em->getRepository('App:Documento')->findOneBy(['id' => $id, 'tipo' => $tipo]);
-    if (!$documento) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // file
-    $file = new File($this->getParameter('dir_classi').'/'.
-      $documento->getClasse()->getAnno().$documento->getClasse()->getSezione().'/'.$documento->getFile());
-    // nome da visualizzare
-    $nome = $documento->getFile();
-    // invia il documento
-    return $this->file($file, $nome);
-  }
-
-  /**
    * Esegue il download dei documenti dello scrutinio per la segreteria.
    *
    * @param EntityManagerInterface $em Gestore delle entità

@@ -1,0 +1,83 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_docenti'|trans }}</h1>
+  {% include('include/form-inline.html.twig') %}
+  {% if dati.lista.count > 0 %}
+  <table class="table table-bordered table-hover table-striped gs-mb-0">
+    <thead class="bg-success">
+      <tr>
+    {% if info.tipo == 'M' %}
+        <th class="col-sm-8">{{ 'label.classe'|trans }}</th>
+    {% else %}
+        <th class="col-sm-4">{{ 'label.cattedra'|trans }}</th>
+        <th class="col-sm-4">{{ 'label.docenti'|trans }}</th>
+    {% endif %}
+        <th class="col-sm-4">{{ 'label.documento'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for i,c in dati.lista %}
+      <tr>
+        <td>
+          <strong>{{ c.anno }}ª {{ c.sezione }}</strong> - {{ c.corso }} - {{ c.sede }}
+          {% if info.tipo != 'M' %}<br><strong>{{ c.materia }}{{ (c.alunno is defined and c.alunno is not empty) ? ' - '~c.alunno }}</strong>{% endif %}
+        </td>
+      {% if info.tipo != 'M' %}
+        <td>
+        {% for d in dati.docenti[i] %}
+          {{ not loop.first ? '<br>' }}<small>{{ d.nome }} {{ d.cognome }}</small>
+        {% endfor %}
+        </td>
+      {% endif %}
+        <td>
+      {% if info.tipo == 'R' and c.alunno is defined and c.alunno is not empty %}
+        {% for d in dati.documenti[i] %}
+          {{ not loop.first ? '<br>' }}
+          <a href="{{ path('documenti_download', {'documento': d.id }) }}" title="Scarica il documento indicato">
+            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.allegati[0].titolo }}</strong>
+          </a><br>
+          <small>Docente: {{ d.docente.nome }} {{ d.docente.cognome }} - Dimensione: {{ (d.allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+        {% else %}
+            <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
+        {% endfor %}
+      {% elseif c.documento %}
+          <a href="{{ path('documenti_download', {'documento': c.documento.id }) }}" title="Scarica il documento indicato">
+            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ c.documento.allegati[0].titolo }}</strong>
+          </a><br>
+          <small>Dimensione: {{ (c.documento.allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+      {% else %}
+          <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
+      {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+    {% if dati.maxPagine > 1 %}
+    <nav aria-label="Navigazione tra le pagine" class="text-center">
+      <ul class="pagination pagination-sm gs-mt-2">
+      {% if info.pagina > 1 %}
+        <li><a href="{{ path('documenti_docenti', {'pagina': info.pagina - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+      {% else %}
+        <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
+      {% endif %}
+      {% for i in 1 .. dati.maxPagine %}
+        <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('documenti_docenti', {'pagina': i}) }}">{{ i }}</a></li>
+      {% endfor %}
+      {% if info.pagina < dati.maxPagine %}
+        <li><a href="{{ path('documenti_docenti', {'pagina': info.pagina + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+      {% else %}
+        <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
+      {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ 'message.no_documenti'|trans }}</strong>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

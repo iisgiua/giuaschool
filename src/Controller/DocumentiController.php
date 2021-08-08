@@ -259,7 +259,7 @@ class DocumentiController extends AbstractController {
     }
     // controlla azione
     $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'R',
-      'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno]);
+      'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno, 'docente' => $this->getUser()]);
     if ($documentoEsistente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -562,6 +562,71 @@ class DocumentiController extends AbstractController {
     // invia il file
     return $this->file($doc->documentoDir($documento).'/'.$allegato->getFile().'.'.$allegato->getEstensione(),
       $allegato->getNome().'.'.$allegato->getEstensione(), ResponseHeaderBag::DISPOSITION_ATTACHMENT);
+  }
+
+  /**
+   * Visualizza i documenti dei docenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/documenti/docenti/{pagina}", name="documenti_docenti",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function docentiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                DocumentiUtil $doc, $pagina) {
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['filtro'] = $session->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
+    $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
+    $criteri['classe'] = $session->get('/APP/ROUTE/documenti_docenti/classe', null);
+    $classe = $em->getRepository('App:Classe')->find((int) $criteri['classe']);
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $session->get('/APP/ROUTE/documenti_docenti/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $session->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
+    }
+    // form filtro
+    $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'filtroDocenti',
+      'values' => [$criteri['filtro'], $criteri['tipo'], $criteri['classe'], $this->getUser()->getSede()]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['filtro'] = $form->get('filtro')->getData();
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['classe'] = $form->get('classe')->getData();
+      $pagina = 1;
+      // memorizza in sessione
+      $session->set('/APP/ROUTE/documenti_docenti/filtro', $criteri['filtro']);
+      $session->set('/APP/ROUTE/documenti_docenti/tipo', $criteri['tipo']);
+      $session->set('/APP/ROUTE/documenti_docenti/classe',
+        is_object($criteri['classe']) ? $criteri['classe']->getId() : 0);
+      $session->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $doc->docenti($criteri, $pagina);
+    // informazioni di visualizzazione
+    $info['pagina'] = $pagina;
+    $info['tipo'] = $criteri['tipo'];
+    // mostra la pagina di risposta
+    return $this->render('documenti/docenti.html.twig', array(
+      'pagina_titolo' => 'page.documenti_docenti',
+      'form' => $form->createView(),
+      'form_success' => null,
+      'form_help' => null,
+      'dati' => $dati,
+      'info' => $info));
   }
 
 }

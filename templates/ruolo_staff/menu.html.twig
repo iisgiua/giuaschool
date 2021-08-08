@@ -31,17 +31,16 @@
       <ul class="dropdown-menu">
         <li{{ app.request.attributes.get('_route')[:22] == 'staff_docenti_colloqui' ? ' class="active"' }}><a href="{{ path('staff_docenti_colloqui') }}" title="Mostra le ore dei colloqui mensili per i docenti">Colloqui mensili</a></li>
         <li{{ app.request.attributes.get('_route')[:25] == 'staff_docenti_statistiche' ? ' class="active"' }}><a href="{{ path('staff_docenti_statistiche') }}" title="Mostra le statistiche sulle ore di lezione svolte dai docenti">Statistiche lezioni</a></li>
+        <li{{ app.request.attributes.get('_route') == 'documenti_docenti' ? ' class="active"' }}><a href="{{ path('documenti_docenti') }}" title="Mostra i documenti dei docenti">Visualizza documenti</a></li>
       </ul>
     </li>
-    <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:15] == 'staff_documenti' ? ' active' }}">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Visualizza i documenti delle classi caricati dai docenti">Documenti<span class="caret gs-ml-3"></span></a>
-      <ul class="dropdown-menu">
-        <li{{ app.request.attributes.get('_route')[:21] == 'staff_documenti_piani' ? ' class="active"' }}><a href="{{ path('staff_documenti_piani') }}" title="Inserimento dei piani di lavoro">Piani di lavoro</a></li>
-        <li{{ app.request.attributes.get('_route')[:21] == 'staff_documenti_doc15' ? ' class="active"' }}><a href="{{ path('staff_documenti_doc15') }}" title="Inserimento dei documenti del 15 maggio">15 Maggio</a></li>
-        <li{{ app.request.attributes.get('_route')[:25] == 'staff_documenti_programmi' ? ' class="active"' }}><a href="{{ path('staff_documenti_programmi') }}" title="Inserimento dei programmi svolti">Programmi</a></li>
-        <li{{ app.request.attributes.get('_route')[:25] == 'staff_documenti_relazioni' ? ' class="active"' }}><a href="{{ path('staff_documenti_relazioni') }}" title="Inserimento delle relazioni finali">Relazioni</a></li>
-      </ul>
-    </li>
+
+    {#-- <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:15] == 'staff_documenti' ? ' active' }}"> #}
+      {#-- <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Visualizza i documenti delle classi caricati dai docenti">Documenti<span class="caret gs-ml-3"></span></a> #}
+      {#-- <ul class="dropdown-menu"> #}
+      {#-- </ul> #}
+    {#-- </li> #}
+
     <li{{ app.request.attributes.get('_route')[:14] == 'staff_password' ? ' class="active"' }}><a href="{{ path('staff_password') }}" title="Generazione delle nuove credenziali di accesso per i genitori">Password</a></li>
   </ul>
 </nav>

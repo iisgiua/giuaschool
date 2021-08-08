@@ -545,6 +545,27 @@ class BrowserContext extends BaseContext {
     $this->assertTrue($element->getAttribute('disabled'));
   }
 
+  /**
+   * Seleziona opzione da lista di scelta (SELECT o RADIO button)
+   *  $valore: testo o valore dell'opzione
+   *  $lista: lista identifica tramite attributo id|name|label
+   *
+   * @When selezioni opzione :valore da lista :lista
+   */
+  public function selezioniOpzioneDaLista($valore, $lista): void {
+    $field = $this->session->getPage()->findField($lista);
+    $this->assertNotEmpty($lista);
+    if (strtolower($field->getTagName()) == 'select') {
+      // select
+      $option = $field->find('named', ['option', $valore]);
+      $this->assertNotEmpty($option);
+      $option->click();
+    } else {
+      // radio button
+      $field->selectOption($valore);
+    }
+  }
+
 
   //==================== METODI PROTETTI DELLA CLASSE ====================
 

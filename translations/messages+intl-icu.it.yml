@@ -431,6 +431,14 @@ label.credito_integrativo: Credito integrativo
 label.credito_integrativo_si: SI (ha recuperato le carenze dello scorso anno scolastico)
 label.credito_integrativo_no: NO (non ha recuperato le carenze dello scorso anno scolastico)
 label.archivio_circolari: Archivio delle circolari
+label.filtro_documenti: Filtro documenti
+label.documenti_presenti: Documenti presenti
+label.documenti_mancanti: Documenti mancanti
+label.documenti_tutti: Tutti i documenti
+label.programmi: Programmi svolti
+label.relazioni: Relazioni finali
+label.tutti_tipi_documento: Tutti i tipi
+label.tipo_documenti: Tipo di documenti
 
 
 ##### PAGINE #####
@@ -493,7 +501,8 @@ title.alunni.modifica_edit: Modifica i dati degli alunni e dei genitori
 page.alunni.classe: Cambio classe Alunni
 title.alunni.classe: Cambia la classe degli alunni ad anno iniziato
 title.alunni.classe_edit: Cambia la classe degli alunni ad anno iniziato
-
+page.documenti_docenti: Documenti docenti
+title.documenti_docenti: Visualizza i documenti dei docenti
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -993,7 +1002,7 @@ message.gestione_notifiche: "La ricezione via email della notifica delle nuove c
 message.dato_memorizzato: La modifica è stata memorizzata correttamente.
 message.no_cattedra_maggio: Non è previsto il caricamento del documento del 15 maggio per questa cattedra.
 message.cancella_maggio: Verrà cancellato il documento del 15 maggio indicato. Vuoi continuare?
-message.inserimento_maggio: "Inserire il documento del 15 maggio come un unico documento comprensivo di ogni sezione prevista."
+message.inserimento_maggio: "Inserire il documento del 15 maggio come un unico documento comprensivo di ogni sezione prevista.<br><strong>Una volta inserito, il documento sarà visibile anche a genitori e alunni della classe.</strong>"
 message.strategie_PAI: "Il Collegio dei Docenti stabilirà come attuare il piano di apprendimento individualizzato, indicando modalità, mezzi e tempi di realizzazione delle attività didattiche, da svolgersi in orario curricolare o extracurricolare. E' comunque da sottolineare l'importanza fondamentale dello studio autonomo da parte dello studente e la sua partecipazione attiva alle proposte educative che saranno programmate."
 message.banner: "Imposta i messaggi che verranno visualizzati nelle pagine principali del registro; lascia la casella vuota per non visualizzare niente.<br>
   Nelle caselle di testo si può inserire anche codice HTML."
@@ -1022,6 +1031,7 @@ message.nota_edit_temporizzato: La nota disciplinare inserita potrà essere modi
 message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.lezione_esiste_altra: "Non è possibile firmare la lezione indicata.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
+message.no_documenti: Non sono presenti documenti
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.

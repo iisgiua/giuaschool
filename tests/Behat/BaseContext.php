@@ -881,7 +881,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
 
   /**
    * Restituisce il valore della variabile di esecuzione
-   * Il testo per specificare la variabile ha la sintassi:
+   * Il testo per specificare la variabile non deve contenere spazi tra i nomi, lo spazio è usato come
+   * separatore nel caso di più varibili (Es. "$c1 $c2"). Ogni variabile ha la sintassi:
    *  "$": come primo carattere, indica variabile di esecuzione
    *  "#": come primo carattere, indica variabile di sistema
    *  "nome": restituisce l'intera istanza o variabile <nome>
@@ -940,6 +941,29 @@ abstract class BaseContext extends RawMinkContext implements Context {
   }
 
   /**
+   * Restituisce il valore della variabile di esecuzione
+   * Il testo per specificare la variabile non deve contenere spazi tra i nomi, lo spazio è usato come
+   * separatore nel caso di più varibili (Es. "$c1 $c2"). La sintssi di ogni variabile è definita in getVar().
+   *
+   * @param string $vars Testo che indica le variabili
+   *
+   * @return mixed Valore delle variabili indicate
+   */
+  protected function getVars($vars) {
+    $values = [];
+    $var_list = explode(' ', $vars);
+    foreach ($var_list as $var) {
+      $value = $this->getVar($var);
+      if (is_array($value)) {
+        $values = array_merge($values, $value);
+      } else {
+        $values[] = $value;
+      }
+    }
+    return count($values) > 1 ? $values : $values[0];
+  }
+
+  /**
    * Converte il testo di un parametro nel valore corrispondente.
    *  I possibili valori contenuti nel testo sono:
    *    $nome o #nome -> valore della variabile (vedi funzione getVar)
@@ -954,7 +978,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected function convertText($text) {
     if ($text[0] == '$' || $text[0] == '#') {
       // valore della variabile di esecuzione
-      return $this->getVar($text);
+      return $this->getVars($text);
     } elseif (preg_match('/^(si|no|null)$/i', $text)) {
       // valore booleano o null
       return strtolower($text) == 'si' ? true : (strtolower($text) == 'no' ? false : null);
@@ -981,7 +1005,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected function convertSearch($search) {
     if ($search[0] == '$' || $search[0] == '#') {
       // valore della variabile di esecuzione
-      $value = $this->getVar($search);
+      $value = $this->getVars($search);
       $value = is_array($value) ? $value : [$value];
       $regex = '';
       $first = true;

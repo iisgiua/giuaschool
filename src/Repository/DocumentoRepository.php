@@ -13,6 +13,7 @@
 namespace App\Repository;
 
 use App\Entity\Docente;
+use App\Entity\Classe;
 
 
 /**
@@ -23,255 +24,186 @@ class DocumentoRepository extends BaseRepository {
   /**
    * Recupera i piani di lavoro del docente indicato o di tutti i docenti
    *
-   * @param Docente|null $docente Docente selezionato, o null per tutti i docenti
-   * @param string $lista Tipo di lista da restituire [T=tutto, D=solo documenti inseriti, M=solo documenti mancanti]
-   * @param bool|int $pagina Indica il numero di pagina da visualizzare (se falso la paginazione è disattivata)
+   * @param Docente $docente Docente di riferimento
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
-  public function piani(Docente $docente=null, $lista='T', $pagina=false) {
-    // query base
+  public function piani(Docente $docente) {
+    // query
     $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve')
+      ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie)')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND c.docente=:docente')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
-      ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'materie' => ['S', 'E']]);
-    // vincolo su docente
-    if ($docente) {
-      // seleziona solo dati del docente indicato
-      $cattedre
-        ->andWhere('c.docente=:docente')
-        ->setParameter('docente', $docente);
-    } else {
-      // seleziona tutti i docenti
-      $cattedre
-        ->addSelect("CONCAT(doc.cognome,' ',doc.nome) AS docente")
-        ->join('c.docente', 'doc')
-        ->addOrderBy('doc.cognome,doc.nome', 'ASC');
-    }
-    // scelta lista da estrarre
-    switch ($lista) {
-      case 'D':
-        // solo documenti esistenti
-        $cattedre
-          ->addSelect('d AS documento')
-          ->join('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->setParameter('documento', 'L');
-        break;
-      case 'M':
-        // solo documenti mancanti
-        $subQuery = $this->createQueryBuilder('d')
-          ->where('d.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->getDql();
-        $cattedre
-          ->andWhere('NOT EXISTS ('.$subQuery.')')
-          ->setParameter('documento', 'L');
-        break;
-      default:
-        // tutto
-        $cattedre
-          ->addSelect('d AS documento')
-          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->setParameter('documento', 'L');
-    }
-    // legge dati
-    $cattedre = $cattedre->getQuery();
+      ->setParameters(['documento' => 'L', 'attiva' => 1, 'potenziamento' => 'P', 'materie' => ['S', 'E'],
+        'docente' => $docente])
+      ->getQuery()
+      ->getResult();
     // restituisce dati
-    return ($pagina === false ? $cattedre->getResult() : $this->paginazione($cattedre, (int) $pagina));
+    return $cattedre;
   }
 
   /**
-   * Recupera i programmi del docente indicato o di tutti i docenti
+   * Recupera i programmi del docente indicato
    *
-   * @param Docente|null $docente Docente selezionato, o null per tutti i docenti
-   * @param string $lista Tipo di lista da restituire [T=tutto, D=solo documenti inseriti, M=solo documenti mancanti]
-   * @param bool|int $pagina Indica il numero di pagina da visualizzare (se falso la paginazione è disattivata)
+   * @param Docente $docente Docente di riferimento
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
-  public function programmi(Docente $docente=null, $lista='T', $pagina=false) {
-    // query base
+  public function programmi(Docente $docente) {
+    // query
     $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve')
+      ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie)')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND cl.anno!=:quinta AND c.docente=:docente')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
-      ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'materie' => ['S', 'E']]);
-    // vincolo su docente
-    if ($docente) {
-      // seleziona solo dati del docente indicato
-      $cattedre
-        ->andWhere('c.docente=:docente')
-        ->setParameter('docente', $docente);
-    } else {
-      // seleziona tutti i docenti
-      $cattedre
-        ->addSelect("CONCAT(doc.cognome,' ',doc.nome) AS docente")
-        ->join('c.docente', 'doc')
-        ->addOrderBy('doc.cognome,doc.nome', 'ASC');
-    }
-    // scelta lista da estrarre
-    switch ($lista) {
-      case 'D':
-        // solo documenti esistenti
-        $cattedre
-          ->addSelect('d AS documento')
-          ->join('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->setParameter('documento', 'P');
-        break;
-      case 'M':
-        // solo documenti mancanti
-        $subQuery = $this->createQueryBuilder('d')
-          ->where('d.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->getDql();
-        $cattedre
-          ->andWhere('NOT EXISTS ('.$subQuery.')')
-          ->setParameter('documento', 'P');
-        break;
-      default:
-        // tutto
-        $cattedre
-          ->addSelect('d AS documento')
-          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
-          ->setParameter('documento', 'P');
-    }
-    // legge dati
-    $cattedre = $cattedre->getQuery();
+      ->setParameters(['documento' => 'P', 'attiva' => 1, 'potenziamento' => 'P', 'materie' => ['S', 'E'],
+        'quinta' => 5, 'docente' => $docente])
+      ->getQuery()
+      ->getResult();
     // restituisce dati
-    return ($pagina === false ? $cattedre->getResult() : $this->paginazione($cattedre, (int) $pagina));
+    return $cattedre;
   }
 
   /**
-   * Recupera le relazioni del docente indicato o di tutti i docenti
+   * Recupera le relazioni del docente indicato
    *
-   * @param Docente|null $docente Docente selezionato, o null per tutti i docenti
-   * @param string $lista Tipo di lista da restituire [T=tutto, D=solo documenti inseriti, M=solo documenti mancanti]
-   * @param bool|int $pagina Indica il numero di pagina da visualizzare (se falso la paginazione è disattivata)
+   * @param Docente $docente Docente di riferimento
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
-  public function relazioni(Docente $docente=null, $lista='T', $pagina=false) {
-    // query base
+  public function relazioni(Docente $docente) {
+    // query
     $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
-      ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,a.id AS alunno_id,a.cognome AS alunnoCognome,a.nome AS alunnoNome')
+      ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,a.id AS alunno_id,a.cognome AS alunnoCognome,a.nome AS alunnoNome,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->leftJoin('c.alunno', 'a')
-      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:materia')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
+      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:materia AND c.docente=:docente AND (cl.anno!=:quinta OR m.tipo=:sostegno)')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
-      ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'materia' => 'E']);
-    // vincolo su docente
-    if ($docente) {
-      // seleziona solo dati del docente indicato
-      $cattedre
-        ->andWhere('c.docente=:docente')
-        ->setParameter('docente', $docente);
-    } else {
-      // seleziona tutti i docenti
-      $cattedre
-        ->addSelect("CONCAT(doc.cognome,' ',doc.nome) AS docente")
-        ->join('c.docente', 'doc')
-        ->addOrderBy('doc.cognome,doc.nome', 'ASC');
-    }
-    // scelta lista da estrarre
-    switch ($lista) {
-      case 'D':
-        // solo documenti esistenti
-        $cattedre
-          ->addSelect('d AS documento')
-          ->join('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (d.alunno=a.id OR (d.alunno IS NULL AND a.id IS NULL))')
-          ->setParameter('documento', 'R');
-        break;
-      case 'M':
-        // solo documenti mancanti
-        $subQuery = $this->createQueryBuilder('d')
-          ->where('d.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (d.alunno=a.id OR (d.alunno IS NULL AND a.id IS NULL))')
-          ->getDql();
-        $cattedre
-          ->andWhere('NOT EXISTS ('.$subQuery.')')
-          ->setParameter('documento', 'R');
-        break;
-      default:
-        // tutto
-        $cattedre
-          ->addSelect('d AS documento')
-          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (d.alunno=a.id OR (d.alunno IS NULL AND a.id IS NULL))')
-          ->setParameter('documento', 'R');
-    }
-    // legge dati
-    $cattedre = $cattedre->getQuery();
+      ->setParameters(['documento' => 'R', 'sostegno' => 'S', 'attiva' => 1, 'potenziamento' => 'P',
+        'materia' => 'E', 'docente' => $docente, 'quinta' => 5])
+      ->getQuery()
+      ->getResult();
     // restituisce dati
-    return ($pagina === false ? $cattedre->getResult() : $this->paginazione($cattedre, (int) $pagina));
+    return $cattedre;
   }
 
   /**
-   * Recupera i documenti del 15 maggio del docente indicato o di tutti i docenti
+   * Recupera i documenti del 15 maggio del docente indicato
    *
-   * @param Docente|null $docente Docente selezionato, o null per tutti i docenti
-   * @param string $lista Tipo di lista da restituire [T=tutto, D=solo documenti inseriti, M=solo documenti mancanti]
-   * @param bool|int $pagina Indica il numero di pagina da visualizzare (se falso la paginazione è disattivata)
+   * @param Docente $docente Docente di riferimento
    *
-   * @return Array Dati formattati come array associativo
+   * @return array Dati formattati come array associativo
    */
-  public function maggio(Docente $docente=null, $lista='T', $pagina=false) {
-    // query base
+  public function maggio(Docente $docente) {
+    // query
     $cattedre = $this->_em->getRepository('App:Classe')->createQueryBuilder('cl')
-      ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede')
+      ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,d AS documento')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->where('cl.anno=:quinta')
+      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
+      ->where('cl.anno=:quinta AND cl.coordinatore=:coordinatore')
       ->orderBy('cl.sezione', 'ASC')
-      ->setParameters(['quinta' => 5]);
-    // vincolo su docente
-    if ($docente) {
-      // seleziona solo dati del docente indicato
+      ->setParameters(['documento' => 'M', 'quinta' => 5, 'coordinatore' => $docente])
+      ->getQuery()
+      ->getResult();
+    // restituisce dati
+    return $cattedre;
+  }
+
+  /**
+   * Recupera i documenti dei docenti secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista con i criteri di ricerca
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function docenti($criteri, $pagina) {
+    // query base
+    $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nomeBreve AS materia,d AS documento')
+      ->join('c.classe', 'cl')
+      ->join('cl.corso', 'co')
+      ->join('cl.sede', 's')
+      ->join('c.materia', 'm')
+      ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:civica')
+      ->groupBy('cl.anno,cl.sezione')
+      ->orderBy('cl.anno,cl.sezione,m.nomeBreve', 'ASC')
+      ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'civica' => 'E']);
+    // tipo di lista
+    if ($criteri['filtro'] != 'T') {
       $cattedre
-        ->andWhere('cl.coordinatore=:docente')
-        ->setParameter('docente', $docente);
-    } else {
-      // seleziona tutti i docenti
-      $cattedre
-        ->addSelect("CONCAT(doc.cognome,' ',doc.nome) AS docente")
-        ->join('cl.coordinatore', 'doc');
+        ->andWhere('d IS '.($criteri['filtro'] == 'D' ? 'NOT ' : '').'NULL');
     }
-    // scelta lista da estrarre
-    switch ($lista) {
-      case 'D':
-        // solo documenti esistenti
+    // filtra tipo di documento
+    switch ($criteri['tipo']) {
+      case 'L':
+        // piani di lavoro (escluso sostegno)
         $cattedre
-          ->addSelect('d AS documento')
-          ->join('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
-          ->setParameter('documento', 'M');
+          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+          ->andWhere('m.tipo!=:sostegno')
+          ->addGroupBy('m.nomeBreve')
+          ->setParameter('documento','L')
+          ->setParameter('sostegno', 'S');
+        break;
+      case 'P':
+        // programmi (escluse quinte e sostegno)
+        $cattedre
+          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+          ->andWhere('m.tipo!=:sostegno AND cl.anno!=:quinta')
+          ->addGroupBy('m.nomeBreve')
+          ->setParameter('documento','P')
+          ->setParameter('sostegno', 'S')
+          ->setParameter('quinta', 5);
+        break;
+      case 'R':
+        // relazioni (escluse quinte curricolari)
+        // NB: nel caso di più docenti di sostegno su stesso alunno ne viene elencato solo uno
+        $cattedre
+          ->addSelect("a.id AS alunno_id,CONCAT(a.cognome,' ',a.nome) AS alunno")
+          ->leftJoin('c.alunno', 'a')
+          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
+          ->andWhere('cl.anno!=:quinta OR m.tipo=:sostegno')
+          ->addGroupBy('m.nomeBreve,a.cognome,a.nome')
+          ->addOrderBy('a.cognome,a.nome', 'ASC')
+          ->setParameter('documento','R')
+          ->setParameter('sostegno', 'S')
+          ->setParameter('quinta', 5);
         break;
       case 'M':
-        // solo documenti mancanti
-        $subQuery = $this->createQueryBuilder('d')
-          ->where('d.tipo=:documento AND d.classe=cl.id')
-          ->getDql();
+        // documento 15 maggio (solo classi quinte)
         $cattedre
-          ->andWhere('NOT EXISTS ('.$subQuery.')')
-          ->setParameter('documento', 'M');
-        break;
-      default:
-        // tutto
-        $cattedre
-          ->addSelect('d AS documento')
           ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
-          ->setParameter('documento', 'M');
+          ->andWhere('cl.anno=:quinta AND cl.coordinatore=c.docente')
+          ->setParameter('documento','M')
+          ->setParameter('quinta', 5);
+        break;
     }
-    // legge dati
-    $cattedre = $cattedre->getQuery();
+    // filtro su classe
+    if ($criteri['classe']) {
+      $cattedre
+        ->andWhere('c.classe=:classe')
+        ->setParameter('classe', $criteri['classe']);
+    }
+    // paginazione
+    $dati = $this->paginazione($cattedre->getQuery(), (int) $pagina);
+    // per evitare errori di paginazione
+    $dati['lista']->setUseOutputWalkers(false);
     // restituisce dati
-    return ($pagina === false ? $cattedre->getResult() : $this->paginazione($cattedre, (int) $pagina));
+    return $dati;
   }
 
 }
