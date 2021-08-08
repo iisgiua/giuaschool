@@ -426,13 +426,16 @@ Schema dello scenario: visualizza filtro classi documenti
     | R    | Relazioni | $cl2:id | Documento non inserito | $c2      |
 
 Schema dello scenario: visualizza filtro classi documenti del 15 maggio
-  Data modifica istanze di tipo "Classe":
+  Data modifica utente attuale con parametri:
+    | nomeParam | valoreParam |
+    | sede      | null         |
+  E modifica istanze di tipo "Classe":
     | anno | sezione | #coordinatore |
-    | 5    | B       | #other        |
+    | 5    | A       | #other        |
     | 5    | C       | #logged       |
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
-    | $cl1 | 5    | B       |
+    | $cl1 | 5    | A       |
     | $cl2 | 5    | C       |
   E ricerca istanze di tipo "Materia":
     | id  | nome        |
@@ -465,7 +468,10 @@ Schema dello scenario: visualizza filtro classi documenti del 15 maggio
 # Bisogna controllare memorizzazione dati di sessione
 
 Schema dello scenario: modifica filtri e controlla che siano memorizzati in sessione
-  Data ricerca istanze di tipo "Classe":
+  Data modifica utente attuale con parametri:
+    | nomeParam | valoreParam |
+    | sede      | null         |
+  E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
     | $cl2 | 3    | B       |
