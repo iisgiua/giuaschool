@@ -337,4 +337,24 @@ class AlunnoRepository extends BaseRepository {
     return $alunni;
   }
 
+  /**
+   * Restituisce la lista degli alunni abilitati e attualmente iscritti alla classe
+   *
+   * @param int $search Identificativo della classe
+   *
+   * @return array Lista degli alunni come array associativo
+   */
+  public function classe($classe) {
+    // legge alunni
+    $alunni = $this->createQueryBuilder('a')
+      ->select('a.id,a.cognome,a.nome,a.dataNascita')
+      ->where('a.abilitato=:abilitato AND a.classe=:classe')
+      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->setParameters(['abilitato' => 1, 'classe' => $classe])
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce lista
+    return $alunni;
+  }
+
 }

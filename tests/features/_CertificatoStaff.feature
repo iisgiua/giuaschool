@@ -19,9 +19,9 @@ Funzionalità: Procedura richiesta certificato
 
 
   Scenario: Visualizza alunni con richiesta di certificato per staff di intera scuola
-    Data modifica utente attuale con parametri:
-      | nomeParam   | valoreParam   |
-      | sede        | null          |
+    Data modifica utente connesso:
+      | sede |
+      | null |
     Date istanze di tipo "Alunno":
       | id        | richiestaCertificato  |
       | $1        | si                    |
@@ -52,9 +52,9 @@ Funzionalità: Procedura richiesta certificato
       | $1        | si                    | $c1    |
       | $2        | si                    | $c2    |
       | $3        | no                    | $c1    |
-    Data modifica utente attuale con parametri:
-      | nomeParam   | valoreParam   |
-      | sede        | $s1          |
+    Data modifica utente connesso:
+      | sede |
+      | $s1  |
     E pagina attiva "staff_studenti_certificato"
     Allora vedi nella tabella le colonne:
       | alunno | classe | sede | azione |

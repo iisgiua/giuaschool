@@ -1,0 +1,150 @@
+{% extends 'documenti/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="panel panel-primary gs-mt-4">
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body gs-pt-0">
+  {% if info.alunno is defined %}
+      <div class="row bg-success gs-mb-3 gs-pt-2 gs-pb-2">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.classe }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Alunn{{ info.sesso == 'M' ? 'o' : 'a' }}:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.alunno }}</span></div>
+      </div>
+  {% endif %}
+      <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_documenti_bes'|trans|raw }}</em></div>
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+  {% if info.alunno is not defined %}
+      {{ form_row(form.classe) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="documento_classe">Alunno</label>
+        <div class="col-sm-10">
+          <div id="gs-info-alunno" class="alert alert-warning gs-big" role="alert">
+            <strong>Scegli prima la classe e poi seleziona l'alunno nella lista che verrà mostrata.</strong>
+          </div>
+          <div id="gs-alunno-individuale" class="row" style="display:none"></div>
+        </div>
+      </div>
+  {% endif %}
+      {{ form_row(form.tipo) }}
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Documento</label>
+        <div class="col-sm-10">
+          <div class="dropzone">
+            <div class="fallback"></div>
+          </div>
+        </div>
+      </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+  {% include 'include/modal-waiting.html.twig' %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/dropzone/css/dropzone.min.css') }}" rel="stylesheet">
+<link href="{{ asset('css/tema_dropzone.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/dropzone/js/dropzone.min.js') }}"></script>
+<script>
+Dropzone.autoDiscover = false;
+var DZ = new Dropzone(".dropzone", {
+  url: "{{ path('file_upload', {'pagina': 'documenti_bes_add', 'param': 'files'}) }}",
+  maxFiles: 1,
+  maxFilesize: 50,
+  acceptedFiles: ".pdf,.odt,.doc,.docx,.rtf,.txt",
+  timeout: 0,
+  paramName: "files",
+  uploadMultiple: true,
+  addRemoveLinks: true,
+  createImageThumbnails: false,
+  clickable: true,
+  dictDefaultMessage: "{{ 'message.single_upload_dropzone'|trans }}",
+  dictFallbackMessage: "{{ 'exception.upload_no_dropzone'|trans }}",
+  dictInvalidFileType: "{{ 'exception.upload_tipo'|trans }}",
+  dictFileTooBig: "{{ 'exception.upload_dimensione'|trans }}",
+  dictMaxFilesExceeded: "{{ 'exception.upload_numero'|trans }}",
+  dictRemoveFile: "{{ 'label.upload_rimuove_file'|trans }}",
+  dictCancelUpload: "{{ 'label.upload_cancella'|trans }}",
+  dictCancelUploadConfirmation: "{{ 'message.upload_cancella'|trans }}",
+  init: function() {
+    this.on("successmultiple", function(files, response) {
+      $.each(files, function(key,file){
+        file.uploaded = response[key];
+        $('#documento_submit').removeAttr('disabled');
+      });
+    });
+    this.on("removedfile", function(file) {
+      if (file.uploaded) {
+        $.post("{{ path('file_remove', {'pagina': 'documenti_bes_add', 'param': 'files'}) }}", {"files": file.uploaded});
+        if (file.status == 'success') {
+          $('#documento_submit').attr('disabled', true);
+        }
+      }
+    });
+    $('#documento_submit').attr('disabled', true);
+  }
+});
+$(document).ready(function() {
+  $('form[name="documento"]').submit(function(ev) {
+    var f = DZ.getAcceptedFiles()[0];
+    if (f && f.type != 'application/pdf') {
+      $('#gs-modal-waiting-title').html('Attendere: conversione del documento in formato PDF.');
+      $('#gs-modal-waiting').modal('show');
+    }
+    $('#documento_alunno').val( $('input[name="documento[alunnoIndividuale][]"]:checked').val() );
+  });
+  $('#documento_classe').change(function() {
+    if ($(this).val()) {
+      $('#gs-modal-waiting').modal('show');
+      url = "{{ path('ajax_classe') }}/"+$(this).val();
+      $.post(url, function(data) {
+          var s1='';
+          var s2='';
+          var r=Math.trunc((data.length + 1) / 2);
+          $.each(data, function(idx, item){
+            if (idx < r) {
+              s1+='<label for="documento_alunno_individuale_'+item.id+'" class="gs-pt-0 gs-checkbox-inline gs-checkbox-split">'+
+                '<input type="radio" id="documento_alunno_individuale_'+item.id+'" name="documento[alunnoIndividuale][]" value="'+item.id+'" onChange="optChange(this)"> '+
+                item.cognome+' '+item.nome+'</label>';
+            } else {
+              s2+='<label for="documento_alunno_individuale_'+item.id+'" class="gs-pt-0 gs-checkbox-inline gs-checkbox-split">'+
+                '<input type="radio" id="documento_alunno_individuale_'+item.id+'" name="documento[alunnoIndividuale][]" value="'+item.id+'" onChange="optChange(this)"> '+
+                item.cognome+' '+item.nome+'</label>';
+            }
+          });
+          s='<div class="col-sm-6">'+s1+'</div><div class="col-sm-6">'+s2+'</div>';
+          $('#gs-alunno-individuale').html(s);
+          $('#gs-info-alunno').hide();
+          $('#gs-alunno-individuale').show();
+          $('#gs-modal-waiting').modal('hide');
+          selezionaAlunno();
+        }, 'json');
+    } else {
+      $('#gs-info-alunno').show();
+      $('#gs-select-alunno').hide();
+    }
+  }).change();
+});
+function optChange(o) {
+  $(o).parent().parent().parent().find('label').removeClass('active');
+  $(o).parent().addClass('active');
+}
+function selezionaAlunno() {
+  if ($('#documento_alunno').val()) {
+    var v = $('#documento_alunno').val();
+    $('input[name="documento[alunnoIndividuale][]"][value="'+v+'"]').prop('checked', true);
+    $('#documento_alunno').val(null);
+  }
+}
+</script>
+{% endblock %}

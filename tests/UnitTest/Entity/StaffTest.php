@@ -44,7 +44,7 @@ class StaffTest extends DatabaseTestCase {
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
         'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto',
-        'sede_id', 'classe_id', 'alunno_id'],
+        'sede_id', 'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id'],
       'gs_sede' => '*'];
     // SQL write
     $this->canWrite = [
@@ -54,7 +54,7 @@ class StaffTest extends DatabaseTestCase {
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
         'religione', 'credito3', 'credito4', 'giustifica_online', 'foto', 'richiesta_certificato',
-        'sede_id', 'classe_id', 'alunno_id']];
+        'sede_id', 'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }

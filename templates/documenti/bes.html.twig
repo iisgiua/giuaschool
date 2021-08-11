@@ -1,0 +1,104 @@
+{% extends 'documenti/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_bes'|trans }}</h1>
+  <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_documenti_bes'|trans|raw }}</em></div>
+  {% if dati.azioni.add is defined  %}
+  <div class="text-right gs-mb-0">
+    <a class="btn btn-primary" href="{{ path('documenti_bes_add') }}" role="button" title="Inserisci un nuovo documento"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+  </div>
+  {% endif %}
+  {% if dati.lista is empty %}
+  <div class="alert alert-warning gs-mt-2" role="alert">
+    <strong class="gs-big">{{ 'message.no_documenti'|trans }}</strong>
+  </div>
+  {% else %}
+  <table class="table table-bordered table-hover table-striped gs-mt-2">
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-5">{{ 'label.alunno'|trans }}</th>
+        <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
+        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for i,alu in dati.lista %}
+      <tr>
+        <td rowspan="{{ dati.documenti[i].lista|length }}">
+          <strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong><br>
+          <strong>{{ alu.classe.anno }}ª {{ alu.classe.sezione }}</strong> - {{ alu.classe.corso.nomeBreve }} - {{ alu.classe.sede.citta|upper }}
+        </td>
+        <td>
+          <a href="{{ path('documenti_download', {'documento': dati.documenti[i].lista[0].id}) }}" title="Scarica il documento indicato">
+            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i].lista[0].allegati[0].titolo }}</strong>
+          </a><br>
+          <small>Dimensione: {{ (dati.documenti[i].lista[0].allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+        </td>
+        <td>
+      {% if dati.documenti[i].add[0] is defined %}
+          <a class="btn btn-primary btn-xs" href="{{ path('documenti_bes_add', {'alunno': alu.id}) }}" role="button" title="Inserisci il documento per l'alunno BES indicato"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+      {% endif %}
+      {% if dati.documenti[i].delete[0] is defined %}
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il documento indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': dati.documenti[i].lista[0].id}) }}" data-text="{{ 'message.cancella_documenti_bes'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+      {% endif %}
+        </td>
+      </tr>
+      {% if dati.documenti[i].lista|length == 2 %}
+      <tr>
+        <td>
+          <a href="{{ path('documenti_download', {'documento': dati.documenti[i].lista[1].id}) }}" title="Scarica il documento indicato">
+            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i].lista[1].allegati[0].titolo }}</strong>
+          </a><br>
+          <small>Dimensione: {{ (dati.documenti[i].lista[1].allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+        </td>
+        <td>
+        {% if dati.documenti[i].add[1] is defined %}
+          <a class="btn btn-primary btn-xs" href="{{ path('documenti_bes_add', {'alunno': alu.id}) }}" role="button" title="Inserisci il documento per l'alunno BES indicato"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+        {% endif %}
+        {% if dati.documenti[i].delete[1] is defined %}
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il documento indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': dati.documenti[i].lista[1].id}) }}" data-text="{{ 'message.cancella_documenti_bes'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+        {% endif %}
+        </td>
+      </tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+    {% if dati.maxPagine > 1 %}
+  <nav aria-label="Navigazione tra le pagine" class="text-center">
+    <ul class="pagination pagination-sm gs-mt-2">
+      {% if info.pagina > 1 %}
+      <li><a href="{{ path('documenti_bes', {'pagina': info.pagina - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+      {% else %}
+      <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
+      {% endif %}
+      {% for i in 1 .. dati.maxPagine %}
+      <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('documenti_bes', {'pagina': i}) }}">{{ i }}</a></li>
+      {% endfor %}
+      {% if info.pagina < dati.maxPagine %}
+      <li><a href="{{ path('documenti_bes', {'pagina': info.pagina + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+      {% else %}
+      <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
+      {% endif %}
+    </ul>
+  </nav>
+    {% endif %}
+  {% endif %}
+  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_documenti_bes'} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+});
+</script>
+{% endblock %}

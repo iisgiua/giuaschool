@@ -31,9 +31,8 @@ Scenario: visualizza pagina inserimento di relazione non presente
   Quando pagina attiva "documenti_relazioni"
   E click su "Aggiungi"
   Allora vedi pagina "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci la relazione finale/"
   E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1ª B\s*Materia:\s*Informatica/"
 
@@ -53,10 +52,8 @@ Scenario: visualizza pagina inserimento di relazione non presente per sostegno
   Quando pagina attiva "documenti_relazioni"
   E click su "Aggiungi"
   Allora vedi pagina "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
-    | alunno    | $a1:id        |
+    | classe  | materia | alunno |
+    | $cl1:id | $m1:id  | $a1:id |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci la relazione finale/"
   E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1ª B\s*Materia:\s*Sostegno - Rossi Mario/"
 
@@ -71,9 +68,8 @@ Scenario: visualizza errore per pagina inserimento di relazione già inserita da
     | id  | classe     | materia     | docente | tipo |
     | $d1 | $c1:classe | $c1:materia | #logged | R    |
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi errore pagina 404
 
 Scenario: visualizza errore per pagina inserimento di relazione già inserita da altri
@@ -95,10 +91,8 @@ Scenario: visualizza errore per pagina inserimento di relazione già inserita da
     | id  | classe     | materia | alunno | docente | tipo |
     | $d1 | $cl1       | $m1     | $a2    | #other  | R    |
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
-    | alunno    | $a2:id        |
+    | classe  | materia | alunno |
+    | $cl1:id | $m1:id  | $a2:id |
   Allora vedi errore pagina 404
 
 Schema dello scenario: visualizza errore per pagina inserimento di cattedra inesistente
@@ -116,9 +110,8 @@ Schema dello scenario: visualizza errore per pagina inserimento di cattedra ines
     | id  | docente   | classe   | materia   | tipo   | attiva   |
     | $c1 | <docente> | <classe> | <materia> | <tipo> | <attiva> |
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi errore pagina 404
   Esempi:
     | docente | classe | materia | tipo | attiva |
@@ -143,9 +136,8 @@ Scenario: inserisce relazione e la visualizza su lista cattedre
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_relazioni"
@@ -171,10 +163,8 @@ Scenario: inserisce relazione di sostegno e la visualizza su lista cattedre
     | id  | docente | attiva | materia | classe | alunno | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | $a1    | N    |
   Quando pagina attiva "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam |
-    | classe    | $cl1:id     |
-    | materia   | $m1:id      |
-    | alunno    | $a1:id      |
+    | classe  | materia | alunno |
+    | $cl1:id | $m1:id  | $a1:id |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_relazioni"
@@ -197,9 +187,8 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
   Allora vedi pagina "documenti_relazioni"
@@ -221,9 +210,8 @@ Scenario: impedisce inserimento relazione con più di un allegato
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E alleghi file "documento-docx.docx" a dropzone
   Allora la sezione "#gs-main .dropzone .dz-error" contiene "/documento-docx\.docx.*Non puoi caricare altri file/i"
@@ -239,9 +227,8 @@ Scenario: impedisce inserimento relazione senza allegato
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   Allora pulsante "Conferma" inattivo
 
 
@@ -254,9 +241,8 @@ Scenario: accesso pagina inserimento relazioni senza utente
     | $c1 | #logged | si     | N    |
   E logout utente
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi pagina "login_form"
 
 Schema dello scenario: accesso pagina inserimento relazioni con altri utenti
@@ -266,9 +252,8 @@ Schema dello scenario: accesso pagina inserimento relazioni con altri utenti
   E logout utente
   E login utente con ruolo esatto <ruolo>
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi errore pagina "403"
   Esempi:
     | ruolo          |

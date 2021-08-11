@@ -31,9 +31,8 @@ Scenario: visualizza pagina inserimento di programma non presente
   Quando pagina attiva "documenti_programmi"
   E click su "Aggiungi"
   Allora vedi pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E la sezione "#gs-main .panel-title" contiene "/Inserisci il programma svolto/"
   E la sezione "#gs-main .panel-body" contiene "/Classe:\s*1ª B\s*Materia:\s*Informatica/"
 
@@ -45,9 +44,8 @@ Scenario: visualizza errore per pagina inserimento di programma già inserito da
     | id  | classe     | materia     | docente | tipo |
     | $d1 | $c1:classe | $c1:materia | #logged | P    |
   Quando vai alla pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi errore pagina 404
 
 Scenario: visualizza errore per pagina inserimento di programma già inserito da altri
@@ -65,9 +63,8 @@ Scenario: visualizza errore per pagina inserimento di programma già inserito da
     | id  | classe     | materia     | docente | tipo |
     | $d1 | $cl1       | $m1         | #other  | P    |
   Quando vai alla pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   Allora vedi errore pagina 404
 
 Schema dello scenario: visualizza errore per pagina inserimento di cattedra inesistente
@@ -85,9 +82,8 @@ Schema dello scenario: visualizza errore per pagina inserimento di cattedra ines
     | id  | docente   | classe   | materia   | tipo   | attiva   |
     | $c1 | <docente> | <classe> | <materia> | <tipo> | <attiva> |
   Quando vai alla pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi errore pagina 404
   Esempi:
     | docente | classe | materia | tipo | attiva |
@@ -113,9 +109,8 @@ Scenario: inserisce programma e lo visualizza su lista cattedre
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_programmi"
@@ -138,9 +133,8 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
   Allora vedi pagina "documenti_programmi"
@@ -162,9 +156,8 @@ Scenario: impedisce inserimento programma con più di un allegato
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   E alleghi file "documento-pdf.pdf" a dropzone
   E alleghi file "documento-docx.docx" a dropzone
   Allora la sezione "#gs-main .dropzone .dz-error" contiene "/documento-docx\.docx.*Non puoi caricare altri file/i"
@@ -180,9 +173,8 @@ Scenario: impedisce inserimento programma senza allegato
     | id  | docente | attiva | materia | classe | tipo |
     | $c1 | #logged | si     | $m1     | $cl1   | N    |
   Quando pagina attiva "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam   |
-    | classe    | $cl1:id       |
-    | materia   | $m1:id        |
+    | classe  | materia |
+    | $cl1:id | $m1:id  |
   Allora pulsante "Conferma" inattivo
 
 
@@ -195,9 +187,8 @@ Scenario: accesso pagina inserimento programmi di lavoro senza utente
     | $c1 | #logged | si     | N    |
   E logout utente
   Quando vai alla pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi pagina "login_form"
 
 Schema dello scenario: accesso pagina inserimento programmi di lavoro con altri utenti
@@ -207,9 +198,8 @@ Schema dello scenario: accesso pagina inserimento programmi di lavoro con altri 
   E logout utente
   E login utente con ruolo esatto <ruolo>
   Quando vai alla pagina "documenti_programmi_add" con parametri:
-    | nomeParam | valoreParam    |
-    | classe    | $c1:classe.id  |
-    | materia   | $c1:materia.id |
+    | classe        | materia        |
+    | $c1:classe.id | $c1:materia.id |
   Allora vedi errore pagina "403"
   Esempi:
     | ruolo          |

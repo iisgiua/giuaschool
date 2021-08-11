@@ -278,20 +278,6 @@ abstract class BaseContext extends RawMinkContext implements Context {
   }
 
   /**
-   * Trasforma una tabella in un array associativo per i parametri
-   *    $tableParams: tabella con campi <nomeParam> e <valoreParam> e relativi valori
-   *
-   * @Transform table:nomeParam,valoreParam
-   */
-  public function trasformaArray(TableNode $tableParams): array {
-    $params = array();
-    foreach ($tableParams->getHash() as $row) {
-      $params[$row['nomeParam']] = $this->convertText($row['valoreParam']);
-    }
-    return $params;
-  }
-
-  /**
    * Trasforma testo in valore corrispondente
    *  I possibili valori contenuti nel testo sono:
    *    $nome o #nome -> valore della variabile di esecuzione o di sistema (vedi funzione getVar)
@@ -376,7 +362,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $this->vars['exec'][trim(substr($row['id'], 1))] = $istanza;
       foreach ($row as $key=>$val) {
         if ($key != 'id' && !empty($val)) {
-          $istanza->{'set'.ucfirst(strtolower($key))}($this->convertText($val));
+          $istanza->{'set'.ucfirst($key)}($this->convertText($val));
         }
       }
     }
@@ -436,7 +422,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $this->em->persist($istanza);
       foreach ($row as $key=>$val) {
         if ($key != 'id' && !empty($val)) {
-          $istanza->{'set'.ucfirst(strtolower($key))}($this->convertText($val));
+          $istanza->{'set'.ucfirst($key)}($this->convertText($val));
         }
       }
       $this->assertNotEmpty($istanza);
@@ -468,7 +454,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $oggetti = $this->em->getRepository('App:'.$classe)->findBy($cerca);
       foreach ($oggetti as $istanza) {
         foreach ($modifica as $key=>$val) {
-          $istanza->{'set'.ucfirst(strtolower($key))}($val);
+          $istanza->{'set'.ucfirst($key)}($val);
         }
       }
     }

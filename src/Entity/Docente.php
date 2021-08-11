@@ -60,6 +60,21 @@ class Docente extends Utente {
    */
   private $ultimoOtp;
 
+  /**
+   * @var boolean $responsabileBes Indica se il docente ha accesso alle funzioni di responsabile BES
+   *
+   * @ORM\Column(name="responsabile_bes", type="boolean", nullable=false)
+   */
+  private $responsabileBes;
+
+  /**
+   * @var Sede $responsabileBesSede Sede di riferimento per il responsabile BES (se definita)
+   *
+   * @ORM\ManyToOne(targetEntity="Sede")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $responsabileBesSede;
+
 
   //==================== METODI SETTER/GETTER ====================
 
@@ -168,6 +183,48 @@ class Docente extends Utente {
     return $this;
   }
 
+  /**
+   * Restituisce se il docente abbia accesso o no alle funzioni di responsabile BES
+   *
+   * @return boolean Vero se il docente ha accesso alle funzioni di responsabile BES, falso altrimenti
+   */
+  public function getResponsabileBes() {
+    return $this->responsabileBes;
+  }
+
+  /**
+   * Modifica se il docente abbia accesso o no alle funzioni di responsabile BES
+   *
+   * @param boolean $responsabileBes Vero se il docente ha accesso alle funzioni di responsabile BES, falso altrimenti
+   *
+   * @return Docente Oggetto modificato
+   */
+  public function setResponsabileBes($responsabileBes) {
+    $this->responsabileBes = $responsabileBes;
+    return $this;
+  }
+
+  /**
+   * Restituisce la sede di riferimento per il responsabile BES (se definita)
+   *
+   * @return Sede Sede di riferimento per il responsabile BES (se definita)
+   */
+  public function getResponsabileBesSede() {
+    return $this->responsabileBesSede;
+  }
+
+  /**
+   * Modifica la sede di riferimento per il responsabile BES (se definita)
+   *
+   * @param Sede $responsabileBesSede Sede di riferimento per il responsabile BES (se definita)
+   *
+   * @return Docente Oggetto modificato
+   */
+  public function setResponsabileBesSede(Sede $responsabileBesSede=null) {
+    $this->responsabileBesSede = $responsabileBesSede;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -177,6 +234,7 @@ class Docente extends Utente {
   public function __construct() {
     // valori predefiniti
     parent::__construct();
+    $this->responsabileBes = false;
   }
 
   /**

@@ -34,7 +34,7 @@ class DocenteTest extends DatabaseTestCase {
     $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato',
       'abilitato', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
       'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica',
-      'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimoOtp'];
+      'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimoOtp', 'responsabileBes', 'responsabileBesSede'];
     // fixture da caricare
     $this->fixtures = [[DocenteFixtures::class, 'encoder']];
     // SQL read
@@ -45,7 +45,8 @@ class DocenteTest extends DatabaseTestCase {
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
         'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
-        'classe_id', 'alunno_id']];
+        'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id'],
+      'gs_sede' => '*'];
     // SQL write
     $this->canWrite = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
@@ -54,7 +55,7 @@ class DocenteTest extends DatabaseTestCase {
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
         'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
-        'classe_id', 'alunno_id']];
+        'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -68,6 +69,8 @@ class DocenteTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
+    $sede1 = $this->getReference('sede_1');
+    $sede2 = $this->getReference('sede_2');
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       $sesso = $this->faker->randomElement(['M', 'F']);
@@ -98,7 +101,9 @@ class DocenteTest extends DatabaseTestCase {
           ($field == 'chiave2' ? $this->faker->optional(0.5, null)->md5() :
           ($field == 'chiave3' ? $this->faker->optional(0.5, null)->md5() :
           ($field == 'otp' ? $this->faker->optional(0.5, null)->randomNumber(6, true) :
-          $this->faker->optional(0.5, null)->randomNumber(6, true)))))))))))))))))))))));
+          ($field == 'ultimoOtp' ? $this->faker->optional(0.5, null)->randomNumber(6, true) :
+          ($field == 'responsabileBes' ? $this->faker->boolean() :
+          $this->faker->randomElement([null, $sede1, $sede2])))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');

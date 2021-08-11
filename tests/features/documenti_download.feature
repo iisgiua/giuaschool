@@ -14,8 +14,8 @@ Funzionalità:
 Scenario: visualizza errore per scaricamento documento non esistente
   Dato login utente con ruolo "Utente"
   Quando vai alla pagina "documenti_download" con parametri:
-    | nomeParam | valoreParam |
-    | documento | 12345       |
+    | documento |
+    | 12345     |
   Allora vedi errore pagina 404
 
 Scenario: visualizza errore per scaricamento piano di lavoro senza permesso di lettura
@@ -36,8 +36,8 @@ Scenario: visualizza errore per scaricamento piano di lavoro senza permesso di l
     | id  | classe     | materia     | docente | tipo | ListaDestinatari |
     | $d1 | $c1:classe | $c1:materia | #other  | L    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
-    | nomeParam | valoreParam |
-    | documento | $d1:id      |
+    | documento |
+    | $d1:id    |
   Allora vedi errore pagina 404
 
 Scenario: visualizza errore per scaricamento programma senza permesso di lettura
@@ -58,8 +58,8 @@ Scenario: visualizza errore per scaricamento programma senza permesso di lettura
     | id  | classe     | materia     | docente | tipo | ListaDestinatari |
     | $d1 | $c1:classe | $c1:materia | #other  | P    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
-    | nomeParam | valoreParam |
-    | documento | $d1:id      |
+    | documento |
+    | $d1:id    |
   Allora vedi errore pagina 404
 
 Scenario: visualizza errore per scaricamento relazione senza permesso di lettura
@@ -80,8 +80,8 @@ Scenario: visualizza errore per scaricamento relazione senza permesso di lettura
     | id  | classe     | materia     | docente | tipo | ListaDestinatari |
     | $d1 | $c1:classe | $c1:materia | #other  | R    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
-    | nomeParam | valoreParam |
-    | documento | $d1:id      |
+    | documento |
+    | $d1:id    |
   Allora vedi errore pagina 404
 
 Scenario: visualizza errore per scaricamento documento del 15 maggio senza permesso di lettura
@@ -103,8 +103,8 @@ Scenario: visualizza errore per scaricamento documento del 15 maggio senza perme
     | id  | classe     | docente | tipo | ListaDestinatari |
     | $d1 | $c1        | #other  | M    | $ld              |
   Quando vai alla pagina "documenti_download" con parametri:
-    | nomeParam | valoreParam |
-    | documento | $d1:id      |
+    | documento |
+    | $d1:id    |
   Allora vedi errore pagina 404
 
 
@@ -220,6 +220,6 @@ Scenario: accesso pagina scaricamento documenti senza utente
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/2B/documento-xlsx.xlsx"
   E logout utente
   Quando vai alla pagina "documenti_download" con parametri:
-    | nomeParam | valoreParam |
-    | documento | $d1:id      |
+    | documento |
+    | $d1:id    |
   Allora vedi pagina "login_form"

@@ -15,6 +15,7 @@ namespace App\DataFixtures;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
@@ -25,7 +26,7 @@ use App\Entity\Docente;
  * DocenteFixtures - dati iniziali di test
  *
  */
-class DocenteFixtures extends Fixture implements FixtureGroupInterface {
+class DocenteFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface {
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
@@ -75,6 +76,17 @@ class DocenteFixtures extends Fixture implements FixtureGroupInterface {
     }
     // memorizza dati
     $em->flush();
+  }
+
+  /**
+   * Restituisce la lista delle classi da cui dipendono i dati inseriti
+   *
+   * @return array Lista delle classi da cui dipende
+   */
+  public function getDependencies() {
+    return array(
+      SedeFixtures::class,
+    );
   }
 
   /**

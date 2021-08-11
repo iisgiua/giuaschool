@@ -44,7 +44,7 @@ class PresideTest extends DatabaseTestCase {
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
         'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
-        'classe_id', 'alunno_id']];
+        'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id']];
     // SQL write
     $this->canWrite = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
@@ -53,7 +53,7 @@ class PresideTest extends DatabaseTestCase {
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
         'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
-        'classe_id', 'alunno_id']];
+        'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }

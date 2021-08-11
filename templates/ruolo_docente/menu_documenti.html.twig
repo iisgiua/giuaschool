@@ -4,5 +4,8 @@
     <li role="presentation"{{ app.request.attributes.get('_route')[:19] == 'documenti_programmi' ? ' class="active"' }}><a href="{{ path('documenti_programmi') }}" title="Inserimento dei programmi svolti">Programmi</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')[:19] == 'documenti_relazioni' ? ' class="active"' }}><a href="{{ path('documenti_relazioni') }}" title="Inserimento delle relazioni finali">Relazioni</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route')[:16] == 'documenti_maggio' ? ' class="active"' }}><a href="{{ path('documenti_maggio') }}" title="Inserimento dei documenti del 15 maggio">15 Maggio</a></li>
+  {% if app.user.responsabileBes %}
+    <li role="presentation"{{ app.request.attributes.get('_route')[:13] == 'documenti_bes' ? ' class="active"' }}><a href="{{ path('documenti_bes') }}" title="Inserimento dei documenti per gli alunni BES">BES</a></li>
+  {% endif %}
   </ul>
 </nav>

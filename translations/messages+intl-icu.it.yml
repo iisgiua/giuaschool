@@ -439,6 +439,10 @@ label.programmi: Programmi svolti
 label.relazioni: Relazioni finali
 label.tutti_tipi_documento: Tutti i tipi
 label.tipo_documenti: Tipo di documenti
+label.documenti_bes_H: P.E.I.
+label.documenti_bes_D: P.D.P.
+label.documenti_bes_B: Diagnosi
+label.scegli_tipo_documento: Scegli il tipo di documento
 
 
 ##### PAGINE #####
@@ -503,6 +507,9 @@ title.alunni.classe: Cambia la classe degli alunni ad anno iniziato
 title.alunni.classe_edit: Cambia la classe degli alunni ad anno iniziato
 page.documenti_docenti: Documenti docenti
 title.documenti_docenti: Visualizza i documenti dei docenti
+page.documenti_bes: Documenti BES
+title.documenti_bes: Inserimento documenti relativi agli alunni BES
+title.nuovo_documento_bes: Inserisci il documento relativo all'alunno BES
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -1032,6 +1039,8 @@ message.colloqui_docenti: "Per effettuare il colloquio, collegarsi in videoconfe
 message.colloqui_genitori: "Per effettuare il colloquio, collegarsi in videoconferenza con Google Meet nel giorno e nell'ora dell'appuntamento, usando le credenziali del proprio figlio e inserendo il seguente codice della riunione: <strong>{codice}</strong>"
 message.lezione_esiste_altra: "Non è possibile firmare la lezione indicata.<br>Hai già firmato una lezione alla stessa ora nella classe {classe}."
 message.no_documenti: Non sono presenti documenti
+message.inserimento_documenti_bes: "Inserire i documenti degli alunni BES: diagnosi e P.E.I./P.D.P.<br>I documenti inseriti saranno visibili solo dai docenti del Consiglio di Classe."
+message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
@@ -1248,3 +1257,6 @@ exception.dichiarazione_incompleta: "Errore: devi compilare la dichiarazione e s
 exception.data_invalida: "Errore: data non valida. Devi inserire una data nel formato gg/mm/aaaa."
 exception.colloquio_ora_invalida: Non hai inserito l'orario dell'appuntamento.
 exception.numero_file_allegati: Hai caricato un numero eccessivo di documenti.
+exception.documento_tipo_mancante: Non hai indicato il tipo di documento.
+exception.documento_alunno_mancante: Non hai indicato l'alunno a cui è riferito il documento.
+exception.documento_esistente: Il documento inserito esiste già per l'alunno selezionato.

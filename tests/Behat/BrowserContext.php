@@ -41,12 +41,20 @@ class BrowserContext extends BaseContext {
   /**
    * Va alla pagina indicata (anche con parametri) e controlla che sia attiva
    *  $pagina: nome della pagina
-   *  $parametri: array associativo dei parametri (presi da trasformazione di tabella)
+   *  $tabella: tabella con nomi dei campi ed i valori da assegnare
    *
    * @Given pagina attiva :pagina
    * @Given pagina attiva :pagina con parametri:
    */
-  public function paginaAttiva($pagina, $parametri=[]): void {
+  public function paginaAttiva($pagina, TableNode $tabella=null): void {
+    $parametri = [];
+    if ($tabella) {
+      foreach ($tabella->getHash() as $row) {
+        foreach ($row as $key=>$val) {
+          $parametri[$key] = $this->convertText($val);
+        }
+      }
+    }
     $url = $this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri);
     $this->session->visit($url);
     $this->waitForPage();
@@ -57,12 +65,20 @@ class BrowserContext extends BaseContext {
   /**
    * Va alla pagina indicata (anche con parametri)
    *  $pagina: nome della pagina
-   *  $parametri: array associativo dei parametri (presi da trasformazione di tabella)
+   *  $tabella: tabella con nomi dei campi ed i valori da assegnare
    *
    * @When vai alla pagina :pagina
    * @When vai alla pagina :pagina con parametri:
    */
-   public function vaiAllaPagina($pagina, $parametri=[]): void {
+   public function vaiAllaPagina($pagina, TableNode $tabella=null): void {
+     $parametri = [];
+     if ($tabella) {
+       foreach ($tabella->getHash() as $row) {
+         foreach ($row as $key=>$val) {
+           $parametri[$key] = $this->convertText($val);
+         }
+       }
+     }
     $url = $this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri);
     $this->session->visit($url);
     $this->waitForPage();
@@ -113,7 +129,7 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo :ruolo
    */
   public function loginUtenteConRuolo($ruolo): void {
-    $class_name = ucfirst(strtolower($ruolo));
+    $class_name = ucfirst($ruolo);
     $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy(['abilitato' => 1]));
     $this->assertNotEmpty($user);
     $this->loginUtente($user->getUsername());
@@ -126,7 +142,7 @@ class BrowserContext extends BaseContext {
    * @Given login utente con ruolo esatto :ruolo
    */
   public function loginUtenteConRuoloEsatto($ruolo): void {
-    $class_name = ucfirst(strtolower($ruolo));
+    $class_name = ucfirst($ruolo);
     do {
       $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy(['abilitato' => 1]));
       $this->assertNotEmpty($user);
@@ -136,14 +152,17 @@ class BrowserContext extends BaseContext {
 
   /**
    * Modifica l'istanza dell'utente attualmente collegato con i parametri indicati
-   *  $parametri: array associativo dei parametri (presi da trasformazione di tabella)
+   *  $tabella: tabella con nomi dei campi ed i valori da assegnare
    *
-   * @Given modifica utente attuale con parametri:
+   * @Given modifica utente connesso:
    */
-  public function modificaUtenteAttualeConParametri($parametri): void {
+  public function modificaUtenteConnesso(TableNode $tabella): void {
     $this->assertNotEmpty($this->vars['sys']['logged']);
-    foreach ($parametri as $key=>$val) {
-      $this->vars['sys']['logged']->{'set'.ucfirst(strtolower($key))}($val);
+    foreach ($tabella->getHash() as $row) {
+      foreach ($row as $key=>$val) {
+        $value = $this->convertText($val);
+        $this->vars['sys']['logged']->{'set'.ucfirst($key)}($value);
+      }
     }
     $this->em->flush();
   }
@@ -224,13 +243,21 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che la pagina attuale sia quella indicata
    *  $pagina: nome della pagina
-   *  $parametri: array associativo dei parametri (presi da trasformazione di tabella)
+   *  $tabella: tabella con nomi dei campi ed i valori da assegnare
    *
    * @Then vedi pagina :pagina
    * @Then vedi pagina :pagina con parametri:
    */
-  public function vediPagina($pagina, $parametri=[]): void {
+  public function vediPagina($pagina, TableNode $tabella=null): void {
     $this->assertPageStatus(200);
+    $parametri = [];
+    if ($tabella) {
+      foreach ($tabella->getHash() as $row) {
+        foreach ($row as $key=>$val) {
+          $parametri[$key] = $this->convertText($val);
+        }
+      }
+    }
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri));
     $this->log('SHOW', 'Pagina: '.$pagina);
   }
@@ -284,7 +311,7 @@ class BrowserContext extends BaseContext {
    * @Then vedi :numero righe nella tabella
    * @Then vedi :numero riga nella tabella
    */
-  public function vediNumeroRigheNellaTabellaIndicata($numero, $indice=1): void {
+  public function vediRigheNellaTabella($numero, $indice=1): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
@@ -301,7 +328,7 @@ class BrowserContext extends BaseContext {
    * @Then vedi almeno :numero righe nella tabella
    * @Then vedi almeno :numero riga nella tabella
    */
-  public function vediAlmenoNumeroRigheNellaTabellaIndicata($numero, $indice=1): void {
+  public function vediAlmenoRigheNellaTabella($numero, $indice=1): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
@@ -318,7 +345,7 @@ class BrowserContext extends BaseContext {
    * @Then vedi al massimo :numero righe nella tabella
    * @Then vedi al massimo :numero riga nella tabella
    */
-  public function vediAlMassimoNumeroRigheNellaTabellaIndicata($numero, $indice=1): void {
+  public function vediAlMassimoRigheNellaTabella($numero, $indice=1): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
@@ -333,7 +360,7 @@ class BrowserContext extends BaseContext {
    * @Then vedi nella tabella :indice le colonne:
    * @Then vedi nella tabella le colonne:
    */
-  public function vediNellaTabellaIndicataLeColonne($indice=1, TableNode $colonne): void {
+  public function vediNellaTabellaLeColonne($indice=1, TableNode $colonne): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
@@ -352,7 +379,7 @@ class BrowserContext extends BaseContext {
    * @Then vedi nella riga :numero della tabella :indice i dati:
    * @Then vedi nella riga :numero della tabella i dati:
    */
-  public function vediNellaRigaNumeroDellaTabellaIndicataIDati($numero, $indice=1, TableNode $dati): void {
+  public function vediNellaRigaDellaTabellaIDati($numero, $indice=1, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
@@ -365,19 +392,22 @@ class BrowserContext extends BaseContext {
     foreach ($dati->getHash()[0] as $key=>$val) {
       $this->assertArrayContains(strtolower($key), $intestazioni_nomi);
       $cella = $colonne[array_search(strtolower($key), $intestazioni_nomi)]->getText();
-      $this->assertTrue(preg_match($this->convertSearch($val), $cella));
+      $cerca = $this->convertSearch($val);
+      $this->logDebug('vediNellaRigaDellaTabellaIDati -> '.$cerca.' | '.$cella);
+      $this->assertTrue(preg_match($cerca, $cella));
     }
   }
 
   /**
    * Controlla che in una riga qualsiasi della tabella indicata i dati corrispondano a quelli specificati
+   * NB: non funziona se si usa nella tabella COLSPAN o ROWSPAN
    *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
    * @Then vedi in una riga della tabella :indice i dati:
    * @Then vedi in una riga della tabella i dati:
    */
-  public function vediInUnaRigaDellaTabellaIndicataIDati($indice=1, TableNode $dati): void {
+  public function vediInUnaRigaDellaTabellaIDati($indice=1, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
@@ -393,7 +423,7 @@ class BrowserContext extends BaseContext {
         $this->assertArrayContains(strtolower($key), $intestazioni_nomi);
         $cella = $colonne[array_search(strtolower($key), $intestazioni_nomi)]->getText();
         $cerca = $this->convertSearch($val);
-        $this->logDebug('vediInUnaRigaDellaTabellaIndicataIDati -> '.$cerca.' | '.$cella);
+        $this->logDebug('vediInUnaRigaDellaTabellaIDati -> '.$cerca.' | '.$cella);
         if (!preg_match($cerca, $cella)) {
           $trovato = false;
           break;
@@ -408,13 +438,13 @@ class BrowserContext extends BaseContext {
 
   /**
    * Controlla che in più righe qualsiasi della tabella indicata i dati corrispondano a quelli specificati
-   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
    * @Then vedi in più righe della tabella :indice i dati:
    * @Then vedi in più righe della tabella i dati:
    */
-  public function vediInPiuRigheDellaTabellaIndicataIDati($indice=1, TableNode $dati): void {
+  public function vediInPiuRigheDellaTabellaIDati($indice=1, TableNode $dati): void {
     $tab = $dati->getTable();
     $intestazione = null;
     foreach ($tab as $num=>$riga) {
@@ -427,7 +457,7 @@ class BrowserContext extends BaseContext {
         $matrice = [
           $intestazione['num'] => $intestazione['riga'],
           $num => $riga];
-        $this->vediInUnaRigaDellaTabellaIndicataIDati($indice, new TableNode($matrice));
+        $this->vediInUnaRigaDellaTabellaIDati($indice, new TableNode($matrice));
       }
     }
   }
@@ -576,6 +606,31 @@ class BrowserContext extends BaseContext {
     $this->assertTrue($field->getValue() == $option->getValue());
   }
 
+  /**
+   * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
+   *  $dati: intestazione e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella :indice:
+   * @Then vedi la tabella:
+   */
+  public function vediLaTabella($indice=1, TableNode $dati): void {
+    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
+    $this->assertNotEmpty($tabelle[$indice - 1]);
+    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    // controlla intestazioni
+    foreach (array_keys($dati->getHash()[0]) as $i=>$nome) {
+      $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
+    }
+    // controlla dati
+    foreach ($dati->getHash() as $ri=>$riga) {
+      foreach (array_values($riga) as $co=>$val) {
+        $this->assertTrue(preg_match($this->convertSearch($val), strtolower($valori[$ri][$co])),
+          'Table row '.($ri + 1).' is different');
+      }
+    }
+  }
+
 
   //==================== METODI PROTETTI DELLA CLASSE ====================
 
@@ -617,6 +672,72 @@ class BrowserContext extends BaseContext {
    */
   protected function waitForPage(): void {
     $this->session->wait(30000, "document.readyState === 'complete'");
+  }
+
+  /**
+   * Restituisce una lista con le intestazioni e i dati della tabella
+   * NB: viene gestito COLSPAN e ROWSPAN, ma non la presenza di entrambi su stessa cella
+   *
+   * @param NodeElement $table Tabella da cui estrarre i dati
+   *
+   * @return array Lista con intestazione e dati della tabella
+   */
+  protected function parseTable($table): array {
+    // intestazione (considera solo prima riga)
+    $header = $this->parseTableRow($table->findAll('xpath', '/thead/tr[1]/th'));
+    $this->assertNotEmpty($header);
+    // contenuto
+    $bodyRows = $table->findAll('xpath', '/tbody/tr');
+    $body = [];
+    $rowspan = [];
+    foreach ($bodyRows as $bodyRow) {
+      $row = $this->parseTableRow($bodyRow->findAll('xpath', '/td'), $rowspan);
+      $this->assertTrue(count($header) == count($row));
+      $body[] = $row;
+    }
+    return array($header, $body);
+  }
+
+  /**
+   * Restituisce un vettore con i dati presenti nella riga della tabella
+   * NB: viene gestito COLSPAN e ROWSPAN, ma non la presenza di entrambi su stessa cella
+   *
+   * @param array $cellList Lista delle celle della tabella
+   * @param array $rowspan Conserva indicazioni di ROWSPAN (valori modificati da funzione)
+   *
+   * @return array Lista dei valori presenti nelle celle
+   */
+  protected function parseTableRow($cellList, &$rowspan=[]): array {
+    $row = [];
+    $col = 0;
+    foreach ($cellList as $cell) {
+      while (isset($rowspan[$col]) && $rowspan[$col]['num']) {
+        // replica contenuto colonna
+        $row[$col] = $rowspan[$col]['text'];
+        $rowspan[$col]['num']--;
+        if ($rowspan[$col]['num'] == 0) {
+          unset($rowspan[$col]);
+        }
+        $col++;
+      }
+      $text = trim(preg_replace('/\s+/', ' ', $cell->getText()));
+      if ($cell->hasAttribute('rowspan')) {
+        $rspan = (int) $cell->getAttribute('rowspan');
+        if ($rspan > 1) {
+          $rowspan[$col]['text'] = $text;
+          $rowspan[$col]['num'] = $rspan - 1;
+        }
+      }
+      $row[$col++] = $text;
+      if ($cell->hasAttribute('colspan')) {
+        $colspan = (int) $cell->getAttribute('colspan');
+        for ($i = 1; $i < $colspan; $i++) {
+          // replica contenuto colonna
+          $row[$col++] = $text;
+        }
+      }
+    }
+    return $row;
   }
 
 }

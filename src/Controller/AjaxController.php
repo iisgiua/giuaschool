@@ -20,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 Use App\Entity\Staff;
+Use App\Entity\Classe;
 
 
 /**
@@ -167,6 +168,28 @@ class AjaxController extends AbstractController {
   public function sessioneAjaxAction() {
     // restituisce dati
     return new JsonResponse(['ok']);
+  }
+
+  /**
+   * Restituisce la lista degli alunni della classe indicata
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param Classe $classe Classe degli alunni
+   *
+   * @return JsonResponse Informazioni di risposta
+   *
+   * @Route("/ajax/classe/{classe}", name="ajax_classe",
+   *    requirements={"classe": "\d+"},
+   *    defaults={"classe": 0},
+   *    methods={"POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function classeAjaxAction(EntityManagerInterface $em, Classe $classe) {
+    // legge alunni
+    $dati = $em->getRepository('App:Alunno')->classe($classe->getId());
+    // restituisce dati
+    return new JsonResponse($dati);
   }
 
 }

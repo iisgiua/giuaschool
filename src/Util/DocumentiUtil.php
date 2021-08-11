@@ -158,30 +158,46 @@ class DocumentiUtil {
       case 'add':     // crea
         if (!$documento->getId()) {
           // documento non esiste su db
-          if (in_array($documento->getTipo(), ['L', 'P', 'R'])) {
-            // piano lavoro/programma/relazione
-            $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
-              'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
-              'alunno' => $documento->getAlunno()]);
-            if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
-              // cattedra docente esiste (escluso potenziamento e Ed.Civica)
-              if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
-                // relazione finale di sostegno: ok
+          switch ($documento->getTipo()) {
+            case 'L':   // piano di lavoro
+            case 'P':   // programma finale
+            case 'R':   // relazione finale
+              $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
+                'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
+                'alunno' => $documento->getAlunno()]);
+              if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
+                // cattedra docente esiste (escluso potenziamento e Ed.Civica)
+                if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
+                  // relazione finale di sostegno: ok
+                  return true;
+                }
+                if ($documento->getMateria()->getTipo() != 'S' &&
+                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
+                  // cattedra curricolare, escluso quinte per programmi e relazioni: ok
+                  return true;
+                }
+              }
+              break;
+            case 'M':   // documento 15 maggio
+              if ($documento->getClasse()->getAnno() == 5 && $documento->getClasse()->getCoordinatore() &&
+                  $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
+                // docente coordinatore di quinta: ok
                 return true;
               }
-              if ($documento->getMateria()->getTipo() != 'S' &&
-                  ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
-                // cattedra curricolare, escluso quinte per programmi e relazioni: ok
+              break;
+            case 'B':   // diagnosi BES
+            case 'H':   // PEI
+            case 'D':   // PDP
+              if ($docente->getResponsabileBes()) {
+                // utente responsabile BES: ok
                 return true;
               }
-            }
-          } elseif ($documento->getTipo() == 'M' && $documento->getClasse()->getAnno() == 5 &&
-                    $documento->getClasse()->getCoordinatore() &&
-                    $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
-            // documento 15 maggio e docente coordinatore di quinta: ok
-            return true;
-          } else {
-            // altri documenti
+              break;
+            default:    // documenti generici
+              if ($docente instanceOf Staff) {
+                // utente staff: ok
+                return true;
+              }
           }
         }
         break;
@@ -193,30 +209,47 @@ class DocumentiUtil {
             // utente è autore di documento: ok
             return true;
           }
-          if (in_array($documento->getTipo(), ['L', 'P', 'R'])) {
-            // documento: piano lavoro/programma/relazione
-            $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
-              'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
-              'alunno' => $documento->getAlunno()]);
-            if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
-              // cattedra docente esiste (escluso potenziamento e Ed.Civica)
-              if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
-                // relazione finale di sostegno: ok
+          switch ($documento->getTipo()) {
+            case 'L':   // piano di lavoro
+            case 'P':   // programma finale
+            case 'R':   // relazione finale
+              $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
+                'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
+                'alunno' => $documento->getAlunno()]);
+              if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
+                // cattedra docente esiste (escluso potenziamento e Ed.Civica)
+                if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
+                  // relazione finale di sostegno: ok
+                  return true;
+                }
+                if ($documento->getMateria()->getTipo() != 'S' &&
+                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
+                  // cattedra curricolare, escluso quinte per programmi e relazioni: ok
+                  return true;
+                }
+              }
+              break;
+            case 'M':   // documento 15 maggio
+              if ($documento->getClasse()->getAnno() == 5 && $documento->getClasse()->getCoordinatore() &&
+                  $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
+                // docente coordinatore di quinta: ok
                 return true;
               }
-              if ($documento->getMateria()->getTipo() != 'S' &&
-                  ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L')) {
-                // cattedra curricolare, escluso quinte per programmi e relazioni: ok
+              break;
+            case 'B':   // diagnosi BES
+            case 'H':   // PEI
+            case 'D':   // PDP
+              if ($docente->getResponsabileBes() && (!$docente->getResponsabileBesSede() ||
+                  $docente->getResponsabileBesSede()->getId() == $documento->getClasse()->getSede()->getId())) {
+                // utente responsabile BES di scuola o di stessa sede di alunno: ok
                 return true;
               }
-            }
-          } elseif ($documento->getTipo() == 'M' && $documento->getClasse()->getAnno() == 5 &&
-                    $documento->getClasse()->getCoordinatore() &&
-                    $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
-            // documento 15 maggio e docente coordinatore: ok
-            return true;
-          } else {
-            // altri documenti
+              break;
+            default:    // documenti generici
+              if ($docente instanceOf Staff) {
+                // utente staff: ok
+                return true;
+              }
           }
         }
         break;
@@ -294,11 +327,23 @@ class DocumentiUtil {
         $titolo = 'Documento 15 maggio - Classe: '.$nomeClasse;
         $nome = 'Documento 15 maggio '.$nomeClasse;
         break;
+      case 'B':
+        // diagnosi alunno BES
+        $titolo = 'Diagnosi - Alunno: '.$nomeAlunno;
+        $nome = 'Diagnosi '.$nomeAlunno;
+        break;
+      case 'H':
+        // PEI
+        $titolo = 'P.E.I. - Alunno: '.$nomeAlunno;
+        $nome = 'PEI '.$nomeAlunno;
+        break;
+      case 'D':
+        // PDP
+        $titolo = 'P.D.P. - Alunno: '.$nomeAlunno;
+        $nome = 'PDP '.$nomeAlunno;
+        break;
     }
-    $nome = strtoupper(preg_replace('/\W+/','-', $nome));
-    if (substr($nome, -1) == '-') {
-      $nome = substr($nome, 0, -1);
-    }
+    $nome = $this->normalizzaNome($nome);
     $nomefile = $nome;
     // imposta documento allegato
     $allegato = (new File)
@@ -399,6 +444,9 @@ class DocumentiUtil {
       // destinatari predeterminati
       switch ($documento->getTipo()) {
         case 'L':   // piani di lavoro
+        case 'B':   // diagnosi alunno BES
+        case 'H':   // PEI
+        case 'D':   // PDP
           // crea destinatari: CdC
           $destinatari
             ->setSedi(new ArrayCollection([$documento->getClasse()->getSede()]))
@@ -536,7 +584,7 @@ class DocumentiUtil {
     } else {
       // altri documenti in archivio classi
       $dir = $this->dirClassi.'/'.$documento->getClasse()->getAnno().$documento->getClasse()->getSezione();
-      if (in_array($documento->getTipo(), ['H', 'D', 'C'])) {
+      if (in_array($documento->getTipo(), ['B', 'H', 'D'])) {
         // documenti riservati
         $dir .= '/riservato';
       }
@@ -574,8 +622,16 @@ class DocumentiUtil {
       $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
         'docente' => $utente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria()]);
       if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E' &&
-          $documento->getMateria()->getTipo() != 'P') {
+          $documento->getMateria()->getTipo() != 'S') {
         // cattedra docente esiste (escluso potenziamento, Ed.Civica e sostegno)
+        return true;
+      }
+    }
+    if (in_array($documento->getTipo(), ['B', 'H', 'D']) && ($utente instanceOf Docente)) {
+      // documento PEI/PDP/diagnosi e utente docente
+      if ($docente->getResponsabileBes() && (!$docente->getResponsabileBesSede() ||
+          $docente->getResponsabileBesSede()->getId() == $documento->getClasse()->getSede()->getId())) {
+        // utente responsabile BES di scuola o di stessa sede di alunno: ok
         return true;
       }
     }
@@ -647,6 +703,65 @@ class DocumentiUtil {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Recupera i documenti degli alunni BES per il responsabile indicato
+   *
+   * @param Docente $docente Docente responsabile BES
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function besDocente(Docente $docente, $pagina) {
+    // genera documento fittizio per l'azione ADD
+    $documentoAdd = (new Documento)
+      ->setTipo('B');
+    // estrae dati alunni
+    $dati = $this->em->getRepository('App:Documento')->bes($docente->getResponsabileBesSede(), $pagina);
+    foreach ($dati['lista'] as $i=>$alunno) {
+      // dati documenti
+      $dati['documenti'][$i]['lista'] = $this->em->getRepository('App:Documento')->createQueryBuilder('d')
+        ->join('d.alunno', 'a')
+        ->where('d.tipo IN (:tipi) AND d.classe=a.classe AND d.alunno=:alunno')
+        ->orderBy('d.tipo', 'ASC')
+        ->setParameters(['tipi' => ['B', 'H', 'D'], 'alunno' => $alunno])
+        ->getQuery()
+        ->getResult();
+      // controlla azioni
+      foreach ($dati['documenti'][$i]['lista'] as $j=>$documento) {
+        if ($this->azioneDocumento('delete', $docente, $documento)) {
+          $dati['documenti'][$i]['delete'][$j] = 1;
+        }
+        if (count($dati['documenti'][$i]['lista']) < 2 &&
+            $this->azioneDocumento('add', $docente, $documentoAdd)) {
+          $dati['documenti'][$i]['add'][$j] = 1;
+        }
+      }
+    }
+    // controlla azioni
+    if ($this->azioneDocumento('add', $docente, $documentoAdd)) {
+      $dati['azioni']['add'] = 1;
+    }
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce il nome di file normalizzato
+   *
+   * @param string $nome Nome di file da normalizzare
+   *
+   * @return string Nome di file normalizzato
+   */
+  public function normalizzaNome($nome) {
+    $testo = mb_strtoupper($nome, 'UTF-8');
+    $testo = str_replace(['À', 'È', 'É', 'Ì', 'Ò', 'Ù'], ['A', 'E', 'E', 'I', 'O', 'U'], $testo);
+    $testo = preg_replace('/\W+/','-', $testo);
+    if (substr($testo, -1) == '-') {
+      $testo = substr($testo, 0, -1);
+    }
+    return $testo;
   }
 
 }

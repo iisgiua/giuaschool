@@ -112,7 +112,7 @@ class DocumentiController extends AbstractController {
     $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
     $info['materia'] = $documento->getMateria()->getNomeBreve();
     // form di inserimento
-    $form = $this->createForm(DocumentoType::class, $documento, [
+    $form = $this->createForm(DocumentoType::class, null, [
       'returnUrl' => $this->generateUrl('documenti_programmi'), 'formMode' => 'P']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -196,6 +196,12 @@ class DocumentiController extends AbstractController {
       case 'M':
         // documento 15 maggio
         $pagina = 'documenti_maggio';
+        break;
+      case 'B':
+      case 'H':
+      case 'D':
+        // documenti bes
+        $pagina = 'documenti_bes';
         break;
       default:
         // piani di lavoro
@@ -283,7 +289,7 @@ class DocumentiController extends AbstractController {
     $info['materia'] = $documento->getMateria()->getNomeBreve().($documento->getAlunno() ?
       ' - '.$documento->getAlunno()->getCognome().' '.$documento->getAlunno()->getNome() : '');
     // form di inserimento
-    $form = $this->createForm(DocumentoType::class, $documento, [
+    $form = $this->createForm(DocumentoType::class, null, [
       'returnUrl' => $this->generateUrl('documenti_relazioni'), 'formMode' => 'R']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -389,7 +395,7 @@ class DocumentiController extends AbstractController {
     $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
     $info['materia'] = $documento->getMateria()->getNomeBreve();
     // form di inserimento
-    $form = $this->createForm(DocumentoType::class, $documento, [
+    $form = $this->createForm(DocumentoType::class, null, [
       'returnUrl' => $this->generateUrl('documenti_piani'), 'formMode' => 'L']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -492,7 +498,7 @@ class DocumentiController extends AbstractController {
     // informazioni da visualizzare
     $info['classe'] = $documento->getClasse()->getAnno().'ª '.$documento->getClasse()->getSezione();
     // form di inserimento
-    $form = $this->createForm(DocumentoType::class, $documento, [
+    $form = $this->createForm(DocumentoType::class, null, [
       'returnUrl' => $this->generateUrl('documenti_maggio'), 'formMode' => 'M']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
@@ -599,7 +605,7 @@ class DocumentiController extends AbstractController {
     }
     // form filtro
     $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'filtroDocenti',
-      'values' => [$criteri['filtro'], $criteri['tipo'], $criteri['classe'], $this->getUser()->getSede()]]);
+      'values' => [$this->getUser()->getSede(), $criteri['filtro'], $criteri['tipo'], $criteri['classe']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -628,5 +634,185 @@ class DocumentiController extends AbstractController {
       'dati' => $dati,
       'info' => $info));
   }
+
+  /**
+   * Gestione inserimento dei documenti per gli alunni BES
+   *
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/documenti/bes/{pagina}", name="documenti_bes",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function besAction(SessionInterface $session, DocumentiUtil $doc, $pagina) {
+    // controlla accesso a funzione
+    if (!$this->getUser()->getResponsabileBes()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // recupera pagina dalla sessione
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $session->get('/APP/ROUTE/documenti_bes/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $session->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $doc->besDocente($this->getUser(), $pagina);
+    $info['pagina'] = $pagina;
+    // mostra la pagina di risposta
+    return $this->render('documenti/bes.html.twig', array(
+      'pagina_titolo' => 'page.documenti_bes',
+      'dati' => $dati,
+      'info' => $info));
+  }
+
+  /**
+   * Gestione inserimento dei documenti per gli alunni BES
+   *
+   * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/documenti/bes/add/{alunno}", name="documenti_bes_add",
+   *    requirements={"alunno": "\d+"},
+   *    defaults={"alunno": 0},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+   public function besAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
+                                Alunno $alunno=null) {
+     // inizializza
+     $info = [];
+     $classe = null;
+     $varSessione = '/APP/FILE/documenti_bes_add/files';
+     if ($request->isMethod('GET')) {
+       // inizializza sessione per allegati
+       $session->set($varSessione, []);
+     }
+     // controlla accesso a funzione
+     if (!$this->getUser()->getResponsabileBes()) {
+       // errore
+       throw $this->createNotFoundException('exception.id_notfound');
+     }
+     // controlla alunno
+     if ($alunno && (!$alunno->getAbilitato() || !$alunno->getClasse())) {
+       // errore
+       throw $this->createNotFoundException('exception.id_notfound');
+     }
+     // controlla azione
+     $listaTipi = ['B', 'H', 'D'];
+     if ($alunno) {
+       $documentiEsistenti = $em->getRepository('App:Documento')->findBy(['alunno' => $alunno]);
+       $tipiEsistenti = [];
+       foreach ($documentiEsistenti as $des) {
+         $tipiEsistenti[] = $des->getTipo();
+         // toglie anche incompatibile (o PEI o PDP)
+         $tipiEsistenti[] = ($des->getTipo() == 'H' ? 'D' : ($des->getTipo() == 'D' ? 'H' : null));
+       }
+       $listaTipi = array_diff($listaTipi, $tipiEsistenti);
+       if (empty($listaTipi)) {
+         // errore
+         throw $this->createNotFoundException('exception.id_notfound');
+       }
+     }
+     // informazioni da visualizzare
+     if ($alunno) {
+       $classe = $alunno->getClasse();
+       $info['classe'] = $classe->getAnno().'ª '.$classe->getSezione();
+       $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
+       $info['sesso'] = $alunno->getSesso();
+     }
+     // crea documento
+     $documento = (new Documento())
+       ->setTipo(array_values($listaTipi)[0])
+       ->setDocente($this->getUser())
+       ->setClasse($classe)
+       ->setAlunno($alunno)
+       ->setListaDestinatari(new ListaDestinatari());
+     $em->persist($documento);
+     // controllo permessi
+     if (!$doc->azioneDocumento('add', $this->getUser(), $documento)) {
+       // errore
+       throw $this->createNotFoundException('exception.id_notfound');
+     }
+     // form di inserimento
+     $form = $this->createForm(DocumentoType::class, null, [
+       'returnUrl' => $this->generateUrl('documenti_bes'), 'formMode' => $documento->getTipo(),
+       'values' => [$this->getUser()->getResponsabileBesSede(), $listaTipi, $alunno]]);
+     $form->handleRequest($request);
+     if ($form->isSubmitted() && $form->isValid()) {
+       // controllo errori
+       $allegati = $session->get($varSessione, []);
+       $tipo = $form->get('tipo')->getData();
+       $alunnoIndividuale = $alunno ? null :
+         $em->getRepository('App:Alunno')->findOneBy(['abilitato' => 1,
+         'id' => $form->get('alunno')->getData()]);
+       if (!$alunno) {
+         $controllaTipi = ($tipo == 'H' || $tipo == 'D') ? ['H', 'D'] : ['B'];
+         $documentiEsistenti = $em->getRepository('App:Documento')->findBy(['alunno' => $alunnoIndividuale,
+           'tipo' => $controllaTipi]);
+       }
+       if (count($allegati) < 1) {
+         // errore: numero allegati
+         $form->addError(new FormError($trans->trans('exception.file_mancante')));
+       }
+       if (empty($tipo)) {
+         // errore: tipo mancante
+         $form->addError(new FormError($trans->trans('exception.documento_tipo_mancante')));
+       }
+       if (!$alunno && (empty($alunnoIndividuale) || empty($alunnoIndividuale->getClasse()))) {
+         // errore: alunno mancante o non abilitato e iscritto
+         $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
+       }
+       if (!$alunno && $alunnoIndividuale && $alunnoIndividuale->getClasse() &&
+           $this->getUser()->getResponsabileBesSede() &&
+           $alunnoIndividuale->getClasse()->getSede() != $this->getUser()->getResponsabileBesSede()) {
+         // errore: alunno di sede non ammessa
+         $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
+       }
+       if (!$alunno && $tipo && $alunnoIndividuale  && !empty($documentiEsistenti)) {
+         // errore: documento già presente
+         $form->addError(new FormError($trans->trans('exception.documento_esistente')));
+       }
+       if ($form->isValid()) {
+         // imposta documento
+         $documento->setTipo($tipo);
+         if (!$alunno) {
+           $documento
+            ->setAlunno($alunnoIndividuale)
+            ->setClasse($alunnoIndividuale->getClasse());
+         }
+         // imposta destinatari
+         $doc->impostaDestinatari($documento);
+         // conversione pfd
+         list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
+         // imposta allegato
+         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+         // rimuove sessione con gli allegati
+         $session->remove($varSessione);
+         // ok: memorizzazione e log
+         $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento BES', $documento);
+         // redirezione
+         return $this->redirectToRoute('documenti_bes');
+       }
+     }
+     // mostra la pagina di risposta
+     return $this->render('documenti/bes_add.html.twig', array(
+       'pagina_titolo' => 'page.documenti_bes',
+       'form' => $form->createView(),
+       'form_title' => 'title.nuovo_documento_bes',
+       'info' => $info));
+   }
 
 }

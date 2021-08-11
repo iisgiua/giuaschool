@@ -222,7 +222,9 @@ Schema dello scenario: visualizza lista cattedre piani/programmi/relazioni con d
     | R    | Relazioni |
 
 Scenario: visualizza lista cattedre relazioni con documenti per sostegno di docenti diversi su stesso alunno
-  Data ricerca istanze di tipo "Materia":
+  Dato logout utente
+  E login utente "lucillatristana.zanini"
+  E ricerca istanze di tipo "Materia":
     | id  | tipo | nome        |
     | $m1 | S    |             |
   E ricerca istanze di tipo "Classe":
@@ -233,12 +235,12 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno di doce
     | $a1  | $cl1   | si        |
   E istanze di tipo "Cattedra":
     | id  | attiva | classe | materia | tipo | docente | alunno |
-    | $c1 | si     | $cl1   | $m1     | N    | #logged | $a1    |
-    | $c2 | si     | $cl1   | $m1     | N    | #other  | $a1    |
+    | $c1 | si     | $cl1   | $m1     | N    | #other  | $a1    |
+    | $c2 | si     | $cl1   | $m1     | N    | #logged | $a1    |
   E istanze di tipo "Documento":
     | id  | classe | materia | alunno | docente | tipo |
-    | $d1 | $cl1   | $m1     | $a1    | #logged | R    |
-    | $d2 | $cl1   | $m1     | $a1    | #other  | R    |
+    | $d1 | $cl1   | $m1     | $a1    | #other  | R    |
+    | $d2 | $cl1   | $m1     | $a1    | #logged | R    |
   Quando pagina attiva "documenti_docenti"
   E selezioni opzione "Tutti" da lista "documento_filtro"
   E selezioni opzione "Relazioni" da lista "documento_tipo"
@@ -249,7 +251,7 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno di doce
   E vedi "1" riga nella tabella
   E vedi in una riga della tabella i dati:
     | classe e materia                                                                 | docenti                                                           | documento                        |
-    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c1:docente.nome,docente.cognome $c2:docente.nome,docente.cognome | /Documento PDF.*Documento Excel/ |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c1:docente.nome,docente.cognome $c2:docente.nome,docente.cognome | /Documento Excel.*Documento PDF/ |
 
 Scenario: visualizza lista cattedre relazioni con documenti per sostegno stesso docente su alunni diversi
   Data ricerca istanze di tipo "Materia":
@@ -387,9 +389,9 @@ Schema dello scenario: visualizza filtro documenti presenti/mancanti per documen
     | mancanti | Documento non inserito | $c2      |
 
 Schema dello scenario: visualizza filtro classi documenti
-  Data modifica utente attuale con parametri:
-    | nomeParam   | valoreParam   |
-    | sede        | null           |
+  Data modifica utente connesso:
+    | sede |
+    | null |
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
@@ -426,9 +428,9 @@ Schema dello scenario: visualizza filtro classi documenti
     | R    | Relazioni | $cl2:id | Documento non inserito | $c2      |
 
 Schema dello scenario: visualizza filtro classi documenti del 15 maggio
-  Data modifica utente attuale con parametri:
-    | nomeParam | valoreParam |
-    | sede      | null         |
+  Data modifica utente connesso:
+    | sede |
+    | null |
   E modifica istanze di tipo "Classe":
     | anno | sezione | #coordinatore |
     | 5    | A       | #other        |
@@ -468,9 +470,9 @@ Schema dello scenario: visualizza filtro classi documenti del 15 maggio
 # Bisogna controllare memorizzazione dati di sessione
 
 Schema dello scenario: modifica filtri e controlla che siano memorizzati in sessione
-  Data modifica utente attuale con parametri:
-    | nomeParam | valoreParam |
-    | sede      | null         |
+  Data modifica utente connesso:
+    | sede |
+    | null |
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
