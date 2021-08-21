@@ -38,10 +38,7 @@ Scenario: visualizza solo lista cattedre utili per inserimento
     | $c7 | #logged | no     | $m4     |        | N    |
     | $c8 | #logged | si     | $m4     | $cl1   | I    |
   Quando pagina attiva "documenti_programmi"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | documento | azione |
-  E vedi "3" righe nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
     | $c2:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
@@ -49,7 +46,8 @@ Scenario: visualizza solo lista cattedre utili per inserimento
 
 Scenario: visualizza lista vuota cattedre docente
   Quando pagina attiva "documenti_programmi"
-  Allora la sezione "#gs-main" non contiene "/<table/i"
+  Allora non vedi la tabella:
+    | classe e materia | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non è previsto il caricamento dei programmi svolti/i"
 
 Scenario: visualizza lista cattedre docente con documenti
@@ -65,10 +63,7 @@ Scenario: visualizza lista cattedre docente con documenti
     | id  | classe     | materia     | tipo |
     | $d1 | $c2:classe | $c2:materia | P    |
   Quando pagina attiva "documenti_programmi"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | documento | azione |
-  E vedi "2" righe nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
     | $c2:classe,classe.corso,classe.sede,materia.nome | Documento Excel        | Cancella |

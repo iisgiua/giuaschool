@@ -70,7 +70,7 @@ Scenario: visualizza errore per pagina inserimento di relazione già inserita da
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
     | classe        | materia        |
     | $c1:classe.id | $c1:materia.id |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per pagina inserimento di relazione già inserita da altri
   Data ricerca istanze di tipo "Materia":
@@ -93,7 +93,7 @@ Scenario: visualizza errore per pagina inserimento di relazione già inserita da
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
     | classe  | materia | alunno |
     | $cl1:id | $m1:id  | $a2:id |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
 
 Schema dello scenario: visualizza errore per pagina inserimento di cattedra inesistente
   Data ricerca istanze di tipo "Materia":
@@ -112,7 +112,7 @@ Schema dello scenario: visualizza errore per pagina inserimento di cattedra ines
   Quando vai alla pagina "documenti_relazioni_add" con parametri:
     | classe        | materia        |
     | $c1:classe.id | $c1:materia.id |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
   Esempi:
     | docente | classe | materia | tipo | attiva |
     | #logged | $cl1   | $m1     | N    | no     |
@@ -141,10 +141,7 @@ Scenario: inserisce relazione e la visualizza su lista cattedre
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_relazioni"
-  E vedi nella tabella le colonne:
-    | classe e materia | documento | azione |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  E vedi la tabella:
     | classe e materia                                 | documento                           | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Relazione finale.*1B.*Informatica/ | Cancella |
   E vedi file "archivio/classi/1B/RELAZIONE-1B-INFORMATICA.pdf" di dimensione "61514"
@@ -168,10 +165,7 @@ Scenario: inserisce relazione di sostegno e la visualizza su lista cattedre
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_relazioni"
-  E vedi nella tabella le colonne:
-    | classe e materia | documento | azione |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  E vedi la tabella:
     | classe e materia                                 | documento                                      | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | /Relazione finale.*1B.*Sostegno - Rossi Mario/ | Cancella |
   E vedi file "archivio/classi/1B/RELAZIONE-1B-SOSTEGNO-ROSSI-MARIO.pdf" di dimensione "61514"
@@ -192,12 +186,10 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
   Allora vedi pagina "documenti_relazioni"
-  E vedi nella tabella le colonne:
-    | classe e materia | documento | azione |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
     | $c1:classe,classe.corso,classe.sede,materia.nome | Documento non inserito | Aggiungi |
+  E non vedi file "archivio/classi/1B/RELAZIONE-1B-INFORMATICA.pdf"
 
 Scenario: impedisce inserimento relazione con più di un allegato
   Data ricerca istanze di tipo "Materia":

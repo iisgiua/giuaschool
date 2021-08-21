@@ -229,18 +229,6 @@ class BrowserContext extends BaseContext {
   }
 
   /**
-   * Clicca sul pulsante indicato tramite testo|id|title|name|alt
-   *  $button: testo del pulsante o presente negli attributi id|title|name o alt (se c'è immagine)
-   *
-   * @Given premuto pulsante :button
-   * @When premi pulsante :button
-   */
-  public function premiPulsante($button): void {
-    $this->session->getPage()->pressButton($button);
-    $this->waitForPage();
-  }
-
-  /**
    * Controlla che la pagina attuale sia quella indicata
    *  $pagina: nome della pagina
    *  $tabella: tabella con nomi dei campi ed i valori da assegnare
@@ -304,7 +292,7 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che la tabella indicata abbia il numero di righe specificato
    *  $numero: numero di righe della tabella
-   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *
    * @Then vedi :numero righe nella tabella :indice
    * @Then vedi :numero riga nella tabella :indice
@@ -321,7 +309,7 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che la tabella indicata abbia almeno il numero di righe specificato
    *  $numero: numero di righe della tabella
-   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *
    * @Then vedi almeno :numero righe nella tabella :indice
    * @Then vedi almeno :numero riga nella tabella :indice
@@ -338,7 +326,7 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che la tabella indicata abbia al massimo il numero di righe specificato
    *  $numero: numero di righe della tabella
-   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *
    * @Then vedi al massimo :numero righe nella tabella :indice
    * @Then vedi al massimo :numero riga nella tabella :indice
@@ -373,7 +361,7 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che nella tabella e riga indicata i dati corrispondano a quelli specificati
    *  $numero: numero di riga dei dati della tabella (parte da 1)
-   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
    * @Then vedi nella riga :numero della tabella :indice i dati:
@@ -401,7 +389,7 @@ class BrowserContext extends BaseContext {
   /**
    * Controlla che in una riga qualsiasi della tabella indicata i dati corrispondano a quelli specificati
    * NB: non funziona se si usa nella tabella COLSPAN o ROWSPAN
-   *  $indice: indice progressivo delle tabelli presenti nel contenuto della pagina (parte da 1)
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
    * @Then vedi in una riga della tabella :indice i dati:
@@ -463,20 +451,23 @@ class BrowserContext extends BaseContext {
   }
 
   /**
-   * Clicca su link o pulsante per scaricare un file
-   *  $file: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
+   * Clicca su link o pulsante per eseguire azione
+   *  $testo: testo del link o pulsante, o presente negli attributi id|name|title|alt|value
+   *  $indice: indice progressivo dei pulsanti presenti nel contenuto della pagina (parte da 1)
    *
+   * @Given premuto pulsante :testo
+   * @Given premuto pulsante :testo con indice :indice
+   * @When premi pulsante :testo
+   * @When premi pulsante :testo con indice :indice
    * @When click su :testo
+   * @When click su :testo con indice :indice
    */
-  public function clickSu($testo): void {
-    $link = $this->session->getPage()->findLink($testo);
-    if ($link) {
-      $link->click();
-    } else {
-      $button = $this->session->getPage()->findButton($testo);
-      $this->assertNotEmpty($button);
-      $button->press();
-    }
+  public function clickSu($testo, $indice=1): void {
+    $links = $this->session->getPage()->findAll('named', array('link_or_button', $testo));
+    $this->assertNotEmpty($links[$indice - 1]);
+    $links[$indice - 1]->click();
+    // attesa per completare le modifiche sulla pagina
+    sleep(1);
     $this->waitForPage();
   }
 
@@ -577,33 +568,47 @@ class BrowserContext extends BaseContext {
   }
 
   /**
-   * Seleziona opzione da lista di scelta (SELECT o RADIO button)
+   * Seleziona opzione da lista di scelta tramite SELECT
    *  $valore: testo o valore dell'opzione
    *  $lista: lista identifica tramite attributo id|name|label
    *
-   * @Given selezionata opzione :valore da lista :lista
+   * @Given opzione :valore selezionata da lista :lista
    * @When selezioni opzione :valore da lista :lista
    */
   public function selezioniOpzioneDaLista($valore, $lista): void {
     $field = $this->session->getPage()->findField($lista);
     $this->assertNotEmpty($field);
-    $option = $field->find('named', [strtolower($field->getTagName()) == 'select' ? 'option' : 'radio', $valore]);
+    $option = $field->find('named', ['option', $valore]);
     $this->assertNotEmpty($option);
     $option->click();
+    // attesa per completare le modifiche sulla pagina
+    sleep(1);
   }
 
   /**
-   * Seleziona opzione da lista di scelta (SELECT o RADIO button)
+   * Seleziona opzione da lista di scelta tramite RADIO BUTTON
    *  $valore: testo o valore dell'opzione
-   *  $lista: lista identifica tramite attributo id|name|label
+   *  $lista: lista identifica tramite attributo id|name
    *
-   * @Then vedi selezionata opzione :valore da lista :lista
+   * @Given opzione :valore selezionata da pulsanti radio :lista
+   * @When selezioni opzione :valore da pulsanti radio :lista
    */
-  public function vediSelezionataOpzioneDaLista($valore, $lista): void {
-    $field = $this->session->getPage()->findField($lista);
-    $this->assertNotEmpty($field);
-    $option = $field->find('named', [strtolower($field->getTagName()) == 'select' ? 'option' : 'radio', $valore]);
-    $this->assertTrue($field->getValue() == $option->getValue());
+  public function selezioniOpzioneDaPulsantiRadio($valore, $lista): void {
+    $options = $this->session->getPage()->findAll('named', ['radio', $valore]);
+    $this->assertNotEmpty($options);
+    $option = null;
+    foreach ($options as $opt) {
+      $id = $opt->getAttribute('id');
+      $name = $opt->getAttribute('name');
+      if (preg_match('/^'.preg_quote($lista).'_\d+$/i', $id) || strtolower($lista) == strtolower($name)) {
+        $option = $opt;
+        break;
+      }
+    }
+    $this->assertNotEmpty($option);
+    $option->click();
+    // attesa per completare le modifiche sulla pagina
+    sleep(1);
   }
 
   /**
@@ -625,8 +630,74 @@ class BrowserContext extends BaseContext {
     // controlla dati
     foreach ($dati->getHash() as $ri=>$riga) {
       foreach (array_values($riga) as $co=>$val) {
-        $this->assertTrue(preg_match($this->convertSearch($val), strtolower($valori[$ri][$co])),
+        $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$val.' | '.$valori[$ri][$co]);
+        $this->assertTrue(preg_match($this->convertSearch($val), $valori[$ri][$co]),
           'Table row '.($ri + 1).' is different');
+      }
+    }
+  }
+
+  /**
+   * Controlla che la tabella indicata abbia le intestazioni e i dati corrispondenti a quelli specificati,
+   * ma non considera l'ordine delle righe
+   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
+   *  $dati: intestazione e dati da confrontare con la tabella indicata
+   *
+   * @Then vedi la tabella :indice non ordinata:
+   * @Then vedi la tabella non ordinata:
+   */
+  public function vediLaTabellaNonOrdinata($indice=1, TableNode $dati): void {
+    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
+    $this->assertNotEmpty($tabelle[$indice - 1]);
+    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    // controlla intestazioni
+    foreach (array_keys($dati->getHash()[0]) as $i=>$nome) {
+      $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
+    }
+    // controlla dati
+    $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
+    $righeTrovate = [];
+    for ($ri = 0; $ri < count($valori); $ri++) {
+      foreach ($dati->getHash() as $idx=>$riga) {
+        if (in_array($dati->getRowLine($idx), $righeTrovate)) {
+          $trovato = false;
+          continue;
+        }
+        $trovato = true;
+        foreach (array_values($riga) as $co=>$val) {
+          if (!preg_match($this->convertSearch($val), $valori[$ri][$co])) {
+            $trovato = false;
+            break;
+          }
+        }
+        if ($trovato) {
+          break;
+        }
+      }
+      $this->assertTrue($trovato, 'Table row '.($ri + 1).' not found');
+      $righeTrovate[] = $dati->getRowLine($idx);
+    }
+  }
+
+  /**
+   * Controlla che la tabella con le intestazioni indicate non sia presente nella pagina
+   *  $dati: intestazione della tabella da controllare
+   *
+   * @Then non vedi la tabella:
+   */
+  public function nonVediLaTabella(TableNode $dati): void {
+    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
+    if (!empty($tabelle)) {
+      foreach ($tabelle as $tabella) {
+        list($intestazione, $valori) = $this->parseTable($tabella);
+        $trovato = true;
+        foreach ($dati->getRows()[0] as $i=>$nome) {
+          if (strtolower($nome) != strtolower($intestazione[$i])) {
+            $trovato = false;
+            break;
+          }
+        }
+        $this->assertFalse($trovato);
       }
     }
   }

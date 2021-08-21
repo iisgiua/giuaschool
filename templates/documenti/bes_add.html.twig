@@ -21,7 +21,7 @@
   {% if info.alunno is not defined %}
       {{ form_row(form.classe) }}
       <div class="form-group">
-        <label class="col-sm-2 control-label" for="documento_classe">Alunno</label>
+        <label class="col-sm-2 control-label" for="documento_alunnoIndividuale">Alunno</label>
         <div class="col-sm-10">
           <div id="gs-info-alunno" class="alert alert-warning gs-big" role="alert">
             <strong>Scegli prima la classe e poi seleziona l'alunno nella lista che verrà mostrata.</strong>
@@ -113,12 +113,12 @@ $(document).ready(function() {
           var r=Math.trunc((data.length + 1) / 2);
           $.each(data, function(idx, item){
             if (idx < r) {
-              s1+='<label for="documento_alunno_individuale_'+item.id+'" class="gs-pt-0 gs-checkbox-inline gs-checkbox-split">'+
-                '<input type="radio" id="documento_alunno_individuale_'+item.id+'" name="documento[alunnoIndividuale][]" value="'+item.id+'" onChange="optChange(this)"> '+
+              s1+='<label for="documento_alunnoIndividuale_'+item.id+'" class="gs-pt-0 gs-checkbox-inline gs-checkbox-split">'+
+                '<input type="radio" id="documento_alunnoIndividuale_'+item.id+'" name="documento[alunnoIndividuale][]" value="'+item.id+'" onChange="optChange(this)"> '+
                 item.cognome+' '+item.nome+'</label>';
             } else {
-              s2+='<label for="documento_alunno_individuale_'+item.id+'" class="gs-pt-0 gs-checkbox-inline gs-checkbox-split">'+
-                '<input type="radio" id="documento_alunno_individuale_'+item.id+'" name="documento[alunnoIndividuale][]" value="'+item.id+'" onChange="optChange(this)"> '+
+              s2+='<label for="documento_alunnoIndividuale_'+item.id+'" class="gs-pt-0 gs-checkbox-inline gs-checkbox-split">'+
+                '<input type="radio" id="documento_alunnoIndividuale_'+item.id+'" name="documento[alunnoIndividuale][]" value="'+item.id+'" onChange="optChange(this)"> '+
                 item.cognome+' '+item.nome+'</label>';
             }
           });
@@ -131,7 +131,7 @@ $(document).ready(function() {
         }, 'json');
     } else {
       $('#gs-info-alunno').show();
-      $('#gs-select-alunno').hide();
+      $('#gs-alunno-individuale').hide();
     }
   }).change();
 });

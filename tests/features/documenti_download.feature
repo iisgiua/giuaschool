@@ -16,7 +16,7 @@ Scenario: visualizza errore per scaricamento documento non esistente
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | 12345     |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per scaricamento piano di lavoro senza permesso di lettura
   Dato login utente con ruolo esatto "Docente"
@@ -38,7 +38,7 @@ Scenario: visualizza errore per scaricamento piano di lavoro senza permesso di l
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per scaricamento programma senza permesso di lettura
   Dato login utente con ruolo esatto "Docente"
@@ -60,7 +60,7 @@ Scenario: visualizza errore per scaricamento programma senza permesso di lettura
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per scaricamento relazione senza permesso di lettura
   Dato login utente con ruolo esatto "Docente"
@@ -82,7 +82,7 @@ Scenario: visualizza errore per scaricamento relazione senza permesso di lettura
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per scaricamento documento del 15 maggio senza permesso di lettura
   Dato login utente con ruolo esatto "Docente"
@@ -105,7 +105,34 @@ Scenario: visualizza errore per scaricamento documento del 15 maggio senza perme
   Quando vai alla pagina "documenti_download" con parametri:
     | documento |
     | $d1:id    |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
+
+Schema dello scenario: visualizza errore per scaricamento documento BES senza permesso di lettura
+  Dato login utente con ruolo esatto "Docente"
+  E modifica utente connesso:
+    | responsabileBes |
+    | no              |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe | abilitato |
+    | $a1 | $cl1   | si        |
+  E crea istanze di tipo "ListaDestinatari":
+    | id  |
+    | $ld |
+  E istanze di tipo "Documento":
+    | id  | classe | alunno | docente | tipo   | ListaDestinatari |
+    | $d1 | $cl1   | $a1    | #other  | <tipo> | $ld              |
+  Quando vai alla pagina "documenti_download" con parametri:
+    | documento |
+    | $d1:id    |
+  Allora vedi errore pagina "404"
+  Esempi:
+    | tipo |
+    | B    |
+    | H    |
+    | D    |
 
 
 ################################################################################
@@ -195,6 +222,30 @@ Scenario: scarica documento del 15 maggio inserito
   Quando pagina attiva "documenti_maggio"
   E click su "Documento Excel"
   Allora file scaricato con nome "documento-excel-versione-1.xlsx" e dimensione "66812"
+
+Schema dello scenario: scarica documento BES inserito
+  Dato login utente con ruolo esatto "Docente"
+  E modifica utente connesso:
+    | responsabileBes | responsabileBesSede |
+    | si              | null                |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe | abilitato |
+    | $a1 | $cl1   | si        |
+  E istanze di tipo "Documento":
+    | id  | classe | alunno | tipo   |
+    | $d1 | $cl1   | $a1    | <tipo> |
+  E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/3A/riservato/documento-xlsx.xlsx"
+  Quando pagina attiva "documenti_bes"
+  E click su "Documento Excel"
+  Allora file scaricato con nome "documento-excel-versione-1.xlsx" e dimensione "66812"
+  Esempi:
+    | tipo |
+    | B    |
+    | H    |
+    | D    |
 
 
 ################################################################################

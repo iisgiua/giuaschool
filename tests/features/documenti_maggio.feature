@@ -26,16 +26,14 @@ Scenario: visualizza solo lista cattedre di coordinatore per inserimento
     | 5    | A       | #logged       |
     | 4    | A       | #logged       |
   Quando pagina attiva "documenti_maggio"
-  Allora vedi nella tabella le colonne:
-    | classe | documento | azione |
-  E vedi "1" righe nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe  | documento              | azione   |
     | 5ª A    | Documento non inserito | Aggiungi |
 
 Scenario: visualizza lista vuota cattedre di coordinatore
   Quando pagina attiva "documenti_maggio"
-  Allora la sezione "#gs-main" non contiene "/<table/i"
+  Allora non vedi la tabella:
+    | classe | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non è previsto il caricamento del documento del 15 maggio/i"
 
 Scenario: visualizza lista cattedre di coordinatore con documenti
@@ -51,10 +49,7 @@ Scenario: visualizza lista cattedre di coordinatore con documenti
     | id  | classe | tipo |
     | $d1 | $c1    | M    |
   Quando pagina attiva "documenti_maggio"
-  Allora vedi nella tabella le colonne:
-    | classe | documento | azione |
-  E vedi "2" righe nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe                      | documento              | azione   |
     | $c1:anno,sezione,corso,sede | Documento Excel        | Cancella |
     | $c2:anno,sezione,corso,sede | Documento non inserito | Aggiungi |

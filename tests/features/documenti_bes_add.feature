@@ -17,130 +17,178 @@ Contesto: login docente responsabile BES
 
 ################################################################################
 # Bisogna controllare prerequisiti per inserimento documenti BES
-@debug
+
 Scenario: visualizza pagina inserimento documento BES di nuovo alunno
   Quando pagina attiva "documenti_bes"
+  E la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   E click su "Aggiungi"
   Allora vedi pagina "documenti_bes_add"
+  E la sezione "#gs-main .panel-title" contiene "/Inserisci il documento relativo all'alunno BES/"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) label" contiene "Classe"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(2) label" contiene "Alunno"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) label" contiene "Tipo di documenti"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "Diagnosi"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.E.I."
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.D.P."
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(4) label" contiene "Documento"
+  E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
+  E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
 
-  #-- E la sezione "#gs-main .panel-title" contiene "/Inserisci il documento del 15 maggio/"
-  #-- E la sezione "#gs-main .panel-body" contiene "/Classe:\s*5ª A/"
+Schema dello scenario: visualizza pagina inserimento nuovo documento BES di alunno con altro documento
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 2    | B       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe | abilitato |
+    | $a1 | $cl1   | si        |
+  E istanze di tipo "Documento":
+    | id  | classe | alunno | tipo   |
+    | $d1 | $cl1   | $a1    | <tipo> |
+  Quando pagina attiva "documenti_bes"
+  E click su "Aggiungi" con indice "2"
+  Allora vedi pagina "documenti_bes_add" con parametri:
+    | alunno |
+    | $a1:id |
+  E la sezione "#gs-main .panel-title" contiene "/Inserisci il documento relativo all'alunno BES/"
+  E la sezione "#gs-main .panel-body" contiene "$a1:classe,cognome,nome"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) label" contiene "Tipo di documenti"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" contiene "<opzione1>"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" contiene "<opzione2>"
+  Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione3>"
+  Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione4>"
+  E la sezione "#gs-main .panel-body form .form-group:nth-of-type(2) label" contiene "Documento"
+  E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
+  E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
+  Ma la sezione "#gs-main .panel-body form label" non contiene "Classe"
+  Ma la sezione "#gs-main .panel-body form label" non contiene "Alunno"
+  Esempi:
+    | tipo | opzione1 | opzione2 | opzione3 | opzione4 |
+    | B    | P.E.I.   | P.D.P.   | Diagnosi | Diagnosi |
+    | H    | Diagnosi | Diagnosi | P.E.I.   | P.D.P.   |
+    | D    | Diagnosi | Diagnosi | P.E.I.   | P.D.P.   |
 
-#-- Scenario: visualizza pagina inserimento nuovo documento BES di alunno con altro documento
+Schema dello scenario: impedisce visualizzazione pagina inserimento quando documenti BES già inseriti
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 2    | B       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe | abilitato |
+    | $a1 | $cl1   | si        |
+  E istanze di tipo "Documento":
+    | id  | classe | alunno | tipo    |
+    | $d1 | $cl1   | $a1    | <tipo1> |
+    | $d2 | $cl1   | $a1    | <tipo2> |
+  Quando pagina attiva "documenti_bes"
+  Allora vedi la tabella non ordinata:
+    | alunno                                  | documento       | azione       |
+    | $a1 $a1:classe,classe.corso,classe.sede | Documento Excel | /^Cancella$/ |
+    | $a1 $a1:classe,classe.corso,classe.sede | Documento Pdf   | /^Cancella$/ |
+  Esempi:
+    | tipo1 | tipo2 |
+    | B     | H     |
+    | B     | D     |
 
-#-- Scenario: visualizza errore per pagina inserimento documento 15 maggio già inserito
-  #-- Data modifica istanze di tipo "Classe":
-    #-- | anno | sezione | #coordinatore |
-    #-- | 5    | A       | #logged       |
-  #-- E ricerca istanze di tipo "Classe":
-    #-- | id   | anno | sezione |
-    #-- | $c1  | 5    | A       |
-  #-- E istanze di tipo "Documento":
-    #-- | id  | classe     | docente | tipo |
-    #-- | $d1 | $c1        | #logged | M    |
-  #-- Quando vai alla pagina "documenti_bes_add" con parametri:
-    #-- | classe |
-    #-- | $c1:id |
-  #-- Allora vedi errore pagina 404
-
-#-- Schema dello scenario: visualizza errore per pagina inserimento di cattedra di coordinatore inesistente
-  #-- Data modifica istanze di tipo "Classe":
-    #-- | anno | sezione | #coordinatore |
-    #-- | 5    | A       | null          |
-    #-- | 2    | B       | #logged       |
-    #-- | 5    | B       | #other        |
-  #-- E ricerca istanze di tipo "Classe":
-    #-- | id   | anno | sezione |
-    #-- | $cl1 | 5    | A       |
-    #-- | $cl2 | 2    | B       |
-    #-- | $cl3 | 5    | B       |
-  #-- Quando vai alla pagina "documenti_bes_add" con parametri:
-    #-- | classe      |
-    #-- | <classe>:id |
-  #-- Allora vedi errore pagina 404
-  #-- Esempi:
-    #-- | classe |
-    #-- | $cl1   |
-    #-- | $cl2   |
-    #-- | $cl3   |
+Schema dello scenario: visualizza errore per pagina inserimento documenti BES già inseriti
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 2    | B       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe | abilitato |
+    | $a1 | $cl1   | si        |
+  E istanze di tipo "Documento":
+    | id  | classe | alunno | tipo    |
+    | $d1 | $cl1   | $a1    | <tipo1> |
+    | $d2 | $cl1   | $a1    | <tipo2> |
+  Quando vai alla pagina "documenti_bes_add" con parametri:
+    | alunno |
+    | $a1:id |
+  Allora vedi errore pagina "404"
+  Esempi:
+    | tipo1 | tipo2 |
+    | B     | H     |
+    | B     | D     |
 
 
 ################################################################################
 # Bisogna caricare un documento da inserire come documento BES
 
-#-- Scenario: inserisce documento 15 maggio e lo visualizza su lista cattedre
-  #-- Data modifica istanze di tipo "Classe":
-    #-- | anno | sezione | #coordinatore |
-    #-- | 5    | A       | #logged       |
-  #-- E ricerca istanze di tipo "Classe":
-    #-- | id   | anno | sezione |
-    #-- | $c1  | 5    | A       |
-  #-- Quando pagina attiva "documenti_bes_add" con parametri:
-    #-- | classe |
-    #-- | $c1:id |
-  #-- E alleghi file "documento-pdf.pdf" a dropzone
-  #-- E premi pulsante "Conferma"
-  #-- Allora vedi pagina "documenti_bes"
-  #-- E vedi nella tabella le colonne:
-    #-- | classe | documento | azione |
-  #-- E vedi "1" riga nella tabella
-  #-- E vedi in una riga della tabella i dati:
-    #-- | classe                      | documento                 | azione   |
-    #-- | $c1:anno,sezione,corso,sede | /Documento 15 maggio.*5A/ | Cancella |
-  #-- E vedi file "archivio/classi/5A/DOCUMENTO-15-MAGGIO-5A.pdf" di dimensione "61514"
+Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserimenti
+  Quando pagina attiva "documenti_bes_add"
+  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<tipo>" da lista "Tipo di documenti"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E premi pulsante "Conferma"
+  Allora vedi pagina "documenti_bes"
+  E vedi la tabella:
+    | alunno               | documento                | azione            |
+    | /Pini Daniela.*3ª A/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
+  E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" di dimensione "61514"
+  Esempi:
+    | tipo     | nome     |
+    | Diagnosi | DIAGNOSI |
+    | P.E.I.   | PEI      |
+    | P.D.P.   | PDP      |
 
-#-- Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
-  #-- Data modifica istanze di tipo "Classe":
-    #-- | anno | sezione | #coordinatore |
-    #-- | 5    | A       | #logged       |
-  #-- E ricerca istanze di tipo "Classe":
-    #-- | id   | anno | sezione |
-    #-- | $c1  | 5    | A       |
-  #-- Quando pagina attiva "documenti_bes_add" con parametri:
-    #-- | classe |
-    #-- | $c1:id |   * @Then vedi :numero righe nella tabella
-   * @Then vedi :numero riga nella tabella
-   */
-  public function vediNumeroRigheNellaTabellaIndicata($numero, $indice=1): void {
-  public function vediRigheNellaTabella($numero, $indice=1): void {
-    $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
-    $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
-  #-- E alleghi file "documento-pdf.pdf" a dropzone
-  #-- E premi pulsante "Annulla"
-  #-- Allora vedi pagina "documenti_bes"
-  #-- E vedi nella tabella le colonne:
-    #-- | classe | documento | azione |
-  #-- E vedi "1" riga nella tabella
-  #-- E vedi in una riga della tabella i dati:
-    #-- | classe                      | documento              | azione   |
-    #-- | $c1:anno,sezione,corso,sede | Documento non inserito | Aggiungi |
+Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza modifiche
+  Quando pagina attiva "documenti_bes_add"
+  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<tipo>" da lista "Tipo di documenti"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E premi pulsante "Annulla"
+  Allora vedi pagina "documenti_bes"
+  E non vedi la tabella:
+    | alunno | documento | azione |
+  Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
+  E non vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
+  Esempi:
+    | tipo     | nome     |
+    | Diagnosi | DIAGNOSI |
+    | P.E.I.   | PEI      |
+    | P.D.P.   | PDP      |
 
-#-- Scenario: impedisce inserimento documento 15 maggio con più di un allegato
-  #-- Data modifica istanze di tipo "Classe":
-    #-- | anno | sezione | #coordinatore |
-    #-- | 5    | A       | #logged       |
-  #-- E ricerca istanze di tipo "Classe":
-    #-- | id   | anno | sezione |
-    #-- | $c1  | 5    | A       |
-  #-- Quando pagina attiva "documenti_bes_add" con parametri:
-    #-- | classe |
-    #-- | $c1:id |
-  #-- E alleghi file "documento-pdf.pdf" a dropzone
-  #-- E alleghi file "documento-docx.docx" a dropzone
-  #-- Allora la sezione "#gs-main .dropzone .dz-error" contiene "/documento-docx\.docx.*Non puoi caricare altri file/i"
+Scenario: errore inserimento documento BES senza selezione classe
+  Quando pagina attiva "documenti_bes_add"
+  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E premi pulsante "Conferma"
+  Allora vedi pagina "documenti_bes_add"
+  E la sezione "#gs-main form .alert" contiene "/Non hai indicato l'alunno/i"
 
-#-- Scenario: impedisce inserimento documento 15 maggio senza allegato
-  #-- Data modifica istanze di tipo "Classe":
-    #-- | anno | sezione | #coordinatore |
-    #-- | 5    | A       | #logged       |
-  #-- E ricerca istanze di tipo "Classe":
-    #-- | id   | anno | sezione |
-    #-- | $c1  | 5    | A       |
-  #-- Quando pagina attiva "documenti_bes_add" con parametri:
-    #-- | classe |
-    #-- | $c1:id |
-  #-- Allora pulsante "Conferma" inattivo
+Scenario: errore inserimento documento BES senza selezione alunno
+  Quando pagina attiva "documenti_bes_add"
+  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E premi pulsante "Conferma"
+  Allora vedi pagina "documenti_bes_add"
+  E la sezione "#gs-main form .alert" contiene "/Non hai indicato l'alunno/i"
+
+Scenario: errore inserimento documento BES senza selezione tipo documento
+  Quando pagina attiva "documenti_bes_add"
+  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E premi pulsante "Conferma"
+  Allora vedi pagina "documenti_bes_add"
+  E la sezione "#gs-main form .alert" contiene "/Non hai indicato il tipo di documento/i"
+
+Scenario: impedisce inserimento documento BES con più di un allegato
+  Quando pagina attiva "documenti_bes_add"
+  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E alleghi file "documento-docx.docx" a dropzone
+  Allora la sezione "#gs-main .dropzone .dz-error" contiene "/documento-docx\.docx.*Non puoi caricare altri file/i"
+
+Scenario: impedisce inserimento documento BES senza allegato
+  Quando pagina attiva "documenti_bes_add"
+  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  Allora pulsante "Conferma" inattivo
 
 
 ################################################################################

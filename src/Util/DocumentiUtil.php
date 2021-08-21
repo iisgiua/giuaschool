@@ -329,17 +329,17 @@ class DocumentiUtil {
         break;
       case 'B':
         // diagnosi alunno BES
-        $titolo = 'Diagnosi - Alunno: '.$nomeAlunno;
+        $titolo = 'Diagnosi - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
         $nome = 'Diagnosi '.$nomeAlunno;
         break;
       case 'H':
         // PEI
-        $titolo = 'P.E.I. - Alunno: '.$nomeAlunno;
+        $titolo = 'P.E.I. - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
         $nome = 'PEI '.$nomeAlunno;
         break;
       case 'D':
         // PDP
-        $titolo = 'P.D.P. - Alunno: '.$nomeAlunno;
+        $titolo = 'P.D.P. - Alunn'.($documento->getAlunno()->getSesso() == 'M' ? 'o' : 'a').': '.$nomeAlunno;
         $nome = 'PDP '.$nomeAlunno;
         break;
     }
@@ -629,8 +629,8 @@ class DocumentiUtil {
     }
     if (in_array($documento->getTipo(), ['B', 'H', 'D']) && ($utente instanceOf Docente)) {
       // documento PEI/PDP/diagnosi e utente docente
-      if ($docente->getResponsabileBes() && (!$docente->getResponsabileBesSede() ||
-          $docente->getResponsabileBesSede()->getId() == $documento->getClasse()->getSede()->getId())) {
+      if ($utente->getResponsabileBes() && (!$utente->getResponsabileBesSede() ||
+          $utente->getResponsabileBesSede()->getId() == $documento->getClasse()->getSede()->getId())) {
         // utente responsabile BES di scuola o di stessa sede di alunno: ok
         return true;
       }

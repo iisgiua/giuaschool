@@ -49,7 +49,7 @@ Scenario: visualizza errore per pagina inserimento documento 15 maggio già inse
   Quando vai alla pagina "documenti_maggio_add" con parametri:
     | classe |
     | $c1:id |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
 
 Schema dello scenario: visualizza errore per pagina inserimento di cattedra di coordinatore inesistente
   Data modifica istanze di tipo "Classe":
@@ -65,7 +65,7 @@ Schema dello scenario: visualizza errore per pagina inserimento di cattedra di c
   Quando vai alla pagina "documenti_maggio_add" con parametri:
     | classe      |
     | <classe>:id |
-  Allora vedi errore pagina 404
+  Allora vedi errore pagina "404"
   Esempi:
     | classe |
     | $cl1   |
@@ -89,10 +89,7 @@ Scenario: inserisce documento 15 maggio e lo visualizza su lista cattedre
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_maggio"
-  E vedi nella tabella le colonne:
-    | classe | documento | azione |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  E vedi la tabella:
     | classe                      | documento                 | azione   |
     | $c1:anno,sezione,corso,sede | /Documento 15 maggio.*5A/ | Cancella |
   E vedi file "archivio/classi/5A/DOCUMENTO-15-MAGGIO-5A.pdf" di dimensione "61514"
@@ -110,12 +107,10 @@ Scenario: annulla inserimento e torna a pagina lista cattedre senza modifiche
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
   Allora vedi pagina "documenti_maggio"
-  E vedi nella tabella le colonne:
-    | classe | documento | azione |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  E vedi la tabella:
     | classe                      | documento              | azione   |
     | $c1:anno,sezione,corso,sede | Documento non inserito | Aggiungi |
+  E non vedi file "archivio/classi/5A/DOCUMENTO-15-MAGGIO-5A.pdf"
 
 Scenario: impedisce inserimento documento 15 maggio con più di un allegato
   Data modifica istanze di tipo "Classe":

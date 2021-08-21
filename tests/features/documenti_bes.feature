@@ -17,7 +17,7 @@ Contesto: login docente responsabile BES
 ################################################################################
 # Bisogna leggere documenti BES visibili al responsabile e mostrarli
 
-Scenario: visualizza solo lista documenti della sede del responsabile
+Schema dello scenario: visualizza solo lista documenti della sede del responsabile
   Data ricerca istanze di tipo "Sede":
     | id  | citta     |
     | $s1 | Bergamo   |
@@ -34,15 +34,20 @@ Scenario: visualizza solo lista documenti della sede del responsabile
     | $a1 | $cl1   | si        |
     | $a2 | $cl2   | si        |
   E istanze di tipo "Documento":
-    | id  | classe | alunno | tipo |
-    | $d1 | $cl1   | $a1    | B    |
-    | $d2 | $cl2   | $a2    | B    |
+    | id  | classe | alunno | tipo   |
+    | $d1 | $cl1   | $a1    | <tipo> |
+    | $d2 | $cl2   | $a2    | <tipo> |
   Quando pagina attiva "documenti_bes"
   Allora vedi la tabella:
     | alunno                   | documento       | azione            |
     | $a1 $cl1 $cl1:corso,sede | Documento Excel | Aggiungi Cancella |
+  Esempi:
+    | tipo |
+    | B    |
+    | H    |
+    | D    |
 
-Scenario: visualizza tutti i documenti per il responsabile della scuola
+Schema dello scenario: visualizza tutti i documenti per il responsabile della scuola
   Data ricerca istanze di tipo "Sede":
     | id  | citta     |
     | $s1 | Bergamo   |
@@ -56,18 +61,24 @@ Scenario: visualizza tutti i documenti per il responsabile della scuola
     | $a1 | $cl1   | si        |
     | $a2 | $cl2   | si        |
   E istanze di tipo "Documento":
-    | id  | classe | alunno | tipo |
-    | $d1 | $cl1   | $a1    | B    |
-    | $d2 | $cl2   | $a2    | B    |
+    | id  | classe | alunno | tipo   |
+    | $d1 | $cl1   | $a1    | <tipo> |
+    | $d2 | $cl2   | $a2    | <tipo> |
   Quando pagina attiva "documenti_bes"
-  Allora vedi la tabella:
+  Allora vedi la tabella non ordinata:
     | alunno                   | documento       | azione            |
     | $a1 $cl1 $cl1:corso,sede | Documento Excel | Aggiungi Cancella |
     | $a2 $cl2 $cl2:corso,sede | Documento Pdf   | Aggiungi Cancella |
+  Esempi:
+    | tipo |
+    | B    |
+    | H    |
+    | D    |
 
 Scenario: visualizza lista vuota per i documenti BES
   Quando pagina attiva "documenti_bes"
-  Allora la sezione "#gs-main" non contiene "/<table/i"
+  Allora non vedi la tabella:
+    | alunno | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   E pulsante "Aggiungi" attivo
 
@@ -80,7 +91,7 @@ Scenario: visualizza più documenti per alunno BES
     | $d1 | $a1:classe | $a1    | B    |
     | $d2 | $a1:classe | $a1    | H    |
   Quando pagina attiva "documenti_bes"
-  E vedi la tabella:
+  E vedi la tabella non ordinata:
     | alunno                                  | documento       | azione   |
     | $a1 $a1:classe,classe.corso,classe.sede | Documento Excel | Cancella |
     | $a1 $a1:classe,classe.corso,classe.sede | Documento Pdf   | Cancella |

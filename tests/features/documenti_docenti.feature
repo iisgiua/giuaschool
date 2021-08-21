@@ -48,10 +48,7 @@ Scenario: visualizza lista cattedre corretta per i piani di lavoro
   E selezioni opzione "Piani" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "3" righe nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe e materia                                      | docenti                                                           | documento              |
     | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome                                  | Documento non inserito |
     | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c2:docente.nome,docente.cognome $c3:docente.nome,docente.cognome | Documento non inserito |
@@ -86,10 +83,7 @@ Scenario: visualizza lista cattedre corretta per i programmi
   E selezioni opzione "Programmi" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "2" righe nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe e materia                                      | docenti                                                           | documento              |
     | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome                                  | Documento non inserito |
     | $c2:classe,classe.corso,classe.sede,materia.nomeBreve | $c2:docente.nome,docente.cognome $c3:docente.nome,docente.cognome | Documento non inserito |
@@ -131,10 +125,7 @@ Scenario: visualizza lista cattedre corretta per le relazioni
   E selezioni opzione "Relazioni" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "5" righe nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe e materia                                                                  | docenti                                                           | documento              |
     | $c1:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c1:docente.nome,docente.cognome                                  | Documento non inserito |
     | $c2:classe,classe.corso,classe.sede,materia.nomeBreve                             | $c2:docente.nome,docente.cognome $c3:docente.nome,docente.cognome | Documento non inserito |
@@ -168,10 +159,7 @@ Scenario: visualizza lista cattedre corretta per i documenti del 15 maggio
   E selezioni opzione "15 maggio" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe | documento |
-  E vedi "2" righe nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe                              | documento              |
     | $c2:classe,classe.corso,classe.sede | Documento non inserito |
     | $c3:classe,classe.corso,classe.sede | Documento non inserito |
@@ -182,7 +170,8 @@ Schema dello scenario: visualizza lista vuota cattedre
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora la sezione "#gs-main" non contiene "/<table/i"
+  Allora non vedi la tabella:
+    | classe | documento |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   Esempi:
     | tipo      |
@@ -209,10 +198,7 @@ Schema dello scenario: visualizza lista cattedre piani/programmi/relazioni con d
   E selezioni opzione "<nome_tipo>" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe e materia                                      | docenti                          | documento       |
     | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome | Documento Excel |
   Esempi:
@@ -246,10 +232,7 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno di doce
   E selezioni opzione "Relazioni" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe e materia                                                                 | docenti                                                           | documento                        |
     | $c1:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c1:docente.nome,docente.cognome $c2:docente.nome,docente.cognome | /Documento Excel.*Documento PDF/ |
 
@@ -277,10 +260,7 @@ Scenario: visualizza lista cattedre relazioni con documenti per sostegno stesso 
   E selezioni opzione "Relazioni" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "2" riga nella tabella
-  E vedi in più righe della tabella i dati:
+  Allora vedi la tabella non ordinata:
     | classe e materia                                                                 | docenti                          | documento       |
     | $c1:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c1:docente.nome,docente.cognome | Documento Excel |
     | $c2:classe,classe.corso,classe.sede,materia.nomeBreve,alunno.cognome,alunno.nome | $c2:docente.nome,docente.cognome | Documento PDF   |
@@ -306,10 +286,7 @@ Scenario: visualizza lista cattedre documenti del 15 maggio con documenti
   E selezioni opzione "15 maggio" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe                              | documento       |
     | $c1:classe,classe.corso,classe.sede | Documento Excel |
 
@@ -338,10 +315,7 @@ Schema dello scenario: visualizza filtro documenti presenti/mancanti
   E selezioni opzione "<nome_tipo>" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe e materia                                             | docenti                                 | documento   |
     | <cattedra>:classe,classe.corso,classe.sede,materia.nomeBreve | <cattedra>:docente.nome,docente.cognome | <documento> |
   Esempi:
@@ -377,10 +351,7 @@ Schema dello scenario: visualizza filtro documenti presenti/mancanti per documen
   E selezioni opzione "15 maggio" da lista "documento_tipo"
   E selezioni opzione "Tutte" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe                                     | documento   |
     | <cattedra>:classe,classe.corso,classe.sede | <documento> |
   Esempi:
@@ -412,10 +383,7 @@ Schema dello scenario: visualizza filtro classi documenti
   E selezioni opzione "<nome_tipo>" da lista "documento_tipo"
   E selezioni opzione "<classe>" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe e materia                                             | docenti                                 | documento   |
     | <cattedra>:classe,classe.corso,classe.sede,materia.nomeBreve | <cattedra>:docente.nome,docente.cognome | <documento> |
   Esempi:
@@ -454,10 +422,7 @@ Schema dello scenario: visualizza filtro classi documenti del 15 maggio
   E selezioni opzione "15 maggio" da lista "documento_tipo"
   E selezioni opzione "<classe>" da lista "documento_classe"
   E premi pulsante "Filtra"
-  Allora vedi nella tabella le colonne:
-    | classe | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe                                     | documento   |
     | <cattedra>:classe,classe.corso,classe.sede | <documento> |
   Esempi:
@@ -489,16 +454,13 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
     | id  | classe     | materia     | tipo   |
     | $d1 | $c1:classe | $c1:materia | <tipo> |
   E pagina attiva "documenti_docenti"
-  E selezionata opzione "<filtro>" da lista "documento_filtro"
-  E selezionata opzione "<nome_tipo>" da lista "documento_tipo"
-  E selezionata opzione "<classe>" da lista "documento_classe"
+  E opzione "<filtro>" selezionata da lista "documento_filtro"
+  E opzione "<nome_tipo>" selezionata da lista "documento_tipo"
+  E opzione "<classe>" selezionata da lista "documento_classe"
   E premuto pulsante "Filtra"
   Quando vai alla pagina "login_home"
   E vai alla pagina "documenti_docenti"
-  Allora vedi nella tabella le colonne:
-    | classe e materia | docenti | documento |
-  E vedi "1" riga nella tabella
-  E vedi in una riga della tabella i dati:
+  Allora vedi la tabella:
     | classe e materia                                             | docenti                                 | documento   |
     | <cattedra>:classe,classe.corso,classe.sede,materia.nomeBreve | <cattedra>:docente.nome,docente.cognome | <documento> |
   Esempi:

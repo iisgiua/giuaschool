@@ -252,11 +252,6 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // salva screenshot
       $this->numScreenshots++;
       $this->screenshot($this->numScreenshots.'-'.$filename, 1);
-      if (!$scope->getTestResult()->isPassed()) {
-        // visualizza log
-        $logFile = dirname(__DIR__).'/temp/behat.log';
-        print_r(file($logFile));
-      }
     }
   }
 
