@@ -24,6 +24,7 @@ use App\Entity\ListaDestinatari;
 use App\Entity\ListaDestinatariUtente;
 use App\Entity\ListaDestinatariClasse;
 use App\Entity\File;
+use App\Entity\Sede;
 
 
 /**
@@ -661,13 +662,14 @@ class DocumentiUtil {
    * Recupera i documenti dei docenti secondo i criteri indicati
    *
    * @param array $criteri Criteri di ricerca
+   * @param Sede $sede Sede dello staff
    * @param int $pagina Indica il numero di pagina da visualizzare
    *
    * @return array Dati formattati come array associativo
    */
-  public function docenti($criteri, $pagina) {
+  public function docenti($criteri, Sede $sede=null, $pagina) {
     // legge cattedre
-    $dati = $this->em->getRepository('App:Documento')->docenti($criteri, $pagina);
+    $dati = $this->em->getRepository('App:Documento')->docenti($criteri, $sede, $pagina);
     if ($criteri['tipo'] == 'M') {
       // documento del 15 maggio: niente da aggiungere
       return $dati;
@@ -762,6 +764,40 @@ class DocumentiUtil {
       $testo = substr($testo, 0, -1);
     }
     return $testo;
+  }
+
+  /**
+   * Recupera i documenti degli alunni secondo i criteri indicati
+   *
+   * @param array $criteri Criteri di ricerca
+   * @param Sede $sede Sede dello staff
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function alunni($criteri, Sede $sede=null, $pagina) {
+    // legge dati
+    $dati = $this->em->getRepository('App:Documento')->alunni($criteri, $sede, $pagina);
+    // query base
+    $query = $this->em->getRepository('App:Documento')->createQueryBuilder('d')
+      ->join('d.alunno', 'a')
+      ->where('d.tipo IN (:tipi) AND d.classe=a.classe AND d.alunno=:alunno')
+      ->orderBy('d.tipo', 'ASC');
+    if ($criteri['tipo']) {
+      $query
+        ->andWhere('d.tipo=:tipo')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
+    foreach ($dati['lista'] as $i=>$alunno) {
+      // dati documenti
+      $dati['documenti'][$i] = (clone $query)
+        ->setParameter('tipi', ['B', 'H', 'D'])
+        ->setParameter('alunno', $alunno)
+        ->getQuery()
+        ->getResult();
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

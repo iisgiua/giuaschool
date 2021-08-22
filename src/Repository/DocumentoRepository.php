@@ -128,11 +128,12 @@ class DocumentoRepository extends BaseRepository {
    * Recupera i documenti dei docenti secondo i criteri di ricerca indicati
    *
    * @param array $criteri Lista con i criteri di ricerca
+   * @param Sede $sede Sede dello staff
    * @param int $pagina Indica il numero di pagina da visualizzare
    *
    * @return array Dati formattati come array associativo
    */
-  public function docenti($criteri, $pagina) {
+  public function docenti($criteri, Sede $sede=null, $pagina) {
     // query base
     $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
       ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nomeBreve AS materia,d AS documento')
@@ -144,6 +145,12 @@ class DocumentoRepository extends BaseRepository {
       ->groupBy('cl.anno,cl.sezione')
       ->orderBy('cl.anno,cl.sezione,m.nomeBreve', 'ASC')
       ->setParameters(['attiva' => 1, 'potenziamento' => 'P', 'civica' => 'E']);
+    // vincolo di sede
+    if ($sede) {
+      $cattedre
+        ->andWhere('s.id=:sede')
+        ->setParameter('sede', $sede);
+    }
     // tipo di lista
     if ($criteri['filtro'] != 'T') {
       $cattedre
@@ -221,13 +228,54 @@ class DocumentoRepository extends BaseRepository {
       ->join('App:Documento', 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
       ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')
-      ->orderBy('a.cognome,a.nome', 'ASC')
+      ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['abilitato' => 1, 'tipi' => ['B', 'H', 'D']]);
     // vincolo di sede
     if ($sede) {
       $alunni
         ->andWhere('cl.sede=:sede')
         ->setParameter('sede', $sede);
+    }
+    // paginazione
+    $dati = $this->paginazione($alunni->getQuery(), (int) $pagina);
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Recupera i documenti degli alunni secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista con i criteri di ricerca
+   * @param Sede $sede Sede dello staff
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function alunni($criteri, Sede $sede=null, $pagina) {
+    // query base
+    $alunni = $this->_em->getRepository('App:Alunno')->createQueryBuilder('a')
+      ->join('App:Documento', 'd', 'WITH', 'd.alunno=a.id')
+      ->join('a.classe', 'cl')
+      ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')
+      ->orderBy('cl.anno,cl.sezione,a.cognome,a.nome,a.dataNascita', 'ASC')
+      ->setParameters(['abilitato' => 1, 'tipi' => ['B', 'H', 'D']]);
+    // vincolo su sede
+    if ($sede) {
+      $alunni
+        ->andWhere('cl.sede=:sede')
+        ->setParameter('sede', $sede);
+    }
+    // vincolo su tipo
+    if ($criteri['tipo']) {
+      $alunni
+        ->andWhere('d.tipo=:tipo')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
+    // vincolo su classe
+    if ($criteri['classe']) {
+      $alunni
+        ->andWhere('d.classe=:classe')
+        ->setParameter('classe', $criteri['classe']);
     }
     // paginazione
     $dati = $this->paginazione($alunni->getQuery(), (int) $pagina);

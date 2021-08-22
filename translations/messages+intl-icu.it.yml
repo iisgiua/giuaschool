@@ -510,6 +510,8 @@ title.documenti_docenti: Visualizza i documenti dei docenti
 page.documenti_bes: Documenti BES
 title.documenti_bes: Inserimento documenti relativi agli alunni BES
 title.nuovo_documento_bes: Inserisci il documento relativo all'alunno BES
+page.documenti_alunni: Documenti alunni
+title.documenti_alunni: Visualizza i documenti degli alunni
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti

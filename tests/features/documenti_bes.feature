@@ -91,7 +91,7 @@ Scenario: visualizza più documenti per alunno BES
     | $d1 | $a1:classe | $a1    | B    |
     | $d2 | $a1:classe | $a1    | H    |
   Quando pagina attiva "documenti_bes"
-  E vedi la tabella non ordinata:
+  Allora vedi la tabella non ordinata:
     | alunno                                  | documento       | azione   |
     | $a1 $a1:classe,classe.corso,classe.sede | Documento Excel | Cancella |
     | $a1 $a1:classe,classe.corso,classe.sede | Documento Pdf   | Cancella |

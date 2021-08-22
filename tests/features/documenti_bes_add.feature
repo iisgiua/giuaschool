@@ -114,9 +114,9 @@ Schema dello scenario: visualizza errore per pagina inserimento documenti BES gi
 
 Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserimenti
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "3ª A" da lista "documento_classe"
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
-  E selezioni opzione "<tipo>" da lista "Tipo di documenti"
+  E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_bes"
@@ -132,9 +132,9 @@ Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserim
 
 Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza modifiche
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "3ª A" da lista "documento_classe"
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
-  E selezioni opzione "<tipo>" da lista "Tipo di documenti"
+  E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
   Allora vedi pagina "documenti_bes"
@@ -150,7 +150,7 @@ Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza mo
 
 Scenario: errore inserimento documento BES senza selezione classe
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_bes_add"
@@ -158,8 +158,8 @@ Scenario: errore inserimento documento BES senza selezione classe
 
 Scenario: errore inserimento documento BES senza selezione alunno
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "Classe"
-  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_bes_add"
@@ -167,7 +167,7 @@ Scenario: errore inserimento documento BES senza selezione alunno
 
 Scenario: errore inserimento documento BES senza selezione tipo documento
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "3ª A" da lista "documento_classe"
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
@@ -176,18 +176,18 @@ Scenario: errore inserimento documento BES senza selezione tipo documento
 
 Scenario: impedisce inserimento documento BES con più di un allegato
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "3ª A" da lista "documento_classe"
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
-  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E alleghi file "documento-docx.docx" a dropzone
   Allora la sezione "#gs-main .dropzone .dz-error" contiene "/documento-docx\.docx.*Non puoi caricare altri file/i"
 
 Scenario: impedisce inserimento documento BES senza allegato
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "3ª A" da lista "documento_classe"
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
-  E selezioni opzione "Diagnosi" da lista "Tipo di documenti"
+  E selezioni opzione "Diagnosi" da lista "documento_tipo"
   Allora pulsante "Conferma" inattivo
 
 

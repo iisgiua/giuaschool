@@ -425,9 +425,9 @@ Schema dello scenario: inserisce e poi cancella documento BES
     | responsabileBes | responsabileBesSede |
     | si              | null                |
   Quando pagina attiva "documenti_bes_add"
-  E selezioni opzione "3ª A" da lista "Classe"
+  E selezioni opzione "3ª A" da lista "documento_classe"
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
-  E selezioni opzione "<tipo>" da lista "Tipo di documenti"
+  E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E vedi pagina "documenti_bes"

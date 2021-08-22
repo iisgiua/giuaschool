@@ -40,7 +40,7 @@ class DocumentoType extends AbstractType {
     $fnSede = function(EntityRepository $er) {
       return $er->createQueryBuilder('c')
         ->orderBy('c.anno,c.sezione', 'ASC'); };
-    if (in_array($options['formMode'], ['B', 'H', 'D', 'filtroDocenti']) &&
+    if (in_array($options['formMode'], ['B', 'H', 'D', 'filtroDocenti', 'filtroAlunni']) &&
         !empty($options['values'][0])) {
       // filtro su sede
       $fnSede = function(EntityRepository $er) use ($options) {
@@ -70,6 +70,33 @@ class DocumentoType extends AbstractType {
           'required' => true))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['values'][3],
+          'class' => 'App:Classe',
+          'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
+          'placeholder' => 'label.tutte_classi',
+          'query_builder' => $fnSede,
+          'group_by' => function($obj) { return $obj->getSede()->getCitta(); },
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false))
+        ->add('submit', SubmitType::class, array('label' => 'label.filtra',
+          'attr' => ['class' => 'btn-primary']));
+      return;
+    }
+    if ($options['formMode'] == 'filtroAlunni') {
+      // form filtro documenti alunni
+      $builder
+        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
+          'data' => $options['values'][1],
+          'choices' => ['label.documenti_bes_B' => 'B', 'label.documenti_bes_H' => 'H',
+            'label.documenti_bes_D' => 'D'],
+          'placeholder' => 'label.tutti_tipi_documento',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => function($val) { return ['class' => 'gs-no-placeholder']; },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false))
+        ->add('classe', EntityType::class, array('label' => 'label.classe',
+          'data' => $options['values'][2],
           'class' => 'App:Classe',
           'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
           'placeholder' => 'label.tutte_classi',

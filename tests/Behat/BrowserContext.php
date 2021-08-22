@@ -624,15 +624,20 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($tabelle[$indice - 1]);
     list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
-    foreach (array_keys($dati->getHash()[0]) as $i=>$nome) {
+    $datiIntestazioni = array_keys($dati->getHash()[0]);
+    $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
+    foreach ($datiIntestazioni as $i=>$nome) {
       $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
     }
     // controlla dati
-    foreach ($dati->getHash() as $ri=>$riga) {
+    $datiValori = $dati->getHash();
+    $this->assertEquals(count($datiValori), count($valori), 'Table row count is different');
+    foreach ($datiValori as $ri=>$riga) {
       foreach (array_values($riga) as $co=>$val) {
-        $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$val.' | '.$valori[$ri][$co]);
-        $this->assertTrue(preg_match($this->convertSearch($val), $valori[$ri][$co]),
-          'Table row '.($ri + 1).' is different');
+        $cerca = $this->convertSearch($val);
+        $this->logDebug('vediLaTabella ['.$ri.','.$co.'] -> '.$cerca.' | '.$valori[$ri][$co]);
+        $this->assertTrue(preg_match($cerca, $valori[$ri][$co]),
+          'Table cell ['.($ri + 1).', '.($co + 1).'] is different');
       }
     }
   }
@@ -651,7 +656,9 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($tabelle[$indice - 1]);
     list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
-    foreach (array_keys($dati->getHash()[0]) as $i=>$nome) {
+    $datiIntestazioni = array_keys($dati->getHash()[0]);
+    $this->assertEquals(count($datiIntestazioni), count($intestazione), 'Table header has different column number');
+    foreach ($datiIntestazioni as $i=>$nome) {
       $this->assertEquals(strtolower($nome), strtolower($intestazione[$i]), 'Table header is different');
     }
     // controlla dati

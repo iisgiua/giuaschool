@@ -9,8 +9,11 @@ Funzionalità: Visualizzazione documenti dei docenti da parte dello staff
   Bisogna controllare accesso a pagina
 
 
-Contesto: login staff senza nessuna cattedra
+Contesto: login staff di scuola senza nessuna cattedra
 	Dato login utente con ruolo esatto "Staff"
+  E modifica utente connesso:
+    | sede |
+    | null |
   E modifica istanze di tipo "Cattedra":
     | attiva | #attiva |
     | si     | no      |
@@ -172,6 +175,8 @@ Schema dello scenario: visualizza lista vuota cattedre
   E premi pulsante "Filtra"
   Allora non vedi la tabella:
     | classe | documento |
+  E non vedi la tabella:
+    | classe e materia | docenti | documento |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   Esempi:
     | tipo      |
@@ -360,10 +365,7 @@ Schema dello scenario: visualizza filtro documenti presenti/mancanti per documen
     | mancanti | Documento non inserito | $c2      |
 
 Schema dello scenario: visualizza filtro classi documenti
-  Data modifica utente connesso:
-    | sede |
-    | null |
-  E ricerca istanze di tipo "Classe":
+  Data ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
     | $cl2 | 3    | B       |
@@ -396,17 +398,14 @@ Schema dello scenario: visualizza filtro classi documenti
     | R    | Relazioni | $cl2:id | Documento non inserito | $c2      |
 
 Schema dello scenario: visualizza filtro classi documenti del 15 maggio
-  Data modifica utente connesso:
-    | sede |
-    | null |
-  E modifica istanze di tipo "Classe":
+  Data modifica istanze di tipo "Classe":
     | anno | sezione | #coordinatore |
     | 5    | A       | #other        |
-    | 5    | C       | #logged       |
+    | 5    | B       | #logged       |
   E ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 5    | A       |
-    | $cl2 | 5    | C       |
+    | $cl2 | 5    | B       |
   E ricerca istanze di tipo "Materia":
     | id  | nome        |
     | $m1 | Informatica |
@@ -430,15 +429,86 @@ Schema dello scenario: visualizza filtro classi documenti del 15 maggio
     | $cl1:id | Documento Excel        | $c1      |
     | $cl2:id | Documento non inserito | $c2      |
 
+Schema dello scenario: visualizza solo documenti di sede dello staff
+  Data ricerca istanze di tipo "Sede":
+    | id  | citta     |
+    | $s1 | Grossetto |
+    | $s2 | Bergamo   |
+  E modifica utente connesso:
+    | sede |
+    | $s1  |
+  E ricerca istanze di tipo "Classe":
+    | id   | sede |
+    | $cl1 | $s1  |
+    | $cl2 | $s2  |
+  E ricerca istanze di tipo "Materia":
+    | id  | nome        |
+    | $m1 | Informatica |
+    | $m2 | Storia      |
+  E istanze di tipo "Cattedra":
+    | id  | docente | attiva | materia | classe | tipo |
+    | $c1 | #logged | si     | $m1     | $cl1   | N    |
+    | $c2 | #other  | si     | $m2     | $cl2   | N    |
+  E istanze di tipo "Documento":
+    | id  | classe     | materia     | tipo   |
+    | $d1 | $c1:classe | $c1:materia | <tipo> |
+    | $d2 | $c2:classe | $c2:materia | <tipo> |
+  Quando pagina attiva "documenti_docenti"
+  E selezioni opzione "Tutti" da lista "documento_filtro"
+  E selezioni opzione "<nome_tipo>" da lista "documento_tipo"
+  E selezioni opzione "Tutte" da lista "documento_classe"
+  E premi pulsante "Filtra"
+  Allora vedi la tabella:
+    | classe e materia                                      | docenti                          | documento       |
+    | $c1:classe,classe.corso,classe.sede,materia.nomeBreve | $c1:docente.nome,docente.cognome | Documento Excel |
+  Esempi:
+    | tipo | nome_tipo |
+    | L    | Piani     |
+    | P    | Programmi |
+    | R    | Relazioni |
+
+Scenario: visualizza solo documenti del 15 maggio di sede dello staff
+  Data ricerca istanze di tipo "Sede":
+    | id  | citta     |
+    | $s1 | Grossetto |
+    | $s2 | Bergamo   |
+  E modifica utente connesso:
+    | sede |
+    | $s1  |
+  Data modifica istanze di tipo "Classe":
+    | anno | sezione | #coordinatore | #sede |
+    | 5    | A       | #logged       | $s1   |
+    | 5    | B       | #other        | $s2   |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 5    | A       |
+    | $cl2 | 5    | B       |
+  E ricerca istanze di tipo "Materia":
+    | id  | nome        |
+    | $m1 | Informatica |
+  E istanze di tipo "Cattedra":
+    | id  | docente | attiva | materia | classe | tipo |
+    | $c1 | #logged | si     | $m1     | $cl1   | N    |
+    | $c2 | #other  | si     | $m1     | $cl2   | N    |
+  E istanze di tipo "Documento":
+    | id  | classe     | tipo |
+    | $d1 | $c1:classe | M    |
+    | $d2 | $c2:classe | M    |
+  Quando pagina attiva "documenti_docenti"
+  E selezioni opzione "Tutti" da lista "documento_filtro"
+  E selezioni opzione "15 maggio" da lista "documento_tipo"
+  E selezioni opzione "Tutte" da lista "documento_classe"
+  E premi pulsante "Filtra"
+  Allora vedi la tabella:
+    | classe                              | documento       |
+    | $c1:classe,classe.corso,classe.sede | Documento Excel |
+
 
 ################################################################################
 # Bisogna controllare memorizzazione dati di sessione
 
 Schema dello scenario: modifica filtri e controlla che siano memorizzati in sessione
-  Data modifica utente connesso:
-    | sede |
-    | null |
-  E ricerca istanze di tipo "Classe":
+  Data ricerca istanze di tipo "Classe":
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
     | $cl2 | 3    | B       |
