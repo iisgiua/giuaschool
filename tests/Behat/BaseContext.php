@@ -983,7 +983,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del parametro
    */
   protected function convertText($text) {
-    if ($text[0] == '$' || $text[0] == '#') {
+    if ($text && ($text[0] == '$' || $text[0] == '#')) {
       // valore della variabile di esecuzione
       return $this->getVars($text);
     } elseif (preg_match('/^(si|no|null)$/i', $text)) {
