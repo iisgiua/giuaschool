@@ -79,7 +79,8 @@ class BachecaController extends AbstractController {
         'attr' => ['placeholder' => 'label.oggetto', 'class' => 'gs-placeholder'],
         'label_attr' => ['class' => 'sr-only'],
         'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->add('submit', SubmitType::class, array('label' => 'label.filtra',
+        'attr' => ['class' => 'btn-primary']))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {

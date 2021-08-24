@@ -57,6 +57,7 @@ label.certificazione_storia: Asse storico-sociale
 label.choose_option: Scegli un'opzione
 label.circolari_da_leggere: Da leggere
 label.avvisi_da_leggere: Da leggere
+label.documenti_da_leggere: Da leggere
 label.circolari_filtro_oggetto: Filtra per oggetto
 label.avvisi_filtro_oggetto: Filtra per oggetto
 label.circolari_filtro_visualizza: Filtra per tipo di visualizzazione
@@ -441,8 +442,11 @@ label.tutti_tipi_documento: Tutti i tipi
 label.tipo_documenti: Tipo di documenti
 label.documenti_bes_H: P.E.I.
 label.documenti_bes_D: P.D.P.
-label.documenti_bes_B: Diagnosi
+label.documenti_bes_B: Diagnosi B.E.S.
+label.documenti_generici: Altro
 label.scegli_tipo_documento: Scegli il tipo di documento
+label.titolo_documento: Titolo del documento
+label.riferimento: Riferimento
 
 
 ##### PAGINE #####
@@ -512,6 +516,8 @@ title.documenti_bes: Inserimento documenti relativi agli alunni BES
 title.nuovo_documento_bes: Inserisci il documento relativo all'alunno BES
 page.documenti_alunni: Documenti alunni
 title.documenti_alunni: Visualizza i documenti degli alunni
+page.documenti_bacheca: Bacheca documenti
+title.documenti_bacheca: Documenti per {utente}
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -629,19 +635,19 @@ page.gestione_colloqui: Gestione Colloqui
 title.agenda_eventi: Agenda degli eventi per il docente
 title.alias_exit: Esci dall'alias
 title.alias: Impersona un altro utente
-title.alunni_avvisi: Avvisi indirizzati agli studenti
+title.alunni_avvisi: Avvisi per gli studenti
 title.annotazioni: Inserimento annotazioni sul registro
 title.appello: Appello degli studenti
 title.archiviazione: Creazione e archiviazione dei registri
 title.autorizza: Gestione dei ritardi e delle uscite anticipate
-title.bacheca_avvisi: Avvisi indirizzati al docente
-title.bacheca_avvisi_ata: Avvisi indirizzati al personale ATA
+title.bacheca_avvisi: Avvisi per il docente
+title.bacheca_avvisi_ata: Avvisi per il personale ATA
 title.cambio_classe_modifica: Modifica un cambio di classe esistente
 title.cambio_classe: Inserisci un nuovo cambio di classe
-title.circolari_alunni: Circolari indirizzate agli studenti
+title.circolari_alunni: Circolari per gli studenti
 title.circolari_ata: Lista delle circolari
 title.circolari_docenti: Lista delle circolari
-title.circolari_genitori: Circolari indirizzate ai genitori
+title.circolari_genitori: Circolari per i genitori
 title.circolari_gestione: Gestione delle circolari
 title.coordinatore_assenze: Assenze della classe
 title.coordinatore_avvisi: Gestione degli avvisi per la classe
@@ -664,7 +670,7 @@ title.documenti_relazioni: Inserimento delle relazioni finali
 title.genera_password: Genera credenziali per i genitori
 title.genitori_argomenti: Argomenti e attività della classe
 title.genitori_assenze: Assenze dell'alunn{sex}
-title.genitori_avvisi: Avvisi indirizzati ai genitori
+title.genitori_avvisi: Avvisi per i genitori
 title.genitori_colloqui: Colloqui individuali con i docenti
 title.genitori_deroghe: Autorizzazioni in deroga per l'alunn{sex}
 title.genitori_eventi: Agenda degli eventi per il genitore

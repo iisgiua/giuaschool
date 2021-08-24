@@ -201,7 +201,7 @@ class ListaDestinatariUtente {
    *
    * @return ListaDestinatariUtente Oggetto modificato
    */
-  public function setLetto(\DateTime $letto) {
+  public function setLetto(\DateTime $letto=null) {
     $this->letto = $letto;
     return $this;
   }
@@ -222,7 +222,7 @@ class ListaDestinatariUtente {
    *
    * @return ListaDestinatariUtente Oggetto modificato
    */
-  public function setFirmato(\DateTime $firmato) {
+  public function setFirmato(\DateTime $firmato=null) {
     $this->firmato = $firmato;
     return $this;
   }

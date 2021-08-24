@@ -17,11 +17,12 @@
     </ul>
   </li>
   <li{{ app.request.attributes.get('_route') == 'genitori_pagelle' ? ' class="active"' }}><a href="{{ path('genitori_pagelle') }}" title="Pagelle e comunicazioni sugli scrutini"><span class="glyphicon glyphicon-file gs-mr-2" aria-hidden="true"></span>Pagelle</a></li>
-  <li class="dropdown{{ app.request.attributes.get('_route') in ['genitori_avvisi','circolari_genitori'] ? ' active' }}">
-    <a href="#" title="Visualizza gli avvisi e le circolari" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a>
+  <li class="dropdown{{ app.request.attributes.get('_route') in ['genitori_avvisi','circolari_genitori','documenti_bacheca'] ? ' active' }}">
+    <a href="#" title="Visualizza circolari, avvisi e documenti" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">
       <li{{ app.request.attributes.get('_route') == 'circolari_genitori' ? ' class="active"' }} ><a href="{{ path('circolari_genitori') }}" title="Visualizza le circolari indirizzate agli studenti">Circolari</a></li>
       <li{{ app.request.attributes.get('_route') == 'genitori_avvisi' ? ' class="active"' }} ><a href="{{ path('genitori_avvisi') }}" title="Visualizza gli avvisi indirizzati agli studenti">Avvisi</a></li>
+      <li role="presentation"{{ app.request.attributes.get('_route') == 'documenti_bacheca' ? ' class="active"' }}><a href="{{ path('documenti_bacheca') }}" title="Visualizza i documenti indirizzati all'alunno">Documenti</a></li>
     </ul>
   </li>
   <li{{ app.request.attributes.get('_route') == 'genitori_eventi' ? ' class="active"' }} ><a href="{{ path('genitori_eventi') }}" title="Visualizza gli eventi in agenda"><span class="glyphicon glyphicon-calendar gs-mr-2" aria-hidden="true"></span>Agenda</a></li>

@@ -709,6 +709,19 @@ class BrowserContext extends BaseContext {
     }
   }
 
+  /**
+   * Inserisce un valore in un campo di testo specificato
+   *  $valore: testo da inserire nel campo
+   *  $campo: campo identificato da attributi id|name o label
+   *
+   * @When inserisci :valore nel campo :campo
+   */
+  public function inserisciNelCampo($valore, $campo): void {
+    $field = $this->session->getPage()->findField($campo);
+    $this->assertNotEmpty($field);
+    $field->setValue($valore);
+  }
+  
 
   //==================== METODI PROTETTI DELLA CLASSE ====================
 

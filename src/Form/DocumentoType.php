@@ -19,6 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Documento;
@@ -40,7 +41,7 @@ class DocumentoType extends AbstractType {
     $fnSede = function(EntityRepository $er) {
       return $er->createQueryBuilder('c')
         ->orderBy('c.anno,c.sezione', 'ASC'); };
-    if (in_array($options['formMode'], ['B', 'H', 'D', 'filtroDocenti', 'filtroAlunni']) &&
+    if (in_array($options['formMode'], ['B', 'H', 'D', 'docenti', 'alunni']) &&
         !empty($options['values'][0])) {
       // filtro su sede
       $fnSede = function(EntityRepository $er) use ($options) {
@@ -49,7 +50,7 @@ class DocumentoType extends AbstractType {
           ->setParameter('sede', $options['values'][0])
           ->orderBy('c.anno,c.sezione', 'ASC'); };
     }
-    if ($options['formMode'] == 'filtroDocenti') {
+    if ($options['formMode'] == 'docenti') {
       // form filtro documenti docenti
       $builder
         ->add('filtro', ChoiceType::class, array('label' => 'label.filtro_documenti',
@@ -83,7 +84,7 @@ class DocumentoType extends AbstractType {
           'attr' => ['class' => 'btn-primary']));
       return;
     }
-    if ($options['formMode'] == 'filtroAlunni') {
+    if ($options['formMode'] == 'alunni') {
       // form filtro documenti alunni
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
@@ -105,6 +106,26 @@ class DocumentoType extends AbstractType {
           'label_attr' => ['class' => 'sr-only'],
           'choice_attr' => function() { return ['class' => 'gs-no-placeholder']; },
           'attr' => ['class' => 'gs-placeholder'],
+          'required' => false))
+        ->add('submit', SubmitType::class, array('label' => 'label.filtra',
+          'attr' => ['class' => 'btn-primary']));
+      return;
+    }
+    if ($options['formMode'] == 'bacheca') {
+      // form filtro documenti docenti
+      $builder
+        ->add('tipo', ChoiceType::class, array('label' => 'label.tipo_documenti',
+          'data' => $options['values'][0],
+          'choices' => $options['values'][1],
+          'placeholder' => 'label.documenti_tutti',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => function($val) { return ['class' => 'gs-no-placeholder']; },
+          'attr' => ['class' => 'gs-placeholder'],
+          'required' => false))
+        ->add('titolo', TextType::class, array('label' => 'label.titolo_documento',
+          'data' => $options['values'][2],
+          'attr' => ['placeholder' => 'label.titolo_documento', 'class' => 'gs-placeholder', 'style' => 'width:30em'],
+          'label_attr' => ['class' => 'sr-only'],
           'required' => false))
         ->add('submit', SubmitType::class, array('label' => 'label.filtra',
           'attr' => ['class' => 'btn-primary']));

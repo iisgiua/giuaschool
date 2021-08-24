@@ -12,6 +12,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Utente;
 use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Sede;
@@ -128,8 +129,8 @@ class DocumentoRepository extends BaseRepository {
    * Recupera i documenti dei docenti secondo i criteri di ricerca indicati
    *
    * @param array $criteri Lista con i criteri di ricerca
-   * @param Sede $sede Sede dello staff
    * @param int $pagina Indica il numero di pagina da visualizzare
+   * @param Sede $sede Sede dello staff
    *
    * @return array Dati formattati come array associativo
    */
@@ -279,6 +280,50 @@ class DocumentoRepository extends BaseRepository {
     }
     // paginazione
     $dati = $this->paginazione($alunni->getQuery(), (int) $pagina);
+    // restituisce dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce la lista dei documenti indirizzati all'utente e rispondenti ai criteri di ricerca.
+   *
+   * @param array $criteri Lista con i criteri di ricerca
+   * @param Utente $utente Destinatario dei documenti
+   * @param int $pagina Indica il numero di pagina da visualizzare
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function lista($criteri, Utente $utente, $pagina) {
+    // query base
+    $documenti = $this->createQueryBuilder('d')
+      ->select('DISTINCT d as documento,ldu.letto,ldu.firmato')
+      ->join('d.listaDestinatari', 'ld')
+      ->join('App:ListaDestinatariUtente', 'ldu', 'WITH', 'ldu.listaDestinatari=ld.id')
+      ->leftJoin('d.classe', 'cl')
+      ->leftJoin('d.materia', 'm')
+      ->leftJoin('d.alunno', 'a')
+      ->where('ldu.utente=:utente')
+      ->orderBy('cl.anno,cl.sezione,m.nomeBreve,a.cognome,a.nome,a.dataNascita,d.tipo', 'ASC')
+      ->setParameters(['utente' => $utente]);
+    // vincolo di tipo
+    if ($criteri['tipo'] == 'X') {
+      // documenti da leggere
+      $documenti
+        ->andWhere('ldu.letto IS NULL');
+    } elseif ($criteri['tipo']) {
+      // tipo di documento
+      $documenti
+        ->andWhere('d.tipo=:tipo')
+        ->setParameter('tipo', $criteri['tipo']);
+    }
+    // filtra titolo
+    if ($criteri['titolo']) {
+      $documenti
+        ->join('d.allegati', 'al', 'WITH', 'al.titolo LIKE :titolo')
+        ->setParameter('titolo', '%'.$criteri['titolo'].'%');
+    }
+    // paginazione
+    $dati = $this->paginazione($documenti->getQuery(), (int) $pagina);
     // restituisce dati
     return $dati;
   }

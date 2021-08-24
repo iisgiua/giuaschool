@@ -32,7 +32,7 @@ Scenario: visualizza lista cattedre corretta per i piani di lavoro
     | $m5 |      | Storia      |
     | $m6 |      | Matematica  |
   E ricerca istanze di tipo "Classe":
-    | id  | anno | sezione |
+    | id   | anno | sezione |
     | $cl1 | 1    | B       |
     | $cl2 | 3    | B       |
     | $cl3 | 5    | B       |

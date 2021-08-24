@@ -29,7 +29,7 @@ Scenario: visualizza errore per scaricamento piano di lavoro senza permesso di l
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
-  E crea istanze di tipo "ListaDestinatari":
+  E creazione istanze di tipo "ListaDestinatari":
     | id  |
     | $ld |
   E istanze di tipo "Documento":
@@ -51,7 +51,7 @@ Scenario: visualizza errore per scaricamento programma senza permesso di lettura
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
-  E crea istanze di tipo "ListaDestinatari":
+  E creazione istanze di tipo "ListaDestinatari":
     | id  |
     | $ld |
   E istanze di tipo "Documento":
@@ -73,7 +73,7 @@ Scenario: visualizza errore per scaricamento relazione senza permesso di lettura
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo |
     | $c1 | #other  | si     | $m1     | N    |
-  E crea istanze di tipo "ListaDestinatari":
+  E creazione istanze di tipo "ListaDestinatari":
     | id  |
     | $ld |
   E istanze di tipo "Documento":
@@ -96,7 +96,7 @@ Scenario: visualizza errore per scaricamento documento del 15 maggio senza perme
     | coordinatore | anno | sezione | #coordinatore |
     | #logged      |      |         | null          |
     |              | 5    | A       | #other        |
-  E crea istanze di tipo "ListaDestinatari":
+  E creazione istanze di tipo "ListaDestinatari":
     | id  |
     | $ld |
   E istanze di tipo "Documento":
@@ -118,7 +118,7 @@ Schema dello scenario: visualizza errore per scaricamento documento BES senza pe
   E ricerca istanze di tipo "Alunno":
     | id  | classe | abilitato |
     | $a1 | $cl1   | si        |
-  E crea istanze di tipo "ListaDestinatari":
+  E creazione istanze di tipo "ListaDestinatari":
     | id  |
     | $ld |
   E istanze di tipo "Documento":

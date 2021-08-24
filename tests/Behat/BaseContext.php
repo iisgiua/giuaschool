@@ -21,6 +21,7 @@ use Symfony\Component\Finder\Finder;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeStepScope;
@@ -407,9 +408,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  $tabella: il campo <id> indica il nome assegnato alla variabile, preceduto da '$', che
    *            conterrà l'instanza; altri campi corrispondono ai valori da impostare nell'istanza
    *
-   * @Given crea istanze di tipo :classe:
+   * @Given creazione istanze di tipo :classe:
    */
-  public function creaIstanzeDiTipo($classe, TableNode $tabella) {
+  public function creazioneIstanzeDiTipo($classe, TableNode $tabella) {
     foreach ($tabella->getHash() as $row) {
       $this->assertTrue($row['id'][0] == '$');
       $nomeClasse = "App\\Entity\\".$classe;
@@ -871,6 +872,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * separatore nel caso di più varibili (Es. "$c1 $c2"). Ogni variabile ha la sintassi:
    *  "$": come primo carattere, indica variabile di esecuzione
    *  "#": come primo carattere, indica variabile di sistema
+   *  "#dtm(G,M,A,h,m,s)": indica variabile DateTime con i valori indicati
+   *  "#arc($v1,$v2,...)": indica variabile ArrayCollection con i valori indicati
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -891,7 +894,25 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $var = substr($var, 1);
     $var_parts = explode(':', $var);
     if (count($var_parts) == 1) {
-      // restituisce intera variabile
+      // controlla variabile DateTime
+      if (preg_match('/^dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
+        // crea variabile DateTime
+        $dtm = (new \Datetime())
+          ->setDate($dt[3], $dt[2], $dt[1])
+          ->setTime($dt[4], $dt[5], $dt[6], 0);
+        return $dtm;
+      }
+      // controlla variabile ArrayCollection
+      if (substr($var, 0, 4) == 'arc(' && substr($var, -1) == ')') {
+        // crea variabile ArrayCollection
+        $ar = explode(',', substr(substr($var, 4), 0 , -1));
+        $values = [];
+        foreach ($ar as $arc) {
+          $values[] = $this->getVar($arc);
+        }
+        return new ArrayCollection($values);
+      }
+      // restituisce intera variabile di sistema
       $this->assertTrue(isset($this->vars[$type][$var]));
       return $this->vars[$type][$var];
     }

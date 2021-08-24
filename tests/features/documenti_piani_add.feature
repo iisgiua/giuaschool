@@ -77,7 +77,7 @@ Schema dello scenario: visualizza errore per pagina inserimento di cattedra ines
     | id   | anno | sezione |
     | $cl1 | 1    | B       |
     | $cl2 | 2    | B       |
-  E crea istanze di tipo "Cattedra":
+  E creazione istanze di tipo "Cattedra":
     | id  | docente   | classe   | materia   | tipo   | attiva   |
     | $c1 | <docente> | <classe> | <materia> | <tipo> | <attiva> |
   Quando vai alla pagina "documenti_piani_add" con parametri:
