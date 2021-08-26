@@ -1309,12 +1309,15 @@ class PagelleUtil {
         ->getResult();
       $dati['ammessi'] = 0;
       $dati['non_ammessi'] = 0;
+      $dati['rinviati'] = 0;
       foreach ($esiti as $e) {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
         if ($e->getEsito() == 'A') {
           $dati['ammessi']++;
         } elseif ($e->getEsito() == 'N') {
           $dati['non_ammessi']++;
+        } elseif ($e->getEsito() == 'X') {
+          $dati['rinviati']++;
         }
       }
       // credito per sospensione giudizio
@@ -2240,11 +2243,11 @@ class PagelleUtil {
       return $percorso.'/'.$nomefile;
     } elseif ($periodo == 'I') {
       // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-tabellone-voti.pdf';
+      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-tabellone-esiti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Tabellone voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+          'Integrazione scrutinio finale - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
         $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
@@ -3123,7 +3126,7 @@ class PagelleUtil {
         if ($dati['classe']->getAnno() == 3) {
           $width += 6;
         } elseif ($dati['classe']->getAnno() >= 4) {
-          $width += 3 * 6;
+          $width += 4 * 6;
         }
         $this->cella($pdf, $width, 11, 0, -5.50, '', 1, 'C', 'M');
         $esito = 'Scrutinio rinviato';

@@ -128,7 +128,7 @@
         </td>
       </tr>
       <tr>
-        <td><strong>Tabellone dei voti da esporre</strong></td>
+        <td><strong>Tabellone degli esiti da esporre</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'T', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
@@ -237,7 +237,7 @@
         </td>
       </tr>
       <tr>
-        <td><strong>Tabellone dei voti da esporre</strong></td>
+        <td><strong>Tabellone degli esiti da esporre</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'T', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
@@ -275,6 +275,11 @@
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
+      </tr>
+      {% endif %}
+      {% if dati.esito.esito == 'X' %}
+      <tr>
+        <td colspan="2" class="text-center gs-big"><strong>SCRUTINIO RINVIATO</strong></td>
       </tr>
       {% endif %}
       {% if dati.esito.esito == 'A' and scrutinio.classe.anno == 2 %}

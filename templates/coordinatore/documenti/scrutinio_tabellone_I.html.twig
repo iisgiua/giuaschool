@@ -21,6 +21,8 @@
       <strong>NON AMMESS{{ alu.sesso == 'M' ? 'O' : 'A' }}</strong>
   {% elseif dati.esiti[id].esito == 'A' %}
       <strong>AMMESS{{ alu.sesso == 'M' ? 'O' : 'A' }}</strong>
+  {% elseif dati.esiti[id].esito == 'X' %}
+      <strong>SCRUTINIO RINVIATO</strong>
   {% endif %}
     </td>
   </tr>
