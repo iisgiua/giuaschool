@@ -23,10 +23,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Circolare - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\CircolareRepository")
- * @ORM\Table(name="gs_circolare", uniqueConstraints={@ORM\UniqueConstraint(columns={"numero"})})
+ * @ORM\Table(name="gs_circolare")
  * @ORM\HasLifecycleCallbacks
- *
- * @UniqueEntity(fields={"numero"}, message="field.unique")
  */
 class Circolare {
 

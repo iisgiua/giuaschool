@@ -31,8 +31,12 @@ class CircolareRepository extends EntityRepository {
    */
   public function prossimoNumero() {
     // legge l'ultima circolare
+    $query = $this->createQueryBuilder('c1')
+      ->select('MAX(c1.data)')
+      ->getDql();
     $numero = $this->createQueryBuilder('c')
       ->select('MAX(c.numero)')
+      ->where('c.data=('.$query.')')
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce prossimo numero
@@ -47,10 +51,18 @@ class CircolareRepository extends EntityRepository {
    * @return bool Vero se il numero non è già in uso, falso altrimenti
    */
   public function controllaNumero(Circolare $circolare) {
-    // legge la circolare in base al numero
+    // A.S. in corso
+    $as = $this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico');
+    $aass = explode('/', $as);
+    $inizio = (new \DateTime('today'))
+      ->setDate($aass[0], 9, 1);
+    $fine = (new \DateTime('today'))
+      ->setDate($aass[1], 8, 31);
+    // legge la circolare in base al numero nell'A.S. in corso
     $trovato = $this->createQueryBuilder('c')
-      ->where('c.numero=:numero')
-      ->setParameter('numero', $circolare->getNumero());
+      ->where('c.numero=:numero AND c.data BETWEEN :inizio AND :fine')
+      ->setParameters(['numero' => $circolare->getNumero(), 'inizio' => $inizio,
+        'fine' => $fine]);
     if ($circolare->getId() > 0) {
       // circolare in modifica, esclude suo id
       $trovato
@@ -361,7 +373,8 @@ class CircolareRepository extends EntityRepository {
     $query = $this->createQueryBuilder('c')
       ->where('c.pubblicata=:pubblicata')
       ->setParameter('pubblicata', 1)
-      ->orderBy('c.numero', 'DESC');
+      ->orderBy('c.data', 'DESC')
+      ->addOrderBy('c.numero', 'DESC');
     if ($cerca['visualizza'] != 'T') {
       // solo circolari destinate all'utente
       $query
@@ -410,7 +423,8 @@ class CircolareRepository extends EntityRepository {
       ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
       ->where('c.pubblicata=:pubblicata AND cc.letta IS NULL')
       ->setParameters(['pubblicata' => 1, 'classe' => $classe])
-      ->orderBy('c.numero', 'ASC')
+      ->orderBy('c.data', 'ASC')
+      ->addOrderBy('c.numero', 'ASC')
       ->getQuery()
       ->getArrayResult();
     // restituisce dati
