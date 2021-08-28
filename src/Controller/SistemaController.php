@@ -731,8 +731,8 @@ class SistemaController extends BaseController {
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-scrutinio-integrativo-riepilogo-voti.pdf';
-            $percorso_old = $dir.'integrativo/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-esame-sospesi-riepilogo-voti.pdf';
+            $percorso_old = $dir.'esami/'.$scrutinio['anno'].$scrutinio['sezione'];
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
@@ -747,8 +747,8 @@ class SistemaController extends BaseController {
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-scrutinio-integrativo-verbale.pdf';
-            $percorso_old = $dir.'integrativo/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-esame-sospesi-verbale.pdf';
+            $percorso_old = $dir.'esami/'.$scrutinio['anno'].$scrutinio['sezione'];
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }

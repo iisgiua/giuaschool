@@ -21,7 +21,7 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere l'alunno">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['P','1','F','I'] %}
+    {% for p in ['P','1','F','E'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_proposte', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
       {% endif %}
@@ -30,7 +30,7 @@
       </div>
     </div>
     <div class="col-sm-4 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': (periodo == 'X' ? 'I' : (periodo ? periodo : 0))}) }}" role="button" title="Visualizza il tabellone dei voti degli scrutini svolti"><span class="glyphicon glyphicon-list gs-mr-3"></span><strong>Tabellone</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': (periodo == 'X' ? 'E' : (periodo ? periodo : 0))}) }}" role="button" title="Visualizza il tabellone dei voti degli scrutini svolti"><span class="glyphicon glyphicon-list gs-mr-3"></span><strong>Tabellone</strong></a>
     </div>
   </div>
   <div class="alert alert-info gs-mt-4" role="alert">

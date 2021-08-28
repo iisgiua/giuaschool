@@ -476,7 +476,7 @@ class GenitoriController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/genitori/pagelle/{periodo}", name="genitori_pagelle",
-   *    requirements={"periodo": "A|P|S|F|I|1|2|0"},
+   *    requirements={"periodo": "A|P|S|F|E|1|2|0"},
    *    defaults={"periodo": "0"},
    *    methods={"GET"})
    *

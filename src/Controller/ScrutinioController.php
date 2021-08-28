@@ -63,7 +63,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/scrutinio/proposte/{cattedra}/{classe}/{periodo}", name="lezioni_scrutinio_proposte",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|I|1|2|0|X"},
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|E|1|2|0|X"},
    *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
    *    methods={"GET","POST"})
    *
@@ -89,9 +89,9 @@ class ScrutinioController extends AbstractController {
     $title['F']['N'] = 'message.proposte';
     $title['F']['R'] = 'message.proposte_religione';
     $title['F']['E'] = 'message.proposte';
-    $title['I']['N'] = 'message.proposte_non_previste';
-    $title['I']['R'] = 'message.proposte_non_previste';
-    $title['I']['E'] = 'message.proposte_non_previste';
+    $title['E']['N'] = 'message.proposte_non_previste';
+    $title['E']['R'] = 'message.proposte_non_previste';
+    $title['E']['E'] = 'message.proposte_non_previste';
     $title['X']['N'] = 'message.proposte_non_previste';
     $title['X']['R'] = 'message.proposte_non_previste';
     $info['valutazioni'] = $valutazioni['N'];
@@ -403,7 +403,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/proposte/{classe}/{materia}/{periodo}/{posizione}", name="coordinatore_scrutinio_proposte",
-   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|E|1|2", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -552,7 +552,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/condotta/{classe}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_condotta",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2", "alunno": "\d+", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -683,7 +683,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/voti/{classe}/{materia}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_voti",
-   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|I|1|2|X", "alunno": "\d+", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|E|1|2|X", "alunno": "\d+", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -698,7 +698,7 @@ class ScrutinioController extends AbstractController {
     $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"', 'format' => '"Non Classificato", "Insufficiente", "Sufficiente", "Discreto", "Buono", "Distinto", "Ottimo"', 'format2' => '"NC", "Insuff.", "Suff.", "Discreto", "Buono", "Distinto", "Ottimo"'];
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['E'] = ['min' => 3, 'max' => 10, 'start' => 6, 'ticks' => '3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['I'] = $valutazioni['F'];
+    $valutazioni['E'] = $valutazioni['F'];
     $valutazioni['X']['N'] = $valutazioni['F']['N'];
     $valutazioni['X']['R'] = $valutazioni['F']['R'];
     $info['valutazioni'] = $valutazioni['P']['N'];
@@ -818,7 +818,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/scrutinio/svolto/{cattedra}/{classe}/{periodo}", name="lezioni_scrutinio_svolto",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|I|1|2|A|X"},
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|E|1|2|A|X"},
    *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
    *    methods="GET")
    *
@@ -833,7 +833,7 @@ class ScrutinioController extends AbstractController {
     $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insuff.', 33 => 'Mediocre', 34 => 'Suff.', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
-    $info['giudizi']['I']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
+    $info['giudizi']['E']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['A']['R'] = $info['giudizi']['F']['R'];
     $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     // parametri cattedra/classe
@@ -882,9 +882,9 @@ class ScrutinioController extends AbstractController {
         // periodo indicato non valido
         $periodo = null;
       }
-      if ($periodo == 'I' || $periodo == 'X') {
+      if ($periodo == 'E' || $periodo == 'X') {
         // voti
-        $dati = $scr->quadroVoti($this->getUser(), $classe, 'I');
+        $dati = $scr->quadroVoti($this->getUser(), $classe, 'E');
         if (isset($lista_periodi['X']) && $lista_periodi['X'] == 'C') {
           $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'X');
         }
@@ -1045,7 +1045,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/esito/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_esito",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2|X", "posizione": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2|X", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -1084,8 +1084,8 @@ class ScrutinioController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // elenco voti
-    if ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo: solo voti insuff.
+    if ($periodo == 'E' || $periodo == 'X') {
+      // esame alunni sospesi: solo voti insuff.
       $dati = $scr->elencoVotiAlunnoSospeso($this->getUser(), $alunno, $periodo);
     } else {
       // scrutinio finale: tutti i voti
@@ -1093,11 +1093,11 @@ class ScrutinioController extends AbstractController {
     }
     // esiti possibili
     $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
-    if ($periodo == 'I') {
-      // integrazione scrutinio finale
+    if ($periodo == 'E') {
+      // esame alunni sospesi
       $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_X' => 'X');
     } elseif ($periodo == 'X') {
-      // rinvio integrazione scrutinio
+      // rinvio esame alunni sospesi
       $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N');
     }
     // form di inserimento
@@ -1268,7 +1268,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/credito/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_credito",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2|X", "posizione": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2|X", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -1323,7 +1323,7 @@ class ScrutinioController extends AbstractController {
     $dati['credito'] = $credito[$alunno->getClasse()->getAnno()][$m];
     // credito per sospensione giudizio
     $creditoSospeso = false;
-    if ($periodo == 'I' || $periodo == 'X') {
+    if ($periodo == 'E' || $periodo == 'X') {
       foreach ($dati['voti'] as $voto) {
         if (!empty($voto->getRecupero()) && $voto->getUnico() >= 7) {
           $creditoSospeso = true;
@@ -1408,7 +1408,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/certificazione/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_certificazione",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2|X", "posizione": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2|X", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -1641,7 +1641,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/debiti/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_debiti",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -1751,7 +1751,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/carenze/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_carenze",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|I|1|2", "posizione": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -1847,7 +1847,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/verbale/{classe}/{periodo}/{step}", name="coordinatore_scrutinio_verbale",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "step": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2", "step": "\d+"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
@@ -1936,7 +1936,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/frequenza/{classe}/{periodo}/{alunno}", name="coordinatore_scrutinio_frequenza",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2", "alunno": "\d+"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
@@ -2028,7 +2028,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/frequenza/annulla/{classe}/{periodo}/{alunno}", name="coordinatore_scrutinio_frequenza_annulla",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2", "alunno": "\d+"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_STAFF")
@@ -2101,7 +2101,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/edcivica/{classe}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_edcivica",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2", "alunno": "\d+", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *

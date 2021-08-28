@@ -7,11 +7,10 @@
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Integrazione dello scrutinio finale per la classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Scrutinio chiuso</h2>
     {% include 'include/modal-error.html.twig' %}
     <table class="table table-bordered table-hover table-striped gs-mt-4">
-      <caption class="text-center text-info"><strong class="gs-big">Integrazione dello scrutinio finale</strong></caption>
       <thead class="bg-success">
         <tr>
           <th class="col-sm-2">Documento</th>
@@ -29,7 +28,7 @@
             Formato del documento: <em>PDF</em>
           <td>
             <div class="gs-mb-2">
-              <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+              <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
             </div>
           </td>
         </tr>
@@ -42,7 +41,7 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
         <tr>
@@ -54,7 +53,7 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
         <tr>
@@ -66,7 +65,7 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
     {% if classe.anno == 2 %}
@@ -79,7 +78,7 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
     {% endif %}
@@ -93,7 +92,7 @@
           </td>
           <td>
     {% for a in dati.non_ammessi %}
-            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'N', 'periodo': 'I'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'N', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
     {% else %}
             <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
     {% endfor %}

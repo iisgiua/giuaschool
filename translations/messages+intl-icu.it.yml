@@ -227,7 +227,7 @@ label.periodo_1: Valutazione Intermedia
 label.periodo_2: ~
 label.periodo_A: A.S. Precedente
 label.periodo_F: Scrutinio Finale
-label.periodo_I: Scrutinio Integrativo
+label.periodo_E: Scrutinio esami giudizio sospeso
 label.periodo_P: Primo Quadrimestre
 label.periodo_S: ~
 label.periodo_X: Scrutinio Rinviato
@@ -942,12 +942,12 @@ non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e no
 message.giudizio_non_ammissione_sospeso: "L'alunn{sex},\\n
 con giudizio sospeso nello scrutinio finale di giugno,\\n
 benché siano stati segnalati alla famiglia i relativi debiti formativi,\\n
-pur essendo state svolte attività di recupero organizzate dalla scuola,\\n
+pur essendo state svolte dalla scuola attività di recupero,\\n
 considerata anche la scarsa partecipazione a tali attività di recupero,\\n
 accertato che persistono le gravi carenze segnalate,\\n
 non ha raggiunto gli obiettivi minimi per le discipline indicate
 e non possiede competenze e conoscenze adeguate per affrontare la classe successiva."
-message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi.
+message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda la sua prova presumibilmente prima dell’inizio delle lezioni, a data da definirsi.
 message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di Stato."
 message.otp_abilitato: Codice OTP abilitato.
 message.modifica_email: Inserisci il tuo indirizzo di posta elettronica. Ricorda che è importante che sia un indirizzo valido, in caso contrario non sarà possibile utilizzare la funzione di recupero password.

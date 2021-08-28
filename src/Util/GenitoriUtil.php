@@ -825,7 +825,7 @@ class GenitoriUtil {
         // non scrutinato
         $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'E') {
       // scrutinato
       $dati['esito'] = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio,
         'alunno' => $alunno]);
@@ -1201,7 +1201,7 @@ class GenitoriUtil {
       ->getResult();
     // controlla presenza alunno in scrutinio
     foreach ($scrutini as $sc) {
-      $alunni = ($sc->getPeriodo() == 'I' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
+      $alunni = ($sc->getPeriodo() == 'E' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
       if (in_array($alunno->getId(), $alunni)) {
         $periodi[] = array($sc->getPeriodo(), $sc);
       }

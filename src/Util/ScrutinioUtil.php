@@ -362,12 +362,12 @@ class ScrutinioUtil {
           $dati = $this->chiusura($docente, $classe, $periodo);
           break;
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo
+    } elseif ($periodo == 'E' || $periodo == 'X') {
+      // esame sospesi
       switch ($stato) {
         case 'N':
           // riepilogo
-          if ($periodo == 'I') {
+          if ($periodo == 'E') {
             $dati = $this->riepilogoSospesi($docente, $classe, $periodo);
           } else {
             $dati = $this->riepilogoRinviati($docente, $classe, $periodo);
@@ -497,8 +497,8 @@ class ScrutinioUtil {
           $form = $this->verbaleForm($classe, $periodo, $form, $dati);
           break;
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo
+    } elseif ($periodo == 'E' || $periodo == 'X') {
+      // esame sospesi
       switch ($stato) {
         case 'N':
           // inizio

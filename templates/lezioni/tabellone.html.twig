@@ -21,7 +21,7 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo and periodo != 'X' ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul style="z-index: 1010" class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['A','P','1','F','I'] %}
+    {% for p in ['A','P','1','F','E'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
       {% endif %}
@@ -217,7 +217,7 @@
       </tbody>
     </table>
   </div>
-    {% elseif periodo == 'I' %}
+    {% elseif periodo == 'E' %}
   <div id="gs-fixed-header">
     <table class="table table-bordered table-hover table-striped">
       <thead class="bg-success">
@@ -324,11 +324,11 @@
         {% if a.esito == 'A' and a.periodo == 'F' %}
             <span class="gs-big"><span class="label label-success">AMMESSO</span></span>
         {% elseif a.esito == 'A' and a.periodo != 'F' %}
-            <span class="gs-big"><span class="label label-success">AMMESSO (SCRUTINIO INTEGRATIVO)</span></span>
+            <span class="gs-big"><span class="label label-success">AMMESSO (ESAME SOSPESI)</span></span>
         {% elseif a.esito == 'N' and a.periodo == 'F' %}
             <span class="gs-big"><span class="label label-danger">NON AMMESSO</span></span>
         {% elseif a.esito == 'N' and a.periodo != 'F' %}
-            <span class="gs-big"><span class="label label-danger">NON AMMESSO (SCRUTINIO INTEGRATIVO)</span></span>
+            <span class="gs-big"><span class="label label-danger">NON AMMESSO (ESAME SOSPESI)</span></span>
         {% elseif a.esito == 'R' %}
             <span class="gs-big"><span class="label label-danger">NON SCRUTINATO</span></span>
         {% elseif a.esito == 'L' %}

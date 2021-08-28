@@ -28,12 +28,12 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, I=scrutinio integrativo, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, X=rinviato, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"P","S","F","I","1","2"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"P","S","F","E","X","1","2"}, strict=true, message="field.choice")
    */
   private $periodo;
 
@@ -147,4 +147,3 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   }
 
 }
-

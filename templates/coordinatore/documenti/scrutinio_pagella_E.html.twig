@@ -9,36 +9,34 @@
     </td>
   </tr>
 </table>
-<p>&nbsp;</p>
+{#-- <p>&nbsp;</p> #}
 <div style="text-align:justify;font-family:times;font-size:11pt">
-  <p><strong>OGGETTO: Integrazione dello scrutinio finale A.S.
-    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione esito di non ammissione</strong></p>
+  <p><strong>OGGETTO: Scrutinio per gli esami degli studenti con sospensione del giudizio A.S.
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione dei voti</strong></p>
   <br>
-  <p>Si comunica che il Consiglio di Classe, nella seduta di integrazione dello scrutinio finale dell’Anno Scolastico
+  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio per gli esami degli studenti con sospensione del giudizio dell’Anno Scolastico
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
     {{ dati.scrutinio.data|date('d/m/Y') }},
-    ha deliberato <strong>la NON AMMISSIONE alla classe successiva</strong>
-    dell'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}, con la seguente motivazione:
+    ha attribuito all'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}
+    le valutazioni che vengono riportate di seguito:
   </p>
-  <p><i style="padding:5px">{{ dati.esito.dati.giudizio }}</i></p>
-  <p>Di seguito viene riportato il riepilogo dei voti attribuiti durante lo scrutinio:</p>
   <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
     <tr nobr="true">
       <td width="60%" align="center"><strong>MATERIA</strong></td>
       <td width="20%" align="center"><strong>VOTO</strong></td>
       <td width="20%" align="center"><strong>ORE DI ASSENZA</strong></td>
     </tr>
-  {% for idmat,mat in dati.materie %}
+{% for idmat,mat in dati.materie %}
     <tr>
       <td align="left"><strong>{{ mat.nome }}</strong></td>
       <td align="center">
-    {% if mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A' %}
+  {% if mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A' %}
         <strong>///</strong>
-    {% elseif (mat.tipo == 'C' and dati.voti[idmat].unico < 5) or (mat.tipo == 'E' and dati.voti[idmat].unico < 4) %}
+  {% elseif (mat.tipo == 'C' and dati.voti[idmat].unico < 5) or (mat.tipo == 'E' and dati.voti[idmat].unico < 4) %}
         <strong>{{ dati.valutazioni[0] }}</strong>
-    {% else %}
+  {% else %}
         <strong>{{ dati.valutazioni[dati.voti[idmat].unico] }}</strong>
-    {% endif %}
+  {% endif %}
       </td>
       <td align="center">
     {% if (mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A') or mat.tipo == 'C' %}
@@ -48,7 +46,7 @@
     {% endif %}
       </td>
     </tr>
-  {% endfor %}
+{% endfor %}
   </table>
   <p>&nbsp;</p>
   <p>Distinti Saluti.</p>

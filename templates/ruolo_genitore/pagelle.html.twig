@@ -14,7 +14,7 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['A','P','1','F','I'] %}
+    {% for p in ['A','P','1','F','E'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('genitori_pagelle', {'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
       {% endif %}
@@ -251,15 +251,15 @@
   </div>
           {% endif %}
         {% endif %}
-      {% elseif periodo == 'I' %}
+      {% elseif periodo == 'E' %}
         {% if dati.esito.esito != 'X' %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-2">
-      <strong>Integrazione dello scrutinio finale</strong>
+      <strong>Scrutinio per gli esami degli studenti con sospensione del giudizio</strong>
           {% if dati.esito.esito == 'A' %}
-      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': (periodo == 'I' and dati.rinviato is defined ? 'X' : periodo) }) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
+      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': (periodo == 'E' and dati.rinviato is defined ? 'X' : periodo) }) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
           {% elseif dati.esito.esito == 'N' %}
-      <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': (periodo == 'I' and dati.rinviato is defined ? 'X' : periodo) }) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
+      <a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': (periodo == 'E' and dati.rinviato is defined ? 'X' : periodo) }) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione di non ammissione</strong></a>
           {%endif %}
     </caption>
     <thead class="bg-success">
@@ -316,7 +316,7 @@
   </div>
         {% endif %}
       {% endif %}
-    {% elseif periodo == 'I' %}
+    {% elseif periodo == 'E' %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">Scrutinio finale non sospeso</strong>
   </div>

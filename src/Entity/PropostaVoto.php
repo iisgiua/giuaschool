@@ -58,7 +58,7 @@ class PropostaVoto {
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"P","S","F","I","1","2"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"P","S","F","1","2"}, strict=true, message="field.choice")
    */
   private $periodo;
 

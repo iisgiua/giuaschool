@@ -331,7 +331,7 @@ class SegreteriaController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/segreteria/scrutini/mostra/{alunno}/{periodo}/{scrutinio}", name="segreteria_scrutini_mostra",
-   *    requirements={"alunno": "\d+", "periodo": "A|P|S|F|I|1|2|X", "scrutinio": "\d+", },
+   *    requirements={"alunno": "\d+", "periodo": "A|P|S|F|E|1|2|X", "scrutinio": "\d+", },
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_ATA")

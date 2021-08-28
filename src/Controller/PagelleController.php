@@ -47,7 +47,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/classe/{classe}/{tipo}/{periodo}", name="pagelle_classe",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|I|1|2|X"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
@@ -122,8 +122,8 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->certificazioni($classe, $periodo);
           break;
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo
+    } elseif ($periodo == 'E' || $periodo == 'X') {
+      // scrutinio esame alunni sospesi
       switch ($tipo) {
         case 'V':
           // verbale
@@ -170,7 +170,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C|E|X", "periodo": "P|S|F|I|1|2|X"},
+   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C|E|X", "periodo": "P|S|F|E|1|2|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
@@ -246,8 +246,8 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->pagella($classe, $alunno, $periodo);
           break;
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo
+    } elseif ($periodo == 'E' || $periodo == 'X') {
+      // scrutinio esame alunni sospesi
       switch ($tipo) {
         case 'N':
           // non ammesso

@@ -90,7 +90,7 @@ class PagelleUtil {
       'P' => 'primo',
       'S' => 'secondo',
       'F' => 'finale',
-      'I' => 'integrativo');
+      'E' => 'esami');
   }
 
   /**
@@ -312,13 +312,13 @@ class PagelleUtil {
           $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
         }
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo
+    } elseif ($periodo == 'E' || $periodo == 'X') {
+      // esame sospesi
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $sospesi = ($periodo == 'I' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
+      $sospesi = ($periodo == 'E' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
         ->where('a.id IN (:lista)')
@@ -461,13 +461,13 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-riepilogo-voti.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
@@ -789,9 +789,9 @@ class PagelleUtil {
           }
         }
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo
-      $dati['periodo'] = 'INTEGRAZIONE SCRUTINIO FINALE';
+    } elseif ($periodo == 'E' || $periodo == 'X') {
+      // esame sospesi
+      $dati['periodo'] = 'SCRUTINIO ESAMI GIUDIZIO SOSPESO';
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
@@ -920,14 +920,14 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-firme-registro.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-firme-registro.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Foglio firme Registro '.$nome_classe);
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Foglio firme Registro '.$nome_classe);
         $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
         $this->pdf->getHandler()->setPrintHeader(false);
@@ -1225,7 +1225,7 @@ class PagelleUtil {
           $dati['insuff5'][] = $ins['alunno'];
         }
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
+    } elseif ($periodo == 'E' || $periodo == 'X') {
       // legge materie
       $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome')
@@ -1286,7 +1286,7 @@ class PagelleUtil {
         $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
       }
       // legge dati di alunni
-      $sospesi = ($periodo == 'I' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
+      $sospesi = ($periodo == 'E' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.credito3,a.credito4')
         ->where('a.id IN (:lista)')
@@ -1410,7 +1410,7 @@ class PagelleUtil {
         // errore
         $dati['errore'] = true;
       }
-    } elseif ($periodo == 'I') {
+    } elseif ($periodo == 'E') {
       // legge esito
       $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -1518,13 +1518,13 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-voti-'.$alunno->getId().'.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'integrazione dello scrutinio finale - Comunicazione dei voti - Alunn'.
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Comunicazione dei voti - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -1814,14 +1814,14 @@ class PagelleUtil {
       }
       // alunno non trovato: errore
       return null;
-    } elseif ($periodo == 'I') {
-      // scrutinio integrativo
+    } elseif ($periodo == 'E') {
+      // esame sospesi
       if (in_array($alunno, $scrutinio->getDato('sospesi'))) {
         // alunno trovato
         $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
       }
     } elseif ($periodo == 'X') {
-      // scrutinio integrativo
+      // esame sospesi
       if (in_array($alunno, $scrutinio->getDato('rinviati'))) {
         // alunno trovato
         $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
@@ -2241,13 +2241,13 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-tabellone-esiti.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-tabellone-esiti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
         $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
@@ -2318,13 +2318,13 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-certificazioni.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->certificazioniDati($classe, $periodo);
         // controllo alunni
         if ($classe->getAnno() != 2) {
@@ -2374,13 +2374,13 @@ class PagelleUtil {
       foreach ($alunni as $alu) {
         $dati['ammessi'][$alu['id']] = $alu;
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
+    } elseif ($periodo == 'E' || $periodo == 'X') {
       // scrutinio
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $sospesi = ($periodo == 'I' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
+      $sospesi = ($periodo == 'E' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
       // alunni ammessi
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,e.dati')
@@ -2705,13 +2705,13 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-non-ammesso-'.$alunno->getId().'.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Comunicazione di non ammissione - Alunn'.
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Comunicazione di non ammissione - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2828,8 +2828,8 @@ class PagelleUtil {
           'unico' => $v->getUnico(),
           'assenze' => $v->getAssenze());
       }
-    } elseif ($periodo == 'I' || $periodo == 'X') {
-      // scrutinio integrativo
+    } elseif ($periodo == 'E' || $periodo == 'X') {
+      // esame sospesi
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
@@ -3043,17 +3043,17 @@ class PagelleUtil {
     $pdf->AddPage('P');
     // intestazione pagina
     $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 15, 5, 0, 2, 'Classe:', 0, 'C', 'B');
+    $this->cella($pdf, 15, 10, 0, 2, 'Classe:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $this->cella($pdf, 85, 5, 0, 0, $classe_completa, 0, 'L', 'B');
+    $this->cella($pdf, 85, 10, 0, 0, $classe_completa, 0, 'L', 'B');
     $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
+    $this->cella($pdf, 31, 10, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
     $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
+    $this->cella($pdf, 20, 10, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $this->cella($pdf, 0, 5, 0, 0, 'INTEGR. SCRUTINIO FINALE', 0, 'R', 'B');
-    $this->acapo($pdf, 5);
+    $this->cella($pdf, 0, 10, 0, 0, 'SCRUTINIO ESAMI GIUDIZIO SOSPESO', 0, 'R', 'B');
+    $this->acapo($pdf, 10);
     // intestazione tabella
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 6, 30, 0, 0, 'Pr.', 1, 'C', 'B');
@@ -3349,14 +3349,14 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-verbale.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-verbale.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Verbale classe '.$nome_classe);
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
         $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
@@ -3428,13 +3428,13 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
-    } elseif ($periodo == 'I') {
-      // integrazione scrutinio finale
-      $nomefile = $classe->getAnno().$classe->getSezione().'-integrazione-scrutinio-finale-certificazione-'.$alunno->getId().'.pdf';
+    } elseif ($periodo == 'E') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-sospesi-certificazione-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
         $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
-          'Integrazione scrutinio finale - Certificazione delle competenze - Alunn'.
+          'Scrutinio per gli esami degli studenti con sospensione del giudizio - Certificazione delle competenze - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $dati = $this->certificazioniDati($classe, $periodo);
         // controllo alunni

@@ -55,12 +55,12 @@ class Scrutinio {
   private $modificato;
 
   /**
-   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, I=scrutinio integrativo, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+  * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, X=rinviato, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"P","S","F","I","1","2"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"P","S","F","E","X","1","2"}, strict=true, message="field.choice")
    */
   private $periodo;
 
@@ -191,7 +191,7 @@ class Scrutinio {
   }
 
   /**
-   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, I=scrutinio integrativo, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
    *
    * @return string Periodo dello scrutinio
    */
@@ -200,7 +200,7 @@ class Scrutinio {
   }
 
   /**
-   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, I=scrutinio integrativo, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
    *
    * @param string $periodo Periodo dello scrutinio
    *

@@ -1734,7 +1734,7 @@ class ArchiviazioneUtil {
           $msg['success'][] = $classe->getAnno().$classe->getSezione().' - Periodo '.$periodo.' - Carenze: '.
             $carenze_num.' ('.$carenze_nuovi.' NUOVI)';
           break;
-        case 'I': // scrutinio integrativo
+        case 'E': // esame sospesi
         case 'X': // scrutinio rimandato
           // riepilogo voti
           if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {

@@ -7,7 +7,7 @@
     <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Integrazione dello scrutinio finale per la classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 2: esito dello scrutinio</h2>
   <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-1"><em>Clicca sul pulsante dell'esito per inserire o modificare l'esito finale dell'alunno.<br>Puoi anche modificare le valutazioni cliccando sui voti relativi ai debiti.</em></h2>
     {% include 'include/modal-error.html.twig' %}
@@ -56,9 +56,9 @@
         {% else %}
           {% if dati.voti[alunno][materia].recupero is not null %}
             {% if dati.voti[alunno][materia].unico == 0 or (m.tipo == 'E' and dati.voti[alunno][materia].unico == 3) %}
-            <button type="button" class="btn btn-xs btn-danger gs-button-remote" title="Modifica la valutazione della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'I', 'alunno': alunno}) }}"><strong>NC</strong></button>
+            <button type="button" class="btn btn-xs btn-danger gs-button-remote" title="Modifica la valutazione della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'E', 'alunno': alunno}) }}"><strong>NC</strong></button>
             {% else %}
-            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'I', 'alunno': alunno}) }}"><strong>{{ dati.voti[alunno][materia].unico }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della materia" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_voti', {'classe': classe.id, 'materia': materia, 'periodo': 'E', 'alunno': alunno}) }}"><strong>{{ dati.voti[alunno][materia].unico }}</strong></button>
             {% endif %}
           {% else %}
             <span class="gs-big"><span class="label label-success">{{ dati.voti[alunno][materia].unico }}</span></span>
@@ -71,13 +71,13 @@
           </td>
           <td>
       {% if dati.esiti[alunno].esito is not defined %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'I'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'E'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
       {% elseif dati.esiti[alunno].esito == 'A' %}
-            <button type="button" class="btn btn-xs btn-success gs-button-round gs-button-remote" title="AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'I'}) }}"><span class="glyphicon glyphicon-ok"></span></button>
+            <button type="button" class="btn btn-xs btn-success gs-button-round gs-button-remote" title="AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'E'}) }}"><span class="glyphicon glyphicon-ok"></span></button>
       {% elseif dati.esiti[alunno].esito == 'N' %}
-            <button type="button" class="btn btn-xs btn-danger gs-button-round gs-button-remote" title="NON AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'I'}) }}"><span class="glyphicon glyphicon-remove"></span></button>
+            <button type="button" class="btn btn-xs btn-danger gs-button-round gs-button-remote" title="NON AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'E'}) }}"><span class="glyphicon glyphicon-remove"></span></button>
       {% elseif dati.esiti[alunno].esito == 'X' %}
-            <button type="button" class="btn btn-xs btn-info gs-button-round gs-button-remote" title="SCRUTINIO RINVIATO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'I'}) }}"><span class="glyphicon glyphicon-refresh"></span></button>
+            <button type="button" class="btn btn-xs btn-info gs-button-round gs-button-remote" title="SCRUTINIO RINVIATO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {'alunno': alunno, 'periodo': 'E'}) }}"><span class="glyphicon glyphicon-refresh"></span></button>
       {% endif %}
           </td>
         </tr>
