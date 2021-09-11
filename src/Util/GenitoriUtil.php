@@ -1189,13 +1189,13 @@ class GenitoriUtil {
   public function pagelleAlunno(Alunno $alunno) {
     $periodi = array();
     $adesso = (new \DateTime())->format('Y-m-d H:i:0');
-    // scrutini di classe corrente o altre di cambio classe
+    // scrutini di classe corrente o altre di cambio classe (escluso rinviato)
     $scrutini = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
       ->leftJoin('s.classe', 'c')
       ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
-      ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso')
+      ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso AND s.periodo!=:rinviato')
       ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(),
-        'stato' => 'C', 'adesso' => $adesso])
+        'stato' => 'C', 'adesso' => $adesso, 'rinviato' => 'X'])
       ->orderBy('s.data', 'DESC')
       ->getQuery()
       ->getResult();
@@ -1276,10 +1276,45 @@ class GenitoriUtil {
   public function pagellePrecedenti(Alunno $alunno) {
     // inizializza
     $dati = array();
-    $dati['voti'] = array();
-    $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
-    $fs = new Filesystem();
-    $storico = $this->em->getRepository('App:StoricoEsito')->findOneByAlunno($alunno);
+    // esito
+    $dati['esito'] = $this->em->getRepository('App:StoricoEsito')->findOneByAlunno($alunno);
+    // voti
+    $dati['voti'] = $this->em->getRepository('App:StoricoVoto')->createQueryBuilder('sv')
+      ->join('sv.materia', 'm')
+      ->where('sv.storicoEsito=:esito')
+      ->orderBy('m.ordinamento', 'ASC')
+      ->setParameters(['esito' => $dati['esito']])
+      ->getQuery()
+      ->getResult();
+    // carenze
+    $dati['carenze'] = null;
+    foreach ($dati['voti'] as $voto) {
+      if (!empty($voto->getCarenze()) && isset($voto->getDati()['carenza']) &&
+          $voto->getDati()['carenza'] == 'C') {
+        $dati['carenze'][$voto->getMateria()->getId()] = [
+          $voto->getMateria()->getNome(), $voto->getCarenze()];
+      }
+    }
+    // scrutinio rinviato svolto nel corrente A.S.
+    $dati['esitoRinviato'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      ->join('e.scrutinio', 's')
+      ->join('s.classe', 'cl')
+      ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato AND s.visibile<=:data')
+      ->setParameters(['alunno' => $alunno, 'anno' => $dati['esito']->getClasse()[0],
+        'sezione' => $dati['esito']->getClasse()[1], 'stato' => 'C', 'rinviato' => 'X',
+        'data' => new \DateTime()])
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getOneOrNullResult();
+    if ($dati['esitoRinviato']) {
+      $dati['votiRinviato'] = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+        ->join('vs.materia', 'm')
+        ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
+        ->orderBy('m.ordinamento', 'ASC')
+        ->setParameters(['scrutinio' => $dati['esitoRinviato']->getScrutinio(), 'alunno' => $alunno])
+        ->getQuery()
+        ->getResult();
+    }
     // restituisce dati come array associativo
     return $dati;
   }

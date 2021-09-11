@@ -91,6 +91,20 @@ class StoricoEsito {
   private $media;
 
   /**
+   * @var integer $credito Punteggio di credito
+   *
+   * @ORM\Column(type="integer", nullable=true)
+   */
+  private $credito;
+
+  /**
+   * @var integer $creditoPrecedente Punteggio di credito degli anni precedenti
+   *
+   * @ORM\Column(name="credito_precedente", type="integer", nullable=true)
+   */
+  private $creditoPrecedente;
+
+  /**
    * @var Alunno $alunno Alunno a cui si attribuisce l'esito
    *
    * @ORM\OneToOne(targetEntity="Alunno")
@@ -242,6 +256,48 @@ class StoricoEsito {
    */
   public function setMedia($media) {
     $this->media = $media;
+    return $this;
+  }
+
+  /**
+   * Restituisce il punteggio di credito
+   *
+   * @return integer Punteggio di credito
+   */
+  public function getCredito() {
+    return $this->credito;
+  }
+
+  /**
+   * Modifica il punteggio di credito
+   *
+   * @param integer $credito Punteggio di credito
+   *
+   * @return StoricoEsito Oggetto modificato
+   */
+  public function setCredito($credito) {
+    $this->credito = $credito;
+    return $this;
+  }
+
+  /**
+   * Restituisce il punteggio di credito degli anni precedenti
+   *
+   * @return integer Punteggio di credito degli anni precedenti
+   */
+  public function getCreditoPrecedente() {
+    return $this->creditoPrecedente;
+  }
+
+  /**
+   * Modifica il punteggio di credito degli anni precedenti
+   *
+   * @param integer $creditoPrecedente Punteggio di credito degli anni precedenti
+   *
+   * @return StoricoEsito Oggetto modificato
+   */
+  public function setCreditoPrecedente($creditoPrecedente) {
+    $this->creditoPrecedente = $creditoPrecedente;
     return $this;
   }
 

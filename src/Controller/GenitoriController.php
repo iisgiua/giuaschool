@@ -107,7 +107,7 @@ class GenitoriController extends AbstractController {
       }
     }
     // legge la classe (può essere null)
-    $classe = $reg->classeInData($data_obj, $alunno);
+    $classe = $alunno->getClasse();
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
     $formatter->setPattern('EEEE d MMMM yyyy');
@@ -131,7 +131,7 @@ class GenitoriController extends AbstractController {
       }
     } else {
       // nessuna classe
-      $errore = $trans->trans('exception.genitori_classe_nulla_data', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
       $lista_festivi = '[]';
     }
     // visualizza pagina
@@ -505,11 +505,11 @@ class GenitoriController extends AbstractController {
     }
     // legge la classe (può essere null)
     $classe = $alunno->getClasse();
-    if ($classe) {
-      // legge lista periodi
-      $dati_periodi = $gen->pagelleAlunno($alunno);
+    // legge lista periodi
+    $dati_periodi = $gen->pagelleAlunno($alunno);
+    if (!empty($dati_periodi)) {
       // seleziona scrutinio indicato o ultimo
-      $scrutinio = (count($dati_periodi) > 0 ? $dati_periodi[0][1] : null);
+      $scrutinio = $dati_periodi[0][1];
       foreach ($dati_periodi as $per) {
         if ($per[0] == $periodo) {
           $scrutinio = $per[1];
@@ -536,7 +536,7 @@ class GenitoriController extends AbstractController {
         }
       }
     } else {
-      // nessuna classe
+      // nessun dato
       $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
     }
     // visualizza pagina

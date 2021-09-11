@@ -1,6 +1,6 @@
 {{ form_start(form) }}
   <div class="modal-header">
-    <h3 class="modal-title gs-h3">Scrutinio di <span class="text-info">{{ alunno.cognome }} {{ alunno.nome }}</span> - Classe {{ alunno.classe.anno~'ª '~alunno.classe.sezione }}</h3>
+    <h3 class="modal-title gs-h3">Scrutinio di <span class="text-info">{{ alunno.cognome }} {{ alunno.nome }}</span> - Classe {{ classe.anno~'ª '~classe.sezione }}</h3>
   </div>
   <div class="modal-body">
     <ul id="gs-form-collection" class="list-group">
@@ -9,7 +9,7 @@
     'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
   {% for voto in dati.voti %}
       <li class="list-group-item gs-pt-1 gs-pb-1">
-        <div class="form-group gs-mb-0{{ dati.materie[voto.materia.id].tipo != 'R' and voto.recupero is not empty ? ' bg-danger' }}">
+        <div class="form-group gs-mb-0{{ dati.materie[voto.materia.id].tipo != 'R' and voto.debito is not empty ? ' bg-danger' }}">
           <label class="control-label col-sm-6 gs-pl-1 gs-pr-1">{{ dati.materie[voto.materia.id].nomeBreve }}</label>
           <div class="col-sm-6">
             <span style="display:inline-block;width:7em;" class="label label-success gs-big">{{ valutazioni[voto.unico] }}</span>
@@ -42,7 +42,7 @@
         </div>
       </div>
     </div>
-  {% if alunno.classe.anno == 4 and alunno.credito3 == 6 %}
+  {% if classe.anno == 4 and credito3 == 6 %}
     <div class="form-group bg-success gs-mb-1">
       <label class="col-sm-4 control-label gs-big">{{ 'label.credito_integrativo'|trans }}</label>
       <div class="col-sm-8">

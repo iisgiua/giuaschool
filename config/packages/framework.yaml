@@ -9,7 +9,7 @@ framework:
     enabled: true
   session:
     enabled: true
-    cookie_samesite: strict
+    cookie_samesite: lax
     cookie_secure: auto
     cookie_httponly: true
     sid_length: 64

@@ -218,6 +218,7 @@ class StaffUtil {
    */
   public function assenze(Classe $classe) {
     $dati = array();
+    $dati['alunni'] = [];
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     // dati GENITORI
@@ -352,6 +353,8 @@ class StaffUtil {
    */
   public function voti(Classe $classe) {
     $dati = array();
+    $dati['materie'] = [];
+    $dati['alunni'] = [];
     $periodo = $this->regUtil->periodo(new \DateTime());
     $dati['periodo'] = $periodo['nome'];
     // lista materie
@@ -478,6 +481,7 @@ class StaffUtil {
    */
   public function alunni(Classe $classe) {
     $dati = array();
+    $dati['alunni'] = [];
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')

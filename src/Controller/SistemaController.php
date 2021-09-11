@@ -46,6 +46,7 @@ use App\Entity\StoricoEsito;
 use App\Entity\StoricoVoto;
 use App\Entity\Documento;
 use App\Entity\Provisioning;
+use App\Entity\Scrutinio;
 
 
 /**
@@ -478,40 +479,85 @@ class SistemaController extends BaseController {
         }
         // importa alunni/genitori
         if (in_array('A', $form->get('dati')->getData())) {
-          // dati alunni
+          // dati alunni con esito finale
           $sql = "SELECT a.*,g.username AS g_username,g.password AS g_password,g.email AS g_email,
               cl.anno,cl.sezione,e.esito
             FROM gs_utente AS a,gs_classe AS cl,gs_utente AS g,gs_esito e
             WHERE a.ruolo=:alunno AND a.abilitato=:abilitato AND a.classe_id=cl.id
             AND g.ruolo=:genitore AND g.alunno_id=a.id
-            AND e.alunno_id=a.id AND e.esito NOT IN (:esiti)
-            ORDER BY a.cognome,a.nome";
+            AND e.alunno_id=a.id AND e.esito IN ('A', 'N', 'E')
+            ORDER BY a.cognome,a.nome,a.data_nascita";
           $stmt = $conn->prepare($sql);
-          $stmt->execute(['alunno' => 'ALU', 'abilitato' => 1, 'genitore' => 'GEN', 'esiti' => "'S','X'"]);
-          foreach ($stmt->fetchAll() as $utente_old) {
-            if (in_array($utente_old['esito'], ['A','E']) && $utente_old['anno'] == 5) {
+          $stmt->execute(['alunno' => 'ALU', 'abilitato' => 1, 'genitore' => 'GEN']);
+          $lista1 = $stmt->fetchAll();
+          // dati alunni con scrutinio rimandato
+          $sql = "SELECT a.*,g.username AS g_username,g.password AS g_password,g.email AS g_email,
+              cl.anno,cl.sezione,e.esito
+            FROM gs_utente AS a,gs_classe AS cl,gs_utente AS g,gs_esito e
+            WHERE a.ruolo=:alunno AND a.abilitato=:abilitato AND a.classe_id=cl.id
+            AND g.ruolo=:genitore AND g.alunno_id=a.id
+            AND e.alunno_id=a.id AND e.esito=:rinviato
+            AND NOT EXISTS (SELECT e1.id FROM gs_esito AS e1 WHERE e1.alunno_id=a.id AND e1.esito IN ('A', 'N', 'E'))
+            ORDER BY a.cognome,a.nome,a.data_nascita";
+          $stmt = $conn->prepare($sql);
+          $stmt->execute(['alunno' => 'ALU', 'abilitato' => 1, 'genitore' => 'GEN', 'rinviato' => 'X']);
+          $lista2 = $stmt->fetchAll();
+          // dati alunni non ammessi per assenze o all'estero
+          $assenze = [];
+          $estero = [];
+          $sql = "SELECT *
+            FROM gs_scrutinio
+            WHERE periodo=:finale";
+          $stmt = $conn->prepare($sql);
+          $stmt->execute(['finale' => 'F']);
+          foreach ($stmt->fetchAll() as $sc) {
+            $dati = unserialize($sc['dati']);
+            $noscrut = (isset($dati['no_scrutinabili']) ? $dati['no_scrutinabili'] : []);
+            foreach ($noscrut as $alu=>$ns) {
+              if (!isset($ns['deroga'])) {
+                $assenze[] = $alu;
+              }
+            }
+            $noscrut = (isset($dati['cessata_frequenza']) ? $dati['cessata_frequenza'] : []);
+            foreach ($noscrut as $alu=>$ns) {
+              $assenze[] = $alu;
+            }
+            $altro = (isset($dati['estero']) ? $dati['estero'] : []);
+            foreach ($altro as $alu) {
+              $estero[] = $alu;
+            }
+          }
+          $alunni = implode(',', $assenze);
+          $sql = "SELECT a.*,g.username AS g_username,g.password AS g_password,g.email AS g_email,
+              cl.anno,cl.sezione,'L' AS esito
+            FROM gs_utente AS a,gs_classe AS cl,gs_utente AS g
+            WHERE a.ruolo=:alunno AND a.classe_id=cl.id
+            AND g.ruolo=:genitore AND g.alunno_id=a.id
+            AND a.id IN ($alunni)
+            ORDER BY a.cognome,a.nome,a.data_nascita";
+          $stmt = $conn->prepare($sql);
+          $stmt->execute(['alunno' => 'ALU', 'genitore' => 'GEN']);
+          $lista3 = $stmt->fetchAll();
+          $alunni = implode(',', $estero);
+          $sql = "SELECT a.*,g.username AS g_username,g.password AS g_password,g.email AS g_email,
+              cl.anno,cl.sezione,'E' AS esito
+            FROM gs_utente AS a,gs_classe AS cl,gs_utente AS g,gs_cambio_classe AS cc
+            WHERE a.ruolo=:alunno AND a.classe_id IS NULL
+            AND cc.alunno_id=a.id AND cc.classe_id=cl.id
+            AND g.ruolo=:genitore AND g.alunno_id=a.id
+            AND a.id IN ($alunni)
+            ORDER BY a.cognome,a.nome,a.data_nascita";
+          $stmt = $conn->prepare($sql);
+          $stmt->execute(['alunno' => 'ALU', 'genitore' => 'GEN']);
+          $lista4 = $stmt->fetchAll();
+          // inserisce alunni/genitori
+          foreach (array_merge($lista1, $lista2, $lista3, $lista4) as $utente_old) {
+            if ($utente_old['esito'] == 'A' && $utente_old['anno'] == 5) {
               // sono esclusi alunni di quinta ammessi
               continue;
             }
-            if (in_array($utente_old['esito'], ['A','E'])) {
-              // ammesso (o all'estero): anno successivo
-              $utente_old['anno']++;
-            }
-            // trova classe
-            $classe = $em->getRepository('App:Classe')->findOneBy(['anno' => $utente_old['anno'],
-              'sezione' => $utente_old['sezione']]);
-            if (!$classe) {
-              // cerca altra classe di stessa sede
-              $sezione = $em->getRepository('App:Classe')->findOneBySezione($utente_old['sezione']);
-              if ($sezione) {
-                $classe = $em->getRepository('App:Classe')->findOneBy(['anno' => $utente_old['anno'],
-                  'sede' => $sezione->getSede()]);
-              }
-            }
             // crea alunno
             $alunno = (new Alunno())
-              ->setClasse($classe)
-              ->setFoto($utente_old['foto'])
               ->setUsername($utente_old['username'])
               ->setPassword($utente_old['password'])
               ->setEmail($utente_old['email'])
@@ -524,8 +570,7 @@ class SistemaController extends BaseController {
               ->setCodiceFiscale($utente_old['codice_fiscale'])
               ->setCitta($utente_old['citta'])
               ->setIndirizzo($utente_old['indirizzo'])
-              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']))
-              ->setNotifica(unserialize($utente_old['notifica']));
+              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']));
             $em->persist($alunno);
             // crea genitore
             $genitore = (new Genitore())
@@ -566,8 +611,7 @@ class SistemaController extends BaseController {
               ->setCodiceFiscale($utente_old['codice_fiscale'])
               ->setCitta($utente_old['citta'])
               ->setIndirizzo($utente_old['indirizzo'])
-              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']))
-              ->setNotifica(unserialize($utente_old['notifica']));
+              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']));
             $em->persist($preside);
           }
           // dati staff
@@ -597,8 +641,7 @@ class SistemaController extends BaseController {
               ->setCodiceFiscale($utente_old['codice_fiscale'])
               ->setCitta($utente_old['citta'])
               ->setIndirizzo($utente_old['indirizzo'])
-              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']))
-              ->setNotifica(unserialize($utente_old['notifica']));
+              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']));
             $em->persist($staff);
           }
           // dati docenti
@@ -626,8 +669,7 @@ class SistemaController extends BaseController {
               ->setCodiceFiscale($utente_old['codice_fiscale'])
               ->setCitta($utente_old['citta'])
               ->setIndirizzo($utente_old['indirizzo'])
-              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']))
-              ->setNotifica(unserialize($utente_old['notifica']));
+              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']));
             $em->persist($docente);
           }
           // dati ATA
@@ -655,8 +697,7 @@ class SistemaController extends BaseController {
               ->setCodiceFiscale($utente_old['codice_fiscale'])
               ->setCitta($utente_old['citta'])
               ->setIndirizzo($utente_old['indirizzo'])
-              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']))
-              ->setNotifica(unserialize($utente_old['notifica']));
+              ->setNumeriTelefono(unserialize($utente_old['numeri_telefono']));
             $em->persist($ata);
           }
           // memorizza dati
@@ -673,90 +714,283 @@ class SistemaController extends BaseController {
           // recupera dati scrutinio
           foreach ($alunni as $alu) {
             // legge esito e voti di alunno
-            $sql = "SELECT a.id AS a_id,c.anno,c.sezione,e.esito,s.periodo,vs.unico,vs.debito,vs.dati,m.nome AS m_nome
+            $classeNome = null;
+            $sql = "SELECT a.id AS a_id,c.anno,c.sezione,e.esito,e.credito,e.credito_precedente,e.dati AS e_dati,s.periodo,vs.unico,vs.debito,vs.dati,m.nome AS m_nome
               FROM gs_utente AS a,gs_classe AS c,gs_esito AS e,gs_scrutinio AS s,
                 gs_voto_scrutinio AS vs,gs_materia AS m
-              WHERE a.ruolo=:alunno AND a.codice_fiscale=:codfis AND a.classe_id=c.id
-              AND e.alunno_id=a.id AND e.esito NOT IN (:esiti) AND e.scrutinio_id=s.id
+              WHERE a.ruolo=:alunno AND a.abilitato=:abilitato AND a.codice_fiscale=:codfis AND a.classe_id=c.id
+              AND e.alunno_id=a.id AND e.esito IN ('A', 'N', 'E') AND e.scrutinio_id=s.id
               AND vs.scrutinio_id=s.id AND vs.alunno_id=a.id AND vs.materia_id=m.id";
             $stmt = $conn->prepare($sql);
-            $stmt->execute(['alunno' => 'ALU', 'codfis' => $alu->getCodiceFiscale(), 'esiti' => "'S','X'"]);
+            $stmt->execute(['alunno' => 'ALU', 'abilitato' => 1, 'codfis' => $alu->getCodiceFiscale()]);
+            $listaVoti = $stmt->fetchAll();
+            if (empty($listaVoti)) {
+              // cerca scrutinio rinviato
+              $sql = "SELECT a.id AS a_id,c.anno,c.sezione,e.esito,e.credito,e.credito_precedente,e.dati AS e_dati,s.periodo,vs.unico,vs.debito,vs.dati,m.nome AS m_nome
+                FROM gs_utente AS a,gs_classe AS c,gs_esito AS e,gs_scrutinio AS s,
+                  gs_voto_scrutinio AS vs,gs_materia AS m
+                WHERE a.ruolo=:alunno AND a.abilitato=:abilitato AND a.codice_fiscale=:codfis AND a.classe_id=c.id
+                AND e.alunno_id=a.id AND e.esito=:rinviato AND e.scrutinio_id=s.id
+                AND vs.scrutinio_id=s.id AND vs.alunno_id=a.id AND vs.materia_id=m.id";
+              $stmt = $conn->prepare($sql);
+              $stmt->execute(['alunno' => 'ALU', 'abilitato' => 1, 'codfis' => $alu->getCodiceFiscale(),
+                'rinviato' => 'X']);
+              $listaVoti = $stmt->fetchAll();
+            }
             $primo = true;
             $media = 0;
-            $num_media = 0;
-            foreach ($stmt->fetchAll() as $scrutinio) {
+            $numMedia = 0;
+            $esito = null;
+            foreach ($listaVoti as $scrutinio) {
               if ($primo) {
                 // imposta esito
+                $datiEsito = unserialize($scrutinio['e_dati']);
+                $creditoPrec = $scrutinio['credito_precedente'];
+                if ($scrutinio['anno'] > 3 && $scrutinio['esito'] == 'A' &&
+                    isset($datiEsito['creditoIntegrativo']) && $datiEsito['creditoIntegrativo']) {
+                  // aggiunge credito integrativo
+                  $creditoPrec++;
+                }
                 $esito = (new StoricoEsito())
                   ->setClasse($scrutinio['anno'].$scrutinio['sezione'])
                   ->setEsito($scrutinio['esito'])
+                  ->setCredito($scrutinio['credito'])
+                  ->setCreditoPrecedente($creditoPrec)
                   ->setPeriodo($scrutinio['periodo'])
                   ->setAlunno($alu);
                 $em->persist($esito);
+                $classeNome = $scrutinio['anno'].$scrutinio['sezione'];
                 $primo = false;
               }
               // imposta voti
               $materia = $em->getRepository('App:Materia')->findOneByNome($scrutinio['m_nome']);
               $dati = unserialize($scrutinio['dati']);
-              $scrutinio_dati = array();
+              $votoDati = array();
               $carenze = null;
-              if (($scrutinio['unico'] < 6 || ($materia->getTipo() == 'R' && $scrutinio['unico'] < 22))
-                  && $scrutinio['anno'] < 5 && $scrutinio['esito'] == 'A') {
-                $carenze = $scrutinio['debito'];
-                $scrutinio_dati['strategie'] = isset($dati['strategie']) ? $dati['strategie'] : '';
+              if ($scrutinio['anno'] < 5 && in_array($scrutinio['esito'], ['A', 'X'])) {
+                // escluse quinte e non ammessi
+                $sql = "SELECT vs.unico,vs.debito,vs.dati
+                  FROM gs_utente AS a,gs_esito AS e,gs_scrutinio AS s,
+                    gs_voto_scrutinio AS vs,gs_materia AS m
+                  WHERE a.id=:alunno
+                  AND e.alunno_id=a.id AND e.esito=:sospeso AND e.scrutinio_id=s.id
+                  AND s.periodo=:finale AND m.nome=:materia AND vs.unico<6
+                  AND vs.scrutinio_id=s.id AND vs.alunno_id=a.id AND vs.materia_id=m.id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute(['alunno' => $scrutinio['a_id'], 'sospeso' => 'S',
+                  'finale' => 'F', 'materia' => $materia->getNome()]);
+                $lista = $stmt->fetchAll();
+                if (count($lista) == 1) {
+                  // debito presente
+                  $carenze = $lista[0]['debito'];
+                  $votoDati['carenza'] = 'D';
+                } else {
+                  // carenze,
+                  $esiti = "'S','A'";
+                  $sql = "SELECT vs.unico,vs.debito,vs.dati,e.dati AS e_dati
+                    FROM gs_utente AS a,gs_esito AS e,gs_scrutinio AS s,
+                      gs_voto_scrutinio AS vs,gs_materia AS m
+                    WHERE a.id=:alunno
+                    AND e.alunno_id=a.id AND e.esito IN ($esiti) AND e.scrutinio_id=s.id
+                    AND s.periodo=:finale AND m.nome=:materia
+                    AND vs.scrutinio_id=s.id AND vs.alunno_id=a.id AND vs.materia_id=m.id";
+                  $stmt = $conn->prepare($sql);
+                  $stmt->execute(['alunno' => $scrutinio['a_id'], 'finale' => 'F',
+                    'materia' => $materia->getNome()]);
+                  $lista = $stmt->fetchAll();
+                  $esitoDati = unserialize($lista[0]['e_dati']);
+                  if (isset($esitoDati['carenze']) && isset($esitoDati['carenze_materie']) &&
+                      in_array($materia->getNomeBreve(), $esitoDati['carenze_materie'])) {
+                    $carenze = $lista[0]['debito'];
+                    $votoDati['carenza'] = 'C';
+                  }
+                }
               }
               $voto = (new StoricoVoto())
                 ->setVoto($scrutinio['unico'])
                 ->setCarenze($carenze)
-                ->setDati($scrutinio_dati)
+                ->setDati($votoDati)
                 ->setStoricoEsito($esito)
                 ->setMateria($materia);
               $em->persist($voto);
               if ($materia->getMedia()) {
+                $numMedia++;
+                if (($materia->getTipo() == 'C' && $scrutinio['unico'] == 4) ||
+                    ($materia->getTipo() == 'E' && $scrutinio['unico'] == 3)) {
+                  // NC equivale a 0
+                  continue;
+                }
                 $media += $scrutinio['unico'];
-                $num_media++;
               }
             }
             // imposta media
-            $esito->setMedia($media / $num_media);
+            if ($esito && $numMedia) {
+              $esito->setMedia($media / $numMedia);
+            }
+            if (!$esito) {
+              // dati alunni non ammessi per assenze o all'estero
+              $sql = "SELECT s.dati,a.id AS a_id,c.anno,c.sezione
+                FROM gs_utente AS a,gs_scrutinio AS s,gs_classe AS c,gs_cambio_classe AS cc
+                WHERE a.codice_fiscale=:alunno AND (a.classe_id=c.id OR (cc.classe_id=c.id AND cc.alunno_id=a.id))
+                AND s.classe_id=c.id AND s.periodo=:finale";
+              $stmt = $conn->prepare($sql);
+              $stmt->execute(['alunno' => $alu->getCodiceFiscale(), 'finale' => 'F']);
+              $lista = $stmt->fetchAll();
+              if (!empty($lista)) {
+                $idAlu = $lista[0]['a_id'];
+                $dati = unserialize($lista[0]['dati']);
+                $tipoEsito = null;
+                if (isset($dati['no_scrutinabili'][$idAlu]) &&
+                    !isset($dati['no_scrutinabili'][$idAlu]['deroga'])) {
+                  $tipoEsito = 'L';
+                } elseif (isset($dati['cessata_frequenza']) && in_array($idAlu, $dati['cessata_frequenza'])) {
+                  $tipoEsito = 'R';
+                } elseif (isset($dati['estero']) && in_array($idAlu, $dati['estero'])) {
+                  $tipoEsito = 'E';
+                }
+                if ($tipoEsito) {
+                  $esito = (new StoricoEsito())
+                    ->setClasse($lista[0]['anno'].$lista[0]['sezione'])
+                    ->setEsito($tipoEsito)
+                    ->setPeriodo('F')
+                    ->setAlunno($alu);
+                  $em->persist($esito);
+                  $classeNome = $lista[0]['anno'].$lista[0]['sezione'];
+                }
+              } else {
+                // errore: alunno non trovato
+                dump($alu);
+                die('ERRORE');
+              }
+            }
             // copia documenti dello scrutinio
-            $percorso = $this->getParameter('dir_scrutini').'/storico/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $percorso = $this->getParameter('dir_scrutini').'/storico/'.$classeNome;
             if (!$fs->exists($percorso)) {
               // crea directory
               $fs->mkdir($percorso, 0775);
             }
             // riepilogo voti
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-scrutinio-finale-riepilogo-voti.pdf';
-            $percorso_old = $dir.'finale/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $classeNome.'-scrutinio-finale-riepilogo-voti.pdf';
+            $percorso_old = $dir.'finale/'.$classeNome;
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-esame-sospesi-riepilogo-voti.pdf';
-            $percorso_old = $dir.'esami/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $classeNome.'-scrutinio-sospesi-riepilogo-voti.pdf';
+            $percorso_old = $dir.'esami/'.$classeNome;
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-scrutinio-rinviato-riepilogo-voti.pdf';
-            $percorso_old = $dir.'rinviato/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $classeNome.'-scrutinio-rinviato-riepilogo-voti.pdf';
+            $percorso_old = $dir.'rinviati/'.$classeNome;
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
             // verbale
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-scrutinio-finale-verbale.pdf';
-            $percorso_old = $dir.'finale/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $classeNome.'-scrutinio-finale-verbale.pdf';
+            $percorso_old = $dir.'finale/'.$classeNome;
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-esame-sospesi-verbale.pdf';
-            $percorso_old = $dir.'esami/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $classeNome.'-scrutinio-sospesi-verbale.pdf';
+            $percorso_old = $dir.'esami/'.$classeNome;
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
-            $documento = $scrutinio['anno'].$scrutinio['sezione'].'-scrutinio-rinviato-verbale.pdf';
-            $percorso_old = $dir.'rinviato/'.$scrutinio['anno'].$scrutinio['sezione'];
+            $documento = $classeNome.'-scrutinio-rinviato-verbale.pdf';
+            $percorso_old = $dir.'rinviati/'.$classeNome;
             if ($fs->exists($percorso_old.'/'.$documento)) {
               $fs->copy($percorso_old.'/'.$documento, $percorso.'/'.$documento, false);
             }
+          }
+          // memorizza dati
+          $em->flush();
+        }
+        // importa scrutini rinviati
+        if (in_array('X', $form->get('dati')->getData())) {
+          // legge scrutini rinviati
+          $sql = "SELECT s.*,c.anno,c.sezione
+            FROM gs_scrutinio AS s,gs_classe AS c
+            WHERE s.classe_id=c.id AND s.periodo=:esami AND s.id IN
+              (SELECT scrutinio_id FROM gs_esito WHERE esito=:rinviato)";
+          $stmt = $conn->prepare($sql);
+          $stmt->execute(['esami' => 'E', 'rinviato' => 'X']);
+          $scrutini = $stmt->fetchAll();
+          foreach ($scrutini as $scrutinio) {
+            $classe = $em->getRepository('App:Classe')->findOneBy(['anno' => $scrutinio['anno'],
+              'sezione' => $scrutinio['sezione']]);
+            $dati = [];
+            // dati scrutinio svolto
+            $dati['scrutinio']['data'] = $scrutinio['data'];
+            // dati materie
+            $sql = "SELECT DISTINCT m.*
+              FROM gs_materia AS m,gs_cattedra AS c
+              WHERE c.materia_id=m.id AND c.classe_id=:classe AND c.attiva=:attiva AND c.tipo=:tipo";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['classe' => $scrutinio['classe_id'], 'attiva' => 1, 'tipo' => 'N']);
+            $materie = $stmt->fetchAll();
+            $sql = "SELECT *
+              FROM gs_materia
+              WHERE tipo=:condotta";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['condotta' => 'C']);
+            $materie = array_merge($materie, $stmt->fetchAll());
+            $trasformaMateria = [];
+            foreach ($materie as $materia) {
+              $mat = $em->getRepository('App:Materia')->findOneByNome($materia['nome']);
+              $trasformaMateria[$materia['id']] = $mat->getId();
+            }
+            $dati['materie'] = array_values($trasformaMateria);
+            // dati alunni
+            $sql = "SELECT a.*
+              FROM gs_esito AS e,gs_utente AS a
+              WHERE e.alunno_id=a.id
+              AND e.scrutinio_id=:scrutinio AND e.esito=:rinviato";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['scrutinio' => $scrutinio['id'], 'rinviato' => 'X']);
+            $alunni = $stmt->fetchAll();
+            $dati['alunni'] = [];
+            $datiScrutinabili = unserialize($scrutinio['dati'])['scrutinabili'];
+            foreach ($alunni as $alunno) {
+              $alu = $em->getRepository('App:Alunno')->findOneByCodiceFiscale($alunno['codice_fiscale']);
+              $dati['alunni'][] = $alu->getId();
+              $dati['religione'][$alu->getId()] = $alunno['religione'];
+              $dati['credito3'][$alu->getId()] = $alunno['credito3'];
+              $dati['scrutinabili'][$alu->getId()] = $datiScrutinabili[$alunno['id']];
+              // legge voti e assenze
+              $sql = "SELECT *
+                FROM gs_voto_scrutinio
+                WHERE scrutinio_id=:scrutinio AND alunno_id=:alunno";
+              $stmt = $conn->prepare($sql);
+              $stmt->execute(['scrutinio' => $scrutinio['id'], 'alunno' => $alunno['id']]);
+              $voti = $stmt->fetchAll();
+              foreach ($voti as $voto) {
+                $dati['voti'][$alu->getId()][$trasformaMateria[$voto['materia_id']]]['unico'] = $voto['unico'];
+                $dati['voti'][$alu->getId()][$trasformaMateria[$voto['materia_id']]]['assenze'] = $voto['assenze'];
+              }
+            }
+            // dati docenti
+            $sql = "SELECT d.id,d.cognome,d.nome,d.sesso,c.tipo,m.id AS m_id
+              FROM gs_cattedra AS c,gs_utente AS d,gs_materia AS m
+              WHERE c.classe_id=:classe AND c.attiva=:attiva AND c.tipo!=:tipo
+              AND c.docente_id=d.id AND c.materia_id=m.id
+              ORDER BY d.cognome,d.nome,m.ordinamento";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['classe' => $scrutinio['classe_id'], 'attiva' => 1, 'tipo' => 'P']);
+            $docenti = $stmt->fetchAll();
+            foreach ($docenti as $docente) {
+              $dati['docenti'][$docente['id']]['cognome'] = $docente['cognome'];
+              $dati['docenti'][$docente['id']]['nome'] = $docente['nome'];
+              $dati['docenti'][$docente['id']]['sesso'] = $docente['sesso'];
+              $dati['docenti'][$docente['id']]['cattedre'][] = ['tipo' => $docente['tipo'],
+                'materia' => $trasformaMateria[$docente['m_id']]];
+            }
+            // crea scrutinio e inserisce dati
+            $scrutinioRinviato = (new Scrutinio())
+              ->setClasse($classe)
+              ->setPeriodo('X')
+              ->setStato('N')
+              ->setDati($dati);
+            $em->persist($scrutinioRinviato);
           }
           // memorizza dati
           $em->flush();

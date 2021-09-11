@@ -5,7 +5,7 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_deroghe'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
   {% if not classe %}
   <div class="alert alert-warning" role="alert">
-    <strong class="gs-big">{{ 'exception.genitori_classe_nulla'|trans }}</strong>
+    <strong class="gs-big">{{ 'exception.genitori_classe_nulla'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }}</strong>
   </div>
   {% else %}
   <div class="alert alert-info gs-mt-5" role="alert">

@@ -35,15 +35,29 @@
       <tr>
         <td><strong>{{ dati.docenti[docente][0].cognome }} {{ dati.docenti[docente][0].nome }}</strong></td>
         <td>
-      {% for mat in dati.docenti[docente] %}
-          {{ mat.tipo=='I' ? 'Lab. ' }}{{ mat.nomeBreve }}{{ not loop.last ? ', '}}
+      {% for kmat,mat in dati.docenti[docente][0].cattedre %}
+          {{ mat.tipo=='I' ? 'Lab. ' }}{{ dati.materie[mat.materia].nomeBreve }}{{ not loop.last ? ', '}}
       {% endfor %}
         </td>
         <td>
           <div class="gs-mt-0">{{ form_widget(d.presenza) }}</div>
+          <div id="row_{{ d.presenza.vars.id[16:] }}" style="display:none">
           <div style="display:flex">
             {{ form_widget(d.sessoSostituto, {attr: {style: 'width:auto'}}) }}
             {{ form_widget(d.sostituto) }}
+          </div>
+            <div class="row">
+              <label class="col-sm-6 control-label" for="{{ d.surrogaProtocollo.vars.id }}">{{ 'label.scrutinio_surroga_protocollo'|trans }}</label>
+              <div class="col-sm-6">
+                {{ form_widget(d.surrogaProtocollo) }}
+              </div>
+            </div>
+            <div class="row">
+              <label class="col-sm-6 control-label" for="{{ d.surrogaData.vars.id }}">{{ 'label.scrutinio_surroga_data'|trans }}</label>
+              <div class="col-sm-6">
+                {{ form_widget(d.surrogaData) }}
+              </div>
+            </div>
           </div>
           {{ form_widget(d.docente) }}
         </td>
@@ -67,7 +81,7 @@
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
       {% if is_granted('ROLE_STAFF') %}
-      <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': 'N'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': 'N'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Annulla apertura scrutinio</strong></a>
       {% endif %}
     </div>
     <div class="text-right col-sm-6">
@@ -124,21 +138,18 @@ $(document).ready(function() {
       $(this).find('a.btn').addClass('btn-primary');
   });
   $('td label.radio-inline input[type="radio"]').change(function() {
-    var t = $(this).parent().parent().parent().find('input[type="text"]');
-    var s = $(this).parent().parent().parent().find('select');
+    var id = parseInt($(this).attr('id').substring(16));
     if (this.value == 1 && this.checked) {
       $(this).parent().css('font-weight', 'bold');
       $(this).parent().siblings('label.radio-inline').css('font-weight', 'normal');
-      t.val('');
-      t.prop('placeholder', '');
-      t.prop('disabled', 'disabled');
-      s.prop('disabled', 'disabled');
+      $('#row_'+id+'_presenza').hide();
     } else if (this.checked) {
       $(this).parent().css('font-weight', 'bold');
       $(this).parent().siblings('label.radio-inline').css('font-weight', 'normal');
-      t.prop('disabled', false);
-      t.prop('placeholder', 'Cognome e Nome del sostituto');
-      s.prop('disabled', false);
+      if ($('#scrutinio_lista_'+id+'_surrogaData').val() == '') {
+        $('#scrutinio_lista_'+id+'_surrogaData').val('{{ date()|date('d/m/Y') }}');
+      }
+      $('#row_'+id+'_presenza').show();
     }
   }).change();
   $('#gs-scrutinio-presidente label.radio-inline input[type="radio"]').change(function() {

@@ -370,6 +370,7 @@ label.importa_classi: Classi
 label.importa_alunni: Utenti di alunni e genitori
 label.importa_personale: Utenti del personale scolastico
 label.importa_esiti: Esiti scrutini
+label.importa_scrutini_rinviati: Scrutini rinviati
 label.passaggio_classe: Assegna in automatico la nuova classe agli alunni
 label.banner_login: Messaggio visualizzato nella pagina pubblica di accesso
 label.banner_home: Messaggio visualizzato nella pagina iniziale degli utenti connessi
@@ -1117,8 +1118,7 @@ exception.file_sede: La sede non è corretta nel record {num}.
 exception.file_tipo: Il tipo indicato nel record {num} è incongruente con gli altri dati.
 exception.file_upload: Errore di caricamento del file.
 exception.formato_password: "La password inserita non rispetta le regole previste: deve contenere almeno una lettera maiuscola, almeno una lettera minuscola e almeno una cifra."
-exception.genitori_classe_nulla_data: Nella data indicata l'alunn{sex} non risulta iscritt{sex}
-exception.genitori_classe_nulla: L'alunn{sex} non risulta iscritt{sex}
+exception.genitori_classe_nulla: L'alunn{sex} non risulta ancora inserit{sex} in una classe
 exception.giorno_riposo_settimanale: Giorno di riposo settimanale.
 exception.giudizio_esito: Non è stato inserito il giudizio di non ammissione dell'alunn{sex} {alunno}.
 exception.id_notfound: Oggetto non trovato.

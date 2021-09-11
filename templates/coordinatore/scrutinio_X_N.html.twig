@@ -42,17 +42,11 @@
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
-      {% if a.bes != 'N' %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-      {% endif %}
-      {% if a.note is not empty %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Note aggiuntive" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.note }}"><span class="glyphicon glyphicon-info-sign"></span></button>
-      {% endif %}
           </td>
       {% for materia,m in dati.materie %}
-          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2{{ m.tipo == 'N' and dati.voti[alunno][materia].unico < 6 ? ' bg-warning' }}">
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2{{ m.tipo != 'R' and dati.voti[alunno][materia].unico < 6 ? ' bg-danger' }}">
         {% if m.tipo == 'R' %}
-          {% if a.religione != 'S' %}
+          {% if a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
           {% else %}
             <span class="label label-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ info.giudizi['F']['R'][dati.voti[alunno][materia].unico] }}</span>
@@ -62,6 +56,12 @@
             <span class="gs-big"><span class="label label-danger">NC</span></span>
           {% else %}
             <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }}">{{ dati.voti[alunno][materia].unico }}</span></span>
+          {% endif %}
+        {% elseif m.tipo == 'E' %}
+          {% if dati.voti[alunno][materia].unico == 3 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+          {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success') }}">{{ dati.voti[alunno][materia].unico }}</span></span>
           {% endif %}
         {% else %}
           {% if dati.voti[alunno][materia].unico == 0 %}
@@ -79,7 +79,7 @@
   </div>
   <div class="alert alert-info text-center gs-mt-4" role="alert">
     <strong class="gs-big">
-      Una volta aperto lo scrutinio, sarà possibile inserire i voti definitivi per le materie con debito formativo.
+      Una volta aperto lo scrutinio, sarà possibile inserire i voti definitivi per le materie con sospensione del giudizio.
     </strong>
   </div>
   <div class="text-center">

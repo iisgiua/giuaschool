@@ -25,21 +25,96 @@
   </div>
     {% if dati.voti is defined %}
       {% if periodo == 'A' %}
-        {% if dati.documenti is defined %}
-  <table class="table table-bordered table-hover table-striped gs-mt-4">
+  <div class="text-info text-center gs-big _gs-pb-2">
+    <strong>Scrutinio dell' {{ 'label.periodo_A'|trans }}</strong>
+  </div>
+        {% if dati.esito.esito in ['N', 'L', 'R'] or (dati.esitoRinviato and dati.esitoRinviato.esito == 'N') %}
+  <div class="alert alert-warning text-center gs-mt-4" role="alert">
+    <strong class="gs-big">Esito finale:
+      {% if dati.esito.esito == 'N' or (dati.esitoRinviato and dati.esitoRinviato.esito == 'N') %}NON AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}{% endif %}
+      {% if dati.esito.esito == 'L' %}NON AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }} PER SUPERAMENTO LIMITE DI ASSENZE{% endif %}
+      {% if dati.esito.esito == 'R' %}NON SCRUTINAT{{ alunno.sesso == 'M' ? 'O' : 'A' }}{% endif %}
+    </strong>
+  </div>
+        {% elseif dati.esito.esito == 'A' or (dati.esitoRinviato and dati.esitoRinviato.esito == 'A') %}
+  <div class="alert alert-success text-center gs-mt-4" role="alert">
+    <strong class="gs-big">Esito finale: AMMESS{{ alunno.sesso == 'M' ? 'O' : 'A' }}
+      {% if dati.esito.credito %}<br>Credito: {{ dati.esito.credito }}{% endif %}
+      {% if dati.esito.creditoPrecedente %}<br>Credito anni precedenti: {{ dati.esito.creditoPrecedente }}{% endif %}
+    </strong>
+  </div>
+        {% elseif dati.esito.esito == 'E' %}
+  <div class="alert alert-success text-center gs-mt-4" role="alert">
+    <strong class="gs-big">ANNO ALL'ESTERO</strong>
+  </div>
+        {% elseif dati.esito.esito == 'X' and dati.esitoRinviato is empty %}
+  <div class="alert alert-info text-center gs-mt-4" role="alert">
+    <strong class="gs-big">SCRUTINIO RINVIATO</strong>
+  </div>
+        {% endif %}
+        {% if dati.voti|length > 0 and dati.esitoRinviato is empty %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>Voti assegnati</strong></caption>
     <thead class="bg-success">
       <tr>
-        <th class="col-sm-6">Documento</th>
-        <th class="col-sm-6">Azioni</th>
+        <th class="col-sm-8">Materia</th>
+        <th class="col-sm-4">Voto</th>
       </tr>
     </thead>
     <tbody>
+          {% for v in dati.voti %}
+      <tr>
+        <td><strong>{{ v.materia.nome }}</strong></td>
+            {% if v.materia.tipo == 'R' %}
+        <td><span class="label label-{{ v.voto < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.voto] }}</span></td>
+            {% else %}
+        <td><span class="label label-{{ v.voto < 6 ? 'danger' : 'success' }} gs-big">{{ ((v.materia.tipo == 'C' and v.voto == 4) or (v.materia.tipo == 'E' and v.voto == 3) or (v.voto == 0)) ? 'NC' : v.voto }}</span></td>
+            {% endif %}
+      </tr>
+          {% endfor %}
     </tbody>
   </table>
-        {% else %}
-  <div class="alert alert-info gs-mt-4" role="alert">
-    <strong class="gs-big">Nessun documento presente</strong>
-  </div>
+        {% elseif dati.votiRinviato is defined %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>Voti assegnati</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-8">Materia</th>
+        <th class="col-sm-4">Voto</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for v in dati.votiRinviato %}
+      <tr>
+        <td><strong>{{ v.materia.nome }}</strong></td>
+            {% if v.materia.tipo == 'R' %}
+        <td><span class="label label-{{ v.unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.unico] }}</span></td>
+            {% else %}
+        <td><span class="label label-{{ v.unico < 6 ? 'danger' : 'success' }} gs-big">{{ ((v.materia.tipo == 'C' and v.unico == 4) or (v.materia.tipo == 'E' and v.unico == 3) or (v.unico == 0)) ? 'NC' : v.unico }}</span></td>
+            {% endif %}
+      </tr>
+          {% endfor %}
+    </tbody>
+  </table>
+        {% endif %}
+        {% if dati.carenze|length > 0 and (dati.esito.esito == 'A' or dati.esitoRinviato.esito == 'A') %}
+  <table class="table table-bordered table-hover table-striped">
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>Carenze da recuperare autonomamente</strong></caption>
+    <thead class="bg-success">
+      <tr>
+        <th class="col-sm-6">Materia</th>
+        <th class="col-sm-6">Argomenti da recuperare</th>
+      </tr>
+    </thead>
+    <tbody>
+          {% for v in dati.carenze %}
+      <tr>
+        <td><strong>{{ v[0] }}</strong></td>
+        <td><small>{{ v[1] }}</small></td>
+      </tr>
+          {% endfor %}
+    </tbody>
+  </table>
         {% endif %}
       {% elseif periodo == 'P' %}
   <table class="table table-bordered table-hover table-striped">

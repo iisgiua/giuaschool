@@ -28,14 +28,15 @@
         {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
         <div class="col-sm-6 col-md-6 gs-pt-4 gs-pb-4 bg-info">
           <p class="text-center text-primary gs-big"><strong>Alunni e Docenti</strong></p>
-          <div class="help-block"><span class="gs-text-normal">Clicca sul pulsante <strong>Accedi con GSuite</strong>, quindi inserisci nella nuova pagina l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
+          <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Accedi con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
           <div class="text-center gs-mt-5">
-            <a href="{{ path('login_gsuite') }}" class="btn btn-primary"><strong>Accedi con GSuite</strong></a>
+            <a href="{{ path('login_gsuite') }}" class="btn btn-primary"><strong>Accedi con GOOGLE</strong></a>
           </div>
+          <p class="gs-mt-3"><strong><em>Password <em>Google</em> dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></strong></p>
         </div>
         <div class="col-sm-6 col-md-5 col-md-offset-1 gs-pt-4 gs-pb-4" style="border:2px solid #337ab7">
           <p class="text-center text-primary gs-big"><strong>Genitori e Personale ATA</strong></p>
-          <div class="help-block"><span class="gs-text-normal">Inserisci l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>Accedi</strong>.</span></div>
+          <div class="help-block"><span class="gs-text-normal">I genitori ed il personale ATA devono inserire, nei campi sottostanti, l'<strong>utente</strong> e la <strong>password</strong>, quindi cliccare sul pulsante <strong>Accedi</strong>.</span></div>
           <form name="login_form" method="post" class="form-horizontal">
             <div class="form-group">
               <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
@@ -54,7 +55,7 @@
             <div class="form-group text-center">
               <button type="submit" class="btn btn-primary" id="login" name="login"><strong>{{ 'label.login'|trans }}</strong></button>
             </div>
-            <p><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></em></strong></p>
+            <p><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></p>
             <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
           </form>
         </div>

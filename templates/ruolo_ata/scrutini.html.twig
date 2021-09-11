@@ -20,7 +20,7 @@
     {% for u in dati.lista %}
       <tr>
         <td>{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})</td>
-        <td>{{ u.classe ? u.classe.anno~'ª '~u.classe.sezione : 'Ritirato/Trasferito/Estero' }}</td>
+        <td>{{ u.classe ? u.classe.anno~'ª '~u.classe.sezione : 'Non definita' }}</td>
         <td>
       {% for periodo in dati.pagelle[u.id] %}
         {% if periodo[0] == 'A' %}
@@ -33,8 +33,8 @@
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio finale</strong></a>
         {% elseif periodo[0] == 'E' %}
           <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Esame sospesi</strong></a>
-        {% elseif periodo[0] == 'X' %}
-          <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio rinviato</strong></a>
+        {#-- {% elseif periodo[0] == 'X' %} #}
+          {#-- <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio rinviato</strong></a> #}
         {% endif %}
       {% endfor %}
         </td>

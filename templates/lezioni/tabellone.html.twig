@@ -335,22 +335,41 @@
             <span class="gs-big"><span class="label label-danger">NON AMMESSO (SUPERAMENTO LIMITE ASSENZE)</span></span>
         {% elseif a.esito == 'E' %}
             <span class="gs-big"><span class="label label-warning">ANNO ALL'ESTERO</span></span>
+        {% elseif a.esito == 'X' %}
+            <span class="gs-big"><span class="label label-warning">SCRUTINIO RINVIATO</span></span>
         {% endif %}
           </td>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+          {% if a.media %}
             <span class="gs-big"><span class="label label-{{ a.media < 6 ? 'danger' : 'success' }}">{{ a.media|number_format(2,',') }}</span></span>
+          {% else %}
+            <span> --- </span>
+          {% endif %}
           </td>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if dati.voti[alunno][info.materia_id].voto is defined %}
           {% if info.materia_tipo == 'R' %}
             <span class="gs-big"><span class="label label-{{ dati.voti[alunno][info.materia_id].voto < 22 ? 'danger' : 'success' }}">{{ info.giudizi['F']['R'][dati.voti[alunno][info.materia_id].voto] }}</span></span>
-          {% elseif dati.voti[alunno][info.materia_id].voto == 0 %}
+          {% elseif dati.voti[alunno][info.materia_id].voto == 0 or (info.materia_tipo == 'C' and dati.voti[alunno][info.materia_id].voto == 4) or (info.materia_tipo == 'E' and dati.voti[alunno][info.materia_id].voto == 3) %}
             <span class="gs-big"><span class="label label-danger">NC</span></span>
           {% else %}
-            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][info.materia_id].voto < 5 ? 'danger' : (dati.voti[alunno][info.materia_id].voto < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][info.materia_id].voto }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][info.materia_id].voto < 6 ? 'danger' : 'success' }}">{{ dati.voti[alunno][info.materia_id].voto }}</span></span>
           {% endif %}
         {% else %}
             <span> --- </span>
+        {% endif %}
+          </td>
+          <td>
+        {% if a.esito == 'A' and dati.voti[alunno][info.materia_id].carenze and dati.voti[alunno][info.materia_id].dati.carenza == 'C' %}
+            <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} - {{ info.materia }}" data-body="carenza-{{ alunno }}-{{ info.materia_id }}" title="Visualizza le carenze con recupero autonomo"></span><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Carenze</strong></button>
+            <div id="carenza-{{ alunno }}-{{ info.materia_id }}" style="display:none">
+              <div class="list-group-item">
+                <div class="list-group-item-text">
+                  <h3 class="gs-h3 text-center gs-mt-1">Carenze segnalate per il recupero autonomo</h3>
+                  <p>{{ dati.voti[alunno][info.materia_id].carenze }}</p>
+                </div>
+              </div>
+            </div>
         {% endif %}
           </td>
         </tr>
@@ -380,6 +399,9 @@ $(document).ready(function() {
     var html = $('#'+id).html();
     $(this).find('#gs-modal-info-label').html(title);
     $(this).find('#gs-modal-info-body').html(html);
+  });
+  $('#gs-modal-info').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
   });
   $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
     var c=floatContainer.find('thead');

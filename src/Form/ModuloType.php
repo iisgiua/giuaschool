@@ -43,10 +43,11 @@ class ModuloType extends AbstractType {
         ->add('directory', TextType::class, array('label' => 'label.directory_precedente',
           'required' => true))
         ->add('dati', ChoiceType::class, array('label' => 'label.importa_dati',
-          'data' => ['I','C','L','A','P','E'],
+          'data' => ['I','C','L','A','P','E','X'],
           'choices' => ['label.importa_istituto' => 'I', 'label.importa_corsi' => 'C',
             'label.importa_classi' => 'L', 'label.importa_alunni' => 'A',
-            'label.importa_personale' => 'P', 'label.importa_esiti' => 'E'],
+            'label.importa_personale' => 'P', 'label.importa_esiti' => 'E',
+            'label.importa_scrutini_rinviati' => 'X'],
           'expanded' => true,
           'multiple' => true,
           'required' => false));

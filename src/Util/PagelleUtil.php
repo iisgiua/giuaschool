@@ -90,7 +90,8 @@ class PagelleUtil {
       'P' => 'primo',
       'S' => 'secondo',
       'F' => 'finale',
-      'E' => 'esami');
+      'E' => 'esami',
+      'X' => 'rinviati');
   }
 
   /**
@@ -312,7 +313,7 @@ class PagelleUtil {
           $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
         }
       }
-    } elseif ($periodo == 'E' || $periodo == 'X') {
+    } elseif ($periodo == 'E') {
       // esame sospesi
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
@@ -406,6 +407,96 @@ class PagelleUtil {
           $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
         }
       }
+    } elseif ($periodo == 'X') {
+      // esame rinviati
+      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+        'periodo' => $periodo, 'stato' => 'C']);
+      $dati['classe'] = $classe;
+      // legge dati di alunni
+      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso')
+        ->where('a.id IN (:lista)')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['lista' => $dati['scrutinio']->getDato('alunni')])
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($alunni as $alu) {
+        $dati['alunni'][$alu['id']] = $alu;
+        $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']->getDato('religione')[$alu['id']];
+      }
+      // legge materie
+      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+        ->select('m.id,m.nome,m.nomeBreve,m.tipo')
+        ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
+        ->setParameters(['tipi' => ['S'], 'lista' => $dati['scrutinio']->getDato('materie')])
+        ->orderBy('m.ordinamento,m.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($materie as $mat) {
+        $dati['materie'][$mat['id']] = $mat;
+      }
+      // legge i voti
+      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+        ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista)')
+        ->setParameters(['scrutinio' => $dati['scrutinio'], 'lista' => $dati['scrutinio']->getDato('alunni')])
+        ->getQuery()
+        ->getResult();
+      foreach ($voti as $v) {
+        // inserisce voti/assenze
+        $dati['voti'][$v->getAlunno()->getId()][$v->getMateria()->getId()] = array(
+          'id' => $v->getId(),
+          'unico' => $v->getUnico(),
+          'assenze' => $v->getAssenze(),
+          'recupero' => $v->getRecupero(),
+          'debito' => $v->getDebito());
+      }
+      // legge esiti
+      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+        ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
+        ->setParameters(['lista' => $dati['scrutinio']->getDato('alunni'), 'scrutinio' => $dati['scrutinio']])
+        ->getQuery()
+        ->getResult();
+      foreach ($esiti as $e) {
+        $dati['esiti'][$e->getAlunno()->getId()] = $e;
+      }
+      // docenti
+      $docenti = $dati['scrutinio']->getDato('docenti');
+      // esclude docente solo Ed.Civica
+      foreach ($docenti as $iddoc=>$doc) {
+        if (count($doc['cattedre']) == 1 && isset($dati['materie'][$doc['cattedre'][0]['materia']]) &&
+            $dati['materie'][$doc['cattedre'][0]['materia']]['tipo'] == 'E') {
+          // rimuove docente
+          unset($docenti[$iddoc]);
+        }
+      }
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      // dati docenti presenti
+      foreach ($docenti as $iddoc=>$doc) {
+        if ($docenti_presenti[$iddoc]->getPresenza()) {
+          // dati docente
+          $dati['docenti'][$iddoc] = ($doc['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ').
+            $doc['cognome'].' '.$doc['nome'];
+        } else {
+          // dati sostituto
+          $dati['docenti'][$iddoc] = ($docenti_presenti[$iddoc]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ').
+            ucwords(strtolower($docenti_presenti[$iddoc]->getSostituto()));
+        }
+      }
+      // presidente
+      if ($dati['scrutinio']->getDato('presiede_ds')) {
+        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+      } else {
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
+        $d = $dati['docenti'][$id_presidente];
+        if ($dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza()) {
+          $dati['presidente_nome'] = $d;
+        } else {
+          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
+        }
+      }
+      // anno scolastico
+      $dati['annoscolastico'] = '2020/2021';
     }
     // restituisce dati
     return $dati;
@@ -472,13 +563,29 @@ class PagelleUtil {
         // crea il documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
         $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
-        $this->creaRiepilogoVoti_I($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        $this->creaRiepilogoVoti_E($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
         // salva il documento
         $this->pdf->save($percorso.'/'.$nomefile);
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
     } elseif ($periodo == 'X') {
+      // esame rinviati
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-riepilogo-voti.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio per gli esami supplettivi degli studenti con sospensione del giudizio - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $dati = $this->riepilogoVotiDati($classe, $periodo);
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaRiepilogoVoti_E($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -789,7 +896,7 @@ class PagelleUtil {
           }
         }
       }
-    } elseif ($periodo == 'E' || $periodo == 'X') {
+    } elseif ($periodo == 'E') {
       // esame sospesi
       $dati['periodo'] = 'SCRUTINIO ESAMI GIUDIZIO SOSPESO';
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
@@ -827,6 +934,43 @@ class PagelleUtil {
               // dati sostituto
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
                 ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+            }
+          }
+        }
+      }
+    } elseif ($periodo == 'X') {
+      // esame rinviati
+      $dati['periodo'] = 'SCRUTINIO ESAMI GIUDIZIO SOSPESO SESSIONE SUPPLETTIVA';
+      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+        'periodo' => $periodo, 'stato' => 'C']);
+      $dati['classe'] = $classe;
+      // legge materie
+      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+        ->select('m.id,m.nome,m.tipo')
+        ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
+        ->setParameters(['tipi' => ['U','C','E'], 'lista' => $dati['scrutinio']->getDato('materie')])
+        ->orderBy('m.ordinamento,m.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+      // legge docenti del CdC
+      $docenti = $dati['scrutinio']->getDato('docenti');
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      // dati per materia
+      foreach ($materie as $mat) {
+        foreach ($docenti as $iddoc=>$doc) {
+          foreach ($doc['cattedre'] as $cat) {
+            if ($cat['materia'] == $mat['id']) {
+              $dati['materie'][$mat['id']]['nome'] = $mat['nome'].
+                ($mat['tipo'] != 'S' ? (', '.$edcivica->getNome()) : '');
+              if ($docenti_presenti[$iddoc]->getPresenza()) {
+                // dati docente
+                $dati['materie'][$mat['id']]['docenti'][$iddoc] = $doc['cognome'].' '.$doc['nome'];
+              } else {
+                // dati sostituto
+                $dati['materie'][$mat['id']]['docenti'][$iddoc] =
+                  ucwords(strtolower($docenti_presenti[$iddoc]->getSostituto()));
+              }
             }
           }
         }
@@ -955,6 +1099,39 @@ class PagelleUtil {
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
     } elseif ($periodo == 'X') {
+      // esame rinviati
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-firme-registro.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio per gli esami supplettivi degli studenti con sospensione del giudizio - Foglio firme Registro '.$nome_classe);
+        $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
+        $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
+        $this->pdf->getHandler()->setPrintHeader(false);
+        $this->pdf->getHandler()->setPrintFooter(false);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
+        $dati = $this->firmeRegistroDati($classe, $periodo);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_firme_'.$periodo.'.html.twig',
+          array('dati' => $dati));
+        $this->pdf->getHandler()->AddPage('L');
+        $this->pdf->getHandler()->writeHTML($html);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -1225,7 +1402,7 @@ class PagelleUtil {
           $dati['insuff5'][] = $ins['alunno'];
         }
       }
-    } elseif ($periodo == 'E' || $periodo == 'X') {
+    } elseif ($periodo == 'E') {
       // legge materie
       $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome')
@@ -1328,6 +1505,107 @@ class PagelleUtil {
           $maggioriSuff = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
             ->select('COUNT(vs.unico)')
             ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.recupero IS NOT NULL AND vs.unico>:suff')
+            ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $kalu, 'suff' => 6])
+            ->getQuery()
+            ->getSingleScalarResult();
+          $dati['creditoSospeso'][$kalu] = ($maggioriSuff > 0);
+        }
+      }
+    } elseif ($periodo == 'X') {
+      // legge materie
+      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+        ->select('m.id,m.nome')
+        ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
+        ->setParameters(['tipi' => ['C'], 'lista' => $dati['scrutinio']->getDato('materie')])
+        ->orderBy('m.ordinamento,m.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      // legge docenti del CdC
+      $docenti = $dati['scrutinio']->getDato('docenti');
+      // dati per la visualizzazione della pagina
+      $dati['docenti'] = $docenti;
+      foreach ($dati_materie as $mat) {
+        foreach ($docenti as $iddoc=>$doc) {
+          foreach ($doc['cattedre'] as $cat) {
+            if ($cat['materia'] == $mat['id']) {
+              $dati['docenti'][$iddoc]['materie'][$mat['id']] = array(
+                'nome_materia' => $mat['nome'],
+                'tipo_cattedra' => $cat['tipo']);
+            }
+          }
+        }
+      }
+      // presidente
+      if ($dati['scrutinio']->getDato('presiede_ds')) {
+        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
+      } else {
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
+        $d = $dati['docenti'][$id_presidente];
+        if ($dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza()) {
+          $dati['presidente_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'];
+          $dati['presidente'] = 'il Coordinatore della classe, '.$dati['presidente_nome'].', '.
+            'delegat'.($d['sesso'] == 'M' ? 'o' : 'a').' dal Dirigente Scolastico';
+        } else {
+          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
+          $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['presidente_nome'].', '.
+            'delegat'.($s->getSessoSostituto() == 'M' ? 'o' : 'a').' dal Dirigente Scolastico';
+        }
+      }
+      // segretario
+      $id_segretario = $dati['scrutinio']->getDato('segretario');
+      $d = $dati['docenti'][$id_segretario];
+      if ($dati['scrutinio']->getDato('presenze')[$id_segretario]->getPresenza()) {
+        $dati['segretario_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa').' '.$d['cognome'].' '.$d['nome'];
+        $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
+      } else {
+        $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
+        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
+        $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
+      }
+      // legge dati di alunni
+      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+        ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso')
+        ->where('a.id IN (:lista)')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['lista' => $dati['scrutinio']->getDato('alunni')])
+        ->getQuery()
+        ->getArrayResult();
+      $dati['alunni_noreligione'] = array();
+      foreach ($alunni as $alu) {
+        $dati['alunni'][$alu['id']] = $alu;
+        $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']->getDato('religione')[$alu['id']];
+        $dati['alunni'][$alu['id']]['credito3'] = $dati['scrutinio']->getDato('credito3')[$alu['id']];
+        $dati['alunni'][$alu['id']]['credito4'] = null;
+        if ($dati['alunni'][$alu['id']]['religione'] != 'S' && $dati['alunni'][$alu['id']]['religione'] != 'A') {
+          $dati['alunni_noreligione'][] = $alu['cognome'].' '.$alu['nome'];
+        }
+      }
+      // legge esiti
+      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+        ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
+        ->setParameters(['lista' => $dati['scrutinio']->getDato('alunni'), 'scrutinio' => $dati['scrutinio']])
+        ->getQuery()
+        ->getResult();
+      $dati['ammessi'] = 0;
+      $dati['non_ammessi'] = 0;
+      foreach ($esiti as $e) {
+        $dati['esiti'][$e->getAlunno()->getId()] = $e;
+        if ($e->getEsito() == 'A') {
+          $dati['ammessi']++;
+        } elseif ($e->getEsito() == 'N') {
+          $dati['non_ammessi']++;
+        }
+      }
+      // credito per sospensione giudizio
+      foreach ($dati['alunni'] as $kalu=>$alu) {
+        if ($dati['esiti'][$kalu]->getEsito() == 'A') {
+          $dati['creditoSospeso'][$kalu] = false;
+          // legge i voti di recupero maggiori al 6
+          $maggioriSuff = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            ->select('COUNT(vs.unico)')
+            ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.debito IS NOT NULL AND vs.unico>:suff')
             ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $kalu, 'suff' => 6])
             ->getQuery()
             ->getSingleScalarResult();
@@ -1822,7 +2100,7 @@ class PagelleUtil {
       }
     } elseif ($periodo == 'X') {
       // esame sospesi
-      if (in_array($alunno, $scrutinio->getDato('rinviati'))) {
+      if (in_array($alunno, $scrutinio->getDato('alunni'))) {
         // alunno trovato
         $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
       }
@@ -2275,6 +2553,38 @@ class PagelleUtil {
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
     } elseif ($periodo == 'X') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-tabellone-esiti.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento PDF
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio per gli esami supplettivi degli studenti con sospensione del giudizio - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
+        $dati = $this->riepilogoVotiDati($classe, $periodo);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_tabellone_'.$periodo.'.html.twig',
+          array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -2341,6 +2651,27 @@ class PagelleUtil {
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
     } elseif ($periodo == 'X') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-certificazioni.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio per gli esami supplettivi degli studenti con sospensione del giudizio - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
+        $dati = $this->certificazioniDati($classe, $periodo);
+        // controllo alunni
+        if ($classe->getAnno() != 2) {
+          // errore
+          return null;
+        }
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaCertificazioni_F($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -2380,7 +2711,7 @@ class PagelleUtil {
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $sospesi = ($periodo == 'E' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('rinviati'));
+      $sospesi = ($periodo == 'E' ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('alunni'));
       // alunni ammessi
       $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,e.dati')
@@ -2392,6 +2723,10 @@ class PagelleUtil {
         ->getResult();
       foreach ($alunni as $alu) {
         $dati['ammessi'][$alu['id']] = $alu;
+      }
+      if ($periodo == 'X') {
+        // A.S. rinviati
+        $dati['annoscolastico'] = '2020/2021';
       }
     }
     // restituisce dati
@@ -2436,7 +2771,8 @@ class PagelleUtil {
       $pdf->writeHTML($html, true, false, false, false, 'C');
       $pdf->Ln(3);
       $pdf->SetFont('times', 'B', 12);
-      $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $as = (isset($dati['annoscolastico']) ? $dati['annoscolastico'] :
+        $this->session->get('/CONFIG/SCUOLA/anno_scolastico'));
       $html = '<p><span style="font-size:14">CERTIFICATO delle COMPETENZE DI BASE</span><br>'.
               '<span style="font-size:11">acquisite nell\'assolvimento dell\' OBBLIGO DI ISTRUZIONE</span></p>'.
               '<p>Anno Scolastico '.$as.'</p>'.
@@ -2746,6 +3082,45 @@ class PagelleUtil {
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
     } elseif ($periodo == 'X') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-non-ammesso-'.$alunno->getId().'.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio per gli esami supplettivi degli studenti con sospensione del giudizio - Comunicazione di non ammissione - Alunn'.
+          ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
+        $dati = $this->nonAmmessoDati($classe, $alunno, $periodo);
+        // controllo alunno
+        if ($dati['tipo'] == null) {
+          // errore
+          return null;
+        } else {
+          // crea comunicazione non ammissione (per scrutinio o per frequenza)
+          $html = $this->tpl->render('coordinatore/documenti/scrutinio_non_ammesso_'.$periodo.'.html.twig',
+            array('dati' => $dati));
+          $this->pdf->createFromHtml($html);
+        }
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -2828,7 +3203,7 @@ class PagelleUtil {
           'unico' => $v->getUnico(),
           'assenze' => $v->getAssenze());
       }
-    } elseif ($periodo == 'E' || $periodo == 'X') {
+    } elseif ($periodo == 'E') {
       // esame sospesi
       $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
@@ -2867,6 +3242,52 @@ class PagelleUtil {
         'nome' => $condotta->getNome(),
         'nomeBreve' => $condotta->getNomeBreve(),
         'tipo' => $condotta->getTipo());
+      // legge i voti
+      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+        ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
+        ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $alunno])
+        ->getQuery()
+        ->getResult();
+      foreach ($voti as $v) {
+        // inserisce voti/assenze
+        $dati['voti'][$v->getMateria()->getId()] = array(
+          'id' => $v->getId(),
+          'unico' => $v->getUnico(),
+          'assenze' => $v->getAssenze());
+      }
+    } elseif ($periodo == 'X') {
+      // esame rinviato
+      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+        'periodo' => $periodo, 'stato' => 'C']);
+      $dati['classe'] = $classe;
+      $dati['alunno'] = $alunno;
+      $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
+      $dati['religione'] = $dati['scrutinio']->getDato('religione')[$alunno->getId()];
+      // legge esito
+      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+        ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
+        ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getOneOrNullResult();
+      // controllo tipo di non ammissione
+      $dati['tipo'] = null;
+      if (in_array($alunno->getId(), $dati['scrutinio']->getDato('alunni')) && $dati['esito'] &&
+          $dati['esito']->getEsito() == 'N') {
+        // non ammesso durante lo scrutinio
+        $dati['tipo'] = 'N';
+      }
+      // legge materie
+      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+        ->select('m.id,m.nome,m.nomeBreve,m.tipo')
+        ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
+        ->setParameters(['tipi' => ['S'], 'lista' => $dati['scrutinio']->getDato('materie')])
+        ->orderBy('m.ordinamento,m.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($materie as $mat) {
+        $dati['materie'][$mat['id']] = $mat;
+      }
       // legge i voti
       $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
@@ -3020,7 +3441,7 @@ class PagelleUtil {
    * @param string $classe_completa Nome della classe con corso e sede
    * @param array $dati Dati dello scrutinio
    */
-  public function creaRiepilogoVoti_I($pdf, $classe, $classe_completa, $dati) {
+  public function creaRiepilogoVoti_E($pdf, $classe, $classe_completa, $dati) {
     $info_voti['N'] = [0 => 'NC', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['C'] = [4 => 'NC', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
     $info_voti['E'] = [3 => 'NC', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
@@ -3042,18 +3463,21 @@ class PagelleUtil {
     $pdf->setPrintFooter(true);
     $pdf->AddPage('P');
     // intestazione pagina
+    $altezza = ($dati['scrutinio']->getPeriodo() == 'X' ? 15 : 10);
     $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 15, 10, 0, 2, 'Classe:', 0, 'C', 'B');
+    $this->cella($pdf, 15, $altezza, 0, 2, 'Classe:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $this->cella($pdf, 85, 10, 0, 0, $classe_completa, 0, 'L', 'B');
+    $this->cella($pdf, 85, $altezza, 0, 0, $classe_completa, 0, 'L', 'B');
     $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 31, 10, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
+    $this->cella($pdf, 31, $altezza, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
-    $this->cella($pdf, 20, 10, 0, 0, $as, 0, 'L', 'B');
+    $as = (isset($dati['annoscolastico']) ? $dati['annoscolastico'] :
+      $this->session->get('/CONFIG/SCUOLA/anno_scolastico'));
+    $this->cella($pdf, 20, $altezza, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $this->cella($pdf, 0, 10, 0, 0, 'SCRUTINIO ESAMI GIUDIZIO SOSPESO', 0, 'R', 'B');
-    $this->acapo($pdf, 10);
+    $periodo = ($dati['scrutinio']->getPeriodo() == 'X' ? 'SCRUTINIO ESAMI GIUDIZIO SOSPESO SESSIONE SUPPLETTIVA' : 'SCRUTINIO ESAMI GIUDIZIO SOSPESO');
+    $this->cella($pdf, 0, $altezza, 0, 0, $periodo, 0, 'R', 'B');
+    $this->acapo($pdf, $altezza);
     // intestazione tabella
     $pdf->SetFont('helvetica', 'B', 8);
     $this->cella($pdf, 6, 30, 0, 0, 'Pr.', 1, 'C', 'B');
@@ -3383,6 +3807,40 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // esame sospesi
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-verbale.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio per gli esami supplettivi degli studenti con sospensione del giudizio - Verbale classe '.$nome_classe);
+        $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
+        $this->pdf->getHandler()->SetFooterMargin(10);
+        $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 9));
+        $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setPrintFooter(true);
+        // azzera margini verticali tra tag
+        $tagvs = array(
+          'div' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+          'p' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.1)),
+          'ul' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'ol' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0.1)),
+          'table' => array(0 => array('h' => 0, 'n' => 0.5), 1 => array('h' => 0, 'n' => 0.5)),
+        );
+        $this->pdf->getHandler()->setHtmlVSpace($tagvs);
+        // legge dati
+        $dati = $this->verbaleDati($classe, $periodo);
+        // crea documento
+        $html = $this->tpl->render('coordinatore/documenti/scrutinio_verbale_'.$periodo.'.html.twig',
+          array('dati' => $dati));
+        $this->pdf->createFromHtml($html);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -3451,6 +3909,29 @@ class PagelleUtil {
       }
       // restituisce nome del file
       return $percorso.'/'.$nomefile;
+    } elseif ($periodo == 'X') {
+      // esame rinviati
+      $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-rinviato-certificazione-'.$alunno->getId().'.pdf';
+      if (!$fs->exists($percorso.'/'.$nomefile)) {
+        // crea pdf
+        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+          'Scrutinio per gli esami supplettivi degli studenti con sospensione del giudizio - Certificazione delle competenze - Alunn'.
+          ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
+        $dati = $this->certificazioniDati($classe, $periodo);
+        // controllo alunni
+        if (!in_array($alunno->getId(), array_keys($dati['ammessi'])) || $classe->getAnno() != 2) {
+          // errore
+          return null;
+        }
+        // crea il documento
+        $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
+        $nome_classe_lungo = $nome_classe.' '.$classe->getCorso()->getNomeBreve().' - '.$classe->getSede()->getCitta();
+        $this->creaCertificazione_F($this->pdf->getHandler(), $nome_classe, $nome_classe_lungo, $dati, $alunno);
+        // salva il documento
+        $this->pdf->save($percorso.'/'.$nomefile);
+      }
+      // restituisce nome del file
+      return $percorso.'/'.$nomefile;
     }
     // errore
     return null;
@@ -3499,7 +3980,8 @@ class PagelleUtil {
       $pdf->writeHTML($html, true, false, false, false, 'C');
       $pdf->Ln(3);
       $pdf->SetFont('times', 'B', 12);
-      $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $as = (isset($dati['annoscolastico']) ? $dati['annoscolastico'] :
+        $this->session->get('/CONFIG/SCUOLA/anno_scolastico'));
       $html = '<p><span style="font-size:14">CERTIFICATO delle COMPETENZE DI BASE</span><br>'.
               '<span style="font-size:11">acquisite nell\'assolvimento dell\' OBBLIGO DI ISTRUZIONE</span></p>'.
               '<p>Anno Scolastico '.$as.'</p>'.

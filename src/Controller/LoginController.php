@@ -40,6 +40,7 @@ use App\Util\LogHandler;
 use App\Util\ConfigLoader;
 use App\Util\OtpUtil;
 use App\Util\StaffUtil;
+use App\Entity\Amministratore;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;

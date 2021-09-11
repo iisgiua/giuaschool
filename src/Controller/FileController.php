@@ -180,7 +180,7 @@ class FileController extends AbstractController {
    * @return Response Documento inviato in risposta
    *
    * @Route("/file/download/segreteria/{tipo}/{id}", name="file_download_segreteria",
-   *    requirements={"tipo": "V|R", "id": "\d+"},
+   *    requirements={"tipo": "V|VS|VX|R|RS|RX|C|CS|CX", "id": "\d+"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_ATA")
@@ -198,17 +198,44 @@ class FileController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // file da scaricare
-    $percorso = $this->getParameter('kernel.project_dir');
+    $percorso = $this->getParameter('kernel.project_dir').'/FILES/archivio/scrutini/storico/'.
+      $storico->getClasse().'/';
     switch ($tipo) {
       case 'V':
-        // verbale
-        $file = new File($percorso.'/FILES/archivio/scrutini/storico/'.
-          $storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-verbale.pdf');
+        // verbale scrutinio finale
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-finale-verbale.pdf');
+        break;
+      case 'VS':
+        // verbale esame sospesi
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-sospesi-verbale.pdf');
+        break;
+      case 'VX':
+        // verbale scrutinio rinviato
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-rinviato-verbale.pdf');
         break;
       case 'R':
-        // riepilogo
-        $file = new File($percorso.'/FILES/archivio/scrutini/storico/'.
-          $storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf');
+        // riepilogo voti scrutinio finale
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf');
+        break;
+      case 'RS':
+        // riepilogo voti scrutinio esame sospesi
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-sospesi-riepilogo-voti.pdf');
+        break;
+      case 'RX':
+        // riepilogo voti scrutinio rinviato
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-rinviato-riepilogo-voti.pdf');
+        break;
+      case 'C':
+        // certificazioni scrutinio finale
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-finale-certificazioni.pdf');
+        break;
+      case 'CS':
+        // certificazioni scrutinio esame sospesi
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-sospesi-certificazioni.pdf');
+        break;
+      case 'CX':
+        // certificazioni scrutinio rinviato
+        $file = new File($percorso.$storico->getClasse().'-scrutinio-rinviato-certificazioni.pdf');
         break;
     }
     // invia il documento

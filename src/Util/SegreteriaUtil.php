@@ -204,8 +204,8 @@ class SegreteriaUtil {
       $scrutini = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
         ->leftJoin('s.classe', 'c')
         ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
-        ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato')
-        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(), 'stato' => 'C'])
+        ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.periodo!=:rinviato')
+        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(), 'stato' => 'C', 'rinviato' => 'X'])
         ->orderBy('s.data')
         ->getQuery()
         ->getResult();
@@ -213,7 +213,7 @@ class SegreteriaUtil {
       $periodi = array();
       foreach ($scrutini as $sc) {
         $alunni = ($sc->getPeriodo() == 'E' ? $sc->getDato('sospesi') :
-          ($sc->getPeriodo() == 'X' ? $sc->getDato('rinviati') : $sc->getDato('alunni')));
+          ($sc->getPeriodo() == 'X' ? $sc->getDato('alunni') : $sc->getDato('alunni')));
         if (in_array($alu->getId(), $alunni)) {
           $periodi[] = array($sc->getPeriodo(), $sc->getId());
         }
@@ -305,18 +305,78 @@ class SegreteriaUtil {
   public function scrutinioPrecedenteAlunno(Alunno $alunno, StoricoEsito $storico) {
     // inizializza
     $dati = array();
+    $dati['esito'] = $storico;
     $dati['documenti'] = array();
     $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
     $fs = new Filesystem();
+    // scrutinio rinviato svolto nel corrente A.S.
+    $dati['esitoRinviato'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      ->join('e.scrutinio', 's')
+      ->join('s.classe', 'cl')
+      ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato')
+      ->setParameters(['alunno' => $alunno, 'anno' => $storico->getClasse()[0],
+        'sezione' => $storico->getClasse()[1], 'stato' => 'C', 'rinviato' => 'X'])
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getOneOrNullResult();
+    // verbale
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-verbale.pdf';
+    if ($fs->exists($documento)) {
+      $dati['documenti'][] = 'V';
+    }
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-sospesi-verbale.pdf';
+    if ($fs->exists($documento)) {
+      $dati['documenti'][] = 'VS';
+    }
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-rinviato-verbale.pdf';
+    if ($fs->exists($documento)) {
+      $dati['documenti'][] = 'VX';
+    }
+    if ($dati['esitoRinviato']) {
+      $dati['documenti'][] = 'VXX';
+    }
     // riepilogo voti
     $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf';
     if ($fs->exists($documento)) {
       $dati['documenti'][] = 'R';
     }
-    // verbale
-    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-verbale.pdf';
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-sospesi-riepilogo-voti.pdf';
     if ($fs->exists($documento)) {
-      $dati['documenti'][] = 'V';
+      $dati['documenti'][] = 'RS';
+    }
+    $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-rinviato-riepilogo-voti.pdf';
+    if ($fs->exists($documento)) {
+      $dati['documenti'][] = 'RX';
+    }
+    if ($dati['esitoRinviato']) {
+      $dati['documenti'][] = 'RXX';
+    }
+    // certificazioni
+    if ($storico->getClasse()[0] == '2') {
+      $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-finale-certificazioni.pdf';
+      if ($fs->exists($documento)) {
+        $dati['documenti'][] = 'C';
+      }
+      $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-sospesi-certificazioni.pdf';
+      if ($fs->exists($documento)) {
+        $dati['documenti'][] = 'CS';
+      }
+      $documento = $percorso.$storico->getClasse().'/'.$storico->getClasse().'-scrutinio-rinviato-certificazioni.pdf';
+      if ($fs->exists($documento)) {
+        $dati['documenti'][] = 'CX';
+      }
+      if ($dati['esitoRinviato']) {
+        // controlla ammessi
+        $ammessi = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+          ->select('COUNT(e.id)')
+          ->where('e.scrutinio=:scrutinio AND e.esito=:ammesso')
+          ->setParameters(['scrutinio' => $dati['esitoRinviato']->getScrutinio(), 'ammesso' => 'A'])
+          ->getQuery()
+          ->getSingleScalarResult();
+        if ($ammessi > 0) {
+          $dati['documenti'][] = 'CXX';
+        }
+      }
     }
     // restituisce dati come array associativo
     return $dati;

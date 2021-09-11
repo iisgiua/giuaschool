@@ -91,6 +91,7 @@ class NotificheUtil {
       $dati['verifiche']['prossime'] = 0;
       $dati['compiti']['oggi'] = 0;
       $dati['compiti']['domani'] = 0;
+      $dati['giustificazioni'] = null;
       $alunno = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->join('a.classe', 'c')
         ->join('App:Genitore', 'g', 'WITH', 'a.id=g.alunno')
