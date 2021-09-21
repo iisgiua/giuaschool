@@ -456,7 +456,7 @@ class CsvImporter {
   public function importaAlunni(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
       'citta', 'indirizzo', 'numeriTelefono', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
-      'classe', 'email');
+      'classe', 'email', 'emailGenitore');
     $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
@@ -526,6 +526,7 @@ class CsvImporter {
       $fields['credito4'] = trim($fields['credito4']);
       $fields['classe'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['classe']));
       $fields['email'] = trim($fields['email']);
+      $fields['emailGenitore'] = trim($fields['emailGenitore']);
       // controlla campi obbligatori
       if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso']) ||
           empty($fields['dataNascita']) || empty($fields['comuneNascita']) || empty($fields['codiceFiscale'])) {
@@ -609,27 +610,26 @@ class CsvImporter {
       }
       // crea username
       $empty_fields['username'] = true;
-      $username = $fields['nome'].'.'.$fields['cognome'];
+      if (strpos($fields['nome'], ' ') !== false) {
+        $nomi = explode(' ', $fields['nome']);
+        $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
+      } else {
+        $username = $fields['nome'].'.'.$fields['cognome'];
+      }
       $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
       $username = preg_replace('/[^a-z\.]+/', '', $username);
-      $result = $this->em->createQueryBuilder()
-        ->select('COUNT(a) AS cnt')
-        ->from('App:Alunno', 'a')
+      $result = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
         ->where('a.username LIKE :username')
         ->setParameter(':username', $username.'.s%')
+        ->orderBy('a.username', 'DESC')
+        ->setMaxResults(1)
         ->getQuery()
-        ->execute();
-      $fields['username'] = $username.'.s'.(1 + $result[0]['cnt']);
+        ->getOneOrNullResult();
+      $suffix = $result ? (1 + substr($result->getUsername(), -1)) : 1;
+      $fields['username'] = $username.'.s'.$suffix;
       // crea username genitore
       $empty_fields['usernameGenitore'] = true;
-      $result = $this->em->createQueryBuilder()
-        ->select('COUNT(g) AS cnt')
-        ->from('App:Genitore', 'g')
-        ->where('g.username LIKE :username')
-        ->setParameter(':username', $username.'.f%')
-        ->getQuery()
-        ->execute();
-      $fields['usernameGenitore'] = $username.'.f'.(1 + $result[0]['cnt']);
+      $fields['usernameGenitore'] = $username.'.f'.$suffix;
       // crea password
       $empty_fields['password'] = true;
       $fields['password'] = $this->staff->creaPassword(8);
@@ -638,6 +638,12 @@ class CsvImporter {
         $empty_fields['email'] = true;
         $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
           $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->session->get('/CONFIG/SISTEMA/dominio_default'));
+      }
+      if (empty($fields['emailGenitore'])) {
+        // crea finta email
+        $empty_fields['emailGenitore'] = true;
+        $fields['emailGenitore'] = $fields['usernameGenitore'].'@'.
+          $this->session->get('/CONFIG/SISTEMA/dominio_default');
       }
       // controlla esistenza di alunno (su codice fiscale)
       $alunno = $this->em->getRepository('App:Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']);
@@ -1492,7 +1498,7 @@ class CsvImporter {
     $genitore = (new Genitore())
       ->setUsername($fields['usernameGenitore'])
       ->setPasswordNonCifrata($fields['password'])
-      ->setEmail($fields['usernameGenitore'].'@'.$this->session->get('/CONFIG/SISTEMA/dominio_default'))
+      ->setEmail($fields['emailGenitore'])
       ->setAbilitato(true)
       ->setNome($fields['nome'])
       ->setCognome($fields['cognome'])
@@ -1516,6 +1522,14 @@ class CsvImporter {
       ->setFunzione('creaUtente')
       ->setDati(['password' => $alunno->getPasswordNonCifrata()]);
     $this->em->persist($provisioning);
+    if ($alunno->getClasse()) {
+      // inserisce in classe
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setFunzione('aggiungeAlunnoClasse')
+        ->setDati(['classe' => $alunno->getClasse()->getId()]);
+      $this->em->persist($provisioning);
+    }
     $this->em->flush();
     // modifica dati per la visualizzazione
     $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
@@ -1553,6 +1567,11 @@ class CsvImporter {
     if (!isset($empty_fields['email'])) {
       $alunno->setEmail($fields['email']);
     }
+    if (!isset($empty_fields['emailGenitore'])) {
+      foreach ($genitori as $gen) {
+        $gen->setEmail($fields['emailGenitore']);
+      }
+    }
     if (!isset($empty_fields['citta'])) {
       $alunno->setCitta($fields['citta']);
     }
@@ -1583,6 +1602,7 @@ class CsvImporter {
       $alunno->setCredito4($fields['credito4']);
     }
     if (!isset($empty_fields['classe'])) {
+      $classePrec = $alunno->getClasse();
       $alunno->setClasse($fields['classe']);
       // modifica dati per la visualizzazione
       $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
@@ -1608,6 +1628,34 @@ class CsvImporter {
       ->setFunzione('modificaUtente')
       ->setDati([]);
     $this->em->persist($provisioning);
+    if (!isset($empty_fields['classe']) && $alunno->getClasse() && !$classePrec) {
+      // inserisce in classe
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setFunzione('aggiungeAlunnoClasse')
+        ->setDati(['classe' => $alunno->getClasse()->getId()]);
+      $this->em->persist($provisioning);
+    } elseif (!isset($empty_fields['classe']) && $alunno->getClasse() && $classePrec &&
+              $alunno->getClasse()->getId() != $classePrec->getId()) {
+        // cambia classe
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('rimuoveAlunnoClasse')
+          ->setDati(['classe' => $classePrec->getId()]);
+        $this->em->persist($provisioning);
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('aggiungeAlunnoClasse')
+          ->setDati(['classe' => $alunno->getClasse()->getId()]);
+        $this->em->persist($provisioning);
+    } elseif (!isset($empty_fields['classe']) && !$alunno->getClasse() && $classePrec) {
+        // rimuove classe
+        $provisioning = (new Provisioning())
+          ->setUtente($alunno)
+          ->setFunzione('rimuoveAlunnoClasse')
+          ->setDati(['classe' => $classePrec->getId()]);
+        $this->em->persist($provisioning);
+    }
     // ok, memorizza su db
     $this->em->flush();
     // modifica dati per la visualizzazione
@@ -1785,6 +1833,7 @@ class CsvImporter {
 
   /**
    * Modifica una cattedra esistente
+   * NB: non viene effettuato provisioning
    *
    * @param Cattedra $cattedra Cattedra da modificare
    * @param Alunno $alunno Alunno da modificare

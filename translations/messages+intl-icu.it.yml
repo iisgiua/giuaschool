@@ -1002,7 +1002,7 @@ message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima
     <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
   </small>"
 message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
-  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, *CodiceFiscale, Citta, Indirizzo, NumeriTelefono, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, Email\"</span><br>
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, *CodiceFiscale, Citta, Indirizzo, NumeriTelefono, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, Email, EmailGenitore\"</span><br>
   <small>
     <span class=\"ml-5\">* campi obbligatori</span><br>
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>

@@ -1078,10 +1078,10 @@ class ScrutinioController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    if ($alunno->getClasse()) {
-      $classe = $alunno->getClasse();
-    } else {
+    if ($periodo == 'X') {
       $classe = $em->getRepository('App:Classe')->find($classe);
+    } else {
+      $classe = $alunno->getClasse();
     }
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
@@ -1315,10 +1315,10 @@ class ScrutinioController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    if ($alunno->getClasse()) {
-      $classe = $alunno->getClasse();
-    } else {
+    if ($periodo == 'X') {
       $classe = $em->getRepository('App:Classe')->find($classe);
+    } else {
+      $classe = $alunno->getClasse();
     }
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
@@ -1466,10 +1466,11 @@ class ScrutinioController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    if ($alunno->getClasse()) {
-      $classe = $alunno->getClasse();
-    } else {
+    // controllo classe
+    if ($periodo == 'X') {
       $classe = $em->getRepository('App:Classe')->find($classe);
+    } else {
+      $classe = $alunno->getClasse();
     }
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {

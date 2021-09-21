@@ -261,6 +261,7 @@ class AccountProvisioning {
 
   /**
    * Aggiunge un alunno alla classe indicata e ai relativi corsi
+   * NB: escluso Sostegno e Ed.Civica
    *
    * @param Alunno $alunno Alunno da aggiungere
    * @param Classe $classe Classe di destinazione dell'alunnno
@@ -284,7 +285,7 @@ class AccountProvisioning {
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
       ->where('c.attiva=:attiva AND c.classe=:classe AND d.abilitato=:abilitato AND m.tipo NOT IN (:materie)')
-      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'materie' => ['S', 'E', 'R']])
+      ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'materie' => ['S', 'E']])
       ->getQuery()
       ->getArrayResult();
     foreach ($cattedre as $cat) {
@@ -412,13 +413,16 @@ class AccountProvisioning {
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
-        ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND m.tipo!=:sostegno')
-        ->setParameters(['attiva' => 1, 'classe' => $cattedra->getClasse(), 'abilitato' => 1, 'sostegno' => 'S'])
+        ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND m.tipo NOT IN (:materie)')
+        ->setParameters(['attiva' => 1, 'classe' => $cattedra->getClasse(), 'abilitato' => 1, 'materie' => ['S', 'E']])
         ->getQuery()
         ->getResult();
-    } else {
-      // cattedra curricolare
+    } elseif ($cattedra->getMateria()->getTipo() != 'E') {
+      // cattedra curricolare (escluso Ed.Civica)
       $cattedre = [$cattedra];
+    } else {
+      // niente da fare
+      $cattedre = [];
     }
     // crea corsi
     foreach ($cattedre as $cat) {
@@ -521,9 +525,9 @@ class AccountProvisioning {
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
-      ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND d.id=:docente AND m.id!=:materia')
+      ->where('c.attiva=:attiva AND cl.id=:classe AND d.abilitato=:abilitato AND d.id=:docente AND m.id!=:materia AND m.tipo!=:civica')
       ->setParameters(['attiva' => 1, 'classe' => $classe, 'abilitato' => 1, 'docente' => $docente,
-        'materia' => $materia])
+        'materia' => $materia, 'civica' => 'E'])
       ->getQuery()
       ->getSingleScalarResult();
     // gestione cattedra di sostegno
@@ -534,8 +538,8 @@ class AccountProvisioning {
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
-        ->where('cl.id=:classe AND m.tipo!=:sostegno')
-        ->setParameters(['classe' => $classe, 'sostegno' => 'S'])
+        ->where('cl.id=:classe AND m.tipo NOT IN (:materie)')
+        ->setParameters(['classe' => $classe, 'materie' => ['S', 'E']])
         ->getQuery()
         ->getArrayResult();
     } else {
@@ -789,7 +793,20 @@ class AccountProvisioning {
     $errore = null;
     $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
     $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    // controlla esistenza
     try {
+      $esistente = $this->serviceGsuite['directory']->users->get($email);
+    } catch (\Exception $e) {
+      // utente non esiste
+      $esistente = null;
+    }
+    if ($esistente) {
+      // utente esiste: lo riattiva (si presume sia sospeso)
+      return $this->sospendeUtenteGsuite($email, $tipo, false);
+    }
+    // crea nuovo utente
+    try {
+      // crea utente
       if ($tipo == 'D') {
         // docenti/staff/preside
         $uo = '/Docenti';
@@ -803,7 +820,6 @@ class AccountProvisioning {
         $gravatar_type = $gravatar[time() % 3];
         $gruppo = 'studenti@'.$dominio;
       }
-      // crea utente
       $user = new GUser([
         'name' => ['givenName' => $nome, 'familyName' => $cognome],
         'gender' => ['type' => ($sesso == 'M' ? 'male' : 'female')],
