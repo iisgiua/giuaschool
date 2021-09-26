@@ -1268,3 +1268,6 @@ exception.numero_file_allegati: Hai caricato un numero eccessivo di documenti.
 exception.documento_tipo_mancante: Non hai indicato il tipo di documento.
 exception.documento_alunno_mancante: Non hai indicato l'alunno a cui è riferito il documento.
 exception.documento_esistente: Il documento inserito esiste già per l'alunno selezionato.
+exception.info_studente_no_app: Il servizio richiesto non è attivo.
+exception.info_studente_no_ip: L'indirizzo IP non è valido.
+exception.info_studente_no_user: L'utente indicato non esiste.

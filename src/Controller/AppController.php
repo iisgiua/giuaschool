@@ -12,7 +12,6 @@
 
 namespace App\Controller;
 
-use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -24,34 +23,20 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use App\Entity\App;
-use App\Entity\Utente;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
-use App\Entity\Notifica;
 use App\Util\ConfigLoader;
-use App\Util\LogHandler;
-use App\Util\GenitoriUtil;
 
 
 /**
- * AppController - gestione delle funzioni per le app
+ * AppController - gestione dell'app e implementazione API
  */
 class AppController extends AbstractController {
 
@@ -223,7 +208,7 @@ class AppController extends AbstractController {
   }
 
   /**
-   * Restituisce la lista dei presenti per le procedure di evacuazione
+   * API: restituisce la lista dei presenti per le procedure di evacuazione di emergenza
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
@@ -295,6 +280,57 @@ class AppController extends AbstractController {
     $risposta['versione'] = isset($app->getDati()['versione']) ? $app->getDati()['versione'] : '0.0';
     // restituisce la risposta
     return new JsonResponse($risposta);
+  }
+
+  /**
+   * API: restituisce informazioni sull'utente studente
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/app/info/studenti/", name="app_info_studenti",
+   *    methods={"POST"})
+   */
+  public function infoStudentiAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans) {
+    // inizializza
+    $dati = array();
+    $token = $request->headers->get('X-Giuaschool-Token');
+    $username = $request->request->get('username');
+    // controlla servizio
+    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    if (!$app) {
+      // errore: servizio non esiste o non è abilitato
+      $dati['stato'] = 'ERRORE';
+      $dati['errore'] = $trans->trans('exception.info_studente_no_app');
+      return new JsonResponse($dati);
+    }
+    // controlla ip
+    $ip = $app->getDati()['ip'];
+    if ($ip && $ip != $request->getClientIp()) {
+      // errore: IP non abilitato
+      $dati['stato'] = 'ERRORE';
+      $dati['errore'] = $trans->trans('exception.info_studente_no_ip');
+      return new JsonResponse($dati);
+    }
+    // cerca utente
+    $alunno = $em->getRepository('App:Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    if (!$alunno) {
+      // errore: utente on valido
+      $dati['stato'] = 'ERRORE';
+      $dati['errore'] = $trans->trans('exception.info_studente_no_user');
+      return new JsonResponse($dati);
+    }
+    // restituisce dati
+    $dati['nome'] = $alunno->getNome();
+    $dati['cognome'] = $alunno->getCognome();
+    $dati['sesso'] = $alunno->getSesso();
+    $dati['classe'] = "".$alunno->getClasse();
+    $dati['stato'] = 'OK';
+    // restituisce la risposta
+    return new JsonResponse($dati);
   }
 
 }
