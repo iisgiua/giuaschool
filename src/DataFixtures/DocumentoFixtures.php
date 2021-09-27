@@ -53,7 +53,7 @@ class DocumentoFixtures extends Fixture implements DependentFixtureInterface, Fi
       ->setDocente($faker->randomElement($docenti))
       ->setListaDestinatari($this->getReference('destinatari_genitori'))
       ->addAllegato($this->getReference('file_pdf_1'))
-      ->setCifrato(true);
+      ->setCifrato('12345678');
     $em->persist($documento);
     // memorizza dati
     $em->flush();

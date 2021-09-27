@@ -5,6 +5,7 @@ Funzionalità: Inserimento dei documenti BES da parte del responsabile
   Come utente docente responsabile BES
   Bisogna controllare prerequisiti per inserimento documenti BES
   Bisogna caricare un documento da inserire come documento BES
+  Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
 
 
@@ -123,7 +124,7 @@ Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserim
   E vedi la tabella:
     | alunno               | documento                | azione            |
     | /Pini Daniela.*3ª A/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
-  E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" di dimensione "61514"
+  E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
   Esempi:
     | tipo     | nome     |
     | Diagnosi | DIAGNOSI |
@@ -189,6 +190,32 @@ Scenario: impedisce inserimento documento BES senza allegato
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   Allora pulsante "Conferma" inattivo
+
+
+################################################################################
+# Bisogna controllare la codifica dei documenti
+
+Schema dello scenario: inserisce documento BES e controlla la sua codifica
+  Data pagina attiva "documenti_bes_add"
+  Quando selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<tipo>" da lista "documento_tipo"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E premi pulsante "Conferma"
+  E vedi pagina "documenti_bes"
+  E ricerca istanze di tipo "Alunno":
+    | id  | username        |
+    | $a1 | daniela.pini.s1 |
+  E ricerca istanze di tipo "Documento":
+    | id  | tipo      | alunno  |
+    | $d1 | <tipodoc> | $a1     |
+  Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" decodificato con "$d1:cifrato"
+  Esempi:
+    | tipo     | nome     | tipodoc |
+    | Diagnosi | DIAGNOSI | B       |
+    | P.E.I.   | PEI      | H       |
+    | P.D.P.   | PDP      | D       |
 
 
 ################################################################################

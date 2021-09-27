@@ -6,7 +6,7 @@ WORKDIR /var/www/giuaschool
 RUN \
 # Install xdebug
   apt-get -qq update && \
-  apt-get -yqq --no-install-recommends install php7.4-xdebug && \
+  apt-get -yqq --no-install-recommends install php7.4-xdebug poppler-utils && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
   echo "xdebug.mode=coverage" >> /etc/php/7.4/mods-available/xdebug.ini && \

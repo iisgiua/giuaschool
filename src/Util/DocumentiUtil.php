@@ -41,6 +41,11 @@ class DocumentiUtil {
   private $em;
 
   /**
+   * @var PdfManager $pdf Gestore dei documenti PDF
+   */
+  private $pdf;
+
+  /**
    * @var string $dirTemp Percorso della directory per i file temporanei
    */
   private $dirTemp;
@@ -62,12 +67,14 @@ class DocumentiUtil {
    * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param PdfManager $pdf Gestore dei documenti PDF
    * @param string $dirTemp Percorso della directory per i file temporanei
    * @param string $dirArchivio Percorso della directory per l'archivio dei documenti
    * @param string $dirUpload Percorso della directory per i file di upload
    */
-  public function __construct(EntityManagerInterface $em, $dirTemp, $dirArchivio, $dirUpload) {
+  public function __construct(EntityManagerInterface $em, PdfManager $pdf, $dirTemp, $dirArchivio, $dirUpload) {
     $this->em = $em;
+    $this->pdf = $pdf;
     $this->dirTemp = $dirTemp;
     $this->dirClassi = $dirArchivio.'/classi';
     $this->dirUpload = $dirUpload;
@@ -798,6 +805,33 @@ class DocumentiUtil {
     }
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Codifica i file del documento
+   * NB: si presuppone che tutti i file siano in formato PDF
+   *
+   * @param Documento $documento Documento da codificare
+   *
+   */
+  public function codificaDocumento(Documento $documento) {
+    // crea password
+    $minuscolo = "abcdefghijklmnopqrstuvwxyz";
+    $maiuscolo = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    $cifre = "1234567890";
+    $password = substr(str_shuffle($minuscolo), 0, 5).substr(str_shuffle($maiuscolo), 0, 5).
+      substr(str_shuffle($cifre), 0, 5);
+    $password = substr(str_shuffle($password), 0, 10);
+    // imposta password per i file del documento
+    $documento->setCifrato($password);
+    $dir = $this->documentoDir($documento);
+    foreach ($documento->getAllegati() as $file) {
+      $percorso = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
+      $this->pdf->import($percorso);
+      $this->pdf->protect($password);
+      $this->pdf->save($percorso);
+      $file->setDimensione(filesize($percorso));
+    }
   }
 
 }

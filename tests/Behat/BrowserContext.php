@@ -14,6 +14,7 @@ namespace App\Tests\Behat;
 
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Process\Process;
 use Doctrine\ORM\EntityManagerInterface;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Exception\ExpectationException;
@@ -526,11 +527,12 @@ class BrowserContext extends BaseContext {
    *  $file: nome del file con percorso relativo alla directory FILES
    *  $dimensione: dimensione del file in byte
    *
+   * @Then vedi file :file
    * @Then vedi file :file di dimensione :dimensione
    */
-  public function vediFileDiDimensione($file, $dimensione): void {
+  public function vediFile($file, $dimensione=null): void {
     $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
-    $this->assertTrue(file_exists($nomefile) && filesize($nomefile) == $dimensione);
+    $this->assertTrue(file_exists($nomefile) && ($dimensione === null || filesize($nomefile) == $dimensione));
     $this->files[] = 'FILES/'.$file;
   }
 
@@ -543,6 +545,34 @@ class BrowserContext extends BaseContext {
   public function nonVediFile($file): void {
     $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
     $this->assertFalse(file_exists($nomefile));
+  }
+
+  /**
+   * Decodifica un file PDF e controlla la presenza del testo indicato
+   *  $ricerca: testo da cercare nel file
+   *  $file: nome del file con percorso relativo alla directory FILES
+   *  $valore: password per la decodifica
+   *
+   * @Then vedi :ricerca in file :file decodificato con :valore
+   */
+  public function vediInFileDecodificato($ricerca, $file, $valore): void {
+    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
+    $convertito = substr($nomefile, 0, -3).'txt';
+    $testo = null;
+    try {
+      $proc = new Process(['/usr/bin/pdftotext', '-upw', $valore, $nomefile, $convertito]);
+      $proc->setTimeout(0);
+      $proc->run();
+      if ($proc->isSuccessful() && file_exists($convertito)) {
+        // conversione ok
+        $testo = file_get_contents($convertito);
+      }
+    } catch (\Exception $err) {
+      // errore: evita eccezione
+    }
+    $this->assertTrue($testo && preg_match($ricerca, $testo));
+    $this->files[] = 'FILES/'.$file;
+    $this->files[] = 'FILES/'.substr($file, 0, -3).'txt';
   }
 
   /**
@@ -721,7 +751,7 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($field);
     $field->setValue($valore);
   }
-  
+
 
   //==================== METODI PROTETTI DELLA CLASSE ====================
 

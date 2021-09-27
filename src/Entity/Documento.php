@@ -116,9 +116,11 @@ class Documento {
   private $alunno;
 
   /**
-   * @var boolean $cifrato Indica se il documento è cifrato
+   * @var string $cifrato Conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
-   * @ORM\Column(type="boolean", nullable=false)
+   * @ORM\Column(type="string", length=255, nullable=true)
+   *
+   * @Assert\Length(max=255,maxMessage="field.maxlength")   
    */
   private $cifrato;
 
@@ -359,23 +361,23 @@ class Documento {
   }
 
   /**
-   * Indica se il documento è cifrato
+   * Restituisce la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
-   * @return boolean Vero se il documento è cifrato, falso altrimenti
+   * @return string La password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    */
   public function getCifrato() {
     return $this->cifrato;
   }
 
   /**
-   * Modifica l'indicazione se il documento sia cifrato
+   * Modifica la password (in chiaro) se il documento è cifrato, altrimenti imposta il valore nullo
    *
-   * @param boolean $cifrato Vero se il documento è cifrato, falso altrimenti
+   * @param string La password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
    * @return Documento Oggetto modificato
    */
   public function setCifrato($cifrato) {
-    $this->cifrato = ($cifrato == true);
+    $this->cifrato = $cifrato;
     return $this;
   }
 
@@ -409,7 +411,6 @@ class Documento {
   public function __construct() {
     // valori predefiniti
     $this->allegati = new ArrayCollection();
-    $this->cifrato = false;
     $this->firma = false;
   }
 

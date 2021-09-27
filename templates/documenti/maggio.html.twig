@@ -28,7 +28,7 @@
           <a href="{{ path('documenti_download', {'documento': d.documento.id}) }}" title="Scarica il documento del 15 maggio indicato">
           <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.documento.allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
       {% else %}
           <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
       {% endif %}

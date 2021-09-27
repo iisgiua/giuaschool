@@ -33,7 +33,8 @@
           <a href="{{ path('documenti_download', {'documento': dati.documenti[i].lista[0].id}) }}" title="Scarica il documento indicato">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i].lista[0].allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ (dati.documenti[i].lista[0].allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ dati.documenti[i].lista[0].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato }}</span></button>
+          <small>Dimensione: {{ (dati.documenti[i].lista[0].allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
         <td>
       {% if dati.documenti[i].add[0] is defined %}
@@ -50,7 +51,8 @@
           <a href="{{ path('documenti_download', {'documento': dati.documenti[i].lista[1].id}) }}" title="Scarica il documento indicato">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i].lista[1].allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ (dati.documenti[i].lista[1].allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ dati.documenti[i].lista[1].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato }}</span></button>
+          <small>Dimensione: {{ (dati.documenti[i].lista[1].allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
         <td>
         {% if dati.documenti[i].add[1] is defined %}
@@ -93,6 +95,7 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
+  $('[data-toggle="popover"]').popover();
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
     $(this).find('#gs-modal-confirm-yes').attr('href', href);

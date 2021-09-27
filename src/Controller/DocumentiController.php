@@ -802,6 +802,8 @@ class DocumentiController extends AbstractController {
          list($file, $estensione) = $doc->convertePdf($allegati[0]['temp']);
          // imposta allegato
          $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
+         // protegge documento
+         $doc->codificaDocumento($documento);
          // rimuove sessione con gli allegati
          $session->remove($varSessione);
          // ok: memorizzazione e log

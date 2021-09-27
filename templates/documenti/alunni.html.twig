@@ -27,7 +27,7 @@
           <a href="{{ path('documenti_download', {'documento': dati.documenti[i][0].id}) }}" title="Scarica il documento indicato">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i][0].allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ (dati.documenti[i][0].allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+          <small>Dimensione: {{ (dati.documenti[i][0].allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
       </tr>
       {% if dati.documenti[i]|length == 2 %}
@@ -36,7 +36,7 @@
           <a href="{{ path('documenti_download', {'documento': dati.documenti[i][1].id}) }}" title="Scarica il documento indicato">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i][1].allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ (dati.documenti[i][1].allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+          <small>Dimensione: {{ (dati.documenti[i][1].allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
       </tr>
       {% endif %}

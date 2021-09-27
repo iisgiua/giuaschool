@@ -35,7 +35,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for d in dati.lista %}
+    {% for k,d in dati.lista %}
       <tr>
         <td rowspan="{{ d.documento.allegati|length }}">
       {% if d.letto %}
@@ -50,8 +50,11 @@
           {% if d.documento.alunno %}Alunn{{ d.documento.alunno.sesso == 'M' ? 'o' : 'a' }}: {{ d.documento.alunno }}{% endif %}
         </td>
         <td>
-          <strong>{{ d.documento.allegati[0].titolo }}</strong>
-          <br><small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1024)|number_format(0,',','.') }} kB</small>
+          <strong>{{ d.documento.allegati[0].titolo }}</strong><br>
+      {% if d.documento.cifrato %}
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ d.documento.cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ d.documento.cifrato }}</span></button>
+      {% endif %}
+          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('documenti_download', {'documento': d.documento.id }) }}" title="Scarica il documento indicato"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -60,8 +63,11 @@
       {% for al in d.documento.allegati[1:] %}
       <tr>
         <td>
-          <strong>{{ al.titolo }}</strong>
-          <br><small>Dimensione: {{ (al.dimensione / 1024)|number_format(0,',','.') }} kB</small>
+          <strong>{{ al.titolo }}</strong><br>
+          {% if d.documento.cifrato %}
+              <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ d.documento.cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ d.documento.cifrato }}</span></button>
+          {% endif %}
+          <small>Dimensione: {{ (al.dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('documenti_download', {'documento': d.documento.id, 'allegato': al.id }) }}" title="Scarica il documento indicato"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -102,6 +108,7 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
+  $('[data-toggle="popover"]').popover();
   $('#documento_tipo').change(function() {
     $('form[name="documento"]').submit();
   });

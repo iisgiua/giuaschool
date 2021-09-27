@@ -13,6 +13,7 @@
 namespace App\Util;
 
 use Qipsius\TCPDFBundle\Controller\TCPDFController;
+use setasign\Fpdi\Tcpdf\Fpdi;
 
 
 /**
@@ -108,6 +109,36 @@ class PdfManager {
    */
   public function getHandler() {
     return $this->pdf;
+  }
+
+  /**
+   * Importa un documento PDF esistente
+   *
+   * @param string $file Percorso completo del file PDF da importare
+   */
+  public function import($file) {
+    $this->pdf = new Fpdi();
+    // numero pagine del documento
+    $pageCount = $this->pdf->setSourceFile($file);
+    // importa tutto il documento
+    for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+      // importa una pagina
+      $templateId = $this->pdf->importPage($pageNo);
+      $this->pdf->AddPage();
+      // imposta le dimensioni della pagina importata
+      $this->pdf->useTemplate($templateId, ['adjustPageSize' => true]);
+    }
+  }
+
+  /**
+   * Protegge il documento con password
+   *
+   * @param string $password Password usata per la protezione del documento
+   */
+  public function protect($password) {
+    $this->pdf->SetProtection(
+      ['print', 'modify', 'copy', 'annot-forms', 'fill-forms', 'extract', 'assemble', 'print-high'],
+      $password, null, 3);
   }
 
 }

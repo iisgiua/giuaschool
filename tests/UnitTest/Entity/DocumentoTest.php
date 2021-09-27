@@ -90,7 +90,7 @@ class DocumentoTest extends DatabaseTestCase {
           ($field == 'materia' ? $this->faker->optional(0.6)->randomElement($materie) :
           ($field == 'classe' ? $this->faker->optional(0.6)->randomElement($classi) :
           ($field == 'alunno' ? $this->faker->optional(0.6)->randomElement($alunni) :
-          ($field == 'cifrato' ? $this->faker->boolean() :
+          ($field == 'cifrato' ? $this->faker->password(8, 8) :
           $this->faker->boolean())))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -216,6 +216,15 @@ class DocumentoTest extends DatabaseTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::allegati - NOT BLANK');
     $existent->setAllegati(new ArrayCollection([$this->em->getRepository('App:File')->find(5)]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::allegati - VALID');
+    // cifrato
+    $existent->setCifrato(null);
+    $err = $this->val->validate($existent);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::cifrato - VALID NULL');
+    $existent->setCifrato(str_repeat('X', 255).'*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::cifrato - MAX LENGTH');
+    $existent->setCifrato(str_repeat('X', 255));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::cifrato - VALID MAX LENGTH');
   }
 
 }

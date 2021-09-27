@@ -332,6 +332,9 @@
             "config/packages/sensio_framework_extra.yaml"
         ]
     },
+    "setasign/fpdi": {
+        "version": "v2.3.6"
+    },
     "symfony/asset": {
         "version": "v4.4.25"
     },
