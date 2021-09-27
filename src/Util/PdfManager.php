@@ -115,11 +115,18 @@ class PdfManager {
    * Importa un documento PDF esistente
    *
    * @param string $file Percorso completo del file PDF da importare
+   *
+   * @return boolean Vero se importazione è avvenuta correttamente, falso altrimenti
    */
   public function import($file) {
     $this->pdf = new Fpdi();
-    // numero pagine del documento
-    $pageCount = $this->pdf->setSourceFile($file);
+    try {
+      // importa file e calcola il numero pagine del documento
+      $pageCount = $this->pdf->setSourceFile($file);
+    } catch (\Exception $e) {
+      // errore: documento illegibile o protetto
+      return false;
+    }
     // importa tutto il documento
     for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
       // importa una pagina
@@ -128,6 +135,8 @@ class PdfManager {
       // imposta le dimensioni della pagina importata
       $this->pdf->useTemplate($templateId, ['adjustPageSize' => true]);
     }
+    // importazione eseguita
+    return true;
   }
 
   /**

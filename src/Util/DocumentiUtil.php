@@ -827,10 +827,11 @@ class DocumentiUtil {
     $dir = $this->documentoDir($documento);
     foreach ($documento->getAllegati() as $file) {
       $percorso = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
-      $this->pdf->import($percorso);
-      $this->pdf->protect($password);
-      $this->pdf->save($percorso);
-      $file->setDimensione(filesize($percorso));
+      if ($this->pdf->import($percorso)) {
+        $this->pdf->protect($password);
+        $this->pdf->save($percorso);
+        $file->setDimensione(filesize($percorso));
+      }
     }
   }
 
