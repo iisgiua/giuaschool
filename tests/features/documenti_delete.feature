@@ -434,7 +434,7 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E vedi la tabella:
     | alunno               | documento                | azione            |
     | /Pini Daniela.*3ª A/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
-  E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" di dimensione "61514"
+  E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_bes"

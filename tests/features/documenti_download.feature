@@ -240,7 +240,7 @@ Schema dello scenario: scarica documento BES inserito
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/3A/riservato/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_bes"
   E click su "Documento Excel"
-  Allora file scaricato con nome "documento-excel-versione-1.xlsx" e dimensione "66812"
+  Allora file scaricato con nome "documento-excel-versione-1.xlsx" 
   Esempi:
     | tipo |
     | B    |
