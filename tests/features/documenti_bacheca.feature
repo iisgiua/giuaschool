@@ -351,6 +351,15 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
   E modifica utente connesso:
     | responsabileBes | responsabileBesSede |
     | si              | null                |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | username        |
+    | $a1 | daniela.pini.s1 |
+  E istanze di tipo "Cattedra":
+    | id  | docente | classe | attiva | tipo |
+    | $c1 | #logged | $cl1   | si     | N    |
   E pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
   E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
@@ -358,20 +367,9 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E vedi pagina "documenti_bes"
-  E ricerca istanze di tipo "Alunno":
-    | id  | username        |
-    | $a1 | daniela.pini.s1 |
   E ricerca istanze di tipo "Documento":
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
-  E logout utente
-  E login utente con ruolo esatto "Docente"
-  E modifica utente connesso:
-    | responsabileBes | responsabileBesSede |
-    | null            | null                |
-  E istanze di tipo "Cattedra":
-    | id  | docente | classe     | attiva |
-    | $c1 | #logged | $a1:classe | si     |
   Quando pagina attiva "documenti_bacheca"
   Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
   E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" decodificato con "$d1:cifrato"
