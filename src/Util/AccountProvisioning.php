@@ -542,6 +542,9 @@ class AccountProvisioning {
         ->setParameters(['classe' => $classe, 'materie' => ['S', 'E']])
         ->getQuery()
         ->getArrayResult();
+    } elseif ($materia->getTipo() == 'E') {
+      // ed.civica: non fa nulla
+      $cattedre = [];
     } else {
       // cattedra curricolare
       $cattedre = array(['nomeBreve' => $materia->getNomeBreve()]);
