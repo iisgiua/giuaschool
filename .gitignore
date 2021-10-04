@@ -21,6 +21,7 @@
 !/public/app/.gitkeep
 /public/bundles/
 /public/img/.local/
+/public/spid/
 /src/Command/Argo/
 /src/Controller/TestController.php
 /src/DataFixtures/AppLocalFixtures.php
