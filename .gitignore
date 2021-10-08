@@ -1,3 +1,5 @@
+/config/metadata/*
+!/config/metadata/.gitkeep
 /config/secrets/*
 !/config/secrets/.gitkeep
 /DEV/
