@@ -13,28 +13,25 @@
 namespace App\Security;
 
 use Doctrine\ORM\EntityManagerInterface;
-use KnpU\OAuth2ClientBundle\Security\Authenticator\SocialAuthenticator;
-use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use App\Util\LogHandler;
 use App\Util\ConfigLoader;
-use App\Entity\Utente;
 
 
 /**
- * GSuiteAuthenticator - servizio usato per l'autenticazione tramite OAuth2 su GSuite
+ * SpidAuthenticator - servizio usato per l'autenticazione tramite SPID
  */
-class GSuiteAuthenticator extends SocialAuthenticator {
+class SpidAuthenticator extends AbstractGuardAuthenticator {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -64,11 +61,6 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    */
   private $config;
 
-  /**
-   * @var ClientRegistry $clientRegistry Gestore dei client OAuth2
-   */
-  private $clientRegistry;
-
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -80,16 +72,14 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
-   * @param ClientRegistry $clientRegistry Gestore dei client OAuth2
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, LoggerInterface $logger,
-                              LogHandler $dblogger, ConfigLoader $config, ClientRegistry $clientRegistry) {
+                              LogHandler $dblogger, ConfigLoader $config) {
     $this->router = $router;
     $this->em = $em;
     $this->logger = $logger;
     $this->dblogger = $dblogger;
     $this->config = $config;
-    $this->clientRegistry = $clientRegistry;
   }
 
   /**
@@ -101,7 +91,7 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    */
   public function supports(Request $request) {
     // solo se vero continua con l'autenticazione
-    return $request->attributes->get('_route') === 'login_gsuite_check' && $request->isMethod('GET');
+    return $request->attributes->get('_route') === 'spid_acs' && $request->isMethod('GET');
   }
 
   /**
@@ -113,8 +103,8 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    * @return mixed|null Le credenziali dell'autenticazione o null
    */
   public function getCredentials(Request $request) {
-    // restituisce il token di accesso
-    return $this->fetchAccessToken($this->clientRegistry->getClient('gsuite'));
+    // restituisce l'ID della risposta dell'idp
+    return $request->attributes->get('responseId');
   }
 
   /**
@@ -128,19 +118,25 @@ class GSuiteAuthenticator extends SocialAuthenticator {
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // init
     $user = null;
-    // trova utente GSuite
-    $gs_user = $this->clientRegistry->getClient('gsuite')->fetchUserFromToken($credentials);
-    if ($gs_user) {
-      // autenticato su GSuite: controlla se esiste nel registro
-      $user = $this->em->getRepository('App:Utente')->findOneByEmail($gs_user->getEmail());
-      if (!$user) {
+    // trova utente SPID
+    $spid = $this->em->getRepository('App:Spid')->findOneBy(['responseId' => $credentials, 'state' => 'A']);
+    if ($spid) {
+      // autenticato su SPID: controlla se esiste nel registro
+      $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
+      $user = $this->em->getRepository('App:Utente')->profiliAttivi($codiceFiscale);
+      if (empty($user)) {
         // utente non esiste nel registro
-        $this->logger->error('Utente non valido nell\'autenticazione GSuite.', array(
-          'email' => $gs_user->getEmail()));
-        throw new CustomUserMessageAuthenticationException('exception.invalid_user');
+        $spid->setState('E');
+        $this->em->flush();
+        $this->logger->error('Utente non valido nell\'autenticazione SPID.', array(
+          'codiceFiscale' => $codiceFiscale,
+          'responseId' => $credentials));
+        throw new CustomUserMessageAuthenticationException('exception.spid_invalid_user');
       }
+      // memorizza url logout
+      $user->setInfoLogin(['logoutUrl' => $spid->getLogoutUrl()]);
     }
-    // utente trovato
+    // restituisce utente
     return $user;
   }
 
@@ -159,19 +155,20 @@ class GSuiteAuthenticator extends SocialAuthenticator {
     $ora = (new \DateTime())->format('Y-m-d H:i');
     $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
     $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    $spid = $this->em->getRepository('App:Spid')->findOneBy(['responseId' => $credentials, 'state' => 'A']);
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
-      $this->logger->error('Tentativo di accesso da GSuite durante la modalità manutenzione.', array(
-        'email' => $user->getEmail()));
-      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
+      $spid->setState('E');
+      $this->em->flush();
+      $this->logger->error('Tentativo di accesso da SPID durante la modalità manutenzione.', array(
+        'codiceFiscale' => $user->getCodiceFiscale(),
+        'responseId' => $credentials));
+      throw new CustomUserMessageAuthenticationException('exception.spid_blocked_login');
     }
-    // controllo se l'utente è abilitato
-    if (!$user->getAbilitato()) {
-      // utente disabilitato
-      $this->logger->error('Utente disabilitato nell\'autenticazione GSuite.', array(
-        'email' => $user->getEmail()));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
-    }
+    // cambia stato del record SPID
+    $spid->setState('L');
+    $this->em->flush();
+    // nessun altro controllo necessario
     return true;
   }
 
@@ -188,17 +185,24 @@ class GSuiteAuthenticator extends SocialAuthenticator {
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
-    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'GSuite');
-    // ultimo accesso dell'utente
-    $last_login = $token->getUser()->getUltimoAccesso();
-    $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($last_login ? $last_login->format('d/m/Y H:i:s') : null));
-    $token->getUser()->setUltimoAccesso(new \DateTime());
-    $this->em->flush();
+    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'SPID');
+    $request->getSession()->set('/APP/UTENTE/spid_logout', $token->getUser()->getInfoLogin()['logoutUrl']);
+    // controlla presenza altri profili
+    if (empty($token->getUser()->getListaProfili())) {
+      // non sono presenti altri profili: imposta ultimo accesso dell'utente
+      $accesso = $token->getUser()->getUltimoAccesso();
+      $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
+      $token->getUser()->setUltimoAccesso(new \DateTime());
+    } else {
+      // sono presenti altri profili: li memorizza in sessione
+      $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
+    }
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
-      'Login' => 'GSuite',
-      'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()));
+      'Login' => 'SPID',
+      'Username' => $token->getUser()->getUsername(),
+      'Ruolo' => $token->getUser()->getRoles()[0],
+      'Lista profili' => $token->getUser()->getListaProfili()));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare
@@ -231,9 +235,6 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    * @return Response Pagina di risposta
    */
   public function start(Request $request, AuthenticationException $authException = null) {
-    // eccezione che ha richiesto l'autenticazione
-    $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
   }

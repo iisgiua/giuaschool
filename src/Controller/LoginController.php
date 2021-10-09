@@ -26,6 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -35,6 +36,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use App\Util\NotificheUtil;
 use App\Util\LogHandler;
 use App\Util\ConfigLoader;
@@ -68,6 +72,10 @@ class LoginController extends BaseController {
    */
   public function formAction(SessionInterface $session, AuthenticationUtils $auth,
                              ConfigLoader $config) {
+    if ($this->isGranted('ROLE_UTENTE')) {
+      // reindirizza a pagina HOME
+      return $this->redirectToRoute('login_home');
+    }
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
@@ -227,6 +235,10 @@ class LoginController extends BaseController {
    * @IsGranted("ROLE_UTENTE")
    */
   public function homeAction(Request $request, ConfigLoader $config, NotificheUtil $notifiche) {
+    if ($request->getSession()->get('/APP/UTENTE/lista_profili') && !$request->query->get('reload')) {
+      // redirezione alla scelta profilo
+      return $this->redirectToRoute('login_profilo');
+    }
     if ($request->query->get('reload') == 'yes') {
       // ricarica configurazione di sistema
       $config->carica();
@@ -428,6 +440,77 @@ class LoginController extends BaseController {
       'errore' => $errore,
       'successo' => $successo,
       'manutenzione' => $manutenzione,
+      ));
+  }
+
+  /**
+   * Scelta del profilo tra quelli di uno stesso utente
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/login/profilo", name="login_profilo",
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_UTENTE")
+   */
+  public function profiloAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                                EventDispatcherInterface $disp, LogHandler $dblogger) {
+    // imposta profili
+    $lista = [];
+    foreach ($session->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
+      foreach ($profili as $id) {
+        $utente = $em->getRepository('App:Utente')->find($id);
+        $nome = $ruolo.($ruolo == 'GENITORE' ? ' di ' : ' ').
+          $utente->getNome().' '.$utente->getCognome().' ('.$utente->getUsername().')';
+        $lista[] = [$nome => $utente->getId()];
+      }
+    }
+    // crea form inserimento email
+    $form = $this->container->get('form.factory')->createNamedBuilder('login_profilo', FormType::class)
+      ->add('profilo', ChoiceType::class, array('label' => 'label.profilo',
+        'data' => $request->getSession()->get('/APP/UTENTE/profilo_usato'),
+        'choices' => $lista,
+        'expanded' => true,
+        'multiple' => false,
+        'label_attr' => ['class' => 'gs-checkbox'],
+        'choice_translation_domain' => false,
+        'required' => true))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' => array('class' => 'btn-primary')))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      $utenteIniziale = $this->getUser();
+      $profiloId = (int) $form->get('profilo')->getData();
+      if ($profiloId && (!$session->get('/APP/UTENTE/profilo_usato') ||
+          $session->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
+        // legge utente selezionato
+        $utente = $em->getRepository('App:Utente')->find($profiloId);
+        // log azione
+        $dblogger->logAzione('ACCESSO', 'Cambio profilo', array(
+          'Username' => $utente->getUsername(),
+          'Ruolo' => $utente->getRoles()[0]));
+        // crea token di autenticazione
+        $token = new UsernamePasswordToken($utente, '', 'main', $utente->getRoles());
+        // autentica con nuovo token
+        $this->get('security.token_storage')->setToken($token);
+        $event = new InteractiveLoginEvent($request, $token);
+        $disp->dispatch('security.interactive_login', $event);
+        // memorizza profilo in uso
+        $session->set('/APP/UTENTE/profilo_usato', $profiloId);
+      }
+      // redirezione alla pagina iniziale
+      return $this->redirectToRoute('login_home', ['reload' => 'yes']);
+    }
+    // visualizza pagina
+    return $this->render('login/profilo.html.twig', array(
+      'pagina_titolo' => 'page.login_profilo',
+      'form' => $form->createView(),
       ));
   }
 

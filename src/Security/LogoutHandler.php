@@ -12,44 +12,38 @@
 
 namespace App\Security;
 
-use Psr\Log\LoggerInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
-use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
+use Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Security;
 use App\Util\LogHandler;
-use App\Util\AccountProvisioning;
 
 
 /**
  * LogoutHandler - Usato per gestire la disconnessione di un utente
  */
-class LogoutHandler implements LogoutHandlerInterface {
+class LogoutHandler implements LogoutSuccessHandlerInterface {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var EntityManagerInterface $em Gestore delle entità
+   * @var RouterInterface $router Gestore delle URL
    */
-  private $em;
+  private $router;
+
+  /**
+   * @var Security $security Gestore dell'autenticazione degli utenti
+   */
+  private $security;
 
   /**
    * @var LogHandler $dblogger Gestore dei log su database
    */
   private $dblogger;
-
-  /**
-  * @var LoggerInterface $logger Gestore dei log su file
-  */
-  private $logger;
-
-  /**
-  * @var AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
-  */
-  private $prov;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -57,17 +51,14 @@ class LogoutHandler implements LogoutHandlerInterface {
   /**
    * Costruttore
    *
-   * @param EntityManagerInterface $em Gestore delle entità
+   * @param RouterInterface $router Gestore delle URL
+   * @param Security $security Gestore dell'autenticazione degli utenti
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param LoggerInterface $logger Gestore dei log su file
-   * @param AccountProvisioning $prov Gestore del provisioning sui sistemi esterni
    */
-  public function __construct(EntityManagerInterface $em, LogHandler $dblogger, LoggerInterface $logger,
-                              AccountProvisioning $prov) {
-    $this->em = $em;
+  public function __construct(RouterInterface $router, Security $security, LogHandler $dblogger) {
+    $this->router = $router;
+    $this->security = $security;
     $this->dblogger = $dblogger;
-    $this->logger = $logger;
-    $this->prov = $prov;
   }
 
   /**
@@ -75,21 +66,23 @@ class LogoutHandler implements LogoutHandlerInterface {
    * Di solito usato per invalidare la sessione, rimuovere i cookie, ecc.
    *
    * @param Request $request Pagina richiesta
-   * @param Response $response Pagina di risposta
-   * @param TokenInterface $token Token di autenticazione (contiene l'utente)
    */
-  public function logout(Request $request, Response $response, TokenInterface $token) {
-    if ($token instanceOf AnonymousToken) {
-      // logout già eseguito
-      return;
-    }
-    // la sessione è già invalidata se è settato il parametro 'invalidate_session' in 'security.yml'
+  public function onLogoutSuccess(Request $request) {
+    // legge utente attuale
+    $utente = $this->security->getUser();
+    // legge eventuale url per il logut SPID
+    $spidLogout = $request->getSession()->get('/APP/UTENTE/spid_logout');
+    // ditrugge la sessione
     $request->getSession()->invalidate();
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'Logout', array(
-      'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()
-      ));
+      'Username' => $utente->getUsername(),
+      'Ruolo' => $utente->getRoles()[0]));
+    if ($spidLogout) {
+      // esegue logout SPID su Identity provider
+      return new RedirectResponse($spidLogout);
+    }
+    // reindirizza a pagina di login
+    return new RedirectResponse($this->router->generate('login_form'));
   }
-
 }

@@ -32,7 +32,7 @@
           <div class="text-center gs-mt-5">
             <a href="{{ path('login_gsuite') }}" class="btn btn-primary"><strong>Accedi con GOOGLE</strong></a>
           </div>
-          <p class="gs-mt-3"><strong><em>Password <em>Google</em> dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></strong></p>
+          <p class="gs-mt-3"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
         </div>
         <div class="col-sm-6 col-md-5 col-md-offset-1 gs-pt-4 gs-pb-4" style="border:2px solid #337ab7">
           <p class="text-center text-primary gs-big"><strong>Genitori e Personale ATA</strong></p>
@@ -55,9 +55,62 @@
             <div class="form-group text-center">
               <button type="submit" class="btn btn-primary" id="login" name="login"><strong>{{ 'label.login'|trans }}</strong></button>
             </div>
-            <p><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></p>
+            <p><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
             <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
           </form>
+        </div>
+        <div class="col-sm-12 text-center gs-pt-4">
+          <div class="text-danger gs-big gs-mr-4"><em><strong>L'accesso SPID è in fase di validazione</strong></em></div>
+          <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * begin * -->
+          <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
+            <span class="italia-it-button-icon"><img src="/spid/spid-sp-access-button/img/spid-ico-circle-bb.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-ico-circle-bb.png'; this.onerror=null;" alt="" /></span>
+            <span class="italia-it-button-text">Entra con SPID</span>
+          </a>
+          <div><a href="http://www.spid.gov.it/" target="_blank"><strong class="gs-ml-2">Informazioni su SPID</strong></a></div>
+          <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
+           <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
+             <li class="spid-idp-button-link" data-idp="arubaid">
+               <a href="{{ path('spid_login', {idp: 'IdAruba'}) }}"><span class="spid-sr-only">Aruba ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-arubaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-arubaid.png'; this.onerror=null;" alt="Aruba ID" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="infocertid">
+               <a href="{{ path('spid_login', {idp: 'IdInfocert'}) }}"><span class="spid-sr-only">Infocert ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-infocertid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="intesaid">
+               <a href="{{ path('spid_login', {idp: 'IdIntesa'}) }}"><span class="spid-sr-only">Intesa ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-intesaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-intesaid.png'; this.onerror=null;" alt="Intesa ID" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="lepidaid">
+               <a href="{{ path('spid_login', {idp: 'IdLepida'}) }}"><span class="spid-sr-only">Lepida ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-lepidaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="namirialid">
+               <a href="{{ path('spid_login', {idp: 'IdNamirial'}) }}"><span class="spid-sr-only">Namirial ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-namirialid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-namirialid.png'; this.onerror=null;" alt="Namirial ID" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="posteid">
+               <a href="{{ path('spid_login', {idp: 'IdPoste'}) }}"><span class="spid-sr-only">Poste ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-posteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-posteid.png'; this.onerror=null;" alt="Poste ID" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="sielteid">
+               <a href="{{ path('spid_login', {idp: 'IdSielte'}) }}"><span class="spid-sr-only">Sielte ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-sielteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="spiditalia">
+               <a href="{{ path('spid_login', {idp: 'IdRegister'}) }}"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="/spid/spid-sp-access-button/img/spid-idp-spiditalia.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
+             </li>
+             <li class="spid-idp-button-link" data-idp="timid">
+               <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-timid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
+             </li>
+             <li class="spid-idp-support-link">
+               <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
+             </li>
+             <li class="spid-idp-support-link">
+               <a href="https://www.spid.gov.it">Maggiori informazioni</a>
+             </li>
+             <li class="spid-idp-support-link">
+               <a href="https://www.spid.gov.it/richiedi-spid">Non hai SPID?</a>
+             </li>
+             <li class="spid-idp-support-link">
+               <a href="https://www.spid.gov.it/serve-aiuto">Serve aiuto?</a>
+             </li>
+           </ul>
+         </div>
+         <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
         </div>
       </div>
     </div>
@@ -105,9 +158,21 @@
 </div>
 {% endblock %}
 
+{% block pagina_css %}
+{{ parent() }}
+<link href="/spid/spid-sp-access-button/css/spid-sp-access-button.min.css" rel="stylesheet">
+<style>
+.spid-idp-button .spid-idp-button-menu li > a img { padding: 0px 10px 0px 10px; }
+.spid-idp-button .spid-idp-button-menu li > a, .spid-idp-button .spid-idp-button-menu label { padding-bottom: 5px; }
+#spid-idp-button-medium-get { text-align: left; }
+</style>
+{% endblock %}
+
 {% block pagina_js_fine %}
+<script type="text/javascript" src="/spid/spid-sp-access-button/js/spid-sp-access-button.min.js"></script>
 <script>
 $(document).ready(function() {
+  $('[data-toggle="popover"]').popover();
   $('form[name="login_form"]').submit(function(e) {
     $.ajax({
       url: "{{ path('ajax_token', {'id': 'authenticate'}) }}",
@@ -118,6 +183,78 @@ $(document).ready(function() {
       async: false
     });
   });
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-small-root-get");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-medium-root-get");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-large-root-get");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-xlarge-root-get");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-small-root-post");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-medium-root-post");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-large-root-post");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
+});
+$(document).ready(function(){
+    var rootList = $("#spid-idp-list-xlarge-root-post");
+    var idpList = rootList.children(".spid-idp-button-link");
+    var lnkList = rootList.children(".spid-idp-support-link");
+    while (idpList.length) {
+        rootList.append(idpList.splice(Math.floor(Math.random() * idpList.length), 1)[0]);
+    }
+    rootList.append(lnkList);
 });
 </script>
 {% endblock %}

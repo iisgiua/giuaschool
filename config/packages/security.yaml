@@ -18,14 +18,14 @@ security:
         parameter: '_alias'
       logout:
         path: '/logout/'
-        target: '/login/form/'
-        invalidate_session: true
-        handlers: ['App\Security\LogoutHandler']
+        invalidate_session: false
+        success_handler: 'App\Security\LogoutHandler'
       guard:
         authenticators:
           - 'App\Security\GSuiteAuthenticator'
           - 'App\Security\FormAuthenticator'
           - 'App\Security\AppAuthenticator'
+          - 'App\Security\SpidAuthenticator'
           - 'App\Security\TokenAuthenticator'
           - 'App\Security\EnrollAuthenticator'
         entry_point: 'App\Security\GSuiteAuthenticator'

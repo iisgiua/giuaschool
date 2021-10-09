@@ -292,9 +292,6 @@ class SistemaController extends BaseController {
         $session->set('/APP/UTENTE/ultimo_accesso',
           ($user->getUltimoAccesso() ? $user->getUltimoAccesso()->format('d/m/Y H:i:s') : null));
         $session->set('/APP/UTENTE/tipo_accesso', 'alias');
-        // cancella altri dati di sessione
-        $session->remove('/APP/ROUTE');
-        $session->remove('/APP/DOCENTE');
         // log azione
         $dblogger->logAzione('ACCESSO', 'Alias', array(
           'Username' => $user->getUsername(),
@@ -337,8 +334,6 @@ class SistemaController extends BaseController {
     $session->remove('/APP/UTENTE/username_reale');
     $session->remove('/APP/UTENTE/ruolo_reale');
     $session->remove('/APP/UTENTE/id_reale');
-    $session->remove('/APP/ROUTE');
-    $session->remove('/APP/DOCENTE');
     // disconnette l'alias in uso e redirect alla home
     return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => '_exit'));
   }

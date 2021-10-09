@@ -66,8 +66,13 @@ class ConfigLoader {
    * Legge tutta la configurazione e la memorizza nella sessione
    */
   public function carica() {
-    // rimuove la configurazione esistente
+    // rimuove i dati esistenti
     $this->session->remove('/CONFIG');
+    $this->session->remove('/APP/ROUTE');
+    $this->session->remove('/APP/FILE');
+    $this->session->remove('/APP/DOCENTE');
+    $this->session->remove('/APP/GENITORE');
+    $this->session->remove('/APP/APP');
     // carica dati dall'entità Configurazione (/CONFIG/SISTEMA/*, /CONFIG/SCUOLA/*, /CONFIG/ACCESSO/*)
     $list = $this->em->getRepository('App:Configurazione')->load();
     foreach ($list as $item) {
@@ -78,7 +83,10 @@ class ConfigLoader {
     // carica i menu (/CONFIG/MENU/*)
     $this->caricaMenu();
     // carica dati dell'utente (/APP/<tipo_utente>/*)
-    $this->caricaUtente();
+    if (!$this->session->get('/APP/UTENTE/lista_profili') || $this->session->get('/APP/UTENTE/profilo_usato')) {
+      // se c'è un solo profilo oppure è stato scelto il profilo: carica dati utente
+      $this->caricaUtente();
+    }
     // carica il tema (/APP/APP/*)
     $this->caricaTema();
 }

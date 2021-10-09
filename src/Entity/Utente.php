@@ -31,7 +31,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @UniqueEntity(fields="username", message="field.unique", entityClass="App\Entity\Utente")
  * @UniqueEntity(fields="email", message="field.unique", entityClass="App\Entity\Utente")
- * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Utente")
  */
 class Utente implements UserInterface, \Serializable {
 
@@ -192,7 +191,7 @@ class Utente implements UserInterface, \Serializable {
   /**
    * @var string $codiceFiscale Codice fiscale dell'utente (univoco)
    *
-   * @ORM\Column(name="codice_fiscale", type="string", length=16, unique=true, nullable=true)
+   * @ORM\Column(name="codice_fiscale", type="string", length=16, nullable=true)
    *
    * @Assert\Length(max=16,maxMessage="field.maxlength")
    */
@@ -229,6 +228,18 @@ class Utente implements UserInterface, \Serializable {
    * @ORM\Column(type="array", nullable=true)
    */
   private $notifica;
+
+  /**
+   * @var array $listaProfili Lista di profili per lo stesso utente (dato non persistente)
+   *
+   */
+  private $listaProfili;
+
+  /**
+   * @var array $infoLogin Lista di dati utili in fase di autenticazione (dato non persistente)
+   *
+   */
+  private $infoLogin;
 
 
   //==================== EVENTI ORM ====================
@@ -801,6 +812,48 @@ class Utente implements UserInterface, \Serializable {
     return $this;
   }
 
+  /**
+   * Restituisce la lista di profili per lo stesso utente (dato non persistente)
+   *
+   * @return array Lista di profili per lo stesso utente
+   */
+  public function getListaProfili() {
+    return $this->listaProfili;
+  }
+
+  /**
+   * Modifica la lista di profili per lo stesso utente (dato non persistente)
+   *
+   * @param array $listaProfili Lista di profili per lo stesso utente
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setListaProfili($listaProfili) {
+    $this->listaProfili = $listaProfili;
+    return $this;
+  }
+
+  /**
+   * Restituisce la lista di dati utili in fase di autenticazione (dato non persistente)
+   *
+   * @return array Lista di dati utili in fase di autenticazione
+   */
+  public function getInfoLogin() {
+    return $this->infoLogin;
+  }
+
+  /**
+   * Modifica la lista di dati utili in fase di autenticazione (dato non persistente)
+   *
+   * @param array $infoLogin Lista di dati utili in fase di autenticazione
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setInfoLogin($infoLogin) {
+    $this->infoLogin = $infoLogin;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -812,6 +865,8 @@ class Utente implements UserInterface, \Serializable {
     $this->numeriTelefono = array();
     $this->notifica = array();
     $this->abilitato = false;
+    $this->listaProfili = array();
+    $this->infoLogin = array();
   }
 
   /**

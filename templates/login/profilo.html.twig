@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container_fluid gs-mt-5">
+  <div class="modal" id="gs-profilo" tabindex="-1" role="dialog" aria-labelledby="gs-profilo-label" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        {{ form_start(form) }}
+        <div class="modal-header">
+          <h3 class="modal-title gs-h2" id="gs-profilo-label">{{ 'title.login_profilo'|trans }}</h3>
+        </div>
+        <div class="modal-body">
+          <p class="gs-big"><em>Dopo aver scelto il profilo, potrai cambiarlo andando alla pagina HOME.</em></p>
+          {{ form_row(form.profilo) }}
+        </div>
+        <div class="modal-footer">
+          <div class="text-left">
+            {{ form_row(form.submit) }}
+          </div>
+        </div>
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  $('#gs-profilo').modal('show');
+  $('label.gs-checkbox input').change(function() {
+    $('label.gs-checkbox').removeClass('required active')
+    if ($(this).is(":checked")) {
+      $(this).parent().addClass('active');
+    }
+  }).change();
+});
+</script>
+{% endblock %}

@@ -355,12 +355,6 @@ class UtenteTest extends DatabaseTestCase {
     $o->setEmail($existent->getEmail());
     $err = $this->val->validate($o);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::email - UNIQUE');
-    // unique - codiceFiscale
-    $o->setEmail($existent->getEmail().'.xxx');
-    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
-    $existent->setCodiceFiscale($o->getCodiceFiscale());
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::codiceFiscale - UNIQUE');
   }
 
 }

@@ -448,6 +448,7 @@ label.documenti_generici: Altro
 label.scegli_tipo_documento: Scegli il tipo di documento
 label.titolo_documento: Titolo del documento
 label.riferimento: Riferimento
+label.profilo: Profilo utente
 
 
 ##### PAGINE #####
@@ -519,6 +520,8 @@ page.documenti_alunni: Documenti alunni
 title.documenti_alunni: Visualizza i documenti degli alunni
 page.documenti_bacheca: Bacheca documenti
 title.documenti_bacheca: Documenti per {utente}
+page.login_profilo: Scelta profilo
+title.login_profilo: Scegli il profilo utente da utilizzare
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -1271,3 +1274,5 @@ exception.documento_esistente: Il documento inserito esiste già per l'alunno se
 exception.info_studente_no_app: Il servizio richiesto non è attivo.
 exception.info_studente_no_ip: L'indirizzo IP non è valido.
 exception.info_studente_no_user: L'utente indicato non esiste.
+exception.spid_invalid_user: L'utente indicato non è presente nel sistema. Rivolgiti alla Segreteria della scuola per risolvere il problema.
+exception.spid_blocked_login: Tentativo di accesso durante una manutenzione programmata del sistema.

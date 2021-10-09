@@ -309,12 +309,8 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @return Response Pagina di risposta
    */
   public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
-    // carica url della risorsa che ha causato la richiesta di autenticazione
-    $url = $request->getSession()->get('_security.'.$providerKey.'.target_path');
-    if (!$url) {
-      // se non presente, usa l'homepage
-      $url = $this->router->generate('login_home');
-    }
+    // url di destinazione: homepage (necessario un punto di ingresso comune)
+    $url = $this->router->generate('login_home');
     // tipo di login
     $tipo_accesso = (($token->getUser() instanceof Docente) && $token->getUser()->getOtp()) ? 'form/OTP' : 'form';
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
