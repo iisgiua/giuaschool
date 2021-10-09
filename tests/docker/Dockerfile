@@ -24,7 +24,7 @@ RUN \
   ln -sf /usr/share/zoneinfo/Europe/Rome /etc/localtime && \
 # Install dev tools
   apt-get -yqq --no-install-recommends install \
-  curl wget ca-certificates apt-utils debconf-utils lsb-release unzip \
+  curl wget ca-certificates apt-utils debconf-utils lsb-release unzip git \
 # Install Apache and MariaDB
   apache2=2.4.* \
   mariadb-common=1:10.3.* mariadb-server=1:10.3.* mariadb-client=1:10.3.* && \
