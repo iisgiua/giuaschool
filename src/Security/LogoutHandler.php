@@ -70,17 +70,19 @@ class LogoutHandler implements LogoutSuccessHandlerInterface {
   public function onLogoutSuccess(Request $request) {
     // legge utente attuale
     $utente = $this->security->getUser();
-    // legge eventuale url per il logut SPID
-    $spidLogout = $request->getSession()->get('/APP/UTENTE/spid_logout');
-    // ditrugge la sessione
-    $request->getSession()->invalidate();
-    // log azione
-    $this->dblogger->logAzione('ACCESSO', 'Logout', array(
-      'Username' => $utente->getUsername(),
-      'Ruolo' => $utente->getRoles()[0]));
-    if ($spidLogout) {
-      // esegue logout SPID su Identity provider
-      return new RedirectResponse($spidLogout);
+    if ($utente) {
+      // legge eventuale url per il logut SPID
+      $spidLogout = $request->getSession()->get('/APP/UTENTE/spid_logout');
+      // ditrugge la sessione
+      $request->getSession()->invalidate();
+      // log azione
+      $this->dblogger->logAzione('ACCESSO', 'Logout', array(
+        'Username' => $utente->getUsername(),
+        'Ruolo' => $utente->getRoles()[0]));
+      if ($spidLogout) {
+        // esegue logout SPID su Identity provider
+        return new RedirectResponse($spidLogout);
+      }
     }
     // reindirizza a pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
