@@ -73,30 +73,40 @@ class UtenteRepository extends EntityRepository {
       // nessun profilo attivo: restituisce null
       return null;
     }
+    // controlla se solo un profilo
     if (count($profili) == 1) {
-      // solo un profilo attivo: restituisce istanza utente
+      // solo un profilo: lo restituisce
       return $profili[0];
     }
     // crea un vettore con i dati dei profili e lo restituisce
     $dati = [];
+    $numDati = 0;
+    $utente = null;
     foreach ($profili as $profilo) {
       if ($profilo instanceOf Ata) {
         // può essercene solo uno
         $dati['ATA'][0] = $profilo->getId();
+        $numDati++;
+        $utente = (!$utente ? $profilo : $utente);
       } elseif ($profilo instanceOf Docente) {
         // può essercene solo uno
         $dati['DOCENTE'][0] = $profilo->getId();
+        $numDati++;
+        $utente = (!$utente ? $profilo : $utente);
       } elseif ($profilo instanceOf Genitore) {
         // ce ne possono essere più di uno (più figli nella stessa scuola)
         $dati['GENITORE'][] = $profilo->getId();
+        $numDati++;
+        $utente = (!$utente ? $profilo : $utente);
       } elseif ($profilo instanceOf Alunno) {
         // può essercene solo uno
         $dati['ALUNNO'][0] = $profilo->getId();
+        $numDati++;
+        $utente = (!$utente ? $profilo : $utente);
       }
     }
     // restituisce primo profilo utente e memorizza la lista di profili
-    $utente = $profili[0];
-    $utente->setListaProfili($dati);
+    $utente->setListaProfili($numDati > 1 ? $dati : []);
     return $utente;
   }
 

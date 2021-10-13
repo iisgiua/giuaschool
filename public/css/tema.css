@@ -318,6 +318,21 @@
   display: flex;
 }
 
+.gs-row-eq-container {
+  display: table;
+  width: 100%;
+}
+.gs-row-eq-col2 {
+  display: table-cell;
+  width: 50%;
+}
+@media (max-width: 767px) {
+  .gs-row-eq-col2 {
+    display: block;
+    width: 100%;
+  }
+}
+
 .gs-pt-0 {
   padding-top: 0rem !important;
 }
