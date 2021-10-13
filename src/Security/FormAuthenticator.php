@@ -182,7 +182,8 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App:Utente')->findOneByUsername($credentials['username']);
+    $user = $this->em->getRepository('App:Utente')->findOneBy(['username' => $credentials['username'],
+      'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login.', array(
@@ -190,8 +191,35 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
         'ip' => $credentials['ip']));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    // utente trovato
-    return $user;
+    if (empty($user->getCodiceFiscale())) {
+      // ok restituisce profilo
+      return $user;
+    }
+    // trova profili attivi
+    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getCodiceFiscale());
+    if ($profilo) {
+      // controlla che il profilo sia lo stesso richiesto con username
+      if ($profilo->getId() == $user->getId()) {
+        // ok restituisce profilo
+        return $user;
+      }
+      // altrimenti cerca tra i profili attivi
+      foreach ($profilo->getListaProfili() as $profili) {
+        foreach ($profili as $id) {
+          if ($id == $user->getId()) {
+            // memorizza lista profili
+            $user->setListaProfili($profilo->getListaProfili());
+            // ok restituisce profilo
+            return $user;
+          }
+        }
+      }
+    }
+    // errore: utente disabilitato
+    $this->logger->error('Utente disabilitato nella richiesta di login.', array(
+      'username' => $credentials['username'],
+      'ip' => $credentials['ip']));
+    throw new CustomUserMessageAuthenticationException('exception.invalid_user');
   }
 
   /**
@@ -226,14 +254,6 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
         'username' => $credentials['username'],
         'ip' => $credentials['ip']));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
-    }
-    // controlla se l'utente è abilitato
-    if (!$user->getAbilitato()) {
-      // utente disabilitato
-      $this->logger->error('Utente disabilitato nella richiesta di login.', array(
-        'username' => $credentials['username'],
-        'ip' => $credentials['ip']));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // controlla username/password
     $plainPassword = $credentials['password'];
@@ -314,31 +334,26 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     // tipo di login
     $tipo_accesso = (($token->getUser() instanceof Docente) && $token->getUser()->getOtp()) ? 'form/OTP' : 'form';
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
-    // ultimo accesso dell'utente
-    $adesso = new \DateTime();
-    $last_login = $token->getUser()->getUltimoAccesso();
-    if ($last_login || !($token->getUser() instanceOf Genitore)) {
-      // ha già effettuato altri login
-      $request->getSession()->set('/APP/UTENTE/ultimo_accesso',
-        $last_login ? $last_login->format('d/m/Y H:i:s') : '');
+    // controlla presenza altri profili
+    if (empty($token->getUser()->getListaProfili())) {
+      // non sono presenti altri profili: imposta ultimo accesso dell'utente
+      $accesso = $token->getUser()->getUltimoAccesso();
+      $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
+      $token->getUser()->setUltimoAccesso(new \DateTime());
+      if ($tipo_accesso != 'form') {
+        // memorizza ultimo codice OTP usato
+        $token->getUser()->setUltimoOtp($request->request->get('_otp'));
+      }
     } else {
-      // primo accesso
-      $request->getSession()->set('/APP/UTENTE/ultimo_accesso', '');
-      $request->getSession()->set('/APP/UTENTE/primo_accesso', $adesso->format('d/m/Y H:i:s'));
+      // sono presenti altri profili: li memorizza in sessione
+      $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
     }
-    // memorizza nuovo accesso
-    $token->getUser()->setUltimoAccesso($adesso);
-    if ($tipo_accesso != 'form') {
-      // memorizza ultimo codice OTP usato
-      $token->getUser()->setUltimoOtp($request->request->get('_otp'));
-    }
-    // memorizza modifiche
-    $this->em->flush($token->getUser());
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => $tipo_accesso,
-      'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()));
+      'Username' => $token->getUser()->getUsername(),
+      'Ruolo' => $token->getUser()->getRoles()[0],
+      'Lista profili' => $token->getUser()->getListaProfili()));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare

@@ -69,7 +69,7 @@ class UtenteRepository extends EntityRepository {
    */
   public function profiliAttivi($codiceFiscale) {
     $profili = $this->findBy(['codiceFiscale' => $codiceFiscale, 'abilitato' => 1]);
-    if (empty($profili)) {
+    if (empty($profili) || empty($codiceFiscale)) {
       // nessun profilo attivo: restituisce null
       return null;
     }

@@ -128,20 +128,51 @@ class GSuiteAuthenticator extends SocialAuthenticator {
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // init
     $user = null;
-    // trova utente GSuite
-    $gs_user = $this->clientRegistry->getClient('gsuite')->fetchUserFromToken($credentials);
-    if ($gs_user) {
-      // autenticato su GSuite: controlla se esiste nel registro
-      $user = $this->em->getRepository('App:Utente')->findOneByEmail($gs_user->getEmail());
-      if (!$user) {
-        // utente non esiste nel registro
-        $this->logger->error('Utente non valido nell\'autenticazione GSuite.', array(
-          'email' => $gs_user->getEmail()));
-        throw new CustomUserMessageAuthenticationException('exception.invalid_user');
+    // trova utente Google
+    $userGoogle = $this->clientRegistry->getClient('gsuite')->fetchUserFromToken($credentials);
+    if (!$userGoogle) {
+      // utente non autenticato su Google
+      $this->logger->error('Autenticazione Google non valida.', array(
+        'credenziali' => $credentials));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
+    }
+    // autenticato su Google: controlla se esiste nel registro
+    $user = $this->em->getRepository('App:Utente')->findOneBy(['email' => $userGoogle->getEmail(),
+      'abilitato' => 1]);
+    if (!$user) {
+      // utente non esiste nel registro
+      $this->logger->error('Utente non valido nell\'autenticazione Google.', array(
+        'email' => $userGoogle->getEmail()));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
+    }
+    if (empty($user->getCodiceFiscale())) {
+      // ok restituisce profilo
+      return $user;
+    }
+    // trova profili attivi
+    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getCodiceFiscale());
+    if ($profilo) {
+      // controlla che il profilo sia lo stesso richiesto tramite autenticazione Google
+      if ($profilo->getId() == $user->getId()) {
+        // ok restituisce profilo
+        return $user;
+      }
+      // altrimenti cerca tra i profili attivi
+      foreach ($profilo->getListaProfili() as $profili) {
+        foreach ($profili as $id) {
+          if ($id == $user->getId()) {
+            // memorizza lista profili
+            $user->setListaProfili($profilo->getListaProfili());
+            // ok restituisce profilo
+            return $user;
+          }
+        }
       }
     }
-    // utente trovato
-    return $user;
+    // errore: utente disabilitato
+    $this->logger->error('Utente disabilitato nell\'autenticazione Google.', array(
+      'email' => $userGoogle->getEmail()));
+    throw new CustomUserMessageAuthenticationException('exception.invalid_user');
   }
 
   /**
@@ -161,17 +192,11 @@ class GSuiteAuthenticator extends SocialAuthenticator {
     $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
-      $this->logger->error('Tentativo di accesso da GSuite durante la modalità manutenzione.', array(
+      $this->logger->error('Tentativo di accesso da Google durante la modalità manutenzione.', array(
         'email' => $user->getEmail()));
       throw new CustomUserMessageAuthenticationException('exception.blocked_login');
     }
-    // controllo se l'utente è abilitato
-    if (!$user->getAbilitato()) {
-      // utente disabilitato
-      $this->logger->error('Utente disabilitato nell\'autenticazione GSuite.', array(
-        'email' => $user->getEmail()));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
-    }
+    // validazione corretta
     return true;
   }
 
@@ -188,17 +213,23 @@ class GSuiteAuthenticator extends SocialAuthenticator {
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
-    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'GSuite');
-    // ultimo accesso dell'utente
-    $last_login = $token->getUser()->getUltimoAccesso();
-    $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($last_login ? $last_login->format('d/m/Y H:i:s') : null));
-    $token->getUser()->setUltimoAccesso(new \DateTime());
-    $this->em->flush();
+    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'Google');
+    // controlla presenza altri profili
+    if (empty($token->getUser()->getListaProfili())) {
+      // non sono presenti altri profili: imposta ultimo accesso dell'utente
+      $accesso = $token->getUser()->getUltimoAccesso();
+      $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
+      $token->getUser()->setUltimoAccesso(new \DateTime());
+    } else {
+      // sono presenti altri profili: li memorizza in sessione
+      $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
+    }
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
-      'Login' => 'GSuite',
-      'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()));
+      'Login' => 'Google',
+      'Username' => $token->getUser()->getUsername(),
+      'Ruolo' => $token->getUser()->getRoles()[0],
+      'Lista profili' => $token->getUser()->getListaProfili()));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare

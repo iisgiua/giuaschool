@@ -479,7 +479,7 @@ class DocumentiUtil {
       }
     }
     // destinatari del documento
-    $documento->setListaDestinatari($destinatari);;
+    $documento->setListaDestinatari($destinatari);
     // determina destinatari
     $utenti = array();
     $classi = array();

@@ -81,7 +81,7 @@
                         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#user"></use>
                       </svg>
                     </span>
-                    <span class="d-none d-lg-block">{{ app.user.nome }} {{ app.user.cognome }} <small>({{ ('label.'~app.user.roles[0])|trans }})</small></span>
+                    <span class="d-none d-lg-block">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %} <small>({{ ('label.'~app.user.roles[0])|trans }})</small></span>
                   </a>
   {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
                   <a class="btn btn-default btn-icon rounded-0" href="{{ path('sistema_alias_exit') }}" title="{{ 'title.alias_exit'|trans }}">

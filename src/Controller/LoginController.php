@@ -491,6 +491,10 @@ class LoginController extends BaseController {
           $session->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
         // legge utente selezionato
         $utente = $em->getRepository('App:Utente')->find($profiloId);
+        // imposta ultimo accesso
+        $accesso = $utente->getUltimoAccesso();
+        $session->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
+        $utente->setUltimoAccesso(new \DateTime());
         // log azione
         $dblogger->logAzione('ACCESSO', 'Cambio profilo', array(
           'Username' => $utente->getUsername(),
