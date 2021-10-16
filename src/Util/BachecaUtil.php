@@ -331,6 +331,11 @@ class BachecaUtil {
       // è autore: ok
       return true;
     }
+    // controlla destinatario classe
+    if ($utente instanceOf Docente && $this->em->getRepository('App:AvvisoClasse')->findOneByAvviso($avviso)) {
+      // docente può leggere gli avvisi rivolti alla classe
+      return true;
+    }
     if ($utente instanceOf Staff) {
       // fa parte dello staff: ok
       return true;
