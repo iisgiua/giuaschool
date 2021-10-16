@@ -803,13 +803,18 @@ class DocumentiController extends AbstractController {
          // imposta allegato
          $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
          // protegge documento
-         $doc->codificaDocumento($documento);
-         // rimuove sessione con gli allegati
-         $session->remove($varSessione);
-         // ok: memorizzazione e log
-         $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento BES', $documento);
-         // redirezione
-         return $this->redirectToRoute('documenti_bes');
+         if ($doc->codificaDocumento($documento)) {
+           // rimuove sessione con gli allegati
+           $session->remove($varSessione);
+           // ok: memorizzazione e log
+           $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento BES', $documento);
+           // redirezione
+           return $this->redirectToRoute('documenti_bes');
+         }
+         // errore di codifica: rimuove file
+         $form->addError(new FormError($trans->trans('exception.documento_errore_codifica')));
+         $file = $documento->getAllegati()[0];
+         unlink($doc->documentoDir($documento).'/'.$file->getFile().'.'.$file->getEstensione());
        }
      }
      // mostra la pagina di risposta

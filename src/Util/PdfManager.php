@@ -14,6 +14,7 @@ namespace App\Util;
 
 use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use setasign\Fpdi\Tcpdf\Fpdi;
+use Symfony\Component\Process\Process;
 
 
 /**
@@ -119,13 +120,27 @@ class PdfManager {
    * @return boolean Vero se importazione è avvenuta correttamente, falso altrimenti
    */
   public function import($file) {
+    if (strtolower(substr($file, -4)) != '.pdf') {
+      // non è un documento PDF
+      return false;
+    }
     $this->pdf = new Fpdi();
     try {
       // importa file e calcola il numero pagine del documento
       $pageCount = $this->pdf->setSourceFile($file);
     } catch (\Exception $e) {
-      // errore: documento illegibile o protetto
-      return false;
+      // documento illegibile o protetto: converte file PDF
+      if (!$this->convertFormat($file)) {
+        // errore nella conversione
+        return false;
+      }
+      try {
+        // riprova l'importazione
+        $pageCount = $this->pdf->setSourceFile($file);
+      } catch (\Exception $e) {
+        // errore nella codifica
+        return false;
+      }
     }
     // importa tutto il documento
     for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
@@ -148,6 +163,29 @@ class PdfManager {
     $this->pdf->SetProtection(
       ['print', 'modify', 'copy', 'annot-forms', 'fill-forms', 'extract', 'assemble', 'print-high'],
       $password, null, 3);
+  }
+
+  /**
+   * Converte il documento PDF in un formato compatibile
+   *
+   * @param string $file Percorso completo del file PDF da convertire
+   *
+   * @return boolean Vero se la conversione è avvenuta correttamente, falso altrimenti
+   */
+  public function convertFormat($file) {
+    try {
+      $proc = new Process(['/usr/bin/unoconv', '-f', 'pdf', '-d', 'document', '-o', $file.'.pdf', $file]);
+      if ($proc->isSuccessful() && file_exists($file.'.pdf')) {
+        // conversione ok: cancella vecchio file e rinomina nuovo
+        unlink($file);
+        rename($file.'.pdf', $file);
+        return true;
+      }
+    } catch (\Exception $err) {
+      // errore: non fa niente
+    }
+    // errore: restituisce falso
+    return false;
   }
 
 }

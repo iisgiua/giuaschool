@@ -813,6 +813,7 @@ class DocumentiUtil {
    *
    * @param Documento $documento Documento da codificare
    *
+   * @return boolean Vero se codifica è avvenuta correttamente, falso altrimenti
    */
   public function codificaDocumento(Documento $documento) {
     // crea password
@@ -831,8 +832,13 @@ class DocumentiUtil {
         $this->pdf->protect($password);
         $this->pdf->save($percorso);
         $file->setDimensione(filesize($percorso));
+      } else {
+        // errore di codifica
+        return false;
       }
     }
+    // tutto ok
+    return true;
   }
 
 }
