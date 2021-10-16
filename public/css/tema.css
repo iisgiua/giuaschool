@@ -324,12 +324,19 @@
 }
 .gs-row-eq-col2 {
   display: table-cell;
-  width: 50%;
+  width: 49%;
+}
+.gs-row-eq-space {
+  display: table-cell;
+  width: 2%;
 }
 @media (max-width: 767px) {
   .gs-row-eq-col2 {
     display: block;
     width: 100%;
+  }
+  .gs-row-eq-space {
+    display: none;
   }
 }
 

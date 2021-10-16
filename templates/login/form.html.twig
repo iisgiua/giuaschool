@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container_fluid gs-mt-0">
+<div class="container_fluid gs-mt-4 gs-ml-3 gs-mr-3">
   {% if app.session.get('/CONFIG/SISTEMA/banner_login') %}
   <div class="alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_login')|raw }}</strong></div>
   {% endif %}
@@ -19,102 +19,137 @@
   </div>
   {% endif %}
   {% if not manutenzione and app.session.get('/CONFIG/SISTEMA/id_provider') %}
-  <div class="col-sm-10 col-sm-offset-1 gs-mt-4">
-    <div class="panel panel-primary" >
-      <div class="panel-heading">
-        <div class="panel-title">Accesso al Registro Elettronico</div>
+  {% if errore %}<div class="alert alert-danger gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>{% endif %}
+  <div class="gs-row-eq-container gs-mb-2">
+    <div class="panel panel-success gs-mb-2 gs-row-eq-col2">
+      <div class="panel-heading gs-pt-1 gs-pb-1">
+        <div class="panel-title text-center"><strong>Accesso Alunni e Docenti</strong></div>
       </div>
-      <div class="panel-body">
-        {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
-        <div class="gs-row-eq-container">
-          <div class="gs-row-eq-col2 gs-pr-4 gs-pl-4 gs-pt-4 gs-pb-4" style="border:2px solid #337ab7">
-            <p class="text-center text-primary gs-big"><strong>Alunni e Docenti</strong></p>
-            <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Accedi con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
-            <div class="text-center gs-mt-5">
-              <a href="{{ path('login_gsuite') }}" class="btn btn-primary"><strong>Accedi con GOOGLE</strong></a>
+      <div class="panel-body gs-pt-1 gs-pb-1">
+          <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Accedi con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
+          <div class="text-center gs-mt-5">
+            <a href="{{ path('login_gsuite') }}" class="btn btn-success"><strong>Accedi con GOOGLE</strong></a>
+          </div>
+          <p class="gs-mt-5 gs-mb-0"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
+      </div>
+    </div>
+    <div class="gs-row-eq-space">
+      &nbsp;
+    </div>
+    <div class="panel panel-info gs-mb-2 gs-row-eq-col2">
+      <div class="panel-heading gs-pt-1 gs-pb-1">
+        <div class="panel-title text-center"><strong>Accesso Genitori e ATA</strong></div>
+      </div>
+      <div class="panel-body gs-pt-1 gs-pb-1">
+        <div class="help-block"><span class="gs-text-normal">I genitori ed il personale ATA devono inserire, nei campi sottostanti, l'<strong>utente</strong> e la <strong>password</strong>, quindi cliccare sul pulsante <strong>Accedi</strong>.</span></div>
+        <form name="login_form" method="post" class="form-horizontal">
+          <div class="form-group">
+            <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
+            <div class="input-group gs-ml-4 gs-mr-4">
+              <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+              <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
             </div>
-            <p class="gs-mt-3 gs-mb-0"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
           </div>
-          <div class="gs-row-eq-col2 gs-pr-4 gs-pl-4 gs-pt-4 gs-pb-4" style="border:2px solid #337ab7">
-            <p class="text-center text-primary gs-big"><strong>Genitori e Personale ATA</strong></p>
-            <div class="help-block"><span class="gs-text-normal">I genitori ed il personale ATA devono inserire, nei campi sottostanti, l'<strong>utente</strong> e la <strong>password</strong>, quindi cliccare sul pulsante <strong>Accedi</strong>.</span></div>
-            <form name="login_form" method="post" class="form-horizontal">
-              <div class="form-group">
-                <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
-                <div class="input-group gs-ml-4 gs-mr-4">
-                  <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
-                  <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
-                <div class="input-group gs-ml-4 gs-mr-4">
-                  <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
-                  <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
-                </div>
-              </div>
-              <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary" id="login" name="login"><strong>{{ 'label.login'|trans }}</strong></button>
-              </div>
-              <p class="gs-mb-0"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
-              <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
-            </form>
+          <div class="form-group">
+            <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
+            <div class="input-group gs-ml-4 gs-mr-4">
+              <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+              <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
+            </div>
           </div>
+          <div class="form-group text-center gs-mb-2">
+            <button type="submit" class="btn btn-info" id="login" name="login"><strong>{{ 'label.login'|trans }}</strong></button>
+          </div>
+          <p class="gs-mb-0"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
+          <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-primary">
+    <div class="panel-body gs-pt-2 gs-pb-2">
+      <div class="col-sm-12 text-center">
+        <div class="text-danger"><em><strong>L'accesso SPID è in fase di validazione</strong></em></div>
+        <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * begin * -->
+        <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
+          <span class="italia-it-button-icon"><img src="/spid/spid-sp-access-button/img/spid-ico-circle-bb.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-ico-circle-bb.png'; this.onerror=null;" alt="" /></span>
+          <span class="italia-it-button-text">Entra con SPID</span>
+        </a>
+        <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
+         <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
+           <li class="spid-idp-button-link" data-idp="arubaid">
+             <a href="{{ path('spid_login', {idp: 'IdAruba'}) }}"><span class="spid-sr-only">Aruba ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-arubaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-arubaid.png'; this.onerror=null;" alt="Aruba ID" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="infocertid">
+             <a href="{{ path('spid_login', {idp: 'IdInfocert'}) }}"><span class="spid-sr-only">Infocert ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-infocertid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="intesaid">
+             <a href="{{ path('spid_login', {idp: 'IdIntesa'}) }}"><span class="spid-sr-only">Intesa ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-intesaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-intesaid.png'; this.onerror=null;" alt="Intesa ID" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="lepidaid">
+             <a href="{{ path('spid_login', {idp: 'IdLepida'}) }}"><span class="spid-sr-only">Lepida ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-lepidaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="namirialid">
+             <a href="{{ path('spid_login', {idp: 'IdNamirial'}) }}"><span class="spid-sr-only">Namirial ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-namirialid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-namirialid.png'; this.onerror=null;" alt="Namirial ID" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="posteid">
+             <a href="{{ path('spid_login', {idp: 'IdPoste'}) }}"><span class="spid-sr-only">Poste ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-posteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-posteid.png'; this.onerror=null;" alt="Poste ID" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="sielteid">
+             <a href="{{ path('spid_login', {idp: 'IdSielte'}) }}"><span class="spid-sr-only">Sielte ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-sielteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="spiditalia">
+             <a href="{{ path('spid_login', {idp: 'IdRegister'}) }}"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="/spid/spid-sp-access-button/img/spid-idp-spiditalia.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
+           </li>
+           <li class="spid-idp-button-link" data-idp="timid">
+             <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-timid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
+           </li>
+           <li class="spid-idp-support-link">
+             <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
+           </li>
+           <li class="spid-idp-support-link">
+             <a href="https://www.spid.gov.it" target="_blank">Maggiori informazioni</a>
+           </li>
+           <li class="spid-idp-support-link">
+             <a href="https://www.spid.gov.it/richiedi-spid" target="_blank">Non hai SPID?</a>
+           </li>
+           <li class="spid-idp-support-link">
+             <a href="https://www.spid.gov.it/serve-aiuto" target="_blank">Serve aiuto?</a>
+           </li>
+         </ul>
         </div>
-        <div class="col-sm-12 text-center gs-pt-4">
-          <div class="text-danger gs-big gs-mr-4"><em><strong>L'accesso SPID è in fase di validazione</strong></em></div>
-          <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * begin * -->
-          <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
-            <span class="italia-it-button-icon"><img src="/spid/spid-sp-access-button/img/spid-ico-circle-bb.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-ico-circle-bb.png'; this.onerror=null;" alt="" /></span>
-            <span class="italia-it-button-text">Entra con SPID</span>
-          </a>
-          <div><a href="http://www.spid.gov.it/" target="_blank"><strong class="gs-ml-2">Informazioni su SPID</strong></a></div>
-          <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
-           <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
-             <li class="spid-idp-button-link" data-idp="arubaid">
-               <a href="{{ path('spid_login', {idp: 'IdAruba'}) }}"><span class="spid-sr-only">Aruba ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-arubaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-arubaid.png'; this.onerror=null;" alt="Aruba ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="infocertid">
-               <a href="{{ path('spid_login', {idp: 'IdInfocert'}) }}"><span class="spid-sr-only">Infocert ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-infocertid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="intesaid">
-               <a href="{{ path('spid_login', {idp: 'IdIntesa'}) }}"><span class="spid-sr-only">Intesa ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-intesaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-intesaid.png'; this.onerror=null;" alt="Intesa ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="lepidaid">
-               <a href="{{ path('spid_login', {idp: 'IdLepida'}) }}"><span class="spid-sr-only">Lepida ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-lepidaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="namirialid">
-               <a href="{{ path('spid_login', {idp: 'IdNamirial'}) }}"><span class="spid-sr-only">Namirial ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-namirialid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-namirialid.png'; this.onerror=null;" alt="Namirial ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="posteid">
-               <a href="{{ path('spid_login', {idp: 'IdPoste'}) }}"><span class="spid-sr-only">Poste ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-posteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-posteid.png'; this.onerror=null;" alt="Poste ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="sielteid">
-               <a href="{{ path('spid_login', {idp: 'IdSielte'}) }}"><span class="spid-sr-only">Sielte ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-sielteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="spiditalia">
-               <a href="{{ path('spid_login', {idp: 'IdRegister'}) }}"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="/spid/spid-sp-access-button/img/spid-idp-spiditalia.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="timid">
-               <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-timid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
-             </li>
-             <li class="spid-idp-support-link">
-               <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
-             </li>
-             <li class="spid-idp-support-link">
-               <a href="https://www.spid.gov.it" target="_blank">Maggiori informazioni</a>
-             </li>
-             <li class="spid-idp-support-link">
-               <a href="https://www.spid.gov.it/richiedi-spid" target="_blank">Non hai SPID?</a>
-             </li>
-             <li class="spid-idp-support-link">
-               <a href="https://www.spid.gov.it/serve-aiuto" target="_blank">Serve aiuto?</a>
-             </li>
-           </ul>
-         </div>
-         <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
+        <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
+        <a href="#" type="button" class="gs-big gs-ml-2" data-toggle="modal" data-target="#gs-spid-info">
+          <strong class="gs-big"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></strong>
+        </a>
+        <div class="modal fade" id="gs-spid-info" tabindex="-1" role="dialog" aria-labelledby="gs-spid-info-title">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                  <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+                  <span class="sr-only">{{ 'label.close'|trans }}</span>
+                </button>
+                <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è SPID?</h3>
+              </div>
+              <div class="modal-body text-left">
+                <p>SPID è il sistema di accesso che consente di utilizzare, con un'identità digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.
+                  <br>Se sei già in possesso di un'identità digitale, accedi con le credenziali del tuo gestore.
+                  <br>Se non hai ancora un'identità digitale, richiedila ad uno dei gestori.</p>
+                <p><a href="https://www.spid.gov.it" target="_blank"><strong>Maggiori informazioni su SPID</strong></a></p>
+                <p><a href="https://www.spid.gov.it/richiedi-spid" target="_blank"><strong>Non hai SPID?</strong></a></p>
+                <p><a href="https://www.spid.gov.it/serve-aiuto" target="_blank"><strong>Serve aiuto?</strong></a></p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'label.close'|trans }}</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+    <div class="modal-footer gs-pb-2 gs-pt-2">
+      <a href="https://www.spid.gov.it/"><img style="height:2.5em" src="/img/spid-agid-logo-lb.svg" alt="SPID"></a>
     </div>
   </div>
   {% elseif not manutenzione %}
@@ -154,13 +189,12 @@
           <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
         </form>
         <div class="col-sm-12 text-center gs-pt-4">
-          <div class="text-danger gs-big gs-mr-4"><em><strong>L'accesso SPID è in fase di validazione</strong></em></div>
+          <div class="text-danger"><em><strong>L'accesso SPID è in fase di validazione</strong></em></div>
           <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * begin * -->
           <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
             <span class="italia-it-button-icon"><img src="/spid/spid-sp-access-button/img/spid-ico-circle-bb.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-ico-circle-bb.png'; this.onerror=null;" alt="" /></span>
             <span class="italia-it-button-text">Entra con SPID</span>
           </a>
-          <div><a href="http://www.spid.gov.it/" target="_blank"><strong class="gs-ml-2">Informazioni su SPID</strong></a></div>
           <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
            <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
              <li class="spid-idp-button-link" data-idp="arubaid">
@@ -203,9 +237,39 @@
                <a href="https://www.spid.gov.it/serve-aiuto" target="_blank">Serve aiuto?</a>
              </li>
            </ul>
-         </div>
-         <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
+          </div>
+          <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
+          <a href="#" type="button" class="gs-big gs-ml-2" data-toggle="modal" data-target="#gs-spid-info">
+            <strong class="gs-big"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></strong>
+          </a>
+          <div class="modal fade" id="gs-spid-info" tabindex="-1" role="dialog" aria-labelledby="gs-spid-info-title">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">
+                    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+                    <span class="sr-only">{{ 'label.close'|trans }}</span>
+                  </button>
+                  <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è SPID?</h3>
+                </div>
+                <div class="modal-body text-left">
+                  <p>SPID è il sistema di accesso che consente di utilizzare, con un'identità digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.
+                    <br>Se sei già in possesso di un'identità digitale, accedi con le credenziali del tuo gestore.
+                    <br>Se non hai ancora un'identità digitale, richiedila ad uno dei gestori.</p>
+                  <p><a href="https://www.spid.gov.it" target="_blank"><strong>Maggiori informazioni su SPID</strong></a></p>
+                  <p><a href="https://www.spid.gov.it/richiedi-spid" target="_blank"><strong>Non hai SPID?</strong></a></p>
+                  <p><a href="https://www.spid.gov.it/serve-aiuto" target="_blank"><strong>Serve aiuto?</strong></a></p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'label.close'|trans }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer gs-pb-2 gs-pt-2">
+        <a href="https://www.spid.gov.it/"><img style="height:2.5em" src="/img/spid-agid-logo-lb.svg" alt="SPID"></a>
       </div>
     </div>
   </div>
