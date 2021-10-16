@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7af407311e7380ce909bd64b49dea5f0",
+    "content-hash": "327429b478c4f1239bf05d2ff37a8c23",
     "packages": [
         {
             "name": "composer/package-versions-deprecated",
@@ -1859,7 +1859,7 @@
         },
         {
             "name": "italia/spid-php",
-            "version": "3.8",
+            "version": "3.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/italia/spid-php",

@@ -9,7 +9,7 @@
             "type": "package",
             "package": {
                 "name": "italia/spid-php",
-                "version": "3.8",
+                "version": "3.8.3",
                 "source": {
                     "url": "https://github.com/italia/spid-php",
                     "type": "git",
