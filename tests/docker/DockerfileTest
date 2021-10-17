@@ -4,7 +4,7 @@ FROM ghcr.io/trinko/giuaschool:latest
 ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /var/www/giuaschool
 RUN \
-# Install xdebug
+# Install xdebug and PDF utilities
   apt-get -qq update && \
   apt-get -yqq --no-install-recommends install php7.4-xdebug poppler-utils && \
   apt-get clean && \

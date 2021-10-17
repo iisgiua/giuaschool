@@ -26,9 +26,9 @@
         <div class="panel-title text-center"><strong>Accesso Alunni e Docenti</strong></div>
       </div>
       <div class="panel-body gs-pt-1 gs-pb-1">
-          <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Accedi con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
+          <div class="help-block"><span class="gs-text-normal">Gli alunni ed i docenti devono cliccare sul pulsante <strong>"Entra con GOOGLE"</strong> e poi inserire, nella pagina mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@giua.edu.it) e la <strong>password</strong>.</span></div>
           <div class="text-center gs-mt-5">
-            <a href="{{ path('login_gsuite') }}" class="btn btn-success"><strong>Accedi con GOOGLE</strong></a>
+            <a href="{{ path('login_gsuite') }}" class="btn btn-success"><strong>Entra con GOOGLE</strong></a>
           </div>
           <p class="gs-mt-5 gs-mb-0"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
       </div>
@@ -41,7 +41,7 @@
         <div class="panel-title text-center"><strong>Accesso Genitori e ATA</strong></div>
       </div>
       <div class="panel-body gs-pt-1 gs-pb-1">
-        <div class="help-block"><span class="gs-text-normal">I genitori ed il personale ATA devono inserire, nei campi sottostanti, l'<strong>utente</strong> e la <strong>password</strong>, quindi cliccare sul pulsante <strong>Accedi</strong>.</span></div>
+        <div class="help-block"><span class="gs-text-normal">I genitori ed il personale ATA devono inserire, nei campi sottostanti, l'<strong>utente</strong> e la <strong>password</strong>, quindi cliccare sul pulsante <strong>Entra</strong>.</span></div>
         <form name="login_form" method="post" class="form-horizontal">
           <div class="form-group">
             <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
@@ -58,7 +58,7 @@
             </div>
           </div>
           <div class="form-group text-center gs-mb-2">
-            <button type="submit" class="btn btn-info" id="login" name="login"><strong>{{ 'label.login'|trans }}</strong></button>
+            <button type="submit" class="btn btn-info" id="login" name="login"><strong>Entra</strong></button>
           </div>
           <p class="gs-mb-0"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
           <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
@@ -149,7 +149,7 @@
       </div>
     </div>
     <div class="modal-footer gs-pb-2 gs-pt-2">
-      <a href="https://www.spid.gov.it/"><img style="height:2.5em" src="/img/spid-agid-logo-lb.svg" alt="SPID"></a>
+      <a href="https://www.spid.gov.it/" target="_blank"><img style="height:2.5em" src="/img/spid-agid-logo-lb.png" alt="SPID"></a>
     </div>
   </div>
   {% elseif not manutenzione %}
@@ -159,7 +159,7 @@
         <div class="panel-title">Accesso al Registro Elettronico</div>
       </div>
       <div class="panel-body">
-        <div class="help-block gs-text-normal">Inserisci il tuo <strong>nome utente</strong> e la tua <strong>password</strong>, quindi clicca sul pulsante <strong>Accedi</strong>.</div>
+        <div class="help-block gs-text-normal">Inserisci il tuo <strong>nome utente</strong> e la tua <strong>password</strong>, quindi clicca sul pulsante <strong>Entra</strong>.</div>
         {% if errore %}<div class="alert alert-danger">{{ errore.message|trans }}</div>{% endif %}
         <form name="login_form" method="post" class="form-horizontal">
           <div class="form-group">
@@ -184,7 +184,7 @@
             </div>
           </div>
           <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary" id="login" name="login">{{ 'label.login'|trans }}</button>
+            <button type="submit" class="btn btn-primary" id="login" name="login">Entra</button>
           </div>
           <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
         </form>
@@ -269,7 +269,7 @@
         </div>
       </div>
       <div class="modal-footer gs-pb-2 gs-pt-2">
-        <a href="https://www.spid.gov.it/"><img style="height:2.5em" src="/img/spid-agid-logo-lb.svg" alt="SPID"></a>
+        <a href="https://www.spid.gov.it/" target="_blank"><img style="height:2.5em" src="/img/spid-agid-logo-lb.png" alt="SPID"></a>
       </div>
     </div>
   </div>
