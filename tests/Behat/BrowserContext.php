@@ -477,13 +477,14 @@ class BrowserContext extends BaseContext {
    *  $nome: nome assegnato al file
    *  $dimensione: lunghezza del file in byte
    *
+   * @Then file scaricato con nome :nome
    * @Then file scaricato con nome :nome e dimensione :dimensione
    */
-  public function fileScaricatoConNomeEDimensione($nome, $dimensione): void {
+  public function fileScaricatoConNomeEDimensione($nome, $dimensione=null): void {
     $this->assertPageStatus(200);
     $headers = $this->session->getResponseHeaders();
     $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", $headers['Content-Disposition'], $data));
-    $this->assertTrue($data[1] == $nome && $headers['Content-Length'] == $dimensione);
+    $this->assertTrue($data[1] == $nome && ($dimensione === null || $headers['Content-Length'] == $dimensione));
     $this->log('DOWNLOAD', 'File: '.$data[1].' ['.$headers['Content-Length'].' byte]');
   }
 

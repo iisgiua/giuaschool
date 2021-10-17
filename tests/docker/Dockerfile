@@ -50,7 +50,7 @@ RUN \
 COPY ./tests/docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
 
 
-########## Second Step - Build Synfony framework
+########## Second Step - Build Symfony framework
 FROM systembuilder as symfonybuilder
 
 ### Install Symfony
