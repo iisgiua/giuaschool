@@ -274,9 +274,8 @@ class CircolareRepository extends EntityRepository {
       "WHERE c.id=:id AND c.id=cu.circolare_id AND u.id=cu.utente_id ".
       "GROUP by u.ruolo,coord,segr";
     $query = $this->_em->getConnection()->prepare($sql);
-    $query->execute(['id' => $circolare->getId()]);
-    $stat = $query->fetchAll();
-    foreach ($stat as $s) {
+    $stat = $query->execute(['id' => $circolare->getId()]);
+    foreach ($stat->fetchAllAssociative() as $s) {
       switch ($s['ruolo']) {
         case 'ALU':
           $dati['ALU'] = array($s['tot'], $s['lette']);
@@ -313,8 +312,8 @@ class CircolareRepository extends EntityRepository {
       "FROM gs_circolare AS c, gs_circolare_classe AS cc, gs_classe AS cl ".
       "WHERE c.id=:id AND c.id=cc.circolare_id AND cl.id=cc.classe_id";
     $query = $this->_em->getConnection()->prepare($sql);
-    $query->execute(['id' => $circolare->getId()]);
-    $stat = $query->fetchAll();
+    $stat = $query->execute(['id' => $circolare->getId()]);
+    $stat = $stat->fetchAll();
     if ($stat[0]['tot'] == 0) {
       $dati['CLASSI'] = array(1, 1, []);
     } else {

@@ -210,9 +210,10 @@ class DatabaseTestCase extends KernelTestCase {
     $purger->purge();
     $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
     // carica i dati
-    $db_name = $connection->getDatabase();
-    $db_user = $connection->getUsername();
-    $db_pass = $connection->getPassword();
+    $params = $this->em->getConnection()->getParams();
+    $db_name = $params['dbname'];
+    $db_user = $params['user'];
+    $db_pass = $params['password'];
     $fs = new Filesystem();
     if (count($this->fixtures) > 0) {
       // carica i dati
@@ -721,8 +722,8 @@ class DatabaseTestCase extends KernelTestCase {
   private function tableFields($db, $table): array {
     $sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=:db AND TABLE_NAME=:table";
     $stmt = $this->em->getConnection()->prepare($sql);
-    $stmt->execute(['db' => $db, 'table' => $table]);
-    $cols = array_column($stmt->fetchAll(), 'COLUMN_NAME');
+    $rs = $stmt->execute(['db' => $db, 'table' => $table]);
+    $cols = array_column($rs->fetchAll(), 'COLUMN_NAME');
     return $cols;
   }
 
