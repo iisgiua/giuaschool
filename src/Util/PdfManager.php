@@ -175,6 +175,8 @@ class PdfManager {
   public function convertFormat($file) {
     try {
       $proc = new Process(['/usr/bin/unoconv', '-f', 'pdf', '-d', 'document', '-o', $file.'.pdf', $file]);
+      $proc->setTimeout(0);
+      $proc->run();
       if ($proc->isSuccessful() && file_exists($file.'.pdf')) {
         // conversione ok: cancella vecchio file e rinomina nuovo
         unlink($file);

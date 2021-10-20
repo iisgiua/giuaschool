@@ -282,6 +282,8 @@ class DocumentiUtil {
       try {
         $proc = new Process(['/usr/bin/unoconv', '-f', 'pdf', '-d', 'document', $file.'.'.$estensione],
           $this->dirTemp);
+        $proc->setTimeout(0);
+        $proc->run();
         if ($proc->isSuccessful() && file_exists($this->dirTemp.'/'.$file.'.pdf')) {
           // conversione ok
           unlink($this->dirTemp.'/'.$file.'.'.$estensione);
