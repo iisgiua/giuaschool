@@ -717,19 +717,20 @@ class DocumentiUtil {
   }
 
   /**
-   * Recupera i documenti degli alunni BES per il responsabile indicato
+   * Recupera i documenti degli alunni BES per il responsabile indicato, secondo i criteri di ricerca
    *
+   * @param array $criteri Criteri di ricerca
    * @param Docente $docente Docente responsabile BES
    * @param int $pagina Indica il numero di pagina da visualizzare
    *
    * @return array Dati formattati come array associativo
    */
-  public function besDocente(Docente $docente, $pagina) {
+  public function besDocente($criteri, Docente $docente, $pagina) {
     // genera documento fittizio per l'azione ADD
     $documentoAdd = (new Documento)
       ->setTipo('B');
     // estrae dati alunni
-    $dati = $this->em->getRepository('App:Documento')->bes($docente->getResponsabileBesSede(), $pagina);
+    $dati = $this->em->getRepository('App:Documento')->bes($criteri, $docente->getResponsabileBesSede(), $pagina);
     foreach ($dati['lista'] as $i=>$alunno) {
       // dati documenti
       $dati['documenti'][$i]['lista'] = $this->em->getRepository('App:Documento')->createQueryBuilder('d')

@@ -52,7 +52,7 @@
         <td>
           <strong>{{ d.documento.allegati[0].titolo }}</strong><br>
       {% if d.documento.cifrato %}
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ d.documento.cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ d.documento.cifrato }}</span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ d.documento.cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ d.documento.cifrato }}</span></button>
       {% endif %}
           <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
@@ -65,7 +65,7 @@
         <td>
           <strong>{{ al.titolo }}</strong><br>
           {% if d.documento.cifrato %}
-              <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ d.documento.cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ d.documento.cifrato }}</span></button>
+              <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ d.documento.cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ d.documento.cifrato }}</span></button>
           {% endif %}
           <small>Dimensione: {{ (al.dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>

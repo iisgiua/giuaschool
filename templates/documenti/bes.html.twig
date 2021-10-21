@@ -9,6 +9,7 @@
     <a class="btn btn-primary" href="{{ path('documenti_bes_add') }}" role="button" title="Inserisci un nuovo documento"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
   </div>
   {% endif %}
+  {% include('include/form-inline.html.twig') %}
   {% if dati.lista is empty %}
   <div class="alert alert-warning gs-mt-2" role="alert">
     <strong class="gs-big">{{ 'message.no_documenti'|trans }}</strong>
@@ -17,8 +18,9 @@
   <table class="table table-bordered table-hover table-striped gs-mt-2">
     <thead class="bg-success">
       <tr>
-        <th class="col-sm-5">{{ 'label.alunno'|trans }}</th>
-        <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
+        <th class="col-sm-3">{{ 'label.classe'|trans }}</th>
+        <th class="col-sm-3">{{ 'label.alunno'|trans }}</th>
+        <th class="col-sm-4">{{ 'label.documento'|trans }}</th>
         <th class="col-sm-2">{{ 'label.action'|trans }}</th>
       </tr>
     </thead>
@@ -26,14 +28,17 @@
     {% for i,alu in dati.lista %}
       <tr>
         <td rowspan="{{ dati.documenti[i].lista|length }}">
-          <strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong><br>
-          <strong>{{ alu.classe.anno }}ª {{ alu.classe.sezione }}</strong> - {{ alu.classe.corso.nomeBreve }} - {{ alu.classe.sede.citta|upper }}
+          <strong>{{ alu.classe.anno }}ª {{ alu.classe.sezione }}</strong>
+          <br>{{ alu.classe.corso.nomeBreve }} - {{ alu.classe.sede.citta|upper }}
+        </td>
+        <td rowspan="{{ dati.documenti[i].lista|length }}">
+          <strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong>
         </td>
         <td>
           <a href="{{ path('documenti_download', {'documento': dati.documenti[i].lista[0].id}) }}" title="Scarica il documento indicato">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i].lista[0].allegati[0].titolo }}</strong>
           </a><br>
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ dati.documenti[i].lista[0].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato }}</span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ dati.documenti[i].lista[0].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato }}</span></button>
           <small>Dimensione: {{ (dati.documenti[i].lista[0].allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
         <td>
@@ -51,7 +56,7 @@
           <a href="{{ path('documenti_download', {'documento': dati.documenti[i].lista[1].id}) }}" title="Scarica il documento indicato">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i].lista[1].allegati[0].titolo }}</strong>
           </a><br>
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ dati.documenti[i].lista[1].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato }}</span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ dati.documenti[i].lista[1].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato }}</span></button>
           <small>Dimensione: {{ (dati.documenti[i].lista[1].allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
         </td>
         <td>

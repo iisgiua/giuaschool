@@ -6,6 +6,7 @@ Funzionalità: Visualizzazione documenti degli alunni da parte dello staff
   Bisogna leggere documenti degli alunni BES e mostrare lista
   Bisogna controllare filtro di visualizzazione
   Bisogna controllare memorizzazione dati di sessione
+  Bisogna controllare la codifica dei documenti
   Bisogna controllare accesso a pagina
 
 
@@ -179,6 +180,41 @@ Schema dello scenario: modifica filtri e controlla che siano memorizzati in sess
     | H    | B     | P.E.I.   | Tutte     |
     | D    | D     | P.D.P.   | $cl1:id   |
     | D    | B     | P.D.P.   | Tutte     |
+
+
+################################################################################
+# Bisogna controllare la codifica dei documenti
+
+Schema dello scenario: visualizza documento BES e controlla la sua codifica
+  Data modifica utente connesso:
+    | responsabileBes | responsabileBesSede |
+    | si              | null                |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | username        |
+    | $a1 | daniela.pini.s1 |
+  E istanze di tipo "Cattedra":
+    | id  | docente | classe | attiva | tipo |
+    | $c1 | #logged | $cl1   | si     | N    |
+  E pagina attiva "documenti_bes_add"
+  E selezioni opzione "3ª A" da lista "documento_classe"
+  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<tipo>" da lista "documento_tipo"
+  E alleghi file "documento-pdf.pdf" a dropzone
+  E premi pulsante "Conferma"
+  Quando pagina attiva "documenti_alunni"
+  E ricerca istanze di tipo "Documento":
+    | id  | tipo      | alunno  |
+    | $d1 | <tipodoc> | $a1     |
+  Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" decodificato con "$d1:cifrato"
+  Esempi:
+    | tipo     | nome     | tipodoc |
+    | Diagnosi | DIAGNOSI | B       |
+    | P.E.I.   | PEI      | H       |
+    | P.D.P.   | PDP      | D       |
 
 
 ################################################################################

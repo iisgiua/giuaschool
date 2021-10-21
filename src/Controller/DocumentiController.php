@@ -641,6 +641,8 @@ class DocumentiController extends AbstractController {
   /**
    * Gestione inserimento dei documenti per gli alunni BES
    *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
    * @param SessionInterface $session Gestore delle sessioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param int $pagina Numero di pagina per la lista visualizzata
@@ -650,11 +652,12 @@ class DocumentiController extends AbstractController {
    * @Route("/documenti/bes/{pagina}", name="documenti_bes",
    *    requirements={"pagina": "\d+"},
    *    defaults={"pagina": 0},
-   *    methods={"GET"})
+   *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function besAction(SessionInterface $session, DocumentiUtil $doc, $pagina) {
+  public function besAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+                            DocumentiUtil $doc, $pagina) {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -668,12 +671,42 @@ class DocumentiController extends AbstractController {
       // pagina specificata: la conserva in sessione
       $session->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_bes/tipo', '');
+    $criteri['classe'] = $em->getRepository('App:Classe')->find(
+      (int) $session->get('/APP/ROUTE/documenti_bes/classe', 0));
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $session->get('/APP/ROUTE/documenti_bes/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $session->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
+    }
+    // form filtro
+    $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'alunni',
+      'values' => [$this->getUser()->getResponsabileBesSede(), $criteri['tipo'], $criteri['classe']]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['classe'] = $form->get('classe')->getData();
+      $pagina = 1;
+      // memorizza in sessione
+      $session->set('/APP/ROUTE/documenti_bes/tipo', $criteri['tipo']);
+      $session->set('/APP/ROUTE/documenti_bes/classe',
+        is_object($criteri['classe']) ? $criteri['classe']->getId() : null);
+      $session->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
+    }
     // recupera dati
-    $dati = $doc->besDocente($this->getUser(), $pagina);
+    $dati = $doc->besDocente($criteri, $this->getUser(), $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->render('documenti/bes.html.twig', array(
       'pagina_titolo' => 'page.documenti_bes',
+      'form' => $form->createView(),
+      'form_success' => null,
+      'form_help' => null,
       'dati' => $dati,
       'info' => $info));
   }
