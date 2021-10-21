@@ -411,7 +411,7 @@ Schema dello scenario: cancella documento BES inserito in precedenza e torna all
     | $d1:id    |
   Allora pagina attiva "documenti_bes"
   E non vedi la tabella:
-    | alunno | documento | azione |
+    | classe | alunno | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   E pulsante "Aggiungi" attivo
   Esempi:
@@ -432,14 +432,14 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E premi pulsante "Conferma"
   E vedi pagina "documenti_bes"
   E vedi la tabella:
-    | alunno               | documento                | azione            |
-    | /Pini Daniela.*3ª A/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
+    | classe | alunno         | documento                | azione            |
+    | /3ª A/ | /Pini Daniela/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
   E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_bes"
   E non vedi la tabella:
-    | alunno | documento | azione |
+    | classe | alunno | documento | azione |
   E la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   E non vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
   Esempi:
