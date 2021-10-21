@@ -15,7 +15,7 @@ RUN \
   echo "deb http://deb.debian.org/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list && \
 # Set locale
   apt-get -qq update && \
-  apt-get -yqq --no-install-recommends install locales && \
+  apt-get -yqq --no-install-recommends --no-install-suggests install locales && \
   sed -i -e "s/# $LANG/$LANG/" /etc/locale.gen && \
   echo "LANG=$LANG">/etc/default/locale && \
   echo "LC_ALL=$LANG">>/etc/default/locale && \
@@ -23,7 +23,7 @@ RUN \
   update-locale LANG=$LANG && \
   ln -sf /usr/share/zoneinfo/Europe/Rome /etc/localtime && \
 # Install dev tools
-  apt-get -yqq --no-install-recommends install \
+  apt-get -yqq --no-install-recommends --no-install-suggests install \
   curl wget ca-certificates apt-utils debconf-utils lsb-release unzip git \
 # Install Apache and MariaDB
   apache2=2.4.* \
@@ -32,8 +32,11 @@ RUN \
   wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
   echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
   apt-get -qq update && \
-  apt-get -yqq --no-install-recommends install \
+  apt-get -yqq --no-install-recommends --no-install-suggests install \
   php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip && \
+# Install external dependencies: libreoffice,unoconv and PDF utils
+  apt-get -yqq --no-install-recommends --no-install-suggests install \
+  libreoffice unoconv poppler-utils && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
 # Install Composer

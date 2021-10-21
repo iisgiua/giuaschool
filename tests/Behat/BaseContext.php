@@ -493,9 +493,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
     // carica i dati
     $fs = new Filesystem();
-    if ($fs->exists('tests/temp/'.$this->gruppo.'.fixtures')) {
+    if ($fs->exists(dirname(__DIR__).'/temp/'.$this->gruppo.'.fixtures')) {
       // carica da file
-      $file = file('tests/temp/'.$this->gruppo.'.fixtures', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+      $file = file(dirname(__DIR__).'/temp/'.$this->gruppo.'.fixtures', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
       $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
       foreach ($file as $sql) {
         $connection->exec($sql);
@@ -513,11 +513,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
       }
       // memorizza su file i dati
       $container = $this->kernel->getContainer();
-      $db_name = $connection->getDatabase();
-      $db_user = $connection->getUsername();
-      $db_pass = $connection->getPassword();
+      // carica i dati
+      $params = $this->em->getConnection()->getParams();
+      $db_name = $params['dbname'];
+      $db_user = $params['user'];
+      $db_pass = $params['password'];
       $process = new Process(['mysqldump', '-u'.$db_user, '-p'.$db_pass, $db_name,
-        '-t', '-n', '--compact', '--result-file=tests/temp/'.$this->gruppo.'.fixtures']);
+        '-t', '-n', '--compact', '--result-file='.dirname(__DIR__).'/temp/'.$this->gruppo.'.fixtures']);
       $process->setTimeout(0);
       $process->run();
       if (!$process->isSuccessful()) {
