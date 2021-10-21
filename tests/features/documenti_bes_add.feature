@@ -81,9 +81,9 @@ Schema dello scenario: impedisce visualizzazione pagina inserimento quando docum
     | $d2 | $cl1   | $a1    | <tipo2> |
   Quando pagina attiva "documenti_bes"
   Allora vedi la tabella non ordinata:
-    | alunno                                  | documento       | azione       |
-    | $a1 $a1:classe,classe.corso,classe.sede | Documento Excel | /^Cancella$/ |
-    | $a1 $a1:classe,classe.corso,classe.sede | Documento Pdf   | /^Cancella$/ |
+    | classe                              | alunno | documento       | azione       |
+    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Excel | /^Cancella$/ |
+    | $a1:classe,classe.corso,classe.sede | $a1    | Documento Pdf   | /^Cancella$/ |
   Esempi:
     | tipo1 | tipo2 |
     | B     | H     |
@@ -122,8 +122,8 @@ Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserim
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_bes"
   E vedi la tabella:
-    | alunno               | documento                | azione            |
-    | /Pini Daniela.*3ª A/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
+    | classe | alunno         | documento                | azione            |
+    | /3ª A/ | /Pini Daniela/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
   E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
   Esempi:
     | tipo     | nome     |
@@ -140,7 +140,7 @@ Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza mo
   E premi pulsante "Annulla"
   Allora vedi pagina "documenti_bes"
   E non vedi la tabella:
-    | alunno | documento | azione |
+    | classe | alunno | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
   E non vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
   Esempi:
