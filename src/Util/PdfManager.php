@@ -134,6 +134,7 @@ class PdfManager {
         // errore nella conversione
         return false;
       }
+      $this->pdf = new Fpdi();
       try {
         // riprova l'importazione
         $pageCount = $this->pdf->setSourceFile($file);
