@@ -99,8 +99,7 @@ class ColloquioType extends AbstractType {
           'choices'  => ['label.frequenza_colloquio_S' => 'S', 'label.frequenza_colloquio_1' => '1',
             'label.frequenza_colloquio_2' => '2', 'label.frequenza_colloquio_3' => '3',
             'label.frequenza_colloquio_4' => '4'],
-          'required' => true,
-          'disabled' => true))
+          'required' => true))
         ->add('giorno', ChoiceType::class, array('label' => 'label.giorno',
           'choices'  => ['label.lunedi' => 1, 'label.martedi' => 2, 'label.mercoledi' => 3, 'label.giovedi' => 4,
             'label.venerdi' => 5, 'label.sabato' => 6],
