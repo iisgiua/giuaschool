@@ -34,7 +34,7 @@ RUN \
   apt-get -qq update && \
   apt-get -yqq --no-install-recommends --no-install-suggests install \
   php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip && \
-# Install external dependencies: libreoffice,unoconv and PDF utils
+# Install external dependencies: libreoffice, unoconv and PDF utils
   apt-get -yqq --no-install-recommends --no-install-suggests install \
   libreoffice unoconv poppler-utils && \
   apt-get clean && \
@@ -51,6 +51,7 @@ RUN \
   sed -r -i -e 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/7.4/apache2/php.ini && \
   sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/cli/php.ini
 COPY ./tests/docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
+COPY ./tests/docker/apache2-mpm.conf /etc/apache2/mods-available/mpm_prefork.conf
 
 
 ########## Second Step - Build Symfony framework

@@ -111,7 +111,7 @@ class AlunnoTest extends DatabaseTestCase {
           ($field == 'credito4' ? $this->faker->optional(0.5, null)->numberBetween(5, 10) :
           ($field == 'giustificaOnline' ? $this->faker->randomElement([false, true]) :
           ($field == 'richiestaCertificato' ? $this->faker->randomElement([false, true]) :
-          ($field == 'foto' ? $this->faker->randomElement([null, new File(__DIR__.'/../../data/'.$this->faker->file('tests', 'tests/data', false))]) :
+          ($field == 'foto' ? $this->faker->randomElement([null, new File(__DIR__.'/../../temp/'.$this->faker->file('tests', 'tests/temp', false))]) :
           $classe))))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }

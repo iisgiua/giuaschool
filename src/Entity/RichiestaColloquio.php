@@ -89,6 +89,22 @@ class RichiestaColloquio {
   private $alunno;
 
   /**
+   * @var Genitore $genitore Genitore che effettua la richiesta del colloquio
+   *
+   * @ORM\ManyToOne(targetEntity="Genitore")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $genitore;
+
+  /**
+   * @var Genitore $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
+   *
+   * @ORM\ManyToOne(targetEntity="Genitore")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $genitoreAnnulla;
+
+  /**
    * @var string $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
@@ -244,6 +260,48 @@ class RichiestaColloquio {
   }
 
   /**
+   * Restituisce il genitore che effettua la richiesta del colloquio
+   *
+   * @return Genitore Genitore che effettua la richiesta del colloquio
+   */
+  public function getGenitore() {
+    return $this->genitore;
+  }
+
+  /**
+   * Modifica il genitore che effettua la richiesta del colloquio
+   *
+   * @param Genitore $genitore Genitore che effettua la richiesta del colloquio
+   *
+   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   */
+  public function setGenitore(Genitore $genitore) {
+    $this->genitore = $genitore;
+    return $this;
+  }
+
+  /**
+   * Restituisce il genitore che effettua l'annullamento della richiesta
+   *
+   * @return GenitoreAnnulla Genitore che effettua l'annullamento della richiesta
+   */
+  public function getGenitoreAnnulla() {
+    return $this->genitoreAnnulla;
+  }
+
+  /**
+   * Modifica il genitore che effettua l'annullamento della richiesta
+   *
+   * @param GenitoreAnnulla $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
+   *
+   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   */
+  public function setGenitoreAnnulla(Genitore $genitoreAnnulla=null) {
+    $this->genitoreAnnulla = $genitoreAnnulla;
+    return $this;
+  }
+
+  /**
    * Restituisce lo stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
    *
    * @return string Stato della richiesta del colloquio
@@ -294,7 +352,7 @@ class RichiestaColloquio {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return $this->data->format('d/m/Y').', '.$this->colloquio;
+    return $this->appuntamento->format('d/m/Y H:i').', '.$this->colloquio;
   }
 
 }
