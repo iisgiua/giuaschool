@@ -58,12 +58,12 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
     $destinatari = $this->em->getRepository('App:ListaDestinatari')->findBy([]);
-    $classi = $this->em->getRepository('App:Classe')->findBy([]);
+    $classi = $this->em->getRepository('App:Classe')->findBy(['sezione' => 'B']);
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'listaDestinatari' ? $this->faker->randomElement($destinatari) :
+          $field == 'listaDestinatari' ? $this->faker->unique()->randomElement($destinatari) :
           ($field == 'classe' ? $this->faker->randomElement($classi) :
           ($field == 'letto' ? $this->faker->dateTimeBetween('-1 month', 'now') :
           $this->faker->dateTimeBetween('-1 month', 'now')));
