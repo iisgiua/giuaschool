@@ -43,7 +43,7 @@ class FirmaSostegnoFixtures extends Fixture implements DependentFixtureInterface
     // carica dati
     foreach ($lezioni as $lez) {
       $materia = $lez->getMateria();
-      if ($materia->getTipo() == 'U' || ($lez->getClasse()->getAnno() == 2 && $lez->getClasse()->getSezion1() == 'A')) {
+      if ($materia->getTipo() == 'U' || ($lez->getClasse()->getAnno() == 2 && $lez->getClasse()->getSezione() == 'A')) {
         // salta supplenza
         continue;
       }
