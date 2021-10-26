@@ -17,6 +17,11 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+
       - name: Build image for testing
         run: docker build -t giuaschool:test -f tests/docker/DockerfileTest .
 
