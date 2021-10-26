@@ -43,7 +43,7 @@ class FirmaFixtures extends Fixture implements DependentFixtureInterface, Fixtur
     // carica dati
     foreach ($lezioni as $lez) {
       $materia = $lez->getMateria();
-      if ($materia->getTipo() == 'S') {
+      if ($materia->getTipo() == 'S' || ($lez->getClasse()->getAnno() == 1 && $lez->getClasse()->getSezion1() == 'A')) {
         // salta sostegno
         continue;
       } elseif ($materia->getTipo() == 'U') {
