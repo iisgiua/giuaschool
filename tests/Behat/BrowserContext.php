@@ -393,61 +393,46 @@ class BrowserContext extends BaseContext {
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
    *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
    *
-   * @Then vedi in una riga della tabella :indice i dati:
-   * @Then vedi in una riga della tabella i dati:
+   * @Then vedi nella tabella :indice i dati:
+   * @Then vedi nella tabella i dati:
    */
-  public function vediInUnaRigaDellaTabellaIDati($indice=1, TableNode $dati): void {
+  public function vediNellaTabellaIDati($indice=1, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
     $this->assertNotEmpty($tabelle[$indice - 1]);
-    $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
-    $this->assertNotEmpty($intestazioni);
-    $intestazioni_nomi = array_map(function($v){ return strtolower(trim($v->getText())); }, $intestazioni);
-    $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
-    $this->assertNotEmpty($righe);
-    foreach ($righe as $riga) {
-      $colonne = $riga->findAll('css', 'td');
-      $this->assertNotEmpty($colonne);
-      $trovato = true;
-      foreach ($dati->getHash()[0] as $key=>$val) {
-        $this->assertArrayContains(strtolower($key), $intestazioni_nomi);
-        $cella = $colonne[array_search(strtolower($key), $intestazioni_nomi)]->getText();
-        $cerca = $this->convertSearch($val);
-        $this->logDebug('vediInUnaRigaDellaTabellaIDati -> '.$cerca.' | '.$cella);
-        if (!preg_match($cerca, $cella)) {
-          $trovato = false;
+    list($intestazione, $valori) = $this->parseTable($tabelle[$indice - 1]);
+    $datiIntestazioni = array_keys($dati->getHash()[0]);
+    $this->assertNotEmpty($datiIntestazioni);
+    $colonne = [];
+    foreach ($datiIntestazioni as $nome) {
+      $trovato = false;
+      foreach ($intestazione as $col=>$val) {
+        if (strtolower($nome) == strtolower($val)) {
+          $colonne[$nome] = $col;
+          $trovato = true;
           break;
         }
       }
-      if ($trovato) {
-        break;
-      }
+      $this->assertTrue($trovato, "Table header is different");
     }
-    $this->assertTrue($trovato);
-  }
-
-  /**
-   * Controlla che in più righe qualsiasi della tabella indicata i dati corrispondano a quelli specificati
-   *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
-   *  $dati: i campi corrispondono ai dati da cercare nelle colonne indicate
-   *
-   * @Then vedi in più righe della tabella :indice i dati:
-   * @Then vedi in più righe della tabella i dati:
-   */
-  public function vediInPiuRigheDellaTabellaIDati($indice=1, TableNode $dati): void {
-    $tab = $dati->getTable();
-    $intestazione = null;
-    foreach ($tab as $num=>$riga) {
-      if (!$intestazione) {
-        // memorizza intestazione
-        $intestazione['num'] = $num;
-        $intestazione['riga'] = $riga;
-      } else {
-        // crea tabella temporanea e cerca valori
-        $matrice = [
-          $intestazione['num'] => $intestazione['riga'],
-          $num => $riga];
-        $this->vediInUnaRigaDellaTabellaIDati($indice, new TableNode($matrice));
+    $datiValori = $dati->getHash();
+    $this->assertNotEmpty($datiValori);
+    foreach ($datiValori as $idx=>$rdati) {
+      $trovato = false;
+      foreach ($valori as $ri=>$rval) {
+        $trovato = true;
+        foreach ($rdati as $nome=>$val) {
+          $cerca = $this->convertSearch($val);
+          $this->logDebug('vediNellaTabellaIDati ['.$idx.','.$nome.'] -> '.$cerca.' | '.$valori[$ri][$colonne[$nome]]);
+          if (!preg_match($cerca, $valori[$ri][$colonne[$nome]])) {
+            $trovato = false;
+            break;
+          }
+        }
+        if ($trovato) {
+          break;
+        }
       }
+      $this->assertTrue($trovato);
     }
   }
 

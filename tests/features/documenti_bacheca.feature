@@ -129,7 +129,7 @@ Schema dello scenario: visualizza più file per documento di utente connesso
   E selezioni opzione "Tutti" da lista "documento_tipo"
   E inserisci "" nel campo "documento_titolo"
   E premi pulsante "Filtra"
-  Allora vedi la tabella non ordinata:
+  Allora vedi nella tabella i dati:
     | stato      | riferimento          | documento | azione  |
     | DA LEGGERE | $cl1 $cl1:corso,sede | Prova 1   | Scarica |
     | DA LEGGERE | $cl1 $cl1:corso,sede | Prova 2   | Scarica |

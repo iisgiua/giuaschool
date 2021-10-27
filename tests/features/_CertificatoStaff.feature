@@ -31,11 +31,9 @@ Funzionalità: Procedura richiesta certificato
     Allora vedi nella tabella le colonne:
       | alunno | classe | sede | azione |
     E vedi "2" righe nella tabella
-    E vedi in una riga della tabella i dati:
+    E vedi nella tabella i dati:
       | alunno          | classe        | sede            |
       | $1:cognome,nome | $1:classe     | $1:classe.sede  |
-    E vedi in una riga della tabella i dati:
-      | alunno          | classe        | sede            |
       | $2:cognome,nome | $2:classe     | $2:classe.sede  |
 
   Scenario: Visualizza alunni con richiesta di certificato per staff di una sede
@@ -59,7 +57,7 @@ Funzionalità: Procedura richiesta certificato
     Allora vedi nella tabella le colonne:
       | alunno | classe | sede | azione |
     E vedi "1" riga nella tabella
-    E vedi nella riga "1" della tabella i dati:
+    E vedi nella tabella i dati:
       | alunno          | classe        | sede            |
       | $1:cognome,nome | $1:classe     | $1:classe.sede  |
 
