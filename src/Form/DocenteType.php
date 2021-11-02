@@ -46,15 +46,15 @@ class DocenteType extends AbstractType {
         'choices' => array('label.maschile' => 'M', 'label.femminile' => 'F'),
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
-      ->add('username', TextType::class, array('label' => 'label.username',
-        'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
-      ->add('email', TextType::class, array('label' => 'label.email',
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
       ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false))
+      ->add('username', TextType::class, array('label' => 'label.username',
+        'attr' => ['widget' => 'gs-row-start'],
+        'required' => true))
+      ->add('email', TextType::class, array('label' => 'label.email',
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',

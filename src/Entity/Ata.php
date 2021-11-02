@@ -14,12 +14,15 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * Ata - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\AtaRepository")
+ *
+ * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Ata")
  */
 class Ata extends Utente {
 

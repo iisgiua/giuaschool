@@ -194,4 +194,24 @@ class DocenteTest extends DatabaseTestCase {
     $this->assertFalse(is_a($existent, 'App\Entity\Amministratore'), $this->entity.'is_a Amministratore');
   }
 
+  /**
+   * Test validazione dei dati
+   */
+  public function testValidazione() {
+    // carica oggetto esistente
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    if (!$existent->getCodiceFiscale()) {
+      $existent->setCodiceFiscale('XCODE-0001');
+      $this->em->flush();
+    }
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    // unique - codiceFiscale
+    $o = $this->em->getRepository($this->entity)->findBy([])[1];
+    $o->setCodiceFiscale('XCODE-0002');
+    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
+    $o->setCodiceFiscale($existent->getCodiceFiscale());
+    $err = $this->val->validate($o);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::codiceFiscale - UNIQUE');
+  }
+
 }

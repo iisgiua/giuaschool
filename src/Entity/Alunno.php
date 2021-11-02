@@ -16,12 +16,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * Alunno - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\AlunnoRepository")
+ *
+ * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Alunno")
  */
 class Alunno extends Utente {
 

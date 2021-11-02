@@ -122,18 +122,7 @@ class UtenteTest extends DatabaseTestCase {
       foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
-        if ($field == 'numeriTelefono') {
-          $created->setNumeriTelefono(['1111','2222','3333']);
-          $created->addNumeriTelefono('070.333.333');
-          $created->addNumeriTelefono('2222');
-          $this->assertSame(['1111','2222','3333','070.333.333'], $created->getNumeriTelefono(),
-            $this->entity.'::addNumeroTelefono');
-          $created->removeNumeriTelefono('2222');
-          $created->removeNumeriTelefono('1111');
-          $created->removeNumeriTelefono('2222');
-          $this->assertEquals(array_values(['3333','070.333.333']), array_values($created->getNumeriTelefono()),
-            $this->entity.'::removeNumeriTelefono');
-        } elseif ($field == 'notifica') {
+        if ($field == 'notifica') {
           // test modifica array
           $obj = new \stdClass();
           $obj->var = 1;
@@ -209,7 +198,7 @@ class UtenteTest extends DatabaseTestCase {
    */
   public function testValidazione() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
     // username
     $existent->setUsername(null);
@@ -344,7 +333,7 @@ class UtenteTest extends DatabaseTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::indirizzo - VALID');
     // unique - username
     $this->em->flush();
-    $o = $this->em->getRepository($this->entity)->find(2);
+    $o = $this->em->getRepository($this->entity)->findBy([])[1];
     $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
     $o->setUsername($existent->getUsername());
     $err = $this->val->validate($o);

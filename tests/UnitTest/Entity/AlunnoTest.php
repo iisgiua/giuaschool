@@ -271,6 +271,18 @@ class AlunnoTest extends DatabaseTestCase {
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::foto - VALID IMAGE');
+    // unique - codiceFiscale
+    if (!$existent->getCodiceFiscale()) {
+      $existent->setCodiceFiscale('XCODE-0001');
+      $this->em->flush();
+    }
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $o = $this->em->getRepository($this->entity)->findBy([])[1];
+    $o->setCodiceFiscale('XCODE-0002');
+    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
+    $o->setCodiceFiscale($existent->getCodiceFiscale());
+    $err = $this->val->validate($o);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::codiceFiscale - UNIQUE');
   }
 
 }

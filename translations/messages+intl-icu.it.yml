@@ -983,7 +983,7 @@ message.num_circolari: "{num, plural, one {Circolare} other {Circolari}}"
 message.registro_lettura_circolare: "{num, plural, one {Letta la circolare n. {circolari}} other {Lette le circolari n. {circolari}}}"
 message.presenti_nuove_circolari: "{num, plural, one {È presente una nuova circolare da leggere} other {Sono presenti # nuove circolari da leggere}}"
 message.importa_ata: "Il file CSV da importare deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
-  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, Username, Password, Email, Sede, Tipo, Segreteria\"</span><br>
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, CodiceFiscale, Username, Password, Email, Tipo, Segreteria, Sede\"</span><br>
   <small>
     <span class=\"ml-5\">* campi obbligatori</span><br>
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
@@ -1005,15 +1005,19 @@ message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima
     <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
   </small>"
 message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
-  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, *CodiceFiscale, Citta, Indirizzo, NumeriTelefono, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, Email, EmailGenitore\"</span><br>
+  <span class=\"ml-4\">\"*Cognome, *Nome, *Sesso, *DataNascita, *ComuneNascita, *CodiceFiscale, Citta, Indirizzo, Bes, NoteBes, FrequenzaEstero, Religione, Credito3, Credito4, Classe, **Username, Password, Email, Genitore1Cognome, Genitore1Nome, Genitore1CodiceFiscale, Genitore1Telefono, **Genitore1Username, Genitore1Password, Genitore1Email, Genitore2Cognome, Genitore2Nome, Genitore2CodiceFiscale, Genitore2Telefono, **Genitore2Username, Genitore2Password, Genitore2Email\"</span><br>
   <small>
-    <span class=\"ml-5\">* campi obbligatori</span><br>
+    <span class=\"ml-5\">* campi obbligatori per l'inserimento di un nuovo utente</span><br>
+    <span class=\"ml-5\">** campi obbligatori per la modifica di un utente esistente</span><br>
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
     <span class=\"ml-5\">Bes: N=No, H=disabile, D=DSA, B=BES</span><br>
-    <span class=\"ml-5\">FrequenzaEstero: 0=No, 1=Si</span><br>
-    <span class=\"ml-5\">Religione: S=Si, U=Uscita</span><br>
+    <span class=\"ml-5\">FrequenzaEstero: S=si, N=no</span><br>
+    <span class=\"ml-5\">Religione: S=si, U=uscita</span><br>
     <span class=\"ml-5\">Credito3, Credito4: Punti di credito per la classe terza e quarta</span><br>
     <span class=\"ml-5\">Classe: In caso di modifica, è inserito il nuovo valore senza gestire il cambio classe.</span><br>
+    <span class=\"ml-5\">Genitore1: i dati si riferisco al padre/tutore/genitore1</span><br>
+    <span class=\"ml-5\">Genitore2: i dati si riferisco alla madre/genitore2</span><br>
+    <span class=\"ml-5\"><em>NB: è possibile modificare tutti i campi tranne le username</em></span><br>
   </small>"
 message.credenziali_inviate: Le credenziali sono state correttamente inviate all'utente.
 message.notifica_circolare_oggetto: "{intestazione_istituto_breve} - Nuove circolari da leggere"
@@ -1103,7 +1107,7 @@ exception.file_cattedra: La cattedra indicata nel record {num} è già presente 
 exception.file_cattedra_mancante: La cattedra indicata nel record {num} non risulta presente nel sistema.
 exception.file_classe: La classe non è corretta nel record {num}.
 exception.file_data: I campi del file non corrispondono a quanto previsto nel record {num}.
-exception.file_date: La data '{date}' non è valida nel record {num}.
+exception.file_date: "La data \"{data}\" non è valida nel record {num}."
 exception.file_docente_duplicato: Il docente indicato nel record {num} è presente più volte nel sistema.
 exception.file_docente_mancante: Il docente indicato nel record {num} non è presente nel sistema.
 exception.file_duplicated: Username generata automaticamente già esistente nel record {num}.

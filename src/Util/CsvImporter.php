@@ -157,10 +157,10 @@ class CsvImporter {
       $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['cognome']))));
       $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['nome']))));
       $fields['sesso'] = strtoupper(trim($fields['sesso']));
+      $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
       $fields['username'] = strtolower(trim($fields['username']));
       $fields['password'] = trim($fields['password']);
-      $fields['email'] = trim($fields['email']);
-      $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
+      $fields['email'] = strtolower(trim($fields['email']));
       // controlla campi obbligatori
       if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso'])) {
         // errore
@@ -169,10 +169,20 @@ class CsvImporter {
         $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
+      if (empty($fields['codiceFiscale'])) {
+        // valore null
+        $empty_fields['codiceFiscale'] = true;
+        $fields['codiceFiscale'] = null;
+      }
       if (empty($fields['username'])) {
         // crea username
         $empty_fields['username'] = true;
-        $username = $fields['nome'].'.'.$fields['cognome'];
+        if (strpos($fields['nome'], ' ') !== false) {
+          $nomi = explode(' ', $fields['nome']);
+          $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
+        } else {
+          $username = $fields['nome'].'.'.$fields['cognome'];
+        }
         $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
         $fields['username'] = preg_replace('/[^a-z\.]+/', '', $username);
       }
@@ -186,11 +196,6 @@ class CsvImporter {
         $empty_fields['email'] = true;
         $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
           $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->session->get('/CONFIG/SISTEMA/dominio_default'));
-      }
-      if (empty($fields['codiceFiscale'])) {
-        // valore null
-        $empty_fields['codiceFiscale'] = true;
-        $fields['codiceFiscale'] = null;
       }
       // controlla esistenza di docente
       $docente = $this->em->getRepository('App:Docente')->findOneByUsername($fields['username']);
@@ -455,8 +460,12 @@ class CsvImporter {
    */
   public function importaAlunni(File $file=null, Form $form) {
     $header = array('cognome', 'nome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale',
-      'citta', 'indirizzo', 'numeriTelefono', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
-      'classe', 'email', 'emailGenitore');
+      'citta', 'indirizzo', 'bes', 'noteBes', 'frequenzaEstero', 'religione', 'credito3', 'credito4',
+      'classe', 'username', 'password', 'email',
+      'genitore1Cognome', 'genitore1Nome', 'genitore1CodiceFiscale', 'genitore1Telefono',
+      'genitore1Username', 'genitore1Password', 'genitore1Email',
+      'genitore2Cognome', 'genitore2Nome', 'genitore2CodiceFiscale', 'genitore2Telefono',
+      'genitore2Username', 'genitore2Password', 'genitore2Email');
     $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
@@ -491,52 +500,94 @@ class CsvImporter {
       $empty_fields = array();
       foreach ($data as $key=>$val) {
         $fields[$this->header[$key]] = $val;
+        $empty_fields[$this->header[$key]] = false;
       }
       // formattazione campi
       $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['cognome']))));
       $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['nome']))));
       $fields['sesso'] = strtoupper(trim($fields['sesso']));
-      $date = \DateTime::createFromFormat('!d/m/Y', trim($fields['dataNascita']));
-      if (!$date || $date->format('d/m/Y') != trim($fields['dataNascita'])) {
-        // errore data
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_date', array(
-          'date' => $fields['dataNascita'], 'num' => $count))));
-        return $imported;
-      } else {
-        $fields['dataNascita'] = $date;
-      }
+      $fields['dataNascita'] = trim($fields['dataNascita']);
       $fields['comuneNascita'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['comuneNascita']))));
       $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
       $fields['citta'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['citta']))));
       $fields['indirizzo'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['indirizzo']))));
-      $telefono = array();
-      foreach (explode(',', $fields['numeriTelefono']) as $t) {
-        if (trim($t) != '') {
-          $telefono[] = trim($t);
-        }
-      }
-      $fields['numeriTelefono'] = $telefono;
       $fields['bes'] = strtoupper(trim($fields['bes']));
       $fields['noteBes'] = trim(str_replace(["\t","\r","\n",'  '], ['','','',' ',],$fields['noteBes']));
-      $fields['frequenzaEstero'] = trim($fields['frequenzaEstero']);
+      $fields['frequenzaEstero'] = strtoupper(trim($fields['frequenzaEstero']));
       $fields['religione'] = strtoupper(trim($fields['religione']));
       $fields['credito3'] = trim($fields['credito3']);
       $fields['credito4'] = trim($fields['credito4']);
       $fields['classe'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['classe']));
-      $fields['email'] = trim($fields['email']);
-      $fields['emailGenitore'] = trim($fields['emailGenitore']);
-      // controlla campi obbligatori
-      if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso']) ||
-          empty($fields['dataNascita']) || empty($fields['comuneNascita']) || empty($fields['codiceFiscale'])) {
-        // errore
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
-        return $imported;
+      $fields['username'] = strtolower(trim($fields['username']));
+      $fields['password'] = trim($fields['password']);
+      $fields['email'] = strtolower(trim($fields['email']));
+      $fields['genitore1Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore1Cognome']))));
+      $fields['genitore1Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore1Nome']))));
+      $fields['genitore1CodiceFiscale'] = strtoupper(trim($fields['genitore1CodiceFiscale']));
+      $telefono = array();
+      foreach (explode(',', $fields['genitore1Telefono']) as $tel) {
+        $tel = preg_replace('/\s/', '', $tel);
+        $tel = (substr($tel, 0, 3) == '+39') ? substr($tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+          $telefono[] = $tel;
+        }
       }
-      // controlla campi opzionali
+      $fields['genitore1Telefono'] = $telefono;
+      $fields['genitore1Username'] = strtolower(trim($fields['genitore1Username']));
+      $fields['genitore1Password'] = trim($fields['genitore1Password']);
+      $fields['genitore1Email'] = strtolower(trim($fields['genitore1Email']));
+      $fields['genitore2Cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore2Cognome']))));
+      $fields['genitore2Nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['genitore2Nome']))));
+      $fields['genitore2CodiceFiscale'] = strtoupper(trim($fields['genitore2CodiceFiscale']));
+      $telefono = array();
+      foreach (explode(',', $fields['genitore2Telefono']) as $tel) {
+        $tel = preg_replace('/\s/', '', $tel);
+        $tel = (substr($tel, 0, 3) == '+39') ? substr($tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+          $telefono[] = $tel;
+        }
+      }
+      $fields['genitore2Telefono'] = $telefono;
+      $fields['genitore2Username'] = strtolower(trim($fields['genitore2Username']));
+      $fields['genitore2Password'] = trim($fields['genitore2Password']);
+      $fields['genitore2Email'] = strtolower(trim($fields['genitore2Email']));
+      // controlla campi
+      if (empty($fields['cognome'])) {
+        // cognome può essere vuoto in modifica
+        $empty_fields['cognome'] = true;
+      }
+      if (empty($fields['nome'])) {
+        // nome può essere vuoto in modifica
+        $empty_fields['nome'] = true;
+      }
+      if (empty($fields['sesso'])) {
+        // sesso può essere vuoto in modifica
+        $empty_fields['sesso'] = true;
+      }
+      if (empty($fields['dataNascita'])) {
+        // dataNascita può essere vuoto in modifica
+        $empty_fields['dataNascita'] = true;
+        $fields['dataNascita'] = null;
+      } else {
+        $date = \DateTime::createFromFormat('!d/m/Y', $fields['dataNascita']);
+        if (!$date || $date->format('d/m/Y') != $fields['dataNascita']) {
+          // errore data
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError($this->trans->trans('exception.file_date', array(
+            'data' => $fields['dataNascita'], 'num' => $count))));
+          return $imported;
+        }
+        $fields['dataNascita'] = $date;
+      }
+      if (empty($fields['comuneNascita'])) {
+        // comuneNascita può essere vuoto in modifica
+        $empty_fields['comuneNascita'] = true;
+      }
+      if (empty($fields['codiceFiscale'])) {
+        // codiceFiscale può essere vuoto in modifica
+        $empty_fields['codiceFiscale'] = true;
+      }
       if (empty($fields['citta'])) {
         // citta può essere vuoto
         $empty_fields['citta'] = true;
@@ -545,29 +596,24 @@ class CsvImporter {
         // indirizzo può essere vuoto
         $empty_fields['indirizzo'] = true;
       }
-      if (empty($fields['numeriTelefono'])) {
-        // numeriTelefono può essere vuoto
-        $empty_fields['numeriTelefono'] = true;
-      }
       if (empty($fields['bes'])) {
         // bes default
         $empty_fields['bes'] = true;
         $fields['bes'] = 'N';
       }
       if (empty($fields['noteBes'])) {
-        // bes default
+        // noteBes può essere vuoto
         $empty_fields['noteBes'] = true;
-        $fields['noteBes'] = '';
       }
       if (empty($fields['frequenzaEstero'])) {
         // frequenzaEstero default
         $empty_fields['frequenzaEstero'] = true;
         $fields['frequenzaEstero'] = 0;
       } else {
-        $fields['frequenzaEstero'] = ($fields['frequenzaEstero'] > 0 ? 1 : 0);
+        $fields['frequenzaEstero'] = ($fields['frequenzaEstero'] == 'S') ? 1 : 0;
       }
       if (empty($fields['religione'])) {
-        // religione non può essere vuoto
+        // religione default
         $empty_fields['religione'] = true;
         $fields['religione'] = 'S';
       }
@@ -576,82 +622,170 @@ class CsvImporter {
         $empty_fields['credito3'] = true;
         $fields['credito3'] = 0;
       } else {
-        $fields['credito3'] = intval($fields['credito3']);
+        $fields['credito3'] = (int) $fields['credito3'];
       }
       if (empty($fields['credito4'])) {
         // credito4 default
         $empty_fields['credito4'] = true;
         $fields['credito4'] = 0;
       } else {
-        $fields['credito4'] = intval($fields['credito4']);
+        $fields['credito4'] = (int) $fields['credito4'];
       }
       if (empty($fields['classe'])) {
+        // classe può essere non definita
         $empty_fields['classe'] = true;
         $fields['classe'] = null;
       } else {
         // controlla esistenza di classe
         if ($fields['classe'] == 'NESSUNA') {
-          // nessuna classe
+          // nessuna classe assegnata
           $fields['classe'] = null;
         } else {
           // classe esistente
-          $lista = $this->em->getRepository('App:Classe')->findBy(array(
-            'anno' => $fields['classe'][0],
-            'sezione' => $fields['classe'][1]));
-          if (count($lista) != 1) {
+          $classe = $this->em->getRepository('App:Classe')->findOneBy(array(
+            'anno' => $fields['classe'][0], 'sezione' => $fields['classe'][1]));
+          if (!$classe) {
             // errore: classe
             fclose($this->fh);
             $this->fh = null;
             $form->addError(new FormError($this->trans->trans('exception.file_classe', ['num' => $count])));
             return $imported;
           }
-          $fields['classe'] = $lista[0];
+          $fields['classe'] = $classe;
         }
       }
-      // crea username
-      $empty_fields['username'] = true;
-      if (strpos($fields['nome'], ' ') !== false) {
-        $nomi = explode(' ', $fields['nome']);
-        $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
-      } else {
-        $username = $fields['nome'].'.'.$fields['cognome'];
+      if (empty($fields['username'])) {
+        // crea username
+        $empty_fields['username'] = true;
+        if (strpos($fields['nome'], ' ') !== false) {
+          $nomi = explode(' ', $fields['nome']);
+          $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
+        } else {
+          $username = $fields['nome'].'.'.$fields['cognome'];
+        }
+        $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
+        $username = preg_replace('/[^a-z\.]+/', '', $username);
+        $result = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+          ->where('a.username LIKE :username')
+          ->setParameter(':username', $username.'.s%')
+          ->orderBy('a.username', 'DESC')
+          ->setMaxResults(1)
+          ->getQuery()
+          ->getOneOrNullResult();
+        $suffix = $result ? (1 + substr($result->getUsername(), -1)) : 1;
+        $fields['username'] = $username.'.s'.$suffix;
       }
-      $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
-      $username = preg_replace('/[^a-z\.]+/', '', $username);
-      $result = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-        ->where('a.username LIKE :username')
-        ->setParameter(':username', $username.'.s%')
-        ->orderBy('a.username', 'DESC')
-        ->setMaxResults(1)
-        ->getQuery()
-        ->getOneOrNullResult();
-      $suffix = $result ? (1 + substr($result->getUsername(), -1)) : 1;
-      $fields['username'] = $username.'.s'.$suffix;
-      // crea username genitore
-      $empty_fields['usernameGenitore'] = true;
-      $fields['usernameGenitore'] = $username.'.f'.$suffix;
-      // crea password
-      $empty_fields['password'] = true;
-      $fields['password'] = $this->staff->creaPassword(8);
+      if (empty($fields['password'])) {
+        // crea password
+        $empty_fields['password'] = true;
+        $fields['password'] = $this->staff->creaPassword(8);
+      }
       if (empty($fields['email'])) {
-        // crea finta email
+        // crea email
         $empty_fields['email'] = true;
         $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
-          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->session->get('/CONFIG/SISTEMA/dominio_default'));
+          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') :
+          $this->session->get('/CONFIG/SISTEMA/dominio_default'));
       }
-      if (empty($fields['emailGenitore'])) {
-        // crea finta email
-        $empty_fields['emailGenitore'] = true;
-        $fields['emailGenitore'] = $fields['usernameGenitore'].'@'.
+      if (empty($fields['genitore1Cognome'])) {
+        // default genitore1Cognome
+        $empty_fields['genitore1Cognome'] = true;
+        $fields['genitore1Cognome'] = $fields['cognome'];
+      }
+      if (empty($fields['genitore1Nome'])) {
+        // default genitore1Nome
+        $empty_fields['genitore1Nome'] = true;
+        $fields['genitore1Nome'] = $fields['nome'];
+      }
+      if (empty($fields['genitore1CodiceFiscale'])) {
+        // default genitore1CodiceFiscale
+        $empty_fields['genitore1CodiceFiscale'] = true;
+        $fields['genitore1CodiceFiscale'] = bin2hex(random_bytes(6)).substr(uniqid(), -4);
+      }
+      if (empty($fields['genitore1Telefono'])) {
+        // genitore1Telefono può essere vuoto
+        $empty_fields['genitore1Telefono'] = true;
+      }
+      if (empty($fields['genitore1Username'])) {
+        // crea genitore1Username
+        $empty_fields['genitore1Username'] = true;
+        $fields['genitore1Username'] = substr($fields['username'], 0, -2).'f'.substr($fields['username'], -1);
+      }
+      if (empty($fields['genitore1Password'])) {
+        // crea genitore1Password
+        $empty_fields['genitore1Password'] = true;
+        $fields['genitore1Password'] = $this->staff->creaPassword(8);
+      }
+      if (empty($fields['genitore1Email'])) {
+        // default genitore1Email
+        $empty_fields['genitore1Email'] = true;
+        $fields['genitore1Email'] = $fields['genitore1Username'].'@'.
           $this->session->get('/CONFIG/SISTEMA/dominio_default');
       }
-      // controlla esistenza di alunno (su codice fiscale)
-      $alunno = $this->em->getRepository('App:Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']);
-      if ($alunno) {
-        // alunno esiste
+      if (empty($fields['genitore2Cognome'])) {
+        // default genitore2Cognome
+        $empty_fields['genitore2Cognome'] = true;
+        $fields['genitore2Cognome'] = $fields['cognome'];
+      }
+      if (empty($fields['genitore2Nome'])) {
+        // default genitore2Nome
+        $empty_fields['genitore2Nome'] = true;
+        $fields['genitore2Nome'] = $fields['nome'];
+      }
+      if (empty($fields['genitore2CodiceFiscale'])) {
+        // default genitore2CodiceFiscale
+        $empty_fields['genitore2CodiceFiscale'] = true;
+        $fields['genitore2CodiceFiscale'] = bin2hex(random_bytes(6)).substr(uniqid(), -4);
+      }
+      if (empty($fields['genitore2Telefono'])) {
+        // genitore2Telefono può essere vuoto
+        $empty_fields['genitore2Telefono'] = true;
+      }
+      if (empty($fields['genitore2Username'])) {
+        // crea genitore2Username
+        $empty_fields['genitore2Username'] = true;
+        $fields['genitore2Username'] = substr($fields['username'], 0, -2).'g'.substr($fields['username'], -1);
+      }
+      if (empty($fields['genitore2Password'])) {
+        // crea genitore2Password
+        $empty_fields['genitore2Password'] = true;
+        $fields['genitore2Password'] = $this->staff->creaPassword(8);
+      }
+      if (empty($fields['genitore2Email'])) {
+        // default genitore2Email
+        $empty_fields['genitore2Email'] = true;
+        $fields['genitore2Email'] = $fields['genitore2Username'].'@'.
+          $this->session->get('/CONFIG/SISTEMA/dominio_default');
+      }
+      // controlla modalità di modifica
+      $alunno = null;
+      $genitore1 = null;
+      $genitore2 = null;
+      if (!$empty_fields['username'] && !$empty_fields['genitore1Username'] && !$empty_fields['genitore2Username']) {
+        // controlla esistenza di alunno
+        $alunno = $this->em->getRepository('App:Alunno')->findOneByUsername($fields['username']);
+        $genitore1 = $this->em->getRepository('App:Genitore')->findOneBy(['username' => $fields['genitore1Username'],
+          'alunno' => $alunno]);
+        $genitore2 = $this->em->getRepository('App:Genitore')->findOneBy(['username' => $fields['genitore2Username'],
+          'alunno' => $alunno]);
+      }
+      $modifica = $alunno && $genitore1 && $genitore2;
+      // controlla modalità di inserimento
+      if (!$modifica) {
+        if ($empty_fields['cognome'] || $empty_fields['nome'] || $empty_fields['sesso'] ||
+            $empty_fields['dataNascita'] || $empty_fields['comuneNascita'] || $empty_fields['codiceFiscale']) {
+          // errore
+          fclose($this->fh);
+          $this->fh = null;
+          $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
+          return $imported;
+        }
+      }
+      if ($modifica) {
+        // utente esiste
         if ($filtro == 'T' || $filtro == 'E') {
-          // modifica alunno
-          $error = $this->modificaAlunno($alunno, $fields, $empty_fields);
+          // modifica utente
+          $error = $this->modificaAlunno($alunno, $genitore1, $genitore2, $fields, $empty_fields);
           if ($error) {
             // errore
             fclose($this->fh);
@@ -659,8 +793,13 @@ class CsvImporter {
             $form->addError(new FormError('# '.$count.': '.$error));
             return $imported;
           }
+          // dati per la visualizzazione
+          $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
+          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
+          $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           foreach ($fields as $k=>$v) {
-            if (isset($empty_fields[$k])) {
+            if ($empty_fields[$k]) {
               unset($fields[$k]);
             }
           }
@@ -668,10 +807,11 @@ class CsvImporter {
         } else {
           // nessuna modifica
           $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
-          $fields['numeriTelefono'] = implode(', ', $fields['numeriTelefono']);
-          $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
+          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
+          $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           foreach ($fields as $k=>$v) {
-            if (isset($empty_fields[$k])) {
+            if ($empty_fields[$k]) {
               unset($fields[$k]);
             }
           }
@@ -679,7 +819,8 @@ class CsvImporter {
         }
       } else {
         // utente non esiste
-        if ($filtro == 'T' || $filtro == 'N') {
+        if ($filtro == 'T' || ($filtro == 'N' &&
+            !$this->em->getRepository('App:Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']))) {
           // crea nuovo alunno
           $error = $this->nuovoAlunno($fields);
           if ($error) {
@@ -689,14 +830,20 @@ class CsvImporter {
             $form->addError(new FormError('# '.$count.': '.$error));
             return $imported;
           }
+          // dati per la visualizzazione
+          $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
+          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
+          $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           $imported['NEW'][$count] = $fields;
         } else {
           // nessuna modifica
           $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
-          $fields['numeriTelefono'] = implode(', ', $fields['numeriTelefono']);
-          $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
+          $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
+          $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
+          $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
           foreach ($fields as $k=>$v) {
-            if (isset($empty_fields[$k])) {
+            if ($empty_fields[$k]) {
               unset($fields[$k]);
             }
           }
@@ -704,7 +851,7 @@ class CsvImporter {
         }
       }
     }
-    // ok
+    // ok: chiude file
     fclose($this->fh);
     $this->fh = null;
     return $imported;
@@ -900,7 +1047,7 @@ class CsvImporter {
    * @return array Lista degli ATA importati
    */
   public function importaAta(File $file=null, Form $form) {
-    $header = array('cognome', 'nome', 'sesso', 'username', 'password', 'email', 'sede', 'tipo', 'segreteria');
+    $header = array('cognome', 'nome', 'sesso', 'codiceFiscale', 'username', 'password', 'email', 'tipo', 'segreteria', 'sede');
     $filtro = $form->get('filtro')->getData();
     // controllo file
     $error = $this->checkFile($file, $header);
@@ -940,12 +1087,13 @@ class CsvImporter {
       $fields['cognome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['cognome']))));
       $fields['nome'] = preg_replace('/\s+/', ' ', ucwords(strtolower(trim($fields['nome']))));
       $fields['sesso'] = strtoupper(trim($fields['sesso']));
+      $fields['codiceFiscale'] = strtoupper(trim($fields['codiceFiscale']));
       $fields['username'] = strtolower(trim($fields['username']));
       $fields['password'] = trim($fields['password']);
-      $fields['email'] = trim($fields['email']);
-      $fields['sede'] = strtoupper(trim($fields['sede']));
+      $fields['email'] = strtolower(trim($fields['email']));
       $fields['tipo'] = strtoupper(trim($fields['tipo']));
       $fields['segreteria'] = strtoupper(trim($fields['segreteria']));
+      $fields['sede'] = strtoupper(trim($fields['sede']));
       // controlla campi obbligatori
       if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso'])) {
         // errore
@@ -954,10 +1102,20 @@ class CsvImporter {
         $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
         return $imported;
       }
+      if (empty($fields['codiceFiscale'])) {
+        // valore null
+        $empty_fields['codiceFiscale'] = true;
+        $fields['codiceFiscale'] = null;
+      }
       if (empty($fields['username'])) {
         // crea username
         $empty_fields['username'] = true;
-        $username = $fields['nome'].'.'.$fields['cognome'];
+        if (strpos($fields['nome'], ' ') !== false) {
+          $nomi = explode(' ', $fields['nome']);
+          $username = $nomi[0].$nomi[1][0].'.'.$fields['cognome'];
+        } else {
+          $username = $fields['nome'].'.'.$fields['cognome'];
+        }
         $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
         $fields['username'] = preg_replace('/[^a-z\.]+/', '', $username);
       }
@@ -970,11 +1128,6 @@ class CsvImporter {
         // crea finta email
         $empty_fields['email'] = true;
         $fields['email'] = $fields['username'].'@'.$this->session->get('/CONFIG/SISTEMA/dominio_default');
-      }
-      if (empty($fields['sede'])) {
-        // valore null
-        $empty_fields['sede'] = true;
-        $fields['sede'] = null;
       }
       if (empty($fields['tipo'])) {
         // default: amministrativo
@@ -989,6 +1142,11 @@ class CsvImporter {
         // valore dipende da tipo
         $fields['segreteria'] = ($fields['tipo'] == 'A' || $fields['tipo'] == 'D') ?
           ($fields['segreteria'] == 'S') : false;
+      }
+      if (empty($fields['sede'])) {
+        // valore null
+        $empty_fields['sede'] = true;
+        $fields['sede'] = null;
       }
       // controlla esistenza
       $ata = $this->em->getRepository('App:Ata')->findOneByUsername($fields['username']);
@@ -1463,11 +1621,17 @@ class CsvImporter {
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
   private function nuovoAlunno(&$fields) {
-    // crea oggetto alunno (nessuna password per impedirne il login)
+    $telefono = [];
+    foreach ($fields['genitore1Telefono'] as $tel) {
+      $telefono['genitore1'][] = $tel;
+    }
+    foreach ($fields['genitore2Telefono'] as $tel) {
+      $telefono['genitore2'][] = $tel;
+    }
+    // crea utente alunno
     $alunno = (new Alunno())
       ->setUsername($fields['username'])
-      ->setPasswordNonCifrata('NOPASSWORD')
-      ->setPassword('NOPASSWORD')
+      ->setPasswordNonCifrata($fields['password'])
       ->setEmail($fields['email'])
       ->setAbilitato(true)
       ->setNome($fields['nome'])
@@ -1478,7 +1642,7 @@ class CsvImporter {
       ->setCodiceFiscale($fields['codiceFiscale'])
       ->setCitta($fields['citta'])
       ->setIndirizzo($fields['indirizzo'])
-      ->setNumeriTelefono($fields['numeriTelefono'])
+      ->setNumeriTelefono($telefono)
       ->setBes($fields['bes'])
       ->setNoteBes($fields['noteBes'])
       ->setFrequenzaEstero($fields['frequenzaEstero'])
@@ -1486,23 +1650,26 @@ class CsvImporter {
       ->setCredito3($fields['credito3'])
       ->setCredito4($fields['credito4'])
       ->setClasse($fields['classe']);
+    $password = $this->encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
+    $alunno->setPassword($password);
     // valida dati alunno
     $errors = $this->validator->validate($alunno);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage().
+      return $errors[0]->getPropertyPath().' (alunno): '.$errors[0]->getMessage().
         ' ['.$fields[$errors[0]->getPropertyPath()].']';
     }
     $this->em->persist($alunno);
-    // crea oggetto genitore (con password per abilitarne il login)
+    // crea utente genitore1
     $genitore = (new Genitore())
-      ->setUsername($fields['usernameGenitore'])
-      ->setPasswordNonCifrata($fields['password'])
-      ->setEmail($fields['emailGenitore'])
+      ->setUsername($fields['genitore1Username'])
+      ->setPasswordNonCifrata($fields['genitore1Password'])
+      ->setEmail($fields['genitore1Email'])
       ->setAbilitato(true)
-      ->setNome($fields['nome'])
-      ->setCognome($fields['cognome'])
-      ->setSesso($fields['sesso'])
+      ->setNome($fields['genitore1Nome'])
+      ->setCognome($fields['genitore1Cognome'])
+      ->setSesso($fields['sesso']) // obbligatorio: imposta sesso alunno
+      ->setCodiceFiscale($fields['genitore1CodiceFiscale'])
       ->setAlunno($alunno);
     $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
@@ -1510,13 +1677,32 @@ class CsvImporter {
     $errors = $this->validator->validate($genitore);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().' genitore: '.$errors[0]->getMessage().
+      return $errors[0]->getPropertyPath().' (genitore1): '.$errors[0]->getMessage().
         ' ['.$fields[$errors[0]->getPropertyPath()].']';
     }
     $this->em->persist($genitore);
-    // ok, memorizza su db
-    $this->em->flush();
-    // provisioning
+    // crea utente genitore2
+    $genitore = (new Genitore())
+      ->setUsername($fields['genitore2Username'])
+      ->setPasswordNonCifrata($fields['genitore2Password'])
+      ->setEmail($fields['genitore2Email'])
+      ->setAbilitato(true)
+      ->setNome($fields['genitore2Nome'])
+      ->setCognome($fields['genitore2Cognome'])
+      ->setSesso($fields['sesso']) // obbligatorio: imposta sesso alunno
+      ->setCodiceFiscale($fields['genitore2CodiceFiscale'])
+      ->setAlunno($alunno);
+    $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
+    $genitore->setPassword($password);
+    // valida dati genitore
+    $errors = $this->validator->validate($genitore);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().' (genitore2): '.$errors[0]->getMessage().
+        ' ['.$fields[$errors[0]->getPropertyPath()].']';
+    }
+    $this->em->persist($genitore);
+    // provisioning (per alunno)
     $provisioning = (new Provisioning())
       ->setUtente($alunno)
       ->setFunzione('creaUtente')
@@ -1530,11 +1716,8 @@ class CsvImporter {
         ->setDati(['classe' => $alunno->getClasse()->getId()]);
       $this->em->persist($provisioning);
     }
+    // ok, memorizza su db
     $this->em->flush();
-    // modifica dati per la visualizzazione
-    $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
-    $fields['numeriTelefono'] = implode(', ', $fields['numeriTelefono']);
-    $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
     return null;
   }
 
@@ -1542,85 +1725,141 @@ class CsvImporter {
    * Modifica un alunno esistente
    *
    * @param Alunno $alunno Alunno da modificare
+   * @param Genitore $genitore1 Genitore 1 da modificare
+   * @param Genitore $genitore2 Genitore 2 da modificare
    * @param array $fields Lista dei dati dell'alunno
    * @param array $empty_fields Lista dei dati nulli
    *
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
-  private function modificaAlunno(Alunno $alunno, &$fields, $empty_fields) {
-    // recupera genitori (anche più di uno)
-    $genitori = $this->em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);
-    // modifica dati obbligatori (escluso codice fiscale, usato come identificatore)
-    $alunno
-      ->setNome($fields['nome'])
-      ->setCognome($fields['cognome'])
-      ->setSesso($fields['sesso'])
-      ->setDataNascita($fields['dataNascita'])
-      ->setComuneNascita($fields['comuneNascita']);
-    foreach ($genitori as $gen) {
-      $gen
-        ->setNome($fields['nome'])
-        ->setCognome($fields['cognome'])
-        ->setSesso($fields['sesso']);
+  private function modificaAlunno(Alunno $alunno, Genitore $genitore1, Genitore $genitore2, &$fields, $empty_fields) {
+    // modifica dati di alunno
+    if (!$empty_fields['password']) {
+      $alunno->setPasswordNonCifrata($fields['password']);
+      $password = $this->encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
+      $alunno->setPassword($password);
     }
-    // modifica dati opzionali solo se specificati
-    if (!isset($empty_fields['email'])) {
+    if (!$empty_fields['email']) {
       $alunno->setEmail($fields['email']);
     }
-    if (!isset($empty_fields['emailGenitore'])) {
-      foreach ($genitori as $gen) {
-        $gen->setEmail($fields['emailGenitore']);
-      }
+    if (!$empty_fields['nome']) {
+      $alunno->setNome($fields['nome']);
     }
-    if (!isset($empty_fields['citta'])) {
+    if (!$empty_fields['cognome']) {
+      $alunno->setCognome($fields['cognome']);
+    }
+    if (!$empty_fields['sesso']) {
+      $alunno->setSesso($fields['sesso']);
+    }
+    if (!$empty_fields['dataNascita']) {
+      $alunno->setDataNascita($fields['dataNascita']);
+    }
+    if (!$empty_fields['comuneNascita']) {
+      $alunno->setComuneNascita($fields['comuneNascita']);
+    }
+    if (!$empty_fields['codiceFiscale']) {
+      $alunno->setCodiceFiscale($fields['codiceFiscale']);
+    }
+    if (!$empty_fields['citta']) {
       $alunno->setCitta($fields['citta']);
     }
-    if (!isset($empty_fields['indirizzo'])) {
+    if (!$empty_fields['indirizzo']) {
       $alunno->setIndirizzo($fields['indirizzo']);
     }
-    if (!isset($empty_fields['numeriTelefono'])) {
-      $alunno->setNumeriTelefono($fields['numeriTelefono']);
-      // modifica dati per la visualizzazione
-      $fields['numeriTelefono'] = implode(', ', $fields['numeriTelefono']);
+    if (!$empty_fields['genitore1Telefono']) {
+      $telefono = $alunno->getNumeriTelefono();
+      unset($telefono['genitore1']);
+      foreach ($fields['genitore1Telefono'] as $tel) {
+        $telefono['genitore1'][] = $tel;
+      }
+      $alunno->setNumeriTelefono($telefono);
     }
-    if (!isset($empty_fields['bes'])) {
+    if (!$empty_fields['genitore2Telefono']) {
+      $telefono = $alunno->getNumeriTelefono();
+      unset($telefono['genitore2']);
+      foreach ($fields['genitore2Telefono'] as $tel) {
+        $telefono['genitore2'][] = $tel;
+      }
+      $alunno->setNumeriTelefono($telefono);
+    }
+    if (!$empty_fields['bes']) {
       $alunno->setBes($fields['bes']);
     }
-    if (!isset($empty_fields['noteBes'])) {
+    if (!$empty_fields['noteBes']) {
       $alunno->setNoteBes($fields['noteBes']);
     }
-    if (!isset($empty_fields['frequenzaEstero'])) {
+    if (!$empty_fields['frequenzaEstero']) {
       $alunno->setFrequenzaEstero($fields['frequenzaEstero']);
     }
-    if (!isset($empty_fields['religione'])) {
+    if (!$empty_fields['religione']) {
       $alunno->setReligione($fields['religione']);
     }
-    if (!isset($empty_fields['credito3'])) {
+    if (!$empty_fields['credito3']) {
       $alunno->setCredito3($fields['credito3']);
     }
-    if (!isset($empty_fields['credito4'])) {
+    if (!$empty_fields['credito4']) {
       $alunno->setCredito4($fields['credito4']);
     }
-    if (!isset($empty_fields['classe'])) {
+    if (!$empty_fields['classe']) {
       $classePrec = $alunno->getClasse();
       $alunno->setClasse($fields['classe']);
-      // modifica dati per la visualizzazione
-      $fields['classe'] = ($fields['classe'] ? $fields['classe']->getAnno().' '.$fields['classe']->getSezione() : '');
     }
-    // valida dati
+    // valida dati alunno
     $errors = $this->validator->validate($alunno);
     if (count($errors) > 0) {
       // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage().
+      return $errors[0]->getPropertyPath().' (alunno): '.$errors[0]->getMessage().
         ' ['.$fields[$errors[0]->getPropertyPath()].']';
     }
-    foreach ($genitori as $gen) {
-      $errors = $this->validator->validate($gen);
-      if (count($errors) > 0) {
-        // errore (restituisce solo il primo)
-        return $errors[0]->getPropertyPath().' genitore: '.$errors[0]->getMessage().
-          ' ['.$fields[$errors[0]->getPropertyPath()].']';
-      }
+    // modifica dati di genitore1
+    if (!$empty_fields['genitore1Password']) {
+      $genitore1->setPasswordNonCifrata($fields['genitore1Password']);
+      $password = $this->encoder->encodePassword($genitore1, $genitore1->getPasswordNonCifrata());
+      $genitore1->setPassword($password);
+    }
+    if (!$empty_fields['genitore1Email']) {
+      $genitore1->setEmail($fields['genitore1Email']);
+    }
+    if (!$empty_fields['genitore1Nome']) {
+      $genitore1->setNome($fields['genitore1Nome']);
+    }
+    if (!$empty_fields['genitore1Cognome']) {
+      $genitore1->setCognome($fields['genitore1Cognome']);
+    }
+    if (!$empty_fields['genitore1CodiceFiscale']) {
+      $genitore1->setCodiceFiscale($fields['genitore1CodiceFiscale']);
+    }
+    // valida dati genitore1
+    $errors = $this->validator->validate($genitore1);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().' (genitore1): '.$errors[0]->getMessage().
+        ' ['.$fields[$errors[0]->getPropertyPath()].']';
+    }
+    // modifica dati di genitore2
+    if (!$empty_fields['genitore2Password']) {
+      $genitore2->setPasswordNonCifrata($fields['genitore2Password']);
+      $password = $this->encoder->encodePassword($genitore2, $genitore2->getPasswordNonCifrata());
+      $genitore2->setPassword($password);
+    }
+    if (!$empty_fields['genitore2Email']) {
+      $genitore2->setEmail($fields['genitore2Email']);
+    }
+    if (!$empty_fields['genitore2Nome']) {
+      $genitore2->setNome($fields['genitore2Nome']);
+    }
+    if (!$empty_fields['genitore2Cognome']) {
+      $genitore2->setCognome($fields['genitore2Cognome']);
+    }
+    if (!$empty_fields['genitore2CodiceFiscale']) {
+      $genitore2->setCodiceFiscale($fields['genitore2CodiceFiscale']);
+    }
+    // valida dati genitore2
+    $errors = $this->validator->validate($genitore2);
+    if (count($errors) > 0) {
+      // errore (restituisce solo il primo)
+      return $errors[0]->getPropertyPath().' (genitore2): '.$errors[0]->getMessage().
+        ' ['.$fields[$errors[0]->getPropertyPath()].']';
     }
     // provisioning
     $provisioning = (new Provisioning())
@@ -1628,14 +1867,14 @@ class CsvImporter {
       ->setFunzione('modificaUtente')
       ->setDati([]);
     $this->em->persist($provisioning);
-    if (!isset($empty_fields['classe']) && $alunno->getClasse() && !$classePrec) {
+    if (!$empty_fields['classe'] && $alunno->getClasse() && !$classePrec) {
       // inserisce in classe
       $provisioning = (new Provisioning())
         ->setUtente($alunno)
         ->setFunzione('aggiungeAlunnoClasse')
         ->setDati(['classe' => $alunno->getClasse()->getId()]);
       $this->em->persist($provisioning);
-    } elseif (!isset($empty_fields['classe']) && $alunno->getClasse() && $classePrec &&
+    } elseif (!$empty_fields['classe'] && $alunno->getClasse() && $classePrec &&
               $alunno->getClasse()->getId() != $classePrec->getId()) {
         // cambia classe
         $provisioning = (new Provisioning())
@@ -1648,7 +1887,7 @@ class CsvImporter {
           ->setFunzione('aggiungeAlunnoClasse')
           ->setDati(['classe' => $alunno->getClasse()->getId()]);
         $this->em->persist($provisioning);
-    } elseif (!isset($empty_fields['classe']) && !$alunno->getClasse() && $classePrec) {
+    } elseif (!$empty_fields['classe'] && !$alunno->getClasse() && $classePrec) {
         // rimuove classe
         $provisioning = (new Provisioning())
           ->setUtente($alunno)
@@ -1658,8 +1897,6 @@ class CsvImporter {
     }
     // ok, memorizza su db
     $this->em->flush();
-    // modifica dati per la visualizzazione
-    $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
     return null;
   }
 
@@ -1751,6 +1988,7 @@ class CsvImporter {
       ->setNome($fields['nome'])
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso'])
+      ->setCodiceFiscale($fields['codiceFiscale'])
       ->setSede($sede)
       ->setTipo($fields['tipo'])
       ->setSegreteria($fields['segreteria']);
@@ -1785,10 +2023,10 @@ class CsvImporter {
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso']);
     // modifica dati opzionali solo se specificati
-    if (!isset($empty_fields['email'])) {
-      $ata->setEmail($fields['email']);
+    if (!isset($empty_fields['codiceFiscale'])) {
+      $ata->setEmail($fields['codiceFiscale']);
     } else {
-      unset($fields['email']);
+      unset($fields['codiceFiscale']);
     }
     if (!isset($empty_fields['password'])) {
       $ata->setPasswordNonCifrata($fields['password']);
@@ -1796,6 +2034,11 @@ class CsvImporter {
       $ata->setPassword($password);
     } else {
       unset($fields['password']);
+    }
+    if (!isset($empty_fields['email'])) {
+      $ata->setEmail($fields['email']);
+    } else {
+      unset($fields['email']);
     }
     if (!isset($empty_fields['tipo'])) {
       $ata->setTipo($fields['tipo']);

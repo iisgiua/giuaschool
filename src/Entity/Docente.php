@@ -13,12 +13,15 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
  * Docente - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\DocenteRepository")
+ *
+ * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Docente")
  */
 class Docente extends Utente {
 

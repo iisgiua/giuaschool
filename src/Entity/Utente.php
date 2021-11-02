@@ -760,34 +760,6 @@ class Utente implements UserInterface, \Serializable {
   }
 
   /**
-   * Aggiunge un nuovo numero alla lista di numeri di telefono dell'utente
-   *
-   * @param string $telefono Numero di telefono da aggiungere
-   *
-   * @return Utente Oggetto Utente
-   */
-  public function addNumeriTelefono($telefono) {
-    if (!in_array($telefono, $this->numeriTelefono)) {
-      $this->numeriTelefono[] = $telefono;
-    }
-    return $this;
-  }
-
-  /**
-   * Elimina un numero alla lista di numeri di telefono dell'utente
-   *
-   * @param string $telefono Numero di telefono da eliminare
-   *
-   * @return Utente Oggetto Utente
-   */
-  public function removeNumeriTelefono($telefono) {
-    if (in_array($telefono, $this->numeriTelefono)) {
-      unset($this->numeriTelefono[array_search($telefono, $this->numeriTelefono)]);
-    }
-    return $this;
-  }
-
-  /**
    * Restituisce i parametri di notifica per i servizi esterni
    *
    * @return array Parametri di notifica per i servizi esterni
