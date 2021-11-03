@@ -59,18 +59,18 @@ class Alunno extends Utente {
   /**
    * @var string $autorizzaEntrata Autorizzazione all'entrata in ritardo
    *
-   * @ORM\Column(name="autorizza_entrata", type="string", length=255, nullable=true)
+   * @ORM\Column(name="autorizza_entrata", type="string", length=2048, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
+   * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
   private $autorizzaEntrata;
 
   /**
    * @var string $autorizzaUscita Autorizzazione all'uscita in anticipo
    *
-   * @ORM\Column(name="autorizza_uscita", type="string", length=255, nullable=true)
+   * @ORM\Column(name="autorizza_uscita", type="string", length=2048, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")
+   * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
   private $autorizzaUscita;
 
