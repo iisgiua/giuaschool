@@ -210,19 +210,19 @@ class AlunnoTest extends DatabaseTestCase {
     $existent->setAutorizzaEntrata(null);
     $err = $this->val->validate($existent);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaEntrata - VALID');
-    $existent->setAutorizzaEntrata(str_repaeat('X', 2049));
+    $existent->setAutorizzaEntrata(str_repeat('X', 2049));
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::autorizzaEntrata - MAX LENGTH');
-    $existent->setAutorizzaEntrata(str_repaeat('X', 2048));
+    $existent->setAutorizzaEntrata(str_repeat('X', 2048));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaEntrata - VALID MAX LENGTH');
     // autorizzaUscita
     $existent->setAutorizzaUscita(null);
     $err = $this->val->validate($existent);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaUscita - VALID');
-    $existent->setAutorizzaUscita(str_repaeat('X', 2049));
+    $existent->setAutorizzaUscita(str_repeat('X', 2049));
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::autorizzaUscita - MAX LENGTH');
-    $existent->setAutorizzaUscita(str_repaeat('X', 2048));
+    $existent->setAutorizzaUscita(str_repeat('X', 2048));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaUscita - VALID MAX LENGTH');
     // religione
     $existent->setReligione(null);
