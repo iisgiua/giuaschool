@@ -44,7 +44,7 @@ class DefinizioneScrutinioFixtures extends Fixture implements FixtureGroupInterf
     $scrutinio = (new DefinizioneScrutinio())
       ->setData(new \DateTime('today'))
       ->setArgomenti($argomenti)
-      ->setPeriodo('F')
+      ->setPeriodo('P')
       ->setDataProposte(new \DateTime('today'))
       ->setStruttura($struttura);
     $em->persist($scrutinio);

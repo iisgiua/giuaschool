@@ -108,6 +108,16 @@ class CattedraFixtures extends Fixture implements DependentFixtureInterface, Fix
             ->setMateria($mat)
             ->setClasse($classe)
             ->setAlunno($alunno);
+          if ($mat->getTipo() != 'S' && $tipo == 'N') {
+            // aggiunge ed.civica
+            $cattedra[] = (new Cattedra())
+              ->setAttiva(true)
+              ->setSupplenza(false)
+              ->setTipo('N')
+              ->setDocente($docente[$i])
+              ->setMateria($this->getReference('materia_ED_CIVICA'))
+              ->setClasse($classe);
+          }
         }
       }
     }
