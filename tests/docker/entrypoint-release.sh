@@ -11,4 +11,4 @@ rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 
 # Archive release
 zip -v -y -r giuaschool-release.zip ./
-tar -zcf giuaschool-release.tgz ./
+#-- tar -zcf giuaschool-release.tgz ./
