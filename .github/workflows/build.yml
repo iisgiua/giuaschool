@@ -58,3 +58,16 @@ jobs:
             trinkodok/giuaschool:${{ github.event.release.tag_name }}
             ghcr.io/trinko/giuaschool:latest
             ghcr.io/trinko/giuaschool:${{ github.event.release.tag_name }}
+
+      - name: Archive release
+        uses: thedoctor0/zip-release@master
+        with:
+          type: 'zip'
+          filename: 'giuaschool-latest.zip'
+          exclusions: '.gitignore .dockerignore'
+
+      - name: Upload release as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: release-zip
+          path: giuaschool-latest.zip
