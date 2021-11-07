@@ -77,9 +77,10 @@ RUN \
   php bin/console doctrine:database:create -n -q && \
   php bin/console doctrine:schema:update -f -q && \
   php bin/console doctrine:fixtures:load --group=App -n -q -e dev && \
-  chown -R www-data:www-data .
+  chown -R www-data:www-data . && \
+  chmod 755 tests/docker/*.sh
+
 
 ### Configure services
-RUN chmod 755 tests/docker/entrypoint.sh
 EXPOSE 80
 CMD tests/docker/entrypoint.sh

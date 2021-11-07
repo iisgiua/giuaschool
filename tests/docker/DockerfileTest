@@ -18,6 +18,5 @@ RUN \
   chown -R www-data:www-data .
 
 ### Run Unit tests
-RUN chmod 755 tests/docker/*.sh
 EXPOSE 80
 CMD tests/docker/entrypoint-test.sh
