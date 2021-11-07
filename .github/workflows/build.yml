@@ -9,7 +9,7 @@ on:
 jobs:
 
   build:
-    name: Build and push Docker image
+    name: Build and create a release
     runs-on: ubuntu-latest
     steps:
 
@@ -60,14 +60,18 @@ jobs:
             ghcr.io/trinko/giuaschool:${{ github.event.release.tag_name }}
 
       - name: Archive release
-        uses: thedoctor0/zip-release@master
-        with:
-          type: 'zip'
-          filename: 'giuaschool-latest.zip'
-          exclusions: '.gitignore .dockerignore'
+        run: |
+          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/entrypoint-release.sh
+          docker cp gs_release:/var/www/giuaschool/giuaschool-release.* .
 
-      - name: Upload release as artifact
+      - name: Upload ZIP release as artifact
         uses: actions/upload-artifact@v2
         with:
           name: release-zip
-          path: giuaschool-latest.zip
+          path: giuaschool-release.zip
+
+      - name: Upload TGZ release as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: release-zip
+          path: giuaschool-release.tgz
