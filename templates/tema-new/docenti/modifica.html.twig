@@ -51,22 +51,22 @@
     {% endif %}
             <div class="d-none" id="info-utente-{{ u.id }}">
               <dl class="row">
-                <dt class="col-sm-3">{{ 'label.ultimo_accesso'|trans }}</dt>
-                <dd class="col-sm-9">{{ u.ultimoAccesso ? (u.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
-                <dt class="col-sm-3">{{ 'label.username'|trans }}</dt>
-                <dd class="col-sm-9">{{ u.username }}</dd>
-                <dt class="col-sm-3">{{ 'label.email'|trans }}</dt>
-                <dd class="col-sm-9">{{ u.email }}</dd>
-                <dt class="col-sm-3">{{ 'label.cognome'|trans }}</dt>
-                <dd class="col-sm-9">{{ u.cognome }}</dd>
-                <dt class="col-sm-3">{{ 'label.nome'|trans }}</dt>
-                <dd class="col-sm-9">{{ u.nome }}</dd>
-                <dt class="col-sm-3">{{ 'label.sesso'|trans }}</dt>
-                <dd class="col-sm-9">{{ (u.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
-                <dt class="col-sm-3">{{ 'label.codice_fiscale'|trans }}</dt>
-                <dd class="col-sm-9">{{ u.codiceFiscale }}</dd>
-                <dt class="col-sm-3">{{ 'label.ruolo'|trans }}</dt>
-                <dd class="col-sm-9">{{ ('label.'~u.roles[0])|trans }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
+                <dd class="col-sm-4">{{ u.nome }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
+                <dd class="col-sm-4">{{ u.cognome }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.sesso'|trans }}</dt>
+                <dd class="col-sm-4">{{ (u.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
+                <dd class="col-sm-4">{{ u.codiceFiscale }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.ruolo'|trans }}</dt>
+                <dd class="col-sm-10">{{ ('label.'~u.roles[0])|trans }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
+                <dd class="col-sm-4">{{ u.username }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
+                <dd class="col-sm-4">{{ u.email }}</dd>
+                <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
+                <dd class="col-sm-4">{{ u.ultimoAccesso ? (u.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
               </dl>
             </div>
           </td>

@@ -68,6 +68,7 @@ class StaffFixtures extends Fixture implements DependentFixtureInterface, Fixtur
         ->setNome($nome)
         ->setCognome($cognome)
         ->setSesso($sesso)
+        ->setCodiceFiscale($faker->unique()->taxId())                
         ->setUltimoAccesso($faker->dateTimeBetween('-1 week', 'now'))
         ->setSede($i % 3 == 0 ? null : $this->getReference('sede_'.($i % 3)));
       $em->persist($staff[$i]);

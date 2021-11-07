@@ -3,37 +3,43 @@
 {% block pagina_contenuto %}
 <div class="container">
   <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
-  {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+  {% include 'tema-new/include/form-tab.html.twig' with {form: form[0], form_help: form[1], tabs: [['gs-alunno', 'Alunno', 'alunno'], ['gs-genitore1', 'Padre/Tutore/Genitore 1', 'genitore1'], ['gs-genitore2', 'Madre/Genitore 2', 'genitore2']]} %}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
-{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'alunno_dataNascita', dp_disabled: null, dp_week: null, dp_min: null, dp_max: date()|date('d/m/Y')}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'alunno_genitore_alunno_dataNascita', dp_disabled: null, dp_week: null, dp_min: null, dp_max: date()|date('d/m/Y')}) }}
 <script>
 $(document).ready(function() {
-  $('#alunno_numeriTelefono').on('click', '.gs-remove-item', function(e) {
-    $(this).closest('.form-group').remove();
-  });
-  $('#alunno_numeriTelefono').parent().on('click', '.gs-add-item', function(e) {
-    var f = '<div class="form-group gs-collection"><div class="input-group"><input type="text" id="alunno_numeriTelefono___name__" name="alunno[numeriTelefono][__name__]" class="form-control" /><div class="input-group-append"><button class="btn btn-danger btn-xs gs-remove-item" type="button" title="Cancella il numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg></button></div></div></div>';
-    var id = $('#alunno_numeriTelefono').find('input').last().attr('id');
-    var re = /\d+$/;
-    var n0 = re.exec(id);
-    var n = (n0 == null ? 0 : parseInt(n0, 10) + 1);
-    f = f.replace(/__name__/g, n);
-    $('#alunno_numeriTelefono').append(f);
+  $('.gs-telefono').on('click', 'button', function() {
+    if ($(this).hasClass('gs-remove-item')) {
+      $(this).closest('.form-group').remove();
+    }
+    if ($(this).hasClass('gs-add-item')) {
+      var html = '<div class="form-group gs-collection"><div class="input-group"><input type="text" id="alunno_genitore_--GEN--_numeriTelefono_--NUM--" name="alunno_genitore[--GEN--][numeriTelefono][--NUM--]" class="form-control" value=""><div class="input-group-append"><button class="btn btn-danger btn-xs gs-remove-item" type="button" title="Cancella il numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="/vendor/fontawesome/sprites/solid.svg#minus"></use></svg></button></div></div></div>'
+      var idNum = $(this).parent().parent().find('.form-group.gs-collection input').last().attr('id')
+      var reNum = /\d+$/;
+      var resNum = reNum.exec(idNum);
+      var num = (resNum == null ? 0 : 1 + parseInt(resNum, 10));
+      html = html.replace(/--NUM--/g, num);
+      var form = $(this).parent().parent().find('div').first();
+      var reGen = /genitore\d/;
+      var gen = reGen.exec(form.attr('id'));
+      html = html.replace(/--GEN--/g, gen);
+      form.append(html);
+    }
   });
   // init
   var inizio = '<div class="input-group">';
   var fine = '<div class="input-group-append"><button class="btn btn-danger btn-xs gs-remove-item" type="button" title="Cancella il numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg></button></div></div>';
-  $('#alunno_numeriTelefono .form-group').each(function(i,o) {
+  $('.gs-telefono .form-group').each(function(i, o) {
     var i = $(o).html();
     var html = inizio+i+fine;
     $(o).html(html);
     $(o).addClass('gs-collection');
   });
   var button = '<div class="text-right"><button class="btn btn-success btn-xs gs-add-item" type="button" title="Aggiunge un numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
-  $('#alunno_numeriTelefono').parent().append(button);
+  $('.gs-telefono').append(button);
 });
 </script>
 {% endblock %}

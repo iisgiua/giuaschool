@@ -1,0 +1,45 @@
+{### form: generico form con schede ###}
+{###    parametri: form, form_help, tabs[id, desc, subform_name] ###}
+{% form_theme form with 'tema-new/layout-form.html.twig' only %}
+
+{% if app.session.flashbag.peekAll() is not empty %}
+  {% for tipo,messaggi in app.flashes %}
+    {% for msg in messaggi %}
+<div class="alert alert-{{ tipo }}" role="alert">{{ msg|trans|raw }}</div>
+    {% endfor %}
+  {% endfor %}
+{% elseif form.vars.submitted and form.vars.valid %}
+<div class="alert alert-success" role="alert">{{ 'message.update_ok'|trans }}</div>
+{% elseif form.vars.submitted and not form.vars.valid and form.vars.errors|length == 0 %}
+<div class="alert alert-danger" role="alert">{{ 'exception.update_errors'|trans }}</div>
+{% endif %}
+<div class="card-wrapper card-space">
+  <div class="card border rounded card-bg">
+  {% if form_help %}
+    <div class="card-header bg-secondary text-white">{{ form_help|trans|raw  }}</div>
+  {% endif %}
+    <div class="card-body">
+      <ul class="nav nav-tabs nav-tabs-cards mb-5 border-bottom" role="tablist">
+  {% for tab in tabs %}
+        <li class="nav-item">
+          <a class="nav-link{{ loop.first ? ' active' }}" id="{{ tab[0] }}-tab" data-toggle="tab" href="#{{ tab[0] }}" role="tab" aria-controls="{{ tab[0] }}" aria-selected="true"><strong>{{ tab[1] }}</strong></a>
+        </li>
+  {% endfor %}
+      </ul>
+      {{ form_start(form) }}
+      <div class="tab-content">
+  {% for tab in tabs %}
+        <div class="tab-pane fade {{ loop.first ? ' show active' }}" id="{{ tab[0] }}" role="tabpanel" aria-labelledby="{{ tab[0] }}-tab">
+          {{ form_row(form.children[tab[2]]) }}
+        </div>
+  {% endfor %}
+      </div>
+  {% for item in form.children %}
+    {% if not item.children %}
+      {{ form_row(item) }}
+    {% endif %}
+  {% endfor %}
+      {{ form_end(form, {render_rest: false}) }}
+    </div>
+  </div>
+</div>

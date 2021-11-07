@@ -51,12 +51,6 @@ class AtaType extends AbstractType {
       ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
         'attr' => ['widget' => 'gs-row-end'],
         'required' => false))
-      ->add('username', TextType::class, array('label' => 'label.username',
-        'attr' => ['widget' => 'gs-row-start'],
-        'required' => true))
-      ->add('email', TextType::class, array('label' => 'label.email',
-        'attr' => ['widget' => 'gs-row-end'],
-        'required' => true))
       ->add('tipo', ChoiceType::class, array('label' => 'label.ata_tipo',
         'choices' => array('label.ata_tipo_D' => 'D', 'label.ata_tipo_A' => 'A', 'label.ata_tipo_T' => 'T',
            'label.ata_tipo_U' => 'U', 'label.ata_tipo_C' => 'C'),
@@ -77,6 +71,12 @@ class AtaType extends AbstractType {
               ->orderBy('s.ordinamento', 'ASC');
           },
         'required' => false))
+      ->add('username', TextType::class, array('label' => 'label.username',
+        'attr' => ['widget' => 'gs-row-start'],
+        'required' => true))
+      ->add('email', TextType::class, array('label' => 'label.email',
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => true))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
       ->add('cancel', ButtonType::class, array('label' => 'label.cancel',

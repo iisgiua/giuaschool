@@ -34,7 +34,7 @@ use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
 use App\Form\RicercaType;
-use App\Form\AlunnoType;
+use App\Form\AlunnoGenitoreType;
 use App\Form\ImportaCsvType;
 use App\Form\CambioClasseType;
 use App\Entity\CambioClasse;
@@ -225,52 +225,64 @@ class AlunniController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);
-      $email = $genitori[0]->getEmail();
       $classe_old = $alunno->getClasse() ? $alunno->getClasse()->getId() : null;
       $alunno_old = array('cognome' => $alunno->getCognome(), 'nome' => $alunno->getNome(),
         'sesso' => $alunno->getSesso());
+      // legge genitori nell'ordine corretto
+      $username = substr($alunno->getUsername(), 0, -2).'f'.substr($alunno->getUsername(), -1);
+      if ($alunno->getGenitori()[0]->getUsername() == $username) {
+        $genitore1 = $alunno->getGenitori()[0];
+        $genitore2 = isset($alunno->getGenitori()[1]) ? $alunno->getGenitori()[1] : null;
+      } else {
+        $genitore1 = $alunno->getGenitori()[1];
+        $genitore2 = $alunno->getGenitori()[0];
+      }
     } else {
       // azione add
       $alunno = (new Alunno())
         ->setAbilitato(true)
         ->setPassword('NOPASSWORD');
       $em->persist($alunno);
-      $genitore = (new Genitore())
+      $classe_old = null;
+      // aggiunge genitori
+      $genitore1 = (new Genitore())
         ->setAbilitato(true)
         ->setAlunno($alunno)
+        ->setSesso('M')
         ->setPassword('NOPASSWORD');
-      $em->persist($genitore);
-      $genitori = [$genitore];
-      $email = null;
-      $classe_old = null;
+      $em->persist($genitore1);
+      $genitore2 = (new Genitore())
+        ->setAbilitato(true)
+        ->setAlunno($alunno)
+        ->setSesso('F')
+        ->setPassword('NOPASSWORD');
+      $em->persist($genitore2);
     }
     // form
-    $form = $this->createForm(AlunnoType::class, $alunno, ['returnUrl' => $this->generateUrl('alunni_modifica'),
-      'dati' => [$email]]);
+    $form = $this->createForm(AlunnoGenitoreType::class, $alunno, [
+      'returnUrl' => $this->generateUrl('alunni_modifica'),'data' => [$alunno, $genitore1, $genitore2]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // mantiene ordine nei numeri di telefono
-      $numtel = array();
-      foreach ($form->get('numeriTelefono')->getData() as $tel) {
-        if (trim($tel) != '') {
-          $numtel[] = trim($tel);
+      // controlla numeri di telefono genitore1
+      $telefono = array();
+      foreach ($genitore1->getNumeriTelefono() as $tel) {
+        $tel = preg_replace('/[^+\d]/', '', $tel);
+        $tel = (substr($tel, 0, 3) == '+39') ? substr($tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+          $telefono[] = $tel;
         }
       }
-      $alunno->setNumeriTelefono($numtel);
-      // genitori
-      foreach ($genitori as $gen) {
-        $gen
-          ->setNome($alunno->getNome())
-          ->setCognome($alunno->getCognome())
-          ->setSesso($alunno->getSesso());
+      $genitore1->setNumeriTelefono($telefono);
+      // controlla numeri di telefono genitore2
+      $telefono = array();
+      foreach ($genitore2->getNumeriTelefono() as $tel) {
+        $tel = preg_replace('/[^+\d]/', '', $tel);
+        $tel = (substr($tel, 0, 3) == '+39') ? substr($tel, 3) : $tel;
+        if ($tel != '' && $tel != str_repeat('0', strlen($tel))) {
+          $telefono[] = $tel;
+        }
       }
-      // primo genitore
-      $username_pos = strrpos($alunno->getUsername(), '.');
-      $username = substr($alunno->getUsername(), 0, $username_pos).'.f'.
-        substr($alunno->getUsername(), $username_pos + 2);
-      $genitori[0]->setUsername($username);
-      $genitori[0]->setEmail($form->get('email_genitore')->getData());
+      $genitore2->setNumeriTelefono($telefono);
       // provisioning
       if (!$id) {
         // crea alunno

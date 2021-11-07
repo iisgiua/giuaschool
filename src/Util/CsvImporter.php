@@ -1621,13 +1621,6 @@ class CsvImporter {
    * @return string|null Messaggio di errore o NULL se tutto ok
    */
   private function nuovoAlunno(&$fields) {
-    $telefono = [];
-    foreach ($fields['genitore1Telefono'] as $tel) {
-      $telefono['genitore1'][] = $tel;
-    }
-    foreach ($fields['genitore2Telefono'] as $tel) {
-      $telefono['genitore2'][] = $tel;
-    }
     // crea utente alunno
     $alunno = (new Alunno())
       ->setUsername($fields['username'])
@@ -1642,7 +1635,6 @@ class CsvImporter {
       ->setCodiceFiscale($fields['codiceFiscale'])
       ->setCitta($fields['citta'])
       ->setIndirizzo($fields['indirizzo'])
-      ->setNumeriTelefono($telefono)
       ->setBes($fields['bes'])
       ->setNoteBes($fields['noteBes'])
       ->setFrequenzaEstero($fields['frequenzaEstero'])
@@ -1668,8 +1660,9 @@ class CsvImporter {
       ->setAbilitato(true)
       ->setNome($fields['genitore1Nome'])
       ->setCognome($fields['genitore1Cognome'])
-      ->setSesso($fields['sesso']) // obbligatorio: imposta sesso alunno
+      ->setSesso('M')
       ->setCodiceFiscale($fields['genitore1CodiceFiscale'])
+      ->setNumeriTelefono($fields['genitore1Telefono'])
       ->setAlunno($alunno);
     $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
@@ -1689,8 +1682,9 @@ class CsvImporter {
       ->setAbilitato(true)
       ->setNome($fields['genitore2Nome'])
       ->setCognome($fields['genitore2Cognome'])
-      ->setSesso($fields['sesso']) // obbligatorio: imposta sesso alunno
+      ->setSesso('F') 
       ->setCodiceFiscale($fields['genitore2CodiceFiscale'])
+      ->setNumeriTelefono($fields['genitore2Telefono'])
       ->setAlunno($alunno);
     $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
@@ -1766,22 +1760,6 @@ class CsvImporter {
     if (!$empty_fields['indirizzo']) {
       $alunno->setIndirizzo($fields['indirizzo']);
     }
-    if (!$empty_fields['genitore1Telefono']) {
-      $telefono = $alunno->getNumeriTelefono();
-      unset($telefono['genitore1']);
-      foreach ($fields['genitore1Telefono'] as $tel) {
-        $telefono['genitore1'][] = $tel;
-      }
-      $alunno->setNumeriTelefono($telefono);
-    }
-    if (!$empty_fields['genitore2Telefono']) {
-      $telefono = $alunno->getNumeriTelefono();
-      unset($telefono['genitore2']);
-      foreach ($fields['genitore2Telefono'] as $tel) {
-        $telefono['genitore2'][] = $tel;
-      }
-      $alunno->setNumeriTelefono($telefono);
-    }
     if (!$empty_fields['bes']) {
       $alunno->setBes($fields['bes']);
     }
@@ -1829,6 +1807,9 @@ class CsvImporter {
     if (!$empty_fields['genitore1CodiceFiscale']) {
       $genitore1->setCodiceFiscale($fields['genitore1CodiceFiscale']);
     }
+    if (!$empty_fields['genitore1Telefono']) {
+      $genitore1->setNumeriTelefono($fields['genitore1Telefono']);
+    }
     // valida dati genitore1
     $errors = $this->validator->validate($genitore1);
     if (count($errors) > 0) {
@@ -1853,6 +1834,9 @@ class CsvImporter {
     }
     if (!$empty_fields['genitore2CodiceFiscale']) {
       $genitore2->setCodiceFiscale($fields['genitore2CodiceFiscale']);
+    }
+    if (!$empty_fields['genitore2Telefono']) {
+      $genitore1->setNumeriTelefono($fields['genitore2Telefono']);
     }
     // valida dati genitore2
     $errors = $this->validator->validate($genitore2);

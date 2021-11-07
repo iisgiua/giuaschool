@@ -18,14 +18,14 @@ use Doctrine\Persistence\ObjectManager;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
-use App\Entity\Assenza;
+use App\Entity\Entrata;
 
 
 /**
- * AssenzaFixtures - dati iniziali di test
+ * EntrataFixtures - dati iniziali di test
  *
  */
-class AssenzaFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface {
+class EntrataFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface {
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -37,45 +37,48 @@ class AssenzaFixtures extends Fixture implements DependentFixtureInterface, Fixt
   public function load(ObjectManager $em) {
     $faker = Factory::create('it_IT');
     $faker->addProvider(new FakerPerson($faker));
-    $faker->seed(7676);
+    $faker->seed(7474);
     // carica dati
     $alunni = $em->getRepository('App:Alunno')->findBy([]);
     $docenti = $em->getRepository('App:Docente')->findBy([]);
-    // assenze non giustificate
+    // ritardi non giustificati
     for ($i = 0; $i < 3; $i++) {
-      $assenza = (new Assenza())
+      $ritardo = (new Entrata())
         ->setData($faker->dateTimeBetween('-1 month', '-1 week'))
+        ->setOra(\DateTime::createFromFormat('H:i', '09:20'))
         ->setAlunno($faker->randomElement($alunni))
         ->setDocente($faker->randomElement($docenti));
-      $em->persist($assenza);
+      $em->persist($ritardo);
     }
-    // assenze giustificate ma non convalidate
+    // ritardi giustificati ma non convalidati
     for ($i = 0; $i < 3; $i++) {
       $alunno = $faker->randomElement($alunni);
       $dichiarazione[0] = [];
       $dichiarazione[1] = ['uno' => $faker->sentence(3)];
       $dichiarazione[2] = ['uno' => $faker->sentence(3), 'due' => $faker->randomFloat()];
-      $assenza = (new Assenza())
+      $ritardo = (new Entrata())
         ->setData($faker->dateTimeBetween('-1 month', '-1 week'))
+        ->setOra(\DateTime::createFromFormat('H:i', '09:40'))
         ->setGiustificato($faker->dateTimeBetween('-1 week', 'now'))
         ->setMotivazione($faker->sentence(5))
         ->setAlunno($alunno)
         ->setDocente($faker->randomElement($docenti))
         ->setUtenteGiustifica($faker->randomElement(array_merge([$alunno], $alunno->getGenitori()->toArray()))) ;
-      $em->persist($assenza);
+      $em->persist($ritardo);
     }
     // assenze convalidate
     for ($i = 0; $i < 3; $i++) {
       $alunno = $faker->randomElement($alunni);
-      $assenza = (new Assenza())
+      $ritardo = (new Entrata())
         ->setData($faker->dateTimeBetween('-1 month', '-1 week'))
+        ->setOra(\DateTime::createFromFormat('H:i', '09:50'))
         ->setGiustificato($faker->dateTimeBetween('-1 week', 'now'))
         ->setMotivazione($faker->sentence(5))
         ->setAlunno($alunno)
         ->setDocente($faker->randomElement($docenti))
         ->setUtenteGiustifica($faker->randomElement(array_merge([$alunno], $alunno->getGenitori()->toArray())))
         ->setDocenteGiustifica($faker->randomElement($docenti));
-      $em->persist($assenza);
+      $em->persist($ritardo);
     }
     // memorizza dati
     $em->flush();

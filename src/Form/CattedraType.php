@@ -81,7 +81,8 @@ class CattedraType extends AbstractType {
         'attr' => ['widget' => 'search'],
         'required' => true))
       ->add('tipo', ChoiceType::class, array('label' => 'label.tipo',
-        'choices' => array('label.tipo_N' => 'N', 'label.tipo_I' => 'I', 'label.tipo_P' => 'P'),
+        'choices' => array('label.tipo_N' => 'N', 'label.tipo_I' => 'I', 'label.tipo_P' => 'P',
+          'label.tipo_A' => 'A'),
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],

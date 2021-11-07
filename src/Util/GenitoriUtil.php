@@ -928,8 +928,10 @@ class GenitoriUtil {
       //-- ->getArrayResult();
     $oggi = new \DateTime('today');
     $colloqui = $this->em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
-      ->select('rc.id,rc.appuntamento,rc.durata,rc.stato,rc.messaggio,(c.docente) AS docente')
+      ->select("rc.id,rc.appuntamento,rc.durata,rc.stato,rc.messaggio,CONCAT(g.nome,' ',g.cognome) AS genitore,CONCAT(ga.nome,' ',ga.cognome) AS genitoreAnnulla,(c.docente) AS docente")
       ->join('rc.colloquio', 'c')
+      ->join('rc.genitore', 'g')
+      ->leftJoin('rc.genitoreAnnulla', 'ga')
       ->where('rc.alunno=:alunno AND rc.appuntamento>=:oggi')
       ->orderBy('rc.appuntamento', 'ASC')
       ->setParameters(['alunno' => $alunno, 'oggi' => $oggi])

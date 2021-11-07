@@ -675,7 +675,8 @@ class GenitoriController extends AbstractController {
           ->setDurata($data[1])
           ->setColloquio($colloquio)
           ->setAlunno($alunno)
-          ->setStato('R');
+          ->setStato('R')
+          ->setGenitore($this->getUser());
         $em->persist($richiesta);
         // ok: memorizza dati
         $em->flush();
@@ -736,7 +737,8 @@ class GenitoriController extends AbstractController {
     $richiesta_old = clone $richiesta;
     $richiesta
       ->setStato('A')
-      ->setMessaggio(null);
+      ->setMessaggio(null)
+      ->setGenitoreAnnulla($this->getUser());
     // ok: memorizza dati
     $em->flush();
     // log azione
@@ -1211,10 +1213,12 @@ class GenitoriController extends AbstractController {
         ->set('ass.motivazione', ':motivazione')
         ->set('ass.dichiarazione', ':dichiarazione')
         ->set('ass.certificati', ':certificati')
+        ->set('ass.utenteGiustifica', ':utente')
         ->where('ass.id in (:ids)')
         ->setParameters(['modificato' => new \DateTime(), 'giustificato' => $giustificato,
           'motivazione' => $motivazione, 'dichiarazione' => serialize($dichiarazione),
-          'certificati' => serialize($certificati), 'ids' => explode(',', $info['assenza']['ids'])])
+          'certificati' => serialize($certificati), 'utente' => $this->getUser(),
+          'ids' => explode(',', $info['assenza']['ids'])])
         ->getQuery()
         ->getResult();
       // memorizza dati
@@ -1346,7 +1350,8 @@ class GenitoriController extends AbstractController {
           // aggiorna dati
           $entrata
             ->setMotivazione(substr($form->get('motivazione')->getData(), 0, 255))
-            ->setGiustificato(new \DateTime());
+            ->setGiustificato(new \DateTime())
+            ->setUtenteGiustifica($this->getUser());
         }
         // ok: memorizza dati
         $em->flush();

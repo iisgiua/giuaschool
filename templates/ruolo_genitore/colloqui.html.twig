@@ -35,6 +35,7 @@
         </td>
         <td><strong>{{ c1.data_str }} {{ c1.ora_str }}</strong></td>
         <td>
+          <em>Richiesto dal genitore {{ c1.genitore }}</em><br>
           {% if c1.stato == 'R' %}
           <strong>In attesa di conferma</strong>
           <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio con il docente" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('genitori_colloqui_disdetta', {'richiesta': c1.id}) }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
@@ -48,7 +49,7 @@
             {% endif %}
           <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio con il docente" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('genitori_colloqui_disdetta', {'richiesta': c1.id}) }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
           {% elseif c1.stato == 'A' %}
-          <strong>Appuntamento annullato dal genitore</strong>
+          <strong>Appuntamento annullato dal genitore {{ c1.genitoreAnnulla }}</strong>
           {% elseif c1.stato == 'N' %}
           <strong>Appuntamento annullato per indisponibilità del docente</strong>
             {% if c1.messaggio %}

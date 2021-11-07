@@ -57,7 +57,8 @@ class PresideFixtures extends Fixture implements FixtureGroupInterface {
       ->setAbilitato(true)
       ->setNome('Alan')
       ->setCognome('Turing')
-      ->setSesso('M');
+      ->setSesso('M')
+      ->setCodiceFiscale('TRNLNA12H23Z114P');
     $password = $this->encoder->encodePassword($utente, 'dirigente');
     $utente->setPassword($password);
     $em->persist($utente);

@@ -98,22 +98,57 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
           $password = $this->encoder->encodePassword($alunno, $username.'.s1');
           $alunno->setPassword($password);
           $em->persist($alunno);
-          // genitore
-          $genitore = (new Genitore())
+          // genitore1
+          list($nome, $cognome) = $faker->unique()->utente('M');
+          $genitore1 = (new Genitore())
             ->setUsername($username.'.f1')
             ->setEmail($username.'.f1@noemail.local')
             ->setAbilitato(true)
             ->setNome($nome)
             ->setCognome($cognome)
-            ->setSesso($sesso)
+            ->setSesso('M')
+            ->setCodiceFiscale($faker->unique()->taxId())
             ->setUltimoAccesso($faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now'))
             ->setAlunno($alunno);
-          $em->persist($genitore);
-          $password = $this->encoder->encodePassword($genitore, $username.'.f1');
-          $genitore->setPassword($password);
+          $em->persist($genitore1);
+          $password = $this->encoder->encodePassword($genitore1, $username.'.f1');
+          $genitore1->setPassword($password);
+          // genitore2
+          list($nome, $cognome) = $faker->unique()->utente('F');
+          $genitore2 = (new Genitore())
+            ->setUsername($username.'.g1')
+            ->setEmail($username.'.g1@noemail.local')
+            ->setAbilitato(true)
+            ->setNome($nome)
+            ->setCognome($cognome)
+            ->setSesso('F')
+            ->setCodiceFiscale($faker->unique()->taxId())
+            ->setUltimoAccesso($faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now'))
+            ->setAlunno($alunno);
+          $em->persist($genitore2);
+          $password = $this->encoder->encodePassword($genitore2, $username.'.g1');
+          $genitore2->setPassword($password);
+          // imposta alunno H
           if ($sezione == 'A' && $anno == 3 && $n == 1) {
             $this->setReference('alunno_H', $alunno);
           }
+        }
+        // imposta genitore di più alunni
+        if ($anno == 2) {
+          $this->setReference('genitore1_alunno1', $genitore1);
+          $this->setReference('genitore2_alunno1', $genitore2);
+        }
+        if ($anno == 4) {
+          $genitore1
+            ->setNome($this->getReference('genitore1_alunno1')->getNome())
+            ->setCognome($this->getReference('genitore1_alunno1')->getCognome())
+            ->setCodiceFiscale($this->getReference('genitore1_alunno1')->getCodiceFiscale());
+          $this->setReference('genitore1_alunno2', $genitore1);
+          $genitore2
+            ->setNome($this->getReference('genitore2_alunno1')->getNome())
+            ->setCognome($this->getReference('genitore2_alunno1')->getCognome())
+            ->setCodiceFiscale($this->getReference('genitore2_alunno1')->getCodiceFiscale());
+          $this->setReference('genitore2_alunno2', $genitore2);
         }
         // memorizza dati
         $em->flush();

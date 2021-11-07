@@ -57,7 +57,8 @@ class AmministratoreFixtures extends Fixture implements FixtureGroupInterface {
       ->setAbilitato(true)
       ->setNome('Charles')
       ->setCognome('Babbage')
-      ->setSesso('M');
+      ->setSesso('M')
+      ->setCodiceFiscale('BBBCRL91T26Z114G');
     $password = $this->encoder->encodePassword($utente, 'admin');
     $utente->setPassword($password);
     $em->persist($utente);

@@ -98,9 +98,9 @@ class Entrata {
   /**
    * @var string $motivazione Motivazione dell'assenza
    *
-   * @ORM\Column(type="string", length=255, nullable=true)
+   * @ORM\Column(type="string", length=1024, nullable=true)
    *
-   * @Assert\Length(max=255, maxMessage="field.maxlength")
+   * @Assert\Length(max=1024, maxMessage="field.maxlength")
    */
   private $motivazione;
 
@@ -140,6 +140,14 @@ class Entrata {
    * @ORM\JoinColumn(nullable=true)
    */
   private $docenteGiustifica;
+
+  /**
+   * @var Utente $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
+   *
+   * @ORM\ManyToOne(targetEntity="Utente")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private $utenteGiustifica;
 
 
   //==================== EVENTI ORM ====================
@@ -402,6 +410,27 @@ class Entrata {
    */
   public function setDocenteGiustifica(Docente $docenteGiustifica = null) {
     $this->docenteGiustifica = $docenteGiustifica;
+    return $this;
+  }
+
+  /**
+   * Restituisce l'utente (Genitore/Alunno) che giustifica il ritardo
+   *
+   * @return Utente Utente (Genitore/Alunno) che giustifica il ritardo
+   */
+  public function getUtenteGiustifica() {
+    return $this->utenteGiustifica;
+  }
+
+  /**
+   * Modifica l'utente (Genitore/Alunno) che giustifica il ritardo
+   *
+   * @param Utente $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
+   *
+   * @return Entrata Oggetto Entrata
+   */
+  public function setUtenteGiustifica(Utente $utenteGiustifica = null) {
+    $this->utenteGiustifica = $utenteGiustifica;
     return $this;
   }
 

@@ -68,6 +68,7 @@ class AtaFixtures extends Fixture implements DependentFixtureInterface, FixtureG
         ->setNome($nome)
         ->setCognome($cognome)
         ->setSesso($sesso)
+        ->setCodiceFiscale($faker->unique()->taxId())        
         ->setTipo($tipo)
         ->setSegreteria($tipo == 'A' ? true : false)
         ->setSede($this->getReference('sede_'.$faker->randomElement(['1', '2'])))
