@@ -62,7 +62,7 @@ jobs:
       - name: Archive release
         run: |
           docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/entrypoint-release.sh
-          docker cp gs_release:/var/www/giuaschool/giuaschool-release.* .
+          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-release.zip
 
       - name: Upload ZIP release as artifact
         uses: actions/upload-artifact@v2
