@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Export database
+service mysql start
 mysqldump -u root -proot giuaschool > database.sql
 
 # Remove unused files
@@ -13,4 +14,4 @@ rm -f .dockerignore .env.test .gitignore behat.yml composer.* phpunit.xml symfon
 rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 
 # Archive release
-zip -y -r giuaschool-release.zip ./
+zip -q -y -r giuaschool-release.zip ./
