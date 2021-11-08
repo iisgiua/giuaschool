@@ -69,9 +69,3 @@ jobs:
         with:
           name: release-zip
           path: giuaschool-release.zip
-
-      #-- - name: Upload TGZ release as artifact
-        #-- uses: actions/upload-artifact@v2
-        #-- with:
-          #-- name: release-tgz
-          #-- path: giuaschool-release.tgz

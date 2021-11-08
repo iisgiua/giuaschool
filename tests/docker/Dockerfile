@@ -72,11 +72,23 @@ FROM symfonybuilder as applicationbuilder
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data . .
 RUN \
+# configure SPID access
+  cp tests/docker/spid-php-openssl.cnf.conf vendor/italia/spid-php/spid-php-openssl.cnf && \
+  cp tests/docker/spid-php-setup.json.conf vendor/italia/spid-php/spid-php-setup.json && \
+  cp tests/docker/spid-config.tpl.conf vendor/italia/spid-php/setup/config/config.tpl && \
+  cp tests/docker/spid-theme.tgz vendor/italia/spid-php/spid-theme.tgz && \
+  cd vendor/italia/spid-php/ && \
+  composer install && \
+  cd vendor/simplesamlphp/simplesamlphp/modules && \
+  tar -zxf ../../../../spid-theme.tgz && \
+  cd /var/www/giuaschool && \
+# create database
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
   service mysql start && mysqladmin -u root password 'root' && \
   php bin/console doctrine:database:create -n -q && \
   php bin/console doctrine:schema:update -f -q && \
   php bin/console doctrine:fixtures:load --group=App -n -q -e dev && \
+# adjust file permissions
   chown -R www-data:www-data . && \
   chmod 755 tests/docker/*.sh
 
