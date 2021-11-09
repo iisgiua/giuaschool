@@ -941,8 +941,7 @@ class GenitoriUtil {
       if (array_key_exists($c['docente'], $dati['orari'])) {
         $c['data_str'] = $settimana[$c['appuntamento']->format('w')].' '.intval($c['appuntamento']->format('d')).' '.
           $mesi[intval($c['appuntamento']->format('m'))].' '.$c['appuntamento']->format('Y');
-        $c['ora_str'] = 'dalle '.$c['appuntamento']->format('G:i').' alle '.
-          $c['appuntamento']->modify('+'.$c['durata'].' minutes')->format('G:i');
+        $c['ora_str'] = 'dalle ore '.$c['appuntamento']->format('G:i');
         $dati['colloqui'][$c['docente']][] = $c;
       }
     }

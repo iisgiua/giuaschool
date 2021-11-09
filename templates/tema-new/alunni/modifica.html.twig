@@ -43,15 +43,52 @@
           <td class="pb-0">
             <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-info-{{ u.alunno.id }}">{{ 'label.show'|trans }}</button>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_modifica_edit', {'id': u.alunno.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 0, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per l'alunno e la invia tramite email">{{ 'label.email_password'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 0, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per l'alunno e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': u.alunno.username, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per l'alunno e la invia tramite email">{{ 'label.email_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': u.alunno.username, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per l'alunno e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
     {% if u.alunno.abilitato %}
             <a class="btn btn-danger btn-xs mb-1" href="{{ path('alunni_abilita', {'id': u.alunno.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
     {% else %}
             <a class="btn btn-success btn-xs mb-1" href="{{ path('alunni_abilita', {'id': u.alunno.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
     {% endif %}
-            <a class="btn btn-secondary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 1, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per il genitore e la invia tramite email">{{ 'label.email_password_genitore'|trans }}</a>
-            <a class="btn btn-secondary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'id': u.alunno.id, 'genitore': 1, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per il genitore e la scarica come documento PDF">{{ 'label.pdf_password_genitore'|trans }}</a>
+            <button type="button" class="btn btn-secondary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-scelta-genitore" title="Genera una nuova password per il genitore e la invia tramite email"
+              data-title="Scegli il genitore a cui inviare la password"
+              data-button1="{{ (u.g1_email and u.g1_email[-6:] != '.local') ? 'Invia' }}"
+              data-gen1="{{ u.g1_nome }} {{ u.g1_cognome }} ({{ u.g1_username }})" data-email1=": {{ u.g1_email }}"
+              data-href1="{{ path('alunni_password', {'username': u.g1_username, 'tipo': 'E'}) }}"
+              data-button2="{{ (u.g2_email and u.g2_email[-6:] != '.local') ? 'Invia' }}"
+              data-gen2="{{ u.g2_nome }} {{ u.g2_cognome }} ({{ u.g2_username }})" data-email2=": {{ u.g2_email }}"
+              data-href2="{{ path('alunni_password', {'username': u.g2_username, 'tipo': 'E'}) }}">{{ 'label.email_password_genitore'|trans }}</button>
+            <button type="button" class="btn btn-secondary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-scelta-genitore" title="Genera una nuova password per il genitore e la scarica come documento PDF"
+              data-title="Scegli il genitore di cui scaricare la password"
+              data-button1="Scarica"
+              data-gen1="{{ u.g1_nome }} {{ u.g1_cognome }} ({{ u.g1_username }})" data-email1=""
+              data-href1="{{ path('alunni_password', {'username': u.g1_username, 'tipo': 'P'}) }}"
+              data-button2="Scarica"
+              data-gen2="{{ u.g2_nome }} {{ u.g2_cognome }} ({{ u.g2_username }})" data-email2=""
+              data-href2="{{ path('alunni_password', {'username': u.g2_username, 'tipo': 'P'}) }}">{{ 'label.pdf_password_genitore'|trans }}</button>
+            <div class="modal fade" id="gs-scelta-genitore" tabindex="-1" role="dialog" aria-labelledby="gs-scelta-genitore-titolo">
+              <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                  <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="gs-scelta-genitore-titolo"></h5>
+                    <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#times') }}"></use></svg>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-sm-10 mb-2"><strong id="gs-scelta-genitore-1"></strong><span id="gs-scelta-genitore-1-email"></span></div>
+                      <div class="col-sm-2 mb-2"><a id="gs-scelta-genitore-1-href" class="btn btn-primary btn-xs" href="" role="button"><strong></strong></a></div>
+                      <div class="col-sm-10"><strong id="gs-scelta-genitore-2"></strong><span id="gs-scelta-genitore-2-email"></span></div>
+                      <div class="col-sm-2"><a id="gs-scelta-genitore-2-href" class="btn btn-primary btn-xs" href="" role="button"><strong></strong></a></div>
+                    </div>
+                  </div>
+                  <div class="modal-footer mx-auto">
+                    <button type="button" class="btn btn-secondary btn-xs mx-auto" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="modal fade" id="gs-info-{{ u.alunno.id }}" tabindex="-1" role="dialog" aria-labelledby="gs-info-{{ u.alunno.id }}-titolo">
               <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
@@ -183,6 +220,36 @@
 {{ include('tema-new/include/thfloat.html.twig') }}
 <script>
 $(document).ready(function() {
+  $('#gs-scelta-genitore').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('title');
+    var button1 = $(e.relatedTarget).data('button1');
+    var gen1 = $(e.relatedTarget).data('gen1');
+    var email1 = $(e.relatedTarget).data('email1');
+    var href1 = $(e.relatedTarget).data('href1');
+    var button2 = $(e.relatedTarget).data('button2');
+    var gen2 = $(e.relatedTarget).data('gen2');
+    var email2 = $(e.relatedTarget).data('email2');
+    var href2 = $(e.relatedTarget).data('href2');
+    $(this).find('#gs-scelta-genitore-titolo').text(title);
+    if (button1) {
+      $('#gs-scelta-genitore-1-href').show();
+      $('#gs-scelta-genitore-1-href strong').text(button1);
+    } else {
+      $('#gs-scelta-genitore-1-href').hide();
+    }
+    if (button2) {
+      $('#gs-scelta-genitore-2-href').show();
+      $('#gs-scelta-genitore-2-href strong').text(button2);
+    } else {
+      $('#gs-scelta-genitore-2-href').hide();
+    }
+    $(this).find('#gs-scelta-genitore-1').text(gen1);
+    $(this).find('#gs-scelta-genitore-1-email').text(email1);
+    $(this).find('#gs-scelta-genitore-1-href').attr('href', href1);
+    $(this).find('#gs-scelta-genitore-2').text(gen2);
+    $(this).find('#gs-scelta-genitore-2-email').text(email2);
+    $(this).find('#gs-scelta-genitore-2-href').attr('href', href2);
+  });
   $("#gs-paginazione").on("submit", function() {
     var p = $("#jumpToPage").val();
     window.location.href = "{{ path('alunni_modifica') }}/"+p;

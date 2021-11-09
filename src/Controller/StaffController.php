@@ -51,6 +51,7 @@ use App\Entity\Entrata;
 use App\Entity\Uscita;
 use App\Entity\Notifica;
 use App\Entity\Provisioning;
+use App\Entity\Alunno;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use App\Util\LogHandler;
@@ -1651,12 +1652,6 @@ class StaffController extends AbstractController {
       $max_pagine = ceil($lista->count() / $limite);
       $dati['lista'] = $staff->entrateUscite($info['periodo']['inizio'], $info['periodo']['fine'], $lista);
       $dati['azioni'] = $reg->azioneAssenze($data_obj, $this->getUser(), null, null, null);
-      // dati genitori
-      $lista_id = array();
-      foreach ($lista as $l) {
-        $lista_id[] = $l->getId();
-      }
-      $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitori($lista_id);
     }
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_autorizza.html.twig', array(
@@ -2114,12 +2109,6 @@ class StaffController extends AbstractController {
     }
     // lista alunni
     $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
-    // dati genitori
-    $lista_id = array();
-    foreach ($lista as $l) {
-      $lista_id[] = $l->getId();
-    }
-    $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitori($lista_id);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_deroghe.html.twig', array(
       'pagina_titolo' => 'page.staff_deroghe',
@@ -2295,12 +2284,6 @@ class StaffController extends AbstractController {
     }
     // lista alunni
     $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
-    // dati genitori
-    $lista_id = array();
-    foreach ($lista as $l) {
-      $lista_id[] = $l->getId();
-    }
-    $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitori($lista_id);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_situazione.html.twig', array(
       'pagina_titolo' => 'page.staff_situazione',
@@ -2636,36 +2619,33 @@ class StaffController extends AbstractController {
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/staff/password/create/{id}/{genitore}", name="staff_password_create",
-   *    requirements={"id": "\d+", "genitore": "0|1"},
+   * @Route("/staff/password/create/{tipo}/{username}", name="staff_password_create",
+   *    requirements={"tipo": "E|P"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_STAFF")
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em,
                                        UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                       StaffUtil $staff, LogHandler $dblogger, PdfManager $pdf, $id, $genitore) {
-    // controlla alunno
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $id, 'abilitato' => 1]);
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
+                                       StaffUtil $staff, LogHandler $dblogger, PdfManager $pdf,
+                                       $tipo, $username=null) {
+     // controlla alunno
+     $utente = $em->getRepository('App:Alunno')->findOneByUsername($username);
+     if (!$utente) {
+       // controlla genitore
+       $utente = $em->getRepository('App:Genitore')->findOneByUsername($username);
+       if (!$utente) {
+         // errore
+         throw $this->createNotFoundException('exception.id_notfound');
+       }
+     }
     // crea password
     $password = $staff->creaPassword(8);
-    if ($genitore) {
-      // password genitore
-      $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);
-      $utente = $genitori[0];
-    } else {
-      // password alunno
-      $utente = $alunno;
-    }
     $utente->setPasswordNonCifrata($password);
     $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
     $utente->setPassword($pswd);
     // provisioning
-    if (!$genitore) {
+    if ($utente instanceOf Alunno) {
       $provisioning = (new Provisioning())
         ->setUtente($utente)
         ->setFunzione('passwordUtente')
@@ -2678,26 +2658,59 @@ class StaffController extends AbstractController {
     $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
       'Username' => $utente->getUsername(),
       'Ruolo' => $utente->getRoles()[0],
-      'ID' => $utente->getId()
-      ));
+      'ID' => $utente->getId()));
     // crea documento PDF
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
-    $html = $this->renderView($genitore ? 'pdf/credenziali_profilo_genitori.html.twig' :
-      'pdf/credenziali_profilo_alunni.html.twig', array(
-        'alunno' => $alunno,
-        'sesso' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+    if ($utente instanceOf Alunno) {
+      $html = $this->renderView('pdf/credenziali_profilo_alunni.html.twig', array(
+        'alunno' => $utente,
+        'sesso' => ($utente->getSesso() == 'M' ? 'o' : 'a'),
         'username' => $utente->getUsername(),
         'password' => $password));
+    } else {
+      $html = $this->renderView('pdf/credenziali_profilo_genitori.html.twig', array(
+        'alunno' => $utente->getAlunno(),
+        'genitore' => $utente,
+        'sesso' => ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a'),
+        'username' => $utente->getUsername(),
+        'password' => $password));
+    }
     $pdf->createFromHtml($html);
-    // crea pdf e lo scarica
     $doc = $pdf->getHandler()->Output('', 'S');
-    $nomefile = 'credenziali-registro.pdf';
-    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-    $response = new Response($doc);
-    $response->headers->set('Content-Disposition', $disposition);
-    return $response;
+    if ($tipo == 'E') {
+      // invia password per email
+      $message = (new Email())
+        ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->to($utente->getEmail())
+        ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->text($this->renderView('email/credenziali.txt.twig'))
+        ->html($this->renderView('email/credenziali.html.twig'))
+        ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
+      try {
+        // invia email
+        $mailer->send($message);
+        $this->addFlash('success', 'message.credenziali_inviate');
+      } catch (\Exception $err) {
+        // errore di spedizione
+        $logger->error('Errore di spedizione email delle credenziali alunno/genitore.', array(
+          'username' => $utente->getUsername(),
+          'email' => $utente->getEmail(),
+          'ip' => $request->getClientIp(),
+          'errore' => $err->getMessage()));
+        $this->addFlash('danger', 'exception.errore_invio_credenziali');
+      }
+      // redirezione
+      return $this->redirectToRoute('alunni_modifica');
+    } else {
+      // crea pdf e lo scarica
+      $nomefile = 'credenziali-registro.pdf';
+      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+      $response = new Response($doc);
+      $response->headers->set('Content-Disposition', $disposition);
+      return $response;
+    }
   }
 
   /**

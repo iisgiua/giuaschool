@@ -98,23 +98,12 @@ class StaffUtil {
     $dati = array();
     // scansione della lista
     foreach ($lista as $a) {
-      $alunno = array();
-      $alunno['alunno_id'] = $a->getId();
-      $alunno['nome'] = $a->getCognome().' '.$a->getNome().' ('.$a->getDataNascita()->format('d/m/Y').')';
-      $alunno['classe_id'] = $a->getClasse()->getId();
-      $alunno['classe'] = $a->getClasse()->getAnno().'ª '.$a->getClasse()->getSezione();
-      $alunno['autorizzaEntrata'] = $a->getAutorizzaEntrata();
-      $alunno['autorizzaUscita'] = $a->getAutorizzaUscita();
-      $alunno['note'] = $a->getNote();
-      $alunno['noteBes'] = $a->getNoteBes();
-      $alunno['bes'] = $a->getBes();
-      $alunno['username'] = $a->getUsername();
-      $alunno['ultimoAccesso'] = $a->getUltimoAccesso();
+      $alunno = $a;
       // dati ritardi
       $entrate = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
         ->select('e.data,e.ora,e.note')
         ->where('e.valido=:valido AND e.alunno=:alunno AND e.data BETWEEN :inizio AND :fine')
-        ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
+        ->setParameters(['valido' => 1, 'alunno' => $a['alunno'], 'inizio' => $inizio->format('Y-m-d'),
           'fine' => $fine->format('Y-m-d')])
         ->orderBy('e.data', 'DESC')
         ->getQuery()
@@ -124,7 +113,7 @@ class StaffUtil {
       $uscite = $this->em->getRepository('App:Uscita')->createQueryBuilder('u')
         ->select('u.data,u.ora,u.note')
         ->where('u.valido=:valido AND u.alunno=:alunno AND u.data BETWEEN :inizio AND :fine')
-        ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
+        ->setParameters(['valido' => 1, 'alunno' => $a['alunno'], 'inizio' => $inizio->format('Y-m-d'),
           'fine' => $fine->format('Y-m-d')])
         ->orderBy('u.data', 'DESC')
         ->getQuery()
@@ -655,7 +644,7 @@ class StaffUtil {
         'totale' => $totale,
         'assenti' => $assenti,
         'presenti' => $presenti,
-        'percentuale' => number_format($presenti / $totale * 100, 2, ',', ''));
+        'percentuale' => ($totale == 0 ? 0 : number_format($presenti / $totale * 100, 2, ',', '')));
     }
     // restituisce dati
     return $dati;

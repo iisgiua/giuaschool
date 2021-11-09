@@ -84,7 +84,9 @@ RUN \
   cd /var/www/giuaschool/public && \
   rm -f spid && \
   ln -s -r ../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/www/ spid && \
-  cd .. && \
+  cd ../var/log && \
+  ln -s -r ../../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log/ spid && \
+  cd ../.. && \
 # create database
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
   service mysql start && mysqladmin -u root password 'root' && \

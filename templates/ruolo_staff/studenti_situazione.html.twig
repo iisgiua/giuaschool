@@ -16,43 +16,44 @@
     {% for u in lista %}
       <tr>
         <td>
-          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-          <span>{{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }})</span>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ u.alunno.cognome }} {{ u.alunno.nome }} ({{ u.alunno.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <span>{{ u.alunno.cognome }} {{ u.alunno.nome }} ({{ u.alunno.dataNascita|date('d/m/Y') }})</span>
           <div id="alunno-{{ loop.index }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Autorizzazioni e deroghe</h3>
-                <p>Ingresso: {{ u.autorizzaEntrata ? u.autorizzaEntrata : 'NESSUNA' }}</p>
-                <p>Uscita: {{ u.autorizzaUscita ? u.autorizzaUscita : 'NESSUNA' }}</p>
-                {% if u.note %}<p>Note:<br><em>{{ u.note }}</em></p>{% endif %}
+                <p>Ingresso: {{ u.alunno.autorizzaEntrata ? u.alunno.autorizzaEntrata : 'NESSUNA' }}</p>
+                <p>Uscita: {{ u.alunno.autorizzaUscita ? u.alunno.autorizzaUscita : 'NESSUNA' }}</p>
+                {% if u.alunno.note %}<p>Note:<br><em>{{ u.alunno.note }}</em></p>{% endif %}
               </div>
             </div>
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
-                <p>Profilo <strong>GENITORE</strong>: {{ dati.genitori[u.id].username }}<br>(ultimo accesso: {{ dati.genitori[u.id].ultimoAccesso ? dati.genitori[u.id].ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
-                <p>Profilo <strong>STUDENTE</strong>: {{ u.username }}<br>(ultimo accesso: {{ u.ultimoAccesso ? u.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+                <p>Profilo <strong>STUDENTE</strong>: {{ u.alunno.username }} (ultimo accesso: {{ u.alunno.ultimoAccesso ? u.alunno.ultimoAccesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ u.g1_nome }} {{ u.g1_cognome }}</strong>: {{ u.g1_username }} (ultimo accesso: {{ u.g1_accesso ? u.g1_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ u.g2_nome }} {{ u.g2_cognome }}</strong>: {{ u.g2_username }} (ultimo accesso: {{ u.g2_accesso ? u.g2_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
               </div>
             </div>
-            {% if u.bes != 'N' %}
+            {% if u.alunno.bes != 'N' %}
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
-                <p>Tipologia: {{ ('label.bes_'~u.bes)|trans }}</p>
-                {% if u.noteBes %}<p>Descrizione:<br><em>{{ u.noteBes|raw }}</em></p>{% endif %}
+                <p>Tipologia: {{ ('label.bes_'~u.alunno.bes)|trans }}</p>
+                {% if u.alunno.noteBes %}<p>Descrizione:<br><em>{{ u.alunno.noteBes|raw }}</em></p>{% endif %}
               </div>
             </div>
             {% endif %}
           </div>
         </td>
-        <td>{{ u.classe.anno }}ª {{ u.classe.sezione }}</td>
+        <td>{{ u.alunno.classe.anno }}ª {{ u.alunno.classe.sezione }}</td>
         <td>
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.id, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.id, 'tipo': 'S', 'formato': 'H'}) }}" role="button" title="Mostra la situazione degli scrutini dell'alunno"><strong>Scrutini</strong></a>
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.id, 'tipo': 'A', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle assenze dell'alunno"><strong>Assenze</strong></a>
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.id, 'tipo': 'N', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle note dell'alunno"><strong>Note</strong></a>
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.id, 'tipo': 'O', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle osservazioni sull'alunno"><strong>Osservazioni</strong></a>
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.id, 'tipo': 'T', 'formato': 'H'}) }}" role="button" title="Mostra la situazione complessiva dell'alunno"><strong>Tutto</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.alunno.id, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.alunno.id, 'tipo': 'S', 'formato': 'H'}) }}" role="button" title="Mostra la situazione degli scrutini dell'alunno"><strong>Scrutini</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.alunno.id, 'tipo': 'A', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle assenze dell'alunno"><strong>Assenze</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.alunno.id, 'tipo': 'N', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle note dell'alunno"><strong>Note</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.alunno.id, 'tipo': 'O', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle osservazioni sull'alunno"><strong>Osservazioni</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_situazione_alunno', {'alunno': u.alunno.id, 'tipo': 'T', 'formato': 'H'}) }}" role="button" title="Mostra la situazione complessiva dell'alunno"><strong>Tutto</strong></a>
         </td>
       </tr>
     {% endfor %}

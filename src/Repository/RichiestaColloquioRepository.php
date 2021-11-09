@@ -36,8 +36,9 @@ class RichiestaColloquioRepository extends EntityRepository {
       $data = new \DateTime('today');
     }
     $colloqui = $this->createQueryBuilder('rc')
-      ->select('rc.id,rc.appuntamento,rc.durata,rc.stato,rc.messaggio,c.dati,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione')
+      ->select("rc.id,rc.appuntamento,rc.durata,rc.stato,rc.messaggio,CONCAT(g.nome,' ',g.cognome) AS genitore,c.dati,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione")
       ->join('rc.alunno', 'a')
+      ->join('rc.genitore', 'g')
       ->join('a.classe', 'cl')
       ->join('rc.colloquio', 'c')
       ->where('c.docente=:docente AND rc.appuntamento>=:data')

@@ -45,46 +45,47 @@
       {% for a in dati.lista %}
       <tr>
         <td>
-          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.nome }}" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-          <span>{{ a.nome }}</span>
-        {% if a.autorizzaEntrata is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.autorizzaEntrata }}"><span class="glyphicon glyphicon-time"></span></button>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <span>{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})</span>
+        {% if a.alunno.autorizzaEntrata is not empty %}
+          <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaEntrata }}"><span class="glyphicon glyphicon-time"></span></button>
         {% endif %}
-        {% if a.autorizzaUscita is not empty %}
-          <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
+        {% if a.alunno.autorizzaUscita is not empty %}
+          <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
         {% endif %}
           <div id="alunno-{{ loop.index }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Autorizzazioni e deroghe</h3>
-                <p>Ingresso: {{ a.autorizzaEntrata ? a.autorizzaEntrata : 'NESSUNA' }}</p>
-                <p>Uscita: {{ a.autorizzaUscita ? a.autorizzaUscita : 'NESSUNA' }}</p>
-                {% if a.note %}<p>Note:<br><em>{{ a.note }}</em></p>{% endif %}
+                <p>Ingresso: {{ a.alunno.autorizzaEntrata ? a.alunno.autorizzaEntrata : 'NESSUNA' }}</p>
+                <p>Uscita: {{ a.alunno.autorizzaUscita ? a.alunno.autorizzaUscita : 'NESSUNA' }}</p>
+                {% if a.alunno.note %}<p>Note:<br><em>{{ a.alunno.note }}</em></p>{% endif %}
               </div>
             </div>
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
-                <p>Profilo <strong>GENITORE</strong>: {{ dati.genitori[a.alunno_id].username }}<br>(ultimo accesso: {{ dati.genitori[a.alunno_id].ultimoAccesso ? dati.genitori[a.alunno_id].ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
-                <p>Profilo <strong>STUDENTE</strong>: {{ a.username }}<br>(ultimo accesso: {{ a.ultimoAccesso ? a.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+                <p>Profilo <strong>STUDENTE</strong>: {{ a.alunno.username }} (ultimo accesso: {{ a.alunno.ultimoAccesso ? a.alunno.ultimoAccesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ a.g1_nome }} {{ a.g1_cognome }}</strong>: {{ a.g1_username }} (ultimo accesso: {{ a.g1_accesso ? a.g1_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ a.g2_nome }} {{ a.g2_cognome }}</strong>: {{ a.g2_username }} (ultimo accesso: {{ a.g2_accesso ? a.g2_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
               </div>
             </div>
-            {% if a.bes != 'N' %}
+            {% if a.alunno.bes != 'N' %}
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
-                <p>Tipologia: {{ ('label.bes_'~a.bes)|trans }}</p>
-                {% if a.noteBes %}<p>Descrizione:<br><em>{{ a.noteBes|raw }}</em></p>{% endif %}
+                <p>Tipologia: {{ ('label.bes_'~a.alunno.bes)|trans }}</p>
+                {% if a.alunno.noteBes %}<p>Descrizione:<br><em>{{ a.alunno.noteBes|raw }}</em></p>{% endif %}
               </div>
             </div>
             {% endif %}
           </div>
         </td>
-        <td>{{ a.classe }}</td>
+        <td>{{ a.alunno.classe }}</td>
         <td>
         {% if a.entrate is not empty %}
-          <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sui ritardi" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sui ritardi" data-body="entrate-{{ a.alunno_id }}">{{ a.entrate|length }}</button>
-          <div id="entrate-{{ a.alunno_id }}" style="display:none">
+          <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sui ritardi" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sui ritardi" data-body="entrate-{{ a.alunno.id }}">{{ a.entrate|length }}</button>
+          <div id="entrate-{{ a.alunno.id }}" style="display:none">
           {% for k,v in a.entrate %}
             <div class="list-group-item">
               <div class="list-group-item-text">
@@ -100,8 +101,8 @@
         </td>
         <td>
         {% if a.uscite is not empty %}
-          <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sulle uscite anticipate" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulle uscite anticipate" data-body="uscite-{{ a.alunno_id }}">{{ a.uscite|length }}</button>
-          <div id="uscite-{{ a.alunno_id }}" style="display:none">
+          <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sulle uscite anticipate" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulle uscite anticipate" data-body="uscite-{{ a.alunno.id }}">{{ a.uscite|length }}</button>
+          <div id="uscite-{{ a.alunno.id }}" style="display:none">
           {% for k,v in a.uscite %}
             <div class="list-group-item">
               <div class="list-group-item-text">
@@ -117,8 +118,8 @@
         </td>
         <td>
         {% if dati.azioni %}
-          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_entrata', {'data': data, 'classe': a.classe_id, 'alunno': a.alunno_id}) }}" role="button" title="Segna il ritardo dell'alunno">R</a>
-          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_uscita', {'data': data, 'classe': a.classe_id, 'alunno': a.alunno_id}) }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_entrata', {'data': data, 'classe': a.alunno.classe.id, 'alunno': a.alunno.id}) }}" role="button" title="Segna il ritardo dell'alunno">R</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_uscita', {'data': data, 'classe': a.alunno.classe.id, 'alunno': a.alunno.id}) }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
         {% endif %}
         </td>
       </tr>

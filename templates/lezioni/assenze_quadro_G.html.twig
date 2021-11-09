@@ -131,8 +131,9 @@
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
-                <p>Profilo <strong>GENITORE</strong>: {{ dati[data].genitori[v.id_alunno].username }}<br>(ultimo accesso: {{ dati[data].genitori[v.id_alunno].ultimoAccesso ? dati[data].genitori[v.id_alunno].ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
-                <p>Profilo <strong>STUDENTE</strong>: {{ v.username }}<br>(ultimo accesso: {{ v.ultimoAccesso ? v.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+                <p>Profilo <strong>STUDENTE</strong>: {{ v.username }} (ultimo accesso: {{ v.ultimoAccesso ? v.ultimoAccesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ dati[data].genitori[v.id_alunno].g1_nome }} {{ dati[data].genitori[v.id_alunno].g1_cognome }}</strong>: {{ dati[data].genitori[v.id_alunno].g1_username }} (ultimo accesso: {{ dati[data].genitori[v.id_alunno].g1_accesso ? dati[data].genitori[v.id_alunno].g1_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ dati[data].genitori[v.id_alunno].g2_nome }} {{ dati[data].genitori[v.id_alunno].g2_cognome }}</strong>: {{ dati[data].genitori[v.id_alunno].g2_username }} (ultimo accesso: {{ dati[data].genitori[v.id_alunno].g2_accesso ? dati[data].genitori[v.id_alunno].g2_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
               </div>
             </div>
               {% if v.bes != 'N' %}

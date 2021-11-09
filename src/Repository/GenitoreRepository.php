@@ -61,12 +61,12 @@ class GenitoreRepository extends UtenteRepository {
    */
   public function datiGenitori(array $alunni) {
     // legge dati
-    $genitori = $this->createQueryBuilder('g')
-      ->select('a.id,g.username,g.ultimoAccesso')
-      ->join('g.alunno', 'a')
+    $genitori = $this->_em->getRepository('App:Alunno')->createQueryBuilder('a')
+      ->select('a.id,g1.cognome AS g1_cognome,g1.nome AS g1_nome,g1.username AS g1_username,g1.email AS g1_email,g1.ultimoAccesso AS g1_accesso,g2.cognome AS g2_cognome,g2.nome AS g2_nome,g2.username AS g2_username,g2.email AS g2_email,g2.ultimoAccesso AS g2_accesso')
+      ->join('App:Genitore', 'g1', 'WITH', 'g1.alunno=a.id AND g1.username LIKE :gen1')
+      ->leftJoin('App:Genitore', 'g2', 'WITH', 'g2.alunno=a.id AND g2.username LIKE :gen2')
       ->where('a.id IN (:alunni)')
-      ->setParameters(['alunni' => $alunni])
-      ->orderBy('g.ultimoAccesso', 'ASC')
+      ->setParameters(['gen1' => '%.f_', 'gen2' => '%.g_', 'alunni' => $alunni])
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo

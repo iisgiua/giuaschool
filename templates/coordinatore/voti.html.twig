@@ -44,8 +44,9 @@
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
-                <p>Profilo <strong>GENITORE</strong>: {{ dati.genitori[a.id].username }}<br>(ultimo accesso: {{ dati.genitori[a.id].ultimoAccesso ? dati.genitori[a.id].ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
-                <p>Profilo <strong>STUDENTE</strong>: {{ a.username }}<br>(ultimo accesso: {{ a.ultimoAccesso ? a.ultimoAccesso|date('d/m/Y H:i:s') : 'MAI' }})</p>
+                <p>Profilo <strong>STUDENTE</strong>: {{ a.username }} (ultimo accesso: {{ a.ultimoAccesso ? a.ultimoAccesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ dati.genitori[a.id].g1_nome }} {{ dati.genitori[a.id].g1_cognome }}</strong>: {{ dati.genitori[a.id].g1_username }} (ultimo accesso: {{ dati.genitori[a.id].g1_accesso ? dati.genitori[a.id].g1_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
+                <p>Profilo <strong>GENITORE - {{ dati.genitori[a.id].g2_nome }} {{ dati.genitori[a.id].g2_cognome }}</strong>: {{ dati.genitori[a.id].g2_username }} (ultimo accesso: {{ dati.genitori[a.id].g2_accesso ? dati.genitori[a.id].g2_accesso|date('d/m/Y H:i') : 'MAI' }})</p>
               </div>
             </div>
             {% if a.bes != 'N' %}

@@ -22,10 +22,11 @@
     <tbody>
       {% for r in dati.richieste %}
       <tr{{ r.stato == 'R' ? ' class="bg-warning"' : (r.stato == 'A' or r.stato == 'N' ? ' class="text-danger"') }}>
-        <td><strong>{{ settimana[r.appuntamento|date('w')] }} {{ r.appuntamento|date('j') }} {{ mesi[r.appuntamento|date('n')] }} dalle {{ r.appuntamento|date('G:i') }} alle {{ r.appuntamento|date_modify('+'~r.durata~' minutes')|date('G:i') }}</strong></td>
+        <td><strong>{{ settimana[r.appuntamento|date('w')] }} {{ r.appuntamento|date('j') }} {{ mesi[r.appuntamento|date('n')] }} dalle {{ r.appuntamento|date('G:i') }}</strong></td>
         <td><strong>{{ r.anno }}ª {{ r.sezione }}</strong></td>
         <td><strong>{{ r.cognome }} {{ r.nome }}</strong></td>
         <td>
+        <em>Richiesto dal genitore {{ r.genitore }}</em><br>
         {% if r.stato == 'R' %}
           <strong>In attesa di conferma</strong>
           <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button gs-ml-3" title="Rifiuta la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_edit', {'richiesta': r.id, 'azione': 'N'}) }}" data-text="{{ 'message.rifiuto_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Rifiuta</strong></button>
@@ -66,7 +67,7 @@
       {% for a in dati.appuntamenti %}
       <tr>
         <td><strong>{{ a.citta is defined ? a.citta : 'A DISTANZA' }}</strong></td>
-        <td><strong>{{ a.inizio|date('d/m/Y') }} dalle {{ a.inizio|date('G:i') }} alle {{ a.fine|date('G:i') }}</strong></td>
+        <td><strong>{{ a.inizio|date('d/m/Y') }} dalle {{ a.inizio|date('G:i') }}</strong></td>
         <td><strong>{{ a.numero }}{% if a.completo is defined %} <span class="badge gs-ml-2">AL COMPLETO</span>{% endif %}</strong></td>
         <td>
         {% if a.completo is defined %}

@@ -345,14 +345,13 @@ class AlunniController extends BaseController {
    * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param int $id ID dell'utente
-   * @param boolean $genitore Vero se si vuole cambiare la password del genitore, falso per la password dell'alunno
    * @param string $tipo Tipo di creazione del documento [E=email, P=Pdf]
+   * @param string $username Username del genitore o alunno di cui si vuole cambiare la password
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/alunni/password/{id}/{genitore}/{tipo}", name="alunni_password",
-   *    requirements={"id": "\d+", "genitore": "0|1", "tipo": "E|P"},
+   * @Route("/alunni/password/{tipo}/{username}", name="alunni_password",
+   *    requirements={"tipo": "E|P"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
@@ -360,28 +359,24 @@ class AlunniController extends BaseController {
   public function passwordAction(Request $request, EntityManagerInterface $em,
                                  UserPasswordEncoderInterface $encoder, SessionInterface $session,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
-                                 LogHandler $dblogger, $id, $genitore, $tipo): Response {
+                                 LogHandler $dblogger, $tipo, $username=null): Response {
     // controlla alunno
-    $alunno = $em->getRepository('App:Alunno')->find($id);
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
+    $utente = $em->getRepository('App:Alunno')->findOneByUsername($username);
+    if (!$utente) {
+      // controlla genitore
+      $utente = $em->getRepository('App:Genitore')->findOneByUsername($username);
+      if (!$utente) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
     }
     // crea password
     $password = $staff->creaPassword(8);
-    if ($genitore) {
-      // password genitore
-      $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alunno]);
-      $utente = $genitori[0];
-    } else {
-      // password alunno
-      $utente = $alunno;
-    }
     $utente->setPasswordNonCifrata($password);
     $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
     $utente->setPassword($pswd);
     // provisioning
-    if (!$genitore) {
+    if ($utente instanceOf Alunno) {
       $provisioning = (new Provisioning())
         ->setUtente($utente)
         ->setFunzione('passwordUtente')
@@ -399,12 +394,20 @@ class AlunniController extends BaseController {
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
-    $html = $this->renderView($genitore ? 'pdf/credenziali_profilo_genitori.html.twig' :
-      'pdf/credenziali_profilo_alunni.html.twig', array(
-        'alunno' => $alunno,
-        'sesso' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+    if ($utente instanceOf Alunno) {
+      $html = $this->renderView('pdf/credenziali_profilo_alunni.html.twig', array(
+        'alunno' => $utente,
+        'sesso' => ($utente->getSesso() == 'M' ? 'o' : 'a'),
         'username' => $utente->getUsername(),
         'password' => $password));
+    } else {
+      $html = $this->renderView('pdf/credenziali_profilo_genitori.html.twig', array(
+        'alunno' => $utente->getAlunno(),
+        'genitore' => $utente,
+        'sesso' => ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a'),
+        'username' => $utente->getUsername(),
+        'password' => $password));
+    }
     $pdf->createFromHtml($html);
     $doc = $pdf->getHandler()->Output('', 'S');
     if ($tipo == 'E') {
@@ -776,42 +779,51 @@ class AlunniController extends BaseController {
       'Credenziali di accesso al Registro Elettronico');
     // legge alunni
     foreach ($dati['lista'] as $alu) {
-      // crea password
-      $password = $staff->creaPassword(8);
       if ($genitore) {
         // password genitore
-        $genitori = $em->getRepository('App:Genitore')->findBy(['alunno' => $alu['alunno']]);
-        $utente = $genitori[0];
+        $utenti = $em->getRepository('App:Genitore')->findBy(['alunno' => $alu['alunno']]);
       } else {
         // password alunno
-        $utente = $alu['alunno'];
+        $utenti = [$alu['alunno']];
       }
-      $utente->setPasswordNonCifrata($password);
-      $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
-      $utente->setPassword($pswd);
-      // provisioning
-      if (!$genitore) {
-        $provisioning = (new Provisioning())
-          ->setUtente($utente)
-          ->setFunzione('passwordUtente')
-          ->setDati(['password' => $utente->getPasswordNonCifrata()]);
-        $em->persist($provisioning);
+      foreach ($utenti as $utente) {
+        // crea password
+        $password = $staff->creaPassword(8);
+        $utente->setPasswordNonCifrata($password);
+        $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
+        $utente->setPassword($pswd);
+        // provisioning
+        if (!$genitore) {
+          $provisioning = (new Provisioning())
+            ->setUtente($utente)
+            ->setFunzione('passwordUtente')
+            ->setDati(['password' => $utente->getPasswordNonCifrata()]);
+          $em->persist($provisioning);
+        }
+        // memorizza su db
+        $em->flush();
+        // log azione
+        $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
+          'Username' => $utente->getUsername(),
+          'Ruolo' => $utente->getRoles()[0],
+          'ID' => $utente->getId()));
+        // contenuto in formato HTML
+        if ($genitore) {
+          $html = $this->renderView('pdf/credenziali_profilo_genitori.html.twig', array(
+            'alunno' => $utente->getAlunno(),
+            'genitore' => $utente,
+            'sesso' => ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a'),
+            'username' => $utente->getUsername(),
+            'password' => $password));
+        } else {
+          $html = $this->renderView('pdf/credenziali_profilo_alunni.html.twig', array(
+            'alunno' => $utente,
+            'sesso' => ($utente->getSesso() == 'M' ? 'o' : 'a'),
+            'username' => $utente->getUsername(),
+            'password' => $password));
+        }
+        $pdf->createFromHtml($html);
       }
-      // memorizza su db
-      $em->flush();
-      // log azione
-      $dblogger->logAzione('SICUREZZA', 'Generazione Password', array(
-        'Username' => $utente->getUsername(),
-        'Ruolo' => $utente->getRoles()[0],
-        'ID' => $utente->getId()));
-      // contenuto in formato HTML
-      $html = $this->renderView($genitore ? 'pdf/credenziali_profilo_genitori.html.twig' :
-        'pdf/credenziali_profilo_alunni.html.twig', array(
-          'alunno' => $alu['alunno'],
-          'sesso' => ($alu['alunno']->getSesso() == 'M' ? 'o' : 'a'),
-          'username' => $utente->getUsername(),
-          'password' => $password));
-      $pdf->createFromHtml($html);
     }
     // crea pdf e lo scarica
     $doc = $pdf->getHandler()->Output('', 'S');
