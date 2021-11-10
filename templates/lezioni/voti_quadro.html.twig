@@ -138,7 +138,7 @@
               <div class="list-group-item-text">
                 <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
                 <p>Tipologia: {{ ('label.bes_'~a.bes)|trans }}</p>
-                {% if a.noteBes and cattedra %}<p>Descrizione:<br><em>{{ a.noteBes|raw }}</em></p>{% endif %}
+                {% if a.noteBes %}<p>Descrizione:<br><em>{{ a.noteBes|raw }}</em></p>{% endif %}
               </div>
             </div>
             {% endif %}
