@@ -1733,8 +1733,7 @@ class StaffController extends AbstractController {
         ->setDocenteGiustifica(null);
     } else {
       // nuovo
-      $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['inizio']);
-      $ora->modify('+60 minutes');
+      $ora = \DateTime::createFromFormat('H:i:s', $orario[0]['fine']);
       $nota = $trans->trans('message.autorizza_ritardo', [
         'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
         'alunno' => $alunno->getCognome().' '.$alunno->getNome()]);
@@ -1914,8 +1913,7 @@ class StaffController extends AbstractController {
       if ($data != $ora->format('Y-m-d') || $ora->format('H:i:00') < $orario[0]['inizio'] ||
           $ora->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
         // data non odierna o ora attuale fuori da orario
-        $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['fine']);
-        $ora->modify('-60 minutes');
+        $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['inizio']);
       }
       $nota = $trans->trans('message.autorizza_uscita', [
         'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
