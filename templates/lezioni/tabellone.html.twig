@@ -192,7 +192,6 @@
             {% if dati.voti[alunno][materia].unico is not defined %}
             <span>--</span>
             {% elseif dati.voti[alunno][materia].unico == 0 or (m.tipo == 'E' and dati.voti[alunno][materia].unico == 3) %}
-            {% elseif dati.voti[alunno][materia].unico == 0 or (m.tipo == 'E' and dati.voti[alunno][materia].unico == 3) %}
             <span class="gs-big"><span class="label label-danger">NC</span></span>
             {% else %}
             <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][materia].unico }}</span></span>

@@ -212,14 +212,14 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
     | id   | anno | sezione |
     | $cl1 | 3    | A       |
   E ricerca istanze di tipo "Alunno":
-    | id  | username        |
-    | $a1 | daniela.pini.s1 |
+    | id  | classe |
+    | $a1 | $cl1   |
   E istanze di tipo "Cattedra":
     | id  | docente | classe | attiva | tipo |
     | $c1 | #logged | $cl1   | si     | N    |
   E pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
@@ -228,12 +228,12 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
   Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
-  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" decodificato con "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" decodificato con "$d1:cifrato"
   Esempi:
-    | tipo     | nome     | tipodoc |
-    | Diagnosi | DIAGNOSI | B       |
-    | P.E.I.   | PEI      | H       |
-    | P.D.P.   | PDP      | D       |
+    | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
+    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
 
 
 ################################################################################

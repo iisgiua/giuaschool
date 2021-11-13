@@ -114,27 +114,39 @@ Schema dello scenario: visualizza errore per pagina inserimento documenti BES gi
 # Bisogna caricare un documento da inserire come documento BES
 
 Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserimenti
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe |
+    | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_bes"
   E vedi la tabella:
-    | classe | alunno         | documento                | azione            |
-    | /3ª A/ | /Pini Daniela/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
-  E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
+    | classe | alunno           | documento | azione            |
+    | /3ª A/ | $a1:cognome,nome | /<tipo>/  | Aggiungi Cancella |
+  E vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
-    | tipo     | nome     |
-    | Diagnosi | DIAGNOSI |
-    | P.E.I.   | PEI      |
-    | P.D.P.   | PDP      |
+    | tipo     | nome     | alunno                 | alunno_file                              |
+    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
 
 Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza modifiche
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe |
+    | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Annulla"
@@ -142,12 +154,12 @@ Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza mo
   E non vedi la tabella:
     | classe | alunno | documento | azione |
   Ma la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
-  E non vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
+  E non vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
-    | tipo     | nome     |
-    | Diagnosi | DIAGNOSI |
-    | P.E.I.   | PEI      |
-    | P.D.P.   | PDP      |
+    | tipo     | nome     | alunno                 | alunno_file                              |
+    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
 
 Scenario: errore inserimento documento BES senza selezione classe
   Quando pagina attiva "documenti_bes_add"
@@ -167,27 +179,45 @@ Scenario: errore inserimento documento BES senza selezione alunno
   E la sezione "#gs-main form .alert" contiene "/Non hai indicato l'alunno/i"
 
 Scenario: errore inserimento documento BES senza selezione tipo documento
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe |
+    | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "$a1:cognome+ +$a1:nome" da pulsanti radio "documento_alunnoIndividuale"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   Allora vedi pagina "documenti_bes_add"
   E la sezione "#gs-main form .alert" contiene "/Non hai indicato il tipo di documento/i"
 
 Scenario: impedisce inserimento documento BES con più di un allegato
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe |
+    | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "$a1:cognome+ +$a1:nome" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E alleghi file "documento-docx.docx" a dropzone
   Allora la sezione "#gs-main .dropzone .dz-error" contiene "/documento-docx\.docx.*Non puoi caricare altri file/i"
 
 Scenario: impedisce inserimento documento BES senza allegato
+  Data ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe |
+    | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "$a1:cognome+ +$a1:nome" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "Diagnosi" da lista "documento_tipo"
   Allora pulsante "Conferma" inattivo
 
@@ -197,25 +227,28 @@ Scenario: impedisce inserimento documento BES senza allegato
 
 Schema dello scenario: inserisce documento BES e controlla la sua codifica
   Data pagina attiva "documenti_bes_add"
+  E ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe |
+    | $a1 | $cl1   |
   Quando selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E vedi pagina "documenti_bes"
-  E ricerca istanze di tipo "Alunno":
-    | id  | username        |
-    | $a1 | daniela.pini.s1 |
   E ricerca istanze di tipo "Documento":
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
   Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
-  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf" decodificato con "$d1:cifrato"
+  E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" decodificato con "$d1:cifrato"
   Esempi:
-    | tipo     | nome     | tipodoc |
-    | Diagnosi | DIAGNOSI | B       |
-    | P.E.I.   | PEI      | H       |
-    | P.D.P.   | PDP      | D       |
+    | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
+    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
 
 
 ################################################################################

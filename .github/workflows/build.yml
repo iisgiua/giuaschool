@@ -66,6 +66,16 @@ jobs:
 
       - name: Upload ZIP release as artifact
         uses: actions/upload-artifact@v2
+        if: github.event_name == 'push'
         with:
           name: release-zip
           path: giuaschool-release.zip
+
+      - name: Publish release
+        uses: svenstaro/upload-release-action@v2
+        if: github.event_name == 'release'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: giuaschool-release.zip
+          asset_name: ${{ github.ref }}.zip
+          tag: ${{ github.ref }}

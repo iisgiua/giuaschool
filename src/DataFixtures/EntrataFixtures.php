@@ -37,7 +37,7 @@ class EntrataFixtures extends Fixture implements DependentFixtureInterface, Fixt
   public function load(ObjectManager $em) {
     $faker = Factory::create('it_IT');
     $faker->addProvider(new FakerPerson($faker));
-    $faker->seed(7474);
+    $faker->seed(7777);
     // carica dati
     $alunni = $em->getRepository('App:Alunno')->findBy([]);
     $docenti = $em->getRepository('App:Docente')->findBy([]);

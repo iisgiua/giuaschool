@@ -459,17 +459,17 @@ class BrowserContext extends BaseContext {
 
   /**
    * Controlla che sia stato scaricato il file indicato
-   *  $nome: nome assegnato al file
+   *  $testoParam: nome assegnato al file (con parametri)
    *  $dimensione: lunghezza del file in byte
    *
-   * @Then file scaricato con nome :nome
-   * @Then file scaricato con nome :nome e dimensione :dimensione
+   * @Then file scaricato con nome :testoParam
+   * @Then file scaricato con nome :testoParam e dimensione :dimensione
    */
-  public function fileScaricatoConNomeEDimensione($nome, $dimensione=null): void {
+  public function fileScaricatoConNomeEDimensione($testoParam, $dimensione=null): void {
     $this->assertPageStatus(200);
     $headers = $this->session->getResponseHeaders();
     $this->assertTrue(preg_match("/^attachment;\s*filename=(.*)$/i", $headers['Content-Disposition'], $data));
-    $this->assertTrue($data[1] == $nome && ($dimensione === null || $headers['Content-Length'] == $dimensione));
+    $this->assertTrue($data[1] == $testoParam && ($dimensione === null || $headers['Content-Length'] == $dimensione));
     $this->log('DOWNLOAD', 'File: '.$data[1].' ['.$headers['Content-Length'].' byte]');
   }
 
@@ -488,61 +488,61 @@ class BrowserContext extends BaseContext {
 
   /**
    * Carica un file tramite dropzone
-   *  $file: nome del file presente nella direcotry tests/data
+   *  $testoParam: nome del file presente nella direcotry tests/data (con parrametri)
    *  $dz: percors CSS per la dropzone
    *
-   * @When alleghi file :file a dropzone
-   * @When alleghi file :file a dropzone :dz
+   * @When alleghi file :testoParam a dropzone
+   * @When alleghi file :testoParam a dropzone :dz
    */
-  public function alleghiFileADropzone($file, $dz='.dropzone'): void {
-    $nomefile = $this->kernel->getProjectDir().'/tests/data/'.$file;
+  public function alleghiFileADropzone($testoParam, $dz='.dropzone'): void {
+    $nomefile = $this->kernel->getProjectDir().'/tests/data/'.$testoParam;
     $this->assertTrue(file_exists($nomefile.'.base64'));
     $data = file_get_contents($nomefile.'.base64');
     $js = 'data = "'.$data.'";'.
       'arrayBuffer = Uint8Array.from(window.atob(data), c => c.charCodeAt(0));'.
-      'file = new File([arrayBuffer], "'.$file.'");'.
+      'file = new File([arrayBuffer], "'.$testoParam.'");'.
       'Dropzone.forElement("'.$dz.'").addFile(file);';
     $this->session->executeScript($js);
     // attesa per completare le modifiche sulla pagina
     sleep(1);
-    $this->log('UPLOAD', 'File: '.$file);
+    $this->log('UPLOAD', 'File: '.$testoParam);
   }
 
   /**
    * Controlla l'esistenza di un file
-   *  $file: nome del file con percorso relativo alla directory FILES
+   *  $testoParam: nome del file con percorso relativo alla directory FILES (con inserimento parametri)
    *  $dimensione: dimensione del file in byte
    *
-   * @Then vedi file :file
-   * @Then vedi file :file di dimensione :dimensione
+   * @Then vedi file :testoParam
+   * @Then vedi file :testoParam di dimensione :dimensione
    */
-  public function vediFile($file, $dimensione=null): void {
-    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
+  public function vediFile($testoParam, $dimensione=null): void {
+    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
     $this->assertTrue(file_exists($nomefile) && ($dimensione === null || filesize($nomefile) == $dimensione));
-    $this->files[] = 'FILES/'.$file;
+    $this->files[] = 'FILES/'.$testoParam;
   }
 
   /**
    * Controlla la non esistenza di un file
-   *  $file: nome del file con percorso relativo alla directory FILES
+   *  $testoParam: nome del file con percorso relativo alla directory FILES (con parametri)
    *
-   * @Then non vedi file :file
+   * @Then non vedi file :testoParam
    */
-  public function nonVediFile($file): void {
-    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
+  public function nonVediFile($testoParam): void {
+    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
     $this->assertFalse(file_exists($nomefile));
   }
 
   /**
    * Decodifica un file PDF e controlla la presenza del testo indicato
    *  $ricerca: testo da cercare nel file
-   *  $file: nome del file con percorso relativo alla directory FILES
+   *  $testoParam: nome del file con percorso relativo alla directory FILES (con parametri)
    *  $valore: password per la decodifica
    *
-   * @Then vedi :ricerca in file :file decodificato con :valore
+   * @Then vedi :ricerca in file :testoParam decodificato con :valore
    */
-  public function vediInFileDecodificato($ricerca, $file, $valore): void {
-    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$file;
+  public function vediInFileDecodificato($ricerca, $testoParam, $valore): void {
+    $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
     $convertito = substr($nomefile, 0, -3).'txt';
     $testo = null;
     try {
@@ -557,8 +557,8 @@ class BrowserContext extends BaseContext {
       // errore: evita eccezione
     }
     $this->assertTrue($testo && preg_match($ricerca, $testo));
-    $this->files[] = 'FILES/'.$file;
-    $this->files[] = 'FILES/'.substr($file, 0, -3).'txt';
+    $this->files[] = 'FILES/'.$testoParam;
+    $this->files[] = 'FILES/'.substr($testoParam, 0, -3).'txt';
   }
 
   /**

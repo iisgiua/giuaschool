@@ -32,6 +32,22 @@ class DefinizioneScrutinioFixtures extends Fixture implements FixtureGroupInterf
    * @param ObjectManager $em Gestore dei dati su database
    */
   public function load(ObjectManager $em) {
+    // attiva lo scrutinio primo quadrimestre
+    $argomenti = [
+      1 => 'Scrutini primo quadrimestre',
+      2 => 'Situazioni particolari da segnalare'];
+    $struttura = [
+      1 => ['ScrutinioInizio', false, []],
+      2 => ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]],
+      3 => ['ScrutinioFine', false, []],
+      4 => ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2]]];
+    $scrutinio = (new DefinizioneScrutinio())
+      ->setData(new \DateTime('2 month ago'))
+      ->setArgomenti($argomenti)
+      ->setPeriodo('P')
+      ->setDataProposte(new \DateTime('2 month ago'))
+      ->setStruttura($struttura);
+    $em->persist($scrutinio);
     // attiva lo scrutinio finale
     $argomenti = [
       1 => 'Scrutini finali',
@@ -42,10 +58,26 @@ class DefinizioneScrutinioFixtures extends Fixture implements FixtureGroupInterf
       3 => ['ScrutinioFine', false, []],
       4 => ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2]]];
     $scrutinio = (new DefinizioneScrutinio())
-      ->setData(new \DateTime('today'))
+      ->setData(new \DateTime('1 month ago'))
       ->setArgomenti($argomenti)
-      ->setPeriodo('P')
-      ->setDataProposte(new \DateTime('today'))
+      ->setPeriodo('F')
+      ->setDataProposte(new \DateTime('1 month ago'))
+      ->setStruttura($struttura);
+    $em->persist($scrutinio);
+    // attiva lo scrutinio per i giudizi sospesi
+    $argomenti = [
+      1 => 'Scrutini per gli alunni con giusdizio sospeso',
+      2 => 'Situazioni particolari da segnalare'];
+    $struttura = [
+      1 => ['ScrutinioInizio', false, []],
+      2 => ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]],
+      3 => ['ScrutinioFine', false, []],
+      4 => ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2]]];
+    $scrutinio = (new DefinizioneScrutinio())
+      ->setData(new \DateTime('yesterday'))
+      ->setArgomenti($argomenti)
+      ->setPeriodo('E')
+      ->setDataProposte(new \DateTime('yesterday'))
       ->setStruttura($struttura);
     $em->persist($scrutinio);
     // memorizza dati

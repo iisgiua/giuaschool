@@ -424,29 +424,35 @@ Schema dello scenario: inserisce e poi cancella documento BES
   Data modifica utente connesso:
     | responsabileBes | responsabileBesSede |
     | si              | null                |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno | sezione |
+    | $cl1 | 3    | A       |
+  E ricerca istanze di tipo "Alunno":
+    | id  | classe |
+    | $a1 | $cl1   |
   Quando pagina attiva "documenti_bes_add"
   E selezioni opzione "3ª A" da lista "documento_classe"
-  E selezioni opzione "Pini Daniela" da pulsanti radio "documento_alunnoIndividuale"
+  E selezioni opzione "<alunno>" da pulsanti radio "documento_alunnoIndividuale"
   E selezioni opzione "<tipo>" da lista "documento_tipo"
   E alleghi file "documento-pdf.pdf" a dropzone
   E premi pulsante "Conferma"
   E vedi pagina "documenti_bes"
   E vedi la tabella:
-    | classe | alunno         | documento                | azione            |
-    | /3ª A/ | /Pini Daniela/ | /<tipo>.*Pini Daniela/   | Aggiungi Cancella |
-  E vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
+    | classe | alunno           | documento        | azione            |
+    | /3ª A/ | $a1:cognome,nome | $a1:cognome,nome | Aggiungi Cancella |
+  E vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   E premi pulsante "Cancella"
   E premi pulsante "Continua"
   Allora pagina attiva "documenti_bes"
   E non vedi la tabella:
     | classe | alunno | documento | azione |
   E la sezione "#gs-main .alert" contiene "/Non sono presenti documenti/i"
-  E non vedi file "archivio/classi/3A/riservato/<nome>-PINI-DANIELA.pdf"
+  E non vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
-    | tipo     | nome     |
-    | Diagnosi | DIAGNOSI |
-    | P.E.I.   | PEI      |
-    | P.D.P.   | PDP      |
+    | tipo     | nome     | alunno                 | alunno_file                              |
+    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
 
 
 ################################################################################

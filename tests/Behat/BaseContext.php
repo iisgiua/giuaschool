@@ -876,6 +876,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "#": come primo carattere, indica variabile di sistema
    *  "#dtm(G,M,A,h,m,s)": indica variabile DateTime con i valori indicati
    *  "#arc($v1,$v2,...)": indica variabile ArrayCollection con i valori indicati
+   *  "#upr($v1)": trasforma in maiuscolo il valore indicato
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -890,30 +891,38 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore della variabile indicata
    */
   protected function getVar($var) {
-    // tipo di variabile
-    $type =  $var[0] == '#' ? 'sys' : 'exec';
-    // gestione variabili
-    $var = substr($var, 1);
-    $var_parts = explode(':', $var);
-    if (count($var_parts) == 1) {
-      // controlla variabile DateTime
-      if (preg_match('/^dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
+    // controlla funzioni
+    if (preg_match('/^#(dtm|arc|upr)\([^\)]*\)$/', $var, $fn)) {
+      // controlla funzione DateTime
+      if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
         $dtm = (new \Datetime())
           ->setDate($dt[3], $dt[2], $dt[1])
           ->setTime($dt[4], $dt[5], $dt[6], 0);
         return $dtm;
       }
-      // controlla variabile ArrayCollection
-      if (substr($var, 0, 4) == 'arc(' && substr($var, -1) == ')') {
+      // controlla funzione ArrayCollection
+      if ($fn[1] == 'arc') {
         // crea variabile ArrayCollection
-        $ar = explode(',', substr(substr($var, 4), 0 , -1));
+        $ar = explode(',', substr(substr($var, 5), 0 , -1));
         $values = [];
         foreach ($ar as $arc) {
           $values[] = $this->getVar($arc);
         }
         return new ArrayCollection($values);
       }
+      // controlla funzione strtoupper
+      if ($fn[1] == 'upr') {
+        $var = substr(substr($var, 5), 0 , -1);
+        return strtoupper($this->getVar($var));
+      }
+    }
+    // tipo di variabile
+    $type =  $var[0] == '#' ? 'sys' : 'exec';
+    // gestione variabili
+    $var = substr($var, 1);
+    $var_parts = explode(':', $var);
+    if (count($var_parts) == 1) {
       // restituisce intera variabile di sistema
       $this->assertTrue(isset($this->vars[$type][$var]));
       return $this->vars[$type][$var];
@@ -952,7 +961,9 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Restituisce il valore della variabile di esecuzione
    * Il testo per specificare la variabile non deve contenere spazi tra i nomi, lo spazio è usato come
-   * separatore nel caso di più varibili (Es. "$c1 $c2"). La sintssi di ogni variabile è definita in getVar().
+   * separatore nel caso di più variabili (Es. "$c1 $c2"). La sintassi di ogni variabile è definita in getVar().
+   *  "$a1 $b1": restituisce un vettore con i valori indicati (solo variabili)
+   *  "$a1+ +$b1": restituisce una stringa con i valori indicati (variabili e testi)
    *
    * @param string $vars Testo che indica le variabili
    *
@@ -960,6 +971,20 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function getVars($vars) {
     $values = [];
+    // stringa di valori
+    $var_list = explode('+', $vars);
+    if (count($var_list) > 1) {
+      foreach ($var_list as $var) {
+        $value = ($var[0] == '$' || $var[0] == '#') ? $this->getVar($var) : $var;
+        if (is_array($value)) {
+          $values = array_merge($values, $value);
+        } else {
+          $values[] = $value;
+        }
+      }
+      return implode($values);
+    }
+    // array di valori o valore singolo
     $var_list = explode(' ', $vars);
     foreach ($var_list as $var) {
       $value = $this->getVar($var);
