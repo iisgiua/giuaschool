@@ -58,6 +58,8 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(8585);
     // carica dati
+    $alu1Ref = false;
+    $alu2Ref = false;
     for ($s = 0; $s < 6; $s++) {
       $sezione = chr(65 + $s);
       for ($anno = 1; $anno <= 5; $anno++) {
@@ -134,11 +136,12 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
           }
         }
         // imposta genitore di più alunni
-        if ($anno == 2) {
+        if ($anno == 2 && !$alu1Ref) {
           $this->setReference('genitore1_alunno1', $genitore1);
           $this->setReference('genitore2_alunno1', $genitore2);
+          $alu1Ref = true;
         }
-        if ($anno == 4) {
+        if ($anno == 4 && !$alu2Ref) {
           $genitore1
             ->setNome($this->getReference('genitore1_alunno1')->getNome())
             ->setCognome($this->getReference('genitore1_alunno1')->getCognome())
@@ -149,6 +152,7 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
             ->setCognome($this->getReference('genitore2_alunno1')->getCognome())
             ->setCodiceFiscale($this->getReference('genitore2_alunno1')->getCodiceFiscale());
           $this->setReference('genitore2_alunno2', $genitore2);
+          $alu2Ref = true;
         }
         // memorizza dati
         $em->flush();

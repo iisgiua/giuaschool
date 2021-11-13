@@ -104,11 +104,16 @@ class BrowserContext extends BaseContext {
     $this->session->getPage()->pressButton('login');
     $this->waitForPage();
     $this->assertPageStatus(200);
+    if ($this->session->getCurrentUrl() == $this->getMinkParameter('base_url').$this->router->generate('login_profilo')) {
+      $this->selezioniOpzioneDaPulsantiRadio($user->getUsername(), 'login_profilo[profilo]');
+      $this->clickSu('Conferma');
+      $this->assertPageStatus(200);
+    }
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
     $this->vars['sys']['logged'] = $user;
     $others = $this->em->getRepository('App:Utente')->createQueryBuilder('u')
-      ->where('u.username!=:username AND u INSTANCE OF '.get_class($user))
-      ->setParameters(['username' => $user->getUsername()])
+      ->where('u.username!=:username AND u.codiceFiscale!=:codFiscale AND u INSTANCE OF '.get_class($user))
+      ->setParameters(['username' => $user->getUsername(), 'codFiscale' => $user->getCodiceFiscale()])
       ->getQuery()
       ->getResult();
     $other = null;
@@ -748,7 +753,11 @@ class BrowserContext extends BaseContext {
    * @param string $message Messaggio di errore
    */
   protected function assertPageUrl($url, $message=null): void {
-    if ($url != $this->session->getCurrentUrl()) {
+    $current = $this->session->getCurrentUrl();
+    if (strpos($current, '?') !== false) {
+      $current = substr($current, 0, strpos($current, '?'));
+    }
+    if ($url != $current) {
       $info = $this->trace();
       $msg = ($message ? $message : 'Failed asserting that URL is the address of the current page').$info."\n".
         '+++ Expected: '.var_export($url, true)."\n".
