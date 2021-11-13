@@ -213,9 +213,7 @@ Schema dello scenario: visualizza lista cattedre piani/programmi/relazioni con d
     | R    | Relazioni |
 
 Scenario: visualizza lista cattedre relazioni con documenti per sostegno di docenti diversi su stesso alunno
-  Dato logout utente
-  E login utente "lucillatristana.zanini"
-  E ricerca istanze di tipo "Materia":
+  Data ricerca istanze di tipo "Materia":
     | id  | tipo | nome        |
     | $m1 | S    |             |
   E ricerca istanze di tipo "Classe":
