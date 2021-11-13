@@ -74,7 +74,7 @@ jobs:
       - name: Get the version
         id: get_version
         if: github.event_name == 'release'
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
 
       - name: Publish release code
         uses: svenstaro/upload-release-action@v2
@@ -82,5 +82,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: giuaschool-release.zip
-          asset_name: giuaschool-${{ VERSION }}.zip
+          asset_name: giuaschool-${{ steps.get_version.outputs.VERSION }}.zip
           tag: ${{ github.event.release.tag_name }}
