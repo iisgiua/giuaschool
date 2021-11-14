@@ -59,7 +59,38 @@ I requisiti minimi per l'installazione sono:
 Ci sono ulteriori requisiti minori che sono richiesti dal framework *Symfony*.
 
 
-## INSTALLAZIONE DI PROVA
+## INSTALLAZIONE SEMPLIFICATA
+
+### 1. Cosa contiene una release
+Nel file compresso della versione dell'applicazione sono presenti tutti i file necessari. 
+E' infatti presente anche il file **database.sql** che contiene l'esportazione del database completo con alcuni dati predefiniti.
+Questa installazione non permette l'installazione di applicazioni esterne, necessarie per alcune particolari funzionalità del registro elettronico: 
+non è pertanto operativa la conversione automatica in PDF dei documenti caricati.
+
+### 1. Scaricare il codice dell'applicazione
+Scaricare il codice dell'applicazione e decomprimere la cartella di installazione.
+Il codice dell'ultima versione è sempre disponibile nella pagina principale del progetto:
+
+[<img src="https://img.shields.io/badge/DOWNLOAD-release-blue?style=for-the-badge">](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release.zip)
+
+### 2. Copiare il codice nella cartella del web server
+I file andranno copiati nella cartella di destinazione del server web.
+
+**ATTENZIONE**: il web server deve essere configurato in modo che solo la cartella **public** sia accessibile agli utenti del sito web. 
+Infatti l'unico contenuto che deve essere esposto sul sito internet è quello all'interno della cartella **public**, mentre il resto del codice deve rimanere inaccessibile.
+
+**Se si dovesse esporre pubblicamente su internet l'intera cartella di installazione, ci sarebbero gravi problemi di sicurezza.**
+
+### 3. Importare il database
+A questo punto bisogna importare il database nel server mysql, utilizzando il file **database.sql**, presente nella cartella di installazione.
+
+### 4. Controllare i permessi delle cartelle
+A seconda del sistema operativo utilizzato, può essere necessario modificare i permessi dei file e delle cartelle di installazione:
+- i file devono essere leggibili dal webserver (ad es. www-data per i server apache);
+- le cartelle devono essere leggibili ed eseguibili dallo stesso utente.
+
+
+## INSTALLAZIONE CON I CONTENITORI DOCKER
 
 ### 1. Uso dei docker
 
@@ -127,17 +158,6 @@ Per chiudere il server e liberare le risorse occupate, eseguire i comandi seguen
 docker container stop gs_test
 ```
 
-
-## INSTALLAZIONE IN UN SERVER DI PRODUZIONE
-
-Per installare l'applicazione in un server di produzione, seguire i seguenti passi:
-  - installare i software necessari indicati nella sezione dei REQUISITI DI SISTEMA;
-  - installare *Symfony* attraverso l'uso di *Composer*;
-  - creare il database attraverso gli appositi comandi della console di *Symfony*;
-  - inserire i dati iniziali attraverso l'uso delle Fixtures.
-
-*Si consiglia di seguire i passi utilizzati per la creazione dell'immagine del docker, presenti
-nel file "docker/Dockerfile", adattando i comandi a quelli del proprio sistema operativo.*
 
 
 ## CREDITS
