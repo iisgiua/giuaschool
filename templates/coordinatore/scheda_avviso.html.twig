@@ -27,7 +27,11 @@
       {{ u.letto ? '- Letto dall\'alunno in data '~(u.letto|date('d/m/Y G:i')) : '- Non letto dall\'alunno' }}
     {% endif %}
     {% if 'G' in dati.avviso.destinatari %}
-      {{ u.letto_genitore ? '- Letto dal genitore in data '~(u.letto_genitore|date('d/m/Y G:i')) : '- Non letto dal genitore' }}
+      {% if u.letto_genitore1 or u.letto_genitore2 %}
+      <span> - Letto da un genitore in data {{ u.letto_genitore1 ? u.letto_genitore1|date('d/m/Y G:i') : u.letto_genitore2|date('d/m/Y G:i') }}</span>
+      {% else %}
+      <span> - Non letto dai genitori</span>
+      {% endif %}
     {% endif %}
     {{ not loop.last ? '<br>' }}
   {% endfor %}

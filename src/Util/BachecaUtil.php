@@ -93,13 +93,16 @@ class BachecaUtil {
     } elseif ($avviso->getFiltroTipo() == 'U') {
       // filtro utenti
       $dati['utenti'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-        ->select('a.cognome,a.nome,a.dataNascita,c.anno,c.sezione,aa.letto,ag.letto AS letto_genitore')
+        ->select('a.cognome,a.nome,a.dataNascita,c.anno,c.sezione,aa.letto,ag1.letto AS letto_genitore1,ag2.letto AS letto_genitore2')
         ->join('a.classe', 'c')
-        ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
+        ->join('App:Genitore', 'g1', 'WITH', 'g1.alunno=a.id AND g1.username LIKE :gen1')
+        ->leftJoin('App:Genitore', 'g2', 'WITH', 'g2.alunno=a.id AND g2.username LIKE :gen2')
         ->leftJoin('App:AvvisoUtente', 'aa', 'WITH', 'aa.utente=a.id AND aa.avviso=:avviso')
-        ->leftJoin('App:AvvisoUtente', 'ag', 'WITH', 'ag.utente=g.id AND ag.avviso=:avviso')
+        ->leftJoin('App:AvvisoUtente', 'ag1', 'WITH', 'ag1.utente=g1.id AND ag1.avviso=:avviso')
+        ->leftJoin('App:AvvisoUtente', 'ag2', 'WITH', 'ag2.utente=g2.id AND ag2.avviso=:avviso')
         ->where('a.id IN (:lista)')
-        ->setParameters(['lista' => $avviso->getFiltro(), 'avviso' => $avviso])
+        ->setParameters(['lista' => $avviso->getFiltro(), 'gen1' => '%.f_', 'gen2' => '%.g_',
+          'avviso' => $avviso])
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->getQuery()
         ->getArrayResult();

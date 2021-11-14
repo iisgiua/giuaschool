@@ -7,11 +7,6 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">Classe non definita</h1>
   {% endif %}
-  {% if errore %}
-  <div class="alert alert-warning" role="alert">
-    <strong class="gs-big">{{ errore }}</strong>
-  </div>
-  {% else %}
   <div class="row gs-mb-1">
     <div class="col-sm-12">
       {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
@@ -19,6 +14,11 @@
       {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
   </div>
+  {% if errore %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ errore }}</strong>
+  </div>
+  {% else %}
   <table class="table table-bordered table-hover table-striped">
     <thead class="bg-success">
       <tr>

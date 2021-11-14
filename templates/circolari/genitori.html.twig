@@ -83,7 +83,10 @@
                   <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Annulla</button>
                 </div>
       {% else %}
-                <div><em>La circolare non è stata ancora letta.</em></div>
+                <div>
+                  <em>La circolare non è stata ancora letta.</em>
+                  <a class="btn btn-xs btn-success pull-right gs-ml-3" href="{{ path('circolari_firma', {'id': a.id}) }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
+                </div>
       {% endif %}
               </div>
             </div>
