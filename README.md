@@ -1,4 +1,5 @@
-# giua@school ![GitHub release (latest by date)](https://img.shields.io/github/v/release/trinko/giuaschool)
+# giua@school ![GitHub release (latest by date)](https://img.shields.io/github/v/release/trinko/giuaschool) [<img src="https://img.shields.io/badge/DOWNLOAD-release-blue">](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release.zip)
+
 *il Registro Elettronico dell'Istituto di Istruzione Superiore "Michele Giua"*
 
 [![Build](https://github.com/trinko/giuaschool/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/trinko/giuaschool/actions/workflows/build.yml)
