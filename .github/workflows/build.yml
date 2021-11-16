@@ -82,5 +82,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: giuaschool-release.zip
-          asset_name: giuaschool-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_name: giuaschool-release.zip
           tag: ${{ github.event.release.tag_name }}
