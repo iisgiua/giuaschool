@@ -26,7 +26,9 @@
         <td><strong>{{ r.anno }}ª {{ r.sezione }}</strong></td>
         <td><strong>{{ r.cognome }} {{ r.nome }}</strong></td>
         <td>
-        <em>Richiesto dal genitore {{ r.genitore }}</em><br>
+        {% if '#' not in r.genitore %}
+          <em>Richiesto dal genitore {{ r.genitore }}</em><br>
+        {% endif %}
         {% if r.stato == 'R' %}
           <strong>In attesa di conferma</strong>
           <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button gs-ml-3" title="Rifiuta la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_edit', {'richiesta': r.id, 'azione': 'N'}) }}" data-text="{{ 'message.rifiuto_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Rifiuta</strong></button>

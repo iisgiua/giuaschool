@@ -68,13 +68,8 @@ jobs:
         uses: actions/upload-artifact@v2
         if: github.event_name == 'push'
         with:
-          name: release-zip
+          name: build-release
           path: giuaschool-release.zip
-
-      - name: Get the version
-        id: get_version
-        if: github.event_name == 'release'
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
 
       - name: Publish release code
         uses: svenstaro/upload-release-action@v2

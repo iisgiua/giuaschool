@@ -690,12 +690,12 @@ class CsvImporter {
       if (empty($fields['genitore1Cognome'])) {
         // default genitore1Cognome
         $empty_fields['genitore1Cognome'] = true;
-        $fields['genitore1Cognome'] = $fields['cognome'];
+        $fields['genitore1Cognome'] = '#NESSUN DATO#';
       }
       if (empty($fields['genitore1Nome'])) {
         // default genitore1Nome
         $empty_fields['genitore1Nome'] = true;
-        $fields['genitore1Nome'] = $fields['nome'];
+        $fields['genitore1Nome'] = '#NESSUN DATO#';
       }
       if (empty($fields['genitore1CodiceFiscale'])) {
         // default genitore1CodiceFiscale
@@ -725,12 +725,12 @@ class CsvImporter {
       if (empty($fields['genitore2Cognome'])) {
         // default genitore2Cognome
         $empty_fields['genitore2Cognome'] = true;
-        $fields['genitore2Cognome'] = $fields['cognome'];
+        $fields['genitore2Cognome'] = '#NESSUN DATO#';
       }
       if (empty($fields['genitore2Nome'])) {
         // default genitore2Nome
         $empty_fields['genitore2Nome'] = true;
-        $fields['genitore2Nome'] = $fields['nome'];
+        $fields['genitore2Nome'] = '#NESSUN DATO#';
       }
       if (empty($fields['genitore2CodiceFiscale'])) {
         // default genitore2CodiceFiscale
@@ -1682,7 +1682,7 @@ class CsvImporter {
       ->setAbilitato(true)
       ->setNome($fields['genitore2Nome'])
       ->setCognome($fields['genitore2Cognome'])
-      ->setSesso('F') 
+      ->setSesso('F')
       ->setCodiceFiscale($fields['genitore2CodiceFiscale'])
       ->setNumeriTelefono($fields['genitore2Telefono'])
       ->setAlunno($alunno);

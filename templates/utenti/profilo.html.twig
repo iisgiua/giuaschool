@@ -9,7 +9,7 @@
     <div class="panel-body" >
       <dl class="dl-horizontal gs-big">
         <dt class="text-success">Utente:</dt>
-        <dd>{% if is_granted('ROLE_GENITORE') %}{{ app.user.nome }} {{ app.user.cognome }} <em>genitore/tutore di</em> {{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</dd>
+        <dd>{% if is_granted('ROLE_GENITORE') %}{{ ('#' not in (app.user.nome~app.user.cognome)) ? (app.user.nome~' '~app.user.cognome) }} <em>genitore/tutore di</em> {{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</dd>
         <dt class="text-success">Ruolo:</dt>
         <dd><strong>{{ ('label.'~app.user.roles[0])|trans }}</strong>
         </dd>

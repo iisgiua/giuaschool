@@ -863,10 +863,11 @@ class GenitoriUtil {
    *
    * @param Classe $classe Classe dell'alunno
    * @param Alunno $alunno Alunno su cui fare i colloqui
+   * @param Genitore $genitore Genitore che richiede il colloquio
    *
    * @return array Dati restituiti come array associativo
    */
-  public function colloqui(Classe $classe, Alunno $alunno) {
+  public function colloqui(Classe $classe, Alunno $alunno, Genitore $genitore) {
     $dati = array();
     $dati['orari'] = null;
     $dati['colloqui'] = null;
@@ -932,9 +933,9 @@ class GenitoriUtil {
       ->join('rc.colloquio', 'c')
       ->join('rc.genitore', 'g')
       ->leftJoin('rc.genitoreAnnulla', 'ga')
-      ->where('rc.alunno=:alunno AND rc.appuntamento>=:oggi')
+      ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND rc.appuntamento>=:oggi')
       ->orderBy('rc.appuntamento', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'oggi' => $oggi])
+      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'oggi' => $oggi])
       ->getQuery()
       ->getArrayResult();
     foreach ($colloqui as $c) {

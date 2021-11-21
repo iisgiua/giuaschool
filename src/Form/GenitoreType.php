@@ -42,7 +42,7 @@ class GenitoreType extends AbstractType {
         'required' => true))
       ->add('codiceFiscale', TextType::class, array('label' => 'label.codice_fiscale',
         'attr' => ['widget' => 'gs-row-start gs-row-end'],
-        'required' => true))
+        'required' => false))
       ->add('numeriTelefono', CollectionType::class, array('label' => 'label.numeri_telefono',
          'entry_options' => ['label'=>false],
          'allow_add' => true,

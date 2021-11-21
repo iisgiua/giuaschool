@@ -101,7 +101,7 @@ class NotificheUtil {
         ->getOneOrNullResult();
       if ($alunno) {
         // legge colloqui
-        $dati['colloqui'] = $this->colloquiGenitore($oggi, $alunno);
+        $dati['colloqui'] = $this->colloquiGenitore($oggi, $alunno, $utente);
         // legge avvisi
         $dati['avvisi'] = $this->numeroAvvisi($utente);
         // legge circolari
@@ -150,10 +150,11 @@ class NotificheUtil {
    *
    * @param \DateTime $data Data del giorno iniziale
    * @param Alunno $alunno Alunno su cui fare i colloqui
+   * @param Genitore $genitore Genitore che ha richiesto i colloqui
    *
    * @return array Dati restituiti come array associativo
    */
-  public function colloquiGenitore(\DateTime $data, Alunno $alunno) {
+  public function colloquiGenitore(\DateTime $data, Alunno $alunno, Genitore $genitore) {
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
@@ -162,9 +163,9 @@ class NotificheUtil {
       ->select('rc.appuntamento,rc.durata,rc.stato,rc.messaggio,c.dati,d.cognome,d.nome,d.sesso')
       ->join('rc.colloquio', 'c')
       ->join('c.docente', 'd')
-      ->where('rc.alunno=:alunno AND rc.appuntamento>=:data AND rc.stato=:stato')
+      ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND rc.appuntamento>=:data AND rc.stato=:stato')
       ->orderBy('rc.appuntamento,c.ora', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'data' => $data, 'stato' => 'C'])
+      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'data' => $data, 'stato' => 'C'])
       ->getQuery()
       ->getArrayResult();
     foreach ($colloqui as $c) {

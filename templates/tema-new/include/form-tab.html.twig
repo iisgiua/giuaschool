@@ -18,6 +18,7 @@
   {% if form_help %}
     <div class="card-header bg-secondary text-white">{{ form_help|trans|raw  }}</div>
   {% endif %}
+    {{ form_errors(form) }}
     <div class="card-body">
       <ul class="nav nav-tabs nav-tabs-cards mb-5 border-bottom" role="tablist">
   {% for tab in tabs %}

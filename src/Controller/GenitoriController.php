@@ -580,7 +580,7 @@ class GenitoriController extends AbstractController {
     $classe = $alunno->getClasse();
     if ($classe) {
       // recupera dati
-      $dati = $gen->colloqui($classe, $alunno);
+      $dati = $gen->colloqui($classe, $alunno, $this->getUser());
     } else {
       // nessuna classe
       $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
