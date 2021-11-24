@@ -69,6 +69,7 @@ class UtenteFixtures extends Fixture implements FixtureGroupInterface {
         ->setPrelogin($faker->optional(0.5, null)->md5())
         ->setPreloginCreato($faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now'))
         ->setAbilitato($faker->randomElement([true, true, true, true, false]))
+        ->setSpid($faker->randomElement([true, true, false]))
         ->setUltimoAccesso($faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now'))
         ->setNome($nome)
         ->setCognome($cognome)

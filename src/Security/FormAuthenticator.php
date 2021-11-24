@@ -196,7 +196,8 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
       return $user;
     }
     // trova profili attivi
-    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getCodiceFiscale());
+    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getNome(),
+      $user->getCognome(), $user->getCodiceFiscale());
     if ($profilo) {
       // controlla che il profilo sia lo stesso richiesto con username
       if ($profilo->getId() == $user->getId()) {

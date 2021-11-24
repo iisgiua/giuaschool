@@ -70,7 +70,15 @@ class AtaType extends AbstractType {
             return $er->createQueryBuilder('s')
               ->orderBy('s.ordinamento', 'ASC');
           },
+        'attr' => ['widget' => 'gs-row-start'],
         'required' => false))
+      ->add('spid', ChoiceType::class, array('label' => 'label.spid',
+        'choices' => array('label.si' => true, 'label.no' => false),
+        'expanded' => true,
+        'multiple' => false,
+        'label_attr' => ['class' => 'radio-inline'],
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => true))
       ->add('username', TextType::class, array('label' => 'label.username',
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))

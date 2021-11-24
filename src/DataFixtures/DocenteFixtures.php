@@ -68,7 +68,7 @@ class DocenteFixtures extends Fixture implements DependentFixtureInterface, Fixt
         ->setNome($nome)
         ->setCognome($cognome)
         ->setSesso($sesso)
-        ->setCodiceFiscale($faker->unique()->taxId())        
+        ->setCodiceFiscale($faker->unique()->taxId())
         ->setUltimoAccesso($faker->dateTimeBetween('-1 week', 'now'));
       $em->persist($docente[$i]);
       $password = $this->encoder->encodePassword($docente[$i], $username);
@@ -97,7 +97,6 @@ class DocenteFixtures extends Fixture implements DependentFixtureInterface, Fixt
    */
   public static function getGroups(): array {
     return array(
-      'App', // dati iniziali dell'applicazione
       'Test', // dati per i test dell'applicazione
     );
   }

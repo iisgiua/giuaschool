@@ -37,7 +37,9 @@
         <td>
         {% for data,v2 in v1 %}
           {% for e in v2 %}
-            {% if e.voto > 0 %}
+            {% if not e.media %}
+          <button type="button" class="btn btn-xs gs-btn-secondary" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
+            {% elseif e.voto > 0 %}
           <button type="button" class="btn btn-xs btn-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
             {% else %}
           <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}"><span class="glyphicon glyphicon-asterisk"></span></button>
@@ -52,6 +54,9 @@
               {% endif %}
               {% if e.giudizio is not empty %}
                 <p><strong>Giudizio:</strong><br>{{ e.giudizio }}</p>
+              {% endif %}
+              {% if not e.media %}
+                <p><em>Il voto non viene preso in considerazione per la media</em></p>
               {% endif %}
               </div>
             </div>

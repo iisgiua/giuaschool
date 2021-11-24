@@ -29,6 +29,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use App\Util\LogHandler;
 use App\Util\ConfigLoader;
 use App\Entity\Utente;
+use App\Entity\Alunno;
+use App\Entity\Docente;
 
 
 /**
@@ -145,12 +147,19 @@ class GSuiteAuthenticator extends SocialAuthenticator {
         'email' => $userGoogle->getEmail()));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    if (empty($user->getCodiceFiscale())) {
+    if (!($user instanceOf Alunno) && !($user instanceOf Docente)) {
+      // utente non è alunno/docente
+      $this->logger->error('Tipo di utente non valido nell\'autenticazione Google.', array(
+        'email' => $userGoogle->getEmail()));
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
+    }
+    if (empty($user->getCodiceFiscale()) || ($user instanceOf Alunno)) {
       // ok restituisce profilo
       return $user;
     }
-    // trova profili attivi
-    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getCodiceFiscale());
+    // trova profili attivi per docente
+    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getNome(),
+      $user->getCognome(), $user->getCodiceFiscale());
     if ($profilo) {
       // controlla che il profilo sia lo stesso richiesto tramite autenticazione Google
       if ($profilo->getId() == $user->getId()) {

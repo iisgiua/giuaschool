@@ -465,8 +465,15 @@ class LoginController extends BaseController {
     foreach ($session->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
       foreach ($profili as $id) {
         $utente = $em->getRepository('App:Utente')->find($id);
-        $nome = $ruolo.($ruolo == 'GENITORE' ? ' di ' : ' ').
-          $utente->getNome().' '.$utente->getCognome().' ('.$utente->getUsername().')';
+        $nome = $ruolo.' ';
+        if ($ruolo == 'GENITORE') {
+          // profilo genitore
+          $nome .= 'DI '.$utente->getAlunno()->getNome().' '.$utente->getAlunno()->getCognome();
+        } else {
+          // altri profili
+          $nome .= $utente->getNome().' '.$utente->getCognome();
+        }
+        $nome .= ' ('.$utente->getUsername().')';
         $lista[] = [$nome => $utente->getId()];
       }
     }

@@ -3,7 +3,7 @@
 {% block pagina_contenuto %}
 <div class="container">
   <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
-  {% include 'tema-new/include/form-tab.html.twig' with {form: form[0], form_help: form[1], tabs: [['gs-alunno', 'Alunno', 'alunno'], ['gs-genitore1', 'Padre/Tutore/Genitore 1', 'genitore1'], ['gs-genitore2', 'Madre/Genitore 2', 'genitore2']]} %}
+  {% include 'tema-new/include/form-tab.html.twig' with {form: form[0], form_help: form[1], tabs: [['gs-alunno', 'Alunno', 'alunno'], ['gs-genitore1', 'Genitore 1', 'genitore1'], ['gs-genitore2', 'Genitore 2', 'genitore2']]} %}
 </div>
 {% endblock %}
 

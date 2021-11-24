@@ -1,0 +1,38 @@
+{% extends 'ruolo_ata/index.html.twig' %}
+
+{% block pagina_submenu %}
+  {% include 'ruolo_ata/menu_segreteria.html.twig' %}
+{% endblock %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <div class="panel panel-primary gs-mt-4" >
+    <div class="panel-heading">
+      <div class="panel-title">{{ form_title|trans }}</div>
+    </div>
+    <div class="panel-body gs-pt-0">
+      <div class="row bg-success gs-mb-4">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ alunno }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ alunno.classe }}</span></div>
+      </div>
+      {{ form_start(form) }}
+      {{ form_errors(form) }}
+      <div class="bg-info gs-pt-2 gs-pb-1 gs-pr-2 gs-mb-3">
+        <p class="text-center gs-h2">Genitore 1</p>
+        {{ form_widget(form.genitore1) }}
+      </div>
+      <div class="bg-info gs-pt-2 gs-pb-1 gs-pr-2 gs-mb-3">
+        <p class="text-center gs-h2">Genitore 2</p>
+        {{ form_widget(form.genitore2) }}
+      </div>
+      <div class="text-center">
+        {{ form_widget(form.submit, {attr: {class: 'btn-primary gs-mr-3'}}) }}
+        {{ form_widget(form.cancel) }}
+      </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+{% endblock %}

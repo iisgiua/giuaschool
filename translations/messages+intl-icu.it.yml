@@ -449,6 +449,7 @@ label.scegli_tipo_documento: Scegli il tipo di documento
 label.titolo_documento: Titolo del documento
 label.riferimento: Riferimento
 label.profilo: Profilo utente
+label.spid: Accesso SPID
 
 
 ##### PAGINE #####
@@ -522,6 +523,8 @@ page.documenti_bacheca: Bacheca documenti
 title.documenti_bacheca: Documenti per {utente}
 page.login_profilo: Scelta profilo
 title.login_profilo: Scegli il profilo utente da utilizzare
+page.segreteria_genitori: Gestione Genitori
+title.segreteria_genitori: Modiche agli utenti genitori
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti

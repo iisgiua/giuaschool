@@ -109,6 +109,12 @@ class AlunnoType extends AbstractType {
         'label_attr' => ['class' => 'radio-inline'],
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
+      ->add('spid', ChoiceType::class, array('label' => 'label.spid',
+        'choices' => array('label.si' => true, 'label.no' => false),
+        'expanded' => true,
+        'multiple' => false,
+        'label_attr' => ['class' => 'radio-inline'],
+        'required' => true))        
       ->add('username', TextType::class, array('label' => 'label.username',
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))

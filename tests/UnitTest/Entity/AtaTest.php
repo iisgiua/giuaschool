@@ -32,14 +32,14 @@ class AtaTest extends DatabaseTestCase {
     $this->entity = '\App\Entity\Ata';
     // campi da testare
     $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato',
-      'abilitato', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
+      'abilitato', 'spid', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
       'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica', 'tipo', 'segreteria', 'sede'];
     // fixture da caricare
     $this->fixtures = [[AtaFixtures::class, 'encoder']];
     // SQL read
     $this->canRead = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
+        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
@@ -49,7 +49,7 @@ class AtaTest extends DatabaseTestCase {
     // SQL write
     $this->canWrite = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
+        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
@@ -83,6 +83,7 @@ class AtaTest extends DatabaseTestCase {
           ($field == 'prelogin' ? $this->faker->optional(0.5, null)->md5() :
           ($field == 'preloginCreato' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
           ($field == 'abilitato' ? $this->faker->randomElement([true, true, true, true, false]) :
+          ($field == 'spid' ? $this->faker->randomElement([true, true, false]) :
           ($field == 'ultimoAccesso' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
           ($field == 'nome' ? $nome :
           ($field == 'cognome' ? $cognome :
@@ -96,7 +97,7 @@ class AtaTest extends DatabaseTestCase {
           ($field == 'notifica' ? null :
           ($field == 'tipo' ? $this->faker->randomElement(['A', 'T', 'C', 'U', 'D']) :
           ($field == 'segreteria' ? $this->faker->randomElement([true, false]) :
-          $this->getReference('sede_'.$this->faker->randomElement(['1', '2']))))))))))))))))))))));
+          $this->getReference('sede_'.$this->faker->randomElement(['1', '2'])))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');

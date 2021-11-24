@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Util\SegreteriaUtil;
 use App\Util\PdfManager;
+use App\Form\AlunnoGenitoreType;
 
 
 /**
@@ -378,6 +379,156 @@ class SegreteriaController extends AbstractController {
       'scrutinio' => $scrutinio,
       'periodo' => $periodo,
       'dati' => $dati,
+    ));
+  }
+
+  /**
+   * Gestisce le modifiche agli utenti genitori
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
+   * @param int $pagina Numero di pagina per la lista dei alunni
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/segreteria/genitori/{pagina}", name="segreteria_genitori",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_ATA")
+   */
+  public function genitoriAction(Request $request, EntityManagerInterface $em, SessionInterface $session, $pagina) {
+    // recupera criteri dalla sessione
+    $search = array();
+    $search['nome'] = $session->get('/APP/ROUTE/segreteria_genitori/nome', '');
+    $search['cognome'] = $session->get('/APP/ROUTE/segreteria_genitori/cognome', '');
+    $search['classe'] = $session->get('/APP/ROUTE/segreteria_genitori/classe', 0);
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App:Classe')->find($search['classe']) : 0);
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $session->get('/APP/ROUTE/segreteria_genitori/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $session->set('/APP/ROUTE/segreteria_genitori/pagina', $pagina);
+    }
+    // controllo accesso alla funzione
+    if (!$this->getUser()->getSegreteria()) {
+      // ATA non abiliatato alla segreteria
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // form di ricerca
+    $classi = $em->getRepository('App:Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_genitori', FormType::class)
+      ->setAction($this->generateUrl('segreteria_genitori'))
+      ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        'data' => $search['cognome'],
+        'attr' => ['placeholder' => 'label.cognome'],
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('nome', TextType::class, array('label' => 'label.nome',
+        'data' => $search['nome'],
+        'attr' => ['placeholder' => 'label.nome'],
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+        'data' => $classe,
+        'choices' => $classi,
+        'choice_label' => function ($obj) {
+            return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
+          },
+        'choice_value' => function ($obj) {
+            return (is_object($obj)  ? $obj->getId() : $obj);
+          },
+        'group_by' => function ($obj) {
+            return $obj->getSede()->getCitta();
+          },
+        'placeholder' => 'label.qualsiasi_classe',
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'required' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.search'))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $search['nome'] = trim($form->get('nome')->getData());
+      $search['cognome'] = trim($form->get('cognome')->getData());
+      $search['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() : 0);
+      $pagina = 1;
+      $session->set('/APP/ROUTE/segreteria_genitori/nome', $search['nome']);
+      $session->set('/APP/ROUTE/segreteria_genitori/cognome', $search['cognome']);
+      $session->set('/APP/ROUTE/segreteria_genitori/classe', $search['classe']);
+      $session->set('/APP/ROUTE/segreteria_genitori/pagina', $pagina);
+    }
+    // lista alunni
+    $search['abilitato'] = 1;
+    $lista = $em->getRepository('App:Alunno')->cerca($search, $pagina);
+    // mostra la pagina di risposta
+    return $this->render('ruolo_ata/genitori.html.twig', array(
+      'pagina_titolo' => 'page.segreteria_genitori',
+      'form' => $form->createView(),
+      'form_help' => null,
+      'form_success' => null,
+      'lista' => $lista,
+      'page' => $pagina,
+    ));
+  }
+
+  /**
+   * Visualizza i documenti dello scrutinio per l'alunno indicato
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param int $alunno Identificativo dell'alunno
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/segreteria/genitori/edit/{alunno}", name="segreteria_genitori_edit",
+   *    requirements={"alunno": "\d+"},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_ATA")
+   */
+  public function genitoriEditAction(Request $request, EntityManagerInterface $em, $alunno) {
+    // controlla alunno
+    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla funzione
+    if (!$this->getUser()->getSegreteria()) {
+      // ATA non abiliatato alla segreteria
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // legge genitori nell'ordine corretto
+    $username = substr($alunno->getUsername(), 0, -2).'f'.substr($alunno->getUsername(), -1);
+    if ($alunno->getGenitori()[0]->getUsername() == $username) {
+      $genitore1 = $alunno->getGenitori()[0];
+      $genitore2 = isset($alunno->getGenitori()[1]) ? $alunno->getGenitori()[1] : null;
+    } else {
+      $genitore1 = $alunno->getGenitori()[1];
+      $genitore2 = $alunno->getGenitori()[0];
+    }
+    // form
+    $form = $this->createForm(AlunnoGenitoreType::class, null, [
+      'returnUrl' => $this->generateUrl('segreteria_genitori'), 'formMode' => 'segreteria',
+      'data' => [$genitore1, $genitore2]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // memorizza modifiche
+      $em->flush();
+      // redirezione
+      return $this->redirectToRoute('segreteria_genitori');
+    }
+    // mostra la pagina di risposta
+    return $this->render('ruolo_ata/genitori_edit.html.twig', array(
+      'pagina_titolo' => 'page.segreteria_genitori',
+      'form' => $form->createView(),
+      'form_title' => 'title.segreteria_genitori',
+      'alunno' => $alunno,
     ));
   }
 

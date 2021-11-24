@@ -33,14 +33,14 @@ class AmministratoreTest extends DatabaseTestCase {
     $this->entity = '\App\Entity\Amministratore';
     // campi da testare
     $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato',
-      'abilitato', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
+      'abilitato', 'spid', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
       'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica'];
     // fixture da caricare
     $this->fixtures = [[AmministratoreFixtures::class, 'encoder']];
     // SQL read
     $this->canRead = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
+        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
@@ -49,7 +49,7 @@ class AmministratoreTest extends DatabaseTestCase {
     // SQL write
     $this->canWrite = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
+        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
@@ -83,6 +83,7 @@ class AmministratoreTest extends DatabaseTestCase {
           ($field == 'prelogin' ? $this->faker->optional(0.5, null)->md5() :
           ($field == 'preloginCreato' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
           ($field == 'abilitato' ? $this->faker->randomElement([true, true, true, true, false]) :
+          ($field == 'spid' ? $this->faker->randomElement([true, true, false]) :
           ($field == 'ultimoAccesso' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
           ($field == 'nome' ? $nome :
           ($field == 'cognome' ? $cognome :
@@ -93,7 +94,7 @@ class AmministratoreTest extends DatabaseTestCase {
           ($field == 'citta' ?  $this->faker->city() :
           ($field == 'indirizzo' ? $this->faker->streetAddress() :
           ($field == 'numeriTelefono' ? $this->faker->telefono($this->faker->numberBetween(0, 3)) :
-          null)))))))))))))))));
+          null))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');

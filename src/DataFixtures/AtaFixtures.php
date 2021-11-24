@@ -68,7 +68,7 @@ class AtaFixtures extends Fixture implements DependentFixtureInterface, FixtureG
         ->setNome($nome)
         ->setCognome($cognome)
         ->setSesso($sesso)
-        ->setCodiceFiscale($faker->unique()->taxId())        
+        ->setCodiceFiscale($faker->unique()->taxId())
         ->setTipo($tipo)
         ->setSegreteria($tipo == 'A' ? true : false)
         ->setSede($this->getReference('sede_'.$faker->randomElement(['1', '2'])))
@@ -101,7 +101,6 @@ class AtaFixtures extends Fixture implements DependentFixtureInterface, FixtureG
    */
   public static function getGroups(): array {
     return array(
-      'App', // dati iniziali dell'applicazione
       'Test', // dati per i test dell'applicazione
     );
   }

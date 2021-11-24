@@ -100,10 +100,10 @@
                           <a class="nav-link active" id="gs-alunno-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-alunno-{{ u.alunno.id }}" role="tab" aria-controls="gs-alunno-{{ u.alunno.id }}" aria-selected="true"><strong>Alunno</strong></a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" id="gs-genitore1-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-genitore1-{{ u.alunno.id }}" role="tab" aria-controls="gs-genitore1-{{ u.alunno.id }}" aria-selected="false"><strong>Padre/Tutore/Genitore 1</strong></a>
+                          <a class="nav-link" id="gs-genitore1-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-genitore1-{{ u.alunno.id }}" role="tab" aria-controls="gs-genitore1-{{ u.alunno.id }}" aria-selected="false"><strong>Genitore 1</strong></a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" id="gs-genitore2-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-genitore2-{{ u.alunno.id }}" role="tab" aria-controls="gs-genitore2-{{ u.alunno.id }}" aria-selected="false"><strong>Madre/Genitore 2</strong></a>
+                          <a class="nav-link" id="gs-genitore2-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-genitore2-{{ u.alunno.id }}" role="tab" aria-controls="gs-genitore2-{{ u.alunno.id }}" aria-selected="false"><strong>Genitore 2</strong></a>
                         </li>
                       </ul>
                     </div>
@@ -145,6 +145,8 @@
                           <dd class="col-sm-4">{{ u.alunno.classe ? u.alunno.classe.anno~'ª '~u.alunno.classe.sezione }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.frequenza_estero'|trans }}</dt>
                           <dd class="col-sm-4">{{ u.alunno.frequenzaEstero ? 'Si' : 'No' }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
+                          <dd class="col-sm-10">{{ u.alunno.spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
                           <dd class="col-sm-4">{{ u.alunno.username }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
@@ -163,6 +165,8 @@
                           <dd class="col-sm-4">{{ u.g1_codice_fiscale }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.numeri_telefono'|trans }}</dt>
                           <dd class="col-sm-4">{{ u.g1_telefono|join(', ') }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
+                          <dd class="col-sm-10">{{ u.g1_spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
                           <dd class="col-sm-4">{{ u.g1_username }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
@@ -181,6 +185,8 @@
                           <dd class="col-sm-4">{{ u.g2_codice_fiscale }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.numeri_telefono'|trans }}</dt>
                           <dd class="col-sm-4">{{ u.g2_telefono|join(', ') }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
+                          <dd class="col-sm-10">{{ u.g2_spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
                           <dd class="col-sm-4">{{ u.g2_username }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>

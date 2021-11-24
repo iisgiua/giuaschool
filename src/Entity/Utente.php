@@ -134,6 +134,13 @@ class Utente implements UserInterface, \Serializable {
   private $abilitato;
 
   /**
+   * @var boolean $spid Indica se l'utente è abilitato all'accesso SPID
+   *
+   * @ORM\Column(type="boolean", nullable=false)
+   */
+  private $spid;
+
+  /**
    * @var \DateTime $ultimoAccesso Data/ora dell'ultimo accesso
    *
    * @ORM\Column(name="ultimo_accesso", type="datetime", nullable=true)
@@ -546,6 +553,27 @@ class Utente implements UserInterface, \Serializable {
   }
 
   /**
+   * Indica se l'utente è abilitato all'accesso SPID
+   *
+   * @return boolean Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
+   */
+  public function getSpid() {
+    return $this->spid;
+  }
+
+  /**
+   * Modifica se l'utente è abilitato all'accesso SPID
+   *
+   * @param boolean $spid Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
+   *
+   * @return Utente Oggetto Utente
+   */
+  public function setSpid($spid) {
+    $this->spid = ($spid == true);
+    return $this;
+  }
+
+  /**
    * Restituisce la data/ora dell'ultimo accesso
    *
    * @return \DateTime Data/ora dell'ultimo accesso
@@ -837,6 +865,7 @@ class Utente implements UserInterface, \Serializable {
     $this->numeriTelefono = array();
     $this->notifica = array();
     $this->abilitato = false;
+    $this->spid = false;
     $this->listaProfili = array();
     $this->infoLogin = array();
   }

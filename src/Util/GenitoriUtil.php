@@ -384,7 +384,7 @@ class GenitoriUtil {
     $dati = array();
     // legge voti
     $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
-      ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,l.data,m.nomeBreve')
+      ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,v.media,l.data,m.nomeBreve')
       ->join('v.lezione', 'l')
       ->join('l.materia', 'm')
       ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=v.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
@@ -419,7 +419,8 @@ class GenitoriUtil {
         'argomento' => $v['argomento'],
         'voto' => $v['voto'],
         'voto_str' => $voto_str,
-        'giudizio' => $v['giudizio']
+        'giudizio' => $v['giudizio'],
+        'media' => $v['media']
         );
     }
     // ordina periodi
@@ -1170,7 +1171,7 @@ class GenitoriUtil {
       $value = $e['appuntamento']->format('Y-m-d G:i');
       foreach ($dati['lista'] as $k=>$v) {
         $keyval = array_keys($v)[0];
-        if (substr($v[$keyval], 0, -3) == $value) {
+        if (explode('|', $v[$keyval])[0] == $value) {
           // data al completp
           $dati['lista'][$k][$keyval] = -1;
           break;

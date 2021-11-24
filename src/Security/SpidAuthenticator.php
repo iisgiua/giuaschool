@@ -122,8 +122,10 @@ class SpidAuthenticator extends AbstractGuardAuthenticator {
     $spid = $this->em->getRepository('App:Spid')->findOneBy(['responseId' => $credentials, 'state' => 'A']);
     if ($spid) {
       // autenticato su SPID: controlla se esiste nel registro
+      $nome = $spid->getAttrName();
+      $cognome = $spid->getAttrFamilyName();
       $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
-      $user = $this->em->getRepository('App:Utente')->profiliAttivi($codiceFiscale);
+      $user = $this->em->getRepository('App:Utente')->profiliAttivi($nome, $cognome, $codiceFiscale, true);
       if (empty($user)) {
         // utente non esiste nel registro
         $spid->setState('E');

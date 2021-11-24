@@ -33,7 +33,7 @@ class AlunnoTest extends DatabaseTestCase {
     $this->entity = '\App\Entity\Alunno';
     // campi da testare
     $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato',
-      'abilitato', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
+      'abilitato', 'spid', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
       'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica',
       'bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero',
       'religione', 'credito3', 'credito4', 'giustificaOnline', 'richiestaCertificato', 'foto', 'classe'];
@@ -42,7 +42,7 @@ class AlunnoTest extends DatabaseTestCase {
     // SQL read
     $this->canRead = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
+        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
@@ -52,7 +52,7 @@ class AlunnoTest extends DatabaseTestCase {
     // SQL write
     $this->canWrite = [
       'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
+        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
         'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
         'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
         'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
@@ -89,6 +89,7 @@ class AlunnoTest extends DatabaseTestCase {
           ($field == 'prelogin' ? $this->faker->optional(0.5, null)->md5() :
           ($field == 'preloginCreato' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
           ($field == 'abilitato' ? $this->faker->randomElement([true, true, true, true, false]) :
+          ($field == 'spid' ? $this->faker->randomElement([true, true, false]) :
           ($field == 'ultimoAccesso' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
           ($field == 'nome' ? $nome :
           ($field == 'cognome' ? $cognome :
@@ -112,7 +113,7 @@ class AlunnoTest extends DatabaseTestCase {
           ($field == 'giustificaOnline' ? $this->faker->randomElement([false, true]) :
           ($field == 'richiestaCertificato' ? $this->faker->randomElement([false, true]) :
           ($field == 'foto' ? $this->faker->randomElement([null, new File(__DIR__.'/../../temp/'.$this->faker->file('tests', 'tests/temp', false))]) :
-          $classe))))))))))))))))))))))))))))));
+          $classe)))))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');

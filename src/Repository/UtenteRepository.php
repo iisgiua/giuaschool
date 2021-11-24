@@ -63,12 +63,21 @@ class UtenteRepository extends EntityRepository {
    * Trova i profili attivi per l'utente indicato tramite codice fiscale.
    * NB: non si considera il profilo AMMINISTRATORE per ragioni di sicurezza (si dovrà accedere con apposito login)
    *
+   * @param string $nome Nome dell'utente
+   * @param string $cognome Cognome dell'utente
    * @param string $codiceFiscale Codice fiscale dell'utente
+   * @param boolean $spid Vero per l'accesso tramite SPID
    *
    * @return null|Utente Null se nessun profilo, il primo profilo attivo negli altri casi
    */
-  public function profiliAttivi($codiceFiscale) {
-    $profili = $this->findBy(['codiceFiscale' => $codiceFiscale, 'abilitato' => 1]);
+  public function profiliAttivi($nome, $cognome, $codiceFiscale, $spid=false) {
+    // trova profili
+    $param = ['nome' => $nome, 'cognome' => $cognome, 'codiceFiscale' => $codiceFiscale, 'abilitato' => 1];
+    if ($spid) {
+      // accesso SPID: contralla che utente sia disabilitato
+      $param['spid'] = 1;
+    }
+    $profili = $this->findBy($param);
     if (empty($profili) || empty($codiceFiscale)) {
       // nessun profilo attivo: restituisce null
       return null;
@@ -83,14 +92,14 @@ class UtenteRepository extends EntityRepository {
     $numDati = 0;
     $utente = null;
     foreach ($profili as $profilo) {
-      if ($profilo instanceOf Ata) {
+      if (($profilo instanceOf Ata) && !isset($dati['ATA'])) {
         // può essercene solo uno
-        $dati['ATA'][0] = $profilo->getId();
+        $dati['ATA'][] = $profilo->getId();
         $numDati++;
         $utente = (!$utente ? $profilo : $utente);
-      } elseif ($profilo instanceOf Docente) {
+      } elseif (($profilo instanceOf Docente) && !isset($dati['DOCENTE'])) {
         // può essercene solo uno
-        $dati['DOCENTE'][0] = $profilo->getId();
+        $dati['DOCENTE'][] = $profilo->getId();
         $numDati++;
         $utente = (!$utente ? $profilo : $utente);
       } elseif ($profilo instanceOf Genitore) {
@@ -98,15 +107,17 @@ class UtenteRepository extends EntityRepository {
         $dati['GENITORE'][] = $profilo->getId();
         $numDati++;
         $utente = (!$utente ? $profilo : $utente);
-      } elseif ($profilo instanceOf Alunno) {
+      } elseif (($profilo instanceOf Alunno) && !isset($dati['ALUNNO'])) {
         // può essercene solo uno
-        $dati['ALUNNO'][0] = $profilo->getId();
+        $dati['ALUNNO'][] = $profilo->getId();
         $numDati++;
         $utente = (!$utente ? $profilo : $utente);
       }
     }
     // restituisce primo profilo utente e memorizza la lista di profili
-    $utente->setListaProfili($numDati > 1 ? $dati : []);
+    if ($utente) {
+      $utente->setListaProfili($numDati > 1 ? $dati : []);
+    }
     return $utente;
   }
 
