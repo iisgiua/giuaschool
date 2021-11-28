@@ -36,7 +36,7 @@ class PropostaVotoRepository extends EntityRepository {
       ->select('(pv.alunno) AS id_alunno,pv.unico,pv.debito,pv.recupero,d.cognome,d.nome')
       ->join('pv.materia', 'm')
       ->join('pv.docente', 'd')
-      ->where('pv.classe=:classe AND pv.periodo=:periodo AND pv.alunno IN (:lista) AND m.tipo=:edcivica')
+      ->where('pv.classe=:classe AND pv.periodo=:periodo AND pv.unico IS NOT NULL AND pv.alunno IN (:lista) AND m.tipo=:edcivica')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'lista' => $alunni, 'edcivica' => 'E'])
       ->orderBY('d.cognome,d.nome')
       ->getQuery()

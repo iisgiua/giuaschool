@@ -1462,13 +1462,12 @@ class ScrutinioUtil {
       if ($voto->getUnico() === null) {
         // voto non presente
         $errore['exception.voto_edcivica'] = true;
-      } elseif ($voto->getUnico() < 6 && !$voto->getRecupero()) {
-        // mancano recuperi
-        $errore['exception.no_recupero_scrutinio'] = true;;
-      } elseif ($voto->getUnico() < 6 && !$voto->getDebito()) {
-        // mancano debiti
-        $errore['exception.no_debito_scrutinio'] = true;
       }
+    }
+    // imposta messaggi di errore
+    foreach ($errore as $msg=>$v) {
+      $this->session->getFlashBag()->add('errore',
+          $this->trans->trans($msg, ['materia' => $edcivica->getNomeBreve()]));
     }
     if (empty($errore)) {
       // aggiorna stato
@@ -1484,11 +1483,6 @@ class ScrutinioUtil {
         ));
       // ok
       return true;
-    }
-    // imposta messaggi di errore
-    foreach ($errore as $msg=>$v) {
-      $this->session->getFlashBag()->add('errore',
-          $this->trans->trans($msg, ['materia' => $edcivica->getNomeBreve()]));
     }
     // errori presenti
     return false;
@@ -1647,6 +1641,17 @@ class ScrutinioUtil {
       }
     }
     if (empty($errori)) {
+      // legge definizione scrutinio e verbale
+      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('P');
+      $scrutinio_dati = $scrutinio->getDati();
+      foreach ($def->getStruttura() as $step=>$args) {
+        if ($args[0] == 'Argomento') {
+          // resetta validazione
+          $scrutinio_dati['verbale'][$step]['validato'] = false;
+        }
+      }
+      // memorizza dati scrutinio
+      $scrutinio->setDati($scrutinio_dati);
      // aggiorna stato
       $scrutinio->setStato('5');
       $this->em->flush();
@@ -1744,18 +1749,6 @@ class ScrutinioUtil {
                                         Classe $classe, Scrutinio $scrutinio) {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
-    // toglie validazione argomenti
-    $dati_scrutinio = $scrutinio->getDati();
-    if (isset($dati_scrutinio['verbale'])) {
-      foreach ($dati_scrutinio['verbale'] as $step=>$args) {
-        // solo elementi da validare
-        if (isset($args['validato']) && $args['validato']) {
-          // elimina validazione
-          $dati_scrutinio['verbale'][$step]['validato'] = false;
-        }
-      }
-    }
-    $scrutinio->setDati($dati_scrutinio);
     // aggiorna stato
     $scrutinio->setStato('4');
     $this->em->flush();
@@ -1874,12 +1867,18 @@ class ScrutinioUtil {
       }
       // controlla validazione argomenti
       $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('P');
-      foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
-        // solo elementi da validare
-        if (isset($args['validato']) && !$args['validato']) {
-          // errore di validazione
-          $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
-            ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
+      if (!isset($scrutinio->getDati()['verbale'])) {
+        // errore di validazione
+        $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
+          ['sezione' => '']));
+      } else {
+        foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
+          // solo elementi da validare
+          if (isset($args['validato']) && !$args['validato']) {
+            // errore di validazione
+            $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
+              ['sezione' => $def->getStruttura()[$step][2]['sezione']]));
+          }
         }
       }
       // se niente errori cambia stato

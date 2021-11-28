@@ -84,6 +84,7 @@ class ScrutinioController extends AbstractController {
     $valutazioni['E'] = ['min' => 3, 'max' => 10, 'start' => 6, 'ticks' => '3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 4, 5, 6, 7, 8, 9, 10'];
     $title['P']['N'] = 'message.proposte';
     $title['P']['R'] = 'message.proposte_religione';
+    $title['P']['E'] = 'message.proposte';
     $title['1']['N'] = 'message.proposte_intermedia';
     $title['1']['R'] = 'message.proposte_religione';
     $title['F']['N'] = 'message.proposte';
@@ -760,13 +761,14 @@ class ScrutinioController extends AbstractController {
       }
     }
     // form di inserimento
+    $tipo = ($periodo == 'P' ? 'debiti' : 'esito');
     $form = $this->container->get('form.factory')->createNamedBuilder('voti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_voti', ['classe' => $classe->getId(),
         'materia' => $materia->getId(), 'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => 'esito'] )))
+        'entry_options' => array('label' => false, 'attr' => ['subType' => $tipo] )))
       ->add('submit', SubmitType::class, array('label' => 'label.submit'))
       ->getForm();
     $form->handleRequest($request);
@@ -2208,13 +2210,14 @@ class ScrutinioController extends AbstractController {
       }
     }
     // form di inserimento
+    $tipo = ($periodo == 'P' ? 'debiti' : 'edcivica');
     $form = $this->container->get('form.factory')->createNamedBuilder('edcivica', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_edcivica', ['classe' => $classe->getId(),
         'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
       ->add('lista', CollectionType::class, array('label' => false,
         'data' => $dati['voti'],
         'entry_type' => VotoScrutinioType::class,
-        'entry_options' => array('label' => false, 'attr' => ['subType' => 'edcivica'])))
+        'entry_options' => array('label' => false, 'attr' => ['subType' => $tipo])))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' =>['class' => 'btn-primary']))
       ->getForm();
