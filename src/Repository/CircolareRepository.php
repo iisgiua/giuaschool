@@ -30,13 +30,13 @@ class CircolareRepository extends EntityRepository {
    * @return integer Il numero per la prossima circolare
    */
   public function prossimoNumero() {
-    // legge l'ultima circolare
-    $query = $this->createQueryBuilder('c1')
-      ->select('MAX(c1.data)')
-      ->getDql();
+    // A.S. in corso
+    $anno = (int) substr($this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    // legge l'ultima circolare dell'A.S. in corso
     $numero = $this->createQueryBuilder('c')
       ->select('MAX(c.numero)')
-      ->where('c.data=('.$query.')')
+      ->where('c.anno=:anno')
+      ->setParameters(['anno' => $anno])
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce prossimo numero
@@ -51,18 +51,10 @@ class CircolareRepository extends EntityRepository {
    * @return bool Vero se il numero non è già in uso, falso altrimenti
    */
   public function controllaNumero(Circolare $circolare) {
-    // A.S. in corso
-    $as = $this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico');
-    $aass = explode('/', $as);
-    $inizio = (new \DateTime('today'))
-      ->setDate($aass[0], 9, 1);
-    $fine = (new \DateTime('today'))
-      ->setDate($aass[1], 8, 31);
-    // legge la circolare in base al numero nell'A.S. in corso
+    // legge la circolare in base e A.S.
     $trovato = $this->createQueryBuilder('c')
-      ->where('c.numero=:numero AND c.data BETWEEN :inizio AND :fine')
-      ->setParameters(['numero' => $circolare->getNumero(), 'inizio' => $inizio,
-        'fine' => $fine]);
+      ->where('c.numero=:numero AND c.anno=:anno')
+      ->setParameters(['numero' => $circolare->getNumero(), 'anno' => $circolare->getAnno()]);
     if ($circolare->getId() > 0) {
       // circolare in modifica, esclude suo id
       $trovato
@@ -77,7 +69,7 @@ class CircolareRepository extends EntityRepository {
   }
 
   /**
-   * Restituisce la lista delle circolari pubblicate secondo i criteri di ricerca indicati
+   * Restituisce la lista delle circolari pubblicate nell'A.S. corrente, secondo i criteri di ricerca indicati
    *
    * @param array $search Lista dei criteri di ricerca
    * @param int $page Pagina corrente
@@ -86,13 +78,15 @@ class CircolareRepository extends EntityRepository {
    * @return Paginator Oggetto Paginator
    */
   public function pubblicate($search, $page, $limit) {
+    // A.S. in corso
+    $anno = (int) substr($this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico'), 0, 4);
     // crea query base
     $query = $this->createQueryBuilder('c')
-      ->where('c.data BETWEEN :inizio AND :fine AND c.oggetto LIKE :oggetto AND c.pubblicata=:pubblicata')
+      ->where('c.data BETWEEN :inizio AND :fine AND c.oggetto LIKE :oggetto AND c.pubblicata=:pubblicata AND c.anno=:anno')
       ->orderBy('c.data', 'DESC')
       ->addOrderBy('c.numero', 'DESC')
       ->setParameters(['inizio' => $search['inizio'], 'fine' => $search['fine'], 'oggetto' => '%'.$search['oggetto'].'%',
-        'pubblicata' => 1]);
+        'pubblicata' => 1, 'anno' => $anno]);
     // crea lista con pagine
     return $this->paginate($query->getQuery(), $page, $limit);
   }
@@ -140,12 +134,14 @@ class CircolareRepository extends EntityRepository {
    * @return int Numero di circolari da leggere
    */
   public function numeroCircolariClasse(Classe $classe) {
+    // A.S. in corso
+    $anno = (int) substr($this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
       ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
-      ->where('c.pubblicata=:pubblicata AND cc.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'classe' => $classe])
+      ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cc.letta IS NULL')
+      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'classe' => $classe])
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -160,12 +156,14 @@ class CircolareRepository extends EntityRepository {
    * @return int Numero di circolari da leggere
    */
   public function numeroCircolariUtente(Utente $utente) {
-    // lista circolari
+    // A.S. in corso
+    $anno = (int) substr($this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico'), 0, 4);
+  // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->select('COUNT(c)')
       ->join('App:CircolareUtente', 'cu', 'WITH', 'cu.circolare=c.id AND cu.utente=:utente')
-      ->where('c.pubblicata=:pubblicata AND cu.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'utente' => $utente])
+      ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cu.letta IS NULL')
+      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'utente' => $utente])
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
@@ -180,11 +178,13 @@ class CircolareRepository extends EntityRepository {
    * @return array Dati formattati come array associativo
    */
   public function circolariClasse(Classe $classe) {
+    // A.S. in corso
+    $anno = (int) substr($this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
-      ->where('c.pubblicata=:pubblicata AND cc.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'classe' => $classe])
+      ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cc.letta IS NULL')
+      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'classe' => $classe])
       ->getQuery()
       ->getResult();
     // restituisce dati
@@ -368,10 +368,19 @@ class CircolareRepository extends EntityRepository {
    */
   public function lista($cerca, $pagina, $limite, Utente $utente) {
     $dati = array();
+    // A.S.
+    if (isset($cerca['anno'])) {
+      // legge A.S. da crriteri di ricerca
+      $anno = $cerca['anno'];
+    } else {
+      // A.S. in corso
+      $anno = (int) substr($this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico'), 0, 4);
+    }
     // legge circolari
     $query = $this->createQueryBuilder('c')
-      ->where('c.pubblicata=:pubblicata')
+      ->where('c.pubblicata=:pubblicata AND c.anno=:anno')
       ->setParameter('pubblicata', 1)
+      ->setParameter('anno', $anno)
       ->orderBy('c.data', 'DESC')
       ->addOrderBy('c.numero', 'DESC');
     if ($cerca['visualizza'] != 'T') {
@@ -387,11 +396,9 @@ class CircolareRepository extends EntityRepository {
     }
     if ($cerca['mese']) {
       // filtra per data
-      $data = explode('-', $cerca['mese']);
       $query
-        ->andWhere('YEAR(c.data)=:anno AND MONTH(c.data)=:mese')
-        ->setParameter('anno', intval($data[0]))
-        ->setParameter('mese', intval($data[1]));
+        ->andWhere('MONTH(c.data)=:mese')
+        ->setParameter('mese', (int) $cerca['mese']);
     }
     if ($cerca['oggetto']) {
       // filtra per oggetto
@@ -417,17 +424,42 @@ class CircolareRepository extends EntityRepository {
    * @return array Lista di circolari da leggere
    */
   public function listaCircolariClasse(Classe $classe) {
+    // A.S. in corso
+    $anno = (int) substr($this->_em->getRepository('App:Configurazione')->getParametro('anno_scolastico'), 0, 4);
     // lista circolari
     $circolari = $this->createQueryBuilder('c')
       ->join('App:CircolareClasse', 'cc', 'WITH', 'cc.circolare=c.id AND cc.classe=:classe')
-      ->where('c.pubblicata=:pubblicata AND cc.letta IS NULL')
-      ->setParameters(['pubblicata' => 1, 'classe' => $classe])
+      ->where('c.pubblicata=:pubblicata AND c.anno=:anno AND cc.letta IS NULL')
+      ->setParameters(['pubblicata' => 1, 'anno' => $anno, 'classe' => $classe])
       ->orderBy('c.data', 'ASC')
       ->addOrderBy('c.numero', 'ASC')
       ->getQuery()
       ->getArrayResult();
     // restituisce dati
     return $circolari;
+  }
+
+  /**
+   * Restituisce la lista degli anni scolatici presenti nell'archivio delle circolari
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function anniScolastici() {
+    // inizializza
+    $dati = [];
+    // legge anni
+    $anni = $this->createQueryBuilder('c')
+      ->select('DISTINCT c.anno')
+      ->where('c.pubblicata=:pubblicata')
+      ->setParameters(['pubblicata' => 1])
+      ->orderBy('c.anno', 'DESC')
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($anni as $val) {
+      $dati['A.S. '.$val['anno'].'/'.($val['anno'] + 1)] = $val['anno'];
+    }
+    // restituisce dati formattati
+    return $dati;
   }
 
 }

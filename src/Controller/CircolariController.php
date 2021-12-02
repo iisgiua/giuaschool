@@ -95,6 +95,7 @@ class CircolariController extends AbstractController {
       $numero = $em->getRepository('App:Circolare')->prossimoNumero();
       $circolare = (new Circolare())
         ->setData(new \DateTime('today'))
+        ->setAnno((int) substr($session->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
         ->setNumero($numero);
       if ($this->getUser()->getSede()) {
         $circolare->addSede($this->getUser()->getSede());
@@ -397,7 +398,7 @@ class CircolariController extends AbstractController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param LogHandler $dblogger Gestore dei log su database
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
-   * @param int $id Identificativo dell'avviso
+   * @param int $id Identificativo della circolare
    *
    * @return Response Pagina di risposta
    *
@@ -566,7 +567,7 @@ class CircolariController extends AbstractController {
    * @param LogHandler $dblogger Gestore dei log su database
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
    * @param bool $pubblica Vero se si vuole pubblicare la circolare, falso per togliere la pubblicazione
-   * @param int $id Identificativo dell'avviso
+   * @param int $id Identificativo della circolare
    *
    * @return Response Pagina di risposta
    *
@@ -979,18 +980,10 @@ class CircolariController extends AbstractController {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    // crea lista mesi
-    $anno_inizio = substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);
-    $anno_fine = $anno_inizio + 1;
-    $lista_mesi = array();
-    for ($i=9; $i<=12; $i++) {
-      $lista_mesi[$mesi[$i].' '.$anno_inizio] = $anno_inizio.'-'.substr('0'.$i, -2);
-    }
-    for ($i=1; $i<=8; $i++) {
-      $lista_mesi[$mesi[$i].' '.$anno_fine] = $anno_fine.'-0'.$i;
-    }
     // recupera criteri dalla sessione
     $cerca = array();
+    $cerca['anno'] = $session->get('/APP/ROUTE/circolari_docenti/anno',
+      substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
     $cerca['visualizza'] = $session->get('/APP/ROUTE/circolari_docenti/visualizza',
       ($this->getUser() instanceOf Staff ? 'T' : 'P'));
     $cerca['mese'] = $session->get('/APP/ROUTE/circolari_docenti/mese', null);
@@ -1002,8 +995,28 @@ class CircolariController extends AbstractController {
       // pagina specificata: la conserva in sessione
       $session->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
     }
+    // crea lista anni
+    $lista_anni = $em->getRepository('App:Circolare')->anniScolastici();
+    // crea lista mesi
+    $lista_mesi = array();
+    for ($i=9; $i<=12; $i++) {
+      $lista_mesi[$mesi[$i]] = $i;
+    }
+    for ($i=1; $i<=8; $i++) {
+      $lista_mesi[$mesi[$i]] = $i;
+    }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_docenti', FormType::class)
+      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
+        'data' => $cerca['anno'],
+        'choices' => $lista_anni,
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true))
       ->add('visualizza', ChoiceType::class, array('label' => 'label.circolari_filtro_visualizza',
         'data' => $cerca['visualizza'],
         'choices' => ['label.circolari_da_leggere' => 'D', 'label.circolari_proprie' => 'P',
@@ -1036,10 +1049,12 @@ class CircolariController extends AbstractController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
+      $cerca['anno'] = $form->get('anno')->getData();
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
+      $session->set('/APP/ROUTE/circolari_docenti/anno', $cerca['anno']);
       $session->set('/APP/ROUTE/circolari_docenti/visualizza', $cerca['visualizza']);
       $session->set('/APP/ROUTE/circolari_docenti/mese', $cerca['mese']);
       $session->set('/APP/ROUTE/circolari_docenti/oggetto', $cerca['oggetto']);
@@ -1047,6 +1062,7 @@ class CircolariController extends AbstractController {
     }
     // legge le circolari
     $dati = $em->getRepository('App:Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
+    $dati['annoCorrente'] = array_values($lista_anni)[0];
     if ($this->getUser() instanceOf Staff) {
       // legge dettagli su circolari
       foreach ($dati['lista'] as $c) {
@@ -1088,18 +1104,10 @@ class CircolariController extends AbstractController {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    // crea lista mesi
-    $anno_inizio = substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);
-    $anno_fine = $anno_inizio + 1;
-    $lista_mesi = array();
-    for ($i=9; $i<=12; $i++) {
-      $lista_mesi[$mesi[$i].' '.$anno_inizio] = $anno_inizio.'-'.substr('0'.$i, -2);
-    }
-    for ($i=1; $i<=8; $i++) {
-      $lista_mesi[$mesi[$i].' '.$anno_fine] = $anno_fine.'-0'.$i;
-    }
     // recupera criteri dalla sessione
     $cerca = array();
+    $cerca['anno'] = $session->get('/APP/ROUTE/circolari_ata/anno',
+      substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
     $cerca['visualizza'] = $session->get('/APP/ROUTE/circolari_ata/visualizza', 'T');
     $cerca['mese'] = $session->get('/APP/ROUTE/circolari_ata/mese', null);
     $cerca['oggetto'] = $session->get('/APP/ROUTE/circolari_ata/oggetto', '');
@@ -1110,8 +1118,28 @@ class CircolariController extends AbstractController {
       // pagina specificata: la conserva in sessione
       $session->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
     }
+    // crea lista anni
+    $lista_anni = $em->getRepository('App:Circolare')->anniScolastici();
+    // crea lista mesi
+    $lista_mesi = array();
+    for ($i=9; $i<=12; $i++) {
+      $lista_mesi[$mesi[$i]] = $i;
+    }
+    for ($i=1; $i<=8; $i++) {
+      $lista_mesi[$mesi[$i]] = $i;
+    }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_ata', FormType::class)
+      ->add('anno', ChoiceType::class, array('label' => 'label.filtro_anno_scolastico',
+        'data' => $cerca['anno'],
+        'choices' => $lista_anni,
+        'choice_translation_domain' => false,
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => true))
       ->add('visualizza', ChoiceType::class, array('label' => 'label.circolari_filtro_visualizza',
         'data' => $cerca['visualizza'],
         'choices' => ['label.circolari_da_leggere' => 'D', 'label.circolari_proprie' => 'P',
@@ -1143,10 +1171,12 @@ class CircolariController extends AbstractController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
+      $cerca['anno'] = $form->get('anno')->getData();
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
+      $session->set('/APP/ROUTE/circolari_ata/anno', $cerca['anno']);
       $session->set('/APP/ROUTE/circolari_ata/visualizza', $cerca['visualizza']);
       $session->set('/APP/ROUTE/circolari_ata/mese', $cerca['mese']);
       $session->set('/APP/ROUTE/circolari_ata/oggetto', $cerca['oggetto']);
@@ -1154,6 +1184,7 @@ class CircolariController extends AbstractController {
     }
     // legge le circolari
     $dati = $em->getRepository('App:Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
+    $dati['annoCorrente'] = array_values($lista_anni)[0];
     // mostra la pagina di risposta
     return $this->render('circolari/ata.html.twig', array(
       'pagina_titolo' => 'page.circolari_ata',

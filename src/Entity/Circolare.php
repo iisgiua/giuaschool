@@ -23,8 +23,10 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Circolare - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\CircolareRepository")
- * @ORM\Table(name="gs_circolare")
+ * @ORM\Table(name="gs_circolare", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","numero"})})
  * @ORM\HasLifecycleCallbacks
+ *
+ * @UniqueEntity(fields={"anno","numero"}, message="field.unique")
  */
 class Circolare {
 
@@ -67,7 +69,16 @@ class Circolare {
   private $sedi;
 
   /**
-   * @var integer $numero Numero della circolare (univoco solo assieme alla sede)
+   * @var integer $anno Anno iniziale dell'A.S. a cui si riferisce la circolare
+   *
+   * @ORM\Column(type="integer", nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   */
+  private $anno;
+
+  /**
+   * @var integer $numero Numero della circolare
    *
    * @ORM\Column(type="integer", nullable=false)
    *
@@ -317,6 +328,27 @@ class Circolare {
    */
   public function removeSede(Sede $sede) {
     $this->sedi->removeElement($sede);
+    return $this;
+  }
+
+  /**
+   * Restituisce l'anno iniziale dell'A.S. a cui si riferisce la circolare
+   *
+   * @return integer Anno iniziale dell'A.S. a cui si riferisce la circolare
+   */
+  public function getAnno() {
+    return $this->anno;
+  }
+
+  /**
+   * Modifica l'anno iniziale dell'A.S. a cui si riferisce la circolare
+   *
+   * @param integer $anno Anno iniziale dell'A.S. a cui si riferisce la circolare
+   *
+   * @return Circolare Oggetto Circolare
+   */
+  public function setAnno($anno) {
+    $this->anno = $anno;
     return $this;
   }
 

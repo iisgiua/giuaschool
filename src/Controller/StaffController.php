@@ -12,6 +12,7 @@
 
 namespace App\Controller;
 
+use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -41,6 +42,9 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mailer\MailerInterface;
 use App\Entity\Annotazione;
 use App\Entity\Colloquio;
 use App\Entity\Avviso;
@@ -2611,7 +2615,9 @@ class StaffController extends AbstractController {
    * @param SessionInterface $session Gestore delle sessioni
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param LogHandler $dblogger Gestore dei log su database
+   * @param LoggerInterface $logger Gestore dei log su file
    * @param PdfManager $pdf Gestore dei documenti PDF
+   * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param int $id ID dell'alunno
    * @param boolean $genitore Vero se si vuole cambiare la password del genitore, falso per la password dell'alunno
    *
@@ -2625,8 +2631,8 @@ class StaffController extends AbstractController {
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em,
                                        UserPasswordEncoderInterface $encoder, SessionInterface $session,
-                                       StaffUtil $staff, LogHandler $dblogger, PdfManager $pdf,
-                                       $tipo, $username=null) {
+                                       StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
+                                       PdfManager $pdf, MailerInterface $mailer, $tipo, $username=null) {
      // controlla alunno
      $utente = $em->getRepository('App:Alunno')->findOneByUsername($username);
      if (!$utente) {
@@ -2700,7 +2706,7 @@ class StaffController extends AbstractController {
         $this->addFlash('danger', 'exception.errore_invio_credenziali');
       }
       // redirezione
-      return $this->redirectToRoute('alunni_modifica');
+      return $this->redirectToRoute('staff_password');
     } else {
       // crea pdf e lo scarica
       $nomefile = 'credenziali-registro.pdf';
