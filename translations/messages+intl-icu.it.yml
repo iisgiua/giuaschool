@@ -568,7 +568,7 @@ page.genitori_assenze: Assenze
 page.genitori_avvisi: Avvisi Genitori
 page.genitori_colloqui: Prenotazione Colloqui
 page.genitori_deroghe: Autorizzazioni
-page.genitori_eventi: Agenda Genitori
+page.genitori_eventi: Agenda Eventi
 page.genitori_lezioni: Lezioni Svolte
 page.genitori_note: Note Disciplinari
 page.genitori_osservazioni: Osservazioni
@@ -681,7 +681,7 @@ title.genitori_assenze: Assenze dell'alunn{sex}
 title.genitori_avvisi: Avvisi per i genitori
 title.genitori_colloqui: Colloqui individuali con i docenti
 title.genitori_deroghe: Autorizzazioni in deroga per l'alunn{sex}
-title.genitori_eventi: Agenda degli eventi per il genitore
+title.genitori_eventi: Agenda degli eventi
 title.genitori_lezioni: Lezioni della classe
 title.genitori_note: Note dell'alunn{sex}
 title.genitori_osservazioni: Osservazioni sull'alunn{sex}

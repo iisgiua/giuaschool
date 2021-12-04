@@ -189,12 +189,14 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       if ($user instanceOf Genitore) {
         // elimina profili non genitore (evita login docente con credenziali poco affidabili)
         $nuoviProfili = [];
+        $contaProfili = 0;
         foreach ($profilo->getListaProfili() as $ruolo=>$profili) {
           if ($ruolo == 'GENITORE') {
             $nuoviProfili[$ruolo] = $profili;
+            $contaProfili = count($profili);
           }
         }
-        $profilo->setListaProfili(count($nuoviProfili) > 1 ? $nuoviProfili : []);
+        $profilo->setListaProfili($contaProfili > 1 ? $nuoviProfili : []);
       }
       // controlla che il profilo sia lo stesso richiesto con username
       if ($profilo->getId() == $user->getId()) {
