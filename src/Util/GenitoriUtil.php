@@ -1167,17 +1167,20 @@ class GenitoriUtil {
     uasort($dati['lista'], function($a, $b) { return (array_values($a)[0] < array_values($b)[0] ? -1 : 1); });
     // segna date al completo
     $esauriti = $this->em->getRepository('App:RichiestaColloquio')->postiEsauriti($colloquio);
+    $numEsauriti = 0;
     foreach ($esauriti as $e) {
       $value = $e['appuntamento']->format('Y-m-d G:i');
       foreach ($dati['lista'] as $k=>$v) {
         $keyval = array_keys($v)[0];
         if (explode('|', $v[$keyval])[0] == $value) {
-          // data al completp
+          // data al completo
           $dati['lista'][$k][$keyval] = -1;
+          $numEsauriti++;
           break;
         }
       }
     }
+    $dati['abilitaInvio'] = ($numEsauriti < count($dati['lista']));
     // restituisce dati
     return $dati;
   }

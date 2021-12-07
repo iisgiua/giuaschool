@@ -121,8 +121,20 @@ class Valutazione {
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
    * @ORM\JoinColumn(nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
    */
   private $lezione;
+
+  /**
+   * @var Materia $materia Materia a cui si riferisce la valutazione (potrebbe non coincidere con quella della lezione)
+   *
+   * @ORM\ManyToOne(targetEntity="Materia")
+   * @ORM\JoinColumn(nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   */
+  private $materia;
 
 
   //==================== EVENTI ORM ====================
@@ -385,8 +397,38 @@ class Valutazione {
     return $this;
   }
 
+  /**
+   * Restituisce la materia a cui si riferisce la valutazione (potrebbe non coincidere con quella della lezione)
+   *
+   * @return Materia Materia a cui si riferisce la valutazione
+   */
+  public function getMateria() {
+    return $this->materia;
+  }
+
+  /**
+   * Modifica la materia a cui si riferisce la valutazione (potrebbe non coincidere con quella della lezione)
+   *
+   * @param Materia $materia Materia a cui si riferisce la valutazione
+   *
+   * @return Valutazione Oggetto Valutazione
+   */
+  public function setMateria(Materia $materia) {
+    $this->materia = $materia;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->visibile = true;
+    $this->media = true;
+  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo

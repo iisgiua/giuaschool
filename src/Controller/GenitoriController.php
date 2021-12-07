@@ -694,6 +694,7 @@ class GenitoriController extends AbstractController {
       'form_title' => 'title.prenota_colloqui',
       'label' => $label,
       'errore' => $dati['errore'],
+      'dati' => $dati,
     ));
   }
 

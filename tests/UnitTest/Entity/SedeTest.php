@@ -61,7 +61,7 @@ class SedeTest extends DatabaseTestCase {
         $data[$i][$field] =
           $field == 'nome' ? implode(' ', array_map('ucfirst', $this->faker->unique()->words(3))) :
           ($field == 'nomeBreve' ? ucfirst($this->faker->unique()->words(1, true)) :
-          ($field == 'citta' ? $this->faker->city() :
+          ($field == 'citta' ? substr($this->faker->city(), 0, 32) :
           ($field == 'indirizzo1' ? $this->faker->streetAddress() :
           ($field == 'indirizzo2' ? $this->faker->postcode().' - '.$this->faker->state().' ('.$this->faker->stateAbbr().')' :
           ($field == 'telefono' ? $this->faker->telefono(1)[0] :

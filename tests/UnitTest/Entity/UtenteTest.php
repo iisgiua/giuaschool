@@ -91,7 +91,7 @@ class UtenteTest extends DatabaseTestCase {
           ($field == 'dataNascita' ? $this->faker->dateTimeBetween('-60 years', '-14 years') :
           ($field == 'comuneNascita' ? $this->faker->city() :
           ($field == 'codiceFiscale' ? $this->faker->unique()->taxId() :
-          ($field == 'citta' ?  $this->faker->city() :
+          ($field == 'citta' ? substr($this->faker->city(), 0, 32) :
           ($field == 'indirizzo' ? $this->faker->streetAddress() :
           ($field == 'numeriTelefono' ? $this->faker->telefono($this->faker->numberBetween(0, 3)) :
           array($this->faker->words(1, true) => $this->faker->words(1, true))))))))))))))))))));

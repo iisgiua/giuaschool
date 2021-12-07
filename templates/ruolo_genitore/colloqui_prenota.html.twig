@@ -29,7 +29,7 @@
           </span>
         </div>
       </div>
-      <p class="text-info gs-big"><strong><em>Scegli la data desiderata e clicca sul pulsante CONFERMA.</em></strong></p>
+      <p class="text-info gs-big"><strong><em>Scegli la data desiderata e clicca sul pulsante CONFERMA o premi ANNULLA per tornare indietro senza fare modifiche.</em></strong></p>
       {{ form_start(form) }}
       {{ form_errors(form) }}
       <div class="form-group">
@@ -38,7 +38,14 @@
           {{ form_widget(form.data) }}
         </div>
       </div>
-      {{ form_end(form) }}
+      <div class="form-group">
+        <div class="row text-center">
+          {{ dati.abilitaInvio ? form_widget(form.submit, {attr: {class: 'btn-primary gs-rm-3'}}) }}
+          {{ form_widget(form.cancel) }}
+        </div>
+      </div>
+      {{ form_widget(form._token) }}
+      {{ form_end(form, {render_rest: false}) }}
     </div>
   </div>
   {% endif %}

@@ -74,7 +74,7 @@ class UtenteRepository extends EntityRepository {
     // trova profili
     $param = ['nome' => $nome, 'cognome' => $cognome, 'codiceFiscale' => $codiceFiscale, 'abilitato' => 1];
     if ($spid) {
-      // accesso SPID: contralla che utente sia disabilitato
+      // accesso SPID: controlla che utente sia abilitato
       $param['spid'] = 1;
     }
     $profili = $this->findBy($param);
@@ -85,6 +85,7 @@ class UtenteRepository extends EntityRepository {
     // controlla se solo un profilo
     if (count($profili) == 1) {
       // solo un profilo: lo restituisce
+      $profili[0]->setListaProfili([]);
       return $profili[0];
     }
     // crea un vettore con i dati dei profili e lo restituisce

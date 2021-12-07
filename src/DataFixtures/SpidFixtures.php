@@ -36,7 +36,7 @@ class SpidFixtures extends Fixture implements FixtureGroupInterface {
   public function load(ObjectManager $em) {
     $faker = Factory::create('it_IT');
     $faker->addProvider(new FakerPerson($faker));
-    $faker->seed('7777');
+    $faker->seed('7272');
     // carica dati
     for ($i = 1; $i <= 3; $i++) {
       $spid = (new Spid())
