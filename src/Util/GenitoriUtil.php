@@ -386,7 +386,7 @@ class GenitoriUtil {
     $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
       ->select('v.id,v.tipo,v.argomento,v.voto,v.giudizio,v.media,l.data,m.nomeBreve')
       ->join('v.lezione', 'l')
-      ->join('l.materia', 'm')
+      ->join('v.materia', 'm')
       ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=v.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where('v.alunno=:alunno AND v.visibile=:visibile AND (l.classe=:classe OR l.classe=cc.classe)')
       ->orderBy('m.nomeBreve', 'ASC')
@@ -394,7 +394,7 @@ class GenitoriUtil {
       ->setParameters(['alunno' => $alunno, 'visibile' => 1, 'classe' => $classe]);
     if ($materia) {
       $voti = $voti
-        ->andWhere('l.materia=:materia')
+        ->andWhere('v.materia=:materia')
         ->setParameter('materia', $materia);
     }
     $voti = $voti
@@ -431,7 +431,7 @@ class GenitoriUtil {
     }
     // restituisce dati come array associativo
     return $dati;
-  }
+  } 
 
   /**
    * Restituisce le assenze dell'alunno indicato.

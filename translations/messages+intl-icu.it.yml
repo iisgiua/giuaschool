@@ -1061,6 +1061,10 @@ message.lezione_esiste_altra: "Non è possibile firmare la lezione indicata.<br>
 message.no_documenti: Non sono presenti documenti
 message.inserimento_documenti_bes: "Inserire i documenti degli alunni BES: diagnosi e P.E.I./P.D.P.<br>I documenti inseriti saranno visibili solo dai docenti del Consiglio di Classe."
 message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?
+message.alunno_assente_in_data: "ATTENZIONE: L'alunno risulta assente alla lezione della data indicata."
+message.modifica_data_o_conferma: "Puoi modificare la data o confermare i dati inseriti."
+message.alunni_assenti_in_data: "ATTENZIONE: Gli alunni seguenti risultano assenti alla lezione della data indicata:"
+
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.

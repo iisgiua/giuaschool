@@ -182,7 +182,8 @@
               </div>
             {% if v.docente_id == app.user.id and edit %}
               <div class="list-group-item-text text-right">
-                <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': v.tipo, 'id': v.id}) }}" role="button" title="Modifica o elimina la valutazione">Modifica</a>
+                <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': v.tipo, 'id': v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
+                <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
               </div>
             {% endif %}
             </div>

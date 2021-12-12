@@ -21,8 +21,8 @@
         <th>Alunno</th>
     {% for dt,v in dati.lista %}
         <th class="gs-pr-0 gs-pl-0">
-          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': dt, 'vista': 'G'}) }}" role="button" title="Visualizza le lezioni del giorno"><strong>{{ v.data }}</strong></a><br>
-          <small>ore: {{ v.durata }}</small>
+          <a class="btn btn-{{ v.durata > 0 ? 'primary' : 'default' }} btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': dt, 'vista': 'G'}) }}" role="button" title="Visualizza le lezioni del giorno"><strong>{{ v.data }}</strong></a><br>
+          <small>ore: {{ v.durata > 0 ? v.durata : '-'}}</small>
         </th>
     {% endfor %}
       </tr>
@@ -38,7 +38,7 @@
         {% for dt,v in dati.lista %}
           {% if v[a.id]['classe'] is defined %}
         <td class="gs-pr-0 gs-pl-0 gs-pt-1 gs-pb-1">
-            {% if v[a.id]['assenze'] is defined %}
+            {% if v[a.id]['assenze'] is defined and v.durata > 0 %}
               {% if v[a.id]['assenze'] >= 1 %}
                 {% for ore in 1 .. (v[a.id]['assenze']|round(0,'floor')) %}
           <span class="label label-default gs-pr-1 gs-pl-1" title="Assenza di un'ora">A</span>

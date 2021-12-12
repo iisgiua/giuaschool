@@ -158,13 +158,6 @@ class ValutazioneTest extends DatabaseTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunno - NOT BLANK');
     $existent->setAlunno($this->em->getRepository('App:Alunno')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::alunno - VALID');
-    // lezione
-    $obj_lezione = $this->getPrivateProperty($this->entity, 'lezione');
-    $obj_lezione->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::lezione - NOT BLANK');
-    $existent->setLezione($this->em->getRepository('App:Lezione')->findOneBy([]));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::lezione - VALID');
     // materia
     $obj_materia = $this->getPrivateProperty($this->entity, 'materia');
     $obj_materia->setValue($existent, null);

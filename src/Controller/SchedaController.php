@@ -68,9 +68,7 @@ class SchedaController extends AbstractController {
         $alunno->getDataNascita()->format('d/m/Y').')';
     $info['sesso'] = $alunno->getSesso();
     // recupera dati
-    $dati = $cattedra->getMateria()->getTipo() == 'E' ?
-      $reg->dettagliVotiEdCivica($this->getUser(), $cattedra, $alunno) :
-      $reg->dettagliVoti($this->getUser(), $cattedra, $alunno);
+    $dati = $reg->dettagliVoti($this->getUser(), $cattedra, $alunno);
     $dati['lezioni'] = $reg->assenzeMateria($cattedra, $alunno);
     $periodi = $reg->infoPeriodi();
     if ($periodo == 'P') {

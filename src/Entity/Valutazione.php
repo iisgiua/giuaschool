@@ -121,8 +121,6 @@ class Valutazione {
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
    * @ORM\JoinColumn(nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
   private $lezione;
 

@@ -406,7 +406,41 @@ class ArchiviazioneUtil {
       ->getQuery()
       ->getSingleScalarResult();
     $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
-    if ($ore > 0) {
+    // voti in lezione di altra materia
+    $votiNoLezione = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+      ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento,l.data')
+      ->join('v.lezione', 'l')
+      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('so.orario', 'o')
+      ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.materia!=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->orderBy('l.data,l.ora', 'ASC')
+      ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
+        'classe' => $cattedra->getClasse(), 'inizio' => $dati_periodi[$periodo]['inizio'],
+        'fine' => $dati_periodi[$periodo]['fine'], 'sede' => $cattedra->getClasse()->getSede()])
+      ->getQuery()
+      ->getArrayResult();
+    foreach ($votiNoLezione as $v) {
+      if ($v['voto'] > 0) {
+        $voto_int = (int) ($v['voto'] + 0.25);
+        $voto_dec = $v['voto'] - ((int) $v['voto']);
+        $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
+      }
+      $dati['voti'][$v['id']][$v['data']->format('d/m/Y')][] = $v;
+      // aggiunge dati alunno
+      $lista = array_intersect([$v['id']], $this->regUtil->alunniInData($v['data'], $cattedra->getClasse()));
+      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+        ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,(a.classe) AS idclasse')
+        ->where('a.id IN (:lista)')
+        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
+        ->setParameters(['lista' => $lista])
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($alunni as $alu) {
+        $dati['alunni'][$alu['id']] = $alu;
+      }
+    }
+    if ($ore > 0 || !empty($votiNoLezione)) {
       // legge lezioni del periodo
       $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
         ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
@@ -459,8 +493,9 @@ class ArchiviazioneUtil {
         // legge voti
         $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
           ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento')
-          ->where('v.lezione=:lezione AND v.docente=:docente')
-          ->setParameters(['lezione' => $l['id'], 'docente' => $docente])
+          ->where('v.lezione=:lezione AND v.materia=:materia AND v.docente=:docente')
+          ->setParameters(['lezione' => $l['id'], 'materia' => $cattedra->getMateria(),
+            'docente' => $docente])
           ->getQuery()
           ->getArrayResult();
         // voti per alunno
@@ -517,171 +552,173 @@ class ArchiviazioneUtil {
       if ($colresidue > 0) {
         $numeropagine++;
       }
-      // cicla per ogni pagina
-      for ($np = 0; $np < $numeropagine; $np++) {
-        // intestazione di pagina
-        $this->intestazionePagina('Lezioni della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
-        if ($np == 0) {
-          $html = '<br>Totale ore di lezione: '.$ore;
-          $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
-        }
-        // intestazione tabella
-        $html_col = '';
-        $html_inizio = '<table border="1"><tr><td style="width:75mm"><b>Alunno</b></td>';
-        $html_inizio_rs = '<table border="1"><tr><td style="width:75mm" rowspan="2"><b>Alunno</b></td>';
-        $html = '';
-        for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
-          $g = $giornilezione[$ng];
-          $gs = $nomesett[$g->format('w')];
-          $gg = $g->format('j');
-          $gm = $nomemesi[$g->format('n')];
-          $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
-          $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
-          $html_col .= '<td><i>'.$strore.'</i></td>';
-        }
-        if ($np == $numeropagine - 1) {
-          $rspan = ($html_col == '' ? '' : ' rowspan="2"');
-          $html .= '<td style="width:20mm"'.$rspan.'><b>Totale<br>ore di<br>assenza</b></td>';
-          $html .= '<td style="width:20mm"'.$rspan.'><b>Proposte<br>di voto</b></td>';
-        }
-        $html = ($html_col == '' ? $html_inizio : $html_inizio_rs).$html.'</tr>'.
-          ($html_col == '' ? '' : '<tr>'.$html_col.'</tr>');
-        // dati alunni
-        foreach ($dati['alunni'] as $idalu=>$alu) {
-          // controllo materia religione
-          if ($cattedra->getTipo() != 'A' && $cattedra->getMateria()->getTipo() == 'R' && $alu['religione'] != 'S') {
-            // materia religione e alunno non si avvale
-            continue;
+      if ($ore > 0) {
+        // cicla per ogni pagina
+        for ($np = 0; $np < $numeropagine; $np++) {
+          // intestazione di pagina
+          $this->intestazionePagina('Lezioni della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
+          if ($np == 0) {
+            $html = '<br>Totale ore di lezione: '.$ore;
+            $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
           }
-          if ($cattedra->getTipo() == 'A' && $cattedra->getMateria()->getTipo() == 'R' && $alu['religione'] != 'A') {
-            // materia alternativa alla religione e alunno non si avvale
-            continue;
-          }
-          // nome
-          $html .= '<tr nobr="true" style="font-size:9pt">'.
-            '<td align="left"> '.
-            ($alu['idclasse'] != $cattedra->getClasse()->getId() ? '* ' : '').
-            $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')'.
-            '</td>';
-          if ($alu['idclasse'] != $cattedra->getClasse()->getId()) {
-            // segnala presenza di alunni ritirati
-            $aluritirati = true;
-          }
-          // assenze e voti
+          // intestazione tabella
+          $html_col = '';
+          $html_inizio = '<table border="1"><tr><td style="width:75mm"><b>Alunno</b></td>';
+          $html_inizio_rs = '<table border="1"><tr><td style="width:75mm" rowspan="2"><b>Alunno</b></td>';
+          $html = '';
           for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
             $g = $giornilezione[$ng];
+            $gs = $nomesett[$g->format('w')];
             $gg = $g->format('j');
-            $gm = $g->format('n');
-            if (isset($dati['lezioni'][$gm][$gg][$idalu]['classe'])) {
-              // alunno inserito in classe
-              $html .= '<td>';
-              // assenze
-              if (isset($dati['lezioni'][$gm][$gg][$idalu]['assenze'])) {
-                $ass = $dati['lezioni'][$gm][$gg][$idalu]['assenze'];
-                $html .= str_repeat('A', intval($ass)).(($ass - intval($ass)) > 0 ? 'a' : '');
-                $dati['alunni'][$idalu]['assenze'] += $ass;
-              }
-              // voti
-              if (isset($dati['lezioni'][$gm][$gg][$idalu]['voti'])) {
-                foreach ($dati['lezioni'][$gm][$gg][$idalu]['voti'] as $voti) {
-                  if (isset($voti['voto_str'])) {
-                    $html .= ' <b>'.$voti['voto_str'].'</b><sub>&nbsp;'.$voti['tipo'].'</sub>';
-                  }
-                }
-              }
-              $html .= '</td>';
-            } else {
-              // alunno non inserito in classe
-              $html .= '<td style="background-color:#CCCCCC">&nbsp;</td>';
-            }
+            $gm = $nomemesi[$g->format('n')];
+            $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
+            $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
+            $html_col .= '<td><i>'.$strore.'</i></td>';
           }
           if ($np == $numeropagine - 1) {
-            // tot. assenze
-            $html .= '<td>'.rtrim(rtrim(number_format($dati['alunni'][$idalu]['assenze'], 1, ',', ''), '0'), ',').'</td>';
-            // proposte voto
-            if (isset($dati['alunni'][$idalu]['proposte'])) {
-              $html .= '<td><b>'.$info_voti[$cattedra->getMateria()->getTipo()][$dati['alunni'][$idalu]['proposte']].'</b></td>';
-            } else {
-              $html .= '<td style="width:20mm">&nbsp;</td>';
-            }
+            $rspan = ($html_col == '' ? '' : ' rowspan="2"');
+            $html .= '<td style="width:20mm"'.$rspan.'><b>Totale<br>ore di<br>assenza</b></td>';
+            $html .= '<td style="width:20mm"'.$rspan.'><b>Proposte<br>di voto</b></td>';
           }
-          $html .= '</tr>';
+          $html = ($html_col == '' ? $html_inizio : $html_inizio_rs).$html.'</tr>'.
+            ($html_col == '' ? '' : '<tr>'.$html_col.'</tr>');
+          // dati alunni
+          foreach ($dati['alunni'] as $idalu=>$alu) {
+            // controllo materia religione
+            if ($cattedra->getTipo() != 'A' && $cattedra->getMateria()->getTipo() == 'R' && $alu['religione'] != 'S') {
+              // materia religione e alunno non si avvale
+              continue;
+            }
+            if ($cattedra->getTipo() == 'A' && $cattedra->getMateria()->getTipo() == 'R' && $alu['religione'] != 'A') {
+              // materia alternativa alla religione e alunno non si avvale
+              continue;
+            }
+            // nome
+            $html .= '<tr nobr="true" style="font-size:9pt">'.
+              '<td align="left"> '.
+              ($alu['idclasse'] != $cattedra->getClasse()->getId() ? '* ' : '').
+              $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')'.
+              '</td>';
+            if ($alu['idclasse'] != $cattedra->getClasse()->getId()) {
+              // segnala presenza di alunni ritirati
+              $aluritirati = true;
+            }
+            // assenze e voti
+            for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
+              $g = $giornilezione[$ng];
+              $gg = $g->format('j');
+              $gm = $g->format('n');
+              if (isset($dati['lezioni'][$gm][$gg][$idalu]['classe'])) {
+                // alunno inserito in classe
+                $html .= '<td>';
+                // assenze
+                if (isset($dati['lezioni'][$gm][$gg][$idalu]['assenze'])) {
+                  $ass = $dati['lezioni'][$gm][$gg][$idalu]['assenze'];
+                  $html .= str_repeat('A', intval($ass)).(($ass - intval($ass)) > 0 ? 'a' : '');
+                  $dati['alunni'][$idalu]['assenze'] += $ass;
+                }
+                // voti
+                if (isset($dati['lezioni'][$gm][$gg][$idalu]['voti'])) {
+                  foreach ($dati['lezioni'][$gm][$gg][$idalu]['voti'] as $voti) {
+                    if (isset($voti['voto_str'])) {
+                      $html .= ' <b>'.$voti['voto_str'].'</b><sub>&nbsp;'.$voti['tipo'].'</sub>';
+                    }
+                  }
+                }
+                $html .= '</td>';
+              } else {
+                // alunno non inserito in classe
+                $html .= '<td style="background-color:#CCCCCC">&nbsp;</td>';
+              }
+            }
+            if ($np == $numeropagine - 1) {
+              // tot. assenze
+              $html .= '<td>'.rtrim(rtrim(number_format($dati['alunni'][$idalu]['assenze'], 1, ',', ''), '0'), ',').'</td>';
+              // proposte voto
+              if (isset($dati['alunni'][$idalu]['proposte'])) {
+                $html .= '<td><b>'.$info_voti[$cattedra->getMateria()->getTipo()][$dati['alunni'][$idalu]['proposte']].'</b></td>';
+              } else {
+                $html .= '<td style="width:20mm">&nbsp;</td>';
+              }
+            }
+            $html .= '</tr>';
+          }
+          // fine tabella
+          $html .= '</table>';
+          $this->pdf->getHandler()->writeHTML($html, false, false, false, false, 'C');
+          if ($html_col == '') {
+            $html = '';
+          } else {
+            $html =
+              '<b>A</b> = assenza di un\'ora; <b>a</b> = assenza di mezzora; '.
+              '<b>S</b> = voto scritto; <b>O</b> = voto orale; <b>P</b> = voto pratico';
+          }
+          if ($aluritirati) {
+            $html .= '<br><b>*</b> Alunno ritirato/trasferito/frequenta l\'anno all\'estero';
+          }
+          $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
         }
-        // fine tabella
-        $html .= '</table>';
-        $this->pdf->getHandler()->writeHTML($html, false, false, false, false, 'C');
-        if ($html_col == '') {
-          $html = '';
-        } else {
-          $html =
-            '<b>A</b> = assenza di un\'ora; <b>a</b> = assenza di mezzora; '.
-            '<b>S</b> = voto scritto; <b>O</b> = voto orale; <b>P</b> = voto pratico';
+        // legge argomenti e attività
+        $data_prec = null;
+        $num_arg = 0;
+        $num_att = 0;
+        foreach ($lezioni as $l) {
+          $data = $l['data']->format('d/m/Y');
+          if ($data_prec && $data != $data_prec) {
+            if ($num_arg == 0) {
+              // nessun argomento in data precedente
+              $dati['argomenti'][$data_prec]['argomento'][0] = '';
+            }
+            if ($num_att == 0) {
+              // nessuna attività in data precedente
+              $dati['argomenti'][$data_prec]['attivita'][0] = '';
+            }
+            // fa ripartire contatori
+            $num_arg = 0;
+            $num_att = 0;
+          }
+          $testo = $this->ripulisceTesto($l['argomento']);
+          if ($testo != '' && ($num_arg == 0 ||
+              strcasecmp($testo, $dati['argomenti'][$data]['argomento'][$num_arg - 1]) != 0)) {
+            // evita ripetizioni identiche degli argomenti
+            $dati['argomenti'][$data]['argomento'][$num_arg] = $testo;
+            $num_arg++;
+          }
+          $testo = $this->ripulisceTesto($l['attivita']);
+          if ($testo != '' && ($num_att == 0 ||
+              strcasecmp($testo, $dati['argomenti'][$data]['attivita'][$num_att - 1]) != 0)) {
+            // evita ripetizioni identiche delle attività
+            $dati['argomenti'][$data]['attivita'][$num_att] = $testo;
+            $num_att++;
+          }
+          // memorizza data attuale
+          $data_prec = $data;
         }
-        if ($aluritirati) {
-          $html .= '<br><b>*</b> Alunno ritirato/trasferito/frequenta l\'anno all\'estero';
-        }
-        $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
-      }
-      // legge argomenti e attività
-      $data_prec = null;
-      $num_arg = 0;
-      $num_att = 0;
-      foreach ($lezioni as $l) {
-        $data = $l['data']->format('d/m/Y');
-        if ($data_prec && $data != $data_prec) {
-          if ($num_arg == 0) {
+        if ($data_prec && $num_arg == 0) {
             // nessun argomento in data precedente
             $dati['argomenti'][$data_prec]['argomento'][0] = '';
-          }
-          if ($num_att == 0) {
-            // nessuna attività in data precedente
-            $dati['argomenti'][$data_prec]['attivita'][0] = '';
-          }
-          // fa ripartire contatori
-          $num_arg = 0;
-          $num_att = 0;
         }
-        $testo = $this->ripulisceTesto($l['argomento']);
-        if ($testo != '' && ($num_arg == 0 ||
-            strcasecmp($testo, $dati['argomenti'][$data]['argomento'][$num_arg - 1]) != 0)) {
-          // evita ripetizioni identiche degli argomenti
-          $dati['argomenti'][$data]['argomento'][$num_arg] = $testo;
-          $num_arg++;
+        if ($data_prec && $num_att == 0) {
+          // nessuna attività in data precedente
+          $dati['argomenti'][$data_prec]['attivita'][0] = '';
         }
-        $testo = $this->ripulisceTesto($l['attivita']);
-        if ($testo != '' && ($num_att == 0 ||
-            strcasecmp($testo, $dati['argomenti'][$data]['attivita'][$num_att - 1]) != 0)) {
-          // evita ripetizioni identiche delle attività
-          $dati['argomenti'][$data]['attivita'][$num_att] = $testo;
-          $num_att++;
+        // scrive argomenti e attività
+        $this->intestazionePagina('Argomenti e attivit&agrave; della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
+        $html = '<table border="1" style="left-padding:2mm">
+          <tr>
+            <td style="width:10%"><b>Data</b></td>
+            <td style="width:45%"><b>Argomenti</b></td>
+            <td style="width:45%"><b>Attivit&agrave;</b></td>
+          </tr>';
+        foreach ($dati['argomenti'] as $d=>$arg) {
+          $html .= '<tr nobr="true"><td>'.$d.'</td>'.
+            '<td align="left">'.implode('<br>', $arg['argomento']).'</td>'.
+            '<td align="left">'.implode('<br>', $arg['attivita']).'</td>'.
+            '</tr>';
         }
-        // memorizza data attuale
-        $data_prec = $data;
+        $html .= '</table>';
+        $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
       }
-      if ($data_prec && $num_arg == 0) {
-          // nessun argomento in data precedente
-          $dati['argomenti'][$data_prec]['argomento'][0] = '';
-      }
-      if ($data_prec && $num_att == 0) {
-        // nessuna attività in data precedente
-        $dati['argomenti'][$data_prec]['attivita'][0] = '';
-      }
-      // scrive argomenti e attività
-      $this->intestazionePagina('Argomenti e attivit&agrave; della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
-      $html = '<table border="1" style="left-padding:2mm">
-        <tr>
-          <td style="width:10%"><b>Data</b></td>
-          <td style="width:45%"><b>Argomenti</b></td>
-          <td style="width:45%"><b>Attivit&agrave;</b></td>
-        </tr>';
-      foreach ($dati['argomenti'] as $d=>$arg) {
-        $html .= '<tr nobr="true"><td>'.$d.'</td>'.
-          '<td align="left">'.implode('<br>', $arg['argomento']).'</td>'.
-          '<td align="left">'.implode('<br>', $arg['attivita']).'</td>'.
-          '</tr>';
-      }
-      $html .= '</table>';
-      $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
       // scrive dettaglio voti
       if (count($dati['voti']) > 0) {
         $this->intestazionePagina('Valutazioni della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
@@ -701,6 +738,7 @@ class ArchiviazioneUtil {
               <td width="6%" style="border:1pt solid #000"><strong>Voto</strong></td>
               <td width="36%" style="border:1pt solid #000"><strong>Giudizio</strong></td>
             </tr>';
+
           foreach ($dati['voti'][$idalu] as $dt=>$vv) {
             foreach ($vv as $v) {
               $argomento = $this->ripulisceTesto($v['argomento']);

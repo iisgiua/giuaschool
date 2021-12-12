@@ -194,6 +194,11 @@ class VotiController extends AbstractController {
     $visibile = true;
     $argomento = null;
     $elenco = null;
+    $assenti = [];
+    if ($request->isMethod('GET')) {
+      // inizializza sessione
+      $session->set('/APP/ROUTE/lezioni_voti_classe/conferma', 0);
+    }
     // controllo cattedra
     $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
     if (!$cattedra) {
@@ -291,96 +296,113 @@ class VotiController extends AbstractController {
         $log['create'] = array();
         $log['edit'] = array();
         $log['delete'] = array();
-        foreach ($form->get('lista')->getData() as $key=>$valutazione) {
-          // correzione voto
-          if ($valutazione->getVoto() > 0 && $valutazione->getVoto() < 1) {
-            $valutazione->setVoto(1);
-          } elseif ($valutazione->getVoto() > 10) {
-            $valutazione->setVoto(10);
-          }
-          // legge alunno
-          $alunno = $em->getRepository('App:Alunno')->find($valutazione->getId());
-          // legge vecchio voto
-          $voto = ($elenco_precedente[$key]->getVotoId() ?
-            $em->getRepository('App:Valutazione')->find($elenco_precedente[$key]->getVotoId()) : null);
-          if (!$voto && ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
-            // valutazione aggiunta
-            $voto = (new Valutazione())
-              ->setTipo($tipo)
-              ->setVisibile($form->get('visibile')->getData())
-              ->setMedia($valutazione->getMedia())
-              ->setArgomento($form->get('argomento')->getData())
-              ->setDocente($this->getUser())
-              ->setLezione($lezione)
-              ->setAlunno($alunno)
-              ->setVoto($valutazione->getVoto())
-              ->setGiudizio($valutazione->getGiudizio());
-            $em->persist($voto);
-            $log['create'][] = $voto;
-          } elseif ($voto && $valutazione->getVoto() == 0 && empty($valutazione->getGiudizio())) {
-            // valutazione cancellata
-            $log['delete'][] = array($voto->getId(), $voto);
-            $em->remove($voto);
-          } elseif ($voto && ($elenco_precedente[$key]->getVoto() != $valutazione->getVoto() ||
-                    $elenco_precedente[$key]->getGiudizio() != $valutazione->getGiudizio() ||
-                    $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData() ||
-                    $voto->getLezione()->getId() != $lezione->getId() || $elenco_precedente[$key]->getMedia() != $valutazione->getMedia())) {
-            // valutazione modificata
-            $log['edit'][] = array($voto->getId(), $voto->getVisibile(), $voto->getArgomento(),
-              $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio(), $voto->getMedia());
-            $voto
-              ->setVisibile($form->get('visibile')->getData())
-              ->setMedia($valutazione->getMedia())
-              ->setLezione($lezione)
-              ->setArgomento($form->get('argomento')->getData())
-              ->setVoto($valutazione->getVoto())
-              ->setGiudizio($valutazione->getGiudizio());
+        // controlla presenza alunni con voto
+        $alunniVoto = [];
+        foreach ($form->get('lista')->getData() as $valutazione) {
+          // controlla voto
+          if ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio())) {
+            $alunniVoto[] = $valutazione->getId();
           }
         }
-        // ok: memorizza dati
-        $em->flush();
-        // log azione e notifica
-        foreach ($log['create'] as $obj) {
-          $notifica = (new Notifica())
-            ->setOggettoNome('Valutazione')
-            ->setOggettoId($obj->getId())
-            ->setAzione('A');
-          $em->persist($notifica);
+        $conferma = 1;
+        $assenti = $em->getRepository('App:Lezione')->alunniAssenti($lezione, $alunniVoto);
+        if (!empty($assenti) && $session->get('/APP/ROUTE/lezioni_voti_classe/conferma', 0) != $conferma) {
+          // alunni assenti: richiede conferma
+          $session->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
+        } else {
+          // alunni presenti
+          foreach ($form->get('lista')->getData() as $key=>$valutazione) {
+            // correzione voto
+            if ($valutazione->getVoto() > 0 && $valutazione->getVoto() < 1) {
+              $valutazione->setVoto(1);
+            } elseif ($valutazione->getVoto() > 10) {
+              $valutazione->setVoto(10);
+            }
+            // legge alunno
+            $alunno = $em->getRepository('App:Alunno')->find($valutazione->getId());
+            // legge vecchio voto
+            $voto = ($elenco_precedente[$key]->getVotoId() ?
+              $em->getRepository('App:Valutazione')->find($elenco_precedente[$key]->getVotoId()) : null);
+            if (!$voto && ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
+              // valutazione aggiunta
+              $voto = (new Valutazione())
+                ->setTipo($tipo)
+                ->setVisibile($form->get('visibile')->getData())
+                ->setMedia($valutazione->getMedia())
+                ->setArgomento($form->get('argomento')->getData())
+                ->setDocente($this->getUser())
+                ->setLezione($lezione)
+                ->setMateria($cattedra->getMateria())
+                ->setAlunno($alunno)
+                ->setVoto($valutazione->getVoto())
+                ->setGiudizio($valutazione->getGiudizio());
+              $em->persist($voto);
+              $log['create'][] = $voto;
+            } elseif ($voto && $valutazione->getVoto() == 0 && empty($valutazione->getGiudizio())) {
+              // valutazione cancellata
+              $log['delete'][] = array($voto->getId(), $voto);
+              $em->remove($voto);
+            } elseif ($voto && ($elenco_precedente[$key]->getVoto() != $valutazione->getVoto() ||
+                      $elenco_precedente[$key]->getGiudizio() != $valutazione->getGiudizio() ||
+                      $argomento != $form->get('argomento')->getData() || $visibile != $form->get('visibile')->getData() ||
+                      $voto->getLezione()->getId() != $lezione->getId() || $elenco_precedente[$key]->getMedia() != $valutazione->getMedia())) {
+              // valutazione modificata
+              $log['edit'][] = array($voto->getId(), $voto->getVisibile(), $voto->getArgomento(),
+                $voto->getLezione()->getId(), $voto->getVoto(), $voto->getGiudizio(), $voto->getMedia());
+              $voto
+                ->setVisibile($form->get('visibile')->getData())
+                ->setMedia($valutazione->getMedia())
+                ->setLezione($lezione)
+                ->setArgomento($form->get('argomento')->getData())
+                ->setVoto($valutazione->getVoto())
+                ->setGiudizio($valutazione->getGiudizio());
+            }
+          }
+          // ok: memorizza dati
+          $em->flush();
+          // log azione e notifica
+          foreach ($log['create'] as $obj) {
+            $notifica = (new Notifica())
+              ->setOggettoNome('Valutazione')
+              ->setOggettoId($obj->getId())
+              ->setAzione('A');
+            $em->persist($notifica);
+          }
+          foreach ($log['edit'] as $obj) {
+            $notifica = (new Notifica())
+              ->setOggettoNome('Valutazione')
+              ->setOggettoId($obj[0])
+              ->setAzione('E');
+            $em->persist($notifica);
+          }
+          foreach ($log['delete'] as $obj) {
+            $notifica = (new Notifica())
+              ->setOggettoNome('Valutazione')
+              ->setOggettoId($obj[0])
+              ->setAzione('D');
+            $em->persist($notifica);
+          }
+          $dblogger->logAzione('VOTI', 'Voti della classe', array(
+            'Tipo' => $tipo,
+            'Voti creati' => implode(', ', array_map(function ($e) {
+                return $e->getId();
+              }, $log['create'])),
+            'Voti modificati' => implode(', ', array_map(function ($e) {
+                return '[Id: '.$e[0].', Visibile: '.$e[1].', Media: '.$e[6].', Argomento: "'.$e[2].'"'.
+                  ', Lezione: '.$e[3].
+                  ', Voto: '.$e[4].', Giudizio: "'.$e[5].'"'.']';
+              }, $log['edit'])),
+            'Voti cancellati' => implode(', ', array_map(function ($e) {
+                return '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
+                  ', Media: '.$e[1]->getMedia().
+                  ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
+                  ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
+                  ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']';
+              }, $log['delete']))
+            ));
+          // redirezione
+          return $this->redirectToRoute('lezioni_voti_quadro');
         }
-        foreach ($log['edit'] as $obj) {
-          $notifica = (new Notifica())
-            ->setOggettoNome('Valutazione')
-            ->setOggettoId($obj[0])
-            ->setAzione('E');
-          $em->persist($notifica);
-        }
-        foreach ($log['delete'] as $obj) {
-          $notifica = (new Notifica())
-            ->setOggettoNome('Valutazione')
-            ->setOggettoId($obj[0])
-            ->setAzione('D');
-          $em->persist($notifica);
-        }
-        $dblogger->logAzione('VOTI', 'Voti della classe', array(
-          'Tipo' => $tipo,
-          'Voti creati' => implode(', ', array_map(function ($e) {
-              return $e->getId();
-            }, $log['create'])),
-          'Voti modificati' => implode(', ', array_map(function ($e) {
-              return '[Id: '.$e[0].', Visibile: '.$e[1].', Media: '.$e[6].', Argomento: "'.$e[2].'"'.
-                ', Lezione: '.$e[3].
-                ', Voto: '.$e[4].', Giudizio: "'.$e[5].'"'.']';
-            }, $log['edit'])),
-          'Voti cancellati' => implode(', ', array_map(function ($e) {
-              return '[Id: '.$e[0].', Tipo: '.$e[1]->getTipo().', Visibile: '.$e[1]->getVisibile().
-                ', Media: '.$e[1]->getMedia().
-                ', Argomento: "'.$e[1]->getArgomento().'", Docente: '.$e[1]->getDocente()->getId().
-                ', Alunno: '.$e[1]->getAlunno()->getId().', Lezione: '.$e[1]->getLezione()->getId().
-                ', Voto: '.$e[1]->getVoto().', Giudizio: "'.$e[1]->getGiudizio().'"'.']';
-            }, $log['delete']))
-          ));
-        // redirezione
-        return $this->redirectToRoute('lezioni_voti_quadro');
       }
     }
     // mostra la pagina di risposta
@@ -389,6 +411,7 @@ class VotiController extends AbstractController {
       'form' => $form->createView(),
       'form_title' => 'title.voti_classe',
       'label' => $label,
+      'assenti' => $assenti,
     ));
   }
 
@@ -419,6 +442,10 @@ class VotiController extends AbstractController {
                                    TranslatorInterface $trans, RegistroUtil $reg, LogHandler $dblogger, $cattedra, $alunno, $tipo, $id) {
     // inizializza
     $label = array();
+    if ($request->isMethod('GET')) {
+      // inizializza sessione
+      $session->set('/APP/ROUTE/lezioni_voti_alunno/conferma', 0);
+    }
     // controllo cattedra
     $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
     if (!$cattedra) {
@@ -441,7 +468,7 @@ class VotiController extends AbstractController {
       if ($valutazione) {
         $valutazione_precedente = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
           $valutazione->getVoto(), $valutazione->getGiudizio(), $valutazione->getLezione()->getId(),
-          $valutazione->getmedia());
+          $valutazione->getMedia(), $valutazione->getMateria());
         $data = $valutazione->getLezione()->getData();
       }
     }
@@ -451,6 +478,7 @@ class VotiController extends AbstractController {
         ->setTipo($tipo)
         ->setDocente($this->getUser())
         ->setAlunno($alunno)
+        ->setMateria($cattedra->getMateria())
         ->setVisibile(true)
         ->setMedia(true);
       $em->persist($valutazione);
@@ -549,57 +577,68 @@ class VotiController extends AbstractController {
         }
       }
       if ($form->isValid()) {
-        // crea o modifica voto
-        if (!$valutazione->getVisibile()) {
-          // media non utilizzata se voto non visibile
-          $valutazione->setMedia(false);
+        // controlla presenza alunno
+        $conferma = 1;
+        $assente = $em->getRepository('App:Lezione')->alunnoAssente($valutazione->getLezione(),
+          $valutazione->getAlunno());
+        if (!($valutazione_precedente && $form->get('delete')->isClicked()) && $assente &&
+            $session->get('/APP/ROUTE/lezioni_voti_alunno/conferma', 0) != $conferma) {
+          // alunno risulta assente: richiede conferma
+          $session->set('/APP/ROUTE/lezioni_voti_alunno/conferma', $conferma);
+        } else {
+          // alunno risulta presente
+          if (!$valutazione->getVisibile()) {
+            // media non utilizzata se voto non visibile
+            $valutazione->setMedia(false);
+          }
+          // ok: memorizza dati
+          $em->flush();
+          // log azione e notifica
+          $notifica = (new Notifica())
+            ->setOggettoNome('Valutazione');
+          $em->persist($notifica);
+          if ($valutazione_precedente && $form->get('delete')->isClicked()) {
+            // cancellazione
+            $notifica->setAzione('D')->setOggettoId($valutazione_precedente[0]);
+            $dblogger->logAzione('VOTI', 'Cancella voto', array(
+              'Id' => $valutazione_precedente[0],
+              'Tipo' => $tipo,
+              'Visibile' => $valutazione_precedente[1],
+              'Media' => $valutazione_precedente[6],
+              'Argomento' => $valutazione_precedente[2],
+              'Voto' => $valutazione_precedente[3],
+              'Giudizio' => $valutazione_precedente[4],
+              'Docente' => $valutazione->getDocente()->getId(),
+              'Alunno' => $valutazione->getAlunno()->getId(),
+              'Lezione' => $valutazione_precedente[5],
+              'Materia' => $valutazione_precedente[6]
+              ));
+          } elseif ($valutazione_precedente && ($valutazione_precedente[3] != $valutazione->getVoto() ||
+                    $valutazione_precedente[4] != $valutazione->getGiudizio() ||
+                    $valutazione_precedente[2] != $valutazione->getArgomento() ||
+                    $valutazione_precedente[1] != $valutazione->getVisibile() ||
+                    $valutazione_precedente[6] != $valutazione->getMedia())) {
+            // modifica
+            $notifica->setAzione('E')->setOggettoId($valutazione->getId());
+            $dblogger->logAzione('VOTI', 'Modifica voto', array(
+              'Id' => $valutazione_precedente[0],
+              'Visibile' => $valutazione_precedente[1],
+              'Media' => $valutazione_precedente[6],
+              'Argomento' => $valutazione_precedente[2],
+              'Voto' => $valutazione_precedente[3],
+              'Giudizio' => $valutazione_precedente[4],
+              'Lezione' => $valutazione_precedente[5]
+              ));
+          } elseif (!$valutazione_precedente) {
+            // creazione
+            $notifica->setAzione('A')->setOggettoId($valutazione->getId());
+            $dblogger->logAzione('VOTI', 'Crea voto', array(
+              'Id' => $valutazione->getId()
+              ));
+          }
+          // redirezione
+          return $this->redirectToRoute('lezioni_voti_quadro');
         }
-        // ok: memorizza dati
-        $em->flush();
-        // log azione e notifica
-        $notifica = (new Notifica())
-          ->setOggettoNome('Valutazione');
-        $em->persist($notifica);
-        if ($valutazione_precedente && $form->get('delete')->isClicked()) {
-          // cancellazione
-          $notifica->setAzione('D')->setOggettoId($valutazione_precedente[0]);
-          $dblogger->logAzione('VOTI', 'Cancella voto', array(
-            'Id' => $valutazione_precedente[0],
-            'Tipo' => $tipo,
-            'Visibile' => $valutazione_precedente[1],
-            'Media' => $valutazione_precedente[6],
-            'Argomento' => $valutazione_precedente[2],
-            'Voto' => $valutazione_precedente[3],
-            'Giudizio' => $valutazione_precedente[4],
-            'Docente' => $valutazione->getDocente()->getId(),
-            'Alunno' => $valutazione->getAlunno()->getId(),
-            'Lezione' => $valutazione_precedente[5]
-            ));
-        } elseif ($valutazione_precedente && ($valutazione_precedente[3] != $valutazione->getVoto() ||
-                  $valutazione_precedente[4] != $valutazione->getGiudizio() ||
-                  $valutazione_precedente[2] != $valutazione->getArgomento() ||
-                  $valutazione_precedente[1] != $valutazione->getVisibile() ||
-                  $valutazione_precedente[6] != $valutazione->getMedia())) {
-          // modifica
-          $notifica->setAzione('E')->setOggettoId($valutazione->getId());
-          $dblogger->logAzione('VOTI', 'Modifica voto', array(
-            'Id' => $valutazione_precedente[0],
-            'Visibile' => $valutazione_precedente[1],
-            'Media' => $valutazione_precedente[6],
-            'Argomento' => $valutazione_precedente[2],
-            'Voto' => $valutazione_precedente[3],
-            'Giudizio' => $valutazione_precedente[4],
-            'Lezione' => $valutazione_precedente[5]
-            ));
-        } elseif (!$valutazione_precedente) {
-          // creazione
-          $notifica->setAzione('A')->setOggettoId($valutazione->getId());
-          $dblogger->logAzione('VOTI', 'Crea voto', array(
-            'Id' => $valutazione->getId()
-            ));
-        }
-        // redirezione
-        return $this->redirectToRoute('lezioni_voti_quadro');
       }
     }
     // mostra la pagina di risposta
@@ -977,6 +1016,61 @@ class VotiController extends AbstractController {
         $nomefile);
     $response->headers->set('Content-Disposition', $disposition);
     return $response;
+  }
+
+
+  /**
+   * Cancellazione di un voto
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Identificativo del voto
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/lezioni/voti/cancella/{id}", name="lezioni_voti_cancella",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function votiCancellaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
+                                     LogHandler $dblogger, $id) {
+    // controllo voto
+    $valutazione = $em->getRepository('App:Valutazione')->findOneBy(['id' => $id,
+      'docente' => $this->getUser()]);
+    if (!$valutazione) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla permessi
+    if (!$reg->azioneVoti($valutazione->getLezione()->getData(), $this->getUser(), $valutazione->getAlunno(),
+        $valutazione->getAlunno()->getClasse(), $valutazione->getMateria())) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // copia per log
+    $vecchiaValutazione = clone $valutazione;
+    // cancella voto
+    $em->remove($valutazione);
+    // memorizzazione e log
+    $dblogger->logAzione('VOTI', 'Cancella voto', array(
+      'Id' => $vecchiaValutazione->getId(),
+      'Tipo' => $vecchiaValutazione->getTipo(),
+      'Visibile' => $vecchiaValutazione->getVisibile(),
+      'Media' => $vecchiaValutazione->getMedia(),
+      'Argomento' => $vecchiaValutazione->getArgomento(),
+      'Voto' => $vecchiaValutazione->getVoto(),
+      'Giudizio' => $vecchiaValutazione->getGiudizio(),
+      'Docente' => $vecchiaValutazione->getDocente()->getId(),
+      'Alunno' => $vecchiaValutazione->getAlunno()->getId(),
+      'Lezione' => $vecchiaValutazione->getLezione()->getId(),
+      'Materia' => $vecchiaValutazione->getMateria()->getId()
+      ));
+    // redirezione
+    return $this->redirectToRoute('lezioni_voti_quadro');
   }
 
 }

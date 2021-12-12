@@ -365,11 +365,11 @@ class StaffUtil {
     $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
     // legge medie
     $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
-      ->select('(v.alunno) AS alunno,(l.materia) AS materia,v.tipo,AVG(v.voto) AS media')
+      ->select('(v.alunno) AS alunno,(v.materia) AS materia,v.tipo,AVG(v.voto) AS media')
       ->join('v.lezione', 'l')
-      ->join('l.materia', 'm')
+      ->join('v.materia', 'm')
       ->where('v.alunno IN (:lista) AND v.media=:media AND v.voto>0 AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND m.media=:media')
-      ->groupBy('v.alunno,l.materia,v.tipo')
+      ->groupBy('v.alunno,v.materia,v.tipo')
       ->setParameters(['lista' => $lista_alunni, 'media' => 1, 'classe' => $classe,
         'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
       ->getQuery()

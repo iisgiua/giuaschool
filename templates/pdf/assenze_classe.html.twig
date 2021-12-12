@@ -1,13 +1,8 @@
-<p style="text-align:center; font-family:times; font-size:12pt">
-  <img style="width: 28pt" src="{{ asset('img/logo-italia.png') }}"><br>
-  <strong>ISTITUTO DI ISTRUZIONE SUPERIORE STATALE</strong><br>
-  <strong><i>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</i></strong><br>
-  <span style="font-size:11pt">Via Montecassino - 09134 - CAGLIARI<br>
-  TEL. 070.500786 &nbsp;-&nbsp; 070.501745<br>
-  Email: {{ app.session.get('/CONFIG/ISTITUTO/email') }} &nbsp;&nbsp;&nbsp;&nbsp; Sito: {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}</span>
-</p>
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="/img/{{ LOCAL_PATH }}intestazione-documenti.jpg" width="400">
+  <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
+</div>
 <p style="text-align:center; font-size:13pt">
-  <strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong><br>
   <strong>Assenze della classe {{ classe.anno }}ª {{ classe.sezione }}</strong>
 </p>
 <br>

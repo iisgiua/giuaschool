@@ -1237,8 +1237,8 @@ class RegistroUtil {
     // legge i voti degli degli alunni
     $voti = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
       ->select('a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
-      ->leftJoin('App:Lezione', 'l', 'WITH', 'l.materia=:materia AND l.classe=:classe AND l.data=:data')
-      ->leftJoin('App:Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo')
+      ->leftJoin('App:Lezione', 'l', 'WITH', 'l.classe=:classe AND l.data=:data')
+      ->leftJoin('App:Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia')
       ->where('a.id IN (:alunni)')
       ->setParameters(['alunni' => $lista_alunni, 'docente' => $docente, 'tipo' => $tipo,
         'materia' => $materia, 'classe' => $classe, 'data' => $data->format('Y-m-d')])
@@ -1285,28 +1285,6 @@ class RegistroUtil {
     }
     // restituisce elenco
     return $elenco;
-  }
-
-  /**
-   * Restituisce il voto di un alunno per la data e il tipo specificato
-   *
-   * @param \DateTime $data Data del giorno in cui si fa la verifica
-   * @param Docente $docente Docente della lezione
-   * @param Alunno $alunno Alunno di cui si cerca il voto
-   * @param Lezione $lezione Lezione in cui si attribuisce il voto
-   * @param string $tipo Tipo di voto (S,O,P)
-   *
-   * @return Valutazione|null Oggetto Valutazione o null se non trovato
-   */
-  public function alunnoVoto(\DateTime $data, Docente $docente, Alunno $alunno, Lezione $lezione, $tipo) {
-    // legge il voto
-    $valutazione = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
-      ->where('v.alunno=:alunno AND v.docente=:docente AND v.lezione=:lezione AND v.tipo=:tipo')
-      ->setParameters(['alunno' => $alunno, 'docente' => $docente, 'lezione' => $lezione, 'tipo' => $tipo])
-      ->setMaxResults(1)
-      ->getQuery()
-      ->getOneOrNullResult();
-    return $valutazione;
   }
 
   /**
@@ -1389,7 +1367,7 @@ class RegistroUtil {
       ->join('v.alunno', 'a')
       ->join('v.lezione', 'l')
       ->join('v.docente', 'd')
-      ->where('a.id IN (:alunni) AND l.materia=:materia AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
+      ->where('a.id IN (:alunni) AND v.materia=:materia AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
       ->orderBy('l.data', 'ASC')
       ->setParameters(['alunni' => $lista_alunni, 'materia' => $cattedra->getMateria(),
         'classe' => $cattedra->getClasse(), 'inizio' => $data_inizio->format('Y-m-d'),
@@ -1413,14 +1391,6 @@ class RegistroUtil {
         $dati['classe'][$v['tipo']][$data]['cont']++;
       }
     }
-    //-- // elimina date con un solo voto per la classe
-    //-- foreach ($dati['classe'] as $tp=>$d) {
-      //-- foreach ($d as $dt=>$v) {
-        //-- if ($v['cont'] < 2) {
-          //-- unset($dati['classe'][$tp][$dt]);
-        //-- }
-      //-- }
-    //-- }
     // restituisce dati
     return $dati;
   }
@@ -1843,12 +1813,17 @@ class RegistroUtil {
       return $this->riepilogoSostegno($data, $cattedra);
     }
     // legge lezioni
+    $queryVoti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+      ->select('v.id')
+      ->where('v.lezione=l.id AND v.materia=:materia AND v.docente=:docente')
+      ->getDQL();
     $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
-      ->select('l.id,l.data,l.ora,so.durata')
+      ->select('l.id,l.data,l.ora,(l.materia) AS materia,so.durata')
       ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
       ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
-      ->where('l.classe=:classe AND l.materia=:materia AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->where('l.classe=:classe AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->andWhere('l.materia=:materia OR EXISTS ('.$queryVoti.')')
       ->orderBy('l.data,l.ora', 'ASC')
       ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
         'docente' => $cattedra->getDocente(), 'mese' => intval($data->format('m')),
@@ -1873,7 +1848,8 @@ class RegistroUtil {
         }
       }
       // aggiorna durata lezioni
-      $dati['lista'][$data_str]['durata'] += $l['durata'];
+      $dati['lista'][$data_str]['durata'] +=
+        ($l['materia'] == $cattedra->getMateria()->getId() ? $l['durata'] : 0);
       // legge assenze
       $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
         ->select('(al.alunno) AS id,al.ore')
@@ -1892,8 +1868,9 @@ class RegistroUtil {
       // legge voti
       $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
         ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento')
-        ->where('v.lezione=:lezione AND v.docente=:docente')
-        ->setParameters(['lezione' => $l['id'], 'docente' => $cattedra->getDocente()])
+        ->where('v.lezione=:lezione AND v.materia=:materia AND v.docente=:docente')
+        ->setParameters(['lezione' => $l['id'], 'materia' => $cattedra->getMateria(),
+          'docente' => $cattedra->getDocente()])
         ->getQuery()
         ->getArrayResult();
       // voti per alunno
@@ -2290,7 +2267,7 @@ class RegistroUtil {
       ->select('v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.docente', 'd')
       ->join('v.lezione', 'l')
-      ->where('v.alunno=:alunno AND l.materia=:materia AND l.classe=:classe')
+      ->where('v.alunno=:alunno AND v.materia=:materia AND l.classe=:classe')
       ->orderBy('v.tipo,l.data', 'ASC')
       ->setParameters(['alunno' => $alunno, 'materia' => $cattedra->getMateria(),
         'classe' => $cattedra->getClasse()])
@@ -2687,55 +2664,6 @@ class RegistroUtil {
     // numero totale di giustificazioni
     $dati['tot_giustificazioni'] = count($dati['assenze']) + count($dati['ritardi']);
     $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']);
-    // restituisce dati
-    return $dati;
-  }
-
-  /**
-   * Restituisce i dettagli dei voti di Ed.Civica per l'alunno indicato.
-   *
-   * @param Docente $docente Docente della lezione
-   * @param Cattedra $cattedra Cattedra del docente
-   * @param Alunno $alunno Alunno selezionato
-   *
-   * @return array Dati restituiti come array associativo
-   */
-  public function dettagliVotiEdCivica(Docente $docente, Cattedra $cattedra, Alunno $alunno) {
-    $dati = array();
-    $dati['lista'] = array();
-    $dati['media'] = array();
-    $periodi = $this->infoPeriodi();
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    // legge i voti dell'alunno
-    $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
-      ->select('v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,m.nomeBreve AS materia,0 AS docente_id')
-      ->join('v.docente', 'd')
-      ->join('v.lezione', 'l')
-      ->join('l.materia', 'm')
-      ->where('v.alunno=:alunno AND v.docente=:docente AND l.classe=:classe')
-      ->orderBy('v.tipo,l.data', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'docente' => $docente, 'classe' => $cattedra->getClasse()])
-      ->getQuery()
-      ->getArrayResult();
-    // formatta i dati nell'array associativo
-    foreach ($voti as $v) {
-      $data = $v['data']->format('Y-m-d');
-      $periodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $v['data_str'] = ((int) substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-      if ($v['voto'] > 0) {
-        $voto_int = (int) ($v['voto'] + 0.25);
-        $voto_dec = $v['voto'] - ((int) $v['voto']);
-        $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
-      }
-      // memorizza dati
-      $dati_periodo[$periodo][$v['tipo']][$data][] = $v;
-    }
-    // riordina periodi
-    for ($k = 3; $k >= 1; $k--) {
-      if (isset($dati_periodo[$k])) {
-        $dati['lista'][$periodi[$k]['nome']] = $dati_periodo[$k];
-      }
-    }
     // restituisce dati
     return $dati;
   }

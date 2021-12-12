@@ -19,6 +19,17 @@
         <div class="col-sm-2 text-right"><strong class="gs-big">Valutazione:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.tipo|trans }}</span></div>
       </div>
+  {% if app.session.get('/APP/ROUTE/lezioni_voti_classe/conferma') != 0 %}
+      <div class="alert alert-warning" role="alert">
+        <div class="text-center">
+          <strong class="gs-big">
+            {{ 'message.alunni_assenti_in_data'|trans }}<br>
+            {% for a in assenti %}{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }}){{ not loop.last ? ', ' }}{% endfor %}.<br>
+            <em>{{ 'message.modifica_data_o_conferma'|trans }}</em>
+          </strong>
+        </div>
+      </div>
+  {% endif %}
       {{ form_start(form) }}
       {{ form_errors(form) }}
       {{ form_row(form.data) }}
