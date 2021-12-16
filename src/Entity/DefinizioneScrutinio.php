@@ -28,12 +28,12 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, X=rinviato, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, U=sessione supplettiva, X=sessione supplettiva in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"P","S","F","E","X","1","2"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"P","S","F","E","U","X"}, strict=true, message="field.choice")
    */
   private $periodo;
 
@@ -52,15 +52,25 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    * [array associativo, primo elemento nome funzione, altri parametri]
    *
    * @ORM\Column(type="array", nullable=false)
+   *
    * @Assert\NotBlank(message="field.notblank")
    */
   private $struttura;
+
+  /**
+  * @var array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
+  *
+  * @ORM\Column(name="classi_visibili", type="array", nullable=false)
+  *
+  * @Assert\NotBlank(message="field.notblank")
+  */
+  private $classiVisibili;
 
 
   //==================== METODI SETTER/GETTER ====================
 
   /**
-   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, R=ripresa scrutinio, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, U=sessione supplettiva, X=sessione supplettiva in precedente A.S.]
    *
    * @return string Periodo dello scrutinio
    */
@@ -69,7 +79,7 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   }
 
   /**
-   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, R=ripresa scrutinio, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+   * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, U=sessione supplettiva, X=sessione supplettiva in precedente A.S.]
    *
    * @param string $periodo Periodo dello scrutinio
    *
@@ -126,6 +136,31 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
     return $this;
   }
 
+  /**
+   * Restituisce la lista di data e ora di pubblicazione esiti per le classi dei vari anni
+   *
+   * @return array Lista di data e ora di pubblicazione esiti per le classi dei vari anni
+   */
+  public function getClassiVisibili() {
+    return $this->classiVisibili;
+  }
+
+  /**
+   * Modifica la lista di data e ora di pubblicazione esiti per le classi dei vari anni
+   *
+   * @param array $classiVisibili Lista di data e ora di pubblicazione esiti per le classi dei vari anni
+   *
+   * @return DefinizioneScrutinio Oggetto modificato
+   */
+  public function setClassiVisibili($classiVisibili) {
+    if ($classiVisibili === $this->classiVisibili) {
+      // clona array per forzare update su doctrine
+      $classiVisibili = unserialize(serialize($classiVisibili));
+    }
+    $this->classiVisibili = $classiVisibili;
+    return $this;
+  }
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -135,6 +170,7 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   public function __construct() {
     // valori predefiniti
     $this->struttura = array();
+    $this->classiVisibili = array(1 => null, 2 => null, 3 => null, 4 => null, 5 => null);
   }
 
   /**
@@ -143,7 +179,7 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString() {
-    return 'Scrutini per il '.$this->data->format('d/m/Y');
+    return 'Scrutini per il '.$this->getData()->format('d/m/Y');
   }
 
 }

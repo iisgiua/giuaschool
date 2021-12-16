@@ -231,6 +231,8 @@ label.periodo_E: Scrutinio esami giudizio sospeso
 label.periodo_P: Primo Quadrimestre
 label.periodo_S: ~
 label.periodo_X: Scrutinio Rinviato
+label.scrutini_periodo_E: Esami giudizio sospeso
+label.scrutini_periodo_U: Sessione supplettiva
 label.piani: Piani di lavoro
 label.precedente: Precedente
 label.presenti: Alunni presenti
@@ -451,6 +453,20 @@ label.riferimento: Riferimento
 label.profilo: Profilo utente
 label.spid: Accesso SPID
 label.filtro_anno_scolastico: Filtra per Anno Scolastico
+label.data_scrutinio: Inizio degli scrutini
+label.data_proposte: Inserimento proposte di voto
+label.verbale_situazioni_particolari: Situazioni particolari da segnalare
+label.verbale_scrutinio_P: Scrutinio del Primo Quadrimestre
+label.verbale_scrutinio_S:
+label.verbale_scrutinio_F: Scrutinio finale
+label.verbale_scrutinio_E: Scrutinio per gli esami degli studenti con sospensione del giudizio
+label.verbale_scrutinio_U: Scrutinio per gli esami degli studenti con sospensione del giudizio - sessione supplettiva
+label.verbale_scrutinio_X: Scrutinio per gli esami degli studenti con sospensione del giudizio - sessione supplettiva
+label.scrutinio_visibile_classe_1: Pubblicazione esiti classi prime
+label.scrutinio_visibile_classe_2: Pubblicazione esiti classi seconde
+label.scrutinio_visibile_classe_3: Pubblicazione esiti classi terze
+label.scrutinio_visibile_classe_4: Pubblicazione esiti classi quarte
+label.scrutinio_visibile_classe_5: Pubblicazione esiti classi quinte
 
 
 ##### PAGINE #####
@@ -526,6 +542,8 @@ page.login_profilo: Scelta profilo
 title.login_profilo: Scegli il profilo utente da utilizzare
 page.segreteria_genitori: Gestione Genitori
 title.segreteria_genitori: Modiche agli utenti genitori
+page.scuola.scrutini: Gestione Scrutini
+title.scuola.scrutini: Gestione degli scrutini
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -1289,3 +1307,4 @@ exception.info_studente_no_user: L'utente indicato non esiste.
 exception.spid_invalid_user: L'utente indicato non è presente nel sistema. Rivolgiti alla Segreteria della scuola per risolvere il problema.
 exception.spid_blocked_login: Tentativo di accesso durante una manutenzione programmata del sistema.
 exception.documento_errore_codifica: Si è verificato un errore durante la procedura di codifica del documento.
+exception.dati_non_presenti: Dati non disponibili

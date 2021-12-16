@@ -537,7 +537,7 @@ class GenitoriController extends AbstractController {
       }
     } else {
       // nessun dato
-      $errore = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+      $errore = $trans->trans('exception.dati_non_presenti');
     }
     // visualizza pagina
     return $this->render('ruolo_genitore/pagelle.html.twig', array(

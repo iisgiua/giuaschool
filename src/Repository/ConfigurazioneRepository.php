@@ -87,4 +87,28 @@ class ConfigurazioneRepository extends EntityRepository {
     return $parametri;
   }
 
+  /**
+   * Restituisce la lista dei periodi configurati per gli scrutini
+   *
+   * @return array Lista dei dati come array associativo
+   */
+  public function infoScrutini(): array {
+    $lista = [];
+    // legge nomi periodi
+    $parametro1 = $this->findOneByParametro('periodo1_nome');
+    $parametro2 = $this->findOneByParametro('periodo2_nome');
+    $parametro3 = $this->findOneByParametro('periodo3_nome');
+    $lista['P'] = $parametro1 ? $parametro1->getValore() : 'P';
+    if (!$parametro3 || empty($parametro3->getValore())) {
+      // solo 2 periodi (2 quadrimestri o trimestre+pentamestre)
+      $lista['F'] = $parametro2 ? $parametro2->getValore() : 'F';
+    } else {
+      // 3 periodi (3 trimestri)
+      $lista['S'] = $parametro2 ? $parametro2->getValore() : 'S';
+      $lista['F'] = $parametro3->getValore();
+    }
+    // restituisce dati
+    return $lista;
+  }
+
 }

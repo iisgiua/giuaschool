@@ -44,7 +44,6 @@ use App\Entity\MenuOpzione;
  *    D : docente
  *    C : docente con funzione di coordinatore
  *    S : staff
- *    I : staff con funzione gestione circolari
  *    P : preside
  */
 class MenuFixtures extends Fixture implements FixtureGroupInterface {
@@ -98,6 +97,7 @@ class MenuFixtures extends Fixture implements FixtureGroupInterface {
         ['Classi', 'Configura le classi', '', null, 1, null, 'M'],
         ['Festività', 'Configura il calendario delle festività', '', null, 1, null, 'M'],
         ['Orario', 'Configura la scansione oraria delle lezioni', '', null, 1, null, 'M'],
+        ['Scrutini', 'Configura gli scrutini', 'scuola_scrutini', null, 0, null, 'M'],
       ]];
     //--- sottomenu ata
     $menu['ata'] = [null, null, 0, [

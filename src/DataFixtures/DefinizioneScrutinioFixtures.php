@@ -41,12 +41,19 @@ class DefinizioneScrutinioFixtures extends Fixture implements FixtureGroupInterf
       2 => ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]],
       3 => ['ScrutinioFine', false, []],
       4 => ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2]]];
+    $classiVisibili = [
+      1 => null,
+      2 => new \DateTime('today'),
+      3 => new \DateTime('tomorrow'),
+      4 => new \DateTime(),
+      5 => (new \DateTime('tomorrow'))->setTime(22, 45)];
     $scrutinio = (new DefinizioneScrutinio())
       ->setData(new \DateTime('2 month ago'))
       ->setArgomenti($argomenti)
       ->setPeriodo('P')
       ->setDataProposte(new \DateTime('2 month ago'))
-      ->setStruttura($struttura);
+      ->setStruttura($struttura)
+      ->setClassiVisibili($classiVisibili);
     $em->persist($scrutinio);
     // attiva lo scrutinio finale
     $argomenti = [
@@ -62,7 +69,8 @@ class DefinizioneScrutinioFixtures extends Fixture implements FixtureGroupInterf
       ->setArgomenti($argomenti)
       ->setPeriodo('F')
       ->setDataProposte(new \DateTime('1 month ago'))
-      ->setStruttura($struttura);
+      ->setStruttura($struttura)
+      ->setClassiVisibili($classiVisibili);
     $em->persist($scrutinio);
     // attiva lo scrutinio per i giudizi sospesi
     $argomenti = [
@@ -78,7 +86,8 @@ class DefinizioneScrutinioFixtures extends Fixture implements FixtureGroupInterf
       ->setArgomenti($argomenti)
       ->setPeriodo('E')
       ->setDataProposte(new \DateTime('yesterday'))
-      ->setStruttura($struttura);
+      ->setStruttura($struttura)
+      ->setClassiVisibili($classiVisibili);
     $em->persist($scrutinio);
     // memorizza dati
     $em->flush();

@@ -1,0 +1,44 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% for tipo,messaggi in app.flashes %}
+    {% for msg in messaggi %}
+  <div class="alert alert-{{ tipo }}" role="alert">{{ msg|trans|raw }}</div>
+    {% endfor %}
+  {% endfor %}
+  <div class="w-100 px-4 py-1 bg-light rounded">
+    <strong class="mr-2">Periodo:</strong>
+    <div class="btn-group">
+      <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {{ info.listaPeriodi[info.periodo] }}
+        <svg class="icon icon-xs icon-white" aria-hidden="true">
+          <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
+        </svg>
+        <span class="sr-only"> attivo</span>
+      </button>
+      <div class="dropdown-menu">
+        <div class="link-list-wrapper">
+          <ul class="link-list" role="menu" aria-label="Scelta del periodo dello scrutinio">
+  {% for pk,pv in info.listaPeriodi %}
+            <li role="none"><a class="list-item" role="menuitem" href="{{ path('scuola_scrutini', {periodo: pk}) }}"><strong>{{ pv|replace({' ': '&nbsp;'})|raw }}</strong><span class="sr-only"> attivo</span></a></li>
+  {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include 'tema-new/include/form-noflash.html.twig' with {form: form[0], form_help: form[1]} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_data', dp_disabled: null, dp_week: '[0]', dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_dataProposte', dp_disabled: null, dp_week: '[0]', dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData1', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData2', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData3', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData4', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData5', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+{% endblock %}

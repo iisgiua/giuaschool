@@ -579,11 +579,17 @@ class ScrutinioUtil {
       ->getQuery()
       ->getOneOrNullResult();
     if (!$scrutinio) {
+      $visibile = null;
+      $definizione = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+      if ($definizione) {
+        $visibile = $definizione->getClassiVisibili()[$classe->getAnno()];
+      }
       // stato iniziale
       $scrutinio = (new Scrutinio())
         ->setClasse($classe)
         ->setPeriodo($periodo)
-        ->setStato('N');
+        ->setStato('N')
+        ->setVisibile($visibile);
       $this->em->persist($scrutinio);
       $this->em->flush();
     }

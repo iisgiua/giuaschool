@@ -1,0 +1,143 @@
+<?php
+/**
+ * giua@school
+ *
+ * Copyright (c) 2017-2021 Antonello Dessì
+ *
+ * @author    Antonello Dessì
+ * @license   http://www.gnu.org/licenses/agpl.html AGPL
+ * @copyright Antonello Dessì 2017-2021
+ */
+
+
+namespace App\Form;
+
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use App\Entity\DefinizioneScrutinio;
+
+
+/**
+ * DefinizioneScrutinioType - form per la classe DefinizioneScrutinio
+ */
+class DefinizioneScrutinioType extends AbstractType {
+
+  /**
+   * Crea il form
+   *
+   * @param FormBuilderInterface $builder Gestore per la creazione del form
+   * @param array $options Lista di opzioni per il form
+   */
+  public function buildForm(FormBuilderInterface $builder, array $options) {
+    // form di modifica
+    $builder
+      ->add('data', DateType::class, array('label' => 'label.data_scrutinio',
+        'widget' => 'single_text',
+        'html5' => false,
+        'format' => 'dd/MM/yyyy',
+        'attr' => ['widget' => 'gs-row-start'],
+        'required' => true))
+      ->add('dataProposte', DateType::class, array('label' => 'label.data_proposte',
+        'widget' => 'single_text',
+        'html5' => false,
+        'format' => 'dd/MM/yyyy',
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => true))
+      ->add('classiVisibiliData1', DateType::class, array('label' => 'label.scrutinio_visibile_classe_1',
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-start'],
+        'format' => 'dd/MM/yyyy',
+        'required' => false,
+        'property_path' => 'classiVisibili[1]'))
+      ->add('classiVisibiliOra1', TimeType::class, array('label' => false,
+        'data' => $options['dati'][1],
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false,
+        'mapped' => false))
+      ->add('classiVisibiliData2', DateType::class, array('label' => 'label.scrutinio_visibile_classe_2',
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-start'],
+        'format' => 'dd/MM/yyyy',
+        'required' => false,
+        'property_path' => 'classiVisibili[2]'))
+      ->add('classiVisibiliOra2', TimeType::class, array('label' => false,
+        'data' => $options['dati'][2],
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false,
+        'mapped' => false))
+      ->add('classiVisibiliData3', DateType::class, array('label' => 'label.scrutinio_visibile_classe_3',
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-start'],
+        'format' => 'dd/MM/yyyy',
+        'required' => false,
+        'property_path' => 'classiVisibili[3]'))
+      ->add('classiVisibiliOra3', TimeType::class, array('label' => false,
+        'data' => $options['dati'][3],
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false,
+        'mapped' => false))
+      ->add('classiVisibiliData4', DateType::class, array('label' => 'label.scrutinio_visibile_classe_4',
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-start'],
+        'format' => 'dd/MM/yyyy',
+        'required' => false,
+        'property_path' => 'classiVisibili[4]'))
+      ->add('classiVisibiliOra4', TimeType::class, array('label' => false,
+        'data' => $options['dati'][4],
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false,
+        'mapped' => false))
+      ->add('classiVisibiliData5', DateType::class, array('label' => 'label.scrutinio_visibile_classe_5',
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-start'],
+        'format' => 'dd/MM/yyyy',
+        'required' => false,
+        'property_path' => 'classiVisibili[5]'))
+      ->add('classiVisibiliOra5', TimeType::class, array('label' => false,
+        'data' => $options['dati'][5],
+        'widget' => 'single_text',
+        'html5' => false,
+        'attr' => ['widget' => 'gs-row-end'],
+        'required' => false,
+        'mapped' => false))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' => ['widget' => 'gs-button-start']))
+      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
+        'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
+  }
+
+  /**
+   * Configura le opzioni usate nel form
+   *
+   * @param OptionsResolver $resolver Gestore delle opzioni
+   */
+  public function configureOptions(OptionsResolver $resolver) {
+    $resolver->setDefined('returnUrl');
+    $resolver->setDefined('dati');
+    $resolver->setDefaults(array(
+      'returnUrl' => null,
+      'dati' => array(1 => null, 2 => null, 3 => null, 4 => null, 5 => null),
+      'data_class' => DefinizioneScrutinio::class));
+  }
+
+}
