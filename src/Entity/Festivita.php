@@ -231,6 +231,14 @@ class Festivita {
   //==================== METODI DELLA CLASSE ====================
 
   /**
+   * Costruttore
+   */
+  public function __construct() {
+    // valori predefiniti
+    $this->tipo = 'F';
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo

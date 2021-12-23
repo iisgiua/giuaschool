@@ -1,0 +1,65 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  $('.gs-giorno').on('click', 'button.gs-remove-item', function() {
+    var form = $(this).closest('.gs-giorno');
+    var formId = $(form).attr('id');
+    var el = $(this).closest('fieldset');
+    var idx = parseInt($(el).find('input[disabled="disabled"]').val());
+    var idxLast = parseInt($(form).find('input[disabled="disabled"][value!="0"]').last().val());
+    for (; idx < idxLast; idx++) {
+      $(form).find('#'+formId+'_'+idx+'_inizio').val($(form).find('#'+formId+'_'+(idx + 1)+'_inizio').val());
+      $(form).find('#'+formId+'_'+idx+'_fine').val($(form).find('#'+formId+'_'+(idx + 1)+'_fine').val());
+      $(form).find('#'+formId+'_'+idx+'_durata').val($(form).find('#'+formId+'_'+(idx + 1)+'_durata').val());
+    }
+    $(form).find('#'+formId+'_'+idxLast+'_ora').attr('value', 0);
+    $(form).find('#'+formId+'_'+idxLast+'_visibile').val(0);
+    $(form).find('#'+formId+'_'+idxLast).closest('fieldset').hide();
+  });
+  $('.gs-giorno').on('click', 'button.gs-add-item', function() {
+    var form = $(this).closest('.gs-giorno');
+    var formId = $(form).attr('id');
+    var idx = parseInt($(form).find('input[disabled="disabled"][value!="0"]').last().val());
+    idx = (idx > 0 ? (idx + 1) : 1);
+    var el = $(form).find('#'+formId+'_'+idx).closest('fieldset');
+    $(el).find('#'+formId+'_'+idx+'_ora').attr('value', idx);
+    $(el).find('#'+formId+'_'+idx+'_inizio').val('08:30');
+    $(el).find('#'+formId+'_'+idx+'_fine').val('09:30');
+    $(el).find('#'+formId+'_'+idx+'_durata').val('1');
+    $(el).find('#'+formId+'_'+idx+'_visibile').val(1);
+    $(el).show();
+  });
+  // init
+  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
+  $('input[disabled="disabled"]').each(function() {
+      var o = $(this).val();
+      var v = $('#'+$(this).attr('id').slice(0, -3)+'visibile');
+      if ($(v).val() === "") {
+        if (o === "0") {
+          $(v).val(0);
+          $(this).closest('fieldset').hide();
+        } else {
+          $(v).val(1);
+        }
+      } else if ($(v).val() === "0") {
+        $(this).attr('value', 0);
+        $(this).closest('fieldset').hide();
+      } else if (o === "0") {
+        var idx = parseInt($(this).closest('.gs-giorno').find('input[disabled="disabled"][value!="0"]').last().val());
+        idx = (idx > 0 ? (idx + 1) : 1);
+        $(this).attr('value', idx);
+      }
+    });
+  $('.gs-giorno').append(button);
+});
+</script>
+{% endblock %}

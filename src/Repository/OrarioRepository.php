@@ -14,6 +14,7 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Sede;
+use App\Entity\Orario;
 
 
 /**
@@ -42,6 +43,30 @@ class OrarioRepository extends EntityRepository {
       ->getQuery()
       ->getOneOrNullResult();
     return $orario;
+  }
+
+  /**
+   * Controlla se esistono sovrapposizioni per il periodo indicato relativamente alla sede indicata
+   *
+   * @param Orario $orario Orario da controllare
+   *
+   * @return bool Vero se esiste una sovrapposizione, falso altrimenti
+   */
+  public function sovrapposizioni(Orario $orario) {
+    $sovrapposizioni = $this->createQueryBuilder('o')
+      ->where('o.sede=:sede')
+      ->andWhere('(:inizio BETWEEN o.inizio AND o.fine) OR (:fine BETWEEN o.inizio AND o.fine) OR (:inizio <= o.inizio AND :fine >= o.fine)')
+      ->setParameters(['sede' => $orario->getSede(), 'inizio' => $orario->getInizio()->format('Y-m-d'),
+        'fine' => $orario->getFine()->format('Y-m-d')]);
+    if ($orario->getId()) {
+      $sovrapposizioni = $sovrapposizioni->andWhere('o.id!=:orario')->setParameter('orario', $orario->getId());
+    }
+    $sovrapposizioni = $sovrapposizioni
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getOneOrNullResult();
+    // restituisce vero/falso
+    return ($sovrapposizioni != null);
   }
 
 }

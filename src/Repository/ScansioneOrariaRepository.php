@@ -16,6 +16,8 @@ use Doctrine\ORM\EntityRepository;
 use App\Entity\Sede;
 use App\Entity\Docente;
 use App\Entity\Lezione;
+use App\Entity\Orario;
+use App\Entity\ScansioneOraria;
 
 
 /**
@@ -132,6 +134,42 @@ class ScansioneOrariaRepository extends EntityRepository {
       ->getQuery()
       ->getArrayResult();
     return $ore;
+  }
+
+  /**
+   * Restituisce i dati della scansione oraria completa per un orario specificato.
+   *
+   * @param Orario $orario Orario a cui fare riferimento
+   *
+   * @return array Array associativo con la scansione oraria
+   */
+  public function orario(Orario $orario) {
+    $dati = [1 => [], 2 => [], 3 => [], 4 => [], 5 => [], 6 => []];
+    // legge le ore
+    $ore = $this->createQueryBuilder('s')
+      ->where('s.orario=:orario')
+      ->orderBy('s.giorno,s.ora', 'ASC')
+      ->setParameters(['orario' => $orario])
+      ->getQuery()
+      ->getResult();
+    foreach ($ore as $so) {
+      $dati[$so->getGiorno()][$so->getOra()] = $so;
+    }
+    // riempe il resto con dati fittizi (ora = 0)
+    for ($giorno = 1; $giorno <= 6; $giorno++) {
+      for ($ora = count($dati[$giorno]) + 1; $ora <= 10; $ora++) {
+        $dati[$giorno][$ora] = (new ScansioneOraria())
+          ->setOrario($orario)
+          ->setGiorno($giorno)
+          ->setOra(0)
+          ->setInizio(\DateTime::createFromFormat('H:i', '08:30'))
+          ->setFine(\DateTime::createFromFormat('H:i', '09:30'))
+          ->setDurata(1);
+        $this->_em->persist($dati[$giorno][$ora]);
+      }
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

@@ -200,4 +200,20 @@ class ClasseRepository extends BaseRepository {
     return array_column($classi, 'id');
   }
 
+  /**
+   * Restituisce la lista ordinata delle classi
+   *
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function cerca($pagina=1) {
+    // crea query base
+    $query = $this->createQueryBuilder('c')
+      ->join('c.sede', 's')
+      ->orderBy('s.ordinamento,c.sezione,c.anno', 'ASC');
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
+  }
+
 }

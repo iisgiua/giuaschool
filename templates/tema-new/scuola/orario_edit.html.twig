@@ -1,0 +1,13 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'orario_inizio', dp_disabled: null, dp_week: null, dp_min: date(app.session.get('/CONFIG/SCUOLA/anno_inizio'))|date('d/m/Y'), dp_max: date(app.session.get('/CONFIG/SCUOLA/anno_fine'))|date('d/m/Y')}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'orario_fine', dp_disabled: null, dp_week: null, dp_min: date(app.session.get('/CONFIG/SCUOLA/anno_inizio'))|date('d/m/Y'), dp_max: date(app.session.get('/CONFIG/SCUOLA/anno_fine'))|date('d/m/Y')}) }}
+{% endblock %}

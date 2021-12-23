@@ -22,3 +22,14 @@ INSERT INTO `gs_menu_opzione` (`menu_id`, `sotto_menu_id`, `creato`, `modificato
 
 
 ALTER TABLE gs_definizione_consiglio ADD classi_visibili LONGTEXT DEFAULT NULL COMMENT '(DC2Type:array)';
+
+
+UPDATE gs_menu_opzione SET url='scuola_amministratore',disabilitato=0 WHERE nome='Amministratore';
+UPDATE gs_menu_opzione SET url='scuola_dirigente',disabilitato=0 WHERE nome='Dirigente&nbsp;scolastico';
+UPDATE gs_menu_opzione SET url='scuola_istituto',disabilitato=0 WHERE nome='Istituto';
+UPDATE gs_menu_opzione SET url='scuola_sedi',disabilitato=0 WHERE nome='Sedi';
+UPDATE gs_menu_opzione SET url='scuola_corsi',disabilitato=0 WHERE nome='Corsi';
+UPDATE gs_menu_opzione SET url='scuola_materie',disabilitato=0 WHERE nome='Materie';
+UPDATE gs_menu_opzione SET url='scuola_classi',disabilitato=0 WHERE nome='Classi';
+UPDATE gs_menu_opzione SET url='scuola_festivita',disabilitato=0 WHERE nome='Festività';
+UPDATE gs_menu_opzione SET url='scuola_orario',disabilitato=0 WHERE nome='Orario';

@@ -128,7 +128,6 @@ class FestivitaFixtures extends Fixture implements DependentFixtureInterface, Fi
    */
   public static function getGroups(): array {
     return array(
-      'App', // dati iniziali dell'applicazione
       'Test', // dati per i test dell'applicazione
     );
   }

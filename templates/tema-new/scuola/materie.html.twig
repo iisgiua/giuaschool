@@ -1,0 +1,79 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('tema-new/include/flash.html.twig') }}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="_margin-top:-2.5rem">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          <th class="col-auto" scope="col">{{ 'label.nome_materia'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.tipo'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for m in dati %}
+        <tr>
+          <td>{{ m.nome }}</td>
+          <td><small>{{ ('label.tipo_materia_'~m.tipo)|trans }}</small></td>
+          <td class="pb-0">
+            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" title="Mostra i dettagli della materia" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ m.nome }}" data-cont-id="info-materia-{{ m.id }}">{{ 'label.show'|trans }}</button>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_materie_edit', {'id': m.id}) }}" role="button" title="Modifica i dati della materia">{{ 'label.edit'|trans }}</a>
+            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella la materia" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ m.nome }}" data-contenuto="{{ 'message.cancella_materia'|trans }}" data-href="{{ path('scuola_materie_delete', {'id': m.id}) }}">{{ 'label.delete'|trans }}</button>
+            <div class="d-none" id="info-materia-{{ m.id }}">
+              <dl class="row">
+                <dt class="col-sm-3 text-right">{{ 'label.nome_materia'|trans }}</dt>
+                <dd class="col-sm-9">{{ m.nome }}</dd>
+                <dt class="col-sm-3 text-right">{{ 'label.nome_breve_materia'|trans }}</dt>
+                <dd class="col-sm-9">{{ m.nomeBreve }}</dd>
+                <dt class="col-sm-3 text-right">{{ 'label.tipo_materia'|trans }}</dt>
+                <dd class="col-sm-3">{{ ('label.tipo_materia_'~m.tipo)|trans }}</dd>
+                <dt class="col-sm-3 text-right">{{ 'label.valutazione_materia'|trans }}</dt>
+                <dd class="col-sm-3">{{ ('label.valutazione_materia_'~m.valutazione)|trans }}</dd>
+                <dt class="col-sm-3 text-right">{{ 'label.media_materia'|trans }}</dt>
+                <dd class="col-sm-3">{{ (m.media ? 'label.si' : 'label.no')|trans }}</dd>
+                <dt class="col-sm-3 text-right">{{ 'label.ordinamento'|trans }}</dt>
+                <dd class="col-sm-3">{{ m.ordinamento }}</dd>
+              </dl>
+            </div>
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">
+            <a class="btn btn-primary btn-sm" href="{{ path('scuola_materie_edit') }}" role="button" title="Nuova materia">{{ 'label.add'|trans }}</a>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {{ include('tema-new/include/modal-info.html.twig') }}
+  {{ include('tema-new/include/modal-confirm.html.twig') }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/thfloat.html.twig') }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $('#'+$(e.relatedTarget).data('cont-id')).html();
+    $(this).find('#gs-modal-info-titolo').html(titolo);
+    $(this).find('#gs-modal-info-contenuto').html(contenuto);
+  });
+  $('#gs-modal-confirm').on('show.bs.modal', function (e) {
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $(e.relatedTarget).data('contenuto');
+    var href = $(e.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-titolo').html(titolo);
+    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+  });
+});
+</script>
+{% endblock %}

@@ -232,15 +232,15 @@
     {#-- {%- endif -%} #}
 {#-- {%- endblock money_widget %} #}
 
-{#-- {%- block url_widget -%} #}
-    {#-- {%- set type = type|default('url') -%} #}
-    {#-- {{ block('form_widget_simple') }} #}
-{#-- {%- endblock url_widget -%} #}
+{%- block url_widget -%}
+  {%- set type = type|default('url') -%}
+  {{ block('form_widget_simple') }}
+{%- endblock url_widget -%}
 
-{#-- {%- block search_widget -%} #}
-    {#-- {%- set type = type|default('search') -%} #}
-    {#-- {{ block('form_widget_simple') }} #}
-{#-- {%- endblock search_widget -%} #}
+{%- block search_widget -%}
+  {%- set type = type|default('search') -%}
+  {{ block('form_widget_simple') }}
+{%- endblock search_widget -%}
 
 {#-- {% block percent_widget -%} #}
     {#-- {%- if symbol -%} #}
@@ -269,15 +269,15 @@
   {{ block('form_widget_simple') }}
 {%- endblock hidden_widget -%}
 
-{#-- {%- block email_widget -%} #}
-    {#-- {%- set type = type|default('email') -%} #}
-    {#-- {{ block('form_widget_simple') }} #}
-{#-- {%- endblock email_widget -%} #}
+{%- block email_widget -%}
+  {%- set type = type|default('email') -%}
+  {{ block('form_widget_simple') }}
+{%- endblock email_widget -%}
 
-{#-- {%- block range_widget -%} #}
-    {#-- {% set type = type|default('range') %} #}
-    {#-- {{- block('form_widget_simple') -}} #}
-{#-- {%- endblock range_widget %} #}
+{%- block range_widget -%}
+  {% set type = type|default('range') %}
+  {{- block('form_widget_simple') -}}
+{%- endblock range_widget %}
 
 {%- block button_widget -%}
   {%- set attr = attr|merge({class: (attr.class|default('btn-secondary') ~ ' btn')|trim}) -%}
@@ -291,7 +291,13 @@
       {%- set label = name|humanize -%}
     {%- endif -%}
   {%- endif -%}
-  <button type="{{ type|default('button') }}" {{ block('button_attributes') }}>{{ translation_domain is same as(false) or label is same as(false) ? label : label|trans(label_translation_parameters, translation_domain) }}</button>
+  <button type="{{ type|default('button') }}" {{ block('button_attributes') }}>
+    {%- if translation_domain is same as(false) or label is same as(false) -%}
+      {{- attr.label_html is defined and attr.label_html ? (label|raw) : label -}}
+    {%- else -%}
+      {{- attr.label_html is defined and attr.label_html ? (label|trans(label_translation_parameters, translation_domain)|raw) : (label|trans(label_translation_parameters, translation_domain)) -}}
+    {%- endif -%}
+  </button>
 {%- endblock button_widget -%}
 
 {%- block submit_widget -%}
@@ -304,20 +310,20 @@
   {{ block('button_widget') }}
 {%- endblock submit_widget -%}
 
-{#-- {%- block reset_widget -%} #}
-  {#-- {%- set type = type|default('reset') -%} #}
-  {#-- {{- block('button_widget') -}} #}
-{#-- {%- endblock reset_widget -%} #}
+{%- block reset_widget -%}
+  {%- set type = type|default('reset') -%}
+  {{- block('button_widget') -}}
+{%- endblock reset_widget -%}
 
-{#-- {%- block tel_widget -%} #}
-    {#-- {%- set type = type|default('tel') -%} #}
-    {#-- {{ block('form_widget_simple') }} #}
-{#-- {%- endblock tel_widget -%} #}
+{%- block tel_widget -%}
+  {%- set type = type|default('tel') -%}
+  {{ block('form_widget_simple') }}
+{%- endblock tel_widget -%}
 
-{#-- {%- block color_widget -%} #}
-    {#-- {%- set type = type|default('color') -%} #}
-    {#-- {{ block('form_widget_simple') }} #}
-{#-- {%- endblock color_widget -%} #}
+{%- block color_widget -%}
+  {%- set type = type|default('color') -%}
+  {{ block('form_widget_simple') }}
+{%- endblock color_widget -%}
 
 {# Labels #}
 
@@ -560,7 +566,7 @@
         <fieldset>
           <legend><span class="sr-only">Orario</span></legend>
           <div>
-            <div class="form-group">
+            <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group')|trim})} %}{{ block('attributes') }}{% endwith %}>
               <div class="calendar-input-container">
                 {{ block('form_label') }}
                 <button type="button" class="btn-time" id="{{ id }}_btnTime" aria-label="Fare clic o premere il tasto Invio o la barra spaziatrice per aprire la finestra di inserimento dell'orario">

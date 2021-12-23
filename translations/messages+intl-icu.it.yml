@@ -467,6 +467,53 @@ label.scrutinio_visibile_classe_2: Pubblicazione esiti classi seconde
 label.scrutinio_visibile_classe_3: Pubblicazione esiti classi terze
 label.scrutinio_visibile_classe_4: Pubblicazione esiti classi quarte
 label.scrutinio_visibile_classe_5: Pubblicazione esiti classi quinte
+label.tipo_istituto: Tipo di istituto (es. Istituto di Istruzione Superiore)
+label.sigla_tipo_istituto: Tipo di istituto (es. I.I.S.)
+label.nome_istituto: Nome dell'istituto
+label.nome_breve_istituto: Nome breve dell'istituto
+label.email_istituto: Indirizzo email dell'istituto
+label.pec_istituto: Indirizzo PEC dell'istituto
+label.url_sito: Indirizzo del sito web dell'istituto
+label.url_registro: Indirizzo del registro elettronico dell'istituto
+label.firma_preside: Firma del Dirigente Scolastico sui documenti
+label.email_amministratore: Indirizzo email dell'amministratore
+label.email_notifiche: Indirizzo email del mittente delle notifiche inviate dal registro
+label.nome_sede: Nome sede
+label.nome_breve_sede: Nome breve della sede
+label.indirizzo_cap: CAP e città
+label.telefono: Numero di telefono
+label.ordinamento: Valore per l'ordinamento
+label.nome_corso: Nome corso
+label.nome_breve_corso: Nome breve del corso
+label.nome_materia: Nome materia
+label.nome_breve_materia: Nome breve della materia
+label.tipo_materia: Tipo
+label.tipo_materia_N: Normale
+label.tipo_materia_R: Religione
+label.tipo_materia_E: Ed. civica
+label.tipo_materia_S: Sostegno
+label.tipo_materia_C: Condotta
+label.tipo_materia_U: Supplenza
+label.valutazione_materia: Tipo di valutazione
+label.valutazione_materia_N: Numerica
+label.valutazione_materia_G: Giudizio
+label.valutazione_materia_A: Assente
+label.media_materia: Rientra nel calcolo della media per gli esiti
+label.corso: Corso
+label.classe_anno: Anno
+label.classe_sezione: Sezione
+label.ore_classe: Ore settimanali di lezione
+label.descrizione: Descrizione
+label.nome_orario: Nome dell'orario
+label.scansione_oraria: Scansione oraria
+label.durata: Durata
+label.cancella_elemento: Cancella l'elemento indicato
+label.aggiunge_elemento: Aggiunge un elemento
+
+
+##### ICONE #####
+
+icon.delete: "<svg class=\"icon icon-white icon-xs\"><use xlink:href=\"/vendor/fontawesome/sprites/solid.svg#minus\"></use></svg>"
 
 
 ##### PAGINE #####
@@ -518,9 +565,9 @@ title.docenti.segretari_edit: Modifica i dati del segretario del Consiglio di Cl
 page.docenti.cattedre: Configura Cattedre
 title.docenti.cattedre: Configura le cattedre dei docenti
 title.docenti.cattedre_edit: Modifica i dati di una cattedra
-page.docenti.colloqui: Richieste Colloqui
-title.docenti.colloqui: Richieste di colloquio
-title.docenti.colloqui_edit: Rispondi alla richiesta di colloquio
+page.docenti.colloqui: Imposta Colloqui
+title.docenti.colloqui: Imposta colloqui dei docenti
+title.docenti.colloqui_edit: Modifica icolloqui dei docenti
 page.alunni.importa: Importa Alunni
 title.alunni.importa: Importa i dati degli alunni e dei genitori
 page.alunni.modifica: Modifica Alunni
@@ -544,6 +591,31 @@ page.segreteria_genitori: Gestione Genitori
 title.segreteria_genitori: Modiche agli utenti genitori
 page.scuola.scrutini: Gestione Scrutini
 title.scuola.scrutini: Gestione degli scrutini
+page.scuola.amministratore: Configura Amministratore
+title.scuola.amministratore: Dati dell'amministratore
+page.scuola.dirigente: Dirigente Scolastico
+title.scuola.dirigente: Dati del Dirigente Scolastico
+page.scuola.istituto: Configura Istituto
+title.scuola.istituto: Dati dell'istituto
+page.scuola.sedi: Configura Sedi
+title.scuola.sedi: Dati delle sedi dell'istituto
+title.scuola.sedi_edit: Modifica i dati della sede scolastica
+page.scuola.corsi: Configura Corsi
+title.scuola.corsi: Dati dei corsi scolastici
+title.scuola.corsi_edit: Modifica i dati del corso scolastico
+page.scuola.materie: Configura Materie
+title.scuola.materie: Dati delle materie scolastiche
+title.scuola.materie_edit: Modifica i dati della materia scolastica
+page.scuola.classi: Configura Classi
+title.scuola.classi: Dati delle classi
+title.scuola.classi_edit: Modifica i dati della classe
+page.scuola.festivita: Configura Festività
+title.scuola.festivita: Dati delle festività
+title.scuola.festivita_edit: Modifica i dati della festività
+page.scuola.orario: Configura Orario
+title.scuola.orario: Dati degli orari scolastici
+title.scuola.orario_edit: Modifica i dati dell'orario scolastico
+title.scuola.orario_scansione: Modifica i dati della scansione oraria
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -814,6 +886,7 @@ title.date_colloqui: Date confermate
 ##### MESSAGGI #####
 message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbligatori.
 message.update_ok: La modifica è stata memorizzata correttamente.
+message.delete_ok: La cancellazione è stata effettuata correttamente.
 message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
   \"Docente, UsernameDocente, Classe, Materia, Alunno, UsernameAlunno, Tipo, Supplenza\".
   Verranno inserite solo le cattedre che non risultano già presenti."
@@ -1082,6 +1155,14 @@ message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alun
 message.alunno_assente_in_data: "ATTENZIONE: L'alunno risulta assente alla lezione della data indicata."
 message.modifica_data_o_conferma: "Puoi modificare la data o confermare i dati inseriti."
 message.alunni_assenti_in_data: "ATTENZIONE: Gli alunni seguenti risultano assenti alla lezione della data indicata:"
+message.definizione_scrutinio: "Configura le date di inizio degli scrutini e di inserimento delle proposte di voto, relativamente al periodo scelto.<br>Aggiungi anche successivamente data e ora per la pubblicazione degli esiti delle classi."
+message.cancella_sede: Verrà cancellata la sede scolastica indicata. Vuoi continuare?
+message.cancella_corso: Verrà cancellata il corso scolastico indicato. Vuoi continuare?
+message.cancella_materia: Verrà cancellata la materia scolastica indicata. Vuoi continuare?
+message.cancella_classe: Verrà cancellata la classe indicata. Vuoi continuare?
+message.cancella_festivita: Verrà cancellata la festività indicata. Vuoi continuare?
+message.cancella_orario: Verrà cancellato l'orario indicato. Vuoi continuare?
+message.scansione_oraria: "Inserisci la scansione oraria per ogni giorno della settimana. Usa i pulsanti per aggiungere o rimuovere un elemento.<br>La durata è indicata come frazioni dell'unità oraria."
 
 
 ##### ERRORI #####
@@ -1270,6 +1351,7 @@ exception.non_ammissione_con_voti_P: "La non ammissione dell'alunn{sex} {alunno}
 exception.non_ammissione_con_voti_S: "La non ammissione dell'alunn{sex} {alunno} è possibile solo se non si ha alcun elemento di valutazione, mentre sono presenti valutazioni nel pentamestre."
 exception.non_ammissione_quinte: "La non ammissione all'Esame dell'alunn{sex} {alunno} non è possibile."
 exception.update_errors: Sono presenti errori nei dati inviati.
+exception.delete_errors: Non è possibile eseguire l'operazione. Sono presenti dati che fanno riferimento a quelli da cancellare.
 exception.database_error: Impossibile connettersi al database.
 exception.directory_error: Il percorso indicato non esiste.
 exception.orario_sede_invalido: Non esiste un orario per la sede indicata.
@@ -1308,3 +1390,7 @@ exception.spid_invalid_user: L'utente indicato non è presente nel sistema. Rivo
 exception.spid_blocked_login: Tentativo di accesso durante una manutenzione programmata del sistema.
 exception.documento_errore_codifica: Si è verificato un errore durante la procedura di codifica del documento.
 exception.dati_non_presenti: Dati non disponibili
+exception.intervallo_date_invalido: La data iniziale è successiva a quella finale
+exception.periodo_sovrapposto: Il periodo indicato si sovrappone ad uno esistente
+exception.intervallo_ore_invalido: L'ora iniziale è successiva a quella finale
+exception.orari_sovrapposti: L'orario si sovrappone al precedente

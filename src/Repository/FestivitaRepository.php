@@ -12,7 +12,6 @@
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
 use App\Entity\Sede;
 use App\Entity\Classe;
 
@@ -20,7 +19,7 @@ use App\Entity\Classe;
 /**
  * Festivita - repository
  */
-class FestivitaRepository extends EntityRepository {
+class FestivitaRepository extends BaseRepository {
 
   /**
    * Indica se il giorno indicato è festivo (per tutta la scuola).
@@ -236,6 +235,21 @@ class FestivitaRepository extends EntityRepository {
       $lista_date .= ',"'.$f->getData()->format($format).'"';
     }
     return '['.substr($lista_date, 1).']';
+  }
+
+  /**
+   * Restituisce la lista ordinata delle festività
+   *
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con la lista dei dati
+   */
+  public function cerca($pagina=1) {
+    // crea query base
+    $query = $this->createQueryBuilder('f')
+      ->orderBy('f.data', 'ASC');
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
   }
 
 }

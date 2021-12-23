@@ -88,16 +88,16 @@ class MenuFixtures extends Fixture implements FixtureGroupInterface {
       ]];
     //--- sottomenu scuola
     $menu['scuola'] = [null, null, 0, [
-        ['Amministratore', 'Configura i dati dell\'amministratore', '', null, 1, null, 'M'],
-        ['Dirigente&nbsp;scolastico', 'Configura i dati del dirigente scolastico', '', null, 1, null, 'M'],
-        ['Istituto', 'Configura i dati dell\'Istituto', '', null, 1, null, 'M'],
-        ['Sedi', 'Configura i dati delle sedi scolastiche', '', null, 1, null, 'M'],
-        ['Corsi', 'Configura i corsi di studio', '', null, 1, null, 'M'],
-        ['Materie', 'Configura le materie scolastiche', '', null, 1, null, 'M'],
-        ['Classi', 'Configura le classi', '', null, 1, null, 'M'],
-        ['Festività', 'Configura il calendario delle festività', '', null, 1, null, 'M'],
-        ['Orario', 'Configura la scansione oraria delle lezioni', '', null, 1, null, 'M'],
-        ['Scrutini', 'Configura gli scrutini', 'scuola_scrutini', null, 0, null, 'M'],
+        ['Amministratore', 'Configura i dati dell\'amministratore', 'scuola_amministratore', null, 0, null, 'M'],
+        ['Dirigente&nbsp;scolastico', 'Configura i dati del dirigente scolastico', 'scuola_dirigente', null, 0, null, 'M'],
+        ['Istituto', 'Configura i dati dell\'Istituto', 'scuola_istituto', null, 0, null, 'M'],
+        ['Sedi', 'Configura i dati delle sedi scolastiche', 'scuola_sedi', null, 0, null, 'M'],
+        ['Corsi', 'Configura i corsi di studio', 'scuola_corsi', null, 0, null, 'M'],
+        ['Materie', 'Configura le materie scolastiche', 'scuola_materie', null, 0, null, 'M'],
+        ['Classi', 'Configura le classi', 'scuola_classi', null, 0, null, 'M'],
+        ['Festività', 'Configura il calendario delle festività', 'scuola_festivita', null, 0, null, 'M'],
+        ['Orario', 'Configura la scansione oraria delle lezioni', 'scuola_orario', null, 0, null, 'M'],
+        ['Scrutini', 'Configura gli scrutini', 'scuola_scrutini', null, 0, null, 'M'],        
       ]];
     //--- sottomenu ata
     $menu['ata'] = [null, null, 0, [
