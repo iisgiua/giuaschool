@@ -103,9 +103,13 @@
            <li class="spid-idp-button-link" data-idp="timid">
              <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-timid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
            </li>
+{#-- RIMUOVERE PER LA VALIDAZIONE AGID
+           <!-- AGID-VALIDATORE-INIZIO -->
            <li class="spid-idp-support-link">
              <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
            </li>
+           <!-- AGID-VALIDATORE-FINE -->
+-- RIMUOVERE PER LA VALIDAZIONE AGID #}
            <li class="spid-idp-support-link">
              <a href="https://www.spid.gov.it" target="_blank">Maggiori informazioni</a>
            </li>
@@ -222,9 +226,13 @@
              <li class="spid-idp-button-link" data-idp="timid">
                <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-timid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
              </li>
-             <li class="spid-idp-support-link">
-               <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
-             </li>
+{#-- RIMUOVERE PER LA VALIDAZIONE AGID
+              <!-- AGID-VALIDATORE-INIZIO -->
+              <li class="spid-idp-support-link">
+                <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
+              </li>
+              <!-- AGID-VALIDATORE-FINE -->
+-- RIMUOVERE PER LA VALIDAZIONE AGID #}
              <li class="spid-idp-support-link">
                <a href="https://www.spid.gov.it" target="_blank">Maggiori informazioni</a>
              </li>
