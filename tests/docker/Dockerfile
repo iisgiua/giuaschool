@@ -47,9 +47,13 @@ RUN \
   rm composer-setup.php && \
 # Configure Apache/PHP
   a2enmod rewrite && \
+  a2enmod ssl && \
   sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/apache2/php.ini && \
   sed -r -i -e 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/7.4/apache2/php.ini && \
-  sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/cli/php.ini
+  sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/cli/php.ini && \
+  rm -f /etc/apache2/sites-available/default-ssl.conf
+COPY ./tests/docker/apache2-certificate.crt /etc/ssl/cert/apache2-certificate.crt
+COPY ./tests/docker/apache2-certificate.key /etc/ssl/private/apache2-certificate.key
 COPY ./tests/docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
 COPY ./tests/docker/apache2-mpm.conf /etc/apache2/mods-available/mpm_prefork.conf
 
@@ -99,5 +103,5 @@ RUN \
 
 
 ### Configure services
-EXPOSE 80
+EXPOSE 443
 CMD tests/docker/entrypoint.sh
