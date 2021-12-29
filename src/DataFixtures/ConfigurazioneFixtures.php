@@ -44,7 +44,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setCategoria('SISTEMA')
       ->setParametro('versione')
       ->setDescrizione("Numero di versione dell'applicazione<br>[testo]")
-      ->setValore('1.4.0')
+      ->setValore('1.4.2')
       ->setGestito(true);
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
@@ -174,7 +174,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setCategoria('ACCESSO')
       ->setParametro('giorni_festivi_classi')
       ->setDescrizione("Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato 'giorno:classe'; giorno: 0=domenica, 1=lunedì, ... 6=sabato; classe: 1A, 2A, ...]")
-      ->setValore('6:1S,6:2S,6:1T,6:2T');
+      ->setValore('');
     // rende persistenti i parametri
     foreach ($param as $obj) {
       $em->persist($obj);

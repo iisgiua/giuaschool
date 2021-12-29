@@ -1,0 +1,43 @@
+<?php
+/**
+ * giua@school
+ *
+ * Copyright (c) 2017-2021 Antonello Dessì
+ *
+ * @author    Antonello Dessì
+ * @license   http://www.gnu.org/licenses/agpl.html AGPL
+ * @copyright Antonello Dessì 2017-2021
+ */
+
+
+require dirname(dirname(__DIR__)).'/config/bootstrap.php';
+
+use App\Kernel;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+
+
+/**
+* encode - Comando per codificare una password in Symfony
+*
+*/
+$commands = [
+  new ArrayInput(['command' => 'security:encode-password',
+    'password' => $password,
+    'user-class' => '\App\Entity\Amministratore',
+    '-n' => null])
+];
+
+$kernel = new Kernel('prod', false);
+$application = new Application($kernel);
+$application->setAutoExit(false);
+$output = new BufferedOutput();
+
+foreach ($commands as $com) {
+  $status = $application->run($com, $output);
+  $content = $output->fetch();
+  if ($status != 0) {
+    break;
+  }
+}
