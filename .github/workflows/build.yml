@@ -3,14 +3,16 @@ name: Build
 on:
   push:
     branches: [ master ]
-  release:
-    types: [ published ]
+  workflow_run:
+    workflows: [ "Release" ]
+    types: [ completed ]
 
 jobs:
 
   build:
     name: Build and create a release
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
 
       - name: Check out the repo
@@ -46,18 +48,23 @@ jobs:
             trinkodok/giuaschool:latest
             ghcr.io/trinko/giuaschool:latest
 
+      - name: Get last release tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+        if: github.event_name == 'workflow_run'
+
       - name: Build and publish image on release event
         uses: docker/build-push-action@v2
-        if: github.event_name == 'release'
+        if: github.event_name == 'workflow_run'
         with:
           context: .
           file: tests/docker/Dockerfile
           push: true
           tags: |
             trinkodok/giuaschool:latest
-            trinkodok/giuaschool:${{ github.event.release.tag_name }}
+            trinkodok/giuaschool:${{ steps.get-latest-tag.outputs.tag }}
             ghcr.io/trinko/giuaschool:latest
-            ghcr.io/trinko/giuaschool:${{ github.event.release.tag_name }}
+            ghcr.io/trinko/giuaschool:${{ steps.get-latest-tag.outputs.tag }}
 
       - name: Archive release
         run: |
@@ -68,14 +75,14 @@ jobs:
         uses: actions/upload-artifact@v2
         if: github.event_name == 'push'
         with:
-          name: build-release
+          name: build-release.zip
           path: giuaschool-release.zip
 
       - name: Publish release code
         uses: svenstaro/upload-release-action@v2
-        if: github.event_name == 'release'
+        if: github.event_name == 'workflow_run'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: giuaschool-release.zip
-          asset_name: giuaschool-release.zip
-          tag: ${{ github.event.release.tag_name }}
+          asset_name: giuaschool-release-${{ steps.get-latest-tag.outputs.tag }}.zip
+          tag: ${{ steps.get-latest-tag.outputs.tag }}
