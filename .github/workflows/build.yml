@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v2
         if: github.event_name == 'push'
         with:
-          name: build-release.zip
+          name: build-release
           path: giuaschool-release.zip
 
       - name: Publish release code

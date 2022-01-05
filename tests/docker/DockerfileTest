@@ -18,5 +18,5 @@ RUN \
   chown -R www-data:www-data .
 
 ### Run Unit tests
-EXPOSE 80
+EXPOSE 443
 CMD tests/docker/entrypoint-test.sh
