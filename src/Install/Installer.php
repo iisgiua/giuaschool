@@ -65,7 +65,7 @@ class Installer {
   private $token;
 
   /**
-   * Conserva il token univoco di installazione
+   * Conserva la lista dei comandi sql per l'installazione iniziale
    *
    * @var array $dataCreate Lista di comandi sql per l'installazione iniziale
    */
@@ -198,6 +198,36 @@ class Installer {
     "INSERT INTO `gs_menu_opzione` VALUES (88,9,8,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Alunni','Gestione degli alunni',NULL,6,0,'child');",
   ];
 
+  /**
+   * Conserva la lista dei comandi sql per l'aggiornamento di versione
+   *
+   * @var array $dataUpdate Lista di comandi sql per l'aggiornamento di versione
+   */
+  private $dataUpdate = [
+    '1.4.2' => [
+      "ALTER TABLE gs_utente ADD spid TINYINT(1) NOT NULL;",
+      "UPDATE gs_utente SET spid=0;",
+      "ALTER TABLE gs_circolare ADD anno INT NOT NULL;",
+      "CREATE UNIQUE INDEX UNIQ_544B974BC6E493B0F55AE19E ON gs_circolare (anno, numero);",
+      "UPDATE gs_circolare SET anno=2021;",
+      "ALTER TABLE gs_valutazione ADD materia_id INT NOT NULL;",
+      "UPDATE gs_valutazione AS v SET v.materia_id=(SELECT l.materia_id FROM gs_lezione AS l WHERE l.id=v.lezione_id);",
+      "ALTER TABLE gs_valutazione ADD CONSTRAINT FK_ACC1A460B54DBBCB FOREIGN KEY (materia_id) REFERENCES gs_materia (id);",
+      "CREATE INDEX IDX_ACC1A460B54DBBCB ON gs_valutazione (materia_id);",
+      "INSERT INTO `gs_menu_opzione` (`menu_id`, `sotto_menu_id`, `creato`, `modificato`, `ruolo`, `funzione`, `nome`, `descrizione`, `url`, `ordinamento`, `disabilitato`, `icona`) VALUES ((SELECT id FROM gs_menu WHERE selettore='scuola'), NULL, NOW(), NOW(), 'ROLE_AMMINISTRATORE', 'NESSUNA', 'Scrutini', 'Configura gli scrutini', 'scuola_scrutini', '10', '0', NULL);",
+      "ALTER TABLE gs_definizione_consiglio ADD classi_visibili LONGTEXT DEFAULT NULL COMMENT '(DC2Type:array)';",
+      "UPDATE gs_menu_opzione SET url='scuola_amministratore',disabilitato=0 WHERE nome='Amministratore';",
+      "UPDATE gs_menu_opzione SET url='scuola_dirigente',disabilitato=0 WHERE nome='Dirigente&nbsp;scolastico';",
+      "UPDATE gs_menu_opzione SET url='scuola_istituto',disabilitato=0 WHERE nome='Istituto';",
+      "UPDATE gs_menu_opzione SET url='scuola_sedi',disabilitato=0 WHERE nome='Sedi';",
+      "UPDATE gs_menu_opzione SET url='scuola_corsi',disabilitato=0 WHERE nome='Corsi';",
+      "UPDATE gs_menu_opzione SET url='scuola_materie',disabilitato=0 WHERE nome='Materie';",
+      "UPDATE gs_menu_opzione SET url='scuola_classi',disabilitato=0 WHERE nome='Classi';",
+      "UPDATE gs_menu_opzione SET url='scuola_festivita',disabilitato=0 WHERE nome='Festività';",
+      "UPDATE gs_menu_opzione SET url='scuola_orario',disabilitato=0 WHERE nome='Orario';",
+    ],
+  ];
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -321,6 +351,22 @@ class Installer {
     }
     // restituisce valore
     return $valore;
+  }
+
+  /**
+   * Modifica il valore del parametro di configurazione
+   *
+   * @param string $parameter Nome del parametro
+   * @param string $value Valore del parametro
+   */
+  private function setParameter($parameter, $value) {
+    // modifica parametro
+    if ($this->pdo) {
+      // imposta query
+      $sql = "UPDATE gs_configurazione SET valore=:value WHERE parametro=:parameter";
+      $stm = $this->pdo->prepare($sql);
+      $stm->execute(['value' => $value, 'parameter' => $parameter]);
+    }
   }
 
   /**
@@ -520,25 +566,26 @@ class Installer {
    * Verifica le credenziali di accesso alla procedura
    *
    * @param string $password Password di installazione
+   * @param int $step Passo della procedura a cui tornare in caso di errore
    *
    */
-  private function authenticate($password) {
+  private function authenticate($password, $step) {
     // carica variabili dia ambiente
     $envPath = dirname(dirname(__DIR__)).'/.env';
     if (!file_exists($envPath)) {
       // non esiste file .env
-      throw new \Exception('Il file ".env" non esiste', 1);
+      throw new \Exception('Il file ".env" non esiste', $step);
     }
     // legge .env e carica variabili di ambiente
     $env = parse_ini_file($envPath);
     if (!isset($env['INSTALLATION_PSW']) || empty($env['INSTALLATION_PSW'])) {
       // non esiste password di installazione
-      throw new \Exception('Il parametro "INSTALLATION_PSW" non è configurato all\'interno del file .env', 1);
+      throw new \Exception('Il parametro "INSTALLATION_PSW" non è configurato all\'interno del file .env', $step);
     }
     // controlla password
     if ($env['INSTALLATION_PSW'] !== $password) {
       // non esiste password di installazione
-      throw new \Exception('La password di installazione non corrisponde a quelle del parametro "INSTALLATION_PSW"', 1);
+      throw new \Exception('La password di installazione non corrisponde a quelle del parametro "INSTALLATION_PSW"', $step);
     }
     // memorizza password in configurazione
     $this->env['INSTALLATION_PSW'] = $password;
@@ -582,6 +629,47 @@ class Installer {
       throw new \Exception('Errore nell\'esecuzione dei comandi per la creazione del database.<br>'.
         $e->getMessage(), 6);
     }
+  }
+
+  /**
+   * Aggiorna il database alla nuova versione
+   *
+   */
+  private function updateSchema() {
+    if (!$this->pdo) {
+      // connessione al database
+      $db = parse_url($this->env['DATABASE_URL']);
+      $dsn = $db['scheme'].':dbname='.substr($db['path'], 1).';host='.$db['host'].';port='.$db['port'];
+      try {
+        $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
+      } catch (\Exception $e) {
+        // errore di connession
+        throw new \Exception('Impossibile connettersi al database');
+      }
+    }
+    // legge versione attuale
+    $version = $this->getParameter('versione');
+    foreach ($this->dataUpdate as $newVersion=>$data) {
+      if (version_compare($newVersion, $version, '<=')) {
+        // salta versione
+        continue;
+      }
+      // esegue i comandi
+      try {
+        foreach ($data as $sql) {
+          $this->pdo->exec($sql);
+        }
+      } catch (\Exception $e) {
+        throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database.<br>'.
+          $e->getMessage(), 5);
+      }
+      // nuova versione installata
+      $this->setParameter('versione', $newVersion);
+      // esegue un aggiornamento alla volta
+      return $newVersion;
+    }
+    // nessun aggiornamento eseguito
+    return $version;
   }
 
   /**
@@ -699,7 +787,7 @@ class Installer {
     }
     // autenticazione
     $password = $_POST['install']['password'];
-    $this->authenticate($password);
+    $this->authenticate($password, 1);
     // imposta dati della pagina
     $page['step'] = '2 - Requisiti obbligatori';
     $page['title'] = 'Requisiti obbligatori di installazione';
@@ -984,15 +1072,184 @@ class Installer {
    */
   private function pageUpdate1() {
     // imposta dati della pagina
-    $page['step'] = '1 - Autenticazione';
-    $page['title'] = 'Autenticazione iniziale';
+    $page['step'] = '1 - Scelta procedura';
+    $page['title'] = 'Scelta della procedura da eseguire';
     $page['_token'] = $this->token;
+    $page['version'] = $this->version;
+    $page['updateVersion'] = array_key_last($this->dataUpdate);
+    $page['update'] = version_compare($this->version, $page['updateVersion'], '<');
     // visualizza pagina
     include('page_update_1.php');
     // imposta nuovo passo
-    //-- $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+  }
 
+  /**
+   * Aggiorna la versione: passo 2
+   *
+   */
+  private function pageUpdate2() {
+    // controllo token
+    $token = $_POST['install']['_token'];
+    if ($this->token !== $token) {
+      // non esiste password di installazione
+      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+    }
+    // controllo scelta
+    if (isset($_POST['install']['create'])) {
+      // installazione iniziale
+      $this->mode = 'Create';
+      $_SESSION['GS_INSTALL_MODE'] = $this->mode;
+      $this->step = 1;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      return $this->pageCreate1();
+    }
+    // imposta dati della pagina
+    $page['step'] = '2 - Autenticazione';
+    $page['title'] = 'Autenticazione iniziale';
+    $page['_token'] = $this->token;
+    $page['updateVersion'] = array_key_last($this->dataUpdate);
+    // visualizza pagina
+    include('page_update_2.php');
+    // imposta nuovo passo
+    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+  }
+
+  /**
+   * Aggiorna la versione: passo 3
+   *
+   */
+  private function pageUpdate3() {
+    // controllo token
+    $token = $_POST['install']['_token'];
+    if ($this->token !== $token) {
+      // non esiste password di installazione
+      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+    }
+    // autenticazione
+    $password = $_POST['install']['password'];
+    $this->authenticate($password, 2);
+    // imposta dati della pagina
+    $page['step'] = '3 - Requisiti obbligatori';
+    $page['title'] = 'Requisiti obbligatori di installazione';
+    $page['_token'] = $this->token;
+    $page['mandatory'] = $this->mandatoryRequirements();
+    $page['error'] = false;
+    foreach ($page['mandatory'] as $req) {
+      if (!$req[2]) {
+        $page['error'] = true;
+        break;
+      }
+    }
+    // visualizza pagina
+    include('page_update_3.php');
+    // imposta nuovo passo
+    if (!$page['error']) {
+      // pagina successiva
+      $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+    }
+  }
+
+  /**
+   * Aggiorna la versione: passo 4
+   *
+   */
+  private function pageUpdate4() {
+    // controllo token
+    $token = $_POST['install']['_token'];
+    if ($this->token !== $token) {
+      // non esiste password di installazione
+      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+    }
+    // imposta dati della pagina
+    $page['step'] = '4 - Requisiti opzionali';
+    $page['title'] = 'Requisiti opzionali di installazione';
+    $page['_token'] = $this->token;
+    $page['optional'] = $this->optionalRequirements();
+    $page['warning'] = false;
+    foreach ($page['optional'] as $req) {
+      if (!$req[2]) {
+        $page['warning'] = true;
+        break;
+      }
+    }
+    // visualizza pagina
+    include('page_update_4.php');
+    // imposta nuovo passo
+    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+  }
+
+  /**
+   * Aggiorna la versione: passo 5
+   *
+   */
+  private function pageUpdate5() {
+    // controllo token
+    $token = $_POST['install']['_token'];
+    if ($this->token !== $token) {
+      // non esiste password di installazione
+      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+    }
+    // aggiorna database
+    $page['updateVersion'] = $this->updateSchema();
+    // imposta dati della pagina
+    $page['step'] = '5 - Aggiornamento database';
+    $page['title'] = 'Aggiornamento del database';
+    $page['_token'] = $this->token;
+    // visualizza pagina
+    include('page_update_5.php');
+    // imposta nuovo passo
+    if (version_compare($page['updateVersion'], array_key_last($this->dataUpdate), '==')) {
+      // continua la procedura
+      $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+    }
+  }
+
+  /**
+   * Aggiorna la versione: passo 6
+   *
+   */
+  private function pageUpdate6() {
+    // controllo token
+    $token = $_POST['install']['_token'];
+    if ($this->token !== $token) {
+      // non esiste password di installazione
+      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+    }
+    // pulisce cache
+    $this->clean();
+    // imposta dati della pagina
+    $page['step'] = '6 - Pulizia finale';
+    $page['title'] = 'Pulizia della cache di sistema';
+    $page['_token'] = $this->token;
+    // visualizza pagina
+    include('page_update_6.php');
+    // imposta nuovo passo
+    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+  }
+
+  /**
+   * Aggiorna la versione: passo 7
+   *
+   */
+  private function pageUpdate7() {
+    // controllo token
+    $token = $_POST['install']['_token'];
+    if ($this->token !== $token) {
+      // non esiste password di installazione
+      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+    }
+    // imposta dati della pagina
+    $page['step'] = '7 - Fine';
+    $page['title'] = 'Fine della procedura';
+    // visualizza pagina
+    include('page_update_7.php');
+    // resetta sessione
     $_SESSION = [];
     session_destroy();
+    // rinomina file di installazione in .txt
+    $path = dirname(dirname(__DIR__)).'/public/install';
+    rename($path.'/index.php', $path.'/index.txt');
   }
+
 }
