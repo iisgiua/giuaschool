@@ -226,6 +226,7 @@ class Installer {
       "UPDATE gs_menu_opzione SET url='scuola_festivita',disabilitato=0 WHERE nome='Festività';",
       "UPDATE gs_menu_opzione SET url='scuola_orario',disabilitato=0 WHERE nome='Orario';",
     ],
+    'build' => []
   ];
 
 
@@ -650,7 +651,7 @@ class Installer {
     // legge versione attuale
     $version = $this->getParameter('versione');
     foreach ($this->dataUpdate as $newVersion=>$data) {
-      if (version_compare($newVersion, $version, '<=')) {
+      if ($newVersion != 'build' && version_compare($newVersion, $version, '<=')) {
         // salta versione
         continue;
       }
@@ -664,7 +665,11 @@ class Installer {
           $e->getMessage(), 5);
       }
       // nuova versione installata
-      $this->setParameter('versione', $newVersion);
+      if ($newVersion != 'build') {
+        $this->setParameter('versione', $newVersion);
+      } elseif (!empty($data)) {
+        $newVersion = $version.'#build';
+      }
       // esegue un aggiornamento alla volta
       return $newVersion;
     }
@@ -1076,8 +1081,15 @@ class Installer {
     $page['title'] = 'Scelta della procedura da eseguire';
     $page['_token'] = $this->token;
     $page['version'] = $this->version;
-    $page['updateVersion'] = array_key_last($this->dataUpdate);
-    $page['update'] = version_compare($this->version, $page['updateVersion'], '<');
+    if (empty($this->dataUpdate['build'])) {
+      // aggiornamento alla versione
+      $page['updateVersion'] = array_slice(array_keys($this->dataUpdate), -2)[0];
+      $page['update'] = version_compare($this->version, $page['updateVersion'], '<');
+    } else {
+      // aggiornamento all'ultima modifica (build)
+      $page['updateVersion'] = array_slice(array_keys($this->dataUpdate), -2)[0].'#build';
+      $page['update'] = true;
+    }
     // visualizza pagina
     include('page_update_1.php');
     // imposta nuovo passo
@@ -1108,7 +1120,8 @@ class Installer {
     $page['step'] = '2 - Autenticazione';
     $page['title'] = 'Autenticazione iniziale';
     $page['_token'] = $this->token;
-    $page['updateVersion'] = array_key_last($this->dataUpdate);
+    $page['updateVersion'] = array_slice(array_keys($this->dataUpdate), -2)[0].
+      (empty($this->dataUpdate['build']) ? '' : '#build');
     // visualizza pagina
     include('page_update_2.php');
     // imposta nuovo passo
@@ -1191,6 +1204,8 @@ class Installer {
       throw new \Exception('Errore di sicurezza nell\'invio dei dati');
     }
     // aggiorna database
+    $lastVersion = array_slice(array_keys($this->dataUpdate), -2)[0].
+      (empty($this->dataUpdate['build']) ? '' : '#build');
     $page['updateVersion'] = $this->updateSchema();
     // imposta dati della pagina
     $page['step'] = '5 - Aggiornamento database';
@@ -1199,7 +1214,7 @@ class Installer {
     // visualizza pagina
     include('page_update_5.php');
     // imposta nuovo passo
-    if (version_compare($page['updateVersion'], array_key_last($this->dataUpdate), '==')) {
+    if (version_compare($page['updateVersion'], $lastVersion, '==')) {
       // continua la procedura
       $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
     }
