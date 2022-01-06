@@ -114,31 +114,31 @@ come, ad esempio, quella di [HTML.IT](https://www.html.it/guide/docker/).
 
 Il comando seguente scarica l'immagine dell'applicazione ed avvia il server in un contenitore *docker*:
 ```
-docker run -d --rm --name gs_test -p 80:80 ghcr.io/trinko/giuaschool:latest
+docker run -d --rm --name gs_test -p 443:443 ghcr.io/trinko/giuaschool:latest
 ```
 
 L'immagine verrà scaricata dal repository di *GitHub*, ma se si preferisce usare *Docker Hub*, allora
 si può modificare il comando nel modo seguente:
 ```
-docker run -d --rm --name gs_test -p 80:80 trinkodok/giuaschool:latest
+docker run -d --rm --name gs_test -p 443:443 trinkodok/giuaschool:latest
 ```
 
 Nel caso il comando riporti un errore di rete del tipo
-*"listen tcp4 0.0.0.0:80: bind: address already in use"*,
-significa che la porta 80 è già utilizzata da un altro servizio del proprio computer.
-Si può quindi impostare una porta differente, ad esempio 8080, modificando il comando come indicato di seguito:
+*"listen tcp4 0.0.0.0:443: bind: address already in use"*,
+significa che la porta 443 è già utilizzata da un altro servizio del proprio computer.
+Si può quindi impostare una porta differente, ad esempio 8443, modificando il comando come indicato di seguito:
 ```
-docker run -d --rm --name gs_test -p 8080:80 ghcr.io/trinko/giuaschool:latest
+docker run -d --rm --name gs_test -p 8443:443 ghcr.io/trinko/giuaschool:latest
 ```
 
 ### 3. Uso dell'applicazione
 
 Una volta avviato il server, usare l'indirizzo seguente nel proprio browser per visualizzare la pagina di accesso:
-  - [http://localhost](http://localhost)
+  - [https://localhost](https://localhost)
 
 Nel caso sia stato modificato il numero di porta, è necessario specificarlo nell'indirizzo.
-Ad esempio, se è stata impostata la porta 8080, l'indirizzo da utilizzare sarà:
-  - [http://localhost:8080](http://localhost:8080)
+Ad esempio, se è stata impostata la porta 8443, l'indirizzo da utilizzare sarà:
+  - [https://localhost:8443](https://localhost:8443)
 
 Accedere all'applicazione utilizzando le seguenti credenziali per l'utente amministratore:
   - nome utente: **admin**
