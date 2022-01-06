@@ -160,8 +160,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->kernel = $kernel;
     $this->em = $em;
     $this->router = $router;
-    $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'http://giuaschool_test',
-      ['downloadBehavior' => 'allow', 'socketTimeout' => 30, 'domWaitTimeout' => 10000]));
+    $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
+      ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
     // gruppo fixtures per i test
     $this->gruppo = 'Test';
     // inizializza variabili
