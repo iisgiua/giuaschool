@@ -320,7 +320,7 @@ class Installer {
     }
     // legge versione corrente
     $this->version = $this->getParameter('versione');
-    if (empty($this->version) || version_compare($this->version, '1.4.0', '<=')) {
+    if (empty($this->version) || version_compare($this->version, '1.4.0', '<')) {
       // versione non configurata o precedente a 1.4.0
       $this->mode = 'Create';
       return;
