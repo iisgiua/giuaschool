@@ -64,8 +64,7 @@ Ci sono ulteriori requisiti minori che sono richiesti dal framework *Symfony*.
 
 ### 1. Cosa contiene una release
 Nel file compresso della versione dell'applicazione sono presenti tutti i file necessari. 
-E' infatti presente anche il file **database.sql** che contiene l'esportazione del database completo con alcuni dati predefiniti.
-Questa installazione non permette l'installazione di applicazioni esterne, necessarie per alcune particolari funzionalità del registro elettronico: 
+Questa versione non permette l'installazione di applicazioni esterne, necessarie per alcune particolari funzionalità del registro elettronico: 
 non è pertanto operativa la conversione automatica in PDF dei documenti caricati.
 
 ### 1. Scaricare il codice dell'applicazione
@@ -82,13 +81,12 @@ Infatti l'unico contenuto che deve essere esposto sul sito internet è quello al
 
 **Se si dovesse esporre pubblicamente su internet l'intera cartella di installazione, ci sarebbero gravi problemi di sicurezza.**
 
-### 3. Importare il database
-A questo punto bisogna importare il database nel server mysql, utilizzando il file **database.sql**, presente nella cartella di installazione.
+### 3. Eseguire la procedura di installazione
+A questo punto bisogna eseguire la procedura di installazione e seguire le istruzioni riportate a video. 
+La procedura permette anche di eseguire un aggiornamento di versione.
 
-### 4. Controllare i permessi delle cartelle
-A seconda del sistema operativo utilizzato, può essere necessario modificare i permessi dei file e delle cartelle di installazione:
-- i file devono essere leggibili dal webserver (ad es. www-data per i server apache);
-- le cartelle devono essere leggibili ed eseguibili dallo stesso utente.
+Per eseguire la procedura di installazione andare alla pagina seguente:
+**https://nome_sito/install/index.php**
 
 
 ## INSTALLAZIONE CON I CONTENITORI DOCKER
