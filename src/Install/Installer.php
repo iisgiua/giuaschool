@@ -319,7 +319,13 @@ class Installer {
       return;
     }
     // legge versione corrente
-    $this->version = $this->getParameter('versione');
+    try {
+      $this->version = $this->getParameter('versione');
+    } catch (\Exception $e) {
+      // tabella di configurazione non esistente
+      $this->mode = 'Create';
+      return;
+    }
     if (empty($this->version) || version_compare($this->version, '1.4.0', '<')) {
       // versione non configurata o precedente a 1.4.0
       $this->mode = 'Create';
