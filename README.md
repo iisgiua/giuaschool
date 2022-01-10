@@ -1,5 +1,5 @@
 # giua@school 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/trinko/giuaschool) [<img src="https://img.shields.io/badge/DOWNLOAD-release-blue">](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release.zip)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/trinko/giuaschool) [<img src="https://img.shields.io/badge/DOWNLOAD-release-blue">](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release-latest.zip)
 
 *il Registro Elettronico dell'Istituto di Istruzione Superiore "Michele Giua"*
 
@@ -71,7 +71,7 @@ non è pertanto operativa la conversione automatica in PDF dei documenti caricat
 Scaricare il codice dell'applicazione e decomprimere la cartella di installazione.
 Il codice dell'ultima versione è sempre disponibile nella pagina principale del progetto:
 
-[<img src="https://img.shields.io/badge/DOWNLOAD-release-blue?style=for-the-badge">](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release.zip)
+[<img src="https://img.shields.io/badge/DOWNLOAD-release-blue?style=for-the-badge">](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release-latest.zip)
 
 ### 2. Copiare il codice nella cartella del web server
 I file andranno copiati nella cartella di destinazione del server web.
