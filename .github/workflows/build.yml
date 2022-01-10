@@ -48,7 +48,7 @@ jobs:
             trinkodok/giuaschool:latest
             ghcr.io/trinko/giuaschool:latest
 
-      - name: Get last release tag
+      - name: Get latest release tag
         uses: actions-ecosystem/action-get-latest-tag@v1
         id: get-latest-tag
         if: github.event_name == 'workflow_run'
