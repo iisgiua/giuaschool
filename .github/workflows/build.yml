@@ -70,19 +70,26 @@ jobs:
         run: |
           docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/entrypoint-release.sh
           docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-release.zip
+          mkdir builds
+          cp giuaschool-release.zip builds/giuaschool-build-latest.zip
 
-      - name: Upload ZIP release as artifact
-        uses: actions/upload-artifact@v2
+      - name: Upload latest build
+        uses: EndBug/add-and-commit@v7
         if: github.event_name == 'push'
         with:
-          name: build-release
-          path: giuaschool-release.zip
+          add: builds/giuaschool-build-latest.zip --force
+          branch: builds
+          branch_mode: create
+          push: '--force --set-upstream origin builds'
+          pull: 'NO-PULL'
+          default_author: github_actor
+          message: 'Upload latest build'
 
-      - name: Publish release code
+      - name: Publish latest release
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'workflow_run'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: giuaschool-release.zip
-          asset_name: giuaschool-release.zip
+          asset_name: giuaschool-release-latest.zip
           tag: ${{ steps.get-latest-tag.outputs.tag }}
