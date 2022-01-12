@@ -95,10 +95,9 @@ jobs:
           tag: ${{ steps.get-latest-tag.outputs.tag }}
 
       - name: Generate changelog
-        uses: EndBug/add-and-commit@v7
-        if: github.event_name == 'push'
         id: changelog
         uses: metcalfc/changelog-generator@v3.0.0
+        if: github.event_name == 'push'
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
