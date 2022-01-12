@@ -116,7 +116,7 @@ jobs:
           echo "# giua@school Versione ${{ github.event.inputs.version }}"  >> docs/latest-release.md
           echo "{: .text-center .fw-400}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "Data e ora del rilascio: ${date +'%d/%m/%Y %H:%M'}" >> docs/latest-release.md
+          echo "Data e ora del rilascio: `date +'%d/%m/%Y %H:%M'`" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "Lista delle modifiche:" >> docs/latest-release.md
           set -o noglob
