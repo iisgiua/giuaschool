@@ -93,3 +93,51 @@ jobs:
           file: giuaschool-release.zip
           asset_name: giuaschool-release-latest.zip
           tag: ${{ steps.get-latest-tag.outputs.tag }}
+
+      - name: Generate changelog
+        uses: EndBug/add-and-commit@v7
+        if: github.event_name == 'push'
+        id: changelog
+        uses: metcalfc/changelog-generator@v3.0.0
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create changelog page
+        if: github.event_name == 'push'
+        run: |
+          mkdir docs
+          echo "---" > docs/latest-release.md
+          echo "layout: default" >> docs/latest-release.md
+          echo "lang: it" >> docs/latest-release.md
+          echo "description: 'giua@school: informazioni sull\'ultima versione rilasciata'" >> docs/latest-release.md
+          echo "title: 'Ultima versione'" >> docs/latest-release.md
+          echo "nav_order: 888" >> docs/latest-release.md
+          echo "---" >> docs/latest-release.md
+          echo "" >> docs/latest-release.md
+          echo "# giua@school Versione ${{ github.event.inputs.version }}"  >> docs/latest-release.md
+          echo "{: .text-center .fw-400}" >> docs/latest-release.md
+          echo "" >> docs/latest-release.md
+          echo "Data e ora del rilascio: ${date +'%d/%m/%Y %H:%M'}" >> docs/latest-release.md
+          echo "" >> docs/latest-release.md
+          echo "Lista delle modifiche:" >> docs/latest-release.md
+          set -o noglob
+          log=$(cat << "EOF"
+          ${{ steps.changelog.outputs.changelog }}
+          EOF
+          )
+          log="${log//'%'/'%25'}"
+          log="${log//$'\n'/'%0A'}"
+          log="${log//$'\r'/'%0D'}"
+          echo "$log"  >> docs/latest-release.md
+
+      - name: Add page and commit
+        uses: EndBug/add-and-commit@v7
+        if: github.event_name == 'push'
+        with:
+          add: docs/latest-release.md --force
+          branch: gh-pages
+          branch_mode: create
+          push: '--force --set-upstream origin gh-pages'
+          pull: 'NO-PULL'
+          default_author: github_actor
+          message: 'Create gh-page'
