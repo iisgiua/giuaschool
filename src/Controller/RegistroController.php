@@ -637,8 +637,16 @@ class RegistroController extends AbstractController {
         // aggiorna lezione (eventualmente cambia materia)
         $lezione
           ->setArgomento($form->get('argomenti')->getData())
-          ->setAttivita($form->get('attivita')->getData())
-          ->setMateria($materia);
+          ->setAttivita($form->get('attivita')->getData());
+        if ($lezione->getMateria()->getTipo() != 'R' &&
+            $cattedra && $cattedra->getMateria()->getTipo() == 'R' && $cattedra->getTipo() == 'A') {
+          // mat. alt. su lezione con altra materia
+          $nuovaMateria = $lezione->getMateria();
+        } else {
+          // imposta materia attuale
+          $nuovaMateria = $materia;
+        }
+        $lezione->setMateria($nuovaMateria);
         if (!$firma_docente) {
           // aggiunge firma
           $firma = (new Firma())

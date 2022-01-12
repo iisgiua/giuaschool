@@ -226,6 +226,15 @@ class RegistroUtil {
             // materia di sostegno o lezione di sostegno: ok
             return true;
           }
+          if ($materia->getTipo() == 'R') {
+            // controlla se cattedra di materia alternativa
+            $matAlter = $this->em->getRepository('App:Cattedra')->findOneBy(['docente' => $docente,
+              'materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipo' => 'A']);
+            if ($matAlter) {
+              // materia alternaativa con lezione di altra disciplina: ok
+              return true;
+            }
+          }
         }
       }
     } elseif ($azione == 'delete') {

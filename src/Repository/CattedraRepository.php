@@ -273,8 +273,8 @@ class CattedraRepository extends BaseRepository {
           // sostegno
           $mat .= $cat->getAlunno() ? (' ('.$cat->getAlunno()->getCognome().' '.$cat->getAlunno()->getNome().')') : '';
           $dati[$mat] = $cat->getId();
-        } elseif (!$sostegno && $cat->getMateria()->getTipo() != 'S') {
-          // materia curricolare
+        } elseif (!$sostegno && $cat->getMateria()->getTipo() != 'S' && $cat->getTipo() != 'A') {
+          // materia curricolare (escluso mat. alt.)
           $dati[$mat] = $cat->getId();
           // controlla cattedre in compresenza
           foreach ($firme as $f) {
