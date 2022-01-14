@@ -59,8 +59,6 @@ jobs:
           echo "---" > docs/latest-release.md
           echo "layout: default" >> docs/latest-release.md
           echo "lang: it" >> docs/latest-release.md
-          echo "description: 'giua@school: informazioni sull\'ultima versione rilasciata" >> docs/latest-release.md
-          echo "title: 'Ultima versione'" >> docs/latest-release.md
           echo "nav_order: 700" >> docs/latest-release.md
           echo "---" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
@@ -69,7 +67,7 @@ jobs:
           echo "" >> docs/latest-release.md
           echo "Versione: ${{ github.event.inputs.version }}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "Data e ora di rilascio: `date +'%d/%m/%Y %H:%M'`" >> docs/latest-release.md
+          echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%x %X'`" >> docs/latest-build.md
           echo "" >> docs/latest-release.md
           echo "Lista delle modifiche incluse nella nuova versione:"  >> docs/latest-release.md
           echo "" >> docs/latest-release.md
@@ -78,8 +76,6 @@ jobs:
           echo "---" > docs/latest-build.md
           echo "layout: default" >> docs/latest-build.md
           echo "lang: it" >> docs/latest-build.md
-          echo "description: 'giua@school: informazioni sulle modifiche effettuate dopo il rilascio dell\'ultima versione" >> docs/latest-build.md
-          echo "title: 'Ultima modifica'" >> docs/latest-build.md
           echo "nav_order: 777" >> docs/latest-build.md
           echo "---" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
