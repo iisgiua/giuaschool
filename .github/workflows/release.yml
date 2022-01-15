@@ -52,9 +52,27 @@ jobs:
           asset_name: giuaschool-release-latest.zip
           tag: "v${{ github.event.inputs.version }}"
 
-      - name: Generate changelog pages
+      - name: Add version tag to documentation
         run: |
           mkdir docs
+          echo "tag: ${{ github.event.inputs.version }}" > docs/version.yml
+
+      - name: Add version tag to documentation
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'docs/version.yml'
+          destination_repo: 'trinko/giuaschool-docs'
+          destination_branch: 'master'
+          destination_folder: '_data'
+          user_name: ${{ github.actor }}
+          user_email: '${{ github.actor }}@users.noreply.github.com'
+          commit_message: 'Add version tag to documentation'
+
+      - name: Generate changelog pages
+        run: |
+          rm -f docs/*.yml
           #####----- latest release page
           echo "---" > docs/latest-release.md
           echo "layout: default" >> docs/latest-release.md
@@ -83,26 +101,15 @@ jobs:
           echo "{: .text-center .fw-400}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "Nessuna modifica dal rilascio dell'ultima versione" >> docs/latest-build.md
-          #####----- data
-          echo "tag: ${{ github.event.inputs.version }}" > docs/version.yml
-
-      - name: Add version tag to documentation
-        uses: andstor/copycat-action@v3
-        with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          src_path: docs/version.yml
-          dst_path: /_data/version.yml
-          dst_owner: trinko
-          dst_repo_name: giuaschool-docs
-          commit_message: 'Create version tag'
 
       - name: Add changelog pages to documentation
-        uses: andstor/copycat-action@v3
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          src_path: docs/
-          file_filter: *.md
-          dst_path: /
-          dst_owner: trinko
-          dst_repo_name: giuaschool-docs
-          commit_message: 'Create gh-pages for changelog'
+          source_file: 'docs/'
+          destination_repo: 'trinko/giuaschool-docs'
+          destination_branch: 'master'
+          user_name: ${{ github.actor }}
+          user_email: '${{ github.actor }}@users.noreply.github.com'
+          commit_message: 'Add changelog pages to documentation'

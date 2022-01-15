@@ -85,11 +85,13 @@ jobs:
           echo "${{ steps.changelog.outputs.changelog }}"  >> docs/latest-build.md
 
       - name: Add changelog page to documentation
-        uses: andstor/copycat-action@v3
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          src_path: docs/latest-build.md
-          dst_path: /latest-build.md
-          dst_owner: trinko
-          dst_repo_name: giuaschool-docs
-          commit_message: 'Create gh-page for changelog'
+          source_file: 'docs/latest-build.md'
+          destination_repo: 'trinko/giuaschool-docs'
+          destination_branch: 'master'
+          user_name: ${{ github.actor }}
+          user_email: '${{ github.actor }}@users.noreply.github.com'
+          commit_message: 'Add changelog page to documentation'
