@@ -58,14 +58,14 @@ jobs:
           #####----- latest release page
           echo "---" > docs/latest-release.md
           echo "layout: default" >> docs/latest-release.md
-          echo "lang: it" >> docs/latest-release.md
-          echo "nav_order: 700" >> docs/latest-release.md
+          echo "title: 'Ultima versione'" >> docs/latest-build.md
+          echo "nav_order: 90" >> docs/latest-release.md
           echo "---" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "# Ultima versione"  >> docs/latest-release.md
           echo "{: .text-center .fw-400}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "Versione: ${{ github.event.inputs.version }}" >> docs/latest-release.md
+          echo "Versione: {{ site.data.version.tag }}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%x %X'`" >> docs/latest-build.md
           echo "" >> docs/latest-release.md
@@ -75,22 +75,34 @@ jobs:
           #####----- latest build page
           echo "---" > docs/latest-build.md
           echo "layout: default" >> docs/latest-build.md
-          echo "lang: it" >> docs/latest-build.md
-          echo "nav_order: 777" >> docs/latest-build.md
+          echo "title: 'Ultima modifica'" >> docs/latest-build.md
+          echo "nav_order: 91" >> docs/latest-build.md
           echo "---" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "# Ultima modifica"  >> docs/latest-build.md
           echo "{: .text-center .fw-400}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "Nessuna modifica dal rilascio dell'ultima versione" >> docs/latest-build.md
+          #####----- data
+          echo "tag: ${{ github.event.inputs.version }}" > docs/version.yml
 
-      - name: Add changelog pages and commit
-        uses: EndBug/add-and-commit@v7
+      - name: Add version tag to documentation
+        uses: andstor/copycat-action@v3
         with:
-          add: docs/*.md --force
-          branch: gh-pages
-          branch_mode: create
-          push: '--force --set-upstream origin gh-pages'
-          pull: 'NO-PULL'
-          default_author: github_actor
-          message: 'Create gh-pages for changelog'
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          src_path: docs/version.yml
+          dst_path: /_data/version.yml
+          dst_owner: trinko
+          dst_repo_name: giuaschool-docs
+          commit_message: 'Create version tag'
+
+      - name: Add changelog pages to documentation
+        uses: andstor/copycat-action@v3
+        with:
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          src_path: docs/
+          file_filter: *.md
+          dst_path: /
+          dst_owner: trinko
+          dst_repo_name: giuaschool-docs
+          commit_message: 'Create gh-pages for changelog'

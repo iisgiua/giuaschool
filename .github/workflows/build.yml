@@ -7,7 +7,7 @@ on:
 jobs:
 
   build:
-    name: Build and create a build release
+    name: Build and create a build code
     runs-on: ubuntu-latest
     steps:
 
@@ -71,8 +71,8 @@ jobs:
           mkdir docs
           echo "---" > docs/latest-build.md
           echo "layout: default" >> docs/latest-build.md
-          echo "lang: it" >> docs/latest-build.md
-          echo "nav_order: 777" >> docs/latest-build.md
+          echo "title: 'Ultima modifica'" >> docs/latest-build.md
+          echo "nav_order: 91" >> docs/latest-build.md
           echo "---" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "# Ultima modifica"  >> docs/latest-build.md
@@ -80,17 +80,16 @@ jobs:
           echo "" >> docs/latest-build.md
           echo "Data e ora dell'ultima modifica: `TZ='Europe/Rome' date +'%x %X'`" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
-          echo "Lista delle modifiche effettuate dopo il rilascio della ${{ github.event.inputs.version }}:"  >> docs/latest-build.md
+          echo "Lista delle modifiche effettuate dopo il rilascio della Versione {{ site.data.version.tag }}:"  >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "${{ steps.changelog.outputs.changelog }}"  >> docs/latest-build.md
 
-      - name: Add changelog page and commit
-        uses: EndBug/add-and-commit@v7
+      - name: Add changelog page to documentation
+        uses: andstor/copycat-action@v3
         with:
-          add: docs/latest-build.md --force
-          branch: gh-pages
-          branch_mode: create
-          push: '--force --set-upstream origin gh-pages'
-          pull: 'NO-PULL'
-          default_author: github_actor
-          message: 'Create gh-page for changelog'
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          src_path: docs/latest-build.md
+          dst_path: /latest-build.md
+          dst_owner: trinko
+          dst_repo_name: giuaschool-docs
+          commit_message: 'Create gh-page for changelog'
