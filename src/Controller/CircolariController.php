@@ -1062,7 +1062,7 @@ class CircolariController extends AbstractController {
     }
     // legge le circolari
     $dati = $em->getRepository('App:Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
-    $dati['annoCorrente'] = array_values($lista_anni)[0];
+    $dati['annoCorrente'] = count($lista_anni) > 0 ? array_values($lista_anni)[0] : '';
     if ($this->getUser() instanceOf Staff) {
       // legge dettagli su circolari
       foreach ($dati['lista'] as $c) {
@@ -1184,7 +1184,7 @@ class CircolariController extends AbstractController {
     }
     // legge le circolari
     $dati = $em->getRepository('App:Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
-    $dati['annoCorrente'] = array_values($lista_anni)[0];
+    $dati['annoCorrente'] = count($lista_anni) > 0 ? array_values($lista_anni)[0] : '';
     // mostra la pagina di risposta
     return $this->render('circolari/ata.html.twig', array(
       'pagina_titolo' => 'page.circolari_ata',

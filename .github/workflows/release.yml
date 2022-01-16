@@ -76,8 +76,8 @@ jobs:
           #####----- latest release page
           echo "---" > docs/latest-release.md
           echo "layout: default" >> docs/latest-release.md
-          echo "title: 'Ultima versione'" >> docs/latest-build.md
-          echo "nav_order: 90" >> docs/latest-release.md
+          echo "title: Ultima versione" >> docs/latest-build.md
+          echo "nav_order: 10" >> docs/latest-release.md
           echo "---" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "# Ultima versione"  >> docs/latest-release.md
@@ -85,7 +85,7 @@ jobs:
           echo "" >> docs/latest-release.md
           echo "Versione: {{ site.data.version.tag }}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%x %X'`" >> docs/latest-build.md
+          echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%d/%m/Y %H:%M'`" >> docs/latest-build.md
           echo "" >> docs/latest-release.md
           echo "Lista delle modifiche incluse nella nuova versione:"  >> docs/latest-release.md
           echo "" >> docs/latest-release.md
@@ -94,7 +94,7 @@ jobs:
           echo "---" > docs/latest-build.md
           echo "layout: default" >> docs/latest-build.md
           echo "title: 'Ultima modifica'" >> docs/latest-build.md
-          echo "nav_order: 91" >> docs/latest-build.md
+          echo "nav_order: 11" >> docs/latest-build.md
           echo "---" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "# Ultima modifica"  >> docs/latest-build.md
