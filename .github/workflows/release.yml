@@ -85,7 +85,7 @@ jobs:
           echo "" >> docs/latest-release.md
           echo "Versione: {{ site.data.version.tag }}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%d/%m/Y %H:%M'`" >> docs/latest-build.md
+          echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-build.md
           echo "" >> docs/latest-release.md
           echo "Lista delle modifiche incluse nella nuova versione:"  >> docs/latest-release.md
           echo "" >> docs/latest-release.md
