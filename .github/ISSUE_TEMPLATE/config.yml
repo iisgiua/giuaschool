@@ -1,9 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Richiesta di aiuto
-    url: https://github.com/trinko/giuaschool/discussions/new?category=idee-e-proposte
+    url: https://github.com/trinko/giuaschool/discussions/new?category=richieste-di-aiuto
     about: Chiedi aiuto agli utenti che seguono il progetto
   - name: Idee e proposte
     url: https://github.com/trinko/giuaschool/discussions/new?category=idee-e-proposte
     about: Proponi nuove funzionalità o miglioramenti per l'applicazione
-    
