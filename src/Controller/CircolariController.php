@@ -772,10 +772,10 @@ class CircolariController extends AbstractController {
     $anno_fine = $anno_inizio + 1;
     $lista_mesi = array();
     for ($i=9; $i<=12; $i++) {
-      $lista_mesi[$mesi[$i].' '.$anno_inizio] = $anno_inizio.'-'.substr('0'.$i, -2);
+      $lista_mesi[$mesi[$i].' '.$anno_inizio] = $i;
     }
     for ($i=1; $i<=8; $i++) {
-      $lista_mesi[$mesi[$i].' '.$anno_fine] = $anno_fine.'-0'.$i;
+      $lista_mesi[$mesi[$i].' '.$anno_fine] = $i;
     }
     // recupera criteri dalla sessione
     $cerca = array();

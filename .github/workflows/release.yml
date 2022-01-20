@@ -81,7 +81,7 @@ jobs:
           echo "---" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "# Ultima versione"  >> docs/latest-release.md
-          echo "{: .text-center .fw-400}" >> docs/latest-release.md
+          echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "Versione: {{ site.data.version.tag }}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
@@ -98,7 +98,7 @@ jobs:
           echo "---" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "# Ultima modifica"  >> docs/latest-build.md
-          echo "{: .text-center .fw-400}" >> docs/latest-build.md
+          echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "Nessuna modifica dal rilascio dell'ultima versione" >> docs/latest-build.md
 

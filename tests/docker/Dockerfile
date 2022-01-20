@@ -1,5 +1,5 @@
 ########## First Step - Build system
-FROM debian:10.10 as systembuilder
+FROM debian:11.2 as systembuilder
 
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
@@ -11,8 +11,8 @@ ENV COMPOSER_ALLOW_SUPERUSER="1"
 ### Install system
 RUN \
 # Source repositories
-  echo "deb http://deb.debian.org/debian/ buster main contrib non-free" > /etc/apt/sources.list && \
-  echo "deb http://deb.debian.org/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list && \
+  echo "deb http://deb.debian.org/debian/ bullseye main contrib non-free" > /etc/apt/sources.list && \
+  echo "deb http://deb.debian.org/debian-security bullseye/updates main contrib non-free" >> /etc/apt/sources.list && \
 # Set locale
   apt-get -qq update && \
   apt-get -yqq --no-install-recommends --no-install-suggests install locales && \
@@ -24,19 +24,14 @@ RUN \
   ln -sf /usr/share/zoneinfo/Europe/Rome /etc/localtime && \
 # Install dev tools
   apt-get -yqq --no-install-recommends --no-install-suggests install \
-  curl wget ca-certificates apt-utils debconf-utils lsb-release zip unzip git \
+  curl wget ca-certificates apt-utils debconf-utils lsb-release zip unzip \
 # Install Apache and MariaDB
   apache2=2.4.* \
-  mariadb-common=1:10.3.* mariadb-server=1:10.3.* mariadb-client=1:10.3.* && \
+  mariadb-common=1:10.5.* mariadb-server=1:10.5.* mariadb-client=1:10.5.* \
 # Install PHP 7.4
-  wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
-  echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
-  apt-get -qq update && \
-  apt-get -yqq --no-install-recommends --no-install-suggests install \
-  php7.4 php7.4-curl php7.4-gd php7.4-intl php7.4-mbstring php7.4-mysql php7.4-readline php7.4-xml php7.4-zip && \
+  php php-curl php-gd php-intl php-mbstring php-mysql php-xml php-zip \
 # Install external dependencies: libreoffice, unoconv and PDF utils
-  apt-get -yqq --no-install-recommends --no-install-suggests install \
-  libreoffice unoconv poppler-utils && \
+  libreoffice-nogui unoconv poppler-utils && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
 # Install Composer
