@@ -18,7 +18,7 @@
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
     {{ dati.scrutinio.data|date('d/m/Y') }},
     ha attribuito all'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}
-    le valutazioni che vengono riportate di seguito:
+    le valutazioni che vengono di seguito riportate:
   </p>
   <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
     <tr nobr="true">
@@ -48,7 +48,5 @@
     </tr>
 {% endfor %}
   </table>
-  <p>&nbsp;</p>
-  <p>Distinti Saluti.</p>
 {{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}
 </div>

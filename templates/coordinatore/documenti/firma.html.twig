@@ -1,7 +1,7 @@
 <p>&nbsp;</p>
 <table border="0" cellpadding="0" nobr="true">
   <tr nobr="true">
-    <td width="55%" align="left">Cagliari, {{ data_firma|date('d/m/Y') }}.</td>
+    <td width="55%" align="left">{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ data_firma|date('d/m/Y') }}.</td>
     <td width="45%" align="center">Il Dirigente Scolastico
       <br><i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>
     </td>

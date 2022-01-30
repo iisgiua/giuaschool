@@ -136,6 +136,8 @@ class ScrutinioController extends AbstractController {
     if ($cattedra) {
       // legge lista periodi
       $lista_periodi = $scr->periodi($classe);
+      // rimuove eventuale scrutinio supplettivo
+      unset($lista_periodi['X']);
       if ($periodo == '0') {
         // cerca periodo attivo
         $periodo = array_search('N', $lista_periodi);

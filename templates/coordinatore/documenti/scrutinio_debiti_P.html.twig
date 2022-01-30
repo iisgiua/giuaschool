@@ -30,25 +30,15 @@
   {% if dati.debiti[idmat].unico is defined %}
     <tr>
       <td align="left"><strong>{{ mat.nome }}</strong></td>
-      <td align="center"><strong>{{ valutazioni[dati.debiti[idmat].unico] }}</strong></td>
+      <td align="center"><strong>{{ (mat.tipo == 'E' and dati.debiti[idmat].unico < 4) ? valutazioni[0] : valutazioni[dati.debiti[idmat].unico] }}</strong></td>
       <td align="left" style="font-size:9pt">{{ dati.debiti[idmat].debito|nl2br }}</td>
       <td align="center">{{ ('label.recupero_'~dati.debiti[idmat].recupero)|trans }}</td>
     </tr>
   {% endif %}
 {% endfor %}
   </table>
-  <p>Qualora le famiglie non intendano far frequentare ai propri figli i corsi sopra indicati,
+  <p>Qualora le famiglie non intendano far frequentare ai propri figli gli eventuai corsi indicati,
     dovranno dichiarare che provvederanno autonomamente agli interventi di recupero.</p>
-  <p>In ogni caso, gli studenti dovranno colmare le lacune nel corso dell'anno scolastico.</p>
-  <p>&nbsp;</p>
-  <p>Distinti Saluti.</p>
-  <p>&nbsp;</p>
-  <table border="0" cellpadding="0" nobr="true">
-    <tr nobr="true">
-      <td width="55%" align="left">Cagliari, {{ dati.scrutinio.data|date('d/m/Y') }}.</td>
-      <td width="45%" align="center">Il Dirigente Scolastico
-        <br><i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>
-      </td>
-    </tr>
-  </table>
+  <p>In ogni caso, gli studenti dovranno colmare le lacune nel corso dell'Anno Scolastico.</p>
+{{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}
 </div>

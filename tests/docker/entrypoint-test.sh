@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Start services
-service mysql start
+service mariadb start
 service apache2 start
 
 # Run Unit tests

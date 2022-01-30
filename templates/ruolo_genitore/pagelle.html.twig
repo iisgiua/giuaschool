@@ -145,7 +145,7 @@
         <td><span class="label label-{{ dati.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ dati.voti[materia].unico == 4 ? 'NC' : dati.voti[materia].unico }}</span></td>
         <td></td>
           {% else %}
-        <td><span class="label label-{{ dati.voti[materia].unico < 5 ? 'danger' : (dati.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ dati.voti[materia].unico == 0 ? 'NC' : dati.voti[materia].unico }}</span></td>
+        <td><span class="label label-{{ dati.voti[materia].unico < 5 ? 'danger' : (dati.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ (dati.voti[materia].unico == 0 or (m.tipo == 'E' and dati.voti[materia].unico == 3)) ? 'NC' : dati.voti[materia].unico }}</span></td>
         <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
           {% endif %}
       </tr>
@@ -187,45 +187,6 @@
     </tbody>
   </table>
         {% endif %}
-      {% elseif periodo == '1' %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-2">
-      <strong>{{ ('label.periodo_'~periodo)|trans }}</strong>
-      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con la valutazione intermedia"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione della valutazione intermedia</strong></a>
-    </caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-5">Materia</th>
-        <th class="col-sm-3">Profitto</th>
-        <th class="col-sm-2">Debito formativo</th>
-        <th class="col-sm-2">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
-        {% for materia,m in dati.materie %}
-      <tr>
-        <td><strong>{{ m.nome }}</strong></td>
-          {% if m.tipo == 'R' and alunno.religione != 'S' %}
-        <td><strong>--</strong></td>
-        <td></td>
-        <td></td>
-          {% elseif m.tipo == 'C'  %}
-        <td><span class="label label-{{ dati.voti[materia].unico < 42 ? 'danger' : (dati.voti[materia].unico < 43 ? 'warning' : 'success') }} gs-big">{{ info.giudizi['1']['C'][dati.voti[materia].unico] }}</span></td>
-        <td></td>
-        <td></td>
-          {% else %}
-        <td><span class="label label-{{ dati.voti[materia].unico < 33 ? 'danger' : (dati.voti[materia].unico < 34 ? 'warning' : 'success') }} gs-big">{{ info.giudizi['1']['N'][dati.voti[materia].unico] }}</span></td>
-        <td>
-            {% if dati.debiti[materia] is defined %}
-          <span class="label label-{{ dati.voti[materia].recupero == 'N' ? 'danger' : 'success' }} gs-big">{{ ('label.recupero_'~dati.voti[materia].recupero)|trans }}</span>
-            {% endif %}
-        </td>
-        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
-          {% endif %}
-      </tr>
-        {% endfor %}
-    </tbody>
-  </table>
       {% elseif periodo == 'F' %}
         {% if dati.noscrutinato is defined %}
           {% if dati.noscrutinato == 'C' %}

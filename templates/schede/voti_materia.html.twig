@@ -24,7 +24,6 @@
         {% for e in v1 %}
       <tr>
         <td{{ e.docente_id ? ' class="bg-info"' }}>
-          {% if info.edcivica %}<strong><em>{{ e.materia }}</em></strong><br>{% endif %}
           <strong>{{ e.data_str }}</strong>
         </td>
         <td{{ e.docente_id ? ' class="bg-info"' }}>

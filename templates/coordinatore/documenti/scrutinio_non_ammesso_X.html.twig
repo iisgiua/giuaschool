@@ -1,8 +1,4 @@
-<div style="text-align:center;font-family:times;font-size:11pt">
-  <img src="/img/{{ LOCAL_PATH }}intestazione-documenti.jpg" width="400">
-  <br><br><strong>Anno Scolastico 2020/2021</strong>
-  <br><br>
-</div>
+{{ include('coordinatore/documenti/intestazione.html.twig') }}
 <table style="font-family:times;font-size:12pt" border="0" cellpadding="3" nobr="true">
   <tr nobr="true">
     <td width="55%">&nbsp;</td>
@@ -54,7 +50,5 @@
     </tr>
   {% endfor %}
   </table>
-  <p>&nbsp;</p>
-  <p>Distinti Saluti.</p>
 {{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}
 </div>

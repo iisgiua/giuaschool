@@ -113,9 +113,9 @@ class CattedraRepository extends BaseRepository {
       ->select('DISTINCT d.id,d.cognome,d.nome,d.sesso,m.nomeBreve,m.id AS materia_id,m.tipo AS tipo_materia,c.tipo,c.supplenza')
       ->join('c.materia', 'm')
       ->join('c.docente', 'd')
-      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo AND m.tipo!=:edcivica AND d.abilitato=:abilitato')
+      ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo AND d.abilitato=:abilitato')
       ->orderBy('d.cognome,d.nome,m.ordinamento,m.nomeBreve', 'ASC')
-      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P', 'edcivica' => 'E', 'abilitato' => 1])
+      ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'P', 'abilitato' => 1])
       ->getQuery()
       ->getArrayResult();
     // elimina docenti in più

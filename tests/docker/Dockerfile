@@ -3,28 +3,30 @@ FROM debian:11.2 as systembuilder
 
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
-ENV LANG="it_IT.UTF-8"
 ENV LANGUAGE="it_IT.UTF-8"
+ENV LANG="it_IT.UTF-8"
 ENV LC_ALL="it_IT.UTF-8"
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 
 ### Install system
 RUN \
 # Source repositories
-  echo "deb http://deb.debian.org/debian/ bullseye main contrib non-free" > /etc/apt/sources.list && \
-  echo "deb http://deb.debian.org/debian-security bullseye/updates main contrib non-free" >> /etc/apt/sources.list && \
+  echo "deb http://deb.debian.org/debian bullseye main contrib non-free" > /etc/apt/sources.list && \
+  echo "deb http://deb.debian.org/debian bullseye-updates main contrib non-free" >> /etc/apt/sources.list && \
+  echo "deb http://security.debian.org/debian-security bullseye-security main contrib non-free" >> /etc/apt/sources.list && \
 # Set locale
   apt-get -qq update && \
   apt-get -yqq --no-install-recommends --no-install-suggests install locales && \
   sed -i -e "s/# $LANG/$LANG/" /etc/locale.gen && \
-  echo "LANG=$LANG">/etc/default/locale && \
-  echo "LC_ALL=$LANG">>/etc/default/locale && \
+  echo "LANGUAGE=$LANG" > /etc/default/locale && \
+  echo "LANG=$LANG" >> /etc/default/locale && \
+  echo "LC_ALL=$LANG" >> /etc/default/locale && \
   dpkg-reconfigure --frontend=noninteractive locales && \
   update-locale LANG=$LANG && \
   ln -sf /usr/share/zoneinfo/Europe/Rome /etc/localtime && \
 # Install dev tools
   apt-get -yqq --no-install-recommends --no-install-suggests install \
-  curl wget ca-certificates apt-utils debconf-utils lsb-release zip unzip \
+  curl wget ca-certificates apt-utils debconf-utils lsb-release zip unzip git \
 # Install Apache and MariaDB
   apache2=2.4.* \
   mariadb-common=1:10.5.* mariadb-server=1:10.5.* mariadb-client=1:10.5.* \
@@ -88,7 +90,7 @@ RUN \
   cd ../.. && \
 # create database
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
-  service mysql start && mysqladmin -u root password 'root' && \
+  service mariadb start && mysqladmin -u root password 'root' && \
   php bin/console doctrine:database:create -n -q && \
   php bin/console doctrine:schema:update -f -q && \
   php bin/console doctrine:fixtures:load --group=App -n -q -e dev && \

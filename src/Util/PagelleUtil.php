@@ -155,11 +155,11 @@ class PagelleUtil {
           // esclude religione dalla media
           if (!isset($somma[$v->getAlunno()->getId()])) {
             $somma[$v->getAlunno()->getId()] =
-              ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4) ? 0 : $v->getUnico();
+              ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4 || $v->getMateria()->getTipo() == 'E' && $v->getUnico() == 3) ? 0 : $v->getUnico();
             $numero[$v->getAlunno()->getId()] = 1;
           } else {
             $somma[$v->getAlunno()->getId()] +=
-              ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4) ? 0 : $v->getUnico();
+              ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4 || $v->getMateria()->getTipo() == 'E' && $v->getUnico() == 3) ? 0 : $v->getUnico();
             $numero[$v->getAlunno()->getId()]++;
           }
         }
@@ -190,6 +190,19 @@ class PagelleUtil {
           // dati sostituto
           $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ').
             ucwords(strtolower($docenti_presenti[$doc['id']]->getSostituto()));
+        }
+      }
+      // presidente
+      if ($scrutinio->getDato('presiede_ds')) {
+        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+      } else {
+        $id_presidente = $scrutinio->getDato('presiede_docente');
+        $d = $dati['docenti'][$id_presidente];
+        if ($scrutinio->getDato('presenze')[$id_presidente]->getPresenza()) {
+          $dati['presidente_nome'] = $d;
+        } else {
+          $s = $scrutinio->getDato('presenze')[$id_presidente];
+          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa').' '.ucwords(strtolower($s->getSostituto()));
         }
       }
     } elseif ($periodo == 'F') {
@@ -731,6 +744,24 @@ class PagelleUtil {
           $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
           $pdf->SetTextColor(0,0,0);
           $this->cella($pdf, 6, 5.50, -6, 5.50, '', 1, 'C', 'M');
+        } elseif ($mat['tipo'] == 'E') {
+          // Ed.Civica
+          $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
+          $assenze = '';
+          switch ($voto) {
+            case 3:
+              $voto = 'NC';
+              $pdf->SetTextColor(255,0,0);
+              break;
+            case 4:
+            case 5:
+              $pdf->SetTextColor(255,0,0);
+              break;
+          }
+          // voto numerico
+          $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
+          $pdf->SetTextColor(0,0,0);
+          $this->cella($pdf, 6, 5.50, -6, 5.50, $assenze, 1, 'C', 'M');
         } else {
           // altre materie
           $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
@@ -789,16 +820,16 @@ class PagelleUtil {
       $this->acapo($pdf, 0, $next_height);
       $pdf->writeHTML($html, true, false, false, false, 'C');
     }
-    // data e firma DS
+    // data e firma presidente
     $this->acapo($pdf, 10, 30);
-    $pdf->SetFont('helvetica', '', 11);
-    $this->cella($pdf, 30, 15, 0, 0, 'Data', 0, 'R', 'B');
-    $this->cella($pdf, 30, 15, 0, 0, $dati['scrutinio']['data'], 'B', 'C', 'B');
-    $pdf->SetXY(-80, $pdf->GetY());
-    $pdf->SetFont('helvetica', 'I', 11);
-    $preside = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
-    $text = '(Il Dirigente Scolastico)'."\n".$preside;
-    $this->cella($pdf, 60, 15, 0, 0, $text, 'B', 'C', 'B');
+    $datascrutinio = $dati['scrutinio']['data'];
+    $html = '<table border="0" cellpadding="0" style="font-family:helvetica;font-size:11pt">'.
+      '<tr nobr="true">'.
+        '<td width="20%">Data &nbsp;&nbsp;<u>&nbsp;&nbsp;'.$datascrutinio.'&nbsp;&nbsp;</u></td>'.
+        '<td width="30%">&nbsp;</td>'.
+        '<td width="50%" align="center">Il Presidente<br><em>('.$dati['presidente_nome'].')</em><br><br>______________________________<br></td>'.
+      '</tr></table>';
+    $pdf->writeHTML($html, true, false, false, false, 'C');
   }
 
   /**
@@ -841,8 +872,14 @@ class PagelleUtil {
       foreach ($dati_materie as $mat) {
         foreach ($dati_docenti as $doc) {
           if (isset($docenti[$doc['id']][$mat['id']])) {
-            $dati['materie'][$mat['id']]['nome'] = $mat['nome'].
-              ($mat['tipo'] != 'S' ? (', '.$edcivica->getNome()) : '');
+            if (count($docenti[$doc['id']]) == 1 && $mat['id'] == $edcivica->getId()) {
+              // solo Ed.civica
+              $dati['materie'][$mat['id']]['nome'] = $mat['nome'];
+            } else {
+              // altra materia + Ed.Civica
+              $dati['materie'][$mat['id']]['nome'] = $mat['nome'].
+                (isset($docenti[$doc['id']][$edcivica->getId()]) ? (', '.$edcivica->getNome()) : '');
+            }
             if ($docenti_presenti[$doc['id']]->getPresenza()) {
               // dati docente
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] = $doc['cognome'].' '.$doc['nome'];
@@ -884,7 +921,7 @@ class PagelleUtil {
         foreach ($dati_docenti as $doc) {
           if (isset($docenti[$doc['id']][$mat['id']])) {
             $dati['materie'][$mat['id']]['nome'] = $mat['nome'].
-              ($mat['tipo'] != 'S' ? (', '.$edcivica->getNome()) : '');
+              (isset($docenti[$doc['id']][$edcivica->getId()]) ? (', '.$edcivica->getNome()) : '');
             if ($docenti_presenti[$doc['id']]->getPresenza()) {
               // dati docente
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] = $doc['cognome'].' '.$doc['nome'];

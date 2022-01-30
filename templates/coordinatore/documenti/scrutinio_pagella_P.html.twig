@@ -17,7 +17,7 @@
   <p>Il Consiglio di Classe, nella seduta dello scrutinio del primo quadrimestre dell’Anno Scolastico
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
     {{ dati.scrutinio.data|date('d/m/Y') }}, ha attribuito all'alunn{{ dati.alunno.sesso == 'M' ? 'o' : 'a' }}
-    le valutazioni che vengono riportate di seguito:</p>
+    le valutazioni che vengono di seguito riportate:</p>
 {% set valutazioni = ['Non classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
   null, null, null, null, null, null, null, null, null,
   'Non classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
@@ -33,7 +33,7 @@
       <td align="center">
   {% if mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A' %}
         <strong>///</strong>
-  {% elseif mat.tipo == 'C' and dati.voti[idmat].unico < 5 %}
+  {% elseif (mat.tipo == 'C' and dati.voti[idmat].unico < 5) or (mat.tipo == 'E' and dati.voti[idmat].unico < 4) %}
         <strong>Non classificato</strong>
   {% else %}
         <strong>{{ valutazioni[dati.voti[idmat].unico] }}</strong>
@@ -51,14 +51,5 @@
     </tr>
 {% endfor %}
   </table>
-  <p>Distinti Saluti.</p>
-  <p>&nbsp;</p>
-  <table border="0" cellpadding="0" nobr="true">
-    <tr nobr="true">
-      <td width="55%" align="left">Cagliari, {{ dati.scrutinio.data|date('d/m/Y') }}.</td>
-      <td width="45%" align="center">Il Dirigente Scolastico
-        <br><i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>
-      </td>
-    </tr>
-  </table>
+{{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}
 </div>

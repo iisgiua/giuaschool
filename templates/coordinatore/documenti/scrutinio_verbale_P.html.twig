@@ -4,16 +4,33 @@
   <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
+{% for num,str in dati.definizione.struttura %}
+{#============================== ARGOMENTO ==============================#}
+  {% if str[0] == 'Argomento' %}
+  <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}.</strong></p>
+    {% if dati.scrutinio.dati.argomento[str[2]['argomento']] is not empty %}
+  <p>{{ str[2]['inizio']|nl2br }}
+    <br><em>{{ dati.scrutinio.dati.argomento[str[2]['argomento']][0:1]|lower }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][-1:] != '.' ? '.' }}</em>
+  </p>
+    {% else %}
+  <p>{{ str[2]['seVuoto']|nl2br }}</p>
+    {% endif %}
+    {% if str[2]['fine'] is not empty %}
+  <p>{{ str[2]['fine']|nl2br }}</p>
+    {% endif %}
+  <p>&nbsp;</p>
+{#============================== SCRUTINIO INIZIO ==============================#}
+  {% elseif str[0] == 'ScrutinioInizio' %}
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
     del mese di {{ dati.nomi_mesi[dati.scrutinio.data|date('n')] }} dell'anno {{ dati.scrutinio.data|date('Y') }}
     alle ore {{ dati.scrutinio.inizio|date('G:i') }}, in seduta telematica, si riunisce,
-    a seguito di regolare convocazione (circ. n. 174 del 12/01/2021),
-    il Consiglio della Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente ordine del giorno:
+    a seguito di regolare convocazione (circ. n. 255 del 11/01/2022, n. 270 del 28/01/2022 e n. 271 del 30/01/2022),
+    il Consiglio della Classe della {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente Ordine del Giorno:
   </p>
   <ol>
-{% for num,arg in dati.definizione.argomenti %}
-    <li><strong>{{ arg }}{{ dati.definizione.argomenti[num + 1] is defined ? ';' : '.' }}</strong></li>
-{% endfor %}
+    {% for num,arg in dati.definizione.argomenti %}
+    <li><strong>{{ arg }}{{ loop.last ? '.' : ';' }}</strong></li>
+    {% endfor %}
   </ol>
   <p>Presiede la riunione {{ dati.presidente }}; funge da segretario verbalizzante {{ dati.segretario }}.
     Sono presenti i professori:
@@ -23,28 +40,28 @@
       <td width="40%" align="center"><strong>DOCENTE</strong></td>
       <td width="60%" align="center"><strong>MATERIA</strong></td>
     </tr>
-{% set assenti=0 %}
-{% for kdoc,doc in dati.scrutinio.dati.presenze %}
-  {% if doc.presenza %}
+    {% set assenti=0 %}
+    {% for kdoc,doc in dati.scrutinio.dati.presenze %}
+      {% if doc.presenza %}
     <tr>
       <td>{{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}</td>
       <td align="left">
-    {% for kv,v in dati.docenti[doc.docente].materie %}
+        {% for kv,v in dati.docenti[doc.docente].materie %}
         <br>&bull; {{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}
-    {% endfor %}
+        {% endfor %}
       </td>
     </tr>
-  {% else %}
-    {% set assenti=assenti+1 %}
-  {% endif %}
-{% endfor %}
-</table>
-{% if assenti %}
+      {% else %}
+        {% set assenti=assenti+1 %}
+      {% endif %}
+    {% endfor %}
+  </table>
+    {% if assenti %}
   <p>Sono assenti i seguenti docenti:</p>
   <ul>
-  {% for kdoc,doc in dati.scrutinio.dati.presenze %}
-    {% if not doc.presenza %}
-      {% set assenti=assenti-1 %}
+      {% for kdoc,doc in dati.scrutinio.dati.presenze %}
+        {% if not doc.presenza %}
+          {% set assenti=assenti-1 %}
     <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa'}}
       {{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}
       sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a'}}
@@ -54,15 +71,15 @@
       {{ doc.sostituto|title }} per
       {% for kv,v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', '}}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
     </li>
-    {% endif %}
-  {% endfor %}
+        {% endif %}
+      {% endfor %}
   </ul>
-{% else %}
+    {% else %}
   <p>Nessun docente risulta assente.</p>
-{% endif %}
+    {% endif %}
   <p>Preliminarmente si fa presente che:</p>
   <ul>
-    <li>la piattaforma individuata è Google Suite Classroom-Meet;</li>
+    <li>la piattaforma individuata è Google Classroom-Meet;</li>
     <li>a tutti i docenti del Consiglio è stata comunicata la modalità di accesso a tale piattaforma.</li>
   </ul>
   <p>Successivamente, constatate:</p>
@@ -74,14 +91,10 @@
     criteri di valutazione deliberati dal Collegio dei Docenti, dichiarando aperta la seduta.
   </div>
   <p>&nbsp;</p>
-  <p><strong>Punto primo. Andamento didattico-disciplinare.</strong></p>
-  <p>Dopo ampia discussione sull'andamento didattico-disciplinare della classe,
-    emerge quanto segue:<br><em>{{ dati.scrutinio.dati.argomento[1][0:1]|lower }}{{ dati.scrutinio.dati.argomento[1][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[1][-1:] != '.' ? '.' }}</em>
-  </p>
-  <p>&nbsp;</p>
-  <p><strong>Punto secondo. Scrutini primo quadrimestre.</strong></p>
-  <p>Si passa quindi alle operazioni di scrutinio.
-    <br>Preliminarmente, per ciascun alunno, viene deliberato il voto di Educazione Civica, su proposta del Coordinatore,
+{#============================== SCRUTINIO SVOLGIMENTO ==============================#}
+  {% elseif str[0] == 'ScrutinioSvolgimento' %}
+  <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}.</strong></p>
+  <p>Preliminarmente, per ciascun alunno, viene deliberato il voto di Educazione Civica, su proposta del Coordinatore,
     basata sui criteri di valutazione deliberati dagli Organi Collegiali. I voti proposti sono approvati all'unanimità.</p>
   <p>Di seguito, su proposta del Coordinatore, viene deliberato il voto di comportamento, indicato nel seguente prospetto:</p>
   <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
@@ -91,34 +104,29 @@
       <td width="48%" align="center"><strong>Giudizio</strong></td>
       <td width="16%" align="center"><strong>Delibera</strong></td>
     </tr>
-{% for kalu,alu in dati.alunni %}
+    {% for kalu,alu in dati.alunni %}
     <tr>
       <td align="left">{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
       <td align="center">{{ dati.voti[kalu].unico == 4 ? 'NC' : dati.voti[kalu].unico }}</td>
       <td align="left" style="font-size:9pt">{{ dati.voti[kalu].dati['motivazione']|nl2br }}</td>
       <td align="left" style="font-size:9pt">
-  {% if dati.voti[kalu].dati['unanimita'] %}
+      {% if dati.voti[kalu].dati['unanimita'] %}
         <strong>UNANIMITÀ</strong>
-  {% else %}
+      {% else %}
         <strong>MAGGIORANZA</strong>
         <br><br><strong>Contrari</strong>:<br>{{ dati.voti[kalu].dati['contrari'] }}
-  {% endif %}
+      {% endif %}
       </td>
     </tr>
-{% endfor %}
+    {% endfor %}
   </table>
     <p>Si passa, quindi, seguendo l'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto
       delle norme sopra riportate, sulla base di giudizi ampiamente motivati.
     I voti proposti sono approvati all'unanimità.</p>
   <p>Il riepilogo dei voti deliberati per ciascun alunno viene allegato al presente verbale, di cui fa parte integrante.</p>
   <p>&nbsp;</p>
-  <p><strong>Punto terzo. Individuazione degli interventi di recupero e di situazioni particolari da segnalare.</strong></p>
-  <p>Terminata la fase deliberativa, si procede alla individuazione degli interventi di recupero e alla compilazione
-    delle comunicazioni per le famiglie relative agli alunni con debito formativo.</p>
-  <p>Tra le situazioni particolari si segnala quanto segue:
-    <br><em>{{ dati.scrutinio.dati.argomento[3][0:1]|lower }}{{ dati.scrutinio.dati.argomento[3][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[3][-1:] != '.' ? '.' }}</em>
-  </p>
-  <p>&nbsp;</p>
+{#============================== SCRUTINIO FINE ==============================#}
+  {% elseif str[0] == 'ScrutinioFine' %}
   <p>Esaurito l'ordine del giorno, il Presidente rammenta ai presenti l'obbligo della stretta osservanza
     del segreto d'ufficio.</p>
   <p>Alle ore {{ dati.scrutinio.fine|date('G:i') }}, la seduta è sciolta.
@@ -126,6 +134,9 @@
     viene letto e approvato all'unanimità.
   </p>
   <p>&nbsp;</p>
+  {% endif %}
+{% endfor %}
+{#============================== FIRMA ==============================#}
   <table border="0" cellpadding="3" nobr="true">
     <tr nobr="true">
       <td width="45%" align="center">Il Segretario</td>

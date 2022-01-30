@@ -917,23 +917,6 @@ class ScrutinioUtil {
         ->setDocente($doc['id'])
         ->setPresenza(true);
     }
-    //-- // aggiunge ed.civica alle materie
-    //-- $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
-    //-- foreach ($dati['docenti'] as $iddoc=>$doc) {
-      //-- // controlla se solo su sostegno
-      //-- $sostegno = true;
-      //-- foreach ($doc as $kmat=>$mat) {
-        //-- if ($mat['tipo_materia'] != 'S') {
-          //-- $sostegno = false;
-        //-- }
-      //-- }
-      //-- if (!$sostegno) {
-        //-- // anche curricolare: aggiunge ed.Civica
-        //-- $dati['docenti'][$iddoc][] = ['id' => $doc[0]['id'], 'cognome' => $doc[0]['cognome'],
-          //-- 'nome' => $doc[0]['nome'], 'sesso' => $doc[0]['sesso'], 'tipo' => 'N', 'supplenza' => false,
-          //-- 'nomeBreve' => $edcivica->getNomeBreve(), 'materia_id' => $edcivica->getId(), 'tipo_materia' => 'E'];
-      //-- }
-    //-- }
     // imposta data/ora
     $dati['scrutinio']['data'] = $scrutinio->getData() ? $scrutinio->getData() : new \DateTime();
     $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 25) ? '00' : '30'));
@@ -1074,22 +1057,6 @@ class ScrutinioUtil {
         $dati_docenti = array();
         foreach ($docenti as $doc) {
           $dati_docenti[$doc['id']][$doc['materia_id']] = $doc['tipo'];
-        }
-        // aggiunge ed.civica alle materie
-        $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
-        $sostegno = $this->em->getRepository('App:Materia')->findOneByTipo('S');
-        foreach ($dati_docenti as $iddoc=>$doc) {
-          // controlla se solo su sostegno
-          $cattsost = true;
-          foreach ($doc as $idmat=>$mat) {
-            if ($idmat != $sostegno->getId()) {
-              $cattsost = false;
-            }
-          }
-          if (!$cattsost) {
-            // anche curricolare: aggiunge ed.Civica
-            $dati_docenti[$iddoc][$edcivica->getId()] = 'N';
-          }
         }
         // imposta dati
         $scrutinio->setData($form->get('data')->getData());
@@ -1529,9 +1496,6 @@ class ScrutinioUtil {
       } elseif ($voto->getDato('unanimita') === false && empty($voto->getDato('contrari'))) {
         // mancano contrari
         $errore['exception.contrari_condotta'] = true;
-      //-- } elseif ($voto->getDato('unanimita') === false && empty($voto->getDato('contrari_motivazione'))) {
-        //-- // mancano contrari
-        //-- $errore['exception.contrari_motivazione_condotta'] = true;
       }
     }
     if (empty($errore)) {
@@ -1542,7 +1506,7 @@ class ScrutinioUtil {
       $this->dblogger->logAzione('SCRUTINIO', 'Cambio stato', array(
         'Scrutinio' => $scrutinio->getId(),
         'Classe' => $classe->getId(),
-        'Periodo' => 'F',
+        'Periodo' => 'P',
         'Stato iniziale' => '3',
         'Stato finale' => '4',
         ));
@@ -1658,7 +1622,7 @@ class ScrutinioUtil {
       }
       // memorizza dati scrutinio
       $scrutinio->setDati($scrutinio_dati);
-     // aggiorna stato
+      // aggiorna stato
       $scrutinio->setStato('5');
       $this->em->flush();
       // log
@@ -4627,6 +4591,7 @@ class ScrutinioUtil {
     $num_arg = $args[2]['argomento'];
     $dati['sezione'] = $args[2]['sezione'];
     $dati['argomento'] = $def->getArgomenti()[$num_arg];
+    $dati['obbligatorio'] = $args[2]['obbligatorio'];
     $dati['testo'] = isset($scrutinio->getDati()['argomento'][$num_arg]) ?
       $scrutinio->getDati()['argomento'][$num_arg] : (isset($args[2]['default']) ? $args[2]['default'] : '');
     // restituisce dati
@@ -4676,11 +4641,11 @@ class ScrutinioUtil {
     $this->session->getFlashBag()->clear();
     // controlla form
     if ($form->isValid()) {
-      //-- // controlli
-      //-- if (empty($form->get('testo')->getData())) {
-        //-- // testo non presente
-        //-- $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_vuoto'));
-      //-- }
+      // controlli
+      if ($args[2]['obbligatorio'] && empty($form->get('testo')->getData())) {
+        // testo non presente
+        $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_vuoto'));
+      }
       // se niente errori modifica dati
       if (!$this->session->getFlashBag()->has('errore')) {
         // modifica dati

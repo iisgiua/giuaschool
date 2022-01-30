@@ -1,8 +1,7 @@
 #!/bin/sh
 
-# Start Mysql service in background
-service mysql start
+# Start MySql service in background
+service mariadb start
 
 # Start Apache service in foreground
 /usr/sbin/apache2ctl -D FOREGROUND
-

@@ -28,7 +28,7 @@
         <div id="row_{{ voto.recupero.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>
           <label class="control-label col-sm-2" for="{{ voto.recupero.vars.id }}">Recupero</label>
           <div class="col-sm-10">
-            {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[1],voto.recupero.vars.choices[2],voto.recupero.vars.choices[3],voto.recupero.vars.choices[4]] }) }}
+            {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[1],voto.recupero.vars.choices[2],voto.recupero.vars.choices[3]] }) }}
           </div>
         </div>
         <div id="row_{{ voto.debito.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>

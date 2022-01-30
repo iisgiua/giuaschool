@@ -4,7 +4,11 @@
     <h4 class="modal-title gs-h4"><em>{{ dati.argomento }}</em></h4>
   </div>
   <div class="modal-body">
+  {% if dati.obbligatorio %}
+    <label class="control-label required" for="verbale_testo">Inserisci il testo:</label>
+  {% else %}
     <label class="control-label required" for="verbale_testo">Inserisci il testo o lascia vuota la casella se non c'è niente di rilevante da verbalizzare:</label>
+  {% endif %}
     {{ form_widget(form.testo) }}
   </div>
   <div class="modal-footer">

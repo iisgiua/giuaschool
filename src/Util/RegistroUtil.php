@@ -2262,10 +2262,11 @@ class RegistroUtil {
    * @param Docente $docente Docente della lezione
    * @param Cattedra $cattedra Cattedra del docente
    * @param Alunno $alunno Alunno selezionato
+   * @param boolean $filtro Se vero riporta solo i voti del docente
    *
    * @return array Dati restituiti come array associativo
    */
-  public function dettagliVoti(Docente $docente, Cattedra $cattedra, Alunno $alunno) {
+  public function dettagliVoti(Docente $docente, Cattedra $cattedra, Alunno $alunno, $filtro=false) {
     $dati = array();
     $dati['lista'] = array();
     $dati['media'] = array();
@@ -2279,7 +2280,13 @@ class RegistroUtil {
       ->where('v.alunno=:alunno AND v.materia=:materia AND l.classe=:classe')
       ->orderBy('v.tipo,l.data', 'ASC')
       ->setParameters(['alunno' => $alunno, 'materia' => $cattedra->getMateria(),
-        'classe' => $cattedra->getClasse()])
+        'classe' => $cattedra->getClasse()]);
+    if ($filtro) {
+      $voti = $voti
+        ->andWhere('d.id=:docente')
+        ->setParameter('docente', $docente);
+    }
+    $voti = $voti
       ->getQuery()
       ->getArrayResult();
     // formatta i dati nell'array associativo
@@ -2338,6 +2345,7 @@ class RegistroUtil {
     // restituisce dati
     return $dati;
   }
+
 
   /**
    * Restituisce le statische sulle ore di assenza per la materia e l'alunno indicati
@@ -2678,3 +2686,4 @@ class RegistroUtil {
   }
 
 }
+
