@@ -38,8 +38,10 @@ class MessageType extends AbstractType {
           },
           // converte nel formato messaggio (testo con HTML) per la memorizzazione
           function ($testo) {
+            // sanifica input
+            $testoPulito = strip_tags($testo);
             return preg_replace('#\b(https?):(/?/?)([^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/)))#i',
-              '<a href="$1://$3" target="_blank" title="Collegamento esterno">$1://$3</a>', $testo);;
+              '<a href="$1://$3" target="_blank" title="Collegamento esterno">$1://$3</a>', $testoPulito);;
           }
         ));
     }

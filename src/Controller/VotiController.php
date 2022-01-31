@@ -26,7 +26,6 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,6 +35,7 @@ use App\Util\RegistroUtil;
 use App\Util\GenitoriUtil;
 use App\Util\PdfManager;
 use App\Form\VotoClasseType;
+use App\Form\MessageType;
 use App\Entity\Valutazione;
 use App\Entity\Notifica;
 
@@ -245,7 +245,7 @@ class VotiController extends AbstractController {
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
         'required' => true))
-      ->add('argomento', TextareaType::class, array('label' => 'label.voto_argomento',
+      ->add('argomento', MessageType::class, array('label' => 'label.voto_argomento',
         'data' => $argomento,
         'trim' => true,
         'required' => false))
@@ -516,11 +516,11 @@ class VotiController extends AbstractController {
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
         'required' => true))
-      ->add('argomento', TextareaType::class, array('label' => 'label.voto_argomento',
+      ->add('argomento', MessageType::class, array('label' => 'label.voto_argomento',
         'trim' => true,
         'required' => false))
       ->add('voto', HiddenType::class)
-      ->add('giudizio', TextareaType::class, array('label' => 'label.voto_giudizio',
+      ->add('giudizio', MessageType::class, array('label' => 'label.voto_giudizio',
         'trim' => true,
         'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',

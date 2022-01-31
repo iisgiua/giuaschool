@@ -24,7 +24,6 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Finder\Finder;
@@ -45,6 +44,7 @@ use App\Form\ScrutinioPresenza;
 use App\Form\ScrutinioPresenzaType;
 use App\Form\ScrutinioAssenza;
 use App\Form\ScrutinioAssenzaType;
+use App\Form\MessageType;
 
 
 /**
@@ -4615,7 +4615,7 @@ class ScrutinioUtil {
     $form
       ->setAction($this->router->generate('coordinatore_scrutinio_verbale',
         ['classe' => $classe->getId(), 'periodo' => $periodo, 'step' => $step]))
-      ->add('testo', TextareaType::class, array('label' => false,
+      ->add('testo', MessageType::class, array('label' => false,
         'data' => $dati['testo'],
         'attr' => ['rows' => 6],
         'trim' => true,

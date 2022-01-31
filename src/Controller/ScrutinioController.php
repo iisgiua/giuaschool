@@ -27,7 +27,6 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use App\Util\LogHandler;
@@ -40,6 +39,7 @@ use App\Entity\Preside;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\DefinizioneScrutinio;
+use App\Form\MessageType;
 
 
 /**
@@ -1149,7 +1149,7 @@ class ScrutinioController extends AbstractController {
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline gs-mr-4'],
         'required' => true))
-      ->add('giudizio', TextareaType::class, array('label' => false,
+      ->add('giudizio', MessageType::class, array('label' => false,
         'data' => $dati['esito']->getDati()['giudizio'],
         'trim' => true,
         'required' => false))
@@ -1516,7 +1516,7 @@ class ScrutinioController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_italiano_motivazione', TextareaType::class, array('label' => false,
+      ->add('certificazione_italiano_motivazione', MessageType::class, array('label' => false,
         'data' => isset($valori['certificazione_italiano_motivazione']) ? $valori['certificazione_italiano_motivazione'] : null,
         'trim' => true,
         'attr' => ['rows' => 4],
@@ -1533,7 +1533,7 @@ class ScrutinioController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_lingua_motivazione', TextareaType::class, array('label' => false,
+      ->add('certificazione_lingua_motivazione', MessageType::class, array('label' => false,
         'data' => isset($valori['certificazione_lingua_motivazione']) ? $valori['certificazione_lingua_motivazione'] : null,
         'trim' => true,
         'attr' => ['rows' => 4],
@@ -1550,7 +1550,7 @@ class ScrutinioController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_linguaggio_motivazione', TextareaType::class, array('label' => false,
+      ->add('certificazione_linguaggio_motivazione', MessageType::class, array('label' => false,
         'data' => isset($valori['certificazione_linguaggio_motivazione']) ? $valori['certificazione_linguaggio_motivazione'] : null,
         'trim' => true,
         'attr' => ['rows' => 4],
@@ -1567,7 +1567,7 @@ class ScrutinioController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_matematica_motivazione', TextareaType::class, array('label' => false,
+      ->add('certificazione_matematica_motivazione', MessageType::class, array('label' => false,
         'data' => isset($valori['certificazione_matematica_motivazione']) ? $valori['certificazione_matematica_motivazione'] : null,
         'trim' => true,
         'attr' => ['rows' => 4],
@@ -1584,7 +1584,7 @@ class ScrutinioController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_scienze_motivazione', TextareaType::class, array('label' => false,
+      ->add('certificazione_scienze_motivazione', MessageType::class, array('label' => false,
         'data' => isset($valori['certificazione_scienze_motivazione']) ? $valori['certificazione_scienze_motivazione'] : null,
         'trim' => true,
         'attr' => ['rows' => 4],
@@ -1601,7 +1601,7 @@ class ScrutinioController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => true))
-      ->add('certificazione_storia_motivazione', TextareaType::class, array('label' => false,
+      ->add('certificazione_storia_motivazione', MessageType::class, array('label' => false,
         'data' => isset($valori['certificazione_storia_motivazione']) ? $valori['certificazione_storia_motivazione'] : null,
         'trim' => true,
         'attr' => ['rows' => 4],

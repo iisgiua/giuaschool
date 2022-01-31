@@ -25,7 +25,6 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
@@ -39,6 +38,7 @@ use App\Entity\Uscita;
 use App\Entity\Staff;
 use App\Form\Appello;
 use App\Form\AppelloType;
+use App\Form\MessageType;
 
 
 /**
@@ -463,7 +463,7 @@ class AssenzeController extends AbstractController {
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'required' => true))
-      ->add('note', TextareaType::class, array('label' => 'label.note',
+      ->add('note', MessageType::class, array('label' => 'label.note',
         'trim' => true,
         'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
@@ -674,7 +674,7 @@ class AssenzeController extends AbstractController {
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
         'required' => true))
-      ->add('note', TextareaType::class, array('label' => 'label.note',
+      ->add('note', MessageType::class, array('label' => 'label.note',
         'trim' => true,
         'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',

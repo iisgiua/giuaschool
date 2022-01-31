@@ -17,13 +17,13 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Doctrine\ORM\EntityRepository;
+use App\Form\MessageType;
 use App\Entity\Alunno;
 
 
@@ -78,7 +78,7 @@ class AlunnoType extends AbstractType {
         'choices' => array('label.bes_B' => 'B', 'label.bes_D' => 'D', 'label.bes_H' => 'H', 'label.bes_N' => 'N'),
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
-      ->add('noteBes', TextAreaType::class, array('label' => 'label.note_bes',
+      ->add('noteBes', MessageType::class, array('label' => 'label.note_bes',
         'attr' => ['rows' => '3'],
         'required' => false))
       ->add('credito3', IntegerType::class, array('label' => 'label.credito3',
@@ -114,7 +114,7 @@ class AlunnoType extends AbstractType {
         'expanded' => true,
         'multiple' => false,
         'label_attr' => ['class' => 'radio-inline'],
-        'required' => true))        
+        'required' => true))
       ->add('username', TextType::class, array('label' => 'label.username',
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))

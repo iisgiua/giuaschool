@@ -15,13 +15,13 @@ namespace App\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\CallbackTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\VotoScrutinio;
+use App\Form\MessageType;
 
 
 /**
@@ -62,7 +62,7 @@ class VotoScrutinioType extends AbstractType {
         $builder
           ->add('alunno', HiddenType::class)
           ->add('unico', HiddenType::class)
-          ->add('motivazione', TextareaType::class, array('label' => false,
+          ->add('motivazione', MessageType::class, array('label' => false,
             'property_path' => 'dati[motivazione]',
             'trim' => true,
             'required' => false))
@@ -105,7 +105,7 @@ class VotoScrutinioType extends AbstractType {
             },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false))
-        ->add('debito', TextareaType::class, array('label' => false,
+        ->add('debito', MessageType::class, array('label' => false,
           'trim' => true,
           'attr' => array('rows' => '3'),
           'required' => false));
@@ -114,7 +114,7 @@ class VotoScrutinioType extends AbstractType {
         $builder
         ->add('alunno', HiddenType::class)
         ->add('unico', HiddenType::class)
-        ->add('debito', TextareaType::class, array('label' => false,
+        ->add('debito', MessageType::class, array('label' => false,
           'trim' => true,
           'required' => false));
       }
@@ -135,10 +135,10 @@ class VotoScrutinioType extends AbstractType {
             },
           'attr' => ['class' => 'gs-placeholder'],
           'required' => false))
-        ->add('debito', TextareaType::class, array('label' => false,
+        ->add('debito', MessageType::class, array('label' => false,
           'trim' => true,
           'required' => false))
-        ->add('motivazione', TextareaType::class, array('label' => false,
+        ->add('motivazione', MessageType::class, array('label' => false,
           'property_path' => 'dati[motivazione]',
           'trim' => true,
           'required' => false))

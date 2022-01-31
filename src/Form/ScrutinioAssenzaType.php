@@ -18,7 +18,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use App\Form\MessageType;
 
 
 /**
@@ -43,7 +43,7 @@ class ScrutinioAssenzaType extends AbstractType {
         'multiple' => false,
         'label_attr' => ['class' => 'gs-text-normal'],
         'required' => true))
-      ->add('motivazione', TextareaType::class, array(
+      ->add('motivazione', MessageType::class, array(
         'attr' => ['rows' => 4],
         'trim' => true,
         'required' => false))

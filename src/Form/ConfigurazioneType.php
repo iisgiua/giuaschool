@@ -21,9 +21,9 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use App\Form\MessageType;
 use App\Entity\Configurazione;
 
 
@@ -42,11 +42,11 @@ class ConfigurazioneType extends AbstractType {
     if ($options['formMode'] == 'banner') {
     // form banner
       $builder
-        ->add('banner_login', TextareaType::class, array('label' => 'label.banner_login',
+        ->add('banner_login', MessageType::class, array('label' => 'label.banner_login',
           'data' => $options['dati'][0],
           'attr' => ['rows' => '3'],
           'required' => false))
-        ->add('banner_home', TextareaType::class, array('label' => 'label.banner_home',
+        ->add('banner_home', MessageType::class, array('label' => 'label.banner_home',
           'data' => $options['dati'][1],
           'attr' => ['rows' => '3'],
           'required' => false));

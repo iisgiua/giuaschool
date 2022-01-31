@@ -27,7 +27,6 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\RichiestaColloquio;
@@ -42,6 +41,7 @@ use App\Util\BachecaUtil;
 use App\Util\AgendaUtil;
 use App\Util\PdfManager;
 use App\Util\LogHandler;
+use App\Form\MessageType;
 
 
 /**
@@ -1069,7 +1069,7 @@ class GenitoriController extends AbstractController {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => false))
-      ->add('motivazione', TextareaType::class, array('label' => null,
+      ->add('motivazione', MessageType::class, array('label' => null,
         'data' => $info['assenza']['motivazione'],
         'trim' => true,
         'attr' => array('rows' => '3'),
@@ -1326,7 +1326,7 @@ class GenitoriController extends AbstractController {
         'attr' => ['class' => 'gs-placeholder'],
         'mapped' => false,
         'required' => false))
-      ->add('motivazione', TextareaType::class, array('label' => null,
+      ->add('motivazione', MessageType::class, array('label' => null,
         'trim' => true,
         'attr' => array('rows' => '3'),
         'required' => true))

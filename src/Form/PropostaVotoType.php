@@ -15,12 +15,12 @@ namespace App\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\CallbackTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\PropostaVoto;
+use App\Form\MessageType;
 
 
 /**
@@ -70,7 +70,7 @@ class PropostaVotoType extends AbstractType {
           },
         'attr' => ['class' => 'gs-placeholder'],
         'required' => false))
-      ->add('debito', TextareaType::class, array('label' => false,
+      ->add('debito', MessageType::class, array('label' => false,
         'trim' => true,
         'attr' => array('rows' => '3'),
         'required' => false));

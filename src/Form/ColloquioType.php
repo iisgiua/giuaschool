@@ -17,13 +17,13 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Doctrine\ORM\EntityRepository;
+use App\Form\MessageType;
 use App\Entity\Colloquio;
 
 
@@ -88,7 +88,7 @@ class ColloquioType extends AbstractType {
     } elseif ($options['formMode'] == 'noSede') {
       // colloqui senza sede (a distanza)
       $builder
-        //-- ->add('note', TextareaType::class, array('label' => 'label.colloqui_note',
+        //-- ->add('note', MessageType::class, array('label' => 'label.colloqui_note',
           //-- 'attr' => ['rows' => 3],
           //-- 'required' => false))
         ->add('codice', TextType::class, array('label' => 'label.colloqui_codice',

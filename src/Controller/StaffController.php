@@ -24,7 +24,6 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
@@ -2162,11 +2161,11 @@ class StaffController extends AbstractController {
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('deroga_edit', FormType::class, $alunno)
-      ->add('autorizzaEntrata', TextareaType::class, array('label' => 'label.autorizza_entrata',
+      ->add('autorizzaEntrata', MessageType::class, array('label' => 'label.autorizza_entrata',
         'required' => false))
-      ->add('autorizzaUscita', TextareaType::class, array('label' => 'label.autorizza_uscita',
+      ->add('autorizzaUscita', MessageType::class, array('label' => 'label.autorizza_uscita',
         'required' => false))
-      ->add('note', TextareaType::class, array('label' => 'label.note',
+      ->add('note', MessageType::class, array('label' => 'label.note',
         'required' => false))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start']))
