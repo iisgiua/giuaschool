@@ -121,8 +121,8 @@ class CattedraRepository extends BaseRepository {
     // elimina docenti in più
     $mat = array();
     foreach ($docenti as $k=>$doc) {
-      if ($doc['tipo_materia'] == 'S') {
-        // non modifica cattedre di SOSTEGNO
+      if ($doc['tipo_materia'] == 'S' || $doc['tipo_materia'] == 'E') {
+        // non modifica cattedre di SOSTEGNO/Ed.Civica
         continue;
       }
       if (!isset($mat[$doc['materia_id']][$doc['tipo']])) {
