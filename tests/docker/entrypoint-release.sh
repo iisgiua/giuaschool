@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Remove unused files
+rm -f -r src/DataFixtures/
 rm -f -r tests/
 rm -f -r var/cache/*
 rm -f -r var/sessions/*
@@ -13,4 +14,4 @@ rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 mv .env .env-dist
 
 # Archive release
-zip -q -y -r giuaschool-release.zip ./
+zip -q -y -r -9 giuaschool-release.zip ./

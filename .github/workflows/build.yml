@@ -49,22 +49,34 @@ jobs:
           mkdir builds
           docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip builds/giuaschool-build-latest.zip
 
-      - name: Upload latest build
-        uses: EndBug/add-and-commit@v7
-        with:
-          add: builds/giuaschool-build-latest.zip --force
-          branch: builds
-          branch_mode: create
-          push: '--force --set-upstream origin builds'
-          pull: 'NO-PULL'
-          default_author: github_actor
-          message: 'Upload latest build'
+      #-- - name: Upload latest build
+        #-- uses: EndBug/add-and-commit@v7
+        #-- with:
+          #-- add: builds/giuaschool-build-latest.zip --force
+          #-- branch: builds
+          #-- branch_mode: create
+          #-- push: '--force --set-upstream origin builds'
+          #-- pull: 'NO-PULL'
+          #-- default_author: github_actor
+          #-- message: 'Upload latest build'
 
       - name: Generate changelog from latest release
         id: changelog
         uses: metcalfc/changelog-generator@v3.0.0
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload latest build
+        uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: latest-build
+          name: "Ultimo aggiornamento"
+          body: ${{ steps.changelog.outputs.changelog }}
+          prerelease: true
+          files: builds/giuaschool-build-latest.zip
+          gzip: false
+          allow_override: true
 
       - name: Generate changelog page
         run: |
