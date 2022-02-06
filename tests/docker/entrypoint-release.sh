@@ -1,12 +1,12 @@
 #!/bin/sh
 
 # Remove unused files
+rm -f bin/
 rm -f -r src/DataFixtures/
 rm -f -r tests/
 rm -f -r var/cache/*
-rm -f -r var/sessions/*
 rm -f -r var/log/*
-rm -f bin/phpunit
+rm -f -r var/sessions/*
 rm -f .dockerignore .env.test .gitignore behat.yml composer.* phpunit.xml symfony.lock publiccode.yml
 rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 

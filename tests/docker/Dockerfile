@@ -62,7 +62,7 @@ FROM systembuilder as symfonybuilder
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data composer.* symfony.lock ./
 RUN \
-  composer -q install --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
+  composer -q install --no-dev --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
   composer clear-cache
 
 
@@ -73,30 +73,37 @@ FROM symfonybuilder as applicationbuilder
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data . .
 RUN \
+# adjust scripts permissions
+  chmod 755 tests/docker/*.sh && \
+# set PROD environment
+  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
+# create database
+  service mariadb start && mysqladmin -u root password 'root' && \
+  php bin/console doctrine:database:create -n -q && \
+  php bin/console doctrine:schema:update -f -q && \
+# init database
+  mysql -uroot -proot giuaschool < src/Install/init-db.sql && \
+  php bin/console security:encode-password -n admin App\\Entity\\Amministratore 2> /dev/null | grep "Encoded password" | sed -r -e "s/^\s*Encoded password\s+(\S+)\s*$/UPDATE gs_utente SET password='\1' where username='admin';/" > admin-pswd && \
+  mysql -uroot -proot giuaschool < admin-pswd && \
+  rm -f admin-pswd && \
 # configure SPID access
   cp tests/docker/spid-php-openssl.cnf.conf vendor/italia/spid-php/spid-php-openssl.cnf && \
   cp tests/docker/spid-php-setup.json.conf vendor/italia/spid-php/spid-php-setup.json && \
   cp tests/docker/spid-config.tpl.conf vendor/italia/spid-php/setup/config/config.tpl && \
-  cp tests/docker/spid-theme.tgz vendor/italia/spid-php/spid-theme.tgz && \
-  cd vendor/italia/spid-php/ && \
+  cd vendor/italia/spid-php/setup && \
+  cd .. && \
   composer install && \
+  composer clear-cache && \
   cd vendor/simplesamlphp/simplesamlphp/modules && \
-  tar -zxf ../../../../spid-theme.tgz && \
+  tar -zxf ../../../../../../../tests/docker/spid-theme.tgz && \
   cd /var/www/giuaschool/public && \
   rm -f spid && \
   ln -s -r ../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/www/ spid && \
   cd ../var/log && \
   ln -s -r ../../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log/ spid && \
   cd ../.. && \
-# create database
-  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
-  service mariadb start && mysqladmin -u root password 'root' && \
-  php bin/console doctrine:database:create -n -q && \
-  php bin/console doctrine:schema:update -f -q && \
-  php bin/console doctrine:fixtures:load --group=App -n -q -e dev && \
 # adjust file permissions
-  chown -R www-data:www-data . && \
-  chmod 755 tests/docker/*.sh
+  chown -R www-data:www-data .
 
 
 ### Configure services

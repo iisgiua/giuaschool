@@ -17,27 +17,48 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 10
 
-      - name: Build image for testing
-        run: docker build -t giuaschool:test -f tests/docker/DockerfileTest .
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish DEV image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: tests/docker/DockerfileDev
+          push: true
+          tags: ghcr.io/trinko/giuaschool-dev:latest
+
+      - name: Build and publish TEST image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: tests/docker/DockerfileTest
+          push: true
+          tags: ghcr.io/trinko/giuaschool-test:latest
 
       - name: Run PHPUnit tests
         run: |
-          docker run --name "gs_test" giuaschool:test
+          docker network create gs_net
+          docker run --name "gs_test" --net gs_net giuaschool-test:latest
+          docker exec gs_test /var/www/giuaschool/tests/docker/entrypoint-test.sh
           docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+          docker run -d --name "chrome_headless" --net gs_net zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080" --ignore-certificate-errors
+          docker exec gs_test /var/www/giuaschool/tests/docker/entrypoint-behat.sh
 
       - name: Codacy coverage reporter
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
-
-      - name: Run Behat tests
-        run: |
-          docker network create gs_net
-          docker run -d --name "chrome_headless" --net gs_net zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080" --ignore-certificate-errors
-          docker run --name "giuaschool_test" --net gs_net giuaschool:test tests/docker/entrypoint-behat.sh
