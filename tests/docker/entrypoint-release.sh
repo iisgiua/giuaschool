@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Remove unused files
-rm -f bin/
+rm -f -r bin/
 rm -f -r src/DataFixtures/
 rm -f -r tests/
 rm -f -r var/cache/*
