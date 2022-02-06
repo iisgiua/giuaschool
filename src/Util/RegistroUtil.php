@@ -333,10 +333,10 @@ class RegistroUtil {
    */
   public function azioneAnnotazione($azione, \DateTime $data, Docente $docente, Classe $classe=null,
                                      Annotazione $annotazione=null) {
-    if ($this->bloccoScrutinio($data, $classe)) {
-      // blocco scrutinio
-      return false;
-    }
+    //-- if ($this->bloccoScrutinio($data, $classe)) {
+      //-- // blocco scrutinio
+      //-- return false;
+    //-- }
     if ($azione == 'add') {
       // azione di creazione
       if (!$annotazione) {
@@ -2686,4 +2686,3 @@ class RegistroUtil {
   }
 
 }
-
