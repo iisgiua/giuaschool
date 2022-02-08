@@ -50,7 +50,7 @@ jobs:
 
       - name: Run PHPUnit tests
         run: |
-          docker run --rm --name "gs_test" ghcr.io/trinko/giuaschool-test:latest tests/docker/entrypoint-test.sh
+          docker run --name "gs_test" ghcr.io/trinko/giuaschool-test:latest tests/docker/entrypoint-test.sh
           docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
       - name: Codacy coverage reporter
