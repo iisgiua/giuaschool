@@ -13,9 +13,10 @@ RUN \
 # Set TEST environment
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
   service mariadb start && \
-  php bin/console doctrine:database:create -n -q -e test && \
-  php bin/console doctrine:schema:update -f -q -e test && \
-  php bin/console doctrine:fixtures:load --group=Test -q -e test && \
+  php bin/console doctrine:database:drop -f -q && \
+  php bin/console doctrine:database:create -n -q && \
+  php bin/console doctrine:schema:update -f -q && \
+  php bin/console doctrine:fixtures:load -n -q --group=Test && \
   mysqldump -uroot -proot giuaschool -t -n --compact --result-file='tests/temp/Test.fixtures' && \
   chown -R www-data:www-data .
 
