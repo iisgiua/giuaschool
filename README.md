@@ -15,7 +15,7 @@
 - [Scarica l'ultima versione](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release-latest.zip)
   - [Visualizza i dettagli](https://trinko.github.io/giuaschool-docs/latest-release.html)
 
-- [Scarica l'ultima modifica](https://github.com/trinko/giuaschool/raw/builds/builds/giuaschool-build-latest.zip)
+- [Scarica l'ultima modifica](https://github.com/trinko/giuaschool/releases/download/latest-build/giuaschool-build-latest.zip)
   - [Visualizza i dettagli](https://trinko.github.io/giuaschool-docs/latest-build.html)
 
 - [Visualizza gli annunci](https://github.com/trinko/giuaschool/discussions/categories/annunci)
@@ -25,5 +25,3 @@
 - [Chiedi aiuto agli utenti che seguono il progetto](https://github.com/trinko/giuaschool/discussions/new?category=richieste-di-aiuto)
 
 - [Proponi nuove funzionalità o miglioramenti per l'applicazione](https://github.com/trinko/giuaschool/discussions/new?category=idee-e-proposte)
-
-
