@@ -747,7 +747,7 @@ class PagelleUtil {
         } elseif ($mat['tipo'] == 'E') {
           // Ed.Civica
           $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-          $assenze = '';
+          $assenze = $dati['voti'][$idalunno][$idmateria]['assenze'];
           switch ($voto) {
             case 3:
               $voto = 'NC';
