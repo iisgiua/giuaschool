@@ -12,7 +12,6 @@
 
 namespace App\Controller;
 
-
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -25,7 +24,11 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
+use App\Kernel;
 use App\Form\ConfigurazioneType;
 use App\Form\UtenteType;
 use App\Form\ModuloType;
@@ -1091,6 +1094,48 @@ class SistemaController extends BaseController {
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'archivia', $dati, $info, [$form->createView(), 'message.archivia']);
+  }
+
+  /**
+   * Cancella la cache di sistema
+   *
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/sistema/manutenzione/cache/", name="sistema_manutenzione_cache",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function manutenzioneCacheAction(TranslatorInterface $trans, Request $request): Response {
+    // comandi per la pulizia della cache del database
+    $commands = [
+      new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => null, '-q' => null]),
+      new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => null, '-q' => null]),
+      new ArrayInput(['command' => 'cache:clear', '-q' => null]),
+    ];
+    // esegue comandi
+    $kernel = new Kernel('prod', false);
+    $application = new Application($kernel);
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
+    foreach ($commands as $com) {
+      $status = $application->run($com, $output);
+      if ($status != 0) {
+        // errore nell'esecuzione del comando
+        $content = $output->fetch();
+        $this->addFlash('danger', $trans->trans('exception.svuota_cache', ['errore' => $content]));
+        break;
+      }
+    }
+    // messaggio
+    if ($status == 0) {
+      // esecuzione senza errori
+      $this->addFlash('success', 'message.svuota_cache_ok');
+    }
+    // redirect
+    return $this->redirectToRoute('sistema_manutenzione');
   }
 
 }

@@ -3,11 +3,28 @@
 {% block pagina_contenuto %}
 <div class="container">
   <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
-  {{ include('tema-new/include/form.html.twig', {form: form[0], form_help: form[1]}) }}
+  {{ include('tema-new/include/flash.html.twig') }}
+  <div class="row mb-3 mx-2">
+    <button class="btn btn-danger btn-xs gs-modal-confirm-button" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('sistema_manutenzione_cache') }}" data-title="Svuota la cache di sistema" data-text="{{ 'message.avviso_svuota_cache'|trans }}">Svuota cache</button>
+  </div>
+  {{ include('tema-new/include/form-noflash.html.twig', {form: form[0], form_help: form[1]}) }}
+  {{ include('tema-new/include/modal-confirm.html.twig') }}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
-  {{ include('tema-new/include/datepicker.html.twig', {dp_field: 'configurazione_data_inizio', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
-  {{ include('tema-new/include/datepicker.html.twig', {dp_field: 'configurazione_data_fine', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'configurazione_data_inizio', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+{{ include('tema-new/include/datepicker.html.twig', {dp_field: 'configurazione_data_fine', dp_disabled: null, dp_week: null, dp_min: null, dp_max: null}) }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var title = $(event.relatedTarget).data('title');
+    $(this).find('#gs-modal-confirm-titolo').text(title);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-contenuto').text(text);
+  });
+});
+</script>
 {% endblock %}
