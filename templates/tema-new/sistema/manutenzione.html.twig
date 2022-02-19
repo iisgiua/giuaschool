@@ -4,8 +4,11 @@
 <div class="container">
   <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
   {{ include('tema-new/include/flash.html.twig') }}
-  <div class="row mb-3 mx-2">
-    <button class="btn btn-danger btn-xs gs-modal-confirm-button" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('sistema_manutenzione_cache') }}" data-title="Svuota la cache di sistema" data-text="{{ 'message.avviso_svuota_cache'|trans }}">Svuota cache</button>
+  <div class="row mb-3">
+    <div class="mx-auto">
+      <button class="btn btn-danger btn-xs gs-modal-confirm-button" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('sistema_manutenzione_cache') }}" data-title="Svuota la cache di sistema" data-text="{{ 'message.avviso_svuota_cache'|trans }}">Svuota cache</button>
+      <button class="btn btn-danger btn-xs ml-4 gs-modal-confirm-button" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('sistema_manutenzione_logout') }}" data-title="Forza il logout degli altri utenti" data-text="{{ 'message.avviso_logout_utenti'|trans }}">Logout utenti</button>
+    </div>
   </div>
   {{ include('tema-new/include/form-noflash.html.twig', {form: form[0], form_help: form[1]}) }}
   {{ include('tema-new/include/modal-confirm.html.twig') }}

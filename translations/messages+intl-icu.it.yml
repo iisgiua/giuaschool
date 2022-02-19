@@ -1141,6 +1141,8 @@ message.cancella_orario: Verrà cancellato l'orario indicato. Vuoi continuare?
 message.scansione_oraria: "Inserisci la scansione oraria per ogni giorno della settimana. Usa i pulsanti per aggiungere o rimuovere un elemento.<br>La durata è indicata come frazioni dell'unità oraria."
 message.svuota_cache_ok: La cache di sistema è stata cancellata.
 message.avviso_svuota_cache: "Attenzione: l'operazione può comportare dei malfunzionamenti per gli utenti attualmente collegati."
+message.logout_utenti_ok: Gli altri utenti sono stati scollegati dal registro.
+message.avviso_logout_utenti: "Attenzione: l'operazione può comportare dei malfunzionamenti per gli utenti attualmente collegati."
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
@@ -1370,5 +1372,5 @@ exception.dati_non_presenti: Dati non disponibili
 exception.intervallo_date_invalido: La data iniziale è successiva a quella finale
 exception.periodo_sovrapposto: Il periodo indicato si sovrappone ad uno esistente
 exception.intervallo_ore_invalido: L'ora iniziale è successiva a quella finale
-exception.orari_sovrapposti: L'orario si sovrappone al precedente
 exception.svuota_cache: "Impossibile eseguire i comandi per svuotare la cache.<br><br>{errore}"
+exception.orari_sovrapposti: L'orario si sovrappone al precedente

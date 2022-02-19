@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -1108,7 +1109,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneCacheAction(TranslatorInterface $trans, Request $request): Response {
+  public function manutenzioneCacheAction(TranslatorInterface $trans): Response {
     // comandi per la pulizia della cache del database
     $commands = [
       new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => null, '-q' => null]),
@@ -1134,6 +1135,35 @@ class SistemaController extends BaseController {
       // esecuzione senza errori
       $this->addFlash('success', 'message.svuota_cache_ok');
     }
+    // redirect
+    return $this->redirectToRoute('sistema_manutenzione');
+  }
+
+  /**
+   * Effettua il logout forzato degli utenti (tranne amministratore)
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/sistema/manutenzione/logout/", name="sistema_manutenzione_logout",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function manutenzioneLogoutAction(Request $request, TranslatorInterface $trans): Response {
+    // nome del file di sessione in uso
+    $mySession = 'sess_'.$request->cookies->get('PHPSESSID');
+    // elimina le sessioni tranne quella corrente
+    $dir = $this->getParameter('kernel.project_dir').'/var/sessions/'.$request->server->get('APP_ENV');
+    $finder = new Finder();
+    $finder->files()->in($dir)->notName([$mySession]);
+    foreach ($finder as $file) {
+      unlink($file->getRealPath());
+    }
+    // messaggio
+    $this->addFlash('success', 'message.logout_utenti_ok');
     // redirect
     return $this->redirectToRoute('sistema_manutenzione');
   }
