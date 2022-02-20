@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -1143,7 +1144,6 @@ class SistemaController extends BaseController {
    * Effettua il logout forzato degli utenti (tranne amministratore)
    *
    * @param Request $request Pagina richiesta
-   * @param TranslatorInterface $trans Gestore delle traduzioni
    *
    * @return Response Pagina di risposta
    *
@@ -1152,7 +1152,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneLogoutAction(Request $request, TranslatorInterface $trans): Response {
+  public function manutenzioneLogoutAction(Request $request): Response {
     // nome del file di sessione in uso
     $mySession = 'sess_'.$request->cookies->get('PHPSESSID');
     // elimina le sessioni tranne quella corrente
@@ -1166,6 +1166,68 @@ class SistemaController extends BaseController {
     $this->addFlash('success', 'message.logout_utenti_ok');
     // redirect
     return $this->redirectToRoute('sistema_manutenzione');
+  }
+
+  /**
+   * Estrae il log degli errori
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/sistema/manutenzione/log/", name="sistema_manutenzione_log",
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function manutenzioneLogAction(Request $request): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // imposta data e ora corrente
+    $data = new \DateTime('today');
+    $ora = new \DateTime('now');
+    // form
+    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'log',
+      'returnUrl' => $this->generateUrl('sistema_manutenzione'), 'dati' => [$data, $ora]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      $msgs = [];
+      // imposta data, ora inizio e ora fine
+      $dt = $form->get('data')->getData()->format('Y-m-d');
+      $tm = $form->get('ora')->getData()->format('H:i');
+      $inizio = '['.$dt.' '.$tm.':00]';
+      $fine = '['.$dt.' '.$form->get('ora')->getData()->modify('+1 hour')->format('H:i').':00]';
+      // nome file
+      $nomefile = $this->getParameter('kernel.project_dir').'/var/log/app_'.
+        mb_strtolower($request->server->get('APP_ENV')).'-'.$dt.'.log';
+      if (file_exists($nomefile)) {
+        $fl = fopen($nomefile, "r");
+        while (($riga = fgets($fl)) !== false) {
+          // legge una riga
+          $tag = substr($riga, 0, 21);
+          if ($tag >= $inizio && $tag <= $fine) {
+            // estrae messaggio;
+            $msgs[] = $riga;
+          }
+        }
+        fclose($fl);
+        if (!empty($msgs)) {
+          // sono presenti messaggi
+          $logfile = $dt.'_'.str_replace(':', '-', $tm).'.log';
+          $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $logfile);
+          $response = new Response(implode($msgs));
+          $response->headers->set('Content-Type', 'text/plain');
+          $response->headers->set('Content-Disposition', $disposition);
+          // invia il file
+          return $response;
+        }
+      }
+      // errore: nessun messaggio
+      $this->addFlash('danger', 'exception.log_errori_vuoto');
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('sistema', 'manutenzione_log', $dati, $info, [$form->createView(), 'message.log_errori']);
   }
 
 }

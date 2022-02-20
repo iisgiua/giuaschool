@@ -541,8 +541,9 @@ page.sistema.importa: Importa Anno
 title.sistema.importa: Importa i dati dell'anno precedente
 page.sistema.banner: Gestione Banner
 title.sistema.banner: Gestione dei banner per le pagine principali
-page.sistema.manutenzione: Modalità Manutenzione
-title.sistema.manutenzione: Impostazione della modalità manutenzione
+page.sistema.manutenzione: Manutenzione Sistema
+title.sistema.manutenzione: Manutenzione del sistema
+title.sistema.manutenzione_log: Scarica i messaggi di errore di sistema
 page.sistema.parametri: Configurazione Parametri
 title.sistema.parametri: Configurazione dei parametri dell'applicazione
 page.sistema.password: Cambio Password
@@ -1143,6 +1144,7 @@ message.svuota_cache_ok: La cache di sistema è stata cancellata.
 message.avviso_svuota_cache: "Attenzione: l'operazione può comportare dei malfunzionamenti per gli utenti attualmente collegati."
 message.logout_utenti_ok: Gli altri utenti sono stati scollegati dal registro.
 message.avviso_logout_utenti: "Attenzione: l'operazione può comportare dei malfunzionamenti per gli utenti attualmente collegati."
+message.log_errori: "Inserisci la data e l'ora iniziale dell'evento per scaricare i messaggi presenti con gli errori di sistema.<br>Verranno estratti solo i messaggi a partire dall'ora indicata e sino a quella successiva."
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
@@ -1374,3 +1376,4 @@ exception.periodo_sovrapposto: Il periodo indicato si sovrappone ad uno esistent
 exception.intervallo_ore_invalido: L'ora iniziale è successiva a quella finale
 exception.svuota_cache: "Impossibile eseguire i comandi per svuotare la cache.<br><br>{errore}"
 exception.orari_sovrapposti: L'orario si sovrappone al precedente
+exception.log_errori_vuoto: Non sono presenti messaggi di errore per la data e ora indicate.

@@ -19,6 +19,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 
@@ -157,6 +159,21 @@ class ModuloType extends AbstractType {
               return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'placeholder' => 'label.choose_option',
           'attr' => ['widget' => 'search'],
+          'required' => true));
+    } elseif ($options['formMode'] == 'log') {
+      $builder
+        ->add('data', DateType::class, array('label' => 'label.data',
+          'data' => $options['dati'][0],
+          'widget' => 'single_text',
+          'html5' => false,
+          'format' => 'dd/MM/yyyy',
+          'attr' => ['widget' => 'gs-row-start'],
+          'required' => true))
+        ->add('ora', TimeType::class, array('label' => 'label.ora_inizio',
+          'data' => $options['dati'][1],
+          'widget' => 'single_text',
+          'html5' => false,
+          'attr' => ['widget' => 'gs-row-end'],
           'required' => true));
     }
     // aggiunge pulsanti al form
