@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8cc2cc98c0b5c3f17fc13ab916734cf5",
+    "content-hash": "17fbde514e8cc2de730ae133f7043046",
     "packages": [
         {
             "name": "composer/package-versions-deprecated",
@@ -1934,16 +1934,6 @@
                 }
             ],
             "time": "2021-10-06T17:43:30+00:00"
-        },
-        {
-            "name": "italia/spid-php",
-            "version": "3.8.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/italia/spid-php",
-                "reference": "master"
-            },
-            "type": "library"
         },
         {
             "name": "knpuniversity/oauth2-client-bundle",

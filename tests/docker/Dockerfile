@@ -62,8 +62,8 @@ FROM systembuilder as symfonybuilder
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data composer.* symfony.lock ./
 RUN \
-  composer -q install --no-dev --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
-  composer clear-cache
+  composer -q install --no-dev --no-progress --prefer-dist --optimize-autoloader --no-plugins --no-scripts && \
+  composer -q clear-cache --no-plugins
 
 
 ########## Third Step - Build Application
@@ -87,19 +87,19 @@ RUN \
   mysql -uroot -proot giuaschool < admin-pswd && \
   rm -f admin-pswd && \
 # configure SPID access
-  cp tests/docker/spid-php-openssl.cnf.conf vendor/italia/spid-php/spid-php-openssl.cnf && \
-  cp tests/docker/spid-php-setup.json.conf vendor/italia/spid-php/spid-php-setup.json && \
-  cp tests/docker/spid-config.tpl.conf vendor/italia/spid-php/setup/config/config.tpl && \
-  cd vendor/italia/spid-php/setup && \
-  cd .. && \
-  composer install && \
-  composer clear-cache && \
+  mkdir vendor/italia && \
+  cd vendor/italia && \
+  tar -zxf ../../tests/docker/spid-php.tgz && \
+  cd spid-php && \
+  composer -q install --no-dev --no-progress --prefer-dist --no-plugins --no-scripts && \
+  composer -q clear-cache --no-plugins && \
   cd vendor/simplesamlphp/simplesamlphp/modules && \
   tar -zxf ../../../../../../../tests/docker/spid-theme.tgz && \
   cd /var/www/giuaschool/public && \
   rm -f spid && \
   ln -s -r ../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/www/ spid && \
   cd ../var/log && \
+  mkdir -p ../../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log && \
   ln -s -r ../../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log/ spid && \
   cd ../.. && \
 # adjust file permissions

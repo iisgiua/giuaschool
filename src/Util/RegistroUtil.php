@@ -1605,17 +1605,39 @@ class RegistroUtil {
       return $this->argomentiSostegno($cattedra);
     }
     // cattedra non di sostegno
-    $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
-      ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
-      ->leftJoin('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-      ->leftJoin('f.docente', 'd')
-      ->where('l.classe=:classe AND l.materia=:materia')
-      ->orderBy('l.data', 'DESC')
-      ->addOrderBy('l.ora', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-        'docente' => $cattedra->getDocente()])
-      ->getQuery()
-      ->getArrayResult();
+    if ($cattedra->getTipo() == 'A') {
+      // cattedra di materia alternaativa
+      $altraCattedra = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+        ->select('c.id')
+        ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
+        ->getDql();
+      $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
+        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->join('f.docente', 'd')
+        ->join('l.materia', 'm')
+        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.')))')
+        ->orderBy('l.data', 'DESC')
+        ->addOrderBy('l.ora', 'ASC')
+        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+          'docente' => $cattedra->getDocente(), 'attiva' => 1, 'cattedra' => $cattedra->getId(),
+          'civica' => 'E'])
+        ->getQuery()
+        ->getArrayResult();
+    } else {
+      // cattedra regolare
+      $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+        ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
+        ->leftJoin('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->leftJoin('f.docente', 'd')
+        ->where('l.classe=:classe AND l.materia=:materia')
+        ->orderBy('l.data', 'DESC')
+        ->addOrderBy('l.ora', 'ASC')
+        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+          'docente' => $cattedra->getDocente()])
+        ->getQuery()
+        ->getArrayResult();
+    }
     // imposta array associativo
     $data_prec = null;
     $num = 0;
@@ -2451,14 +2473,35 @@ class RegistroUtil {
   public function programma(Cattedra $cattedra) {
     // inizializza
     $dati = array();
-    // lezioni
-    $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
-      ->select('l.id,l.data,l.ora,l.argomento')
-      ->where('l.classe=:classe AND l.materia=:materia')
-      ->orderBy('l.data,l.ora', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()])
-      ->getQuery()
-      ->getArrayResult();
+
+    if ($cattedra->getTipo() == 'A') {
+      // cattedra di materia alternativa
+      $altraCattedra = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+        ->select('c.id')
+        ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
+        ->getDql();
+      $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+        ->select('l.id,l.data,l.ora,l.argomento')
+        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->join('f.docente', 'd')
+        ->join('l.materia', 'm')
+        ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.')))')
+        ->orderBy('l.data,l.ora', 'ASC')
+        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+          'docente' => $cattedra->getDocente(), 'attiva' => 1, 'cattedra' => $cattedra->getId(),
+          'civica' => 'E'])
+        ->getQuery()
+        ->getArrayResult();
+    } else {
+      // cattedra normale
+      $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+        ->select('l.id,l.data,l.ora,l.argomento')
+        ->where('l.classe=:classe AND l.materia=:materia')
+        ->orderBy('l.data,l.ora', 'ASC')
+        ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria()])
+        ->getQuery()
+        ->getArrayResult();
+    }
     // imposta programma (elimina ripetizioni)
     foreach ($lezioni as $l) {
       $argomento = strip_tags($l['argomento']);
