@@ -66,95 +66,14 @@
       </div>
     </div>
   </div>
+    {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}
   <div class="panel panel-primary">
     <div class="panel-body gs-pt-2 gs-pb-2">
-      <div class="col-sm-12 text-center gs-pt-3">
-        <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * begin * -->
-        <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
-          <span class="italia-it-button-icon"><img src="/spid/spid-sp-access-button/img/spid-ico-circle-bb.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-ico-circle-bb.png'; this.onerror=null;" alt="" /></span>
-          <span class="italia-it-button-text">Entra con SPID</span>
-        </a>
-        <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
-         <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
-           <li class="spid-idp-button-link" data-idp="arubaid">
-             <a href="{{ path('spid_login', {idp: 'IdAruba'}) }}"><span class="spid-sr-only">Aruba ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-arubaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-arubaid.png'; this.onerror=null;" alt="Aruba ID" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="infocertid">
-             <a href="{{ path('spid_login', {idp: 'IdInfocert'}) }}"><span class="spid-sr-only">Infocert ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-infocertid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="intesaid">
-             <a href="{{ path('spid_login', {idp: 'IdIntesa'}) }}"><span class="spid-sr-only">Intesa ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-intesaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-intesaid.png'; this.onerror=null;" alt="Intesa ID" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="lepidaid">
-             <a href="{{ path('spid_login', {idp: 'IdLepida'}) }}"><span class="spid-sr-only">Lepida ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-lepidaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="namirialid">
-             <a href="{{ path('spid_login', {idp: 'IdNamirial'}) }}"><span class="spid-sr-only">Namirial ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-namirialid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-namirialid.png'; this.onerror=null;" alt="Namirial ID" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="posteid">
-             <a href="{{ path('spid_login', {idp: 'IdPoste'}) }}"><span class="spid-sr-only">Poste ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-posteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-posteid.png'; this.onerror=null;" alt="Poste ID" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="sielteid">
-             <a href="{{ path('spid_login', {idp: 'IdSielte'}) }}"><span class="spid-sr-only">Sielte ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-sielteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="spiditalia">
-             <a href="{{ path('spid_login', {idp: 'IdRegister'}) }}"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="/spid/spid-sp-access-button/img/spid-idp-spiditalia.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
-           </li>
-           <li class="spid-idp-button-link" data-idp="timid">
-             <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-timid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
-           </li>
-{#-- RIMUOVERE PER LA VALIDAZIONE AGID
-           <!-- AGID-VALIDATORE-INIZIO -->
-           <li class="spid-idp-support-link">
-             <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
-           </li>
-           <!-- AGID-VALIDATORE-FINE -->
--- RIMUOVERE PER LA VALIDAZIONE AGID #}
-           <li class="spid-idp-support-link">
-             <a href="https://www.spid.gov.it" target="_blank">Maggiori informazioni</a>
-           </li>
-           <li class="spid-idp-support-link">
-             <a href="https://www.spid.gov.it/richiedi-spid" target="_blank">Non hai SPID?</a>
-           </li>
-           <li class="spid-idp-support-link">
-             <a href="https://www.spid.gov.it/serve-aiuto" target="_blank">Serve aiuto?</a>
-           </li>
-         </ul>
-        </div>
-        <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
-        <a href="#" type="button" class="gs-big gs-ml-2" data-toggle="modal" data-target="#gs-spid-info">
-          <strong class="gs-big"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></strong>
-        </a>
-        <div class="modal fade" id="gs-spid-info" tabindex="-1" role="dialog" aria-labelledby="gs-spid-info-title">
-          <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                  <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
-                  <span class="sr-only">{{ 'label.close'|trans }}</span>
-                </button>
-                <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è SPID?</h3>
-              </div>
-              <div class="modal-body text-left">
-                <p>SPID è il sistema di accesso che consente di utilizzare, con un'identità digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.
-                  <br>Se sei già in possesso di un'identità digitale, accedi con le credenziali del tuo gestore.
-                  <br>Se non hai ancora un'identità digitale, richiedila ad uno dei gestori.</p>
-                <p><a href="https://www.spid.gov.it" target="_blank"><strong>Maggiori informazioni su SPID</strong></a></p>
-                <p><a href="https://www.spid.gov.it/richiedi-spid" target="_blank"><strong>Non hai SPID?</strong></a></p>
-                <p><a href="https://www.spid.gov.it/serve-aiuto" target="_blank"><strong>Serve aiuto?</strong></a></p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'label.close'|trans }}</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    {{ include('login/form-spid.html.twig') }}
     </div>
-    <div class="panel-footer text-right gs-pb-2 gs-pt-2">
-      <a href="https://www.spid.gov.it/" target="_blank"><img style="height:2.5em" src="/img/spid-agid-logo-lb.png" alt="SPID"></a>
-    </div>
+    {{ include('login/form-agid.html.twig') }}
   </div>
+    {% endif %}
   {% elseif not manutenzione %}
   <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4">
     <div class="panel panel-primary" >
@@ -191,92 +110,13 @@
           </div>
           <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
         </form>
-        <div class="col-sm-12 text-center gs-pt-4">
-          <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * begin * -->
-          <a href="#" class="italia-it-button italia-it-button-size-m button-spid" spid-idp-button="#spid-idp-button-medium-get" aria-haspopup="true" aria-expanded="false">
-            <span class="italia-it-button-icon"><img src="/spid/spid-sp-access-button/img/spid-ico-circle-bb.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-ico-circle-bb.png'; this.onerror=null;" alt="" /></span>
-            <span class="italia-it-button-text">Entra con SPID</span>
-          </a>
-          <div id="spid-idp-button-medium-get" class="spid-idp-button spid-idp-button-tip spid-idp-button-relative">
-           <ul id="spid-idp-list-medium-root-get" class="spid-idp-button-menu" aria-labelledby="spid-idp">
-             <li class="spid-idp-button-link" data-idp="arubaid">
-               <a href="{{ path('spid_login', {idp: 'IdAruba'}) }}"><span class="spid-sr-only">Aruba ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-arubaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-arubaid.png'; this.onerror=null;" alt="Aruba ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="infocertid">
-               <a href="{{ path('spid_login', {idp: 'IdInfocert'}) }}"><span class="spid-sr-only">Infocert ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-infocertid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-infocertid.png'; this.onerror=null;" alt="Infocert ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="intesaid">
-               <a href="{{ path('spid_login', {idp: 'IdIntesa'}) }}"><span class="spid-sr-only">Intesa ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-intesaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-intesaid.png'; this.onerror=null;" alt="Intesa ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="lepidaid">
-               <a href="{{ path('spid_login', {idp: 'IdLepida'}) }}"><span class="spid-sr-only">Lepida ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-lepidaid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-lepidaid.png'; this.onerror=null;" alt="Lepida ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="namirialid">
-               <a href="{{ path('spid_login', {idp: 'IdNamirial'}) }}"><span class="spid-sr-only">Namirial ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-namirialid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-namirialid.png'; this.onerror=null;" alt="Namirial ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="posteid">
-               <a href="{{ path('spid_login', {idp: 'IdPoste'}) }}"><span class="spid-sr-only">Poste ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-posteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-posteid.png'; this.onerror=null;" alt="Poste ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="sielteid">
-               <a href="{{ path('spid_login', {idp: 'IdSielte'}) }}"><span class="spid-sr-only">Sielte ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-sielteid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-sielteid.png'; this.onerror=null;" alt="Sielte ID" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="spiditalia">
-               <a href="{{ path('spid_login', {idp: 'IdRegister'}) }}"><span class="spid-sr-only">SPIDItalia Register.it</span><img src="/spid/spid-sp-access-button/img/spid-idp-spiditalia.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-spiditalia.png'; this.onerror=null;" alt="SpidItalia" /></a>
-             </li>
-             <li class="spid-idp-button-link" data-idp="timid">
-               <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="/spid/spid-sp-access-button/img/spid-idp-timid.svg" onerror="this.src='/spid/spid-sp-access-button/img/spid-idp-timid.png'; this.onerror=null;" alt="Tim ID" /></a>
-             </li>
-{#-- RIMUOVERE PER LA VALIDAZIONE AGID
-              <!-- AGID-VALIDATORE-INIZIO -->
-              <li class="spid-idp-support-link">
-                <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>
-              </li>
-              <!-- AGID-VALIDATORE-FINE -->
--- RIMUOVERE PER LA VALIDAZIONE AGID #}
-             <li class="spid-idp-support-link">
-               <a href="https://www.spid.gov.it" target="_blank">Maggiori informazioni</a>
-             </li>
-             <li class="spid-idp-support-link">
-               <a href="https://www.spid.gov.it/richiedi-spid" target="_blank">Non hai SPID?</a>
-             </li>
-             <li class="spid-idp-support-link">
-               <a href="https://www.spid.gov.it/serve-aiuto" target="_blank">Serve aiuto?</a>
-             </li>
-           </ul>
-          </div>
-          <!-- AGID - SPID IDP BUTTON MEDIUM "ENTRA CON SPID" * end * -->
-          <a href="#" type="button" class="gs-big gs-ml-2" data-toggle="modal" data-target="#gs-spid-info">
-            <strong class="gs-big"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></strong>
-          </a>
-          <div class="modal fade" id="gs-spid-info" tabindex="-1" role="dialog" aria-labelledby="gs-spid-info-title">
-            <div class="modal-dialog modal-lg" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal">
-                    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
-                    <span class="sr-only">{{ 'label.close'|trans }}</span>
-                  </button>
-                  <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è SPID?</h3>
-                </div>
-                <div class="modal-body text-left">
-                  <p>SPID è il sistema di accesso che consente di utilizzare, con un'identità digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.
-                    <br>Se sei già in possesso di un'identità digitale, accedi con le credenziali del tuo gestore.
-                    <br>Se non hai ancora un'identità digitale, richiedila ad uno dei gestori.</p>
-                  <p><a href="https://www.spid.gov.it" target="_blank"><strong>Maggiori informazioni su SPID</strong></a></p>
-                  <p><a href="https://www.spid.gov.it/richiedi-spid" target="_blank"><strong>Non hai SPID?</strong></a></p>
-                  <p><a href="https://www.spid.gov.it/serve-aiuto" target="_blank"><strong>Serve aiuto?</strong></a></p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'label.close'|trans }}</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}
+          {{ include('login/form-spid.html.twig') }}+
+        {% endif %}
       </div>
-      <div class="panel-footer text-right gs-pb-2 gs-pt-2">
-        <a href="https://www.spid.gov.it/" target="_blank"><img style="height:2.5em" src="/img/spid-agid-logo-lb.png" alt="SPID"></a>
-      </div>
+      {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}
+        {{ include('login/form-agid.html.twig') }}
+      {% endif %}
     </div>
   </div>
   {% endif %}
@@ -285,7 +125,7 @@
 
 {% block pagina_css %}
 {{ parent() }}
-<link href="/spid/spid-sp-access-button/css/spid-sp-access-button.min.css" rel="stylesheet">
+<link href="{{ asset('spid/spid-sp-access-button/css/spid-sp-access-button.min.css') }}" rel="stylesheet">
 <style>
 .spid-idp-button .spid-idp-button-menu li > a img { padding: 0px 10px 0px 10px; }
 .spid-idp-button .spid-idp-button-menu li > a, .spid-idp-button .spid-idp-button-menu label { padding-bottom: 5px; }
@@ -294,7 +134,7 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
-<script type="text/javascript" src="/spid/spid-sp-access-button/js/spid-sp-access-button.min.js"></script>
+<script type="text/javascript" src="{{ asset('spid/spid-sp-access-button/js/spid-sp-access-button.min.js') }}"></script>
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();

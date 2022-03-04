@@ -512,11 +512,6 @@ label.cancella_elemento: Cancella l'elemento indicato
 label.aggiunge_elemento: Aggiunge un elemento
 
 
-##### ICONE #####
-
-icon.delete: "<svg class=\"icon icon-white icon-xs\"><use xlink:href=\"/vendor/fontawesome/sprites/solid.svg#minus\"></use></svg>"
-
-
 ##### PAGINE #####
 
 #=== nuovo tema ===#
@@ -966,10 +961,10 @@ message.docenti_colloqui_importa: "Il file CSV deve avere la struttura seguente 
   in caso contrario, verranno modificati anche i dati dei colloqui esistenti."
 message.disdetta_colloquio: Verrà cancellata la richiesta di colloquio con il docente. Vuoi continuare?
 message.rifiuto_colloquio: Verrà rifiutata la richiesta di colloquio con il genitore. Vuoi continuare?
-message.login_genitore: "Cliccando sul nome dell'utente, presente in alto nella prima riga, potrai accedere alla <a href=\"/utenti/profilo/\" title=\"Vai alla pagina di gestione del profilo\">pagina di gestione del tuo profilo</a>, da cui potrai configurare la tua email, cambiare la password e gestire le notifiche.<br>"
-message.login_alunno: "Cliccando sul tuo nome, presente in alto nella prima riga, potrai accedere alla <a href=\"/utenti/profilo/\" title=\"Vai alla pagina di gestione del profilo\">pagina di gestione del tuo profilo</a>, da cui potrai gestire le notifiche.<br>"
-message.login_docente: "Cliccando sul tuo nome, presente in alto nella prima riga, potrai accedere alla <a href=\"/utenti/profilo/\" title=\"Vai alla pagina di gestione del profilo\">pagina del tuo profilo</a>, da cui potrai gestire le notifiche.<br>"
-message.login_ata: "Cliccando sul tuo nome, presente in alto nella prima riga, potrai accedere alla <a href=\"/utenti/profilo/\" title=\"Vai alla pagina di gestione del profilo\">pagina del tuo profilo</a>, da cui potrai configurare la tua email, cambiare la password e gestire le notifiche.<br>"
+message.login_genitore: "Cliccando sul nome dell'utente, presente in alto nella prima riga, potrai accedere alla <a href=\"{url}\" title=\"Vai alla pagina di gestione del profilo\">pagina di gestione del tuo profilo</a>, da cui potrai configurare la tua email, cambiare la password e gestire le notifiche.<br>"
+message.login_alunno: "Cliccando sul tuo nome, presente in alto nella prima riga, potrai accedere alla <a href=\"{url}\" title=\"Vai alla pagina di gestione del profilo\">pagina di gestione del tuo profilo</a>, da cui potrai gestire le notifiche.<br>"
+message.login_docente: "Cliccando sul tuo nome, presente in alto nella prima riga, potrai accedere alla <a href=\"{url}\" title=\"Vai alla pagina di gestione del profilo\">pagina del tuo profilo</a>, da cui potrai gestire le notifiche.<br>"
+message.login_ata: "Cliccando sul tuo nome, presente in alto nella prima riga, potrai accedere alla <a href=\"{url}\" title=\"Vai alla pagina di gestione del profilo\">pagina del tuo profilo</a>, da cui potrai configurare la tua email, cambiare la password e gestire le notifiche.<br>"
 message.upload_dropzone: Clicca o trascina qui i file per caricarli
 message.single_upload_dropzone: Clicca o trascina qui il file per caricarlo
 message.upload_cancella: Sei sicuro di voler annullare il caricamento in corso?

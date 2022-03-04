@@ -1,15 +1,13 @@
 <?php include('page_header.php'); ?>
 
-<h1 class="text-center mb-4"><?php echo $page['title']; ?></h1>
-
-<div class="alert alert-success mt-5" role="alert"><strong>
-  Pulizia della cache effettuata con successo.
-</strong></div>
+<?php if (isset($page['_token'])) { ?>
 <form name="install" method="post">
   <div class="form-group col text-center">
     <button type="submit" id="install_submit" name="install[submit]" class="btn-primary mt-1 btn">Vai avanti</button>
   </div>
+  <input type="hidden" id="install_step" name="install[step]" value="<?php echo $this->step; ?>">
   <input type="hidden" id="install__token" name="install[_token]" value="<?php echo $page['_token']; ?>">
 </form>
+<?php } ?>
 
 <?php include('page_footer.php'); ?>

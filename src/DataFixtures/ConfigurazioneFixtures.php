@@ -82,6 +82,12 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setParametro('dominio_id_provider')
       ->setDescrizione("Nel caso si utilizzi un identity provider esterno, indica il dominio di posta predefinito per le email degli utenti (usato nell'importazione)<br>[testo]")
       ->setGestito(false);
+    $param[] = (new Configurazione())
+      ->setCategoria('SISTEMA')
+      ->setParametro('spid')
+      ->setDescrizione("Indica la modalità dell'accesso SPID: 'no' = non utilizzato, 'si' = utilizzato, 'validazione' = utilizzato in validazione.<br>[si|no|validazione]")
+      ->setGestito(true)
+      ->setValore('no');
     //--- categoria SCUOLA
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')

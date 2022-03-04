@@ -25,6 +25,8 @@ INSERT INTO `gs_configurazione` VALUES (23,NOW(),NOW(),'ACCESSO','blocco_fine','
 INSERT INTO `gs_configurazione` VALUES (24,NOW(),NOW(),'ACCESSO','ip_scuola','Lista degli IP dei router di scuola (accerta che login provenga da dentro l\'istituto)<br>[lista separata da virgole degli IP]','127.0.0.1',0);
 INSERT INTO `gs_configurazione` VALUES (25,NOW(),NOW(),'ACCESSO','giorni_festivi_istituto','Indica i giorni festivi settimanali per l\'intero istituto<br>[lista separata da virgole nel formato: 0=domenica, 1=lunedì, ... 6=sabato]','0',0);
 INSERT INTO `gs_configurazione` VALUES (26,NOW(),NOW(),'ACCESSO','giorni_festivi_classi','Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato \'giorno:classe\'; giorno: 0=domenica, 1=lunedì, ... 6=sabato; classe: 1A, 2A, ...]','',0);
+INSERT INTO `gs_configurazione` VALUES (27,NOW(),NOW(),'SISTEMA','spid','Indica la modalità dell\'accesso SPID: \'no\' = non utilizzato, \'si\' = utilizzato, \'validazione\' = utilizzato in validazione.<br>[si|no|validazione]', 'no', 1);
+
 
 ----- TABELLA MENU -----
 INSERT INTO `gs_menu` VALUES (1,NOW(),NOW(),'help','Aiuto','Guide e supporto per l\'utente',0);

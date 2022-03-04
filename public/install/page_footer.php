@@ -10,7 +10,7 @@
             <div class="row">
               <div class="col-lg-6 col-md-12">
                 <h2>
-                  <a class="text-white text-decoration-none" href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai al progetto su GitHub">
+                  <a class="text-white text-decoration-none" href="https://trinko.github.io/giuaschool-docs/" target="_blank" title="Vai alla documentazione del progetto">
                     <em>giua@school</em>
                   </a>
                 </h2>
@@ -19,10 +19,10 @@
               <div class="col-lg-6 col-md-12 d-none d-md-block link-list-wrapper">
                 <ul class="footer-list link-list">
                   <li>
-                    <a class="list-item" href="https://github.com/trinko/giuaschool#giuaschool" target="_blank" title="Vai al progetto su GitHub">
+                    <a class="list-item" href="https://github.com/trinko/giuaschool" target="_blank" title="Vai al progetto su GitHub">
                       <svg class="icon icon-sm icon-light mr-2" aria-hidden="true">
                         <use xlink:href="/vendor/fontawesome/sprites/brands.svg#github"></use>
-                      </svg><span class="text-white">Progetto e codice sorgente</span>
+                      </svg><span class="text-white">Codice sorgente su GitHub</span>
                     </a>
                   </li>
                 </ul>
@@ -71,6 +71,9 @@
         });
       });
     </script>
+    <?php if (!empty($page['javascript'])) { ?>
+    <script><?php echo $page['javascript']; ?></script>
+    <?php } ?>
     <!-- FINE caricamento javascript -->
 
   </body>

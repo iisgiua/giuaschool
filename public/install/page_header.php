@@ -68,3 +68,27 @@
     <!-- contenuto pagina -->
     <main id="gs-main" class="clearfix pb-5">
       <div class="container">
+
+        <!-- TITLE -->
+        <h1 class="text-center mb-4"><?php echo $page['title']; ?></h1>
+        <!-- MESSAGE: danger/warning/info/success/text/code -->
+        <?php if (!empty($page['danger'])) { ?>
+        <div class="alert alert-danger mt-5" role="alert"><strong><?php echo $page['danger']; ?></strong></div>
+        <?php } ?>
+        <?php if (!empty($page['warning'])) { ?>
+        <div class="alert alert-warning mt-5" role="alert"><strong><?php echo $page['warning']; ?></strong></div>
+        <?php } ?>
+        <?php if (!empty($page['info'])) { ?>
+        <div class="alert alert-info mt-5" role="alert"><strong><?php echo $page['info']; ?></strong></div>
+        <?php } ?>
+        <?php if (!empty($page['success'])) { ?>
+        <div class="alert alert-success mt-5" role="alert"><strong><?php echo $page['success']; ?></strong></div>
+        <?php } ?>
+        <?php if (!empty($page['text'])) { ?>
+        <p class="mt-5"><strong><em><?php echo $page['text']; ?></em></strong></p>
+        <?php } ?>
+        <?php if (!empty($page['code'])) { ?>
+        <pre class="border px-2 mx-5 bg-light"><code>
+        <?php echo $page['code']; ?>
+        </code></pre>
+        <?php } ?>

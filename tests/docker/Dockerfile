@@ -86,7 +86,7 @@ RUN \
   php bin/console security:encode-password -n admin App\\Entity\\Amministratore 2> /dev/null | grep "Encoded password" | sed -r -e "s/^\s*Encoded password\s+(\S+)\s*$/UPDATE gs_utente SET password='\1' where username='admin';/" > admin-pswd && \
   mysql -uroot -proot giuaschool < admin-pswd && \
   rm -f admin-pswd && \
-# configure SPID access
+# install SPID library
   mkdir vendor/italia && \
   cd vendor/italia && \
   tar -zxf ../../tests/docker/spid-php.tgz && \
@@ -95,13 +95,11 @@ RUN \
   composer -q clear-cache --no-plugins && \
   cd vendor/simplesamlphp/simplesamlphp/modules && \
   tar -zxf ../../../../../../../tests/docker/spid-theme.tgz && \
-  cd /var/www/giuaschool/public && \
-  rm -f spid && \
-  ln -s -r ../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/www/ spid && \
-  cd ../var/log && \
-  mkdir -p ../../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log && \
-  ln -s -r ../../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log/ spid && \
-  cd ../.. && \
+  cd .. && \
+  mkdir log cert && \
+  cp ../../.gitkeep log/ && \
+  cp ../../.gitkeep cert/ && \
+  cd /var/www/giuaschool && \
 # adjust file permissions
   chown -R www-data:www-data .
 

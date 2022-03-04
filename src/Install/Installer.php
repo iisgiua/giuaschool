@@ -12,6 +12,16 @@
 
 namespace App\Install;
 
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Filesystem\Filesystem;
+use App\Kernel;
+
 
 /**
 * Installer - Gestione procedura di installazione
@@ -65,137 +75,64 @@ class Installer {
   private $token;
 
   /**
-   * Conserva la lista dei comandi sql per l'installazione iniziale
+   * Conserva il percorso della cartella pubblica (accessibile dal web)
    *
-   * @var array $dataCreate Lista di comandi sql per l'installazione iniziale
+   * @var string $publicPath Percorso della cartella pubblica
    */
-  private $dataCreate = [
-    // tabella configurazione
-    "INSERT INTO `gs_configurazione` VALUES (1,NOW(),NOW(),'SISTEMA','versione','Numero di versione dell\'applicazione<br>[testo]','1.4.2',1);",
-    "INSERT INTO `gs_configurazione` VALUES (2,NOW(),NOW(),'SISTEMA','manutenzione_inizio','Inizio della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);",
-    "INSERT INTO `gs_configurazione` VALUES (3,NOW(),NOW(),'SISTEMA','manutenzione_fine','Fine della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);",
-    "INSERT INTO `gs_configurazione` VALUES (4,NOW(),NOW(),'SISTEMA','banner_login','Messaggio da visualizzare nella pagina pubblica di login<br>[testo HTML]','',1);",
-    "INSERT INTO `gs_configurazione` VALUES (5,NOW(),NOW(),'SISTEMA','banner_home','Messaggio da visualizzare nella pagina home degli utenti autenticati<br>[testo HTML]','',1);",
-    "INSERT INTO `gs_configurazione` VALUES (6,NOW(),NOW(),'SISTEMA','id_provider','Se presente, indica l\'uso di un identity provider esterno (es. SSO su Google)<br>[testo]','',0);",
-    "INSERT INTO `gs_configurazione` VALUES (7,NOW(),NOW(),'SISTEMA','dominio_default','Indica il dominio di posta predefinito per le email degli utenti (usato nell\'importazione)<br>[testo]','noemail.local',0);",
-    "INSERT INTO `gs_configurazione` VALUES (8,NOW(),NOW(),'SISTEMA','dominio_id_provider','Nel caso si utilizzi un identity provider esterno, indica il dominio di posta predefinito per le email degli utenti (usato nell\'importazione)<br>[testo]','',0);",
-    "INSERT INTO `gs_configurazione` VALUES (9,NOW(),NOW(),'SCUOLA','anno_scolastico','Anno scolastico corrente<br>[formato: \'AAAA/AAAA\']','2021/2022',0);",
-    "INSERT INTO `gs_configurazione` VALUES (10,NOW(),NOW(),'SCUOLA','anno_inizio','Data dell\'inizio dell\'anno scolastico<br>[formato: \'AAAA-MM-GG\']','2021-09-22',0);",
-    "INSERT INTO `gs_configurazione` VALUES (11,NOW(),NOW(),'SCUOLA','anno_fine','Data della fine dell\'anno scolastico<br>[formato: \'AAAA-MM-GG\']','2022-06-12',0);",
-    "INSERT INTO `gs_configurazione` VALUES (12,NOW(),NOW(),'SCUOLA','periodo1_nome','Nome del primo periodo dell\'anno scolastico (primo trimestre/quadrimestre)<br>[testo]','Primo Quadrimestre',0);",
-    "INSERT INTO `gs_configurazione` VALUES (13,NOW(),NOW(),'SCUOLA','periodo1_fine','Data della fine del primo periodo, da \'anno_inizio\' sino al giorno indicato incluso<br>[formato: \'AAAA-MM-GG\']','2022-01-31',0);",
-    "INSERT INTO `gs_configurazione` VALUES (14,NOW(),NOW(),'SCUOLA','periodo2_nome','Nome del secondo periodo dell\'anno scolastico (secondo trimestre/quadrimestre/pentamestre)<br>[testo]','Secondo Quadrimestre',0);",
-    "INSERT INTO `gs_configurazione` VALUES (15,NOW(),NOW(),'SCUOLA','periodo2_fine','Data della fine del secondo periodo, da \'periodo1_fine\'+1 sino al giorno indicato incluso (se non è usato un terzo periodo, la data dovrà essere uguale a \'anno_fine\')<br>[formato \'AAAA-MM-GG\']','2022-06-12',0);",
-    "INSERT INTO `gs_configurazione` VALUES (16,NOW(),NOW(),'SCUOLA','periodo3_nome','Nome del terzo periodo dell\'anno scolastico (terzo trimestre) o vuoto se non usato (se è usato un terzo periodo, inizia a \'periodo2_fine\'+1 e finisce a \'anno_fine\')<br>[testo]','',0);",
-    "INSERT INTO `gs_configurazione` VALUES (17,NOW(),NOW(),'SCUOLA','ritardo_breve','Numero di minuti per la definizione di ritardo breve (non richiede giustificazione)<br>[intero]','10',0);",
-    "INSERT INTO `gs_configurazione` VALUES (18,NOW(),NOW(),'SCUOLA','mesi_colloqui','Mesi con i colloqui generali, nei quali non si può prenotare il colloquio individuale<br>[lista separata da virgola dei numeri dei mesi]','12,3',0);",
-    "INSERT INTO `gs_configurazione` VALUES (19,NOW(),NOW(),'SCUOLA','notifica_circolari','Ore di notifica giornaliera delle nuove circolari<br>[lista separata da virgola delle ore in formato HH]','15,18,20',0);",
-    "INSERT INTO `gs_configurazione` VALUES (20,NOW(),NOW(),'SCUOLA','assenze_dichiarazione','Indica se le assenze online devono inglobare l\'autodichiarazione NO-COVID<br>[booleano, 0 o 1]','0',0);",
-    "INSERT INTO `gs_configurazione` VALUES (21,NOW(),NOW(),'SCUOLA','assenze_ore','Indica se le assenze devono essere gestite su base oraria e non giornaliera<br>[booleano, 0 o 1]','0',0);",
-    "INSERT INTO `gs_configurazione` VALUES (22,NOW(),NOW(),'ACCESSO','blocco_inizio','Inizio orario del blocco di alcune modalità di accesso per i docenti<br>[formato: \'HH:MM\', vuoto se nessun blocco]','',0);",
-    "INSERT INTO `gs_configurazione` VALUES (23,NOW(),NOW(),'ACCESSO','blocco_fine','Fine orario del blocco di alcune modalità di accesso per i docenti<br>[formato \'HH:MM\', vuoto se nessun blocco]','',0);",
-    "INSERT INTO `gs_configurazione` VALUES (24,NOW(),NOW(),'ACCESSO','ip_scuola','Lista degli IP dei router di scuola (accerta che login provenga da dentro l\'istituto)<br>[lista separata da virgole degli IP]','127.0.0.1',0);",
-    "INSERT INTO `gs_configurazione` VALUES (25,NOW(),NOW(),'ACCESSO','giorni_festivi_istituto','Indica i giorni festivi settimanali per l\'intero istituto<br>[lista separata da virgole nel formato: 0=domenica, 1=lunedì, ... 6=sabato]','0',0);",
-    "INSERT INTO `gs_configurazione` VALUES (26,NOW(),NOW(),'ACCESSO','giorni_festivi_classi','Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato \'giorno:classe\'; giorno: 0=domenica, 1=lunedì, ... 6=sabato; classe: 1A, 2A, ...]','',0);",
-    // tabella menu
-    "INSERT INTO `gs_menu` VALUES (1,NOW(),NOW(),'help','Aiuto','Guide e supporto per l\'utente',0);",
-    "INSERT INTO `gs_menu` VALUES (2,NOW(),NOW(),'user','Utente','Gestione del profilo dell\'utente',0);",
-    "INSERT INTO `gs_menu` VALUES (3,NOW(),NOW(),'info','Informazioni','Informazioni sul sito web',0);",
-    "INSERT INTO `gs_menu` VALUES (4,NOW(),NOW(),'sistema',NULL,NULL,0);",
-    "INSERT INTO `gs_menu` VALUES (5,NOW(),NOW(),'scuola',NULL,NULL,0);",
-    "INSERT INTO `gs_menu` VALUES (6,NOW(),NOW(),'ata',NULL,NULL,0);",
-    "INSERT INTO `gs_menu` VALUES (7,NOW(),NOW(),'docenti',NULL,NULL,0);",
-    "INSERT INTO `gs_menu` VALUES (8,NOW(),NOW(),'alunni',NULL,NULL,0);",
-    "INSERT INTO `gs_menu` VALUES (9,NOW(),NOW(),'main','Menu Principale','Apri il menu principale',0);",
-    // tabella opzioni menu
-    "INSERT INTO `gs_menu_opzione` VALUES (1,1,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (2,1,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (3,1,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (4,1,NULL,NOW(),NOW(),'ROLE_GENITORE','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (5,1,NULL,NOW(),NOW(),'ROLE_DOCENTE','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (6,1,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (7,1,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (8,2,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (9,2,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (10,2,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (11,2,NULL,NOW(),NOW(),'ROLE_GENITORE','NESSUNA','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (12,2,NULL,NOW(),NOW(),'ROLE_DOCENTE','NESSUNA','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (13,2,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUNA','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (14,2,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (15,3,NULL,NOW(),NOW(),'NESSUNO','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (16,3,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (17,3,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (18,3,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (19,3,NULL,NOW(),NOW(),'ROLE_GENITORE','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (20,3,NULL,NOW(),NOW(),'ROLE_DOCENTE','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (21,3,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (22,3,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (23,3,NULL,NOW(),NOW(),'NESSUNO','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (24,3,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (25,3,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (26,3,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (27,3,NULL,NOW(),NOW(),'ROLE_GENITORE','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (28,3,NULL,NOW(),NOW(),'ROLE_DOCENTE','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (29,3,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (30,3,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (31,3,NULL,NOW(),NOW(),'NESSUNO','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (32,3,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (33,3,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (34,3,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (35,3,NULL,NOW(),NOW(),'ROLE_GENITORE','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (36,3,NULL,NOW(),NOW(),'ROLE_DOCENTE','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (37,3,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (38,3,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (39,3,NULL,NOW(),NOW(),'NESSUNO','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (40,3,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (41,3,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (42,3,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (43,3,NULL,NOW(),NOW(),'ROLE_GENITORE','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (44,3,NULL,NOW(),NOW(),'ROLE_DOCENTE','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (45,3,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (46,3,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (47,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Parametri','Configura i parametri dell\'applicazione','sistema_parametri',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (48,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Banner','Visualizza un banner sulle pagine principali','sistema_banner',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (49,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Manutenzione','Imposta la modalità di manutenzione','sistema_manutenzione',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (50,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Importazione&nbsp;iniziale','Importa i dati dall\'A.S. precedente','sistema_importa',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (51,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Archiviazione','Archivia i registri e i documenti delle classi','sistema_archivia',5,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (52,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','__SEPARATORE__','__SEPARATORE__',NULL,6,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (53,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Alias','Assumi l\'identità di un altro utente','sistema_alias',7,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (54,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Password','Cambia la password di un utente','sistema_password',8,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (55,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Amministratore','Configura i dati dell\'amministratore','scuola_amministratore',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (56,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Dirigente&nbsp;scolastico','Configura i dati del dirigente scolastico','scuola_dirigente',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (57,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Istituto','Configura i dati dell\'Istituto','scuola_istituto',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (58,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Sedi','Configura i dati delle sedi scolastiche','scuola_sedi',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (59,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Corsi','Configura i corsi di studio','scuola_corsi',5,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (60,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Materie','Configura le materie scolastiche','scuola_materie',6,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (61,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Classi','Configura le classi','scuola_classi',7,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (62,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Festività','Configura il calendario delle festività','scuola_festivita',8,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (63,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Orario','Configura la scansione oraria delle lezioni','scuola_orario',9,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (64,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Scrutini','Configura gli scrutini','scuola_scrutini',10,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (65,6,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Importa','Importa da file i dati del personale ATA','ata_importa',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (66,6,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Modifica','Modifica i dati del personale ATA','ata_modifica',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (67,7,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Importa','Importa da file i dati dei docenti','docenti_importa',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (68,7,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Modifica','Modifica i dati dei docenti','docenti_modifica',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (69,7,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Staff','Configura i componenti dello staff della dirigenza','docenti_staff',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (70,7,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Coordinatori','Configura i coordinatori del Consiglio di Classe','docenti_coordinatori',4,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (71,7,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Segretari','Configura i segretari del Consiglio di Classe','docenti_segretari',5,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (72,7,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Cattedre','Configura le cattedre dei docenti','docenti_cattedre',6,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (73,7,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Colloqui','Configura i colloqui dei docenti','docenti_colloqui',7,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (74,8,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Importa','Importa da file i dati degli alunni','alunni_importa',1,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (75,8,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Modifica','Modifica i dati degli alunni','alunni_modifica',2,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (76,8,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Cambio&nbsp;classe','Configura il cambio di classe degli alunni','alunni_classe',3,0,NULL);",
-    "INSERT INTO `gs_menu_opzione` VALUES (77,9,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Home','Pagina principale','login_home',1,0,'home');",
-    "INSERT INTO `gs_menu_opzione` VALUES (78,9,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Home','Pagina principale','login_home',1,0,'home');",
-    "INSERT INTO `gs_menu_opzione` VALUES (79,9,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Home','Pagina principale','login_home',1,0,'home');",
-    "INSERT INTO `gs_menu_opzione` VALUES (80,9,NULL,NOW(),NOW(),'ROLE_GENITORE','NESSUNA','Home','Pagina principale','login_home',1,0,'home');",
-    "INSERT INTO `gs_menu_opzione` VALUES (81,9,NULL,NOW(),NOW(),'ROLE_DOCENTE','NESSUNA','Home','Pagina principale','login_home',1,0,'home');",
-    "INSERT INTO `gs_menu_opzione` VALUES (82,9,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUNA','Home','Pagina principale','login_home',1,0,'home');",
-    "INSERT INTO `gs_menu_opzione` VALUES (83,9,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Home','Pagina principale','login_home',1,0,'home');",
-    "INSERT INTO `gs_menu_opzione` VALUES (84,9,4,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Sistema','Gestione generale del sistema',NULL,2,0,'cog');",
-    "INSERT INTO `gs_menu_opzione` VALUES (85,9,5,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Scuola','Configurazione dei dati della scuola',NULL,3,0,'school');",
-    "INSERT INTO `gs_menu_opzione` VALUES (86,9,6,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','ATA','Gestione del personale ATA',NULL,4,0,'user-tie');",
-    "INSERT INTO `gs_menu_opzione` VALUES (87,9,7,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Docenti','Gestione dei docenti',NULL,5,0,'user-graduate');",
-    "INSERT INTO `gs_menu_opzione` VALUES (88,9,8,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Alunni','Gestione degli alunni',NULL,6,0,'child');",
+  private $publicPath;
+
+  /**
+   * Conserva il percorso della directory dell'applicazione
+   *
+   * @var string $projectPath Percorso della directory dell'applicazione
+   */
+  private $projectPath;
+
+  /**
+   * Conserva il percorso base della URL di esecuzione dell'applicazione
+   *
+   * @var string $urlPath Percorso base della URL di esecuzione
+   */
+  private $urlPath;
+
+  /**
+   * Conserva le procedure da eseguire a seconda della modalità e del passo
+   *
+   * @var array $procedure Percorso da eseguire
+   */
+  private $procedure = [
+    'Create' => [
+      '1' => 'pageInstall',
+      '2' => 'pageAuthenticate',
+      '3' => 'pageMandatory',
+      '4' => 'pageOptional',
+      '5' => 'pageDatabase',
+      '6' => 'pageSchema',
+      '7' => 'pageAdmin',
+      '8' => 'pageEmail',
+      '9' => 'pageEmailTest',
+      '10' => 'pageSpid',
+      '11' => 'pageSpidRequirements',
+      '12' => 'pageSpidData',
+      '13' => 'pageSpidValidate',
+      '14' => 'pageClean',
+      '15' => 'pageEnd',
+    ],
+    'Update' => [
+      '1' => 'pageInstall',
+      '2' => 'pageAuthenticate',
+      '3' => 'pageMandatory',
+      '4' => 'pageOptional',
+      '5' => 'pageUpdate',
+      '6' => 'pageEmail',
+      '7' => 'pageEmailTest',
+      '8' => 'pageSpid',
+      '9' => 'pageSpidRequirements',
+      '10' => 'pageSpidData',
+      '11' => 'pageSpidValidate',
+      '12' => 'pageClean',
+      '13' => 'pageEnd',
+    ]
   ];
 
   /**
@@ -226,7 +163,11 @@ class Installer {
       "UPDATE gs_menu_opzione SET url='scuola_festivita',disabilitato=0 WHERE nome='Festività';",
       "UPDATE gs_menu_opzione SET url='scuola_orario',disabilitato=0 WHERE nome='Orario';",
     ],
-    'build' => []
+    //-- '1.4.3' => [
+    //-- ],
+    'build' => [
+      "INSERT INTO `gs_configurazione` (`creato`, `modificato`, `categoria`, `parametro`, `descrizione`, `valore`, `gestito`) VALUES (NOW(),NOW(),'SISTEMA','spid','Indica la modalità dell\'accesso SPID: \'no\' = non utilizzato, \'si\' = utilizzato, \'validazione\' = utilizzato in validazione.<br>[si|no|validazione]','no',1);",
+    ]
   ];
 
 
@@ -236,14 +177,20 @@ class Installer {
    * Costruttore
    * Inizializza variabili di classe
    *
+   * @param string $path Percorso della directory di esecuzione
    */
-  public function __construct() {
+  public function __construct($path) {
     $this->env = [];
     $this->pdo = null;
     $this->version = null;
     $this->mode = null;
     $this->step = null;
     $this->token = null;
+    $this->publicPath = $path;
+    $this->projectPath = dirname($path);
+    $this->urlPath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
+      '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+    $this->urlPath = substr($this->urlPath, 0, -strlen('/install/index.php'));
   }
 
   /**
@@ -272,8 +219,16 @@ class Installer {
       $_SESSION['GS_INSTALL_TOKEN'] = $this->token;
     }
     try {
+      // controllo token
+      if ($this->step != 1) {
+        $token = $_POST['install']['_token'] ?? null;
+        if ($this->token !== $token) {
+          // identificatore della procedura di installazione errato
+          throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+        }
+      }
       // esegue pagina
-      $this->{'page'.$this->mode.$this->step}();
+      $this->{$this->procedure[$this->mode][$this->step]}();
     } catch (\Exception $e) {
       // errore
       $this->pageError($e->getMessage(), $e->getCode());
@@ -293,7 +248,7 @@ class Installer {
     // imposta il token univoco di installazione
     $this->token = bin2hex(random_bytes(16));
     // controlla esistenza file .env
-    $envPath = dirname(dirname(__DIR__)).'/.env';
+    $envPath = $this->projectPath.'/.env';
     if (!file_exists($envPath)) {
       // non esiste file .env
       $this->mode = 'Create';
@@ -309,10 +264,8 @@ class Installer {
       return;
     }
     // connette al database
-    $db = parse_url($this->env['DATABASE_URL']);
-    $dsn = $db['scheme'].':dbname='.substr($db['path'], 1).';host='.$db['host'].';port='.$db['port'];
     try {
-      $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
+      $this->connectDb();
     } catch (\Exception $e) {
       // configurazione database errata
       $this->mode = 'Create';
@@ -345,16 +298,17 @@ class Installer {
   private function getParameter($parameter) {
     // init
     $valore = null;
-    // legge parametro
-    if ($this->pdo) {
-      // imposta query
-      $sql = "SELECT valore FROM gs_configurazione WHERE parametro=:parameter";
-      $stm = $this->pdo->prepare($sql);
-      $stm->execute(['parameter' => $parameter]);
-      $data = $stm->fetchAll();
-      if (isset($data[0]['valore'])) {
-        $valore = $data[0]['valore'];
-      }
+    if (!$this->pdo) {
+      // connessione al db
+      $this->connectDb();
+    }
+    // imposta query
+    $sql = "SELECT valore FROM gs_configurazione WHERE parametro=:parameter";
+    $stm = $this->pdo->prepare($sql);
+    $stm->execute(['parameter' => $parameter]);
+    $data = $stm->fetchAll();
+    if (isset($data[0]['valore'])) {
+      $valore = $data[0]['valore'];
     }
     // restituisce valore
     return $valore;
@@ -367,21 +321,23 @@ class Installer {
    * @param string $value Valore del parametro
    */
   private function setParameter($parameter, $value) {
-    // modifica parametro
-    if ($this->pdo) {
-      // imposta query
-      $sql = "UPDATE gs_configurazione SET valore=:value WHERE parametro=:parameter";
-      $stm = $this->pdo->prepare($sql);
-      $stm->execute(['value' => $value, 'parameter' => $parameter]);
+    if (!$this->pdo) {
+      // connessione al db
+      $this->connectDb();
     }
+    // modifica parametro
+    $sql = "UPDATE gs_configurazione SET valore=:value WHERE parametro=:parameter";
+    $stm = $this->pdo->prepare($sql);
+    $stm->execute(['value' => $value, 'parameter' => $parameter]);
   }
 
   /**
    * Controlla i requisiti obbligatori per l'applicazione
-   * Il vettore restituito contiene 3 campi per ogni requisito:
+   * Il vettore restituito contiene 4 campi per ogni requisito:
    *  [0] = descrizione del requisito (string)
    *  [1] = impostazione attuale (string)
    *  [2] = se il requisito è soddisfatto (bool)
+   *  [3] = 'mandatory' o 'optional'
    *
    * @return array Vettore associativo con le informazioni sui requisiti controllati
    */
@@ -393,106 +349,107 @@ class Installer {
     $data[] = [
       'Versione PHP 7.4 o superiore',
       PHP_VERSION,
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: Ctype
     $test = function_exists('ctype_alpha');
     $data[] = [
       'Estensione PHP: Ctype',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: iconv
     $test = function_exists('iconv');
     $data[] = [
       'Estensione PHP: iconv',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: JSON
     $test = function_exists('json_encode');
     $data[] = [
       'Estensione PHP: JSON',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: mysqli
     $test = function_exists('mysqli_connect');
     $data[] = [
       'Estensione PHP: mysqli',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: PCRE
     $test = defined('PCRE_VERSION');
     $data[] = [
       'Estensione PHP: PCRE',
       $test ? PCRE_VERSION : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: PDO
     $test = class_exists('PDO');
     $data[] = [
       'Estensione PHP: PDO',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: Session
     $test = function_exists('session_start');
     $data[] = [
       'Estensione PHP: Session',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: SimpleXML
     $test = function_exists('simplexml_import_dom');
     $data[] = [
       'Estensione PHP: SimpleXML',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'mandatory'];
     // estensioni PHP: Tokenizer
     $test = function_exists('token_get_all');
     $data[] = [
       'Estensione PHP: Tokenizer',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
-    // directory scrivibili: cache
-    $path = dirname(dirname(__DIR__)).'/var/cache';
+      $test, 'mandatory'];
+    // directory scrivibili: .
+    $path = $this->projectPath;
     $test = is_dir($path) && is_writable($path);
     $data[] = [
-      'Cartella principale della cache con permessi di scrittura',
+      'Cartella principale dell\'applicazione con permessi di scrittura',
       $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // directory scrivibili: cache/prod
-    $path = dirname(dirname(__DIR__)).'/var/cache/prod';
+      $test, 'mandatory'];
+    // directory scrivibili: var/cache/prod
+    $path = $this->projectPath.'/var/cache/prod';
     $test = is_dir($path) && is_writable($path);
     $data[] = [
-      'Cartella in uso della cache con permessi di scrittura',
+      'Cartella della cache di sistema con permessi di scrittura',
       $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
+      $test, 'mandatory'];
     // directory scrivibili: log
-    $path = dirname(dirname(__DIR__)).'/var/log';
+    $path = $this->projectPath.'/var/log';
     $test = is_dir($path) && is_writable($path);
     $data[] = [
-      'Cartella dei log con permessi di scrittura',
+      'Cartella dei log di sistema con permessi di scrittura',
       $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // directory scrivibili: sessions
-    $path = dirname(dirname(__DIR__)).'/var/sessions';
-    $test = is_dir($path) && is_writable($path);
-    $data[] = [
-      'Cartella principale delle sessioni con permessi di scrittura',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
+      $test, 'mandatory'];
     // directory scrivibili: sessions/prod
-    $path = dirname(dirname(__DIR__)).'/var/sessions/prod';
+    $path = $this->projectPath.'/var/sessions/prod';
     $test = is_dir($path) && is_writable($path);
     $data[] = [
-      'Cartella in uso delle sessioni con permessi di scrittura',
+      'Cartella delle sessioni con permessi di scrittura',
       $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
+      $test, 'mandatory'];
+    // file scrivibili: .env
+    $path = $this->projectPath.'/.env';
+    $test = is_writable($path);
+    $data[] = [
+      'File di configurazione ".env" con permessi di scrittura',
+      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
+      $test, 'mandatory'];
     // restituisce dati
     return $data;
   }
 
   /**
    * Controlla i requisiti opzionali per l'applicazione
-   * Il vettore restituito contiene 3 campi per ogni requisito:
+   * Il vettore restituito contiene 4 campi per ogni requisito:
    *  [0] = descrizione del requisito (string)
    *  [1] = impostazione attuale (string)
    *  [2] = se il requisito è soddisfatto (bool)
+   *  [3] = 'mandatory' o 'optional'
    *
    * @return array Vettore associativo con le informazioni sui requisiti controllati
    */
@@ -504,95 +461,305 @@ class Installer {
     $data[] = [
       'Estensione PHP: curl',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'optional'];
     // estensioni PHP: gd
     $test = function_exists('gd_info');
     $data[] = [
       'Estensione PHP: gd',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'optional'];
     // estensioni PHP: intl
     $test = extension_loaded('intl');
     $data[] = [
       'Estensione PHP: intl',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'optional'];
     // estensioni PHP: mbstring
     $test = function_exists('mb_strlen');
     $data[] = [
       'Estensione PHP: mbstring',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'optional'];
     // estensioni PHP: xml
     $test = extension_loaded('xml');
     $data[] = [
       'Estensione PHP: xml',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'optional'];
     // estensioni PHP: zip
     $test = extension_loaded('zip');
     $data[] = [
       'Estensione PHP: zip',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
-    // symlink : public/spid
-    $path = dirname(dirname(__DIR__)).'/public/spid';
-    $pathLinked = '../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/www';
-    $test = is_link($path) && readlink($path) == $pathLinked;
-    $data[] = [
-      'Collegamento alla cartella SPID per la visualizzazione',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // symlink : log/spid
-    $path = dirname(dirname(__DIR__)).'/var/log/spid';
-    $pathLinked = '../../vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log';
-    $test = is_link($path) && readlink($path) == $pathLinked;
-    $data[] = [
-      'Collegamento alla cartella SPID per i log',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
-    // directory scrivibili: log/spid
-    $path = dirname(dirname(__DIR__)).'/var/log/spid';
-    $test = is_dir($path) && is_writable($path);
-    $data[] = [
-      'Cartella SPID per i log con permessi di scrittura',
-      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
-      $test];
+      $test, 'optional'];
     // applicazione: unoconv
     $path = '/usr/bin/unoconv';
     $test = is_executable($path);
     $data[] = [
       'Applicazione UNOCONV per la conversione in PDF',
       $test ? 'INSTALLATA' : 'NON INSTALLATA',
-      $test];
+      $test, 'optional'];
     // restituisce dati
     return $data;
+  }
+
+  /**
+   * Controlla i requisiti per lo SPID
+   * Il vettore restituito contiene 4 campi per ogni requisito:
+   *  [0] = descrizione del requisito (string)
+   *  [1] = impostazione attuale (string)
+   *  [2] = se il requisito è soddisfatto (bool)
+   *  [3] = 'mandatory' o 'optional'
+   *
+   * @return array Vettore associativo con le informazioni sui requisiti controllati
+   */
+  private function spidRequirements() {
+    // init
+    $data = [];
+    // estensioni PHP: openssl
+    $test = extension_loaded('openssl');
+    $data[] = [
+      'Estensione PHP: openssl',
+      $test ? 'INSTALLATA' : 'NON INSTALLATA',
+      $test, 'mandatory'];
+    // directory scrivibili: vendor/italia/spid-php
+    $path = $this->projectPath.'/vendor/italia/spid-php';
+    $test = is_dir($path) && is_writable($path);
+    $data[] = [
+      'Cartella di configurazione dello SPID con permessi di scrittura',
+      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
+      $test, 'mandatory'];
+    // directory scrivibili: vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/cert
+    $path = $this->projectPath.'/vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/cert';
+    $test = is_dir($path) && is_writable($path);
+    $data[] = [
+      'Cartella di utilizzo del certificato SPID con permessi di scrittura',
+      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
+      $test, 'mandatory'];
+    // directory scrivibili: vendor/italia/spid-php/cert
+    $path = $this->projectPath.'/vendor/italia/spid-php/cert';
+    $test = is_dir($path) && is_writable($path);
+    $data[] = [
+      'Cartella di archivio del certificato SPID con permessi di scrittura',
+      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
+      $test, 'mandatory'];
+    // directory scrivibili: config/metadata
+    $path = $this->projectPath.'/config/metadata';
+    $test = is_dir($path) && is_writable($path);
+    $data[] = [
+      'Cartella di memorizzazione dei metadata con permessi di scrittura',
+      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
+      $test, 'mandatory'];
+    // directory scrivibili: vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log
+    $path = $this->projectPath.'/vendor/italia/spid-php/vendor/simplesamlphp/simplesamlphp/log';
+    $test = is_dir($path) && is_writable($path);
+    $data[] = [
+      'Cartella di log dello SPID con permessi di scrittura',
+      $test ? 'SI' : 'NO (controlla: "'.$path.'")',
+      $test, 'mandatory'];
+    // restituisce dati
+    return $data;
+  }
+
+  /**
+   * Configura la libreria SPID-PHP
+   *
+   * @param bool $validate Vero se la modalità validazione è attiva
+   */
+  private function spidSetup($validate) {
+    // inizializza
+    $fs = new Filesystem();
+    // legge configurazione
+    $spid = json_decode(file_get_contents(
+      $this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json'), true);
+    $spid['addValidatorIDP'] = $validate;
+    // salva configurazione modificata
+    unlink($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json');
+    file_put_contents($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json',
+      json_encode($spid));
+    // crea certificati
+    if (file_exists($spid['installDir'].'/cert/spid-sp.crt') && file_exists($spid['installDir'].'/cert/spid-sp.pem')) {
+      // certificato esiste: aggiorna configurazione SAML
+      $fs->mirror($spid['installDir'].'/cert',
+        $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert');
+    } else {
+      // crea file configurazione SSL
+      unlink($spid['installDir'].'/spid-php-openssl.cnf');
+      $sslFile = fopen($spid['installDir'].'/spid-php-openssl.cnf', 'w');
+      fwrite($sslFile, 'oid_section = spid_oids'."\n");
+      fwrite($sslFile, "\n".'[ req ]'."\n");
+      fwrite($sslFile, 'default_bits = 3072'."\n");
+      fwrite($sslFile, 'default_md = sha256'."\n");
+      fwrite($sslFile, 'distinguished_name = dn'."\n");
+      fwrite($sslFile, 'encrypt_key = no'."\n");
+      fwrite($sslFile, 'prompt = no'."\n");
+      fwrite($sslFile, 'req_extensions  = req_ext'."\n");
+      fwrite($sslFile, "\n".'[ spid_oids ]'."\n");
+      fwrite($sslFile, 'spid-privatesector-SP=1.3.76.16.4.3.1'."\n");
+      fwrite($sslFile, 'spid-publicsector-SP=1.3.76.16.4.2.1'."\n");
+      fwrite($sslFile, 'uri=2.5.4.83'."\n");
+      fwrite($sslFile, "\n".'[ dn ]'."\n");
+      fwrite($sslFile, 'organizationName='.$spid['spOrganizationName']."\n");
+      fwrite($sslFile, 'commonName='.$spid['spOrganizationDisplayName']."\n");
+      fwrite($sslFile, 'uri='.$spid['entityID']."\n");
+      fwrite($sslFile, 'organizationIdentifier='.$spid['spOrganizationIdentifier']."\n");
+      fwrite($sslFile, 'countryName='.$spid['spCountryName']."\n");
+      fwrite($sslFile, 'localityName='.$spid['spLocalityName']."\n");
+      fwrite($sslFile, "\n".'[ req_ext ]'."\n");
+      fwrite($sslFile, 'certificatePolicies = @spid_policies'."\n");
+      fwrite($sslFile, "\n".'[ spid_policies ]'."\n");
+      fwrite($sslFile, 'policyIdentifier = spid-publicsector-SP'."\n");
+      fclose($sslFile);
+      // crea certificato
+      $errors = '';
+      $sslParams = array(
+        'config' => $spid['installDir'].'/spid-php-openssl.cnf',
+        'x509_extensions' => 'req_ext');
+  	 	if (($sslPkey = openssl_pkey_new($sslParams)) === false) {
+        // errore di creazione del certificato
+        while (($e = openssl_error_string()) !== false) {
+          $errors .= '<br>'.$e;
+        }
+        $this->pageError('Impossibile creare il certificato per lo SPID (openssl_pkey_new).'.$errors, $this->step);
+      }
+      $sslDn = [
+        'organizationName' => $spid['spOrganizationName'],
+        'commonName' => $spid['spOrganizationDisplayName'],
+        'uri' => $spid['entityID'],
+        'organizationIdentifier' => $spid['spOrganizationIdentifier'],
+        'countryName' => $spid['spCountryName'],
+        'localityName' => $spid['spLocalityName']];
+      if (($sslCsr = openssl_csr_new($sslDn, $sslPkey, $sslParams)) === false) {
+        // errore di creazione del certificato
+        while (($e = openssl_error_string()) !== false) {
+          $errors .= '<br>'.$e;
+        }
+        $this->pageError('Impossibile creare il certificato per lo SPID (openssl_csr_new).'.$errors, $this->step);
+      }
+      if (($sslCert = openssl_csr_sign($sslCsr, null, $sslPkey, 730, $sslParams, time())) === false) {
+        // errore di creazione del certificato
+        while (($e = openssl_error_string()) !== false) {
+          $errors .= '<br>'.$e;
+        }
+        $this->pageError('Impossibile creare il certificato per lo SPID (openssl_csr_sign).'.$errors, $this->step);
+      }
+      if (openssl_x509_export_to_file($sslCert, $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert/spid-sp.crt') === false) {
+        // errore di creazione del certificato
+        while (($e = openssl_error_string()) !== false) {
+          $errors .= '<br>'.$e;
+        }
+        $this->pageError('Impossibile creare il certificato per lo SPID (openssl_x509_export_to_file).'.$errors, $this->step);
+      }
+      if (openssl_pkey_export_to_file($sslPkey, $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert/spid-sp.pem', null, $sslParams) === false) {
+        // errore di creazione del certificato
+        while (($e = openssl_error_string()) !== false) {
+          $errors .= '<br>'.$e;
+        }
+        $this->pageError('Impossibile creare il certificato per lo SPID (openssl_pkey_export_to_file).'.$errors, $this->step);
+      }
+      // copia in directory di configurazione SPID
+      $fs->mirror($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/cert',
+        $spid['installDir'].'/cert');
+    }
+    // crea link a dir pubblica
+    $fs->symlink($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/www',
+      $spid['wwwDir'].'/'.$spid['serviceName']);
+    // crea link a dir log
+    $fs->symlink($spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/log',
+      $this->projectPath.'/var/log/'.$spid['serviceName']);
+    // personalizza configurazione SAML
+    $db = parse_url($this->env['DATABASE_URL']);
+    $vars = array(
+      '{{BASEURLPATH}}' => "'".$spid['serviceName']."/'",
+      '{{ADMIN_PASSWORD}}' => "'".$spid['adminPassword']."'",
+      '{{SECRETSALT}}' => "'".$spid['secretsalt']."'",
+      '{{TECHCONTACT_NAME}}' => "'".$spid['technicalContactName']."'",
+      '{{TECHCONTACT_EMAIL}}' => "'".$spid['technicalContactEmail']."'",
+      '{{ACSCUSTOMLOCATION}}' => "'".$spid['acsCustomLocation']."'",
+      '{{SLOCUSTOMLOCATION}}' => "'".$spid['sloCustomLocation']."'",
+      '{{SP_DOMAIN}}' => "'".$spid['spDomain']."'",
+      '{{DB_DSN}}' => "'".$db['scheme'].':host='.$db['host'].';port='.$db['port'].';dbname='.substr($db['path'], 1)."'",
+      '{{DB_USER}}' => "'".$db['user']."'",
+      '{{DB_PASW}}' => "'".$db['pass']."'");
+    $template = file_get_contents($spid['installDir'].'/setup/config/config.tpl');
+    $customized = str_replace(array_keys($vars), $vars, $template);
+    $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/config.php';
+    if (file_put_contents($dest, $customized) === false) {
+      // errore di creazione del file
+      $this->pageError('Impossibile creare il file di configurazione SAML (config.php).', $this->step);
+    }
+    // personalizza configurazione SP
+    $vars = array(
+      '{{ENTITYID}}' => "'".$spid['entityID']."'",
+      '{{NAME}}' => "'".$spid['spName']."'",
+      '{{DESCRIPTION}}' => "'".$spid['spDescription']."'",
+      '{{ORGANIZATIONNAME}}' => "'".$spid['spOrganizationName']."'",
+      '{{ORGANIZATIONDISPLAYNAME}}' => "'".$spid['spOrganizationDisplayName']."'",
+      '{{ORGANIZATIONURL}}' => "'".$spid['spOrganizationURL']."'",
+      '{{ACSINDEX}}' => $spid['acsIndex'],
+      '{{ATTRIBUTES}}' => implode(',', $spid['attr']),
+      '{{ORGANIZATIONCODETYPE}}' => "'".$spid['spOrganizationCodeType']."'",
+      '{{ORGANIZATIONCODE}}' => "'".$spid['spOrganizationCode']."'",
+      '{{ORGANIZATIONEMAILADDRESS}}' => "'".$spid['spOrganizationEmailAddress']."'",
+      '{{ORGANIZATIONTELEPHONENUMBER}}' => "'".$spid['spOrganizationTelephoneNumber']."'");
+    $template = file_get_contents($spid['installDir'].'/setup/config/authsources_public.tpl');
+    $customized = str_replace(array_keys($vars), $vars, $template);
+    $dest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/config/authsources.php';
+    if (file_put_contents($dest, $customized) === false) {
+      // errore di creazione del file
+      $this->pageError('Impossibile creare il file di configurazione del Service Provider (authsources.php).', $this->step);
+    }
+    // aggiorna metadata
+    require ($spid['installDir'].'/setup/Setup.php');
+    require ($spid['installDir'].'/setup/Colors.php');
+    chdir($spid['installDir']);
+    try {
+      ob_start();
+      \SPID_PHP\Setup::updateMetadata();
+      ob_end_clean();
+      chdir($this->projectPath.'/public/install');
+    } catch (\Exception $e) {
+      // errore
+      chdir($this->projectPath.'/public/install');
+      $this->pageError($e->getMessage(), $this->step);
+    }
+    // copia HTML pulsante SPID
+    $pathSource = $spid['installDir'].'/vendor/italia/spid-sp-access-button/src/production';
+    $pathDest = $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/www/spid-sp-access-button';
+    foreach (['/css', '/img', '/js'] as $value) {
+      $source = $pathSource.$value;
+      $dest = $pathDest.$value;
+      $fs->mkdir($dest);
+      $fs->mirror($source, $dest);
+    }
+    // copia template twig per SPID
+    $fs->mirror($spid['installDir'].'/setup/simplesamlphp/simplesamlphp/templates',
+      $spid['installDir'].'/vendor/simplesamlphp/simplesamlphp/templates');
   }
 
   /**
    * Verifica le credenziali di accesso alla procedura
    *
    * @param string $password Password di installazione
-   * @param int $step Passo della procedura a cui tornare in caso di errore
    *
    */
-  private function authenticate($password, $step) {
-    // carica variabili dia ambiente
-    $envPath = dirname(dirname(__DIR__)).'/.env';
+  private function authenticate($password) {
+    // carica variabili di ambiente
+    $envPath = $this->projectPath.'/.env';
     if (!file_exists($envPath)) {
       // non esiste file .env
-      throw new \Exception('Il file ".env" non esiste', $step);
+      throw new \Exception('Il file ".env" non esiste', $this->step);
     }
     // legge .env e carica variabili di ambiente
     $env = parse_ini_file($envPath);
     if (!isset($env['INSTALLATION_PSW']) || empty($env['INSTALLATION_PSW'])) {
       // non esiste password di installazione
-      throw new \Exception('Il parametro "INSTALLATION_PSW" non è configurato all\'interno del file .env', $step);
+      throw new \Exception('Il parametro "INSTALLATION_PSW" non è configurato all\'interno del file .env', $this->step);
     }
     // controlla password
     if ($env['INSTALLATION_PSW'] !== $password) {
-      // non esiste password di installazione
-      throw new \Exception('La password di installazione non corrisponde a quelle del parametro "INSTALLATION_PSW"', $step);
+      // password di installazione diversa
+      throw new \Exception('La password di installazione non corrisponde a quelle del parametro "INSTALLATION_PSW"', $this->step);
     }
     // memorizza password in configurazione
     $this->env['INSTALLATION_PSW'] = $password;
@@ -600,42 +767,56 @@ class Installer {
   }
 
   /**
-   * Crea il database iniziale caricandolo da file
+   * Crea il database iniziale
    *
    */
   private function createSchema() {
-    // crea il database
+    // comandi per la creazione del db
+    $commands = [
+      new ArrayInput(['command' => 'doctrine:database:create', '--if-not-exists' => null]),
+      new ArrayInput(['command' => 'doctrine:schema:drop', '--full-database' => null, '--force' => null]),
+      new ArrayInput(['command' => 'doctrine:schema:create'])
+    ];
+    // esegue comandi
+    $kernel = new Kernel('prod', false);
+    $application = new Application($kernel);
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
     try {
-      include('createdb.txt');
+      foreach ($commands as $com) {
+        $status = $application->run($com, $output);
+        $content = $output->fetch();
+        if ($status != 0) {
+          break;
+        }
+      }
     } catch (\Exception $e) {
       // errore di sistema
       $status = -1;
       $content = $e->getMessage();
     }
+    // controlla errori
     if ($status != 0) {
       // errore di sistema
-      throw new \Exception('Impossibile eseguire i comandi per creare il database.<br><br>'.$content, 6);
+      throw new \Exception('Impossibile eseguire i comandi per creare il database.<br><br>'.$content, $this->step);
     }
     if (!$this->pdo) {
-      // connessione al database
-      $db = parse_url($this->env['DATABASE_URL']);
-      $dsn = $db['scheme'].':dbname='.substr($db['path'], 1).';host='.$db['host'].';port='.$db['port'];
-      try {
-        $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
-      } catch (\Exception $e) {
-        // errore di connession
-        throw new \Exception('Impossibile connettersi al database', 6);
-      }
+      // connessione al db
+      $this->connectDb();
     }
-    // esegue i comandi
+    // inizializza il database
+    $file = file($this->projectPath.'/src/Install/init-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
     try {
-      foreach ($this->dataCreate as $sql) {
+      foreach ($file as $sql) {
         $this->pdo->exec($sql);
       }
     } catch (\Exception $e) {
-      throw new \Exception('Errore nell\'esecuzione dei comandi per la creazione del database.<br>'.
-        $e->getMessage(), 6);
+      $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+      throw new \Exception('Errore nell\'esecuzione dei comandi per l\'inizializzazione del database.<br>'.
+        $e->getMessage(), $this->step);
     }
+    $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
   }
 
   /**
@@ -644,15 +825,8 @@ class Installer {
    */
   private function updateSchema() {
     if (!$this->pdo) {
-      // connessione al database
-      $db = parse_url($this->env['DATABASE_URL']);
-      $dsn = $db['scheme'].':dbname='.substr($db['path'], 1).';host='.$db['host'].';port='.$db['port'];
-      try {
-        $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
-      } catch (\Exception $e) {
-        // errore di connession
-        throw new \Exception('Impossibile connettersi al database');
-      }
+      // connessione al db
+      $this->connectDb();
     }
     // legge versione attuale
     $version = $this->getParameter('versione');
@@ -668,13 +842,13 @@ class Installer {
         }
       } catch (\Exception $e) {
         throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database.<br>'.
-          $e->getMessage(), 5);
+          $e->getMessage(), $this->step);
       }
       // nuova versione installata
       if ($newVersion != 'build') {
         $this->setParameter('versione', $newVersion);
-      } elseif (!empty($data)) {
-        $newVersion = $version.'#build';
+      } else {
+        $newVersion = $version.(empty($data) ? '' : '#build');
       }
       // esegue un aggiornamento alla volta
       return $newVersion;
@@ -690,239 +864,93 @@ class Installer {
    * @param string $password Password utente in chiaro
    */
   private function createAdmin($username, $password) {
-    // cifra la password
+    // comandi per la codifica della password
+    $commands = [
+      new ArrayInput(['command' => 'security:encode-password',
+        'password' => $password,
+        'user-class' => '\App\Entity\Amministratore',
+        '-n' => null])
+    ];
+    // esegue comandi
+    $kernel = new Kernel('prod', false);
+    $application = new Application($kernel);
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
     try {
-      include('encode.txt');
+      foreach ($commands as $com) {
+        $status = $application->run($com, $output);
+        $content = $output->fetch();
+        if ($status != 0) {
+          break;
+        }
+      }
     } catch (\Exception $e) {
       // errore di sistema
       $status = -1;
       $content = $e->getMessage();
     }
+    // controlla errori
     if ($status != 0) {
       // errore di sistema
-      throw new \Exception('Impossibile eseguire i comandi per cifrare la password.<br><br>'.$content, 7);
+      throw new \Exception('Impossibile eseguire i comandi per cifrare la password.<br><br>'.$content, $this->step);
     }
+    // legge password
     preg_match('/Encoded password\s+(.*)\s+/', $content, $matches);
     $pswd = trim($matches[1]);
-    // connessione al database
     if (!$this->pdo) {
-      $db = parse_url($this->env['DATABASE_URL']);
-      $dsn = $db['scheme'].':dbname='.substr($db['path'], 1).';host='.$db['host'].';port='.$db['port'];
-      try {
-        $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
-      } catch (\Exception $e) {
-        // errore di connession
-        throw new \Exception('Impossibile connettersi al database', 7);
-      }
+      // connessione al db
+      $this->connectDb();
     }
-    // crea l'utente
-    $sql = "INSERT INTO gs_utente (creato, modificato, username, password, email, abilitato, nome, cognome, sesso, numeri_telefono, notifica, ruolo, spid) ".
-      "VALUES (NOW(), NOW(), '$username', '$pswd', '$username@noemail.local', 1, 'Amministratore', 'Registro', 'M', 'a:0:{}', 'a:0:{}', 'AMM', 0)";
+    // modifica l'utente amministratore
+    $sql = "UPDATE gs_utente SET username='$username', password='$pswd', email='$username@noemail.local' WHERE username='admin';";
     // esegue i comandi
     try {
       $this->pdo->exec($sql);
     } catch (\Exception $e) {
       throw new \Exception('Errore nell\'esecuzione del comando per la creazione dell\'utente amministratore<br>'.
-        $e->getMessage(), 7);
+        $e->getMessage(), $this->step);
     }
   }
 
   /**
-   * Pulisce la cache
+   * Pulisce la cache di sistema
    *
    */
   private function clean() {
-    // pulisce la cache
-    try {
-      include('clean.txt');
-    } catch (\Exception $e) {
-      // errore di sistema
-      $status = -1;
-      $content = $e->getMessage();
-    }
-    if ($status != 0) {
-      // errore di sistema
-      throw new \Exception('Impossibile eseguire i comandi per ripulire la cache.<br><br>'.$content, 8);
-    }
+    // cancella contenuto cache
+    $this->fileDelete($this->projectPath.'/var/cache/prod');
+    // cancella contenuto delle sessioni
+    $this->fileDelete($this->projectPath.'/var/sessions/prod');
   }
 
   /**
-   * Mostra errore e blocca installazione
+   * Cancella i file e le sottodirectory del percorso indicato
    *
-   * @param string $error Messaggio di errore
-   * @param int $step Numero passo a cui riportare la pagina
+   * @param string $dir Percorso della directory da cancellare
    */
-  private function pageError($error, $step) {
-    // imposta dati della pagina
-    $page['step'] = 'Errore';
-    $page['title'] = 'Si è verificato un errore';
-    $page['error'] = $error;
-    $page['_token'] = $this->token;
-    // visualizza pagina
-    include('page_error.php');
-    if ($step > 0) {
-      // imposta passo
-      $_SESSION['GS_INSTALL_STEP'] = $step;
-    } else {
-      // resetta la sessione (riparte dall'inizio)
-      $_SESSION = [];
-      session_destroy();
-    }
-  }
-
-  /**
-   * Crea una nuova installazione: passo 1
-   *
-   */
-  private function pageCreate1() {
-    // imposta dati della pagina
-    $page['step'] = '1 - Autenticazione';
-    $page['title'] = 'Autenticazione iniziale';
-    $page['_token'] = $this->token;
-    // visualizza pagina
-    include('page_create_1.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-  }
-
-  /**
-   * Crea una nuova installazione: passo 2
-   *
-   */
-  private function pageCreate2() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // autenticazione
-    $password = $_POST['install']['password'];
-    $this->authenticate($password, 1);
-    // imposta dati della pagina
-    $page['step'] = '2 - Requisiti obbligatori';
-    $page['title'] = 'Requisiti obbligatori di installazione';
-    $page['_token'] = $this->token;
-    $page['mandatory'] = $this->mandatoryRequirements();
-    $page['error'] = false;
-    foreach ($page['mandatory'] as $req) {
-      if (!$req[2]) {
-        $page['error'] = true;
-        break;
+  private function fileDelete($dir) {
+    foreach(glob($dir . '/*') as $file) {
+      if ($file == '.' || $file == '..') {
+        // salta
+        continue;
+      } elseif(is_dir($file)) {
+        // rimuove directory e suo contenuto
+        $this->fileDelete($file);
+        rmdir($file);
+      } else {
+        // rimuove file
+        unlink($file);
       }
     }
-    // visualizza pagina
-    include('page_create_2.php');
-    // imposta nuovo passo
-    if (!$page['error']) {
-      // pagina successiva
-      $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-    }
   }
 
   /**
-   * Crea una nuova installazione: passo 3
+   * Legge la configurazione attuale e la prepara per la scrittura
    *
+   * @return string Configurazione formattata
    */
-  private function pageCreate3() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // imposta dati della pagina
-    $page['step'] = '3 - Requisiti opzionali';
-    $page['title'] = 'Requisiti opzionali di installazione';
-    $page['_token'] = $this->token;
-    $page['optional'] = $this->optionalRequirements();
-    $page['warning'] = false;
-    foreach ($page['optional'] as $req) {
-      if (!$req[2]) {
-        $page['warning'] = true;
-        break;
-      }
-    }
-    // visualizza pagina
-    include('page_create_3.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-  }
-
-  /**
-   * Crea una nuova installazione: passo 4
-   *
-   */
-  private function pageCreate4() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // imposta dati della pagina
-    $page['step'] = '4 - Impostazioni database';
-    $page['title'] = 'Impostazioni per la connessione al database';
-    $page['_token'] = $this->token;
-    $page['server'] = 'localhost';
-    $page['port'] = '3306';
-    $page['user'] = '';
-    $page['password'] = '';
-    $page['database'] = 'giuaschool';
-    if (isset($this->env['DATABASE_URL']) && !empty($this->env['DATABASE_URL'])) {
-      // legge configurazione
-      $db = parse_url($this->env['DATABASE_URL']);
-      $page['server'] = $db['host'];
-      $page['port'] = $db['port'];
-      $page['user'] = $db['user'];
-      $page['password'] = $db['pass'];
-      $page['database'] = substr($db['path'], 1);
-    }
-    // visualizza pagina
-    include('page_create_4.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-  }
-
-  /**
-   * Crea una nuova installazione: passo 5
-   *
-   */
-  private function pageCreate5() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // connette al server database
-    $dsn = 'mysql:host='.$_POST['install']['server'].';port='.$_POST['install']['port'];
-    try {
-      $this->pdo = new \PDO($dsn, $_POST['install']['user'], $_POST['install']['password']);
-    } catch (\Exception $e) {
-      // configurazione database errata
-      throw new \Exception('Impossibile connettersi al database', 4);
-    }
-    // imposta nuove variabili d'ambiente
-    $env = [];
-    $env['APP_ENV'] = (empty($this->env['APP_ENV']) ? 'prod' : $this->env['APP_ENV']);
-    $env['DATABASE_URL'] = 'mysql://'.$_POST['install']['user'].':'.$_POST['install']['password'].
-      '@'.$_POST['install']['server'].':'.$_POST['install']['port'].'/'.$_POST['install']['database'];
-    $env['APP_SECRET'] = (empty($this->env['APP_SECRET']) ? bin2hex(random_bytes(20)) : $this->env['APP_SECRET']);
-    $env['MAILER_DSN'] = (empty($this->env['MAILER_DSN']) ? 'gmail://utente:password@default' : $this->env['MAILER_DSN']);
-    $env['GOOGLE_API_KEY'] = (empty($this->env['GOOGLE_API_KEY']) ? '' : $this->env['GOOGLE_API_KEY']);
-    $env['GOOGLE_CLIENT_ID'] = (empty($this->env['GOOGLE_CLIENT_ID']) ? '' : $this->env['GOOGLE_CLIENT_ID']);
-    $env['GOOGLE_CLIENT_SECRET'] = (empty($this->env['GOOGLE_CLIENT_SECRET']) ? '' : $this->env['GOOGLE_CLIENT_SECRET']);
-    $env['OAUTH_GOOGLE_CLIENT_ID'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_ID']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_ID']);
-    $env['OAUTH_GOOGLE_CLIENT_SECRET'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_SECRET']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_SECRET']);
-    $env['OAUTH_GOOGLE_CLIENT_HD'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_HD']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_HD']);
-    $env['LOCAL_PATH'] = (empty($this->env['LOCAL_PATH']) ? '' : $this->env['LOCAL_PATH']);
-    $env['INSTALLATION_PSW'] = (empty($this->env['INSTALLATION_PSW']) ? '' : $this->env['INSTALLATION_PSW']);
-    $this->env = $env;
-    $_SESSION['GS_INSTALL_ENV'] = $this->env;
-    // scrive nuova configurazione
-    $page['error'] = false;
-    $envPath = dirname(dirname(__DIR__)).'/';
+  private function formatEnv(): string {
+    // imposta configurazione
     $envData =
       "### definisce l'ambiente correntemente utilizzato\n".
       "APP_ENV='".$this->env['APP_ENV']."'\n\n".
@@ -943,334 +971,800 @@ class Installer {
       "LOCAL_PATH='".$this->env['LOCAL_PATH']."'\n\n".
       "### imposta la password di installazione\n".
       "INSTALLATION_PSW='".$this->env['INSTALLATION_PSW']."'\n\n";
-    if (is_writable($envPath) && is_writable($envPath.'.env')) {
-      // file scrivibile: salva nuova configurazione
-      rename($envPath.'.env', $envPath.'.env_backup');
+    // restituisce configurazione
+    return $envData;
+  }
+
+  /**
+   * Scrive la configurazione sul file .env
+   *
+   */
+  private function writeEnv() {
+    // imposta nuove variabili d'ambiente
+    $env = [];
+    $env['APP_ENV'] = (empty($this->env['APP_ENV']) ? 'prod' : $this->env['APP_ENV']);
+    $env['APP_SECRET'] = (empty($this->env['APP_SECRET']) ? bin2hex(random_bytes(20)) : $this->env['APP_SECRET']);
+    $env['DATABASE_URL'] = (empty($this->env['DATABASE_URL']) ? 'mysql://root:root@localhost:3306/giuaschool' : $this->env['DATABASE_URL']);
+    $env['MAILER_DSN'] = (empty($this->env['MAILER_DSN']) ? 'gmail://utente:password@default' : $this->env['MAILER_DSN']);
+    $env['GOOGLE_API_KEY'] = (empty($this->env['GOOGLE_API_KEY']) ? '' : $this->env['GOOGLE_API_KEY']);
+    $env['GOOGLE_CLIENT_ID'] = (empty($this->env['GOOGLE_CLIENT_ID']) ? '' : $this->env['GOOGLE_CLIENT_ID']);
+    $env['GOOGLE_CLIENT_SECRET'] = (empty($this->env['GOOGLE_CLIENT_SECRET']) ? '' : $this->env['GOOGLE_CLIENT_SECRET']);
+    $env['OAUTH_GOOGLE_CLIENT_ID'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_ID']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_ID']);
+    $env['OAUTH_GOOGLE_CLIENT_SECRET'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_SECRET']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_SECRET']);
+    $env['OAUTH_GOOGLE_CLIENT_HD'] = (empty($this->env['OAUTH_GOOGLE_CLIENT_HD']) ? '' : $this->env['OAUTH_GOOGLE_CLIENT_HD']);
+    $env['LOCAL_PATH'] = (empty($this->env['LOCAL_PATH']) ? '' : $this->env['LOCAL_PATH']);
+    $env['INSTALLATION_PSW'] = (empty($this->env['INSTALLATION_PSW']) ? '' : $this->env['INSTALLATION_PSW']);
+    $this->env = $env;
+    $_SESSION['GS_INSTALL_ENV'] = $this->env;
+    // scrive nuova configurazione
+    $envPath = $this->projectPath.'/';
+    $envData = $this->formatEnv();
+    try {
+      unlink($envPath.'.env');
       file_put_contents($envPath.'.env', $envData);
+    } catch (\Exception $e) {
+      // errore: impossibile scriver configurazione
+      throw new \Exception('Impossibile scrivere la nuova configurazione nel file ".env"<br>'.
+        $e->getMessage(), $this->step);
+    }
+  }
+
+  /**
+   * Scrive la configurazione sul file .env
+   *
+   * @param bool $onlyserver Se vero, si connette al server senza indicare il nome del database
+   */
+  private function connectDb($onlyserver=false) {
+    // connessione al database
+    $db = parse_url($this->env['DATABASE_URL']);
+    $dsn = $db['scheme'].':host='.$db['host'].';port='.$db['port'].
+      ($onlyserver ? '' : (';dbname='.substr($db['path'], 1)));
+    try {
+      $this->pdo = new \PDO($dsn, $db['user'], $db['pass']);
+    } catch (\Exception $e) {
+      // errore di connessione
+      $this->pdo = null;
+      throw new \Exception('Impossibile connettersi al database', $this->step);
+    }
+  }
+
+  /**
+   * Invia una email di test
+   *
+   * @param string $from Indirizzo email del mittente
+   * @param string $dest Indirizzo email del destinatario
+   */
+  private function testEmail($from, $dest) {
+    $text = "Questa è il testo dell'email.\n".
+      "La mail è stata spedita dall'applicazione giua@school per verificare il corretto recapito della posta elettronica.\n\n".
+      "Allegato:\n - il file di testo della licenza AGPL.\n";
+    $html = "<p><strong>Questa è il testo dell'email.</strong></p>".
+      "<p><em>La mail è stata spedita dall'applicazione <strong>giua@school</strong> per verificare il corretto recapito della posta elettronica.</em></p>".
+      "<p>Allegato:</p><ul><li>il file di testo della licenza AGPL.</li></ul>";
+    // invia per email
+    $message = (new Email())
+      ->from($from)
+      ->to($dest)
+      ->subject('[TEST] giua@school - Invio email di prova')
+      ->text($text)
+      ->html($html)
+      ->attachFromPath($this->projectPath.'/LICENSE', 'LICENSE.txt', 'text/plain');
+    try {
+      // invia email
+      $transport = Transport::fromDsn($this->env['MAILER_DSN']);
+      $mailer = new Mailer($transport);
+      $sent = $mailer->send($message);
+    } catch (\Exception $err) {
+      $debug = $err->getMessage();
+      throw new \Exception('Errore nella spedizione della mail<br><pre>'.$debug.'</pre>', $this->step);
+    }
+  }
+
+  /**
+   * Mostra errore e blocca installazione
+   *
+   * @param string $error Messaggio di errore
+   * @param int $step Numero passo a cui riportare la pagina
+   */
+  private function pageError($error, $step) {
+    // imposta dati della pagina
+    $page['step'] = 'Errore';
+    $page['title'] = 'Si è verificato un errore';
+    $page['_token'] = $this->token;
+    $page['danger'] = $error;
+    $page['text'] = "Correggi l'errore e riprova.";
+    // visualizza pagina
+    include('page_error.php');
+    if ($step > 0) {
+      // imposta passo
+      $_SESSION['GS_INSTALL_STEP'] = $step;
     } else {
-      // file non scrivibile: controlla configurazione attuale
-      $env = parse_ini_file($envPath.'.env');
-      foreach ($this->env as $key=>$val) {
-        if ($val !== $env[$key]) {
-          // configurazione differente
-          $page['error'] = true;
-          $page['env'] = $envData;
-          break;
-        }
+      // resetta la sessione (riparte dall'inizio)
+      $_SESSION = [];
+      session_destroy();
+    }
+  }
+
+  /**
+   * Pagina per la scelta della procedura di installazione
+   *
+   */
+  private function pageInstall() {
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      if (isset($_POST['install']['create'])) {
+        // installazione iniziale
+        $this->mode = 'Create';
+        $_SESSION['GS_INSTALL_MODE'] = $this->mode;
       }
-    }
-    // imposta dati della pagina
-    $page['step'] = '5 - File di configurazione';
-    $page['title'] = 'Imposta il nuovo file di configurazione .env';
-    $page['_token'] = $this->token;
-    // visualizza pagina
-    include('page_create_5.php');
-    // imposta nuovo passo
-    if ($page['error']) {
-      $_SESSION['GS_INSTALL_STEP'] = $this->step - 1;
-    } else {
-      $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-    }
-  }
-
-  /**
-   * Crea una nuova installazione: passo 6
-   *
-   */
-  private function pageCreate6() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // crea il database
-    $this->createSchema();
-    // imposta dati della pagina
-    $page['step'] = '6 - Creazione database';
-    $page['title'] = 'Creazione del database iniziale';
-    $page['_token'] = $this->token;
-    // visualizza pagina
-    include('page_create_6.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-  }
-
-  /**
-   * Crea una nuova installazione: passo 7
-   *
-   */
-  private function pageCreate7() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // imposta dati della pagina
-    $page['step'] = '7 - Utente amministratore';
-    $page['title'] = 'Credenziali di accesso per l\'utente amministratore';
-    $page['_token'] = $this->token;
-    // visualizza pagina
-    include('page_create_7.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-  }
-
-  /**
-   * Crea una nuova installazione: passo 8
-   *
-   */
-  private function pageCreate8() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // controllo credenziali
-    $username = trim($_POST['install']['username']);
-    if (strlen($username) < 4) {
-      // username troppo corto
-      throw new \Exception('Il nome utente deve avere una lunghezza di almeno 4 caratteri', 7);
-    }
-    $password = trim($_POST['install']['password']);
-    if (strlen($password) < 8) {
-      // password troppo corta
-      throw new \Exception('La password deve avere una lunghezza di almeno 8 caratteri', 7);
-    }
-    // crea utente
-    $this->createAdmin($username, $password);
-    // pulisce cache
-    $this->clean();
-    // imposta dati della pagina
-    $page['step'] = '8 - Pulizia finale';
-    $page['title'] = 'Pulizia della cache di sistema';
-    $page['_token'] = $this->token;
-    // visualizza pagina
-    include('page_create_8.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-  }
-
-  /**
-   * Crea una nuova installazione: passo 9
-   *
-   */
-  private function pageCreate9() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // imposta dati della pagina
-    $page['step'] = '9 - Fine';
-    $page['title'] = 'Fine della procedura';
-    // visualizza pagina
-    include('page_create_9.php');
-    // resetta sessione
-    $_SESSION = [];
-    session_destroy();
-    // rinomina file di installazione in .txt
-    $path = dirname(dirname(__DIR__)).'/public/install';
-    rename($path.'/index.php', $path.'/index.txt');
-  }
-
-  /**
-   * Aggiorna la versione: passo 1
-   *
-   */
-  private function pageUpdate1() {
-    // imposta dati della pagina
-    $page['step'] = '1 - Scelta procedura';
-    $page['title'] = 'Scelta della procedura da eseguire';
-    $page['_token'] = $this->token;
-    $page['version'] = $this->version;
-    if (empty($this->dataUpdate['build'])) {
-      // aggiornamento alla versione
-      $page['updateVersion'] = array_slice(array_keys($this->dataUpdate), -2)[0];
-      $page['update'] = version_compare($this->version, $page['updateVersion'], '<');
-    } else {
-      // aggiornamento all'ultima modifica (build)
-      $page['updateVersion'] = array_slice(array_keys($this->dataUpdate), -2)[0].'#build';
-      $page['update'] = true;
-    }
-    // visualizza pagina
-    include('page_update_1.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
-  }
-
-  /**
-   * Aggiorna la versione: passo 2
-   *
-   */
-  private function pageUpdate2() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
-    // controllo scelta
-    if (isset($_POST['install']['create'])) {
-      // installazione iniziale
-      $this->mode = 'Create';
-      $_SESSION['GS_INSTALL_MODE'] = $this->mode;
-      $this->step = 1;
+      // va al passo successivo
+      $page = [];
+      $this->step++;
       $_SESSION['GS_INSTALL_STEP'] = $this->step;
-      return $this->pageCreate1();
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Installazione';
+      $page['title'] = 'Procedura di installazione';
+      $page['_token'] = $this->token;
+      if ($this->mode == 'Create') {
+        // installazione iniziale
+        $page['warning'] = 'Verrà eseguita una nuova installazione.<br>'.
+          "ATTENZIONE: l'eventuale contenuto del database sarà cancellato.";
+        $page['update'] = false;
+      } else {
+        // aggiornamento alla versione
+        $page['info'] = 'Verrà eseguita la procedura di aggiornamento.<br>'.
+          'Il contenuto esistente del database non sarà modificato.<br><br>'.
+          '<em>In alternativa, puoi eseguire la procedura di installazione iniziale, '.
+          'che prevede la cancellazione del database esistente.</em>';
+        $page['update'] = true;
+      }
+      // visualizza pagina
+      include('page_install.php');
     }
-    // imposta dati della pagina
-    $page['step'] = '2 - Autenticazione';
-    $page['title'] = 'Autenticazione iniziale';
-    $page['_token'] = $this->token;
-    $page['updateVersion'] = array_slice(array_keys($this->dataUpdate), -2)[0].
-      (empty($this->dataUpdate['build']) ? '' : '#build');
-    // visualizza pagina
-    include('page_update_2.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
   }
 
   /**
-   * Aggiorna la versione: passo 3
+   * Pagina per l'autenticazione iniziale
    *
    */
-  private function pageUpdate3() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+  private function pageAuthenticate() {
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // effettua l'autenticazione
+      $password = $_POST['install']['password'];
+      $this->authenticate($password);
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Autenticazione';
+      $page['title'] = 'Autenticazione iniziale';
+      $page['_token'] = $this->token;
+      // visualizza pagina
+      include('page_authenticate.php');
     }
-    // autenticazione
-    $password = $_POST['install']['password'];
-    $this->authenticate($password, 2);
+  }
+
+  /**
+   * Pagina per i requisiti tecnici obbligatori
+   *
+   */
+  private function pageMandatory() {
     // imposta dati della pagina
-    $page['step'] = '3 - Requisiti obbligatori';
-    $page['title'] = 'Requisiti obbligatori di installazione';
+    $page['step'] = $this->step.' - Requisiti obbligatori';
+    $page['title'] = 'Requisiti tecnici obbligatori';
     $page['_token'] = $this->token;
-    $page['mandatory'] = $this->mandatoryRequirements();
-    $page['error'] = false;
-    foreach ($page['mandatory'] as $req) {
+    $page['requirements'] = $this->mandatoryRequirements();
+    // controlla errori
+    $error = false;
+    foreach ($page['requirements'] as $req) {
       if (!$req[2]) {
-        $page['error'] = true;
+        $error = true;
         break;
       }
     }
+    if ($error) {
+      // messaggio di errore
+      $page['danger'] = "Non si può continuare con l'installazione.<br>".
+        "Il sistema non soddisfa i requisiti tecnici indispensabili per il funzionameno dell'applicazione.";
+    }
     // visualizza pagina
-    include('page_update_3.php');
-    // imposta nuovo passo
-    if (!$page['error']) {
+    include('page_requirements.php');
+    // imposta nuova pagina
+    if (!$error) {
       // pagina successiva
       $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
     }
   }
 
   /**
-   * Aggiorna la versione: passo 4
+   * Pagina per i requisiti tecnici opzionali
    *
    */
-  private function pageUpdate4() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
-    }
+  private function pageOptional() {
     // imposta dati della pagina
-    $page['step'] = '4 - Requisiti opzionali';
-    $page['title'] = 'Requisiti opzionali di installazione';
+    $page['step'] = $this->step.' - Requisiti opzionali';
+    $page['title'] = 'Requisiti tecnici opzionali';
     $page['_token'] = $this->token;
-    $page['optional'] = $this->optionalRequirements();
-    $page['warning'] = false;
-    foreach ($page['optional'] as $req) {
+    $page['requirements'] = $this->optionalRequirements();
+    // controlla errori
+    $error = false;
+    foreach ($page['requirements'] as $req) {
       if (!$req[2]) {
-        $page['warning'] = true;
+        $error = true;
         break;
       }
     }
+    if ($error) {
+      // messaggio di errore
+      $page['warning'] = "La procedura di installazione può continuare.<br>".
+        "Alcune funzionalità non essenziali potrebbero non funzionare correttamente.";
+    }
     // visualizza pagina
-    include('page_update_4.php');
+    include('page_requirements.php');
+    // imposta nuova pagina
+    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+  }
+
+  /**
+   * Pagina per le impostazioni del database
+   *
+   */
+  private function pageDatabase() {
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // connessione di test al db (solo server, senza nome database)
+      $this->connectDb(true);
+      // chiude connessione di test
+      $this->pdo = null;
+      // salva configurazione
+      $this->env['DATABASE_URL'] = 'mysql://'.$_POST['install']['db_user'].':'.
+        $_POST['install']['db_password'].'@'.$_POST['install']['db_server'].':'.
+        $_POST['install']['db_port'].'/'.$_POST['install']['db_name'];
+      $_SESSION['GS_INSTALL_ENV'] = $this->env;
+      $this->writeEnv();
+      // ricarica ambiente modificato
+      (new Dotenv(false))->loadEnv($this->projectPath.'/.env');
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Impostazioni database';
+      $page['title'] = 'Impostazioni per la connessione al database';
+      $page['_token'] = $this->token;
+      $page['warning'] = "ATTENZIONE: l'eventuale contenuto del database sarà cancellato.";
+      $page['db_server'] = 'localhost';
+      $page['db_port'] = '3306';
+      $page['db_user'] = '';
+      $page['db_password'] = '';
+      $page['db_name'] = 'giuaschool';
+      if (isset($this->env['DATABASE_URL']) && !empty($this->env['DATABASE_URL'])) {
+        // legge configurazione
+        $db = parse_url($this->env['DATABASE_URL']);
+        $page['db_server'] = $db['host'];
+        $page['db_port'] = $db['port'];
+        $page['db_user'] = $db['user'];
+        $page['db_password'] = $db['pass'];
+        $page['db_name'] = substr($db['path'], 1);
+      }
+      // visualizza pagina
+      include('page_database.php');
+    }
+  }
+
+  /**
+   * Pagina per la creazione dello schema sul database
+   *
+   */
+  private function pageSchema() {
+    // crea il database iniziale
+    $this->createSchema();
+    // imposta dati della pagina
+    $page['step'] = $this->step.' - Creazione database';
+    $page['title'] = 'Creazione del database iniziale';
+    $page['_token'] = $this->token;
+    $page['success'] = 'Il nuovo database è stato creato correttamente.';
+    // visualizza pagina
+    include('page_message.php');
     // imposta nuovo passo
     $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
   }
 
   /**
-   * Aggiorna la versione: passo 5
+   * Pagina per la creazione dell'amministratore
    *
    */
-  private function pageUpdate5() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+  private function pageAdmin() {
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // controllo credenziali
+      $username = trim($_POST['install']['username']);
+      if (strlen($username) < 4) {
+        // username troppo corto
+        throw new \Exception('Il nome utente deve avere una lunghezza di almeno 4 caratteri', $this->step);
+      }
+      $password = trim($_POST['install']['password']);
+      if (strlen($password) < 8) {
+        // password troppo corta
+        throw new \Exception('La password deve avere una lunghezza di almeno 8 caratteri', $this->step);
+      }
+      // crea utente
+      $this->createAdmin($username, $password);
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Utente amministratore';
+      $page['title'] = 'Credenziali di accesso per l\'utente amministratore';
+      $page['_token'] = $this->token;
+      // visualizza pagina
+      include('page_admin.php');
     }
-    // aggiorna database
-    $lastVersion = array_slice(array_keys($this->dataUpdate), -2)[0].
-      (empty($this->dataUpdate['build']) ? '' : '#build');
-    $page['updateVersion'] = $this->updateSchema();
+  }
+
+  /**
+   * Pagina per la configurazione dell'email
+   *
+   */
+  private function pageEmail() {
+    if (isset($_POST['install']['next'])) {
+      // salta configurazione e test email
+      $page = [];
+      $this->step += 2;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } elseif (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // controllo dati
+      $mail_server = (int) $_POST['install']['mail_server'];
+      if ($mail_server < 0 || $mail_server > 2) {
+        // mail server sconosciuto
+        throw new \Exception('La modalità scelta per l\'invio delle mail è sconosciuta', $this->step);
+      }
+      $mail_user = trim($_POST['install']['mail_user']);
+      if ($mail_server < 2 && empty($mail_user)) {
+        // utente non presente
+        throw new \Exception('Non è stato indicato l\'utente', $this->step);
+      }
+      if ($mail_server < 2 && strpos($mail_user, '@') !== false) {
+        // indirizzo al posto dell'utente
+        throw new \Exception('Devi indicare solo il nome utente, non l\'intero indirizzo email', $this->step);
+      }
+      $mail_password = trim($_POST['install']['mail_password']);
+      if ($mail_server < 2 && empty($mail_password)) {
+        // password non presente
+        throw new \Exception('Non è stata indicata la password dell\'utente', $this->step);
+      }
+      $mail_host = trim($_POST['install']['mail_host']);
+      if ($mail_server == 1 && empty($mail_host)) {
+        // host SMTP
+        throw new \Exception('Non è stato indicato il server SMTP', $this->step);
+      }
+      $mail_port = trim($_POST['install']['mail_port']);
+      if ($mail_server == 1 && empty($mail_port)) {
+        // porta SMTP
+        throw new \Exception('Non è stata indicata la porta del server SMTP', $this->step);
+      }
+      $mail_test = trim($_POST['install']['mail_test']);
+      if (empty($mail_test) || strpos($mail_test, '@') == false) {
+        // indirizzo di test errato
+        throw new \Exception('L\'indirizzo a cui spedire la mail di prova non è valido', $this->step);
+      }
+      // salva configurazione
+      if ($mail_server == 0) {
+        // GMAIL
+        $this->env['MAILER_DSN'] = 'gmail://'.$_POST['install']['mail_user'].':'.
+          $_POST['install']['mail_password'].'@default';
+      } elseif ($mail_server == 1) {
+        // SMTP
+        $this->env['MAILER_DSN'] = 'smtp://'.$_POST['install']['mail_user'].':'.
+          $_POST['install']['mail_password'].'@'.$_POST['install']['mail_host'].':'.
+          $_POST['install']['mail_port'];
+      } else {
+        // SENDMAIL
+        $this->env['MAILER_DSN'] = 'sendmail://default';
+      }
+      $_SESSION['GS_INSTALL_ENV'] = $this->env;
+      $this->writeEnv();
+      // ricarica ambiente modificato
+      (new Dotenv(false))->loadEnv($this->projectPath.'/.env');
+      // invia email di test
+      $this->testEmail('test@noreply.no', $mail_test);
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Configurazione email';
+      $page['title'] = 'Configurazione per l\'invio delle email';
+      $page['_token'] = $this->token;
+      $page['info'] = 'Puoi saltare questa configurazione se non usi l\'invio delle email.';
+      $mail = parse_url($this->env['MAILER_DSN']);
+      $page['mail_server'] = ($mail['scheme'] == 'gmail' ? 0 : ($mail['scheme'] == 'smtp' ? 1 : 2));
+      $page['mail_user'] = isset($mail['user']) ? $mail['user'] : '';
+      $page['mail_password'] = isset($mail['pass']) ? $mail['pass'] : '';
+      $page['mail_host'] = isset($mail['host']) ? $mail['host'] : '';
+      $page['mail_port'] = isset($mail['port']) ? $mail['port'] : '';
+      // visualizza pagina
+      include('page_email.php');
+    }
+  }
+
+  /**
+   * Pagina per la configurazione dell'email
+   *
+   */
+  private function pageEmailTest() {
+    if (isset($_POST['install']['next'])) {
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } elseif (isset($_POST['install']['previous'])) {
+      // torna al passo precedente
+      $page = [];
+      $this->step--;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Test email';
+      $page['title'] = 'Test di invio di una email';
+      $page['_token'] = $this->token;
+      $page['success'] = 'La mail è stata inviata correttamente.<br>Controlla di averla ricevuta.';
+      // visualizza pagina
+      include('page_email_test.php');
+    }
+  }
+
+  /**
+   * Pagina per la configurazione dello SPID
+   *
+   */
+  private function pageSpid() {
+    if (isset($_POST['install']['skip'])) {
+      $this->setParameter('spid', 'no');
+      // salta lo SPID
+      $page = [];
+      $this->step += 4;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } elseif (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Configurazione SPID';
+      $page['title'] = 'Configurazione dell\'accesso tramite SPID';
+      $page['_token'] = $this->token;
+      $page['info'] = 'Se continui, il sistema verrà configurato per l\'accesso tramite SPID.<br>'.
+        'Se salti la procedura, il sistema sarà impostato per non usare lo SPID.';
+      // visualizza pagina
+      include('page_spid.php');
+    }
+  }
+
+  /**
+   * Pagina per i requisiti tecnici dello SPID
+   *
+   */
+  private function pageSpidRequirements() {
     // imposta dati della pagina
-    $page['step'] = '5 - Aggiornamento database';
-    $page['title'] = 'Aggiornamento del database';
+    $page['step'] = $this->step.' - Requisiti SPID';
+    $page['title'] = 'Requisiti tecnici obbligatori per l\'utilizzo dello SPID';
     $page['_token'] = $this->token;
+    $page['requirements'] = $this->spidRequirements();
+    // controlla errori
+    $error = false;
+    foreach ($page['requirements'] as $req) {
+      if (!$req[2]) {
+        $error = true;
+        break;
+      }
+    }
+    if ($error) {
+      // messaggio di errore
+      $page['danger'] = "Non si può continuare con la configurazione dello SPID.<br>".
+        "Il sistema non soddisfa i requisiti tecnici indispensabili per il funzionameno dell'accesso SPID.";
+    }
     // visualizza pagina
-    include('page_update_5.php');
-    // imposta nuovo passo
-    if (version_compare($page['updateVersion'], $lastVersion, '==')) {
-      // continua la procedura
+    include('page_requirements.php');
+    // imposta nuova pagina
+    if (!$error) {
+      // pagina successiva
       $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
+    } else {
+      // pagina precedente
+      $_SESSION['GS_INSTALL_STEP'] = $this->step - 1;
     }
   }
 
   /**
-   * Aggiorna la versione: passo 6
+   * Pagina per le impostazioni dello SPID
    *
    */
-  private function pageUpdate6() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+  private function pageSpidData() {
+    // legge configurazione esistente
+    $spid = json_decode(file_get_contents(
+      $this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json'), true);
+    // controlla pagina
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // controlla i dati
+      $spid['entityID'] = strtolower(trim($_POST['install']['entityID']));
+      if (empty($spid['entityID'])) {
+        // errore
+        throw new \Exception('Non è stato indicato l\'identificativo del service provider', $this->step);
+      }
+      if (substr($spid['entityID'], 0, 7) != 'http://' && substr($spid['entityID'], 0, 8) != 'https://') {
+        // errore
+        throw new \Exception('L\'identificativo del service provider deve essere un indirizzo internet', $this->step);
+      }
+      $spid['spLocalityName'] = str_replace("'", "\\'", trim($_POST['install']['spLocalityName']));
+      if (empty($spid['spLocalityName'])) {
+        // errore
+        throw new \Exception('Non è stata indicata la sede legale del service provider', $this->step);
+      }
+      $spid['spName'] = str_replace("'", "\\'", trim($_POST['install']['spName']));
+      if (empty($spid['spName'])) {
+        // errore
+        throw new \Exception('Non è stato indicato il nome del service provider', $this->step);
+      }
+      $spid['spDescription'] = str_replace("'", "\\'", trim($_POST['install']['spDescription']));
+      if (empty($spid['spDescription'])) {
+        // errore
+        throw new \Exception('Non è stata indicata la descrizione del service provider', $this->step);
+      }
+      $spid['spOrganizationName'] = str_replace("'", "\\'", trim($_POST['install']['spOrganizationName']));
+      if (empty($spid['spOrganizationName'])) {
+        // errore
+        throw new \Exception('Non è stato indicato il nome completo dell\'ente', $this->step);
+      }
+      $spid['spOrganizationDisplayName'] = str_replace("'", "\\'", trim($_POST['install']['spOrganizationDisplayName']));
+      if (empty($spid['spOrganizationDisplayName'])) {
+        // errore
+        throw new \Exception('Non è stato indicato il nome abbreviato dell\'ente', $this->step);
+      }
+      $spid['spOrganizationURL'] = trim($_POST['install']['spOrganizationURL']);
+      if (empty($spid['spOrganizationURL'])) {
+        // errore
+        throw new \Exception('Non è stata indicato l\'indirizzo internet dell\'ente', $this->step);
+      }
+      if (substr($spid['spOrganizationURL'], 0, 7) != 'http://' && substr($spid['spOrganizationURL'], 0, 8) != 'https://') {
+        // errore
+        throw new \Exception('L\'indirizzo internet dell\'ente non è valido', $this->step);
+      }
+      $spid['spOrganizationCode'] = trim($_POST['install']['spOrganizationCode']);
+      if (empty($spid['spOrganizationCode'])) {
+        // errore
+        throw new \Exception('Non è stato indicato il codice IPA dell\'ente', $this->step);
+      }
+      $spid['spOrganizationEmailAddress'] = trim($_POST['install']['spOrganizationEmailAddress']);
+      if (empty($spid['spOrganizationEmailAddress'])) {
+        // errore
+        throw new \Exception('Non è stato indicato l\'indirizzo email dell\'ente', $this->step);
+      }
+      if (strpos($spid['spOrganizationEmailAddress'], '@') === false) {
+        // errore
+        throw new \Exception('L\'indirizzo email dell\'ente non è valido', $this->step);
+      }
+      $spid['spOrganizationTelephoneNumber'] = str_replace(' ', '', trim($_POST['install']['spOrganizationTelephoneNumber']));
+      if (empty($spid['spOrganizationTelephoneNumber'])) {
+        // errore
+        throw new \Exception('Non è stato indicato il numero di telefono dell\'ente', $this->step);
+      }
+      if ($spid['spOrganizationTelephoneNumber'][0] != '+' && substr($spid['spOrganizationTelephoneNumber'], 0, 2) != '00') {
+        // aggiunge prefisso internazionale
+        $spid['spOrganizationTelephoneNumber'] = '+39'.$spid['spOrganizationTelephoneNumber'];
+      }
+      // imposta dominio service provider
+      $spid['spDomain'] = parse_url($spid['entityID'], PHP_URL_HOST);
+      if (substr($spid['spDomain'], 0, 4) == 'www.') {
+        $spid['spDomain'] = substr($spid['spDomain'], 4);
+      }
+      // imposta identificatore ente
+      $spid['spOrganizationIdentifier'] = 'PA:IT-'. $spid['spOrganizationCode'];
+      if (empty($spid['installDir'])) {
+        // imposta directory di installazione SPID
+        $spid['installDir'] = $this->projectPath.'/vendor/italia/spid-php';
+      }
+      if (empty($spid['wwwDir'])) {
+        // imposta directory pubblica dello SPID
+        $spid['wwwDir'] = $this->publicPath;
+      }
+      if (empty($spid['adminPassword'])) {
+        // imposta password admin SPID
+        $spid['adminPassword'] = uniqid();
+      }
+      if (empty($spid['secretsalt'])) {
+        // imposta salt per crittografia
+        $spid['secretsalt'] = bin2hex(random_bytes(16));
+      }
+      // salva configurazione
+      unlink($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json');
+      file_put_contents($this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json',
+        json_encode($spid));
+      // rimuove certificato esistente
+      if (file_exists($this->projectPath.'/vendor/italia/spid-php/cert/spid-sp.crt')) {
+        unlink($this->projectPath.'/vendor/italia/spid-php/cert/spid-sp.crt');
+        unlink($this->projectPath.'/vendor/italia/spid-php/cert/spid-sp.pem');
+      }
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Impostazioni SPID';
+      $page['title'] = 'Impostazioni per l\'accesso tramite SPID';
+      $page['_token'] = $this->token;
+      if (empty($spid['entityID'])) {
+        // imposta default
+        $spid['entityID'] = $this->urlPath;
+      }
+      // rimuove escaped chars
+      $spid['spLocalityName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spLocalityName']));
+      $spid['spName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spName']));
+      $spid['spDescription'] = htmlspecialchars(str_replace("\\'", "'", $spid['spDescription']));
+      $spid['spOrganizationName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spOrganizationName']));
+      $spid['spOrganizationDisplayName'] = htmlspecialchars(str_replace("\\'", "'", $spid['spOrganizationDisplayName']));
+      // visualizza pagina
+      include('page_spid_data.php');
     }
-    // pulisce cache
-    $this->clean();
-    // imposta dati della pagina
-    $page['step'] = '6 - Pulizia finale';
-    $page['title'] = 'Pulizia della cache di sistema';
-    $page['_token'] = $this->token;
-    // visualizza pagina
-    include('page_update_6.php');
-    // imposta nuovo passo
-    $_SESSION['GS_INSTALL_STEP'] = $this->step + 1;
   }
 
   /**
-   * Aggiorna la versione: passo 7
+   * Pagina per la modalità di validazione dello SPID
    *
    */
-  private function pageUpdate7() {
-    // controllo token
-    $token = $_POST['install']['_token'];
-    if ($this->token !== $token) {
-      // non esiste password di installazione
-      throw new \Exception('Errore di sicurezza nell\'invio dei dati');
+  private function pageSpidValidate() {
+    // controlla pagina
+    if (isset($_POST['install']['next'])) {
+      // legge metadata
+      $xml = urldecode($_POST['install']['xml']);
+      // scrive metadata
+      if (file_put_contents($this->projectPath.'/config/metadata/registro-spid.xml', $xml) === false) {
+        // errore di creazione del file
+        $this->pageError('Impossibile memorizzare il file dei metadata (registro-spid.xml).', $this->step);
+      }
+      // pagina successiva
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } elseif (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // imposta validazione
+      $this->setParameter('spid', $_POST['install']['spidValidate'] == 1 ? 'validazione' : 'si');
+      // imposta libreria SPID-PHP
+      $this->spidSetup($_POST['install']['spidValidate'] == 1);
+      // JS per scaricare metadata
+      $page['javascript'] = <<<EOT
+        $('#gs-waiting').modal('show');
+        $.get({
+          'url': '/spid/module.php/saml/sp/metadata.php/service',
+          'dataType': 'text'
+        }).done(function(xml) {
+          $('#install_xml').val(encodeURI(xml));
+          $('#install_submit').click();
+        });
+        EOT;
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Validazione SPID';
+      $page['title'] = 'Imposta la modalità validazione per lo SPID';
+      $page['_token'] = $this->token;
+      $page['submitType'] = 'next';
+      // visualizza pagina
+      include('page_spid_validate.php');
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Validazione SPID';
+      $page['title'] = 'Imposta la modalità validazione per lo SPID';
+      $page['_token'] = $this->token;
+      $page['submitType'] = 'submit';
+      $page['spidValidate'] = ($this->getParameter('spid') != 'si');
+      // visualizza pagina
+      include('page_spid_validate.php');
     }
+  }
+
+  /**
+   * Pagina per la pulizia finale della cache
+   *
+   */
+  private function pageClean() {
+    // controlla pagina
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // pulisce cache
+      $this->clean();
+      // va al passo successivo
+      $page = [];
+      $this->step++;
+      $_SESSION['GS_INSTALL_STEP'] = $this->step;
+      $this->{$this->procedure[$this->mode][$this->step]}();
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Pulizia cache';
+      $page['title'] = 'Pulizia della cache di sistema';
+      $page['_token'] = $this->token;
+      $page['info'] = 'Verrà effettuata la pulizia finale della cache di sistema.';
+      // visualizza pagina
+      include('page_message.php');
+    }
+  }
+
+  /**
+   * Pagina per la fine dell'installazione
+   *
+   */
+  private function pageEnd() {
     // imposta dati della pagina
-    $page['step'] = '7 - Fine';
-    $page['title'] = 'Fine della procedura';
+    $page['step'] = $this->step.' - Fine installazione';
+    $page['title'] = 'Procedura di installazione terminata';
+    $page['success'] = 'La procedura di installazione è terminata con successo.<br>'.
+      'Ora puoi andare alla pagina principale.';
     // visualizza pagina
-    include('page_update_7.php');
+    include('page_message.php');
+    // toglie la modalità manutenzione (se presente)
+    $this->setParameter('manutenzione_inizio', '');
+    $this->setParameter('manutenzione_fine', '');
     // resetta sessione
     $_SESSION = [];
     session_destroy();
     // rinomina file di installazione in .txt
-    $path = dirname(dirname(__DIR__)).'/public/install';
-    rename($path.'/index.php', $path.'/index.txt');
+    rename($this->publicPath.'/install/index.php', $this->publicPath.'/install/index.txt');
+  }
+
+  /**
+   * Pagina per l'aggiornamento di versione
+   *
+   */
+  private function pageUpdate() {
+    // controlla pagina
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // aggiorna database
+      $lastVersion = array_slice(array_keys($this->dataUpdate), -2)[0].
+        (empty($this->dataUpdate['build']) ? '' : '#build');
+      $updateVersion = $this->updateSchema();
+      // imposta nuovo passo
+      if (isset($_POST['install']['exit'])) {
+        // va al passo successivo
+        $page = [];
+        $this->step++;
+        $_SESSION['GS_INSTALL_STEP'] = $this->step;
+        $this->{$this->procedure[$this->mode][$this->step]}();
+      } else {
+        // riesegue procedura
+        $page['step'] = $this->step.' - Aggiornamento';
+        $page['title'] = 'Aggiornamento del database';
+        $page['_token'] = $this->token;
+        $page['submitType'] = version_compare($updateVersion, $lastVersion, '==') ? 'exit' : 'submit';
+        $page['success'] = 'Il database è stato correttamente aggiornato alla versione <em>'.$updateVersion.'</em>.';
+        // visualizza pagina
+        include('page_update.php');
+      }
+    } else {
+      // imposta dati della pagina
+      $page['step'] = $this->step.' - Aggiornamento';
+      $page['title'] = 'Aggiornamento del database';
+      $page['_token'] = $this->token;
+      $page['submitType'] = 'submit';
+      $page['info'] = 'Saranno effettuate le modifiche necessarie al database.<br>'.
+        'I dati esistenti non saranno modificati.';
+      // visualizza pagina
+      include('page_update.php');
+    }
   }
 
 }

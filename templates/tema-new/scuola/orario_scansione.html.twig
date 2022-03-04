@@ -39,27 +39,28 @@ $(document).ready(function() {
     $(el).show();
   });
   // init
+  $('.gs-giorno').append(button);
+  $('.gs-giorno button.gs-remove-item').html('<svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#minus') }}"></use></svg>');
   var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
   $('input[disabled="disabled"]').each(function() {
-      var o = $(this).val();
-      var v = $('#'+$(this).attr('id').slice(0, -3)+'visibile');
-      if ($(v).val() === "") {
-        if (o === "0") {
-          $(v).val(0);
-          $(this).closest('fieldset').hide();
-        } else {
-          $(v).val(1);
-        }
-      } else if ($(v).val() === "0") {
-        $(this).attr('value', 0);
+    var o = $(this).val();
+    var v = $('#'+$(this).attr('id').slice(0, -3)+'visibile');
+    if ($(v).val() === "") {
+      if (o === "0") {
+        $(v).val(0);
         $(this).closest('fieldset').hide();
-      } else if (o === "0") {
-        var idx = parseInt($(this).closest('.gs-giorno').find('input[disabled="disabled"][value!="0"]').last().val());
-        idx = (idx > 0 ? (idx + 1) : 1);
-        $(this).attr('value', idx);
+      } else {
+        $(v).val(1);
       }
-    });
-  $('.gs-giorno').append(button);
+    } else if ($(v).val() === "0") {
+      $(this).attr('value', 0);
+      $(this).closest('fieldset').hide();
+    } else if (o === "0") {
+      var idx = parseInt($(this).closest('.gs-giorno').find('input[disabled="disabled"][value!="0"]').last().val());
+      idx = (idx > 0 ? (idx + 1) : 1);
+      $(this).attr('value', idx);
+    }
+  });
 });
 </script>
 {% endblock %}
