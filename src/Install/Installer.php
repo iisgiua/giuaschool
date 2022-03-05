@@ -1083,6 +1083,8 @@ class Installer {
       $_SESSION = [];
       session_destroy();
     }
+    // termina esecuzione
+    die();
   }
 
   /**
@@ -1709,13 +1711,6 @@ class Installer {
    *
    */
   private function pageEnd() {
-    // imposta dati della pagina
-    $page['step'] = $this->step.' - Fine installazione';
-    $page['title'] = 'Procedura di installazione terminata';
-    $page['success'] = 'La procedura di installazione è terminata con successo.<br>'.
-      'Ora puoi andare alla pagina principale.';
-    // visualizza pagina
-    include('page_message.php');
     // toglie la modalità manutenzione (se presente)
     $this->setParameter('manutenzione_inizio', '');
     $this->setParameter('manutenzione_fine', '');
@@ -1724,6 +1719,13 @@ class Installer {
     session_destroy();
     // rinomina file di installazione in .txt
     rename($this->publicPath.'/install/index.php', $this->publicPath.'/install/index.txt');
+    // imposta dati della pagina
+    $page['step'] = $this->step.' - Fine installazione';
+    $page['title'] = 'Procedura di installazione terminata';
+    $page['success'] = 'La procedura di installazione è terminata con successo.<br>'.
+      'Ora puoi andare alla pagina principale.';
+    // visualizza pagina
+    include('page_message.php');
   }
 
   /**
