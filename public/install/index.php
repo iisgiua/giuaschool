@@ -13,7 +13,8 @@ $installer->run();
 
 function exception_error_handler($severity, $message, $file, $line) {
   if (strtolower(substr($message, 0, 25)) == 'use of undefined constant' ||
-      strtolower(substr($message, 0, 50)) == 'stream_isatty() expects parameter 1 to be resource') {
+      strtolower(substr($message, 0, 50)) == 'stream_isatty() expects parameter 1 to be resource' ||
+      strtolower(substr($message, 0, 41)) == 'is_executable(): open_basedir restriction') {
     // errore non considerato
     return false;
   }
