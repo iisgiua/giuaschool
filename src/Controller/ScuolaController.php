@@ -192,9 +192,11 @@ class ScuolaController extends BaseController {
     if (!$preside) {
       // crea nuovo utente
       $preside = (new Preside())
-        ->setPassword('NOPASSWORD');
+        ->setAbilitato(true);
       $em->persist($preside);
     }
+    // assicura che l'utente sia abilitato
+    $preside->setAbilitato(true);
     // form
     $form = $this->createForm(PresideType::class, $preside, ['returnUrl' => $this->generateUrl('scuola_dirigente')]);
     $form->handleRequest($request);
