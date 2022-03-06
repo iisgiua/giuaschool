@@ -16,7 +16,7 @@ $(document).ready(function() {
       $(this).closest('.form-group').remove();
     }
     if ($(this).hasClass('gs-add-item')) {
-      var html = '<div class="form-group gs-collection"><div class="input-group"><input type="text" id="alunno_genitore_--GEN--_numeriTelefono_--NUM--" name="alunno_genitore[--GEN--][numeriTelefono][--NUM--]" class="form-control" value=""><div class="input-group-append"><button class="btn btn-danger btn-xs gs-remove-item" type="button" title="Cancella il numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="/vendor/fontawesome/sprites/solid.svg#minus"></use></svg></button></div></div></div>'
+      var html = '<div class="form-group gs-collection"><div class="input-group"><input type="text" id="alunno_genitore_--GEN--_numeriTelefono_--NUM--" name="alunno_genitore[--GEN--][numeriTelefono][--NUM--]" class="form-control" value=""><div class="input-group-append"><button class="btn btn-danger btn-xs gs-remove-item" type="button" title="Cancella il numero di telefono"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#minus') }}"></use></svg></button></div></div></div>'
       var idNum = $(this).parent().parent().find('.form-group.gs-collection input').last().attr('id')
       var reNum = /\d+$/;
       var resNum = reNum.exec(idNum);

@@ -28,6 +28,8 @@
 /src/Controller/TestController.php
 /src/DataFixtures/AppLocalFixtures.php
 /templates/argo/
+/templates/info/.local/
+/templates/tema-new/info/.local/
 /tests/temp/*
 !/tests/temp/.gitkeep
 /var/cache/*

@@ -444,7 +444,7 @@ class LezioniController extends AbstractController {
     $section->addText($session->get('/CONFIG/ISTITUTO/nome'),
       array('bold' => true, 'italic' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText('CAGLIARI - ASSEMINI',
+    $section->addText($session->get('/CONFIG/ISTITUTO/sede_0_citta'),
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addTextBreak(1);

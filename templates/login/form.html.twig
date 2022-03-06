@@ -111,7 +111,7 @@
           <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
         </form>
         {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}
-          {{ include('login/form-spid.html.twig') }}+
+          {{ include('login/form-spid.html.twig') }}
         {% endif %}
       </div>
       {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}

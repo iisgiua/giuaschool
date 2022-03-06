@@ -345,7 +345,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('times', '', 14);
     $html = '
       <div style="text-align:center">
-        <img src="/img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
+        <img src="img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
       </div>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
@@ -859,7 +859,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('times', '', 14);
     $html = '
       <div style="text-align:center">
-        <img src="/img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
+        <img src="img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
       </div>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
@@ -1222,7 +1222,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->SetFont('times', '', 14);
     $html = '
       <div style="text-align:center">
-        <img src="/img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
+        <img src="img/'.$this->localpath.'intestazione-documenti.jpg" width="600">
       </div>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);

@@ -11,9 +11,9 @@
   <p>Titolare del trattamento dei dati è l'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}, con sede in {{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, al quale ci si potrà rivolgere per esercitare i diritti degli interessati.</p>
 
   <h2>Responsabile per la protezione dei dati</h2>
-  <p>Il Responsabile per la protezione dei dati personali dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }} è stato individuato con decreto dirigenziale pubblicato nella sezione <em>Amministrazione Trasparente</em> del sito web istituzionale:</p>
+  <p>Il Data Protection Officer (DPO), ai sensi del Regolamento Europeo 2016/679, è reperibile alla mail istituzionale:</p>
   <ul>
-    <li><a target="_blank" href="http://www.giua.edu.it/privacy-412.html" title="Vai alla pagina dedicata sul sito istituzionale">Nomina RPD</a></li>
+    <li><strong>{{ app.session.get('/CONFIG/ISTITUTO/email') }}</strong></li>
   </ul>
 
   <h2>Finalità del trattamento</h2>
@@ -79,7 +79,9 @@
 
   <h2>Link correlati</h2>
   <ul>
-    <li><a target="_blank" href="http://www.giua.edu.it/privacy-412.html">Informazioni sulla privacy presenti nel sito istituzionale (sezione <em>Amministrazione Trasparente</em>)</a></li>
+  {% if LOCAL_PATH %}
+    {% include('info/'~LOCAL_PATH~'privacy-link.html.twig') %}
+  {% endif %}
     <li><a href="{{ path('info_cookie') }}">Informativa sull'uso dei cookie</a></li>
   </ul>
 

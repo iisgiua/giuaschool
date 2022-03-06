@@ -2804,7 +2804,7 @@ class PagelleUtil {
       $alu_nascita = $alu['dataNascita']->format('d/m/Y');
       $alu_citta = strtoupper($alu['comuneNascita']);
       // prima pagina
-      $html = '<img src="/img/'.'.local/'.'intestazione-documenti.jpg" width="400">';
+      $html = '<img src="img/'.'.local/'.'intestazione-documenti.jpg" width="400">';
       $pdf->writeHTML($html, true, false, false, false, 'C');
       $pdf->Ln(3);
       $pdf->SetFont('times', 'B', 12);
@@ -4013,7 +4013,7 @@ class PagelleUtil {
       $alu_nascita = $alu['dataNascita']->format('d/m/Y');
       $alu_citta = strtoupper($alu['comuneNascita']);
       // prima pagina
-      $html = '<img src="/img/'.'.local/'.'intestazione-documenti.jpg" width="400">';
+      $html = '<img src="img/'.'.local/'.'intestazione-documenti.jpg" width="400">';
       $pdf->writeHTML($html, true, false, false, false, 'C');
       $pdf->Ln(3);
       $pdf->SetFont('times', 'B', 12);
