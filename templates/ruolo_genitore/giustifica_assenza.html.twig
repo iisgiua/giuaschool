@@ -63,7 +63,7 @@
       </ul>
     {% endif %}
       <p><em>La presente autodichiarazione viene rilasciata quale misura di prevenzione correlata con l’emergenza pandemica del COVID-19.</em></p>
-      <p><em>Cagliari, {{ date()|date('d/m/Y') }}.</em></p>
+      <p><em>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ date()|date('d/m/Y') }}.</em></p>
       {{ form_widget(form.firma) }}
     </div>
   </div>

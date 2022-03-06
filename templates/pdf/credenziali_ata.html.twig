@@ -24,6 +24,6 @@ Pertanto, la S.V. è tenuta ad osservare la seguente politica di gestione delle 
 L'accesso al Registro Elettronico, effettuato tramite le credenziali, e le operazioni eseguite nell'applicativo saranno registrate, come meglio specificato nell'informativa ai sensi dell'art. 13 del D.Lgs. n. 196 del 2013 e del Regolamento Europeo 2016/679 che si rilascia con la presente.</p>
 <p style="text-align: justify">Distinti saluti.</p>
 <p>&nbsp;</p>
-<p>Cagliari, {{ 'now'|date('d/m/Y') }}.</p>
+<p>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ 'now'|date('d/m/Y') }}.</p>
 <p style="text-align: right">Il Dirigente Scolastico<br>
 <i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>&nbsp;&nbsp;</p>

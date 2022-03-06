@@ -45,4 +45,4 @@
 {% endfor %}
 <div style="text-align:center">Legenda: <strong>A</strong> = assenza, <strong>R</strong> = ingresso in ritardo, <strong>U</strong> = uscita anticipata.</div>
 <br>
-<p>Cagliari, {{ date()|date('d/m/Y') }}.</p>
+<p>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ date()|date('d/m/Y') }}.</p>

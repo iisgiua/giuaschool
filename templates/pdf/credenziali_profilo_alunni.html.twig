@@ -25,7 +25,7 @@ Inoltre, le stesse credenziali si possono usare per accedere alle piattaforme di
 <span style="font-size:13pt">Password: &nbsp;&nbsp;<strong style="font-family:helvetica">{{ password }}</strong></span></p>
 <p>Quando si inserisce l'utente e la password nella pagina di accesso, <i>fai attenzione ad inserire correttamente caratteri maiuscoli e minuscoli, senza aggiungere spazi</i>.</p>
 <p>&nbsp;</p>
-<p>Cagliari, {{ 'now'|date('d/m/Y') }}.</p>
+<p>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ 'now'|date('d/m/Y') }}.</p>
 <p>&nbsp;</p>
 <p style="text-align: right">Il Dirigente Scolastico<br>
 <i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>&nbsp;&nbsp;</p>
