@@ -117,14 +117,11 @@ class AlunnoRepository extends BaseRepository {
   public function findClassEnabled(Sede $sede=null, $search=null, $page=1, $limit=10) {
     // crea query base
     $query = $this->createQueryBuilder('a')
-      ->select('a AS alunno,g1.cognome AS g1_cognome,g1.nome AS g1_nome,g1.username AS g1_username,g1.email AS g1_email,g1.ultimoAccesso AS g1_accesso,g2.cognome AS g2_cognome,g2.nome AS g2_nome,g2.username AS g2_username,g2.email AS g2_email,g2.ultimoAccesso AS g2_accesso')
       ->join('a.classe', 'cl')
-      ->join('App:Genitore', 'g1', 'WITH', 'g1.alunno=a.id AND g1.username LIKE :gen1')
-      ->leftJoin('App:Genitore', 'g2', 'WITH', 'g2.alunno=a.id AND g2.username LIKE :gen2')
       ->where('a.abilitato=:abilitato AND a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['gen1' => '%.f_', 'gen2' => '%.g_', 'nome' => $search['nome'].'%',
-        'cognome' => $search['cognome'].'%', 'abilitato' => 1]);
+      ->setParameters(['nome' => $search['nome'].'%', 'cognome' => $search['cognome'].'%',
+        'abilitato' => 1]);
     if ($sede) {
       $query
         ->andwhere('cl.sede=:sede')
@@ -298,13 +295,9 @@ class AlunnoRepository extends BaseRepository {
   public function cerca($criteri, $pagina=1) {
     // crea query base
     $query = $this->createQueryBuilder('a')
-      ->select('a AS alunno,g1.cognome AS g1_cognome,g1.nome AS g1_nome,g1.codiceFiscale AS g1_codice_fiscale,g1.spid AS g1_spid,g1.numeriTelefono AS g1_telefono,g1.username AS g1_username,g1.email AS g1_email,g1.ultimoAccesso AS g1_accesso,g2.cognome AS g2_cognome,g2.nome AS g2_nome,g2.codiceFiscale AS g2_codice_fiscale,g2.spid AS g2_spid,g2.numeriTelefono AS g2_telefono,g2.username AS g2_username,g2.email AS g2_email,g2.ultimoAccesso AS g2_accesso')
-      ->join('App:Genitore', 'g1', 'WITH', 'g1.alunno=a.id AND g1.username LIKE :gen1')
-      ->leftJoin('App:Genitore', 'g2', 'WITH', 'g2.alunno=a.id AND g2.username LIKE :gen2')
       ->where('a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['gen1' => '%.f_', 'gen2' => '%.g_', 'nome' => $criteri['nome'].'%',
-        'cognome' => $criteri['cognome'].'%']);
+      ->setParameters(['nome' => $criteri['nome'].'%', 'cognome' => $criteri['cognome'].'%']);
     if (isset($criteri['abilitato'])) {
       $query->andwhere('a.abilitato=:abilitato')->setParameter('abilitato', $criteri['abilitato']);
     }

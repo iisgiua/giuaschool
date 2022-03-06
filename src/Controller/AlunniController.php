@@ -153,6 +153,8 @@ class AlunniController extends BaseController {
     // lista alunni
     $dati = $em->getRepository('App:Alunno')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
+    // aggiunge dati dei genitori
+    $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitoriPaginator($dati['lista']);
     // mostra la pagina di risposta
     return $this->renderHtml('alunni', 'modifica', $dati, $info, [$form->createView()]);
   }
@@ -774,6 +776,8 @@ class AlunniController extends BaseController {
     $pagina = $session->get('/APP/ROUTE/alunni_modifica/pagina', 1);
     // recupera dati
     $dati = $em->getRepository('App:Alunno')->cerca($criteri, $pagina);
+    $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitoriPaginator($dati['lista']);
+
     // crea documento PDF
     $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
@@ -781,10 +785,10 @@ class AlunniController extends BaseController {
     foreach ($dati['lista'] as $alu) {
       if ($genitore) {
         // password genitore
-        $utenti = $em->getRepository('App:Genitore')->findBy(['alunno' => $alu['alunno']]);
+        $utenti = $em->getRepository('App:Genitore')->findBy(['alunno' => $alu]);
       } else {
         // password alunno
-        $utenti = [$alu['alunno']];
+        $utenti = [$alu];
       }
       foreach ($utenti as $utente) {
         // crea password

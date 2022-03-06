@@ -12,6 +12,7 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Entity\Alunno;
 
 
@@ -62,20 +63,37 @@ class GenitoreRepository extends UtenteRepository {
   public function datiGenitori(array $alunni) {
     // legge dati
     $genitori = $this->_em->getRepository('App:Alunno')->createQueryBuilder('a')
-      ->select('a.id,g1.cognome AS g1_cognome,g1.nome AS g1_nome,g1.username AS g1_username,g1.email AS g1_email,g1.ultimoAccesso AS g1_accesso,g2.cognome AS g2_cognome,g2.nome AS g2_nome,g2.username AS g2_username,g2.email AS g2_email,g2.ultimoAccesso AS g2_accesso')
-      ->join('App:Genitore', 'g1', 'WITH', 'g1.alunno=a.id AND g1.username LIKE :gen1')
-      ->leftJoin('App:Genitore', 'g2', 'WITH', 'g2.alunno=a.id AND g2.username LIKE :gen2')
+      ->select('a.id,g.cognome,g.nome,g.codiceFiscale,g.numeriTelefono,g.spid,g.username,g.email,g.ultimoAccesso')
+      ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
       ->where('a.id IN (:alunni)')
-      ->setParameters(['gen1' => '%.f_', 'gen2' => '%.g_', 'alunni' => $alunni])
+      ->setParameters(['alunni' => $alunni])
+      ->orderBy('g.username')
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
     $dati = array();
     foreach ($genitori as $g) {
-      $dati[$g['id']] = $g;
+      $dati[$g['id']][] = $g;
     }
     // restituisce valore
     return $dati;
+  }
+
+  /**
+   * Restituisce i dati dei genitori degli alunni indicati da una query con paginazione
+   *
+   * @param Paginator $query Paginazione di una query sugli alunni
+   *
+   * @return array Lista associativa con i dati dei genitori
+   */
+  public function datiGenitoriPaginator(Paginator $query) {
+    // legge ID alunni
+    $alunni = [];
+    foreach ($query as $alu) {
+      $alunni[] = $alu->getId();
+    }
+    // restiruisce dati dei genitori
+    return $this->datiGenitori($alunni);
   }
 
 }

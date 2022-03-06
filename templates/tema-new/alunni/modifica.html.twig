@@ -18,10 +18,10 @@
         </tr>
       </thead>
       <tbody>
-  {% for u in dati.lista %}
-        <tr{% if not u.alunno.abilitato %} class="table-danger"{% endif %}>
+  {% for a in dati.lista %}
+        <tr{% if not a.abilitato %} class="table-danger"{% endif %}>
           <td>
-    {% if u.alunno.abilitato %}
+    {% if a.abilitato %}
             <span title="{{ 'label.utente_attivo'|trans }}">
               <svg class="icon icon-xs icon-success" aria-hidden="true">
                 <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
@@ -35,37 +35,37 @@
             </span>
     {% endif %}
           </td>
-          <td><small>{{ u.alunno.cognome }}</small></td>
-          <td><small>{{ u.alunno.nome }}</small></td>
-          <td><small>{{ u.alunno.dataNascita|date('d/m/Y') }}</small></td>
-          <td><small>{{ ('label.bes_'~u.alunno.bes)|trans }}</small></td>
-          <td><small>{{ u.alunno.classe ? u.alunno.classe.anno~'ª '~u.alunno.classe.sezione }}</small></td>
+          <td><small>{{ a.cognome }}</small></td>
+          <td><small>{{ a.nome }}</small></td>
+          <td><small>{{ a.dataNascita|date('d/m/Y') }}</small></td>
+          <td><small>{{ ('label.bes_'~a.bes)|trans }}</small></td>
+          <td><small>{{ a.classe ? a.classe.anno~'ª '~a.classe.sezione }}</small></td>
           <td class="pb-0">
-            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-info-{{ u.alunno.id }}">{{ 'label.show'|trans }}</button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_modifica_edit', {'id': u.alunno.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': u.alunno.username, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per l'alunno e la invia tramite email">{{ 'label.email_password'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': u.alunno.username, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per l'alunno e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
-    {% if u.alunno.abilitato %}
-            <a class="btn btn-danger btn-xs mb-1" href="{{ path('alunni_abilita', {'id': u.alunno.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
+            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-info-{{ a.id }}">{{ 'label.show'|trans }}</button>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_modifica_edit', {'id': a.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': a.username, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per l'alunno e la invia tramite email">{{ 'label.email_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': a.username, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per l'alunno e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+    {% if a.abilitato %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
     {% else %}
-            <a class="btn btn-success btn-xs mb-1" href="{{ path('alunni_abilita', {'id': u.alunno.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
     {% endif %}
             <button type="button" class="btn btn-secondary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-scelta-genitore" title="Genera una nuova password per il genitore e la invia tramite email"
               data-title="Scegli il genitore a cui inviare la password"
-              data-button1="{{ (u.g1_email and u.g1_email[-6:] != '.local') ? 'Invia' }}"
-              data-gen1="{{ u.g1_nome }} {{ u.g1_cognome }} ({{ u.g1_username }})" data-email1=": {{ u.g1_email }}"
-              data-href1="{{ path('alunni_password', {'username': u.g1_username, 'tipo': 'E'}) }}"
-              data-button2="{{ (u.g2_email and u.g2_email[-6:] != '.local') ? 'Invia' }}"
-              data-gen2="{{ u.g2_nome }} {{ u.g2_cognome }} ({{ u.g2_username }})" data-email2=": {{ u.g2_email }}"
-              data-href2="{{ path('alunni_password', {'username': u.g2_username, 'tipo': 'E'}) }}">{{ 'label.email_password_genitore'|trans }}</button>
+              data-button1="{{ (dati.genitori[a.id][0].email and dati.genitori[a.id][0].email[-6:] != '.local') ? 'Invia' }}"
+              data-gen1="{{ dati.genitori[a.id][0].nome }} {{ dati.genitori[a.id][0].cognome }} ({{ dati.genitori[a.id][0].username }})" data-email1="{{ (dati.genitori[a.id][0].email and dati.genitori[a.id][0].email[-6:] != '.local') ? (': '~dati.genitori[a.id][0].email) }}"
+              data-href1="{{ path('alunni_password', {'username': dati.genitori[a.id][0].username, 'tipo': 'E'}) }}"
+              data-button2="{{ (dati.genitori[a.id][1].email and dati.genitori[a.id][1].email[-6:] != '.local') ? 'Invia' }}"
+              data-gen2="{{ dati.genitori[a.id][1].nome }} {{ dati.genitori[a.id][1].cognome }} ({{ dati.genitori[a.id][1].username }})" data-email2="{{ (dati.genitori[a.id][1].email and dati.genitori[a.id][1].email[-6:] != '.local') ? (': '~dati.genitori[a.id][1].email) }}"
+              data-href2="{{ path('alunni_password', {'username': dati.genitori[a.id][1].username, 'tipo': 'E'}) }}">{{ 'label.email_password_genitore'|trans }}</button>
             <button type="button" class="btn btn-secondary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-scelta-genitore" title="Genera una nuova password per il genitore e la scarica come documento PDF"
               data-title="Scegli il genitore di cui scaricare la password"
               data-button1="Scarica"
-              data-gen1="{{ u.g1_nome }} {{ u.g1_cognome }} ({{ u.g1_username }})" data-email1=""
-              data-href1="{{ path('alunni_password', {'username': u.g1_username, 'tipo': 'P'}) }}"
+              data-gen1="{{ dati.genitori[a.id][0].nome }} {{ dati.genitori[a.id][0].cognome }} ({{ dati.genitori[a.id][0].username }})" data-email1=""
+              data-href1="{{ path('alunni_password', {'username': dati.genitori[a.id][0].username, 'tipo': 'P'}) }}"
               data-button2="Scarica"
-              data-gen2="{{ u.g2_nome }} {{ u.g2_cognome }} ({{ u.g2_username }})" data-email2=""
-              data-href2="{{ path('alunni_password', {'username': u.g2_username, 'tipo': 'P'}) }}">{{ 'label.pdf_password_genitore'|trans }}</button>
+              data-gen2="{{ dati.genitori[a.id][1].nome }} {{ dati.genitori[a.id][1].cognome }} ({{ dati.genitori[a.id][1].username }})" data-email2=""
+              data-href2="{{ path('alunni_password', {'username': dati.genitori[a.id][1].username, 'tipo': 'P'}) }}">{{ 'label.pdf_password_genitore'|trans }}</button>
             <div class="modal fade" id="gs-scelta-genitore" tabindex="-1" role="dialog" aria-labelledby="gs-scelta-genitore-titolo">
               <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
@@ -89,21 +89,21 @@
                 </div>
               </div>
             </div>
-            <div class="modal fade" id="gs-info-{{ u.alunno.id }}" tabindex="-1" role="dialog" aria-labelledby="gs-info-{{ u.alunno.id }}-titolo">
+            <div class="modal fade" id="gs-info-{{ a.id }}" tabindex="-1" role="dialog" aria-labelledby="gs-info-{{ a.id }}-titolo">
               <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                   <div class="modal-header border-bottom">
                     <div>
-                      <h5 class="modal-title" id="gs-info-{{ u.alunno.id }}-titolo">{{ u.alunno.cognome }} {{ u.alunno.nome }}</h5>
+                      <h5 class="modal-title" id="gs-info-{{ a.id }}-titolo">{{ a.cognome }} {{ a.nome }}</h5>
                       <ul class="nav nav-tabs nav-tabs-cards" role="tablist">
                         <li class="nav-item">
-                          <a class="nav-link active" id="gs-alunno-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-alunno-{{ u.alunno.id }}" role="tab" aria-controls="gs-alunno-{{ u.alunno.id }}" aria-selected="true"><strong>Alunno</strong></a>
+                          <a class="nav-link active" id="gs-alunno-{{ a.id }}-tab" data-toggle="pill" href="#gs-alunno-{{ a.id }}" role="tab" aria-controls="gs-alunno-{{ a.id }}" aria-selected="true"><strong>Alunno</strong></a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" id="gs-genitore1-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-genitore1-{{ u.alunno.id }}" role="tab" aria-controls="gs-genitore1-{{ u.alunno.id }}" aria-selected="false"><strong>Genitore 1</strong></a>
+                          <a class="nav-link" id="gs-genitore1-{{ a.id }}-tab" data-toggle="pill" href="#gs-genitore1-{{ a.id }}" role="tab" aria-controls="gs-genitore1-{{ a.id }}" aria-selected="false"><strong>Genitore 1</strong></a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" id="gs-genitore2-{{ u.alunno.id }}-tab" data-toggle="pill" href="#gs-genitore2-{{ u.alunno.id }}" role="tab" aria-controls="gs-genitore2-{{ u.alunno.id }}" aria-selected="false"><strong>Genitore 2</strong></a>
+                          <a class="nav-link" id="gs-genitore2-{{ a.id }}-tab" data-toggle="pill" href="#gs-genitore2-{{ a.id }}" role="tab" aria-controls="gs-genitore2-{{ a.id }}" aria-selected="false"><strong>Genitore 2</strong></a>
                         </li>
                       </ul>
                     </div>
@@ -113,86 +113,86 @@
                   </div>
                   <div class="modal-body">
                     <div class="tab-content">
-                      <div class="tab-pane fade show active" id="gs-alunno-{{ u.alunno.id }}" role="tabpanel" aria-labelledby="gs-alunno-{{ u.alunno.id }}-tab">
+                      <div class="tab-pane fade show active" id="gs-alunno-{{ a.id }}" role="tabpanel" aria-labelledby="gs-alunno-{{ a.id }}-tab">
                         <dl class="row">
                           <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.nome }}</dd>
+                          <dd class="col-sm-4">{{ a.nome }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.cognome }}</dd>
+                          <dd class="col-sm-4">{{ a.cognome }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.sesso'|trans }}</dt>
-                          <dd class="col-sm-4">{{ (u.alunno.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
+                          <dd class="col-sm-4">{{ (a.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.data_nascita'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.dataNascita|date('d/m/Y') }}</dd>
+                          <dd class="col-sm-4">{{ a.dataNascita|date('d/m/Y') }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.comune_nascita'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.comuneNascita }}</dd>
+                          <dd class="col-sm-4">{{ a.comuneNascita }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.codiceFiscale }}</dd>
+                          <dd class="col-sm-4">{{ a.codiceFiscale }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.citta'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.citta }}</dd>
+                          <dd class="col-sm-4">{{ a.citta }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.indirizzo'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.indirizzo }}</dd>
+                          <dd class="col-sm-4">{{ a.indirizzo }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.religione'|trans }}</dt>
-                          <dd class="col-sm-4">{{ ('label.religione_'~u.alunno.religione)|trans }}</dd>
+                          <dd class="col-sm-4">{{ ('label.religione_'~a.religione)|trans }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.bes'|trans }}</dt>
-                          <dd class="col-sm-4">{{ ('label.bes_'~u.alunno.bes)|trans }}</dd>
+                          <dd class="col-sm-4">{{ ('label.bes_'~a.bes)|trans }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.note_bes'|trans }}</dt>
-                          <dd class="col-sm-10">{{ u.alunno.noteBes|raw }}</dd>
+                          <dd class="col-sm-10">{{ a.noteBes|raw }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.credito3'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.credito3 }}</dd>
+                          <dd class="col-sm-4">{{ a.credito3 }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.credito4'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.credito4 }}</dd>
+                          <dd class="col-sm-4">{{ a.credito4 }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.classe'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.classe ? u.alunno.classe.anno~'ª '~u.alunno.classe.sezione }}</dd>
+                          <dd class="col-sm-4">{{ a.classe ? a.classe.anno~'ª '~a.classe.sezione }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.frequenza_estero'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.frequenzaEstero ? 'Si' : 'No' }}</dd>
+                          <dd class="col-sm-4">{{ a.frequenzaEstero ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
-                          <dd class="col-sm-10">{{ u.alunno.spid ? 'Si' : 'No' }}</dd>
+                          <dd class="col-sm-10">{{ a.spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.username }}</dd>
+                          <dd class="col-sm-4">{{ a.username }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.alunno.email }}</dd>
+                          <dd class="col-sm-4">{{ a.email }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
-                          <dd class="col-sm-10">{{ u.alunno.ultimoAccesso ? (u.alunno.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+                          <dd class="col-sm-10">{{ a.ultimoAccesso ? (a.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
                         </dl>
                       </div>
-                      <div class="tab-pane fade" id="gs-genitore1-{{ u.alunno.id }}" role="tabpanel" aria-labelledby="gs-genitore1-{{ u.alunno.id }}-tab">
+                      <div class="tab-pane fade" id="gs-genitore1-{{ a.id }}" role="tabpanel" aria-labelledby="gs-genitore1-{{ a.id }}-tab">
                         <dl class="row">
                           <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g1_nome }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].nome }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g1_cognome }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].cognome }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g1_codice_fiscale }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].codiceFiscale }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.numeri_telefono'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g1_telefono|join(', ') }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].numeriTelefono|join(', ') }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
-                          <dd class="col-sm-10">{{ u.g1_spid ? 'Si' : 'No' }}</dd>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][0].spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g1_username }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].username }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g1_email }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].email }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
-                          <dd class="col-sm-10">{{ u.g1_accesso ? (u.g1_accesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][0].ultimoAccesso ? (dati.genitori[a.id][0].ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
                         </dl>
                       </div>
-                      <div class="tab-pane fade" id="gs-genitore2-{{ u.alunno.id }}" role="tabpanel" aria-labelledby="gs-genitore2-{{ u.alunno.id }}-tab">
+                      <div class="tab-pane fade" id="gs-genitore2-{{ a.id }}" role="tabpanel" aria-labelledby="gs-genitore2-{{ a.id }}-tab">
                         <dl class="row">
                           <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g2_nome }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].nome }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g2_cognome }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].cognome }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g2_codice_fiscale }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].codiceFiscale }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.numeri_telefono'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g2_telefono|join(', ') }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].numeriTelefono|join(', ') }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
-                          <dd class="col-sm-10">{{ u.g2_spid ? 'Si' : 'No' }}</dd>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][1].spid ? 'Si' : 'No' }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g2_username }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].username }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
-                          <dd class="col-sm-4">{{ u.g2_email }}</dd>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].email }}</dd>
                           <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
-                          <dd class="col-sm-10">{{ u.g2_accesso ? (u.g2_accesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][1].ultimoAccesso ? (dati.genitori[a.id][1].ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
                         </dl>
                       </div>
                     </div>

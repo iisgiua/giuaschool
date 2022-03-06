@@ -465,6 +465,7 @@ class SegreteriaController extends AbstractController {
     // lista alunni
     $search['abilitato'] = 1;
     $lista = $em->getRepository('App:Alunno')->cerca($search, $pagina);
+    $lista['genitori'] = $em->getRepository('App:Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/genitori.html.twig', array(
       'pagina_titolo' => 'page.segreteria_genitori',

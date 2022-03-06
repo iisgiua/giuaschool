@@ -18,18 +18,18 @@
       </tr>
     </thead>
     <tbody>
-    {% for u in lista.lista %}
+    {% for a in lista.lista %}
       <tr>
-        <td>{{ u.alunno.cognome }} {{ u.alunno.nome }} ({{ u.alunno.dataNascita|date('d/m/Y') }})</td>
-        <td>{{ u.alunno.classe ? u.alunno.classe.anno~'ª '~u.alunno.classe.sezione : 'Non definita' }}</td>
+        <td>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</td>
+        <td>{{ a.classe ? a.classe.anno~'ª '~a.classe.sezione : 'Non definita' }}</td>
         <td>
-          <span class="glyphicon glyphicon-{{ u.g1_spid ? 'ok-circle text-success' : 'ban-circle text-danger' }} gs-big" aria-hidden="true"></span>
-            Genitore 1{{ ('#' not in (u.g1_nome~u.g1_cognome)) ? (': '~u.g1_nome~' '~u.g1_cognome~' - '~u.g1_codice_fiscale) }}<br>
-          <span class="glyphicon glyphicon-{{ u.g2_spid ? 'ok-circle text-success' : 'ban-circle text-danger' }} gs-big" aria-hidden="true"></span>
-            Genitore 2{{ ('#' not in (u.g2_nome~u.g2_cognome)) ? (': '~u.g2_nome~' '~u.g2_cognome~' - '~u.g2_codice_fiscale) }}
+      {% for g in lista.genitori[a.id] %}
+          <span class="glyphicon glyphicon-{{ g.spid ? 'ok-circle text-success' : 'ban-circle text-danger' }} gs-big" aria-hidden="true"></span>
+            Genitore {{ loop.index }}{{ ('#' not in (g.nome~g.cognome)) ? (': '~g.nome~' '~g.cognome~' - '~g.codiceFiscale) }}<br>
+      {% endfor %}
         </td>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('segreteria_genitori_edit', {'alunno': u.alunno.id}) }}" role="button" title="Clicca per modificare le impostazioni"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span><strong>{{ 'label.edit'|trans }}</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('segreteria_genitori_edit', {'alunno': a.id}) }}" role="button" title="Clicca per modificare le impostazioni"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span><strong>{{ 'label.edit'|trans }}</strong></a>
         </td>
       </tr>
     {% endfor %}

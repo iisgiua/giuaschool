@@ -1653,6 +1653,7 @@ class StaffController extends AbstractController {
       // non festivo: recupera dati
       $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
       $max_pagine = ceil($lista->count() / $limite);
+      $dati['genitori'] = $em->getRepository('App:Genitore')->datiGenitoriPaginator($lista);
       $dati['lista'] = $staff->entrateUscite($info['periodo']['inizio'], $info['periodo']['fine'], $lista);
       $dati['azioni'] = $reg->azioneAssenze($data_obj, $this->getUser(), null, null, null);
     }
@@ -2109,7 +2110,8 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_studenti_deroghe/pagina', $pagina);
     }
     // lista alunni
-    $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['lista'] = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $em->getRepository('App:Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_deroghe.html.twig', array(
       'pagina_titolo' => 'page.staff_deroghe',
@@ -2119,7 +2121,7 @@ class StaffController extends AbstractController {
       'lista' => $lista,
       'dati' => $dati,
       'page' => $pagina,
-      'maxPages' => ceil($lista->count() / $limite),
+      'maxPages' => ceil($lista['lista']->count() / $limite),
     ));
   }
 
@@ -2284,7 +2286,8 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_studenti_situazione/pagina', $pagina);
     }
     // lista alunni
-    $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['lista'] = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $em->getRepository('App:Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/studenti_situazione.html.twig', array(
       'pagina_titolo' => 'page.staff_situazione',
@@ -2294,7 +2297,7 @@ class StaffController extends AbstractController {
       'lista' => $lista,
       'dati' => $dati,
       'page' => $pagina,
-      'maxPages' => ceil($lista->count() / $limite),
+      'maxPages' => ceil($lista['lista']->count() / $limite),
     ));
   }
 
@@ -2592,7 +2595,8 @@ class StaffController extends AbstractController {
       $session->set('/APP/ROUTE/staff_password/pagina', $pagina);
     }
     // lista alunni
-    $lista = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['lista'] = $em->getRepository('App:Alunno')->findClassEnabled($sede, $search, $pagina, $limite);
+    $lista['genitori'] = $em->getRepository('App:Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_staff/password.html.twig', array(
       'pagina_titolo' => 'page.staff_password',
@@ -2601,7 +2605,7 @@ class StaffController extends AbstractController {
       'form_success' => null,
       'lista' => $lista,
       'page' => $pagina,
-      'maxPages' => ceil($lista->count() / $limite),
+      'maxPages' => ceil($lista['lista']->count() / $limite),
     ));
   }
 

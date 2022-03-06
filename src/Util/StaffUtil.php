@@ -98,12 +98,12 @@ class StaffUtil {
     $dati = array();
     // scansione della lista
     foreach ($lista as $a) {
-      $alunno = $a;
+      $alunno['alunno'] = $a;
       // dati ritardi
       $entrate = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
         ->select('e.data,e.ora,e.note')
         ->where('e.valido=:valido AND e.alunno=:alunno AND e.data BETWEEN :inizio AND :fine')
-        ->setParameters(['valido' => 1, 'alunno' => $a['alunno'], 'inizio' => $inizio->format('Y-m-d'),
+        ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
           'fine' => $fine->format('Y-m-d')])
         ->orderBy('e.data', 'DESC')
         ->getQuery()
@@ -113,7 +113,7 @@ class StaffUtil {
       $uscite = $this->em->getRepository('App:Uscita')->createQueryBuilder('u')
         ->select('u.data,u.ora,u.note')
         ->where('u.valido=:valido AND u.alunno=:alunno AND u.data BETWEEN :inizio AND :fine')
-        ->setParameters(['valido' => 1, 'alunno' => $a['alunno'], 'inizio' => $inizio->format('Y-m-d'),
+        ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
           'fine' => $fine->format('Y-m-d')])
         ->orderBy('u.data', 'DESC')
         ->getQuery()
