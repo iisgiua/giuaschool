@@ -29,6 +29,7 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Dotenv\Dotenv;
 use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use App\Kernel;
 use App\Form\ConfigurazioneType;
@@ -111,6 +112,8 @@ class SistemaController extends BaseController {
     // init
     $dati = [];
     $info = [];
+    // informazioni passate alla pagina
+    $info['logLevel'] = $request->server->get('LOG_LEVEL');
     // legge parametri
     $manutenzione_inizio = $em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio', null);
     $manutenzione_fine = $em->getRepository('App:Configurazione')->getParametro('manutenzione_fine', null);
@@ -1115,7 +1118,7 @@ class SistemaController extends BaseController {
     $commands = [
       new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => null, '-q' => null]),
       new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => null, '-q' => null]),
-      new ArrayInput(['command' => 'cache:clear', '-q' => null]),
+      //-- new ArrayInput(['command' => 'cache:clear', '-q' => null]),
     ];
     // esegue comandi
     $kernel = new Kernel('prod', false);
@@ -1131,8 +1134,10 @@ class SistemaController extends BaseController {
         break;
       }
     }
-    // messaggio
     if ($status == 0) {
+      // cancella cache
+      $dir = $this->getParameter('kernel.cache_dir');
+      $this->fileDelete($dir);
       // esecuzione senza errori
       $this->addFlash('success', 'message.svuota_cache_ok');
     }
@@ -1228,6 +1233,70 @@ class SistemaController extends BaseController {
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'manutenzione_log', $dati, $info, [$form->createView(), 'message.log_errori']);
+  }
+
+  /**
+   * Imposta le informazioni di debug nel log di sistema
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/sistema/manutenzione/debug/", name="sistema_manutenzione_debug",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function manutenzioneDebugAction(Request $request): Response {
+    // imposta nuovo livello di log
+    $logLevel = ($request->server->get('LOG_LEVEL') == 'warning') ? 'debug' : 'warning';
+    // legge .env
+    $envPath = $this->getParameter('kernel.project_dir').'/.env';
+    $envData = file($envPath);
+    // modifica impostazione
+    foreach ($envData as $row=>$text) {
+      if (substr($text, 0 , 9) == 'LOG_LEVEL') {
+        // modifica valore
+        $envData[$row] = "LOG_LEVEL='".$logLevel."'\n";
+        break;
+      }
+    }
+    // scrive nuovo .env
+    unlink($envPath);
+    file_put_contents($envPath, $envData);
+    // cancella cache (solo file principali)
+    $dir = $this->getParameter('kernel.cache_dir');
+    $finder = new Finder();
+    $finder->files()->in($dir);
+    foreach ($finder as $file) {
+      unlink($file->getRealPath());
+    }
+    // messaggio
+    $this->addFlash('success', 'message.modifica_log_level_ok');
+    // redirect
+    return $this->redirectToRoute('sistema_manutenzione');
+  }
+
+
+  //==================== METODI PRIVATI DELLA CLASSE ====================
+
+  /**
+   * Cancella i file e le sottodirectory del percorso indicato
+   *
+   * @param string $dir Percorso della directory da cancellare
+   */
+  private function fileDelete($dir) {
+    foreach(glob($dir . '/*') as $file) {
+      if ($file == '.' || $file == '..') {
+        // salta
+        continue;
+      } elseif(is_dir($file)) {
+        // rimuove directory e suo contenuto
+        $this->fileDelete($file);
+        rmdir($file);
+      } else {
+        // rimuove file
+        unlink($file);
+      }
+    }
   }
 
 }

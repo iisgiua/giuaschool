@@ -1140,6 +1140,9 @@ message.avviso_svuota_cache: "Attenzione: l'operazione può comportare dei malfu
 message.logout_utenti_ok: Gli altri utenti sono stati scollegati dal registro.
 message.avviso_logout_utenti: "Attenzione: l'operazione può comportare dei malfunzionamenti per gli utenti attualmente collegati."
 message.log_errori: "Inserisci la data e l'ora iniziale dell'evento per scaricare i messaggi presenti con gli errori di sistema.<br>Verranno estratti solo i messaggi a partire dall'ora indicata e sino a quella successiva."
+message.avviso_attiva_log_level: "Attenzione: l'operazione attiverà la modalità di debug per il log di sistema. Si consiglia di lasciarla attiva solo per il tempo necessario."
+message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la modalità di debug per il log di sistema."
+message.modifica_log_level_ok: La modalità di debug è stata modificata.
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.

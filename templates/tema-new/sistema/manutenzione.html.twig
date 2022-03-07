@@ -7,6 +7,7 @@
   <div class="row mb-3">
     <div class="mx-auto">
       <a class="btn btn-success btn-xs gs-modal-confirm-button" title="Scarica i messaggi di errore di sistema" href="{{ path('sistema_manutenzione_log') }}">Log errori</a>
+      <button class="btn btn-warning btn-xs ml-4 gs-modal-confirm-button" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('sistema_manutenzione_debug') }}" title="Attiva o disattiva la modalità di debug nel log di sistema" data-text="{{ (info.logLevel == 'debug' ? 'message.avviso_disattiva_log_level' : 'message.avviso_attiva_log_level')|trans }}">{{ info.logLevel == 'debug' ? 'Disattiva' : 'Attiva' }} debug</button>
       <button class="btn btn-danger btn-xs ml-4 gs-modal-confirm-button" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('sistema_manutenzione_cache') }}" title="Svuota la cache di sistema" data-text="{{ 'message.avviso_svuota_cache'|trans }}">Svuota cache</button>
       <button class="btn btn-danger btn-xs ml-4 gs-modal-confirm-button" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('sistema_manutenzione_logout') }}" title="Forza il logout degli altri utenti" data-text="{{ 'message.avviso_logout_utenti'|trans }}">Logout utenti</button>
     </div>

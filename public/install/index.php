@@ -12,11 +12,13 @@ $installer = new Installer($path);
 $installer->run();
 
 function exception_error_handler($severity, $message, $file, $line) {
-  if (strtolower(substr($message, 0, 25)) == 'use of undefined constant' ||
-      strtolower(substr($message, 0, 50)) == 'stream_isatty() expects parameter 1 to be resource' ||
-      strtolower(substr($message, 0, 41)) == 'is_executable(): open_basedir restriction') {
-    // errore non considerato
-    return false;
+  if ($severity == E_WARNING) {
+    if (strtolower(substr($message, 0, 18)) == 'file_get_contents(' ||
+        strtolower(substr($message, 0, 7)) == 'rename(') {
+      // invia una eccezione
+      throw new ErrorException("$message<br>In $file:$line", 0, $severity, $file, $line);
+    }
   }
-  throw new ErrorException("$message<br>In $file:$line", 0, $severity, $file, $line);
+  // ritorna alla gestione php
+  return false;
 }

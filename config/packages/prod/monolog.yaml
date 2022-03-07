@@ -8,7 +8,7 @@ monolog:
       type: rotating_file
       max_files: 30
       path: '%kernel.logs_dir%/app_%kernel.environment%.log'
-      level: warning
+      level: '%env(LOG_LEVEL)%'
       channels: ['!command', '!console']
     command:
       type: rotating_file
