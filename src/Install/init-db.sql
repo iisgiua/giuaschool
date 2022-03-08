@@ -1,4 +1,4 @@
---- TABELLA CONFIGURAZIONE --
+-- TABELLA CONFIGURAZIONE --
 INSERT INTO `gs_configurazione` VALUES (1,NOW(),NOW(),'SISTEMA','versione','Numero di versione dell\'applicazione<br>[testo]','1.4.2',1);
 INSERT INTO `gs_configurazione` VALUES (2,NOW(),NOW(),'SISTEMA','manutenzione_inizio','Inizio della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
 INSERT INTO `gs_configurazione` VALUES (3,NOW(),NOW(),'SISTEMA','manutenzione_fine','Fine della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
