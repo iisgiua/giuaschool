@@ -1,4 +1,4 @@
------ TABELLA CONFIGURAZIONE -----
+--- TABELLA CONFIGURAZIONE --
 INSERT INTO `gs_configurazione` VALUES (1,NOW(),NOW(),'SISTEMA','versione','Numero di versione dell\'applicazione<br>[testo]','1.4.2',1);
 INSERT INTO `gs_configurazione` VALUES (2,NOW(),NOW(),'SISTEMA','manutenzione_inizio','Inizio della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
 INSERT INTO `gs_configurazione` VALUES (3,NOW(),NOW(),'SISTEMA','manutenzione_fine','Fine della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
@@ -28,7 +28,7 @@ INSERT INTO `gs_configurazione` VALUES (26,NOW(),NOW(),'ACCESSO','giorni_festivi
 INSERT INTO `gs_configurazione` VALUES (27,NOW(),NOW(),'SISTEMA','spid','Indica la modalità dell\'accesso SPID: \'no\' = non utilizzato, \'si\' = utilizzato, \'validazione\' = utilizzato in validazione.<br>[si|no|validazione]', 'no', 1);
 
 
------ TABELLA MENU -----
+-- TABELLA MENU --
 INSERT INTO `gs_menu` VALUES (1,NOW(),NOW(),'help','Aiuto','Guide e supporto per l\'utente',0);
 INSERT INTO `gs_menu` VALUES (2,NOW(),NOW(),'user','Utente','Gestione del profilo dell\'utente',0);
 INSERT INTO `gs_menu` VALUES (3,NOW(),NOW(),'info','Informazioni','Informazioni sul sito web',0);
@@ -39,7 +39,7 @@ INSERT INTO `gs_menu` VALUES (7,NOW(),NOW(),'docenti',NULL,NULL,0);
 INSERT INTO `gs_menu` VALUES (8,NOW(),NOW(),'alunni',NULL,NULL,0);
 INSERT INTO `gs_menu` VALUES (9,NOW(),NOW(),'main','Menu Principale','Apri il menu principale',0);
 
------ TABELLA OPZIONI MENU -----
+-- TABELLA OPZIONI MENU --
 INSERT INTO `gs_menu_opzione` VALUES (1,1,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (2,1,NULL,NOW(),NOW(),'ROLE_ATA','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (3,1,NULL,NOW(),NOW(),'ROLE_ALUNNO','NESSUNA','Manuale','Scarica il manuale d\'uso dell\'applicazione','',1,1,NULL);
@@ -129,5 +129,5 @@ INSERT INTO `gs_menu_opzione` VALUES (86,9,6,NOW(),NOW(),'ROLE_AMMINISTRATORE','
 INSERT INTO `gs_menu_opzione` VALUES (87,9,7,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Docenti','Gestione dei docenti',NULL,5,0,'user-graduate');
 INSERT INTO `gs_menu_opzione` VALUES (88,9,8,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Alunni','Gestione degli alunni',NULL,6,0,'child');
 
------ TABELLA UTENTE -----
+-- TABELLA UTENTE --
 INSERT INTO `gs_utente` (creato, modificato, username, password, email, abilitato, nome, cognome, sesso, numeri_telefono, notifica, ruolo, spid) VALUES (NOW(), NOW(), 'admin', 'NOPASSWORD', 'admin@noemail.local', 1, 'Amministratore', 'Registro', 'M', 'a:0:{}', 'a:0:{}', 'AMM', 0);
