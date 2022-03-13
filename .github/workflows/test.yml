@@ -62,5 +62,5 @@ jobs:
       - name: Run Behat tests
         run: |
           docker network create gs_net
-          docker run -d --name "chrome_headless" --net host zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080" --ignore-certificate-errors
-          docker run --name "gs_behat" --net host ghcr.io/trinko/giuaschool-test:latest tests/docker/entrypoint-behat.sh
+          docker run -d --name "chrome_headless" --net gs_net zenika/alpine-chrome --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 --window-size="1920,1080" --ignore-certificate-errors
+          docker run --name "gs_behat" --net gs_net ghcr.io/trinko/giuaschool-test:latest tests/docker/entrypoint-behat.sh

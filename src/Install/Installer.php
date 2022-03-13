@@ -1344,7 +1344,7 @@ class Installer {
         // utente non presente
         throw new \Exception('Non è stato indicato l\'utente', $this->step);
       }
-      if ($mail_server < 2 && strpos($mail_user, '@') !== false) {
+      if ($mail_server == 0 && strpos($mail_user, '@') !== false) {
         // indirizzo al posto dell'utente
         throw new \Exception('Devi indicare solo il nome utente, non l\'intero indirizzo email', $this->step);
       }
