@@ -114,7 +114,7 @@ class Installer {
       '10' => 'pageSpid',
       '11' => 'pageSpidRequirements',
       '12' => 'pageSpidData',
-      '13' => 'pageSpidValidate',
+      '13' => 'pageSpidConfig',
       '14' => 'pageClean',
       '15' => 'pageEnd',
     ],
@@ -129,7 +129,7 @@ class Installer {
       '8' => 'pageSpid',
       '9' => 'pageSpidRequirements',
       '10' => 'pageSpidData',
-      '11' => 'pageSpidValidate',
+      '11' => 'pageSpidConfig',
       '12' => 'pageClean',
       '13' => 'pageEnd',
     ]
@@ -571,12 +571,12 @@ class Installer {
   /**
    * Configura la libreria SPID-PHP
    *
-   * @param bool $validate Vero se la modalità validazione è attiva
    */
-  private function spidSetup($validate) {
+  private function spidSetup() {
     // inizializza
     $fs = new Filesystem();
-    // legge configurazione
+    // legge configurazione e imposta validazione
+    $validate = ($this->getParameter('spid') == 'validazione');
     $spid = json_decode(file_get_contents(
       $this->projectPath.'/vendor/italia/spid-php/spid-php-setup.json'), true);
     $spid['addValidatorIDP'] = $validate;
@@ -1398,7 +1398,7 @@ class Installer {
       $page['step'] = $this->step.' - Configurazione email';
       $page['title'] = 'Configurazione per l\'invio delle email';
       $page['_token'] = $this->token;
-      $page['info'] = 'Puoi saltare questa configurazione se non usi l\'invio delle email.';
+      $page['info'] = 'Se non usi l\'invio delle email, puoi saltare questa configurazione cliccando sull\'apposito pulsante a fine pagina.';
       $mail = parse_url($this->env['MAILER_DSN']);
       $page['mail_server'] = ($mail['scheme'] == 'gmail' ? 0 : ($mail['scheme'] == 'smtp' ? 1 : 2));
       $page['mail_user'] = isset($mail['user']) ? $mail['user'] : '';
@@ -1443,17 +1443,24 @@ class Installer {
    *
    */
   private function pageSpid() {
-    if (isset($_POST['install']['skip'])) {
-      $this->setParameter('spid', 'no');
-      // salta lo SPID
+    if (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
+      // imposta l'utilizzo dello SPID
+      $spid = $_POST['install']['spid'];
+      if ($spid == 'validazione') {
+        // validazione: va alla pagina successiva
+        $this->step++;
+      } elseif ($spid == 'si') {
+        // spid attivo: salta configurazione
+        $this->step += 3;
+      } else {
+        // spid non usato: salta tutto
+        $spid = 'no';
+        $this->step += 4;
+      }
+      // scrive su db
+      $this->setParameter('spid', $spid);
+      // salta alla prossima pagina
       $page = [];
-      $this->step += 4;
-      $_SESSION['GS_INSTALL_STEP'] = $this->step;
-      $this->{$this->procedure[$this->mode][$this->step]}();
-    } elseif (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
-      // va al passo successivo
-      $page = [];
-      $this->step++;
       $_SESSION['GS_INSTALL_STEP'] = $this->step;
       $this->{$this->procedure[$this->mode][$this->step]}();
     } else {
@@ -1461,8 +1468,7 @@ class Installer {
       $page['step'] = $this->step.' - Configurazione SPID';
       $page['title'] = 'Configurazione dell\'accesso tramite SPID';
       $page['_token'] = $this->token;
-      $page['info'] = 'Se continui, il sistema verrà configurato per l\'accesso tramite SPID.<br>'.
-        'Se salti la procedura, il sistema sarà impostato per non usare lo SPID.';
+      $page['spid'] = $this->getParameter('spid');
       // visualizza pagina
       include('page_spid.php');
     }
@@ -1638,14 +1644,14 @@ class Installer {
   }
 
   /**
-   * Pagina per la modalità di validazione dello SPID
+   * Pagina per la configurazione dello SPID
    *
    */
-  private function pageSpidValidate() {
+  private function pageSpidConfig() {
     // controlla pagina
     if (isset($_POST['install']['next'])) {
       // legge metadata
-      $xml = urldecode($_POST['install']['xml']);
+      $xml = base64_decode($_POST['install']['xml']);
       // scrive metadata
       if (file_put_contents($this->projectPath.'/config/metadata/registro-spid.xml', $xml) === false) {
         // errore di creazione del file
@@ -1657,10 +1663,8 @@ class Installer {
       $_SESSION['GS_INSTALL_STEP'] = $this->step;
       $this->{$this->procedure[$this->mode][$this->step]}();
     } elseif (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
-      // imposta validazione
-      $this->setParameter('spid', $_POST['install']['spidValidate'] == 1 ? 'validazione' : 'si');
-      // imposta libreria SPID-PHP
-      $this->spidSetup($_POST['install']['spidValidate'] == 1);
+      // configura SPID-PHP
+      $this->spidSetup();
       // JS per scaricare metadata
       $page['javascript'] = <<<EOT
         $('#gs-waiting').modal('show');
@@ -1668,26 +1672,26 @@ class Installer {
           'url': '/spid/module.php/saml/sp/metadata.php/service',
           'dataType': 'text'
         }).done(function(xml) {
-          $('#install_xml').val(encodeURI(xml));
+          $('#install_xml').val(btoa(xml));
           $('#install_submit').click();
         });
         EOT;
       // imposta dati della pagina
-      $page['step'] = $this->step.' - Validazione SPID';
-      $page['title'] = 'Imposta la modalità validazione per lo SPID';
+      $page['step'] = $this->step.' - Configurazione SPID';
+      $page['title'] = 'Configurazione dello SPID';
       $page['_token'] = $this->token;
       $page['submitType'] = 'next';
       // visualizza pagina
-      include('page_spid_validate.php');
+      include('page_spid_config.php');
     } else {
       // imposta dati della pagina
-      $page['step'] = $this->step.' - Validazione SPID';
-      $page['title'] = 'Imposta la modalità validazione per lo SPID';
+      $page['step'] = $this->step.' - Configurazione SPID';
+      $page['title'] = 'Configurazione dello SPID';
       $page['_token'] = $this->token;
       $page['submitType'] = 'submit';
-      $page['spidValidate'] = ($this->getParameter('spid') != 'si');
+      $page['info'] = 'Si procede ora alla configurazione dell\'applicazione per l\'utilizzo dello SPID.';
       // visualizza pagina
-      include('page_spid_validate.php');
+      include('page_spid_config.php');
     }
   }
 

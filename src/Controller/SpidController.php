@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 
 /**
@@ -74,7 +75,9 @@ class SpidController extends AbstractController {
     $xml = file_get_contents($this->getParameter('kernel.project_dir').'/config/metadata/registro-spid.xml');
     $response = new Response($xml);
     // invia metadata
-    $response->headers->set('Content-Type', 'text/xml');
+    $response->headers->set('Content-Type', 'application/samlmetadata+xml');
+    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, 'metadata.xml');
+    $response->headers->set('Content-Disposition', $disposition);
     return $response;
   }
 

@@ -3,7 +3,7 @@
 <div class="card-wrapper card-space">
   <div class="card border rounded card-bg">
     <div class="card-header bg-secondary text-white">
-      Inserisci la configurazione per l'invio delle email.<br>
+      Inserisci la configurazione per l'invio delle email.
     </div>
     <div class="card-body">
       <form name="install" method="post">
