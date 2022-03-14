@@ -163,10 +163,10 @@ class Installer {
       "UPDATE gs_menu_opzione SET url='scuola_festivita',disabilitato=0 WHERE nome='Festività';",
       "UPDATE gs_menu_opzione SET url='scuola_orario',disabilitato=0 WHERE nome='Orario';",
     ],
-    //-- '1.4.3' => [
-    //-- ],
-    'build' => [
+    '1.4.3' => [
       "INSERT INTO `gs_configurazione` (`creato`, `modificato`, `categoria`, `parametro`, `descrizione`, `valore`, `gestito`) VALUES (NOW(),NOW(),'SISTEMA','spid','Indica la modalità dell\'accesso SPID: \'no\' = non utilizzato, \'si\' = utilizzato, \'validazione\' = utilizzato in validazione.<br>[si|no|validazione]','no',1);",
+    ],
+    'build' => [
     ]
   ];
 
