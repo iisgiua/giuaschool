@@ -60,11 +60,11 @@ jobs:
           mkdir docs
           echo "---" > docs/latest-build.md
           echo "layout: default" >> docs/latest-build.md
-          echo "title: Ultima modifica" >> docs/latest-build.md
+          echo "title: Ultimo aggiornamento" >> docs/latest-build.md
           echo "nav_order: 11" >> docs/latest-build.md
           echo "---" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
-          echo "# Ultima modifica"  >> docs/latest-build.md
+          echo "# Ultimo aggiornamento"  >> docs/latest-build.md
           echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "Data e ora dell'ultima modifica: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-build.md
