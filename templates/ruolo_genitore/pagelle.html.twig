@@ -14,9 +14,9 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['A','P','1','F','E'] %}
+    {% for p in ['A','P','S','F','E'] %}
       {% if lista_periodi[p] is defined %}
-          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('genitori_pagelle', {'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
+          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('genitori_pagelle', {'periodo': p}) }}">{{ p ? (p == 'P' ? app.session.get('/CONFIG/SCUOLA/periodo1_nome') : (p == 'S' ? app.session.get('/CONFIG/SCUOLA/periodo2_nome') : ('label.periodo_'~p)|trans)) : ('label.scegli_periodo'|trans) }}</a></li>
       {% endif %}
     {% endfor %}
         </ul>
@@ -116,10 +116,10 @@
     </tbody>
   </table>
         {% endif %}
-      {% elseif periodo == 'P' %}
+      {% elseif periodo == 'P' or periodo == 'S' %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-2">
-      <strong>Scrutinio del {{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}</strong>
+      <strong>Scrutinio del {{ periodo == 'P' ? app.session.get('/CONFIG/SCUOLA/periodo1_nome') : app.session.get('/CONFIG/SCUOLA/periodo2_nome') }}</strong>
       <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
     </caption>
     <thead class="bg-success">

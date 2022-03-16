@@ -47,7 +47,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/classe/{classe}/{tipo}/{periodo}", name="pagelle_classe",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2|X"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
@@ -82,7 +82,7 @@ class PagelleController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // scarica documento
-    if ($periodo == 'P') {
+    if ($periodo == 'P' || $periodo == 'S') {
       // primo trimestre
       switch ($tipo) {
         case 'I':
@@ -170,7 +170,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C|E|X", "periodo": "P|S|F|E|1|2|X"},
+   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C|E|X", "periodo": "P|S|F|E|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
@@ -210,7 +210,7 @@ class PagelleController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // scarica documento
-    if ($periodo == 'P') {
+    if ($periodo == 'P' || $periodo == 'S') {
       // primo trimestre
       switch ($tipo) {
         case 'P':

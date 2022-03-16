@@ -21,7 +21,7 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ (periodo and periodo != 'X' ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul style="z-index: 1010" class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['A','P','1','F','E'] %}
+    {% for p in ['A','P','S','F','E'] %}
       {% if lista_periodi[p] is defined %}
           <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
       {% endif %}
@@ -35,7 +35,7 @@
     {% endif %}
     </div>
   </div>
-    {% if periodo == 'P' %}
+    {% if periodo == 'P' or periodo == 'S' %}
   <div id="gs-fixed-header">
     <table class="table table-bordered table-hover table-striped">
       <thead class="bg-success">
@@ -91,57 +91,6 @@
           </td>
         </tr>
       {% endfor %}
-      </tbody>
-    </table>
-  </div>
-    {% elseif periodo == '1' %}
-  <div id="gs-fixed-header">
-    <table class="table table-bordered table-hover table-striped">
-      <thead class="bg-success">
-        <tr>
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-    {% for materia,m in dati.materie %}
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
-          </th>
-    {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-    {% for alunno,a in dati.alunni %}
-        <tr>
-          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
-          </td>
-      {% for materia,m in dati.materie %}
-          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-        {% if m.tipo == 'C' %}
-          {% if dati.voti[alunno][materia].unico is not defined %}
-            <span>--</span>
-          {% else %}
-            <span class="label label-{{ dati.voti[alunno][materia].unico < 42 ? 'danger' : (dati.voti[alunno][materia].unico < 43 ? 'warning' : 'success') }}">{{ info.condotta['1'][dati.voti[alunno][materia].unico] }}</span>
-          {% endif %}
-        {% else %}
-          {% if m.tipo == 'R' and a.religione != 'S' %}
-              <span>NA</span>
-          {% elseif dati.voti[alunno][materia].unico is not defined %}
-              <span>--</span>
-          {% else %}
-              <span class="label label-{{ dati.voti[alunno][materia].unico < 33 ? 'danger' : (dati.voti[alunno][materia].unico < 34 ? 'warning' : 'success') }}">{{ info.giudizi['1'][dati.voti[alunno][materia].unico] }}</span>
-          {% endif %}
-        {% endif %}
-        {% if m.tipo == 'N' and dati.debiti[alunno][materia] is defined %}
-            <br>
-          {% if dati.voti[alunno][materia].recupero is not defined or dati.voti[alunno][materia].recupero is empty %}
-            <span>--</span>
-          {% else %}
-            <small>{{ ('label.recupero_'~dati.voti[alunno][materia].recupero)|trans }}</small>
-          {% endif %}
-        {% endif %}
-          </td>
-      {% endfor %}
-        </tr>
-    {% endfor %}
       </tbody>
     </table>
   </div>

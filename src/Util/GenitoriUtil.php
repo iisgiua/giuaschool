@@ -431,7 +431,7 @@ class GenitoriUtil {
     }
     // restituisce dati come array associativo
     return $dati;
-  } 
+  }
 
   /**
    * Restituisce le assenze dell'alunno indicato.
@@ -779,7 +779,7 @@ class GenitoriUtil {
         'unico' => $v->getUnico(),
         'assenze' => $v->getAssenze());
       // inserisce voti/debiti
-      if ($periodo == 'P') {
+      if ($periodo == 'P' || $periodo == 'S') {
         // primo trimestre
         if (in_array($v->getMateria()->getTipo(), ['N', 'E']) && $v->getUnico() < 6) {
           $dati['debiti'][$v->getMateria()->getId()] = array(

@@ -53,6 +53,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param SessionInterface $session Gestore delle sessioni
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param string $periodo Periodo dello scrutinio
    *
@@ -63,7 +64,8 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function scrutiniAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+  public function scrutiniAction(Request $request, EntityManagerInterface $em,
+                                 SessionInterface $session, TranslatorInterface $trans,
                                  $periodo): Response {
     // init
     $dati = [];
@@ -80,14 +82,31 @@ class ScuolaController extends BaseController {
     $info['periodo'] = $periodo;
     // legge dati
     $definizione = $em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
-    if (!$definizione) {
-      // nuova definizione
-      $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo);
+    if ($definizione) {
+      // controlla dati mancanti
+      $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
+        ['periodo' => ($periodo == 'P' ? $session->get('/CONFIG/SCUOLA/periodo1_nome') :
+        ($periodo == 'S' ? $session->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
       $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
       $struttura[1] = ['ScrutinioInizio', false, []];
       $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
-      $struttura[3] = ['ScrutinioFine', false, []];
-      $struttura[4] = ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2]];
+      $struttura[3] = ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2,
+        'obbligatorio' => false, 'inizio' => '', 'seVuoto' => '', 'default' => '', 'fine' => '']];
+      $struttura[4] = ['ScrutinioFine', false, []];
+      $definizione
+        ->setArgomenti($argomenti)
+        ->setStruttura($struttura);
+    } else {
+      // nuova definizione
+      $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
+        ['periodo' => ($periodo == 'P' ? $session->get('/CONFIG/SCUOLA/periodo1_nome') :
+        ($periodo == 'S' ? $session->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
+      $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
+      $struttura[1] = ['ScrutinioInizio', false, []];
+      $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
+      $struttura[3] = ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2,
+        'obbligatorio' => false, 'inizio' => '', 'seVuoto' => '', 'default' => '', 'fine' => '']];
+      $struttura[4] = ['ScrutinioFine', false, []];
       $definizione = (new DefinizioneScrutinio())
         ->setData(new \DateTime('today'))
         ->setDataProposte(new \DateTime('today'))

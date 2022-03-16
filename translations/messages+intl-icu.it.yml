@@ -230,7 +230,7 @@ label.periodo_A: A.S. Precedente
 label.periodo_F: Scrutinio Finale
 label.periodo_E: Scrutinio esami giudizio sospeso
 label.periodo_P: Primo Quadrimestre
-label.periodo_S: ~
+label.periodo_S: Secondo Quadrimestre
 label.periodo_X: Scrutinio Rinviato
 label.scrutini_periodo_E: Esami giudizio sospeso
 label.scrutini_periodo_U: Sessione supplettiva
@@ -457,8 +457,8 @@ label.filtro_anno_scolastico: Filtra per Anno Scolastico
 label.data_scrutinio: Inizio degli scrutini
 label.data_proposte: Inserimento proposte di voto
 label.verbale_situazioni_particolari: Situazioni particolari da segnalare
-label.verbale_scrutinio_P: Scrutinio del Primo Quadrimestre
-label.verbale_scrutinio_S:
+label.verbale_scrutinio_P: "Scrutinio del {periodo}"
+label.verbale_scrutinio_S: "Scrutinio del {periodo}"
 label.verbale_scrutinio_F: Scrutinio finale
 label.verbale_scrutinio_E: Scrutinio per gli esami degli studenti con sospensione del giudizio
 label.verbale_scrutinio_U: Scrutinio per gli esami degli studenti con sospensione del giudizio - sessione supplettiva

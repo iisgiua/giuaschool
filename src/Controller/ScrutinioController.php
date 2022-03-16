@@ -85,8 +85,9 @@ class ScrutinioController extends AbstractController {
     $title['P']['N'] = 'message.proposte';
     $title['P']['R'] = 'message.proposte_religione';
     $title['P']['E'] = 'message.proposte';
-    $title['1']['N'] = 'message.proposte_intermedia';
-    $title['1']['R'] = 'message.proposte_religione';
+    $title['S']['N'] = 'message.proposte';
+    $title['S']['R'] = 'message.proposte_religione';
+    $title['S']['E'] = 'message.proposte';
     $title['F']['N'] = 'message.proposte';
     $title['F']['R'] = 'message.proposte_religione';
     $title['F']['E'] = 'message.proposte';
@@ -300,6 +301,7 @@ class ScrutinioController extends AbstractController {
     $form = null;
     $template = 'coordinatore/scrutinio.html.twig';
     $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
+    $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     // parametro classe
     if ($classe == 0) {
@@ -699,6 +701,8 @@ class ScrutinioController extends AbstractController {
     $info = array();
     $valutazioni['P']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['P']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
+    $valutazioni['S']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
+    $valutazioni['S']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"'];
     $valutazioni['F']['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"', 'format' => '"Non Classificato", "Insufficiente", "Sufficiente", "Discreto", "Buono", "Distinto", "Ottimo"', 'format2' => '"NC", "Insuff.", "Suff.", "Discreto", "Buono", "Distinto", "Ottimo"'];
     $valutazioni['F']['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
     $valutazioni['F']['E'] = ['min' => 3, 'max' => 10, 'start' => 6, 'ticks' => '3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 4, 5, 6, 7, 8, 9, 10'];
@@ -763,7 +767,7 @@ class ScrutinioController extends AbstractController {
       }
     }
     // form di inserimento
-    $tipo = ($periodo == 'P' ? 'debiti' : 'esito');
+    $tipo = (($periodo == 'P' || $periodo == 'S') ? 'debiti' : 'esito');
     $form = $this->container->get('form.factory')->createNamedBuilder('voti', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_voti', ['classe' => $classe->getId(),
         'materia' => $materia->getId(), 'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))
@@ -843,7 +847,7 @@ class ScrutinioController extends AbstractController {
     $lista_periodi = null;
     $info = array();
     $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
-    $info['giudizi']['1'] = [30 => 'NC', 31 => 'Scarso', 32 => 'Insuff.', 33 => 'Mediocre', 34 => 'Suff.', 35 => 'Discreto', 36 => 'Buono', 37 => 'Ottimo'];
+    $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['E']['R'] = [20 => 'NC', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $info['giudizi']['A']['R'] = $info['giudizi']['F']['R'];
@@ -2212,7 +2216,7 @@ class ScrutinioController extends AbstractController {
       }
     }
     // form di inserimento
-    $tipo = ($periodo == 'P' ? 'debiti' : 'edcivica');
+    $tipo = (($periodo == 'P' || $periodo == 'S') ? 'debiti' : 'edcivica');
     $form = $this->container->get('form.factory')->createNamedBuilder('edcivica', FormType::class)
       ->setAction($this->generateUrl('coordinatore_scrutinio_edcivica', ['classe' => $classe->getId(),
         'periodo' => $periodo, 'alunno' => $alunno, 'posizione' => $posizione]))

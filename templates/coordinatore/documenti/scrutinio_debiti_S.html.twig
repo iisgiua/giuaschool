@@ -1,0 +1,44 @@
+{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<table style="font-family:times;font-size:12pt" border="0" cellpadding="3" nobr="true">
+  <tr nobr="true">
+    <td width="55%">&nbsp;</td>
+    <td width="45%" align="left">
+      <em>Ai genitori dell'alunn{{ dati.alunno.sesso == 'M' ? 'o' : 'a' }}</em><br>
+      {{ dati.alunno.cognome|upper }} {{ dati.alunno.nome|upper }}<br>
+      Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }}
+    </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<div style="text-align:justify;font-family:times;font-size:11pt">
+  <p><strong>OGGETTO: Scrutinio del {{ app.session.get('/CONFIG/SCUOLA/periodo2_nome')|lower }} A.S.
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione del debito formativo</strong></p>
+  <br>
+  <p>Il Consiglio di Classe, nella seduta dello scrutinio del {{ app.session.get('/CONFIG/SCUOLA/periodo2_nome')|lower }} dell’Anno Scolastico
+    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
+    {{ dati.scrutinio.data|date('d/m/Y') }}, ha rilevato la presenza di una o più insufficienze.
+    La tabella seguente illustra le modalità e gli argomenti per il recupero:</p>
+{% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] %}
+  <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="30%" align="center"><strong>MATERIA</strong></td>
+      <td width="7%" align="center"><strong>VOTO</strong></td>
+      <td width="50%" align="center"><strong>Argomenti da recuperare</strong></td>
+      <td width="13%" align="center"><strong>Modalità di recupero</strong></td>
+    </tr>
+{% for idmat,mat in dati.materie %}
+  {% if dati.debiti[idmat].unico is defined %}
+    <tr>
+      <td align="left"><strong>{{ mat.nome }}</strong></td>
+      <td align="center"><strong>{{ (mat.tipo == 'E' and dati.debiti[idmat].unico < 4) ? valutazioni[0] : valutazioni[dati.debiti[idmat].unico] }}</strong></td>
+      <td align="left" style="font-size:9pt">{{ dati.debiti[idmat].debito|nl2br }}</td>
+      <td align="center">{{ ('label.recupero_'~dati.debiti[idmat].recupero)|trans }}</td>
+    </tr>
+  {% endif %}
+{% endfor %}
+  </table>
+  <p>Qualora le famiglie non intendano far frequentare ai propri figli gli eventuai corsi indicati,
+    dovranno dichiarare che provvederanno autonomamente agli interventi di recupero.</p>
+  <p>In ogni caso, gli studenti dovranno colmare le lacune nel corso dell'Anno Scolastico.</p>
+{{ include('coordinatore/documenti/firma.html.twig', {data_firma: dati.scrutinio.data}) }}
+</div>

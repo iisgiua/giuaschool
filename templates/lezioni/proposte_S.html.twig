@@ -33,7 +33,7 @@
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': (periodo ? periodo : 0)}) }}" role="button" title="Visualizza il tabellone dei voti degli scrutini svolti"><span class="glyphicon glyphicon-list gs-mr-3"></span><strong>Tabellone</strong></a>
     </div>
   </div>
-    {% if periodo == 'F' %}
+    {% if periodo == 'S' %}
       {% if lista_periodi[periodo] == 'N' %}
         {% form_theme form _self %}
   <div class="panel panel-info gs-mt-2" >
@@ -287,7 +287,7 @@ window.setInterval(function(){
     <div class="form-group">
       <label class="control-label col-sm-2 text-danger" for="{{ form.debito.vars.id }}">Recupero</label>
       <div class="col-sm-10">
-        {{ form_widget(form.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [form.recupero.vars.choices[0],form.recupero.vars.choices[3]] }) }}
+        {{ form_widget(form.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [form.recupero.vars.choices[0],form.recupero.vars.choices[1],form.recupero.vars.choices[2],form.recupero.vars.choices[3]] }) }}
       </div>
     </div>
     <div class="form-group">

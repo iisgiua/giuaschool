@@ -252,7 +252,7 @@ class SegreteriaUtil {
     // controlla alunno
     if (in_array($alunno->getId(), $alunni)) {
       // alunno in scrutinio
-      if ($scrutinio->getPeriodo() == 'P') {
+      if ($scrutinio->getPeriodo() == 'P' || $scrutinio->getPeriodo() == 'S') {
         // legge i debiti
         $dati['debiti'] = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
           ->join('vs.materia', 'm')
@@ -261,9 +261,6 @@ class SegreteriaUtil {
           ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno, 'tipo' => ['N', 'E'], 'suff' => 6])
           ->getQuery()
           ->getArrayResult();
-      } elseif ($scrutinio->getPeriodo() == '1') {
-        // verbale non previsto
-        $dati['verbale'] = false;
       } elseif ($scrutinio->getPeriodo() == 'F') {
         // dati esito
         $scrutinati = ($scrutinio->getDato('scrutinabili') == null ? [] : array_keys($scrutinio->getDato('scrutinabili')));

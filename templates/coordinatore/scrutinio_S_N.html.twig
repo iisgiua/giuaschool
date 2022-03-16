@@ -1,0 +1,178 @@
+{% extends 'coordinatore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {% if not classe %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.classe_mancante'|trans }}</strong>
+  </div>
+  {% else %}
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Proposte di voto</h2>
+    {% include 'include/modal-error.html.twig' %}
+    {% for messaggio in app.flashes('avviso') %}
+      {% if loop.first %}
+  <div class="alert alert-warning gs-mb-3" role="alert">
+      {% endif %}
+    {{ messaggio|raw }}<br>
+      {% if loop.last %}
+  </div>
+      {% endif %}
+    {% endfor %}
+    {{ form_start(form) }}
+  <div id="gs-fixed-header">
+    <table class="table table-bordered table-hover table-striped">
+      <thead class="bg-success">
+        <tr>
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
+    {% for materia,m in dati.materie %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+      {% if dati.errori[materia] is defined and dati.errori[materia] == 1 and dati.modifica %}
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i dati mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {'classe': classe.id, 'materia': materia, 'periodo': 'S'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <br>
+      {% endif %}
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
+          </th>
+    {% endfor %}
+          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Educazione civica">Ed. civica</span></small>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+    {% for alunno,a in dati.alunni %}
+        <tr>
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+            <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
+      {% if a.bes != 'N' %}
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+      {% endif %}
+          </td>
+      {% for materia,m in dati.materie %}
+          <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
+        {% if m.tipo == 'R' %}
+          {% if a.religione != 'S' and a.religione != 'A' %}
+            <span>NA</span>
+          {% elseif dati.proposte[alunno][materia].unico is not defined %}
+            <span>--</span>
+          {% else %}
+            <span class="label label-{{ dati.proposte[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ info.giudizi['S']['R'][dati.proposte[alunno][materia].unico] }}</span>
+          {% endif %}
+        {% else %}
+          {% if dati.proposte[alunno][materia].unico is not defined %}
+            <span>--</span>
+          {% elseif dati.proposte[alunno][materia].unico == 0 %}
+            <span class="gs-big"><span class="label label-danger">NC</span></span>
+          {% else %}
+            <span class="gs-big"><span class="label label-{{ dati.proposte[alunno][materia].unico < 5 ? 'danger' : (dati.proposte[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.proposte[alunno][materia].unico }}</span></span>
+          {% endif %}
+        {% endif %}
+          </td>
+      {% endfor %}
+          <td class="text-center gs-pt-2 gs-pb-1 gs-pl-2 gs-pr-2">
+      {% if dati.civica[alunno] is not defined %}
+            <span>--</span>
+      {% else %}
+            <button type="button" class="btn btn-xs btn-primary" title="Visualizza le proposte di voto di Educazione Civica" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            <div id="alunno-{{ loop.index }}" style="display:none">
+              <div class="list-group-item">
+                <div class="list-group-item-text">
+                  <h3 class="gs-h3 text-center gs-mt-1">Proposte di voto di Educazione Civica</h3>
+                  <div class="row bg-info gs-pl-3 gs-pr-3 gs-pt-2 gs-pb-2">
+        {% for v in dati.civica[alunno] %}
+                    <div style="border-bottom: solid #000 1px;" class="col-sm-4 col-sm-offset-1 gs-pt-1 gs-pb-0 gs-pl-0">{{ v.docente }}</div>
+                    <div style="border-bottom: solid #000 1px;" class="col-sm-1 text-right gs-pt-1 gs-pb-0 gs-pr-0"><span class="label label-{{ v.unico < 5 ? 'danger' : (v.unico < 6 ? 'warning' : 'success') }}">{{ v.unico == 3 ? 'NC' : v.unico }}</span></div>
+        {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+      {% endif %}
+          </td>
+        </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {% if not dati.blocco %}
+  <div class="alert alert-info text-center gs-mt-4" role="alert">
+    <strong class="gs-big">
+      Con l'apertura dello scrutinio verranno bloccate tutte le modifiche ai dati del Primo Quadrimestre e saranno calcolate le ore di assenza.<br>
+      Le modifiche alle proposte di voto inserite saranno possibili durante l'esecuzione dello scrutinio.
+    </strong>
+  </div>
+  <div class="text-center">
+    <button class="btn btn-primary" title="Inizia la procedura dello scrutinio" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-play gs-mr-2"></span><strong>Apri lo scrutinio</strong></button>
+  </div>
+    {% endif %}
+    {{ form_end(form) }}
+    {% include 'include/modal-remote.html.twig' %}
+    {% include 'include/modal-waiting.html.twig' %}
+    {% include 'include/modal-info.html.twig' %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-slider/css/bootstrap-slider.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-slider/js/bootstrap-slider.min.js') }}"></script>
+<script src="{{ asset('vendor/floatThead/jquery.floatThead.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('[data-toggle="popover"]').popover({container: 'body'});
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href')+'/'+Math.floor($('html').scrollTop());
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $('#gs-modal-remote').on('shown.bs.modal', function (event) {
+    window.dispatchEvent(new Event('resize'));
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+  $('#gs-modal-waiting').on('shown.bs.modal', function (event) {
+    $('form[name="scrutinio"]').submit();
+  });
+  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
+    var c=floatContainer.find('thead');
+    if(isFloated){
+      c.hide();
+      c.removeClass("bg-success").addClass("bg-info");
+      c.fadeIn();
+    } else {
+      c.removeClass("bg-info").addClass("bg-success");
+    }
+  });
+  $('#gs-modal-info').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('title');
+    var body = $('#'+$(e.relatedTarget).data('body')).html();
+    $(this).find('#gs-modal-info-label').html(title);
+    $(this).find('#gs-modal-info-body').html(body);
+  });
+  $('#gs-modal-info').on('shown.bs.modal', function (e) {
+    $('body').addClass('modal-open');
+  });
+  // init
+  $('#gs-fixed-header table').floatThead({top: 60});
+  {% if posizione > 0 %}
+  $('html').scrollTop({{ posizione }});
+  {% endif %}
+  {% for messaggio in app.flashes('errore') %}
+    {% if loop.first %}
+  var m = '';
+    {% endif %}
+  m = m + "{{ messaggio|raw }}<br>";
+    {% if loop.last %}
+  $('#gs-modal-error-text').html(m);
+  $('#gs-modal-error').modal('show');
+    {% endif %}
+  {% endfor %}
+});
+</script>
+{% endblock %}

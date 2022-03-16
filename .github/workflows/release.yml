@@ -106,7 +106,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: 'docs/'
+          source_file: 'docs/.'
           destination_repo: 'trinko/giuaschool-docs'
           destination_branch: 'master'
           user_name: ${{ github.actor }}
