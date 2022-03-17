@@ -18,7 +18,7 @@
 - [Scarica l'ultima modifica](https://github.com/trinko/giuaschool/releases/download/latest-build/giuaschool-build-latest.zip)
   - [Visualizza i dettagli](https://trinko.github.io/giuaschool-docs/latest-build.html)
 
-- [Vai alla DEMO](https://giuademo.x10.mx/richiesta-demo/)
+- [Vai alla DEMO](https://giuademo.x10.mx/)
   - [Richiedi le credenziali della DEMO](https://giuademo.x10.mx/richiesta-demo/)
 
 - [Visualizza gli annunci](https://github.com/trinko/giuaschool/discussions/categories/annunci)
