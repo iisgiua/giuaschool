@@ -1725,6 +1725,8 @@ class Installer {
    *
    */
   private function pageEnd() {
+    // salva .env agggiornato
+    $this->writeEnv();
     // toglie la modalità manutenzione (se presente)
     $this->setParameter('manutenzione_inizio', '');
     $this->setParameter('manutenzione_fine', '');
