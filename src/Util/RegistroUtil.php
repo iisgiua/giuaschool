@@ -766,7 +766,7 @@ class RegistroUtil {
         // conteggio assenze da giustificare
         $giustifica_assenze = $this->em->getRepository('App:Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
-          ->where('ass.alunno=:alunno AND ass.data<=:data AND ass.giustificato IS NULL')
+          ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NULL')
           ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
           ->getQuery()
           ->getSingleScalarResult();
@@ -782,7 +782,7 @@ class RegistroUtil {
         // conteggio convalide giustificazioni online
         $convalide_assenze = $this->em->getRepository('App:Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
-          ->where('ass.alunno=:alunno AND ass.data<=:data AND ass.giustificato IS NOT NULL AND ass.docenteGiustifica IS NULL')
+          ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NOT NULL AND ass.docenteGiustifica IS NULL')
           ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
           ->getQuery()
           ->getSingleScalarResult();
