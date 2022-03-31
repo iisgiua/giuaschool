@@ -1,0 +1,5 @@
+# config/packages/qipsius_tcpdf.yaml
+
+qipsius_tcpdf:
+  tcpdf:
+    k_tcpdf_calls_in_html: true
