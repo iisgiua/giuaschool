@@ -97,7 +97,7 @@ class MenuFixtures extends Fixture implements FixtureGroupInterface {
         ['Classi', 'Configura le classi', 'scuola_classi', null, 0, null, 'M'],
         ['Festività', 'Configura il calendario delle festività', 'scuola_festivita', null, 0, null, 'M'],
         ['Orario', 'Configura la scansione oraria delle lezioni', 'scuola_orario', null, 0, null, 'M'],
-        ['Scrutini', 'Configura gli scrutini', 'scuola_scrutini', null, 0, null, 'M'],        
+        ['Scrutini', 'Configura gli scrutini', 'scuola_scrutini', null, 0, null, 'M'],
       ]];
     //--- sottomenu ata
     $menu['ata'] = [null, null, 0, [
@@ -280,7 +280,6 @@ class MenuFixtures extends Fixture implements FixtureGroupInterface {
    */
   public static function getGroups(): array {
     return array(
-      'App', // dati iniziali dell'applicazione
       'Test', // dati per i test dell'applicazione
     );
   }

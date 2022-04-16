@@ -167,7 +167,25 @@ class Installer {
       "INSERT INTO `gs_configurazione` (`creato`, `modificato`, `categoria`, `parametro`, `descrizione`, `valore`, `gestito`) VALUES (NOW(),NOW(),'SISTEMA','spid','Indica la modalità dell\'accesso SPID: \'no\' = non utilizzato, \'si\' = utilizzato, \'validazione\' = utilizzato in validazione.<br>[si|no|validazione]','no',1);",
     ],
     'build' => [
+      "INSERT INTO `gs_configurazione` VALUES (114,NOW(),NOW(),'SCUOLA','voti_finali_R','Lista dei voti finali per Religione<br>[lista serializzata]','a:8:{s:3:\"min\";i:20;s:3:\"max\";i:27;s:4:\"suff\";i:23;s:3:\"med\";i:23;s:6:\"valori\";s:23:\"20,21,22,23,24,25,26,27\";s:9:\"etichette\";s:36:\"\"NC\",\"\",\"\",\"Suff.\",\"\",\"\",\"\",\"Ottimo\"\";s:4:\"voti\";s:98:\"\"Non Classificato\",\"Insufficiente\",\"Mediocre\",\"Sufficiente\",\"Discreto\",\"Buono\",\"Distinto\",\"Ottimo\"\";s:8:\"votiAbbr\";s:84:\"\"NC\",\"Insufficiente\",\"Mediocre\",\"Sufficiente\",\"Discreto\",\"Buono\",\"Distinto\",\"Ottimo\"\";}',1);",
+      "INSERT INTO `gs_configurazione` VALUES (115,NOW(),NOW(),'SCUOLA','voti_finali_E','Lista dei voti finali per Educazione Civica<br>[lista serializzata]','a:8:{s:3:\"min\";i:2;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:5;s:6:\"valori\";s:18:\"2,3,4,5,6,7,8,9,10\";s:9:\"etichette\";s:21:\"\"NC\",3,4,5,6,7,8,9,10\";s:4:\"voti\";s:35:\"\"Non Classificato\",3,4,5,6,7,8,9,10\";s:8:\"votiAbbr\";s:21:\"\"NC\",3,4,5,6,7,8,9,10\";}',1);",
+      "INSERT INTO `gs_configurazione` VALUES (116,NOW(),NOW(),'SCUOLA','voti_finali_C','Lista dei voti finali per Condotta<br>[lista serializzata]','a:8:{s:3:\"min\";i:4;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:6;s:6:\"valori\";s:14:\"4,5,6,7,8,9,10\";s:9:\"etichette\";s:17:\"\"NC\",5,6,7,8,9,10\";s:4:\"voti\";s:31:\"\"Non Classificato\",5,6,7,8,9,10\";s:8:\"votiAbbr\";s:17:\"\"NC\",5,6,7,8,9,10\";}',1);",
+      "INSERT INTO `gs_configurazione` VALUES (117,NOW(),NOW(),'SCUOLA','voti_finali_N','Lista dei voti finali per le altre materie<br>[lista serializzata]','a:8:{s:3:\"min\";i:0;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:5;s:6:\"valori\";s:22:\"0,1,2,3,4,5,6,7,8,9,10\";s:9:\"etichette\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";s:4:\"voti\";s:39:\"\"Non Classificato\",1,2,3,4,5,6,7,8,9,10\";s:8:\"votiAbbr\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";}',1);",
     ]
+  ];
+
+  /**
+   * Conserva la lista dei controlli sull'esecuzione dei comandi corrispondenti nella build
+   *  Ogni elemento della lista è una SELECT SQL che restistuisce un insieme vuoto se
+   *  il comando corrispondente nella build è necessario.
+   *
+   * @var array $buildCheck Lista di comandi sql per il controllo sulla build
+   */
+  private $buildCheck = [
+    "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_R';",
+    "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_E';",
+    "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_C';",
+    "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_N';",
   ];
 
 
@@ -841,6 +859,22 @@ class Installer {
       if ($newVersion != 'build' && version_compare($newVersion, $version, '<=')) {
         // salta versione
         continue;
+      }
+      // se BUILD: controlla comandi da eseguire
+      if ($newVersion == 'build') {
+        try {
+          foreach ($this->buildCheck as $key=>$sql) {
+            $stm = $this->pdo->prepare($sql);
+            $stm->execute();
+            if (!empty($stm->fetchAll())) {
+              // evita esecuzione comando non necessario
+              unset($data[$key]);
+            }
+          }
+        } catch (\Exception $e) {
+          throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database.<br>'.
+            $e->getMessage(), $this->step);
+        }
       }
       // esegue i comandi
       try {
