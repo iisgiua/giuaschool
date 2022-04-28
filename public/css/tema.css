@@ -551,3 +551,11 @@ body {
 .modal {
   z-index: 1100;
 }
+
+form .slider .tooltip.tooltip-main.top {
+  margin-left: -10px;
+}
+form .slider .tooltip .tooltip-arrow {
+  left: 0;
+  margin-left: 6px;
+}
