@@ -1080,7 +1080,7 @@ class GenitoriUtil {
         foreach ($lista_mesi as $m=>$v) {
           if (isset($lista[1][$m])) {
             $dati['lista'][] = $lista[1][$m];
-          } elseif ($m != intval($inizio->format('m')) && isset($lista[2][$m])) {
+          } elseif (($m != intval($inizio->format('m'))) && isset($lista[2][$m])) {
             $dati['lista'][] = $lista[2][$m];
           } elseif ($m != intval($inizio->format('m')) && isset($lista[3][$m])) {
             $dati['lista'][] = $lista[3][$m];
@@ -1095,7 +1095,7 @@ class GenitoriUtil {
         foreach ($lista_mesi as $m=>$v) {
           if (isset($lista[2][$m])) {
             $dati['lista'][] = $lista[2][$m];
-          } elseif ($m != intval($inizio->format('m')) && isset($lista[1][$m])) {
+          } elseif (($m == 5 || $m != intval($inizio->format('m'))) && isset($lista[1][$m])) {
             $dati['lista'][] = $lista[1][$m];
           } elseif ($m != intval($inizio->format('m')) && isset($lista[3][$m])) {
             $dati['lista'][] = $lista[3][$m];
@@ -1114,7 +1114,7 @@ class GenitoriUtil {
             $dati['lista'][] = $lista[4][$m];
           } elseif ($m != intval($inizio->format('m')) && isset($lista[2][$m])) {
             $dati['lista'][] = $lista[2][$m];
-          } elseif ($m != intval($inizio->format('m')) && isset($lista[1][$m])) {
+          } elseif (($m == 5 || $m != intval($inizio->format('m'))) && isset($lista[1][$m])) {
             $dati['lista'][] = $lista[1][$m];
           } elseif ($m != intval($inizio->format('m')) && isset($lista[5][$m])) {
             $dati['lista'][] = $lista[5][$m];
@@ -1131,7 +1131,7 @@ class GenitoriUtil {
             $dati['lista'][] = $lista[3][$m];
           } elseif ($m != intval($inizio->format('m')) && isset($lista[2][$m])) {
             $dati['lista'][] = $lista[2][$m];
-          } elseif ($m != intval($inizio->format('m')) && isset($lista[1][$m])) {
+          } elseif (($m == 5 || $m != intval($inizio->format('m'))) && isset($lista[1][$m])) {
             $dati['lista'][] = $lista[1][$m];
           }
         }
