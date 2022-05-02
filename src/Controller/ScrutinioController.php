@@ -73,15 +73,12 @@ class ScrutinioController extends AbstractController {
                                  TranslatorInterface $trans, ScrutinioUtil $scr, LogHandler $dblogger,
                                  $cattedra, $classe, $periodo) {
     // inizializza variabili
-    $info = array();
+    $info = [];
     $lista_periodi = null;
     $form = null;
     $form_title = null;
     $elenco = array();
     $elenco['alunni'] = array();
-    $valutazioni['N'] = ['min' => 0, 'max' => 10, 'start' => 6, 'ticks' => '0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10'];
-    $valutazioni['R'] = ['min' => 20, 'max' => 26, 'start' => 22, 'ticks' => '20, 21, 22, 23, 24, 25, 26', 'labels' => '"NC", "", "Suff.", "", "Buono", "", "Ottimo"', 'format' => '"Non Classificato", "Insufficiente", "Sufficiente", "Discreto", "Buono", "Distinto", "Ottimo"', 'format2' => '"NC", "Insufficiente", "Sufficiente", "Discreto", "Buono", "Distinto", "Ottimo"'];
-    $valutazioni['E'] = ['min' => 3, 'max' => 10, 'start' => 6, 'ticks' => '3, 4, 5, 6, 7, 8, 9, 10', 'labels' => '"NC", 4, 5, 6, 7, 8, 9, 10', 'format' => '"Non Classificato", 4, 5, 6, 7, 8, 9, 10', 'format2' => '"NC", 4, 5, 6, 7, 8, 9, 10'];
     $title['P']['N'] = 'message.proposte';
     $title['P']['R'] = 'message.proposte_religione';
     $title['P']['E'] = 'message.proposte';
@@ -97,6 +94,47 @@ class ScrutinioController extends AbstractController {
     $title['X']['N'] = 'message.proposte_non_previste';
     $title['X']['R'] = 'message.proposte_non_previste';
     $title['X']['E'] = 'message.proposte_non_previste';
+    $valutazioni['R'] = unserialize($em->getRepository('App:Configurazione')->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($em->getRepository('App:Configurazione')->getParametro('voti_finali_E'));
+    $valutazioni['N'] = unserialize($em->getRepository('App:Configurazione')->getParametro('voti_finali_N'));
+    // retrocompatibilità per A.S 21/22
+    if ($periodo == 'P' || $periodo == 'S') {
+      $valutazioni['R'] = [
+        'min' => 20,
+        'max' => 26,
+        'suff' => 22,
+        'med' => 22,
+        'valori' => '20,21,22,23,24,25,26',
+        'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
+        'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
+        'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
+      $valutazioni['E'] = [
+        'min' => 3,
+        'max' => 10,
+        'suff' => 6,
+        'med' => 5,
+        'valori' => '3,4,5,6,7,8,9,10',
+        'etichette' => '"NC",4,5,6,7,8,9,10',
+        'voti' => '"Non Classificato",4,5,6,7,8,9,10',
+        'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
+    }
+    // crea lista voti
+    $listaValori = explode(',', $valutazioni['R']['valori']);
+    $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+    foreach ($listaValori as $key=>$val) {
+      $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
+    }
+    $listaValori = explode(',', $valutazioni['E']['valori']);
+    $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+    foreach ($listaValori as $key=>$val) {
+      $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
+    }
+    $listaValori = explode(',', $valutazioni['N']['valori']);
+    $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+    foreach ($listaValori as $key=>$val) {
+      $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
+    }
+    // valore predefinito
     $info['valutazioni'] = $valutazioni['N'];
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
@@ -126,6 +164,9 @@ class ScrutinioController extends AbstractController {
       $classe = $cattedra->getClasse();
       $info['materia'] = $cattedra->getMateria()->getNomeBreve();
       $info['alunno'] = $cattedra->getAlunno();
+      $info['valutazioni'] = $valutazioni[$cattedra->getMateria()->getTipo()];
+      // imposta sessione
+      $session->set('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni', $info['valutazioni']);
     } elseif ($classe > 0) {
       // supplenza
       $classe = $em->getRepository('App:Classe')->find($classe);
@@ -157,7 +198,6 @@ class ScrutinioController extends AbstractController {
             'data' => $elenco['proposte'],
             'entry_type' => PropostaVotoType::class,
             'entry_options' => array('label' => false)];
-          $info['valutazioni'] = $valutazioni[$cattedra->getMateria()->getTipo()];
           $form_title = $title[$periodo][$cattedra->getMateria()->getTipo()];
           if ($cattedra->getMateria()->getTipo() == 'R') {
             // religione
@@ -199,17 +239,20 @@ class ScrutinioController extends AbstractController {
                 // nessun voto
                 $errori[0] = 'exception.no_voto';
                 continue;
-              } elseif ($prop->getUnico() < $info['valutazioni']['min'] || $prop->getUnico() > $info['valutazioni']['max']) {
-                // voto non ammesso
-                $errori[1] = 'exception.voto_errato';
-                $prop = $proposte_prec[$key];
-                continue;
-              } elseif ($prop->getUnico() < 6 && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
+              }
+              if ($prop->getUnico() < $info['valutazioni']['min']) {
+                // corregge voto min
+                $form->get('lista')->getData()[$key]->setUnico($info['valutazioni']['min']);
+              } elseif ($prop->getUnico() > $info['valutazioni']['max']) {
+                // corregge voto max
+                $form->get('lista')->getData()[$key]->setUnico($info['valutazioni']['max']);
+              }
+              if ($prop->getUnico() < $info['valutazioni']['suff'] && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
                 // manca tipo recupero
                   $errori[2] = 'exception.no_recupero';
-              } elseif ($prop->getUnico() < 6 && empty($prop->getDebito()) && !isset($opzioni['attr']['no_recupero'])) {
+              } elseif ($prop->getUnico() < $info['valutazioni']['suff'] && empty($prop->getDebito()) && !isset($opzioni['attr']['no_recupero'])) {
                 // manca argomenti debito
-                if (($cattedra->getMateria()->getTipo() == 'N' && $prop->getUnico() > 0) || $prop->getUnico() > 3) {
+                if ($prop->getUnico() > $info['valutazioni']['min']) {
                   // esclude NC da messaggio di errore
                   $errori[3] = 'exception.no_debito';
                 }
@@ -225,7 +268,7 @@ class ScrutinioController extends AbstractController {
                 // aggiorna docente proposta
                 $prop->setDocente($this->getUser());
               }
-              if (($prop->getUnico() >= 6 && $prop->getUnico() <= 10) || $prop->getUnico() >= 22 || isset($opzioni['attr']['no_recupero'])) {
+              if ($prop->getUnico() >= $info['valutazioni']['suff'] || isset($opzioni['attr']['no_recupero'])) {
                 // svuota campi inutili
                 $prop->setDebito('');
               }

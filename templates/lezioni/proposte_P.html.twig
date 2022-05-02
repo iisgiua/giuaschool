@@ -159,12 +159,12 @@ $(document).ready(function() {
     min: {{ info.valutazioni.min }},
     max: {{ info.valutazioni.max }},
     step: 1,
-    ticks: [{{ info.valutazioni.ticks }}],
-    ticks_labels: [{{ info.valutazioni.labels|raw }}],
+    ticks: [{{ info.valutazioni.valori }}],
+    ticks_labels: [{{ info.valutazioni.etichette|raw }}],
     ticks_snap_bounds: 0,
     focus: true,
     formatter: function(val) {
-      var d = [{{ info.valutazioni.format|raw }}];
+      var d = [{{ info.valutazioni.voti|raw }}];
       return d[val - {{ info.valutazioni.min }}];
       },
     natural_arrow_keys: true
@@ -175,23 +175,24 @@ $(document).ready(function() {
         min: {{ info.valutazioni.min }},
         max: {{ info.valutazioni.max }},
         step: 1,
-        ticks: [{{ info.valutazioni.ticks }}],
-        ticks_labels: [{{ info.valutazioni.labels|raw }}],
+        ticks: [{{ info.valutazioni.valori }}],
+        ticks_labels: [{{ info.valutazioni.etichette|raw }}],
         ticks_snap_bounds: 0,
         focus: true,
         formatter: function(val) {
-          var d = [{{ info.valutazioni.format|raw }}];
+          var d = [{{ info.valutazioni.voti|raw }}];
           return d[val - {{ info.valutazioni.min }}];
           },
         natural_arrow_keys: true
       });
     $(this).hide();
     $(this).siblings('button.gs-button-delete').show();
-    $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.start }}', true, true);
+    $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.suff }}', true, true);
     $(this).siblings('div').find('div').focus();
     e.preventDefault();
   });
   $('#gs-form-collection button.gs-button-delete').on('click', function(e) {
+    $(this).parentsUntil('li').find('div:nth-child(3)').hide();
     $(this).siblings('div').find('input').slider('destroy');
     $(this).siblings('div').find('input').val('');
     $(this).siblings('div').attr('style', 'display:none');
@@ -201,7 +202,7 @@ $(document).ready(function() {
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
-    var d = [{{ info.valutazioni.format2|raw }}];
+    var d = [{{ info.valutazioni.votiAbbr|raw }}];
     var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
       (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ info.valutazioni.min }}]);
@@ -285,7 +286,7 @@ window.setInterval(function(){
   </div>
   <div id="row_{{ form.debito.vars.id }}"{{ form.parent.vars.attr.no_recupero is defined or form.unico.vars.value is empty or (form.unico.vars.value >= 6 and form.unico.vars.value <= 10) or form.unico.vars.value >= 22 ? ' style="display:none"' }}>
     <div class="form-group">
-      <label class="control-label col-sm-2 text-danger" for="{{ form.debito.vars.id }}">Recupero</label>
+      <label class="control-label col-sm-2 text-danger" for="{{ form.recupero.vars.id }}">Recupero</label>
       <div class="col-sm-10">
         {{ form_widget(form.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [form.recupero.vars.choices[0],form.recupero.vars.choices[1],form.recupero.vars.choices[2],form.recupero.vars.choices[3]] }) }}
       </div>

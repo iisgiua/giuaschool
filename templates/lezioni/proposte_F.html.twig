@@ -80,15 +80,6 @@
     </div>
   </div>
       {% else %}
-        {% if cattedra.materia.tipo == 'E' %}
-          {% set valutazioni = [null, null, null, 'NC', 4, 5, 6, 7, 8, 9, 10,
-            null, null, null, null, null, null, null, null, null,
-            'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-        {% else %}
-          {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            null, null, null, null, null, null, null, null, null,
-            'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-        {% endif %}
   <div class="panel panel-info gs-mt-2" >
     <div class="panel-heading">
       <div class="panel-title"><strong>{{ form_title|trans }}</strong></div>
@@ -116,7 +107,7 @@
             <div class="col-sm-9">
               <div class="row">
             {% if proposte.proposte[k].unico is not empty %}
-                <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ proposte.proposte[k].unico < 5 ? 'label-danger' : (proposte.proposte[k].unico < 6 ? 'label-warning' : (proposte.proposte[k].unico <= 10 ? 'label-success' : (proposte.proposte[k].unico < 22 ? 'label-danger' : 'label-success'))) }} gs-ml-4 gs-big">{{ valutazioni[proposte.proposte[k].unico] }}</span>
+                <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ proposte.proposte[k].unico < info.valutazioni.med ? 'label-danger' : (proposte.proposte[k].unico < info.valutazioni.suff ? 'label-warning' : 'label-success') }} gs-ml-4 gs-big">{{ info.valutazioni.lista[proposte.proposte[k].unico] }}</span>
             {% else %}
                 <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-ml-4 gs-big">--</span>
             {% endif %}
@@ -153,20 +144,18 @@
 {{ parent() }}
 <script src="{{ asset('vendor/bootstrap-slider/js/bootstrap-slider.min.js') }}"></script>
 <script>
+var voti = [{{ info.valutazioni.voti|raw }}];
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
   $("#gs-form-collection input.slider").slider({
     min: {{ info.valutazioni.min }},
     max: {{ info.valutazioni.max }},
     step: 1,
-    ticks: [{{ info.valutazioni.ticks }}],
-    ticks_labels: [{{ info.valutazioni.labels|raw }}],
+    ticks: [{{ info.valutazioni.valori }}],
+    ticks_labels: [{{ info.valutazioni.etichette|raw }}],
     ticks_snap_bounds: 0,
     focus: true,
-    formatter: function(val) {
-      var d = [{{ info.valutazioni.format|raw }}];
-      return d[val - {{ info.valutazioni.min }}];
-      },
+    formatter: function(val) { return voti[val - {{ info.valutazioni.min }}]; },
     natural_arrow_keys: true
   });
   $('#gs-form-collection button.gs-button-add').on('click', function(e) {
@@ -175,23 +164,21 @@ $(document).ready(function() {
         min: {{ info.valutazioni.min }},
         max: {{ info.valutazioni.max }},
         step: 1,
-        ticks: [{{ info.valutazioni.ticks }}],
-        ticks_labels: [{{ info.valutazioni.labels|raw }}],
+        ticks: [{{ info.valutazioni.valori }}],
+        ticks_labels: [{{ info.valutazioni.etichette|raw }}],
         ticks_snap_bounds: 0,
         focus: true,
-        formatter: function(val) {
-          var d = [{{ info.valutazioni.format|raw }}];
-          return d[val - {{ info.valutazioni.min }}];
-          },
+        formatter: function(val) { return voti[val - {{ info.valutazioni.min }}]; },
         natural_arrow_keys: true
       });
     $(this).hide();
     $(this).siblings('button.gs-button-delete').show();
-    $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.start }}', true, true);
+    $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.suff }}', true, true);
     $(this).siblings('div').find('div').focus();
     e.preventDefault();
   });
   $('#gs-form-collection button.gs-button-delete').on('click', function(e) {
+    $(this).parentsUntil('li').find('div:nth-child(3)').hide();
     $(this).siblings('div').find('input').slider('destroy');
     $(this).siblings('div').find('input').val('');
     $(this).siblings('div').attr('style', 'display:none');
@@ -201,13 +188,12 @@ $(document).ready(function() {
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
-    var d = [{{ info.valutazioni.format2|raw }}];
-    var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
-      (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
+    var d = [{{ info.valutazioni.votiAbbr|raw }}];
+    var c = (e.value.newValue < {{ info.valutazioni.med }} ? 'label-danger' : (e.value.newValue < {{ info.valutazioni.suff }} ? 'label-warning' : 'label-success'));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ info.valutazioni.min }}]);
     var id = this.id.slice(15,-6);
   {% if form.lista.vars.attr.no_recupero is not defined %}
-    if (e.value.newValue < 6) {
+    if (e.value.newValue < {{ info.valutazioni.suff }}) {
       $('#row_proposte_lista_'+id+'_recupero').fadeIn(300);
       $('#row_proposte_lista_'+id+'_debito').fadeIn(300);
     } else {
@@ -252,21 +238,12 @@ window.setInterval(function(){
 {% endblock %}
 
 {% block _proposte_lista_entry_widget %}
-  {% if form.vars.data.materia.tipo == 'E' %}
-    {% set valutazioni = [null, null, null, 'NC', 4, 5, 6, 7, 8, 9, 10,
-      null, null, null, null, null, null, null, null, null,
-      'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-  {% else %}
-    {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-      null, null, null, null, null, null, null, null, null,
-      'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-  {% endif %}
   <div class="col-sm-9">
     <div class="row">
       <label class="control-label col-sm-2" for="{{ form.unico.vars.id }}">Voto</label>
       <div class="col-sm-10">
-  {% if (form.vars.data.materia.tipo != 'E' and form.unico.vars.value is not empty) or (form.vars.data.materia.tipo == 'E' and form.unico.vars.value > 0) %}
-        <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < 5 ? 'label-danger' : (form.unico.vars.value < 6 ? 'label-warning' : (form.unico.vars.value <= 10 ? 'label-success' : (form.unico.vars.value < 22 ? 'label-danger' : 'label-success'))) }} gs-mr-4 gs-big">{{ valutazioni[form.unico.vars.value] }}</span>
+  {% if form.unico.vars.value is not empty %}
+        <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').med ? 'label-danger' : (form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? 'label-warning' : 'label-success') }} gs-mr-4 gs-big">{{ app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').lista[form.unico.vars.value] }}</span>
         <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
     {% if form.vars.data.materia.tipo == 'E' %}
         <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
@@ -283,9 +260,9 @@ window.setInterval(function(){
       </div>
     </div>
   </div>
-  <div id="row_{{ form.debito.vars.id }}"{{ form.parent.vars.attr.no_recupero is defined or form.unico.vars.value is empty or (form.unico.vars.value >= 6 and form.unico.vars.value <= 10) or form.unico.vars.value >= 22 ? ' style="display:none"' }}>
+  <div id="row_{{ form.debito.vars.id }}"{{ form.parent.vars.attr.no_recupero is defined or form.unico.vars.value is empty or form.unico.vars.value >= app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? ' style="display:none"' }}>
     <div class="form-group">
-      <label class="control-label col-sm-2 text-danger" for="{{ form.debito.vars.id }}">Recupero</label>
+      <label class="control-label col-sm-2 text-danger" for="{{ form.recupero.vars.id }}">Recupero</label>
       <div class="col-sm-10">
         {{ form_widget(form.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [form.recupero.vars.choices[0],form.recupero.vars.choices[3]] }) }}
       </div>

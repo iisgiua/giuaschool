@@ -2233,7 +2233,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')." - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -3511,7 +3511,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione').' - CAGLIARI - ASSEMINI     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione').'     ***     RIEPILOGO VOTI '.$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);

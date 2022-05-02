@@ -875,6 +875,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    *  "$": come primo carattere, indica variabile di esecuzione
    *  "#": come primo carattere, indica variabile di sistema
    *  "#dtm(G,M,A,h,m,s)": indica variabile DateTime con i valori indicati
+   *  "#dtm()": indica variabile DateTime con il valore della data e ora corrente
    *  "#arc($v1,$v2,...)": indica variabile ArrayCollection con i valori indicati
    *  "#upr($v1)": trasforma in maiuscolo il valore indicato
    *  "nome": restituisce l'intera istanza o variabile <nome>
@@ -899,6 +900,10 @@ abstract class BaseContext extends RawMinkContext implements Context {
         $dtm = (new \Datetime())
           ->setDate($dt[3], $dt[2], $dt[1])
           ->setTime($dt[4], $dt[5], $dt[6], 0);
+        return $dtm;
+      } elseif (preg_match('/^#dtm\(\)$/', $var, $dt)) {
+        // crea variabile DateTime
+        $dtm = new \Datetime();
         return $dtm;
       }
       // controlla funzione ArrayCollection

@@ -154,6 +154,50 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setParametro('assenze_ore')
       ->setDescrizione("Indica se le assenze devono essere gestite su base oraria e non giornaliera<br>[booleano, 0 o 1]")
       ->setValore('0');
+    $lista = ['min' => 20, 'max' => 27, 'suff' => 23, 'med' => 23,
+      'valori' => '20,21,22,23,24,25,26,27',
+      'etichette' => '"NC","","","Suff.","","","","Ottimo"',
+      'voti' => '"Non Classificato","Insufficiente","Mediocre","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
+      'votiAbbr' => '"NC","Insufficiente","Mediocre","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
+    $param[] = (new Configurazione())
+      ->setCategoria('SCUOLA')
+      ->setParametro('voti_finali_R')
+      ->setDescrizione("Lista dei voti finali per Religione<br>[lista serializzata]")
+      ->setGestito(true)
+      ->setValore(serialize($lista));
+    $lista = ['min' => 2, 'max' => 10, 'suff' => 6, 'med' => 5,
+      'valori' => '2,3,4,5,6,7,8,9,10',
+      'etichette' => '"NC",3,4,5,6,7,8,9,10',
+      'voti' => '"Non Classificato",3,4,5,6,7,8,9,10',
+      'votiAbbr' => '"NC",3,4,5,6,7,8,9,10'];
+    $param[] = (new Configurazione())
+      ->setCategoria('SCUOLA')
+      ->setParametro('voti_finali_E')
+      ->setDescrizione("Lista dei voti finali per Educazione Civica<br>[lista serializzata]")
+      ->setGestito(true)
+      ->setValore(serialize($lista));
+    $lista = ['min' => 4, 'max' => 10, 'suff' => 6, 'med' => 6,
+      'valori' => '4,5,6,7,8,9,10',
+      'etichette' => '"NC",5,6,7,8,9,10',
+      'voti' => '"Non Classificato",5,6,7,8,9,10',
+      'votiAbbr' => '"NC",5,6,7,8,9,10'];
+    $param[] = (new Configurazione())
+      ->setCategoria('SCUOLA')
+      ->setParametro('voti_finali_C')
+      ->setDescrizione("Lista dei voti finali per Condotta<br>[lista serializzata]")
+      ->setGestito(true)
+      ->setValore(serialize($lista));
+    $lista = ['min' => 0, 'max' => 10, 'suff' => 6, 'med' => 5,
+      'valori' => '0,1,2,3,4,5,6,7,8,9,10',
+      'etichette' => '"NC",1,2,3,4,5,6,7,8,9,10',
+      'voti' => '"Non Classificato",1,2,3,4,5,6,7,8,9,10',
+      'votiAbbr' => '"NC",1,2,3,4,5,6,7,8,9,10'];
+    $param[] = (new Configurazione())
+      ->setCategoria('SCUOLA')
+      ->setParametro('voti_finali_N')
+      ->setDescrizione("Lista dei voti finali per le altre materie<br>[lista serializzata]")
+      ->setGestito(true)
+      ->setValore(serialize($lista));
     //--- categoria ACCESSO
     $param[] = (new Configurazione())
       ->setCategoria('ACCESSO')

@@ -280,7 +280,7 @@ class BrowserContext extends BaseContext {
    */
   public function laSezioneContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
-    $this->assertTrue($sezione && preg_match($ricerca, $sezione->getText()));
+    $this->assertTrue($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()));
   }
 
   /**
@@ -292,7 +292,7 @@ class BrowserContext extends BaseContext {
    */
   public function laSezioneNonContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
-    $this->assertFalse($sezione && preg_match($ricerca, $sezione->getText()));
+    $this->assertFalse($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()));
   }
 
   /**
@@ -598,6 +598,19 @@ class BrowserContext extends BaseContext {
    */
   public function selezioniOpzioneDaLista($valore, $lista): void {
     $field = $this->session->getPage()->findField($lista);
+    if (!$field || !$field->isVisible()) {
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$lista.'")');
+      foreach ($labels as $lab) {
+        if (!$lab->isVisible()) {
+          continue;
+        }
+        $id = $lab->getAttribute('for');
+        $field = $this->session->getPage()->find('css', 'SELECT[id="'.$id.'"]');
+        if ($field) {
+          break;
+        }
+      }
+    }
     $this->assertNotEmpty($field);
     $option = $field->find('named', ['option', $valore]);
     $this->assertNotEmpty($option);
@@ -738,9 +751,92 @@ class BrowserContext extends BaseContext {
    * @When inserisci :valore nel campo :campo
    */
   public function inserisciNelCampo($valore, $campo): void {
-    $field = $this->session->getPage()->findField($campo);
+    $fields = $this->session->getPage()->findAll('named', ['field', $campo]);
+    $this->assertNotEmpty($fields);
+    $field = null;
+    foreach ($fields as $f) {
+      if (!$f->isVisible()) {
+        continue;
+      }
+      $field = $f;
+      break;
+    }
     $this->assertNotEmpty($field);
     $field->setValue($valore);
+  }
+
+  /**
+   * Clicca su link o pulsante per eseguire azione
+   *  $indice: indice progressivo dei cursori presenti nel contenuto della pagina (parte da 1)
+   *  $pos: numero di posizioni di far scorrere il cursore (+ a destra, - a sinistra)
+   *
+   * @When scorri cursore di :pos posizione
+   * @When scorri cursore di :pos posizioni
+   * @When scorri cursore :indice di :pos posizione
+   * @When scorri cursore :indice di :pos posizioni
+   */
+  public function scorreCursore($indice=1, $pos): void {
+    $sliders = $this->session->getPage()->findAll('css', 'form div.slider');
+    $this->assertNotEmpty($sliders[$indice - 1]);
+    $handle = $sliders[$indice - 1]->find('css', '.min-slider-handle');
+    $this->assertNotEmpty($handle);
+    $vmin = $handle->getAttribute('aria-valuemin');
+    $vmax = $handle->getAttribute('aria-valuemax');
+    $val = $handle->getAttribute('aria-valuenow') - $vmin + $pos;
+    $val = ($val < 0 ? 0 : ($val > ($vmax - $vmin) ? ($vmax - $vmin) : $val));
+    $element = $sliders[$indice - 1]->find('css', '.slider-tick-container > .slider-tick:nth-child('.($val + 1).')');
+    $this->assertNotEmpty($element);
+    $element->click();
+  }
+
+  /**
+   * Controlla che il valore impostato nel campo del form sia uguale a quello indicato
+   *  $campo: campo del form identificato tramite attributo id|name|label
+   *  $valore: testo o valore presente nel campo del form
+   *
+   * @Then il campo :campo contiene :valore
+   */
+  public function campoContiene($campo, $valore): void {
+    $field = $this->session->getPage()->findField($campo);
+    if (!$field || !$field->isVisible()) {
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$campo.'")');
+      foreach ($labels as $lab) {
+        if (!$lab->isVisible()) {
+          continue;
+        }
+        $id = $lab->getAttribute('for');
+        $field = $this->session->getPage()->find('css', '*[id="'.$id.'"]');
+        if ($field) {
+          break;
+        }
+      }
+    }
+    $this->assertTrue($field && strtolower($field->getValue()) == strtolower($valore));
+  }
+
+  /**
+   * Controlla che il valore impostato nel campo del form sia diverso da quello indicato
+   *  $campo: campo del form identificato tramite attributo id|name|label
+   *  $valore: testo o valore del campo del form
+   *
+   * @Then il campo :campo non contiene :valore
+   */
+  public function campoNonContiene($campo, $valore): void {
+    $field = $this->session->getPage()->findField($campo);
+    if (!$field || !$field->isVisible()) {
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$campo.'")');
+      foreach ($labels as $lab) {
+        if (!$lab->isVisible()) {
+          continue;
+        }
+        $id = $lab->getAttribute('for');
+        $field = $this->session->getPage()->find('css', '*[id="'.$id.'"]');
+        if ($field) {
+          break;
+        }
+      }
+    }
+    $this->assertTrue($field && strtolower($field->getValue()) != strtolower($valore));
   }
 
 
