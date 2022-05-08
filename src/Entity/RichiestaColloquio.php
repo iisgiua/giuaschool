@@ -283,16 +283,16 @@ class RichiestaColloquio {
   /**
    * Restituisce il genitore che effettua l'annullamento della richiesta
    *
-   * @return GenitoreAnnulla Genitore che effettua l'annullamento della richiesta
+   * @return Genitore Genitore che effettua l'annullamento della richiesta
    */
-  public function getGenitoreAnnulla() {
+  public function getGenitoreAnnulla(): Genitore {
     return $this->genitoreAnnulla;
   }
 
   /**
    * Modifica il genitore che effettua l'annullamento della richiesta
    *
-   * @param GenitoreAnnulla $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
+   * @param Genitore|null $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
    *
    * @return RichiestaColloquio Oggetto RichiestaColloquio
    */
