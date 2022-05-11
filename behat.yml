@@ -15,3 +15,28 @@ default:
       paths: [ '%paths.base%/tests/features' ]
       contexts:
         - App\Tests\Behat\BrowserContext
+
+    documenti_bes:
+      paths: [ '%paths.base%/tests/features/documenti_bes.feature', '%paths.base%/tests/features/documenti_bes_add.feature' ]
+      contexts:
+        - App\Tests\Behat\BrowserContext
+
+    documenti_maggio:
+      paths: [ '%paths.base%/tests/features/documenti_maggio.feature', '%paths.base%/tests/features/documenti_maggio_add.feature' ]
+      contexts:
+        - App\Tests\Behat\BrowserContext
+
+    documenti_piani:
+      paths: [ '%paths.base%/tests/features/documenti_piani.feature', '%paths.base%/tests/features/documenti_piani_add.feature' ]
+      contexts:
+        - App\Tests\Behat\BrowserContext
+
+    documenti_programmi:
+      paths: [ '%paths.base%/tests/features/documenti_programmi.feature', '%paths.base%/tests/features/documenti_programmi_add.feature' ]
+      contexts:
+        - App\Tests\Behat\BrowserContext
+
+    documenti_relazioni:
+      paths: [ '%paths.base%/tests/features/documenti_relazioni.feature', '%paths.base%/tests/features/documenti_relazioni_add.feature' ]
+      contexts:
+        - App\Tests\Behat\BrowserContext

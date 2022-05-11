@@ -5,10 +5,11 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-
-  test:
-    name: Build test environment and run tests
+  test-phpunit:
+    name: phpunit tests
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
     steps:
 
       - name: Check out the repo
@@ -20,9 +21,274 @@ jobs:
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
-          swap-size-gb: 10
+          swap-size-gb: 5
 
-      - name: Run tests
-        run: |
-          docker build -t "gs:build" -f tests/docker/DockerfilePR .
-          docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test.sh
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run only phpunit
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-phpunit.sh
+
+  test-behat-certificato-staff:
+    name: behat feature- certificato staff
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - certificato staff
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-_certificatoStaff.sh
+
+  test-behat-documenti-alunni:
+    name: behat feature - documenti alunni
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti alunni
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_alunni.sh
+
+  test-behat-documenti-bacheca:
+    name: behat feature - documenti bacheca
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti bacheca
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_bacheca.sh
+
+  test-behat-documenti-bes:
+    name: behat suite - documenti bes
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti bes
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_bes.sh
+
+  test-behat-documenti-docenti:
+    name: behat feature - documenti docenti
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti docenti
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_docenti.sh
+
+  test-behat-documenti-download:
+    name: behat feature - documenti download
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti download
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_download.sh
+
+  test-behat-documenti-maggio:
+    name: behat suite - documenti maggio
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti maggio
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_maggio.sh
+
+  test-behat-documenti-piani:
+    name: behat suite - documenti piani
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti piani
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_piani.sh
+
+  test-behat-documenti-programmi:
+    name: behat suite - documenti programmi
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti piani
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_programmi.sh
+
+  test-behat-documenti-relazioni:
+    name: behat suite - documenti relazioni
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti piani
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-documenti_relazioni.sh
+
+  test-behat-lezioni-scrutino-proposte:
+    name: behat feature - lezioni scrutino proposte
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat - documenti docenti
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-lezioni_scrutino_proposte.sh
