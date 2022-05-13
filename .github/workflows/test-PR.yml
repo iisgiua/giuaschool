@@ -46,7 +46,7 @@ jobs:
           - 'documenti_download'
           - 'documenti_maggio'
           - 'documenti_piani'
-          - 'documenti_programma'
+          - 'documenti_programmi'
           - 'documenti_relazioni'
           - 'lezioni_scrutino_proposte'
 
