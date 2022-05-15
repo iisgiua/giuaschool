@@ -84,7 +84,7 @@ jobs:
 
   deploy:
     if: github.event.push
-    need: [test-phpunit, test-behat]
+    needs: [test-phpunit, test-behat]
     name: Deploy release
     runs-on: ubuntu-latest
     strategy:
