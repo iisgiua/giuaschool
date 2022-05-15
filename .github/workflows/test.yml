@@ -80,11 +80,11 @@ jobs:
 
   test-behat:
     name: Behat tests
-    needs: [build, feature-matrix]
+    needs: [feature-matrix, build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        feature: ${{ needs.feature-matrix.outputs.matrix }}
+        feature: ${{ fromJson(needs.feature-matrix.outputs.matrix) }}
     steps:
 
       - name: Set swap space
