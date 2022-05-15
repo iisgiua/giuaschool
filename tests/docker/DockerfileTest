@@ -1,4 +1,4 @@
-FROM ghcr.io/trinko/giuaschool-dev:latest
+FROM gs:dev
 
 ### Unit test environment
 ARG DEBIAN_FRONTEND=noninteractive

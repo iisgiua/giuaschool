@@ -1,60 +1,98 @@
 name: Test
 
 on:
-  workflow_run:
-    workflows: [ "Build" ]
-    types:
-      - completed
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 jobs:
 
-  test:
-    name: Build test environment and run tests
+  build:
+    name: Build PROD/DEV/TEST environment
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    strategy:
+      fail-fast: true
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+      - name: Set up docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Set Swap Space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 10
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and publish DEV image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: tests/docker/DockerfileDev
-          push: true
-          tags: ghcr.io/trinko/giuaschool-dev:latest
-
-      - name: Build and publish TEST image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: tests/docker/DockerfileTest
-          push: true
-          tags: ghcr.io/trinko/giuaschool-test:latest
-
-      - name: Run tests
+      - name: Build docker images
         run: |
-          docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 ghcr.io/trinko/giuaschool-test:latest tests/docker/entrypoint-test.sh
-          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+          docker build -t "gs:prod" -f tests/docker/Dockerfile .
+          docker save --output docker-prod-${{ github.event_name }}.tar gs:prod
+          docker build -t "gs:dev" -f tests/docker/DockerfileDev .
+          docker save --output docker-dev-${{ github.event_name }}.tar gs:dev
+          docker build -t "gs:test" -f tests/docker/DockerfileTest .
+          docker save --output docker-test-${{ github.event_name }}.tar gs:test
 
-      - name: Codacy coverage reporter
-        uses: codacy/codacy-coverage-reporter-action@master
+      - name: Upload docker image for PROD environment
+        uses: actions/upload-artifact@v3
         with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: clover.xml
+          name: docker-prod
+          path: docker-prod-${{ github.event_name }}.tar
+          retention-days: 1
+
+      - name: Upload docker image for DEV environment
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-dev
+          path: docker-dev-${{ github.event_name }}.tar
+          retention-days: 1
+
+      - name: Upload docker image for TEST environment
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-test
+          path: docker-test-${{ github.event_name }}.tar
+          retention-days: 1
+
+
+  #-- test:
+    #-- name: Build test environment and run tests
+    #-- runs-on: ubuntu-latest
+    #-- if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #-- steps:
+
+      #-- - name: Set Swap Space
+        #-- uses: pierotofy/set-swap-space@master
+        #-- with:
+          #-- swap-size-gb: 10
+
+      #-- - name: Login to GitHub Container Registry
+        #-- uses: docker/login-action@v1
+        #-- with:
+          #-- registry: ghcr.io
+          #-- username: ${{ github.repository_owner }}
+          #-- password: ${{ secrets.GITHUB_TOKEN }}
+
+      #-- - name: Build and publish DEV image
+        #-- uses: docker/build-push-action@v2
+        #-- with:
+          #-- context: .
+          #-- file: tests/docker/DockerfileDev
+          #-- push: true
+          #-- tags: ghcr.io/trinko/giuaschool-dev:latest
+
+      #-- - name: Build and publish TEST image
+        #-- uses: docker/build-push-action@v2
+        #-- with:
+          #-- context: .
+          #-- file: tests/docker/DockerfileTest
+          #-- push: true
+          #-- tags: ghcr.io/trinko/giuaschool-test:latest
+
+      #-- - name: Run tests
+        #-- run: |
+          #-- docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 ghcr.io/trinko/giuaschool-test:latest tests/docker/test-phpunit.sh
+          #-- docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+
+      #-- - name: Codacy coverage reporter
+        #-- uses: codacy/codacy-coverage-reporter-action@master
+        #-- with:
+          #-- project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          #-- coverage-reports: clover.xml
