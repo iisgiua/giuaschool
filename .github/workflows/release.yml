@@ -16,10 +16,12 @@ jobs:
   release:
     name: Publish a new release
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
     steps:
 
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Generate changelog from latest release
         id: changelog
@@ -40,7 +42,7 @@ jobs:
 
       - name: Archive release code
         run: |
-          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/entrypoint-release.sh
+          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/release.sh
           docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-release-latest.zip
 
       - name: Publish latest release code

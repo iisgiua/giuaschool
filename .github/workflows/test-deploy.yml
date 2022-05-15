@@ -1,0 +1,186 @@
+name: Test and deploy
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+
+  test-phpunit:
+    name: PhpUnit tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build docker images
+        run: |
+          docker build -t "gs:prod" -f tests/docker/Dockerfile .
+          docker build -t "gs:dev" -f tests/docker/DockerfileDev .
+          docker build -t "gs:test" -f tests/docker/DockerfileTest .
+
+      - name: Run phpunit
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
+
+      - name: Codacy coverage report
+        if: github.event.push
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: clover.xml
+
+  feature-matrix:
+    name: Create feature matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set matrix of features
+        id: set-matrix
+        run: echo "::set-output name=matrix::$(ls tests/features/* | jq -R -s -c 'split("\n")[:-1]')"
+
+  test-behat:
+    name: Behat tests
+    needs: feature-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        feature: ${{ fromJson(needs.feature-matrix.outputs.matrix) }}
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Set swap space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker images
+        run: |
+          docker build -t "gs:prod" -f tests/docker/Dockerfile .
+          docker build -t "gs:dev" -f tests/docker/DockerfileDev .
+          docker build -t "gs:test" -f tests/docker/DockerfileTest .
+
+      - name: Run behat
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
+
+  deploy:
+    if: github.event.push
+    need: [test-phpunit, test-behat]
+    name: Deploy release
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/docker/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/trinko/giuaschool:latest
+            gs:prod
+
+      - name: Archive build code
+        run: |
+          docker run --name "gs_release" gs:prod tests/docker/release.sh
+          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-build-latest.zip
+
+      - name: Generate changelog from latest release
+        id: changelog
+        uses: metcalfc/changelog-generator@v3.0.0
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload latest build
+        uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: latest-build
+          name: "Ultimo aggiornamento"
+          body: ${{ steps.changelog.outputs.changelog }}
+          prerelease: true
+          files: giuaschool-build-latest.zip
+          gzip: false
+          allow_override: true
+
+      - name: Generate changelog page
+        run: |
+          mkdir docs
+          echo "---" > docs/latest-build.md
+          echo "layout: default" >> docs/latest-build.md
+          echo "title: Ultimo aggiornamento" >> docs/latest-build.md
+          echo "nav_order: 11" >> docs/latest-build.md
+          echo "---" >> docs/latest-build.md
+          echo "" >> docs/latest-build.md
+          echo "# Ultimo aggiornamento"  >> docs/latest-build.md
+          echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
+          echo "" >> docs/latest-build.md
+          echo "Data e ora dell'ultima modifica: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-build.md
+          echo "" >> docs/latest-build.md
+          echo "Lista delle modifiche effettuate dopo il rilascio della Versione {{ site.data.version.tag }}:"  >> docs/latest-build.md
+          echo "" >> docs/latest-build.md
+          echo "${{ steps.changelog.outputs.changelog }}"  >> docs/latest-build.md
+
+      - name: Add changelog page to documentation
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'docs/latest-build.md'
+          destination_repo: 'trinko/giuaschool-docs'
+          destination_branch: 'master'
+          user_name: ${{ github.actor }}
+          user_email: '${{ github.actor }}@users.noreply.github.com'
+          commit_message: 'Add changelog page to documentation'
+
+      - name: Build and publish DEV image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/docker/DockerfileDev
+          push: true
+          tags: |
+            ghcr.io/trinko/giuaschool-dev:latest
+            gs:dev
+
+      - name: Build and publish TEST image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/docker/DockerfileTest
+          push: true
+          tags: ghcr.io/trinko/giuaschool-test:latest
