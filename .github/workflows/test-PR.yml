@@ -67,4 +67,4 @@ jobs:
         run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
 
       - name: Run behat
-        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat-${{ matrix.docker-entrypoint }}.sh
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat.sh tests/features/${{ matrix.docker-entrypoint }}.feature
