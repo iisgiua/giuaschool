@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         docker-entrypoint:
-          - '_certificatoStaff'
+          - '_CertificatoStaff'
           - 'documenti_alunni'
           - 'documenti_bacheca'
           - 'documenti_bes'
