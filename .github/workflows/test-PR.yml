@@ -48,7 +48,6 @@ jobs:
           - 'documenti_piani'
           - 'documenti_programmi'
           - 'documenti_relazioni'
-          - 'lezioni_scrutino_proposte'
 
     steps:
 
