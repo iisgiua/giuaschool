@@ -62,20 +62,30 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
 
-  test-behat:
-    name: Behat tests
-    needs: build
+  feature-matrix:
+    name: Create feature matrix
     runs-on: ubuntu-latest
-    env:
-      FEATURE: ${{ matrix.feature }}
     strategy:
-      matrix:
-        feature: ${{ steps.set-matrix.outputs.matrix }}
+      fail-fast: true
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
 
       - name: Set matrix of features
         id: set-matrix
         run: echo "::set-output name=matrix::$(ls tests/features/* | jq -R -s -c 'split("\n")[:-1]')"
+
+  test-behat:
+    name: Behat tests
+    needs: [build, feature-matrix]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        feature: ${{ needs.feature-matrix.outputs.matrix }}
+    steps:
 
       - name: Set swap space
         uses: pierotofy/set-swap-space@master
