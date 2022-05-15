@@ -9,8 +9,9 @@ on:
 
 jobs:
 
-  build:
-    name: Build images
+  test-phpunit:
+    name: PhpUnit tests
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -27,30 +28,6 @@ jobs:
           docker build -t "gs:prod" -f tests/docker/Dockerfile .
           docker build -t "gs:dev" -f tests/docker/DockerfileDev .
           docker build -t "gs:test" -f tests/docker/DockerfileTest .
-          docker save --output docker-test-${{ github.event_name }}.tar gs:test
-
-      - name: Upload docker image for TEST environment
-        uses: actions/upload-artifact@v3
-        with:
-          name: docker-test-${{ github.event_name }}
-          path: docker-test-${{ github.event_name }}.tar
-          retention-days: 1
-
-  test-phpunit:
-    name: PhpUnit tests
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-    steps:
-
-      - name: Download docker image
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-test-${{ github.event_name }}
-
-      - name: Load docker image
-        run: docker load --input docker-test-${{ github.event_name }}.tar
 
       - name: Run phpunit
         run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
@@ -87,19 +64,22 @@ jobs:
         feature: ${{ fromJson(needs.feature-matrix.outputs.matrix) }}
     steps:
 
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Set swap space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 5
 
-      - name: Download docker image
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-test-${{ github.event_name }}
-
-      - name: Load docker image
-        run: docker load --input docker-test-${{ github.event_name }}.tar
+      - name: Build docker images
+        run: |
+          docker build -t "gs:prod" -f tests/docker/Dockerfile .
+          docker build -t "gs:dev" -f tests/docker/DockerfileDev .
+          docker build -t "gs:test" -f tests/docker/DockerfileTest .
 
       - name: Run behat
-        run: echo "*** ${{ matrix.feature }} ***"
-        #-- run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh tests/features/${{ matrix.feature }}.feature
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
