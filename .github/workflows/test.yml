@@ -27,32 +27,7 @@ jobs:
           docker build -t "gs:prod" -f tests/docker/Dockerfile .
           docker build -t "gs:dev" -f tests/docker/DockerfileDev .
           docker build -t "gs:test" -f tests/docker/DockerfileTest .
-
-      - name: Save docker PROD/DEV images
-        if: ${{ github.event.event_name == 'push' }}
-        run: |
-          docker save --output docker-prod-${{ github.event_name }}.tar gs:prod
-          docker save --output docker-dev-${{ github.event_name }}.tar gs:dev
-
-      - name: Save docker TEST image
-        run: |
           docker save --output docker-test-${{ github.event_name }}.tar gs:test
-
-      - name: Upload docker image for PROD environment
-        if: ${{ github.event.event_name == 'push' }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: docker-prod-${{ github.event_name }}
-          path: docker-prod-${{ github.event_name }}.tar
-          retention-days: 1
-
-      - name: Upload docker image for DEV environment
-        if: ${{ github.event.event_name == 'push' }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: docker-dev-${{ github.event_name }}
-          path: docker-dev-${{ github.event_name }}.tar
-          retention-days: 1
 
       - name: Upload docker image for TEST environment
         uses: actions/upload-artifact@v3
@@ -87,42 +62,32 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: clover.xml
 
+  test-behat:
+    name: Behat tests
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      FEATURE: ${{ matrix.feature }}
+    strategy:
+      matrix:
+        feature:
+          - '_CertificatoStaff'
+          - 'documenti_alunni'
+          - 'documenti_bacheca'
+          - 'documenti_bes'
+          - 'documenti_docenti'
+          - 'documenti_download'
+          - 'documenti_maggio'
+          - 'documenti_piani'
+          - 'documenti_programmi'
+          - 'documenti_relazioni'
 
-  #-- test:
-    #-- name: Build test environment and run tests
-    #-- runs-on: ubuntu-latest
-    #-- if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    #-- steps:
+    steps:
 
-      #-- - name: Set Swap Space
-        #-- uses: pierotofy/set-swap-space@master
-        #-- with:
-          #-- swap-size-gb: 10
+      - name: Set swap space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
 
-      #-- - name: Login to GitHub Container Registry
-        #-- uses: docker/login-action@v1
-        #-- with:
-          #-- registry: ghcr.io
-          #-- username: ${{ github.repository_owner }}
-          #-- password: ${{ secrets.GITHUB_TOKEN }}
-
-      #-- - name: Build and publish DEV image
-        #-- uses: docker/build-push-action@v2
-        #-- with:
-          #-- context: .
-          #-- file: tests/docker/DockerfileDev
-          #-- push: true
-          #-- tags: ghcr.io/trinko/giuaschool-dev:latest
-
-      #-- - name: Build and publish TEST image
-        #-- uses: docker/build-push-action@v2
-        #-- with:
-          #-- context: .
-          #-- file: tests/docker/DockerfileTest
-          #-- push: true
-          #-- tags: ghcr.io/trinko/giuaschool-test:latest
-
-      #-- - name: Run tests
-        #-- run: |
-          #-- docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 ghcr.io/trinko/giuaschool-test:latest tests/docker/test-phpunit.sh
-          #-- docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
+      - name: Run behat
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/test-behat.sh tests/features/${{ matrix.feature }}.feature
