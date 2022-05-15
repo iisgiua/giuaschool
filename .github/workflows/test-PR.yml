@@ -5,10 +5,11 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-
-  test:
-    name: Build test environment and run tests
+  test-phpunit:
+    name: phpunit tests
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
     steps:
 
       - name: Check out the repo
@@ -20,9 +21,49 @@ jobs:
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
-          swap-size-gb: 10
+          swap-size-gb: 5
 
-      - name: Run tests
-        run: |
-          docker build -t "gs:build" -f tests/docker/DockerfilePR .
-          docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test.sh
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run only phpunit
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-phpunit.sh
+
+
+  test-behat:
+    name: behat - ${{ matrix.docker-entrypoint}}
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_ENTRYPOINT: ${{ matrix.docker-entrypoint}}
+    strategy:
+      matrix:
+        docker-entrypoint:
+          - '_CertificatoStaff'
+          - 'documenti_alunni'
+          - 'documenti_bacheca'
+          - 'documenti_bes'
+          - 'documenti_docenti'
+          - 'documenti_download'
+          - 'documenti_maggio'
+          - 'documenti_piani'
+          - 'documenti_programmi'
+          - 'documenti_relazioni'
+
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 5
+
+      - name: Build docker test container
+        run: docker build -t "gs:build" -f tests/docker/DockerfilePR .
+
+      - name: Run behat
+        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/entrypoint-test-behat.sh tests/features/${{ matrix.docker-entrypoint }}.feature
