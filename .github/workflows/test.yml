@@ -70,24 +70,26 @@ jobs:
       FEATURE: ${{ matrix.feature }}
     strategy:
       matrix:
-        feature:
-          - '_CertificatoStaff'
-          - 'documenti_alunni'
-          - 'documenti_bacheca'
-          - 'documenti_bes'
-          - 'documenti_docenti'
-          - 'documenti_download'
-          - 'documenti_maggio'
-          - 'documenti_piani'
-          - 'documenti_programmi'
-          - 'documenti_relazioni'
-
+        feature: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+
+      - name: Set matrix of features
+        id: set-matrix
+        run: echo "::set-output name=matrix::$(ls tests/features/* | jq -R -s -c 'split("\n")[:-1]')"
 
       - name: Set swap space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 5
 
+      - name: Download docker image
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-test-${{ github.event_name }}
+
+      - name: Load docker image
+        run: docker load --input docker-test-${{ github.event_name }}.tar
+
       - name: Run behat
-        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:build tests/docker/test-behat.sh tests/features/${{ matrix.feature }}.feature
+        run: echo "*** ${{ matrix.feature }} ***"
+        #-- run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh tests/features/${{ matrix.feature }}.feature
