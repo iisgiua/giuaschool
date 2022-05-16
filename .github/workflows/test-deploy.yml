@@ -31,7 +31,7 @@ jobs:
         run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
 
       - name: Codacy coverage report
-        if: github.event.push
+        if: ${{ github.event_name == 'push' }}
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -83,7 +83,7 @@ jobs:
         run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
 
   deploy:
-    if: github.event.push
+    if: ${{ github.event_name == 'push' }} 
     needs: [test-phpunit, test-behat]
     name: Deploy release
     runs-on: ubuntu-latest
