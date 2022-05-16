@@ -38,21 +38,21 @@ class App {
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private int $id;
 
   /**
    * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato;
 
   /**
    * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato;
 
   /**
    * @var string $nome Nome dell'app
@@ -62,7 +62,7 @@ class App {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(min=3,max=255,minMessage="field.minlength",maxMessage="field.maxlength")
    */
-  private $nome;
+  private string $nome;
 
   /**
    * @var string $token Token univoco per l'app
@@ -72,21 +72,21 @@ class App {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(min=16,max=128,minMessage="field.minlength",maxMessage="field.maxlength")
    */
-  private $token;
+  private string $token;
 
   /**
    * @var boolean $attiva Indica se l'app è attiva o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $attiva;
+  private bool $attiva;
 
   /**
    * @var boolean $css Indica se l'app deve caricare un proprio CSS o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $css;
+  private bool $css;
 
   /**
    * @var string $notifica Tipo di notifica utilizzata dall'app [N=nessuna, E=email, G=Google, T=Telegram]
@@ -95,14 +95,14 @@ class App {
    *
    * @Assert\Choice(choices={"N","E","G","T"}, strict=true, message="field.choice")
    */
-  private $notifica;
+  private string $notifica;
 
   /**
-   * @var string $download Estensione del file da scaricare, o null se nessun file è previsto
+   * @var string|null $download Estensione del file da scaricare, o null se nessun file è previsto
    *
    * @ORM\Column(type="string", length=64, nullable=true)
    */
-  private $download;
+  private ?string $download;
 
   /**
    * @var string $abilitati Indica gli utenti abilitati all'uso dell'app [A=alunni,G=genitori,D=docenti,T=ata,N=nessuno]
@@ -111,14 +111,14 @@ class App {
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $abilitati;
+  private string $abilitati;
 
   /**
    * @var array $dati Lista di dati aggiuntivi necessari per le funzionalità dell'app
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private array $dati;
 
 
   //==================== EVENTI ORM ====================
@@ -128,7 +128,7 @@ class App {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
    // inserisce data/ora di creazione
    $this->creato = new \DateTime();
    $this->modificato = $this->creato;
@@ -139,7 +139,7 @@ class App {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -152,7 +152,7 @@ class App {
    *
    * @return integer Identificativo univoco
    */
-  public function getId() {
+  public function getId(): int {
     return $this->id;
   }
 
@@ -161,7 +161,7 @@ class App {
    *
    * @return \DateTime Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
@@ -170,7 +170,7 @@ class App {
    *
    * @return \DateTime Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -179,7 +179,7 @@ class App {
    *
    * @return string Nome dell'app
    */
-  public function getNome() {
+  public function getNome(): string {
     return $this->nome;
   }
 
@@ -190,7 +190,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setNome($nome) {
+  public function setNome(string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -200,7 +200,7 @@ class App {
    *
    * @return string Token univoco per l'app
    */
-  public function getToken() {
+  public function getToken(): string {
     return $this->token;
   }
 
@@ -211,7 +211,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setToken($token) {
+  public function setToken(string $token): self {
     $this->token = $token;
     return $this;
   }
@@ -221,7 +221,7 @@ class App {
    *
    * @return boolean Vero se l'app è attiva, falso altrimenti
    */
-  public function getAttiva() {
+  public function getAttiva(): bool {
     return $this->attiva;
   }
 
@@ -232,7 +232,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setAttiva($attiva) {
+  public function setAttiva(bool $attiva): self {
     $this->attiva = ($attiva == true);
     return $this;
   }
@@ -242,7 +242,7 @@ class App {
    *
    * @return boolean Vero se l'app deve caricare un proprio CSS, falso altrimenti
    */
-  public function getCss() {
+  public function getCss(): bool {
     return $this->css;
   }
 
@@ -253,7 +253,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setCss($css) {
+  public function setCss(bool $css): self {
     $this->css = ($css == true);
     return $this;
   }
@@ -263,7 +263,7 @@ class App {
    *
    * @return string Tipo di notifica utilizzata dall'app
    */
-  public function getNotifica() {
+  public function getNotifica(): string {
     return $this->notifica;
   }
 
@@ -274,7 +274,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setNotifica($notifica) {
+  public function setNotifica(string $notifica): self {
     $this->notifica = $notifica;
     return $this;
   }
@@ -284,7 +284,7 @@ class App {
    *
    * @return string|null Estensione del file da scaricare
    */
-  public function getDownload() {
+  public function getDownload(): ?string {
     return $this->download;
   }
 
@@ -295,7 +295,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setDownload($download=null) {
+  public function setDownload(?string $download=null): self {
     $this->download = $download;
     return $this;
   }
@@ -305,7 +305,7 @@ class App {
    *
    * @return string Utenti abilitati all'uso dell'app
    */
-  public function getAbilitati() {
+  public function getAbilitati(): string {
     return $this->abilitati;
   }
 
@@ -316,7 +316,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setAbilitati($abilitati) {
+  public function setAbilitati(string $abilitati): self {
     $this->abilitati = $abilitati;
     return $this;
   }
@@ -326,7 +326,7 @@ class App {
    *
    * @return array Lista di dati aggiuntivi necessari per le funzionalità dell'app
    */
-  public function getDati() {
+  public function getDati(): array {
     return $this->dati;
   }
 
@@ -337,7 +337,7 @@ class App {
    *
    * @return App Oggetto App
    */
-  public function setDati($dati) {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -365,7 +365,7 @@ class App {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->nome;
   }
 
