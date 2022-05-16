@@ -304,7 +304,7 @@ class Annotazione {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->data->format('d/m/Y') . ' Annotazione.php' .$this->classe.': '.$this->testo;
+    return $this->data->format('d/m/Y').' '.$this->classe.': '.$this->testo;
   }
 
 }
