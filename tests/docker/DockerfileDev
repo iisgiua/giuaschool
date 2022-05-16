@@ -1,4 +1,5 @@
-FROM gs:prod
+ARG BASE_IMAGE=ghcr.io/trinko/giuaschool:latest
+FROM $BASE_IMAGE
 
 ### Unit test environment
 ARG DEBIAN_FRONTEND=noninteractive

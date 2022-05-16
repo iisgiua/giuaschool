@@ -24,8 +24,8 @@ jobs:
       - name: Build docker images
         run: |
           docker build -t "gs:prod" -f tests/docker/Dockerfile .
-          docker build -t "gs:dev" -f tests/docker/DockerfileDev .
-          docker build -t "gs:test" -f tests/docker/DockerfileTest .
+          docker build -t "gs:dev" --build-arg BASE_IMAGE=gs:prod -f tests/docker/DockerfileDev .
+          docker build -t "gs:test" --build-arg BASE_IMAGE=gs:dev -f tests/docker/DockerfileTest .
 
       - name: Run phpunit
         run: |
@@ -78,8 +78,8 @@ jobs:
       - name: Build docker images
         run: |
           docker build -t "gs:prod" -f tests/docker/Dockerfile .
-          docker build -t "gs:dev" -f tests/docker/DockerfileDev .
-          docker build -t "gs:test" -f tests/docker/DockerfileTest .
+          docker build -t "gs:dev" --build-arg BASE_IMAGE=gs:prod -f tests/docker/DockerfileDev .
+          docker build -t "gs:test" --build-arg BASE_IMAGE=gs:dev -f tests/docker/DockerfileTest .
 
       - name: Run behat
         run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
@@ -114,11 +114,10 @@ jobs:
           push: true
           tags: |
             ghcr.io/trinko/giuaschool:latest
-            gs:prod
 
       - name: Archive build code
         run: |
-          docker run --name "gs_release" gs:prod tests/docker/release.sh
+          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/release.sh
           docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-build-latest.zip
 
       - name: Generate changelog from latest release
@@ -177,7 +176,6 @@ jobs:
           push: true
           tags: |
             ghcr.io/trinko/giuaschool-dev:latest
-            gs:dev
 
       - name: Build and publish TEST image
         uses: docker/build-push-action@v3
