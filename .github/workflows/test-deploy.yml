@@ -28,7 +28,9 @@ jobs:
           docker build -t "gs:test" -f tests/docker/DockerfileTest .
 
       - name: Run phpunit
-        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
+        run: |
+          docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
+          docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
       - name: Codacy coverage report
         if: ${{ github.event_name == 'push' }}
@@ -83,7 +85,7 @@ jobs:
         run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
 
   deploy:
-    if: ${{ github.event_name == 'push' }} 
+    if: ${{ github.event_name == 'push' }}
     needs: [test-phpunit, test-behat]
     name: Deploy release
     runs-on: ubuntu-latest
