@@ -105,7 +105,8 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
-          build-args: --target application_prod
+          build-args: |
+            --target application_prod
           push: true
           tags: |
             ghcr.io/trinko/giuaschool:latest
@@ -168,7 +169,8 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
-          build-args: --target application_dev
+          build-args: |
+            --target application_dev
           push: true
           tags: |
             ghcr.io/trinko/giuaschool-dev:latest
