@@ -2,8 +2,7 @@
 
 *Il Registro Elettronico open source dell'Istituto di Istruzione Superiore "Michele Giua"*
 
-[![Build](https://github.com/trinko/giuaschool/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/trinko/giuaschool/actions/workflows/build.yml)
-[![Test](https://github.com/trinko/giuaschool/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/trinko/giuaschool/actions/workflows/test.yml)
+[![Test and deploy](https://github.com/trinko/giuaschool/actions/workflows/test-deploy.yml/badge.svg?branch=master)](https://github.com/trinko/giuaschool/actions/workflows/test-deploy.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/d1e4b6505b984dc190eb3e89e86868ff)](https://www.codacy.com/gh/trinko/giuaschool/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=trinko/giuaschool&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/d1e4b6505b984dc190eb3e89e86868ff)](https://www.codacy.com/gh/trinko/giuaschool/dashboard?utm_source=github.com&utm_medium=referral&utm_content=trinko/giuaschool&utm_campaign=Badge_Coverage)
 
