@@ -1,5 +1,5 @@
 ########## First Step - Build system
-FROM debian:11.2 as systembuilder
+FROM debian:11.2 as systemBuilder
 
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
@@ -55,7 +55,7 @@ COPY ./tests/docker/apache2-mpm.conf /etc/apache2/mods-available/mpm_prefork.con
 
 
 ########## Second Step - Build Symfony framework
-FROM systembuilder as symfonybuilder
+FROM systemBuilder as symfonyBuilder
 
 ### Install Symfony
 WORKDIR /var/www/giuaschool
@@ -65,8 +65,8 @@ RUN \
   composer -q clear-cache --no-plugins
 
 
-########## Third Step - Build Application
-FROM symfonybuilder as applicationbuilder
+########## Third Step - Build Application for PROD environment
+FROM symfonyBuilder as applicationProd
 
 ### Configure application
 WORKDIR /var/www/giuaschool
@@ -102,7 +102,54 @@ RUN \
 # adjust file permissions
   chown -R www-data:www-data .
 
-
 ### Configure services
 EXPOSE 443
 CMD tests/docker/entrypoint.sh
+
+
+########## Fourth Step - Build Application for DEV environment
+FROM applicationProd as applicationDev
+
+### Build environment
+ARG DEBIAN_FRONTEND=noninteractive
+
+### Configure application
+WORKDIR /var/www/giuaschool
+RUN \
+# Set DEV environment
+  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=dev/" .env && \
+  composer -q install --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
+  composer clear-cache && \
+  chown -R www-data:www-data .
+
+
+########## Fifth Step - Build Application for TEST environment
+FROM applicationDev as applicationTest
+
+### Build environment
+ARG DEBIAN_FRONTEND=noninteractive
+
+### Configure application
+WORKDIR /var/www/giuaschool
+RUN \
+# Install chrome headless
+  wget -qO - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg && \
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
+  apt-get -qq update && \
+  apt-get -yqq --no-install-recommends --no-install-suggests install google-chrome-stable && \
+  dbus-uuidgen > /var/lib/dbus/machine-id && \
+  mkdir -p /var/run/dbus && \
+# Install xdebug
+  apt-get -yqq --no-install-recommends --no-install-suggests install php-xdebug && \
+  echo "xdebug.mode=coverage" >> /etc/php/7.4/mods-available/xdebug.ini && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* && \
+# Set TEST environment
+  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
+  service mariadb start && \
+  php bin/console doctrine:database:drop -f -q && \
+  php bin/console doctrine:database:create -n -q && \
+  php bin/console doctrine:schema:update -f -q && \
+  php bin/console doctrine:fixtures:load -n -q --group=Test && \
+  mysqldump -uroot -proot giuaschool -t -n --compact --result-file='tests/temp/Test.fixtures' && \
+  chown -R www-data:www-data .
