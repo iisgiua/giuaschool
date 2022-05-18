@@ -1,5 +1,5 @@
 ########## First Step - Build system
-FROM debian:11.2 as systemBuilder
+FROM debian:11.2 as system_builder
 
 ### System and build environments
 ARG DEBIAN_FRONTEND=noninteractive
@@ -55,7 +55,7 @@ COPY ./tests/docker/apache2-mpm.conf /etc/apache2/mods-available/mpm_prefork.con
 
 
 ########## Second Step - Build Symfony framework
-FROM systemBuilder as symfonyBuilder
+FROM system_builder as symfony_builder
 
 ### Install Symfony
 WORKDIR /var/www/giuaschool
@@ -66,7 +66,7 @@ RUN \
 
 
 ########## Third Step - Build Application for PROD environment
-FROM symfonyBuilder as applicationProd
+FROM symfony_builder as application_prod
 
 ### Configure application
 WORKDIR /var/www/giuaschool
@@ -108,7 +108,7 @@ CMD tests/docker/entrypoint.sh
 
 
 ########## Fourth Step - Build Application for DEV environment
-FROM applicationProd as applicationDev
+FROM application_prod as application_dev
 
 ### Build environment
 ARG DEBIAN_FRONTEND=noninteractive
@@ -124,7 +124,7 @@ RUN \
 
 
 ########## Fifth Step - Build Application for TEST environment
-FROM applicationDev as applicationTest
+FROM application_dev as application_test
 
 ### Build environment
 ARG DEBIAN_FRONTEND=noninteractive
