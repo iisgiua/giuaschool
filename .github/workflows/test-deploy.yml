@@ -105,11 +105,9 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
-          build-args: |
-            --target application_prod
+          target: application_prod
           push: true
-          tags: |
-            ghcr.io/trinko/giuaschool:latest
+          tags: ghcr.io/trinko/giuaschool:latest
 
       - name: Archive build code
         run: |
@@ -169,11 +167,9 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
-          build-args: |
-            --target application_dev
+          target: application_dev
           push: true
-          tags: |
-            ghcr.io/trinko/giuaschool-dev:latest
+          tags: ghcr.io/trinko/giuaschool-dev:latest
 
       - name: Build and publish TEST image
         uses: docker/build-push-action@v3
