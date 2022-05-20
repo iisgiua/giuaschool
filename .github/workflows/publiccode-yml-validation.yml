@@ -1,0 +1,9 @@
+on: [push, pull_request]
+
+jobs:
+  publiccode_yml_validation:
+    runs-on: ubuntu-latest
+    name: publiccode.yml validation
+    steps:
+    - uses: actions/checkout@v2
+    - uses: italia/publiccode-parser-action@v1

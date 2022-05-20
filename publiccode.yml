@@ -1,0 +1,76 @@
+# This repository adheres to the publiccode.yml standard by including this
+# metadata file that makes public software easily discoverable.
+# More info at https://yml.publiccode.tools
+
+publiccodeYmlVersion: '0.3'
+categories:
+  - data-collection
+  - data-analytics
+description:
+  it:
+    documentation: 'https://trinko.github.io/giuaschool-docs/'
+    features:
+      - |-
+        Gestione di due sedi scolastiche, con docenti che possono lavorare anche
+        in entrambe le sedi
+      - |-
+        Orario scolastico differente per sede, con unità orarie anche da 90
+        minuti
+      - Orario provvisorio di inizio anno con solo 4 unità orarie da 60 minuti
+      - Calcolo delle ore di assenza degli studenti
+      - |-
+        Gestione dello scrutinio, comprese le problematiche della non ammissione
+        per superamento assenze
+      - Gestione dell’importazione e dell’esportazione dei dati
+    longDescription: |
+      **giua@school** è un progetto nato dalla volontà di utilizzare un Registro
+      Elettronico _open source_ per le attività scolastiche dell’**Istituto di
+      Istruzione Superiore “Michele Giua”**.
+
+
+      Ssebbene sia stato riscritto da zero, può essere considerato una _fork_ di
+      [Lampschool](http://www.lampschool.it/), perché riprende da questo diverse
+      soluzioni algoritmiche e l’importante esperienza maturata con il suo uso.
+
+
+      Da  allora, il software del registro elettronico viene aggiornato di 
+      continuo, seguendo le esigenze dei docenti e dell’organizzazione 
+      scolastica, ma cercando, al tempo stesso, di mantenerlo semplice e 
+      intuitivo per l’utente finale.
+    shortDescription: Registro Elettronico open source
+developmentStatus: stable
+intendedAudience:
+  countries:
+    - it
+  scope:
+    - education
+it:
+  conforme:
+    gdpr: false
+    lineeGuidaDesign: false
+    misureMinimeSicurezza: false
+    modelloInteroperabilita: false
+  countryExtensionVersion: '0.2'
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: true
+logo: https://giuademo.x10.mx/wp-content/uploads/2022/03/cropped-download-1-1.png
+legal:
+  license: AGPL-3.0-or-later
+localisation:
+  availableLanguages:
+    - it
+  localisationReady: false
+maintenance:
+  contacts:
+    - name: Antonello Dessì
+  type: community
+name: giua@school
+platforms:
+  - web
+releaseDate: '2022-03-14'
+softwareType: standalone/web
+softwareVersion: 1.4.3
+url: 'https://github.com/trinko/giuaschool'
