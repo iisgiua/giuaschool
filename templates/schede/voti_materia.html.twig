@@ -75,11 +75,11 @@
     <strong class="gs-big">Non sono presenti valutazioni</strong>
   </div>
 {% endfor %}
-{% if dati.precedente is defined %}
-  {% for prec in dati.precedente %}
-  <div class="alert alert-info  text-center gs-mt-4" role="alert">
-    <strong class="gs-big"><em>{{ prec.nome }}</em></strong><br>
-    <strong class="gs-big"><em>{{ prec.voto ? prec.voto : 'Non sono presenti valutazioni' }}</em></strong><br>
+{% if dati.scrutini is defined %}
+  {% for scr in dati.scrutini %}
+  <div class="alert alert-info text-center gs-mt-4" role="alert">
+    <strong class="gs-big"><em>{{ scr.nome }}</em></strong><br>
+    <strong class="gs-big"><em>{{ scr.voto ? scr.voto : 'Non sono presenti valutazioni' }}</em></strong><br>
   </div>
   {% endfor %}
 {% endif %}

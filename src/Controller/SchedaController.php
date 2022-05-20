@@ -72,25 +72,14 @@ class SchedaController extends AbstractController {
     $dati['lezioni'] = $reg->assenzeMateria($cattedra, $alunno);
     $periodi = $reg->infoPeriodi();
     if ($periodo == 'P') {
-      foreach ($dati['lista'] as $per=>$d) {
-        if ($per != $periodi[1]['nome']) {
-          unset($dati['lista'][$per]);
-          unset($dati['media'][$per]);
-          unset($dati['lezioni'][$per]);
-        }
-      }
-    } elseif ($periodo == 'F') {
-      // scrutinio finale
-      foreach ($dati['lista'] as $per=>$d) {
-        if ($per != $periodi[2]['nome']) {
-          unset($dati['lista'][$per]);
-          unset($dati['media'][$per]);
-          unset($dati['lezioni'][$per]);
-        }
-      }
-      // voto primo trimestre
-      $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono',  25 => 'Distinto', 26 => 'Ottimo'];
-      $dati['precedente'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
+      // primo trimestre/quadrimestre
+      $periodoNome = $periodi[1]['nome'];
+    } elseif ($periodo == 'S' || ($periodo == 'F' && empty($periodi[3]['nome']))) {
+      // secondo trimestre o scrutinio finale di quadrimestri
+      $periodoNome = $periodi[2]['nome'];
+      // voto primo trimestre/quadrimestre
+      $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
+      $dati['scrutini'][0]['voto'] = null;
       $voto = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
@@ -99,11 +88,44 @@ class SchedaController extends AbstractController {
         ->getQuery()
         ->getOneOrNullResult();
       if ($voto) {
-        $dati['precedente'][0]['voto'] = ($voto->getUnico() == 0 ? 'NC' :
+        // retrocompatibilità per A.S 21/22
+        $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono',  25 => 'Distinto', 26 => 'Ottimo'];
+        $dati['scrutini'][0]['voto'] = ($voto->getUnico() == 0 ? 'NC' :
           ($voto->getUnico() >= 20 ? $giudizi[$voto->getUnico()] :
           ($voto->getUnico() == 3 && $cattedra->getMateria()->getTipo() == 'E' ? 'NC' : $voto->getUnico())));
-      } else {
-        $dati['precedente'][0]['voto'] = null;
+      }
+    } elseif ($periodo == 'F') {
+      // scrutinio finale con trimestri
+      $periodoNome = $periodi[3]['nome'];
+      // voto primo trimestre/quadrimestre
+      $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
+      $dati['scrutini'][0]['voto'] = null;
+      $dati['scrutini'][1]['nome'] = 'Scrutinio del '.$periodi[2]['nome'];
+      $dati['scrutini'][1]['voto'] = null;
+      $voti = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+        ->join('vs.scrutinio', 's')
+        ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo IN (:periodi) AND s.stato=:stato')
+        ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+          'periodi' => ['P', 'S'], 'stato' => 'C'])
+        ->orderBy('s.periodo')
+        ->getQuery()
+        ->getResult();
+      foreach ($voti as $p=>$v) {
+        // retrocompatibilità per A.S 21/22
+        $giudizi = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono',  25 => 'Distinto', 26 => 'Ottimo'];
+        if ($v !== null) {
+          $dati['scrutini'][$p]['voto'] = ($v->getUnico() == 0 ? 'NC' :
+            ($v->getUnico() >= 20 ? $giudizi[$v->getUnico()] :
+            ($v->getUnico() == 3 && $cattedra->getMateria()->getTipo() == 'E' ? 'NC' : $v->getUnico())));
+        }
+      }
+    }
+    // cancella dati inutili
+    foreach (['lista', 'media', 'lezioni'] as $tipo) {
+      foreach ($dati[$tipo] as $per=>$d) {
+        if ($per != $periodoNome) {
+          unset($dati[$tipo][$per]);
+        }
       }
     }
     // visualizza pagina
