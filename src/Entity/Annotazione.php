@@ -295,6 +295,7 @@ class Annotazione {
    */
   public function __construct() {
     // valori predefiniti
+    $this->avviso = null;
     $this->visibile = false;
   }
 
