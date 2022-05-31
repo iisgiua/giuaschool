@@ -6,8 +6,14 @@
 <div style="text-align:justify;font-family:times;font-size:11pt">
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
     del mese di {{ dati.nomi_mesi[dati.scrutinio.data|date('n')] }} dell'anno {{ dati.scrutinio.data|date('Y') }},
-    alle ore {{ dati.scrutinio.inizio|date('G:i') }}, nei locali dell'<em>Istituto di Istruzione Superiore "Michele Giua"</em>
-    di Cagliari, si riunisce in presenza, a seguito di regolare convocazione (circolare n. 358 del 27/05/2021),
+    alle ore {{ dati.scrutinio.inizio|date('G:i') }},
+{% if dati.scrutinio.dati.in_presenza %}
+    nei locali dell'<em>Istituto di Istruzione Superiore "Michele Giua"</em>
+    di Cagliari, si riunisce in presenza,
+{% else %}
+    si riunisce in seduta telematica,
+{% endif %}
+    a seguito di regolare convocazione (circolare n. 442 del 17/05/2022),
     il Consiglio della Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente
     ordine del giorno:
   </p>
@@ -64,13 +70,29 @@
 {% else %}
   <p>Nessun docente risulta assente.</p>
 {% endif %}
+{% if dati.scrutinio.dati.in_presenza %}
   <p>Accertata la legalità della seduta, il Presidente richiama le norme in vigore sullo scrutinio
     (D.P.R. 122/09 e L. 169/08) e in particolare i criteri di valutazione deliberati dal Collegio dei Docenti,
     dichiarando aperta la seduta.
   </p>
+{% else %}
+  <p>Preliminarmente si fa presente che:</p>
+  <ul>
+    <li>la piattaforma individuata è Google Classroom-Meet;</li>
+    <li>a tutti i docenti del Consiglio è stata comunicata la modalità di accesso a tale piattaforma.</li>
+  </ul>
+  <p>Successivamente, constatate:</p>
+  <ul>
+    <li>la presenza di tutti i componenti del Consiglio di Classe, presenza attestata dalla loro visibilità sulla piattaforma, a cui sono collegati in modalità audio e video;</li>
+    <li>la disponibilità di strumenti telematici idonei allo svolgimento della seduta;</li>
+  </ul>
+  <div>il Presidente richiama le norme in vigore sullo scrutinio (D.P.R. 122/09 e L. 169/08) e in particolare i
+    criteri di valutazione deliberati dal Collegio dei Docenti, dichiarando aperta la seduta.
+  </div>
+{% endif %}
   <p>&nbsp;</p>
   <p><strong>Punto primo. Scrutini finali.</strong></p>
-  <p>Il Consiglio di Classe verifica preliminarmente, per ciascun alunno, la frequenza delle lezioni.</p>
+  <p>Il Consiglio di Classe verifica, per ciascun alunno, la frequenza delle lezioni.</p>
 {% if (dati.no_scrutinabili|length + dati.deroga|length) > 0 %}
   <p>Si esaminano ora gli alunni che presentano un numero di assenze superiore al 25%
     dell’orario annuale personalizzato, individuati nella seguente tabella:
@@ -158,20 +180,22 @@
       <td width="48%" align="center"><strong>Descrittori</strong></td>
       <td width="16%" align="center"><strong>Delibera</strong></td>
     </tr>
-{% for kalu in dati.scrutinati %}
+{% for idalunno,alu in dati.alunni %}
+  {% if idalunno in dati.scrutinati %}
     <tr>
-      <td>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</td>
-      <td align="center">{{ dati.voti[kalu].unico == 4 ? 'NC' : dati.voti[kalu].unico }}</td>
-      <td style="font-size:9pt">{{ dati.voti[kalu].dati['motivazione']|replace({'*': ''}) }}</td>
+      <td>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
+      <td align="center">{{ dati.voti[idalunno].unico == 4 ? 'NC' : dati.voti[idalunno].unico }}</td>
+      <td style="font-size:9pt">{{ dati.voti[idalunno].dati['motivazione']|replace({'*': ''}) }}</td>
       <td style="font-size:9pt">
-  {% if dati.voti[kalu].dati['unanimita'] %}
+    {% if dati.voti[idalunno].dati['unanimita'] %}
         <strong>UNANIMITÀ</strong>
-  {% else %}
+    {% else %}
         <strong>MAGGIORANZA</strong>
-        <br><br><strong>Contrari</strong>: {{ dati.voti[kalu].dati['contrari'] }}
-  {% endif %}
+        <br><br><strong>Contrari</strong>: {{ dati.voti[idalunno].dati['contrari'] }}
+    {% endif %}
       </td>
     </tr>
+  {% endif %}
 {% endfor %}
   </table>
   <p>Si passa, quindi, seguendo l'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto
@@ -190,16 +214,16 @@
       <td width="40%" align="center"><strong>ALUNNO</strong></td>
       <td width="60%" align="center"><strong>Delibera</strong></td>
     </tr>
-  {% for kalu in dati.scrutinati %}
-    {% if dati.esiti[kalu].esito == 'A' %}
+  {% for idalunno,alu in dati.alunni %}
+    {% if idalunno in dati.scrutinati and dati.esiti[idalunno].esito == 'A' %}
     <tr nobr="true">
-      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }} ({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
+      <td><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
       <td style="font-size:9pt">
-      {% if dati.esiti[kalu].dati['unanimita'] %}
+      {% if dati.esiti[idalunno].dati['unanimita'] %}
         <strong>UNANIMITÀ</strong>
       {% else %}
         <strong>MAGGIORANZA</strong>
-        <br><strong>Contrari</strong>: {{ dati.esiti[kalu].dati['contrari'] }}
+        <br><strong>Contrari</strong>: {{ dati.esiti[idalunno].dati['contrari'] }}
       {% endif %}
       </td>
     </tr>
@@ -221,7 +245,7 @@
   {% for idalunno,alu in dati.alunni %}
     {% if idalunno in dati.insuff5 %}
     <tr nobr="true">
-      <td><strong>{{ dati.alunni[idalunno].cognome }} {{ dati.alunni[idalunno].nome }} ({{ dati.alunni[idalunno].dataNascita|date('d/m/Y') }})</strong></td>
+      <td><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
       <td align="center" style="font-size:9pt">{% if dati.esiti[idalunno].dati.unanimita %}UNANIMITÀ{% else %}MAGGIORANZA<br>Contrari: {{ dati.esiti[idalunno].dati.contrari }}{% endif %}</td>
       <td style="font-size:9pt">{{ dati.esiti[idalunno].dati.giudizio }}</td>
     </tr>
@@ -252,31 +276,58 @@
   {% else %}
     <tr nobr="true">
       <td width="30%" align="center"><strong>ALUNNO</strong></td>
-      <td width="8%" align="center"><strong>Media voti</strong></td>
-      <td width="26%" align="center"><strong>Criteri</strong></td>
-      <td width="9%" align="center"><strong>Credito</strong></td>
-      <td width="9%" align="center"><strong>Credito anni prec.</strong></td>
-      <td width="9%" align="center"><strong>Credito integr.</strong></td>
-      <td width="9%" align="center"><strong>Credito totale</strong></td>
+      <td width="10%" align="center"><strong>Media voti</strong></td>
+      <td width="30%" align="center"><strong>Criteri</strong></td>
+      <td width="10%" align="center"><strong>Credito</strong></td>
+      <td width="10%" align="center"><strong>Credito anni prec.</strong></td>
+      <td width="10%" align="center"><strong>Credito totale</strong></td>
     </tr>
   {% endif %}
-  {% for kalu in dati.scrutinati %}
-    {% if dati.esiti[kalu].esito == 'A' %}
+  {% for idalunno,alu in dati.alunni %}
+    {% if idalunno in dati.scrutinati and dati.esiti[idalunno].esito == 'A' %}
     <tr nobr="true">
-      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }}<br>({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="center">{{ dati.esiti[kalu].media|number_format(2,',','') }}</td>
-      <td style="font-size:9pt">{% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% else %}---{% endfor %}</td>
-      <td align="center">{{ dati.esiti[kalu].credito }}</td>
+      <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
+      <td align="center">{{ dati.esiti[idalunno].media|number_format(2,',','') }}</td>
+      <td style="font-size:9pt">{% for cr in dati.esiti[idalunno].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% else %}---{% endfor %}</td>
+      <td align="center">{{ dati.esiti[idalunno].credito }}</td>
       {% if dati.classe.anno == 4 %}
-      <td align="center">{{ dati.esiti[kalu].creditoPrecedente }}</td>
-      <td align="center">{{ dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0 }}</td>
-      <td align="center">{{ dati.esiti[kalu].creditoPrecedente + dati.esiti[kalu].credito + (dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0) }}</td>
+      <td align="center">{{ dati.esiti[idalunno].creditoPrecedente }}</td>
+      <td align="center">{{ dati.esiti[idalunno].creditoPrecedente + dati.esiti[idalunno].credito }}</td>
       {% endif%}
     </tr>
     {% endif %}
   {% endfor %}
   </table>
   <p>Tutte le decisioni in merito all’attribuzione del credito scolastico dell’anno in corso vengono prese all’unanimità.</p>
+{% endif %}
+{% if dati.classe.anno == 5 %}
+  <p>&nbsp;</p>
+  <p>Il Consiglio di Classe procede alla conversione del punteggio dei crediti attribuiti nel triennio,
+    sulla base di quanto stabilito nell'OM n. 65 del 14 marzo 2022 (Allegato C, Tabella 1).
+    I risultati di tale conversione sono mostrati nella tabella seguente:
+  </p>
+  <table border="1" cellpadding="2" style="text-align:left;font-family:helvetica;font-size:10pt">
+    <tr nobr="true">
+      <td width="40%" align="center"><strong>ALUNNO</strong></td>
+      <td width="10%" align="center"><strong>Credito TERZA</strong></td>
+      <td width="10%" align="center"><strong>Credito QUARTA</strong></td>
+      <td width="10%" align="center"><strong>Credito QUINTA</strong></td>
+      <td width="10%" align="center"><strong>Credito TOTALE</strong></td>
+      <td width="20%" align="center"><strong>Credito CONVERTITO</strong></td>
+    </tr>
+  {% for idalunno,alu in dati.alunni %}
+    {% if idalunno in dati.scrutinati and dati.esiti[idalunno].esito == 'A' %}
+    <tr nobr="true">
+      <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
+      <td align="center" style="font-size:9pt">{{ alu.credito3 }}</td>
+      <td align="center" style="font-size:9pt">{{ alu.credito4 }}</td>
+      <td align="center" style="font-size:9pt">{{ dati.esiti[idalunno].credito }}</td>
+      <td align="center" style="font-size:9pt">{{ alu.credito3 + alu.credito4 + dati.esiti[idalunno].credito }}</td>
+      <td align="center"><strong>{{ dati.esiti[idalunno].dati['creditoConvertito'] }}</strong></td>
+    </tr>
+    {% endif %}
+  {% endfor %}
+  </table>
 {% endif %}
 {% if dati.debiti|length > 0 %}
   <p>&nbsp;</p>
@@ -287,10 +338,11 @@
     del superamento delle carenze riscontrate.
     Viene di seguito riportato il dettaglio dei debiti formativi per gli alunni con giudizio sospeso:
   </p>
-  {% for idalunno,deb in dati.debiti %}
+  {% for idalunno,alu in dati.alunni %}
+    {% if idalunno in dati.debiti|keys %}
   <br>
   <ul>
-    <li><strong>{{ dati.alunni[idalunno].cognome }} {{ dati.alunni[idalunno].nome }} ({{ dati.alunni[idalunno].dataNascita|date('d/m/Y') }})</strong>
+    <li><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong>
       <br>Delibera {% if dati.esiti[idalunno].dati.unanimita %}all'unanimità{% else %}a maggioranza - Contrari: {{ dati.esiti[idalunno].dati.contrari }}{% endif %}
     </li>
   </ul>
@@ -301,15 +353,16 @@
       <td width="50%" align="center"><strong>Debito formativo</strong></td>
       <td width="13%" align="center"><strong>Modalità di recupero</strong></td>
     </tr>
-    {% for d in deb %}
+        {% for d in dati.debiti[idalunno] %}
     <tr nobr="true">
       <td>{{ d.materia }}</td>
       <td align="center">{{ (d.unico == 0 or (d.tipo == 'E' and d.unico == 3)) ? 'NC' : d.unico }}</td>
       <td style="font-size:9pt">{{ d.debito }}</td>
       <td align="center" style="font-size:9pt">{{ ('label.recupero_'~d.recupero)|trans }}</td>
     </tr>
-    {% endfor %}
+        {% endfor %}
   </table>
+    {% endif %}
   {% endfor %}
 {% endif %}
 {% if dati.non_ammessi > 0 %}
@@ -331,13 +384,13 @@
       <td width="20%" align="center"><strong>Delibera</strong></td>
       <td width="50%" align="center"><strong>Motivazione della non ammissione</strong></td>
     </tr>
-  {% for kalu in dati.scrutinati %}
-    {% if dati.esiti[kalu].esito == 'N' %}
+  {% for idalunno,alu in dati.alunni %}
+    {% if idalunno in dati.scrutinati and dati.esiti[idalunno].esito == 'N' %}
     <tr nobr="true">
-      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }}<br>({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="center" style="font-size:9pt">{% if dati.esiti[kalu].dati.unanimita %}UNANIMITÀ{% else %}MAGGIORANZA<br>Contrari: {{ dati.esiti[kalu].dati.contrari }}{% endif %}</td>
+      <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
+      <td align="center" style="font-size:9pt">{% if dati.esiti[idalunno].dati.unanimita %}UNANIMITÀ{% else %}MAGGIORANZA<br>Contrari: {{ dati.esiti[idalunno].dati.contrari }}{% endif %}</td>
       <td style="font-size:9pt">
-        {{ dati.esiti[kalu].dati.giudizio }}
+        {{ dati.esiti[idalunno].dati.giudizio }}
       </td>
     </tr>
     {% endif %}
@@ -380,44 +433,6 @@
     </tr>
 {% endif %}
   </table>
-{% if dati.classe.anno == 5 %}
-  <p>Il Consiglio di Classe procede alla conversione del punteggio dei crediti attribuiti al terzo e
-    quarto anno, sulla base di quanto stabilito nell' OM n. 53 del 3 marzo 2021 (Allegato A, Tabella A e B).
-    I risultati di tale conversione sono mostrati nella tabella seguente:
-  </p>
-  <table border="1" cellpadding="2" style="text-align:left;font-family:helvetica;font-size:10pt">
-    <tr nobr="true">
-      <td width="30%" align="center" rowspan="2"><strong>ALUNNO</strong></td>
-      <td width="22%" align="center" colspan="2"><strong>Credito TERZA</strong></td>
-      <td width="22%" align="center" colspan="2"><strong>Credito QUARTA</strong></td>
-      <td width="8%" align="center" rowspan="2"><strong>Credito Integr.</strong></td>
-      <td width="9%" align="center" rowspan="2"><strong>Credito QUINTA</strong></td>
-      <td width="9%" align="center" rowspan="2"><strong>Credito TOTALE</strong></td>
-    </tr>
-    <tr nobr="true" style="font-size:9pt">
-      <td width="11%" align="center"><strong>Assegnato</strong></td>
-      <td width="11%" align="center"><strong>Convertito</strong></td>
-      <td width="11%" align="center"><strong>Assegnato</strong></td>
-      <td width="11%" align="center"><strong>Convertito</strong></td>
-    </tr>
-  {% for kalu in dati.scrutinati %}
-    {% if dati.esiti[kalu].esito == 'A' %}
-    <tr nobr="true">
-      <td><strong>{{ dati.alunni[kalu].cognome }} {{ dati.alunni[kalu].nome }}<br>({{ dati.alunni[kalu].dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="center" style="font-size:9pt">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].credito3 }}
-        <br>Media: {{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].media3|number_format(2, ',') }}</td>
-      <td align="center">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti3 }}</td>
-      <td align="center" style="font-size:9pt">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].credito4 }}
-        <br>Media: {{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].media4|number_format(2, ',') }}</td>
-      <td align="center">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti4 }}</td>
-      <td align="center">{{ dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0 }}</td>
-      <td align="center">{{ dati.esiti[kalu].credito }}</td>
-      <td align="center">{{ dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti3 + dati.scrutinio.dati.nuovo_credito[dati.alunni[kalu].codiceFiscale].punti4 + (dati.esiti[kalu].dati.creditoIntegrativo ? 1 : 0) + dati.esiti[kalu].credito }}</td>
-    </tr>
-    {% endif %}
-  {% endfor %}
-  </table>
-{% endif %}
   <p>&nbsp;</p>
 {% if dati.classe.anno != 5 %}
   <p><strong>Punto secondo. Individuazione degli interventi di recupero e di situazioni particolari da segnalare.</strong></p>

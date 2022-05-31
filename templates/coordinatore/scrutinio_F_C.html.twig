@@ -46,18 +46,6 @@
           </td>
         </tr>
         <tr>
-          <td><strong>Tabellone voti</strong></td>
-          <td>
-            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica: sarà firmata dal Dirigente ed esposta all'albo.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
-          </td>
-          <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-          </td>
-        </tr>
-        <tr>
           <td><strong>Foglio firme Registro dei voti</strong></td>
           <td>
             Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
@@ -73,7 +61,7 @@
         <tr>
           <td><strong>Certificazione competenze</strong></td>
           <td>
-            Sarà stampata conservata agli atti dalla Segreteria Didattica<br>
+            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
@@ -84,9 +72,21 @@
         </tr>
     {% endif %}
         <tr>
+          <td><strong>Tabellone esiti</strong></td>
+          <td>
+            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
+            <strong><em>Controllare che non ci siano errori.</em></strong><br>
+            <br>
+            Formato del documento: <em>PDF</em>
+          </td>
+          <td>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'F'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          </td>
+        </tr>
+        <tr>
           <td><strong>Comunicazione Non Ammessi</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
+            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
@@ -103,7 +103,7 @@
         <tr>
           <td><strong>Comunicazione Debiti</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
+            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
@@ -119,7 +119,7 @@
         <tr>
           <td><strong>Comunicazione Carenze</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
+            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>

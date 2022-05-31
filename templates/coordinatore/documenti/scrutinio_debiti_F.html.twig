@@ -17,11 +17,11 @@
   <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio finale dell’Anno Scolastico
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
     {{ dati.scrutinio.data|date('d/m/Y') }},
-    avendo accertato la presenza di un debito formativo per
+    avendo accertato l'insufficienza in {{ dati.debiti|length }} materi{{ dati.debiti|length > 1 ? 'e' : 'a' }} per
     l'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }},
     ne ha deliberato la <strong>SOSPENSIONE DEL GIUDIZIO</strong>, ai sensi dell'art. 4 comma 6 del D.P.R. 122 del 2009.
-    <br>Si riporta nel prospetto seguente il dettaglio del debito formativo dell'alunn{{ dati.sex }}
-    e la modalità consigliata per il recupero:
+    <br>Si riporta{{ dati.debiti|length > 1 ? 'no' }} nel prospetto seguente {{ dati.debiti|length > 1 ? 'le discipline' : 'la disciplina' }}
+    con voto insufficiente e la modalità consigliata per il recupero:
   </p>
   <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
     <tr nobr="true">
@@ -34,7 +34,7 @@
   {% if dati.debiti[idmat].unico is defined %}
     <tr>
       <td align="left"><strong>{{ mat.nome }}</strong></td>
-      <td align="center"><strong>{{ (mat.tipo == 'E' and dati.debiti[idmat].unico < 4) ? dati.valutazioni[0] : dati.valutazioni[dati.debiti[idmat].unico] }}</strong></td>
+      <td align="center"><strong>{{ dati.valutazioni[mat.tipo].lista[dati.debiti[idmat].unico] }}</strong></td>
       <td align="left" style="font-size:9pt">{{ dati.debiti[idmat].debito|nl2br }}</td>
       <td align="center">{{ ('label.recupero_'~dati.debiti[idmat].recupero)|trans }}</td>
     </tr>
@@ -42,9 +42,9 @@
 {% endfor %}
   </table>
   <p>Qualora le famiglie non intendano far frequentare ai propri figli i corsi organizzati dalla scuola,
-    dovranno dichiarare che provvederanno autonomamente agli interventi di recupero.
-    In ogni caso, gli studenti saranno chiamati a sottoporsi alle prove di verifica del superamento
-    del debito formativo.
+    dovranno dichiarare formalmente che provvederanno autonomamente agli interventi di recupero.
+    In ogni caso, gli studenti saranno sottoposti alle prove di verifica del superamento
+    del debito formativo, nel periodo dal 25 agosto al 31 agosto.
   </p>
   <p>Si ricorda che, ai sensi della normativa vigente, non sarà consentita l'ammissione alla classe successiva
     nel caso persista il debito formativo sopra evidenziato.</p>

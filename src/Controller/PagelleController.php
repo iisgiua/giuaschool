@@ -110,8 +110,8 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->riepilogoVoti($classe, $periodo);
           break;
         case 'T':
-          // tabellone voti
-          $nomefile = $pag->tabelloneVoti($classe, $periodo);
+          // tabellone esiti
+          $nomefile = $pag->tabelloneEsiti($classe, $periodo);
           break;
         case 'I':
           // firme registro voti
@@ -134,8 +134,8 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->riepilogoVoti($classe, $periodo);
           break;
         case 'T':
-          // tabellone voti
-          $nomefile = $pag->tabelloneVoti($classe, $periodo);
+          // tabellone esiti
+          $nomefile = $pag->tabelloneEsiti($classe, $periodo);
           break;
         case 'I':
           // firme registro voti
@@ -170,7 +170,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "tipo": "P|N|D|C|E|X", "periodo": "P|S|F|E|X"},
+   *    requirements={"classe": "\d+", "alunno": "\d+", "periodo": "P|S|F|E|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
@@ -245,7 +245,11 @@ class PagelleController extends AbstractController {
           // pagella
           $nomefile = $pag->pagella($classe, $alunno, $periodo);
           break;
-      }
+        case 'T':
+          // tabellone esiti
+          $nomefile = $pag->tabelloneEsiti($classe, $periodo);
+          break;
+    }
     } elseif ($periodo == 'E' || $periodo == 'X') {
       // scrutinio esame alunni sospesi
       switch ($tipo) {

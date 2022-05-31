@@ -25,18 +25,6 @@
     {% endif %}
           </div>
         </div>
-        <div id="row_{{ voto.recupero.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2" for="{{ voto.recupero.vars.id }}">Recupero</label>
-          <div class="col-sm-10">
-            {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[1],voto.recupero.vars.choices[2],voto.recupero.vars.choices[3]] }) }}
-          </div>
-        </div>
-        <div id="row_{{ voto.debito.vars.id }}" class="form-group gs-mb-2"{{ voto.unico.vars.value is empty or voto.unico.vars.value >= 6 ? ' style="display:none"' }}>
-          <label class="control-label col-sm-2" for="{{ voto.debito.vars.id }}">Argomenti</label>
-          <div class="col-sm-10">
-            {{ form_widget(voto.debito) }}
-          </div>
-        </div>
         {{ form_widget(voto.alunno) }}
       </li>
   {% endfor %}
@@ -97,16 +85,6 @@ $(document).ready(function() {
     var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' :
       (e.value.newValue <= 10 ? 'label-success' : (e.value.newValue < 22 ? 'label-danger' : 'label-success'))));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
-    var id = this.id.slice(11,-6);
-    if (e.value.newValue < 6) {
-      $('#row_voti_lista_'+id+'_recupero').fadeIn(300);
-      $('#row_voti_lista_'+id+'_debito').fadeIn(300);
-    } else {
-      $('#voti_lista_'+id+'_recupero').val('');
-      $('#voti_lista_'+id+'_debito').val('');
-      $('#row_voti_lista_'+id+'_recupero').fadeOut(300);
-      $('#row_voti_lista_'+id+'_debito').fadeOut(300);
-    }
   });
 });
 </script>

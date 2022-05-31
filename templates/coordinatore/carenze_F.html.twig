@@ -8,7 +8,6 @@
       <div><em><strong>Cancellare gli argomenti delle carenze se non si desidera inviare comunicazioni alle famiglie.</strong></em></div>
     </div>
     <ul id="gs-form-collection" class="list-group">
-  {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] %}
   {% for voto in form.lista %}
       <li class="list-group-item gs-pt-2 gs-pb-2">
         <div class="form-group gs-mb-0">
@@ -18,11 +17,11 @@
           <div class="row gs-mb-2">
             <div class="col-sm-6 gs-pl-0">
               <span class="gs-pl-5 gs-mr-3"><strong>Voto proposto</strong></span>
-              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ dati.proposte[voto.vars.value.materia.id] < 5 ? 'danger' : 'warning' }} gs-big">{{ valutazioni[dati.proposte[voto.vars.value.materia.id]] }}</span>
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ dati.proposte[voto.vars.value.materia.id] < dati.valutazioni[voto.vars.value.materia.tipo].med ? 'danger' : 'warning' }} gs-big">{{ dati.valutazioni[voto.vars.value.materia.tipo].lista[dati.proposte[voto.vars.value.materia.id]] }}</span>
             </div>
             <div class="col-sm-6 gs-pl-0">
               <span class="gs-pl-5 gs-mr-3"><strong>Voto deliberato</strong></span>
-              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-success gs-big">{{ (voto.vars.value.materia.tipo == 'E' and voto.vars.value.unico == 3) ? 'NC' : valutazioni[voto.vars.value.unico] }}</span>
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-success gs-big">{{ dati.valutazioni[voto.vars.value.materia.tipo].lista[voto.vars.value.unico] }}</span>
             </div>
           </div>
           <div>
@@ -39,7 +38,7 @@
     </ul>
   </div>
   <div class="modal-footer">
-    {{ form_widget(form.submit) }}
+    {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}

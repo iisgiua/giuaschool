@@ -31,6 +31,14 @@ class PropostaVotoRepository extends EntityRepository {
    * @return array Array associativo con i dati delle proposte di voto
    */
   public function proposteEdCivica(Classe $classe, $periodo, $alunni) {
+    // dati valutazioni
+    $scrutinio = $this->_em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+      ->where('s.classe=:classe AND s.periodo=:periodo')
+      ->setParameters(['classe' => $classe, 'periodo' => $periodo])
+      ->setMaxResults(1)
+      ->getQuery()
+      ->getOneOrNullResult();
+    $valutazioni = $scrutinio->getDato('valutazioni')['E'];
     // legge proposte
     $proposte = $this->createQueryBuilder('pv')
       ->select('(pv.alunno) AS id_alunno,pv.unico,pv.debito,pv.recupero,d.cognome,d.nome')
@@ -48,13 +56,13 @@ class PropostaVotoRepository extends EntityRepository {
       $docente = $prop['nome'].' '.$prop['cognome'];
       $dati[$prop['id_alunno']]['proposte'][$docente] = $prop['unico'];
       // aggiunge eventuali argomenti da recuperare
-      if ($prop['unico'] < 6 && $prop['debito']) {
+      if ($prop['unico'] < $valutazioni['suff'] && $prop['debito']) {
         $dati[$prop['id_alunno']]['debito'] = (isset($dati[$prop['id_alunno']]['debito']) ?
           ($dati[$prop['id_alunno']]['debito'].' ') : '').$prop['debito'];
       }
       // somma voti per media
       $dati[$prop['id_alunno']]['media'] = (isset($dati[$prop['id_alunno']]['media']) ?
-        $dati[$prop['id_alunno']]['media'] : 0) + ($prop['unico'] == 3 ? 0 : $prop['unico']);
+        $dati[$prop['id_alunno']]['media'] : 0) + ($prop['unico'] == $valutazioni['min'] ? 0 : $prop['unico']);
     }
     // calcola medie
     foreach ($dati as $id_alunno=>$prop) {

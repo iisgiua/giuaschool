@@ -510,6 +510,8 @@ label.scansione_oraria: Scansione oraria
 label.durata: Durata
 label.cancella_elemento: Cancella l'elemento indicato
 label.aggiunge_elemento: Aggiunge un elemento
+label.scrutinio_svolto_in_presenza: Scrutinio in presenza
+label.scrutinio_svolto_a_distanza: Scrutinio a distanza
 
 
 ##### PAGINE #####
@@ -1004,7 +1006,6 @@ message.motivazione_deroga_P: Vista la partecipazione ad attività sportive, ade
 message.motivazione_deroga_R: Vista l'adesione a una confessione religiosa che considera il sabato come giorno di riposo, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.motivazione_deroga_L: Vista la condizione di studente lavoratore, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.giudizio_non_ammissione: "L'alunn{sex},\\n
-ancorché scrutinat{sex} in deroga al limite di assenze,\\n
 con frequenza irregolare e numero elevato di assenze,\\n
 benché siano state svolte attività di recupero in orario curricolare ed extracurricolare,\\n
 pur essendo stata informata la famiglia,\\n
@@ -1375,3 +1376,4 @@ exception.intervallo_ore_invalido: L'ora iniziale è successiva a quella finale
 exception.svuota_cache: "Impossibile eseguire i comandi per svuotare la cache.<br><br>{errore}"
 exception.orari_sovrapposti: L'orario si sovrappone al precedente
 exception.log_errori_vuoto: Non sono presenti messaggi di errore per la data e ora indicate.
+exception.scrutinio_svolgimento: Non è stata inserito il tipo di scrutinio svolto

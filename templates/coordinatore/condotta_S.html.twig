@@ -5,15 +5,21 @@
   </div>
   <div class="modal-body">
     <ul id="gs-form-collection" class="list-group">
-  {% set valutazioni = [null, null, null, null, 'NC', 5, 6, 7, 8, 9, 10] %}
   {% for voto in form.lista %}
       <li class="list-group-item">
-        <div class="row gs-pl-2 gs-pr-2"><strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong></div>
+        <div class="row gs-pl-2 gs-pr-2">
+          <div class="col-sm-6">
+            <strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong>
+          </div>
+          <div class="col-sm-6 text-right">
+            <strong>Percentuale di assenze: <span class="label label-info gs-big">{{ dati.assenze[voto.alunno.vars.value].percentuale|number_format(2,   ',') }}%</span></strong>
+          </div>
+        </div>
         <div class="form-group gs-mb-2">
           <label class="control-label col-sm-2" for="{{ voto.unico.vars.id }}">Voto</label>
           <div class="col-sm-10">
     {% if voto.unico.vars.value is not empty %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 6 ? 'danger' : 'success' }} gs-mr-4 gs-big">{{ valutazioni[voto.unico.vars.value] }}</span>
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < dati.valutazioni.med ? 'danger' : (voto.unico.vars.value < dati.valutazioni.suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni.lista[voto.unico.vars.value] }}</span>
             <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
@@ -24,7 +30,7 @@
           </div>
         </div>
         <div id="row_{{ voto.motivazione.vars.id }}" class="form-group gs-mb-2">
-          <label class="control-label col-sm-2" for="{{ voto.motivazione.vars.id }}">Motivazione</label>
+          <label class="control-label col-sm-2" for="{{ voto.motivazione.vars.id }}">Descrittori</label>
           <div class="col-sm-10">
             {{ form_widget(voto.motivazione, {'attr': {'rows': 4, 'readonly': 'readonly'}}) }}
           </div>
@@ -39,10 +45,6 @@
             <div class="col-sm-8">
               {{ form_widget(voto.contrari, {attr: {title: 'Nomi dei docenti contrari'}}) }}
             </div>
-            {#-- <label class="control-label col-sm-2 col-sm-offset-2" for="{{ voto.contrari_motivazione.vars.id }}">Motivazione</label> #}
-            {#-- <div class="col-sm-8"> #}
-              {#-- {{ form_widget(voto.contrari_motivazione, {attr: {rows: 3, title: 'Motivazione del voto contrario'}}) }} #}
-            {#-- </div> #}
           </div>
         </div>
         {{ form_widget(voto.alunno) }}
@@ -58,49 +60,44 @@
 {{ form_end(form, {'render_rest': false}) }}
 
 <script>
+var voti = [{{ dati.valutazioni.voti|raw }}];
 $(document).ready(function() {
   $("#gs-form-collection input.slider").slider({
-    min: {{ info.valutazioni.min }},
-    max: {{ info.valutazioni.max }},
+    min: {{ dati.valutazioni.min }},
+    max: {{ dati.valutazioni.max }},
     step: 1,
-    ticks: [{{ info.valutazioni.ticks }}],
-    ticks_labels: [{{ info.valutazioni.labels|raw }}],
+    ticks: [{{ dati.valutazioni.valori }}],
+    ticks_labels: [{{ dati.valutazioni.etichette|raw }}],
     ticks_snap_bounds: 0,
     focus: true,
-    formatter: function(val) {
-      var d = [null, null, null, null, 'Non Classificato', 5, 6, 7, 8, 9, 10];
-      return d[val];
-      },
+    formatter: function(val) { return voti[val - {{ dati.valutazioni.min }}]; },
     natural_arrow_keys: true
   });
   $('#gs-form-collection button.gs-button-add').on('click', function(e) {
     $(this).parent().find('div').attr('style', 'display:inline-block').find('input').addClass('slider')
       .slider({
-        min: {{ info.valutazioni.min }},
-        max: {{ info.valutazioni.max }},
+        min: {{ dati.valutazioni.min }},
+        max: {{ dati.valutazioni.max }},
         step: 1,
-        ticks: [{{ info.valutazioni.ticks }}],
-        ticks_labels: [{{ info.valutazioni.labels|raw }}],
+        ticks: [{{ dati.valutazioni.valori }}],
+        ticks_labels: [{{ dati.valutazioni.etichette|raw }}],
         ticks_snap_bounds: 0,
         focus: true,
-        formatter: function(val) {
-          var d = [null, null, null, null, 'Non Classificato', 5, 6, 7, 8, 9, 10];
-          return d[val];
-          },
+        formatter: function(val) { return voti[val - {{ dati.valutazioni.min }}]; },
         natural_arrow_keys: true
       });
     $(this).hide();
-    $(this).siblings('div').find('input').slider('setValue', '{{ info.valutazioni.start }}', true, true);
+    $(this).siblings('div').find('input').slider('setValue', '{{ dati.valutazioni.suff }}', true, true);
     $(this).siblings('div').find('div').focus();
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
-    var g = [null, null, null, null, "", "{{ 'message.giudizio_condotta_5'|trans }}", "{{ 'message.giudizio_condotta_6'|trans }}", "{{ 'message.giudizio_condotta_7'|trans }}", "{{ 'message.giudizio_condotta_8'|trans }}", "{{ 'message.giudizio_condotta_9'|trans }}", "{{ 'message.giudizio_condotta_10'|trans }}"];
-    var d = [null, null, null, null, 'NC', 5, 6, 7, 8, 9, 10];
-    var c = (e.value.newValue < 6 ? 'label-danger' : 'label-success');
-    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
+    var g = [null, null, null, null, "{{ 'message.giudizio_condotta_NC'|trans }}", "{{ 'message.giudizio_condotta_5'|trans }}", "{{ 'message.giudizio_condotta_6'|trans }}", "{{ 'message.giudizio_condotta_7'|trans }}", "{{ 'message.giudizio_condotta_8'|trans }}", "{{ 'message.giudizio_condotta_9'|trans }}", "{{ 'message.giudizio_condotta_10'|trans }}"];
+    var d = [{{ dati.valutazioni.votiAbbr|raw }}];
+    var c = (e.value.newValue < {{ dati.valutazioni.med }} ? 'label-danger' : (e.value.newValue < {{ dati.valutazioni.suff }} ? 'label-warning' : 'label-success'));
+    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ dati.valutazioni.min }}]);
     var id = this.id.slice(15,-6);
-    $('#row_condotta_lista_'+id+'_motivazione').find('textarea').val(e.value.newValue < 5 ? "{{ 'message.giudizio_condotta_NC'|trans }}" : g[e.value.newValue]);
+    $('#row_condotta_lista_'+id+'_motivazione').find('textarea').val(g[e.value.newValue]);
   });
   $('.gs-scrutinio-unanimita label.radio-inline input[type="radio"]').change(function() {
     var id = parseInt($(this).attr('id').substring(15));

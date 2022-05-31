@@ -5,14 +5,13 @@
   <div class="modal-body">
     <div class="text-center text-info"><strong class="gs-big">Debiti formativi</strong></div>
     <ul id="gs-form-collection" class="list-group">
-  {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] %}
   {% for voto in form.lista %}
       <li class="list-group-item gs-pt-2 gs-pb-2">
         <div class="form-group gs-mb-0">
           <div class="row gs-mb-2">
             <div class="col-sm-9 gs-pl-5"><strong class="gs-big">{{ voto.vars.value.materia.nome }}</strong></div>
             <div class="col-sm-3 gs-pl-0">
-              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.vars.value.unico < 5 ? 'danger' : 'warning' }} gs-big">{{ (voto.vars.value.materia.tipo == 'E' and voto.vars.value.unico == 3) ? 'NC' : valutazioni[voto.vars.value.unico] }}</span>
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.vars.value.unico < dati.valutazioni[voto.vars.value.materia.tipo].med ? 'danger' : 'warning' }} gs-big">{{ dati.valutazioni[voto.vars.value.materia.tipo].lista[voto.vars.value.unico] }}</span>
             </div>
           </div>
           <div>
@@ -35,7 +34,7 @@
     </ul>
   </div>
   <div class="modal-footer">
-    {{ form_widget(form.submit) }}
+    {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}    
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}

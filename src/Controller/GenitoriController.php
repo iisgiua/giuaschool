@@ -469,6 +469,7 @@ class GenitoriController extends AbstractController {
   /**
    * Mostra le pagelle dell'alunno.
    *
+   * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param $string $periodo Periodo dello scrutinio
@@ -482,16 +483,13 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function pagelleAction(TranslatorInterface $trans, GenitoriUtil $gen,
-                                 $periodo) {
+  public function pagelleAction(EntityManagerInterface $em, TranslatorInterface $trans, GenitoriUtil $gen,
+                                $periodo) {
     // inizializza variabili
     $errore = null;
     $dati = array();
     $lista_periodi = null;
     $info = array();
-    $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
-    $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
-    $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
       // utente è alunno
@@ -534,6 +532,15 @@ class GenitoriController extends AbstractController {
         } else {
           // altri periodi
           $dati = $gen->pagelle($classe, $alunno, $periodo);
+        }
+        // retrocompatibilità a.s. 21/22
+        $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
+        $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
+        if (!in_array($periodo, ['P', 'S', 'A'])) {
+          // legge dati valutazioni
+          $dati['valutazioni'] = $em->getRepository('App:Scrutinio')
+            ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
+            ->getDato('valutazioni');
         }
       }
     } else {

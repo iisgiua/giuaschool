@@ -1,0 +1,166 @@
+{% for id,alu in dati.ammessi %}
+<tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['false'] }}" />
+<tcpdf method="startPageGroup" />
+<tcpdf method="AddPage" />
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
+  <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
+</div>
+<div style="font-family:times;font-size:11pt">
+  <p style="text-align:center"><strong><span style="font-size:14pt">CERTIFICATO delle COMPETENZE DI BASE</span>
+    <br><span style="font-size:11pt">acquisite nell'assolvimento dell'OBBLIGO DI ISTRUZIONE</span></strong></p>
+  <p>&nbsp;</p>
+  <p>N° ..............</p>
+  <p style="text-align:center"><strong>IL DIRIGENTE SCOLASTICO</strong></p>
+  <p>Visto il regolamento emanato dal Ministro dell'Istruzione, Università e Ricerca con decreto 22 agosto 2007, n.139;</p>
+  <p>Visti gli atti di ufficio;</p>
+  <p style="text-align:center;font-size:14pt"><strong>CERTIFICA
+    <br><em>che {{ alu.sesso == 'M' ? 'lo studente' : 'la studentessa' }}</em></strong></p>
+  <table border="0" cellpadding="0" cellspacing="5">
+    <tr>
+      <td width="9%">cognome</td>
+      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.cognome|upper }}</strong></td>
+      <td width="11%" align="right">nome&nbsp;&nbsp;</td>
+      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.nome|upper }}</strong></td>
+    </tr>
+  </table>
+  <table border="0" cellpadding="0" cellspacing="5">
+    <tr>
+      <td width="9%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} il</td>
+      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
+      <td width="11%" align="right">a&nbsp;&nbsp;</td>
+      <td width="40%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }}</strong></td>
+    </tr>
+  </table>
+  <table border="0" cellpadding="0" cellspacing="5">
+    <tr>
+      <td width="75%">iscritt{{ alu.sesso == 'M' ? 'o' : 'a' }} nell'anno scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} presso questo Istituto nella classe II sezione</td>
+      <td width="25%" style="border-bottom-width:0.1px"><strong>{{ dati.classe.sezione }} - {{ dati.classe.sede.citta }}</strong></td>
+    </tr>
+  </table>
+  <table border="0" cellpadding="0" cellspacing="5">
+    <tr>
+      <td width="17%">indirizzo di studio</td>
+      <td width="83%" style="border-bottom-width:0.1px"><strong>{{ dati.classe.corso.nome }}</strong></td>
+    </tr>
+  </table>
+  <table border="0" cellpadding="0" cellspacing="5">
+    <tr>
+      <td>nell'assolvimento dell'obbligo di istruzione, della durata di 10 anni,</td>
+    </tr>
+  </table>
+  <p style="text-align:center;font-size:14pt"><strong><em>ha acquisito</em></strong></p>
+  <table border="0" cellpadding="0" cellspacing="5">
+    <tr>
+      <td>le competenze di base di seguito indicate.</td>
+    </tr>
+  </table>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+  <table border="0" cellpadding="0" cellspacing="5">
+    <tr>
+      <td width="25%">&nbsp;</td>
+      <td width="50%" style="font-family:helvetica;font-size:9pt;border-top-width:0.5px" align="center"><strong>Note</strong></td>
+      <td width="25%">&nbsp;</td>
+    </tr>
+  </table>
+  <p style="font-family:helvetica;font-size:9pt"><strong>1) Il presente certificato ha validità nazionale.</strong></p>
+  <p style="font-family:helvetica;font-size:9pt"><strong>2) I livelli relativi all’acquisizione delle competenze di ciascun asse sono i seguenti:</strong></p>
+  <ul style="font-family:helvetica;font-size:9pt">
+    <li><strong>LIVELLO BASE: lo studente svolge compiti semplici in situazioni note, mostrando di possedere conoscenze ed abilità essenziali e di saper applicare regole e procedure fondamentali. Nel caso in cui non sia stato raggiunto il livello base, è riportata l’espressione "Livello base non raggiunto", con l’indicazione della relativa motivazione.</strong></li>
+    <li><strong>LIVELLO INTERMEDIO: lo studente svolge compiti e risolve problemi complessi in situazioni note, compie scelte consapevoli, mostrando di saper utilizzare le conoscenze e le abilità acquisite.</strong></li>
+    <li><strong>LIVELLO AVANZATO: lo studente svolge compiti e problemi complessi in situazioni anche non note, mostrando padronanza nell’uso delle conoscenze e delle abilità. Es. proporre e sostenere le proprie opinioni e assumere autonomamente decisioni consapevoli.</strong></li>
+  </ul>
+</div>
+<tcpdf method="setHeaderData" params="{{ dati.tcpdf_params[id] }}" />
+<tcpdf method="setPrintHeader" params="{{ dati.tcpdf_params['true'] }}" />
+<tcpdf method="AddPage" />
+<p style="text-align:center;font-family:helvetica;font-size:11pt"><strong>COMPETENZE DI BASE E RELATIVI LIVELLI RAGGIUNTI</strong></p>
+<table border="1" cellpadding="2" cellspacing="0" style="font-family:helvetica;font-size:9pt">
+  <tr>
+    <td width="50%" style="font-size:10pt" align="center"><strong>ASSE DEI LINGUAGGI</strong></td>
+    <td width="50%" style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
+  </tr>
+  <tr>
+    <td><strong><em>Lingua Italiana:</em></strong>
+      <ul>
+        <li>Padroneggiare gli strumenti espressivi ed argomentativi indispensabili per gestire l'interazione comunicativa verbale in vari contesti</li>
+        <li>Leggere comprendere e interpretare testi scritti di vario tipo</li>
+        <li>Produrre testi di vario tipo in relazione ai differenti scopi comunicativi</li>
+      </ul>
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_italiano'])|trans }}{{ alu.dati['certificazione_italiano'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_italiano_motivazione']) : '' }}</strong></td>
+  </tr>
+  <tr>
+    <td><strong><em>Lingua straniera:</em></strong>
+      <ul>
+        <li>Utilizzare la lingua Inglese per i principali scopi comunicativi ed operativi</li>
+      </ul>
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_lingua'])|trans }}{{ alu.dati['certificazione_lingua'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_lingua_motivazione']) : '' }}</strong></td>
+  </tr>
+  <tr>
+    <td><strong><em>Altri linguaggi:</em></strong>
+      <ul>
+        <li>Utilizzare gli strumenti fondamentali per una fruizione consapevole del patrimonio artistico e letterario</li>
+        <li>Utilizzare e produrre testi multimediali</li>
+      </ul>
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_linguaggio'])|trans }}{{ alu.dati['certificazione_linguaggio'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_linguaggio_motivazione']) : '' }}</strong></td>
+  </tr>
+  <tr>
+    <td style="font-size:10pt" align="center"><strong>ASSE MATEMATICO</strong></td>
+    <td style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
+  </tr>
+  <tr>
+    <td>
+      <ul>
+        <li>Utilizzare le tecniche e le procedure del calcolo aritmetico ed algebrico, rappresentandole anche sotto forma grafica</li>
+        <li>Confrontare ed analizzare figure geometriche, individuando invarianti e relazioni</li>
+        <li>Individuare le strategie appropriate per la soluzione dei problemi</li>
+        <li>Analizzare dati e interpretarli sviluppando deduzioni e ragionamenti sugli stessi anche con l’ausilio di rappresentazioni grafiche, usando consapevolmente gli strumenti di calcolo e le potenzialità offerte da applicazioni specifiche di tipo informatico</li>
+      </ul>
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_matematica'])|trans }}{{ alu.dati['certificazione_matematica'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_matematica_motivazione']) : '' }}</strong></td>
+  </tr>
+  <tr>
+    <td style="font-size:10pt" align="center"><strong>ASSE SCIENTIFICO-TECNOLOGICO</strong></td>
+    <td style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
+  </tr>
+  <tr>
+    <td>
+      <ul>
+        <li>Osservare, descrivere ed analizzare fenomeni appartenenti alla realtà naturale e artificiale e riconoscere nelle varie forme i concetti di sistema e di complessità</li>
+        <li>Analizzare qualitativamente e quantitativamente fenomeni legati alle trasformazioni di energia a partire dall’esperienza</li>
+        <li>Essere consapevoli delle potenzialità e dei limiti delle tecnologie nel contesto culturale e sociale in cui vengono applicate</li>
+      </ul>
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_scienze'])|trans }}{{ alu.dati['certificazione_scienze'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_scienze_motivazione']) : '' }}</strong></td>
+  </tr>
+  <tr>
+    <td style="font-size:10pt" align="center"><strong>ASSE STORICO-SOCIALE</strong></td>
+    <td style="font-size:10pt" align="center"><strong>LIVELLI</strong></td>
+  </tr>
+  <tr>
+    <td>
+      <ul>
+        <li>Comprendere il cambiamento e la diversità dei tempi storici in una dimensione diacronica attraverso il confronto fra epoche e in una dimensione sincronica attraverso il confronto fra aree geografiche e culturali</li>
+        <li>Collocare l’esperienza personale in un sistema di regole fondato sul reciproco riconoscimento dei diritti garantiti dalla Costituzione, a tutela della persona, della collettività e dell’ambiente</li>
+        <li>Riconoscere le caratteristiche essenziali del sistema socio economico per orientarsi nel tessuto produttivo del proprio territorio</li>
+      </ul>
+    </td>
+    <td style="font-size:10pt" align="center"><strong>{{ ('label.certificazione_livello_'~alu.dati['certificazione_storia'])|trans }}{{ alu.dati['certificazione_storia'] == 'N' ? (' per la seguente motivazione: '~alu.dati['certificazione_storia_motivazione']) : '' }}</strong></td>
+  </tr>
+</table>
+<p style="font-family:helvetica;font-size:9pt">Le competenze di base relative agli assi culturali sopra richiamati sono state acquisite dallo studente con riferimento alle competenze chiave di cittadinanza di cui all’allegato 2 del regolamento citato in premessa (1. imparare ad imparare; 2. progettare; 3. comunicare; 4. collaborare e partecipare; 5. agire in modo autonomo e responsabile; 6. risolvere problemi; 7. individuare collegamenti e relazioni; 8. acquisire e interpretare l’informazione).</p>
+<p>&nbsp;</p>
+<table style="font-family:helvetica;font-size:11pt" border="0" cellpadding="0" nobr="true">
+  <tr nobr="true">
+    <td width="55%" align="left">{{ app.session.get('/CONFIG/ISTITUTO/sede_0_citta') }}, {{ dati.scrutinio.data|date('d/m/Y') }}.</td>
+    <td width="45%" align="center">Il Dirigente Scolastico
+      <br><i>{{ app.session.get('/CONFIG/ISTITUTO/firma_preside') }}</i>
+    </td>
+  </tr>
+</table>
+{% endfor %}

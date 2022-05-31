@@ -46,10 +46,8 @@
       <td align="center">
     {% if mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A' %}
         <strong>///</strong>
-    {% elseif (mat.tipo == 'C' and dati.voti[idmat].unico < 5) or (mat.tipo == 'E' and dati.voti[idmat].unico < 4) %}
-        <strong>{{ dati.valutazioni[0] }}</strong>
     {% else %}
-        <strong>{{ dati.valutazioni[dati.voti[idmat].unico] }}</strong>
+        <strong>{{ dati.valutazioni[mat.tipo].lista[dati.voti[idmat].unico] }}</strong>
     {% endif %}
       </td>
       <td align="center">

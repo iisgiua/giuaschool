@@ -798,7 +798,6 @@ class GenitoriUtil {
     // esito scrutinio
     if ($periodo == 'F') {
       $scrutinati = ($scrutinio->getDato('scrutinabili') == null ? [] : array_keys($scrutinio->getDato('scrutinabili')));
-      $cessata_frequenza = ($scrutinio->getDato('cessata_frequenza') == null ? [] : $scrutinio->getDato('cessata_frequenza'));
       if (in_array($alunno->getId(), $scrutinati)) {
         // scrutinato
         $dati['esito'] = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio,
@@ -824,7 +823,7 @@ class GenitoriUtil {
         }
       } else {
         // non scrutinato
-        $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
+        $dati['noscrutinato'] = 1;
       }
     } elseif ($periodo == 'E') {
       // scrutinato
