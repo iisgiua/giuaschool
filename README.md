@@ -11,10 +11,10 @@
 
 - [Visualizza la documentazione](https://trinko.github.io/giuaschool-docs/)
 
-- [Scarica l'ultima versione](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release-latest.zip)
+- [Scarica l'ultima versione (codice stabile)](https://github.com/trinko/giuaschool/releases/latest/download/giuaschool-release-latest.zip)
   - [Visualizza i dettagli](https://trinko.github.io/giuaschool-docs/latest-release.html)
 
-- [Scarica l'ultima modifica](https://github.com/trinko/giuaschool/releases/download/latest-build/giuaschool-build-latest.zip)
+- [Scarica l'ultimo aggiornamento (codice ancora in fase di revisione)](https://github.com/trinko/giuaschool/releases/download/latest-build/giuaschool-build-latest.zip)
   - [Visualizza i dettagli](https://trinko.github.io/giuaschool-docs/latest-build.html)
 
 - [Vai alla DEMO](https://giuademo.x10.mx/)
