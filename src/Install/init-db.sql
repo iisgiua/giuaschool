@@ -1,5 +1,5 @@
 -- TABELLA CONFIGURAZIONE --
-INSERT INTO `gs_configurazione` VALUES (  1,NOW(),NOW(),'SISTEMA','versione','Numero di versione dell\'applicazione<br>[testo]','1.4.3',1);
+INSERT INTO `gs_configurazione` VALUES (  1,NOW(),NOW(),'SISTEMA','versione','Numero di versione dell\'applicazione<br>[testo]','1.4.4',1);
 INSERT INTO `gs_configurazione` VALUES (  2,NOW(),NOW(),'SISTEMA','manutenzione_inizio','Inizio della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
 INSERT INTO `gs_configurazione` VALUES (  3,NOW(),NOW(),'SISTEMA','manutenzione_fine','Fine della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
 INSERT INTO `gs_configurazione` VALUES (  4,NOW(),NOW(),'SISTEMA','banner_login','Messaggio da visualizzare nella pagina pubblica di login<br>[testo HTML]','',1);
