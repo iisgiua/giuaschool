@@ -176,28 +176,23 @@ class Installer {
   ];
 
   /**
-   * Conserva la lista dei controlli sull'esecuzione dei comandi corrispondenti nella build
+   * Conserva la lista dei controlli sull'esecuzione dei comandi corrispondenti nella varie versioni
    *  Ogni elemento della lista è una SELECT SQL che restistuisce un insieme vuoto se
-   *  il comando corrispondente nella build è necessario.
+   *  il comando corrispondente è necessario.
    *
-   * @var array $buildCheck Lista di comandi sql per il controllo sulla build
+   * @var array $checkUpdate Lista di comandi sql per il controllo sui comandi da eseguire
    */
-  private $buildCheck = [
-  ];
-
-  /**
-   * Conserva la lista dei controlli sull'esecuzione dei comandi corrispondenti nell'ultima versione.
-   *  Ogni elemento della lista è una SELECT SQL che restistuisce un insieme vuoto se
-   *  il comando corrispondente nella versione è necessario.
-   *
-   * @var array $buildCheck Lista di comandi sql per il controllo sulla build
-   */
-  private $releaseCheck = [
+  private $checkUpdate = [
+    '1.4.3' => [
+      "SELECT id FROM `gs_configurazione` WHERE parametro='spid';",
+    ],
     '1.4.4' => [
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_R';",
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_E';",
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_C';",
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_N';"
+    ],
+    'build' => [
     ]
   ];
 
@@ -873,26 +868,10 @@ class Installer {
         // salta versione
         continue;
       }
-      // se BUILD: controlla comandi da eseguire
-      if ($newVersion == 'build') {
+      // controlla comandi da eseguire
+      if (in_array($newVersion, $this->checkUpdate)) {
         try {
-          foreach ($this->buildCheck as $key=>$sql) {
-            $stm = $this->pdo->prepare($sql);
-            $stm->execute();
-            if (!empty($stm->fetchAll())) {
-              // evita esecuzione comando non necessario
-              unset($data[$key]);
-            }
-          }
-        } catch (\Exception $e) {
-          throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database.<br>'.
-            $e->getMessage(), $this->step);
-        }
-      }
-      // se ultima versione: controlla comandi da eseguire
-      if (in_array($newVersion, $this->releaseCheck)) {
-        try {
-          foreach ($this->releaseCheck[$newVersion] as $key=>$sql) {
+          foreach ($this->checkUpdate[$newVersion] as $key=>$sql) {
             $stm = $this->pdo->prepare($sql);
             $stm->execute();
             if (!empty($stm->fetchAll())) {
