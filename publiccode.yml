@@ -33,9 +33,9 @@ description:
       soluzioni algoritmiche e l’importante esperienza maturata con il suo uso.
 
 
-      Da  allora, il software del registro elettronico viene aggiornato di 
-      continuo, seguendo le esigenze dei docenti e dell’organizzazione 
-      scolastica, ma cercando, al tempo stesso, di mantenerlo semplice e 
+      Da  allora, il software del registro elettronico viene aggiornato di
+      continuo, seguendo le esigenze dei docenti e dell’organizzazione
+      scolastica, ma cercando, al tempo stesso, di mantenerlo semplice e
       intuitivo per l’utente finale.
     shortDescription: Registro Elettronico open source
 developmentStatus: stable
@@ -58,7 +58,7 @@ it:
     spid: true
   riuso:
     codiceIPA: istsc_catf04000p
-logo: https://giuademo.x10.mx/wp-content/uploads/2022/03/cropped-download-1-1.png
+logo: https://github.com/trinko/giuaschool/blob/v1.4.4beta/public/img/logo-giuaschool.png
 legal:
   license: AGPL-3.0-or-later
 localisation:
@@ -72,7 +72,7 @@ maintenance:
 name: giua@school
 platforms:
   - web
-releaseDate: '2022-03-14'
+releaseDate: '2022-06-01'
 softwareType: standalone/web
-softwareVersion: 1.4.3
+softwareVersion: 1.4.4
 url: 'https://github.com/trinko/giuaschool'
