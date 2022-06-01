@@ -869,7 +869,7 @@ class Installer {
         continue;
       }
       // controlla comandi da eseguire
-      if (in_array($newVersion, $this->checkUpdate)) {
+      if (in_array($newVersion, array_keys($this->checkUpdate))) {
         try {
           foreach ($this->checkUpdate[$newVersion] as $key=>$sql) {
             $stm = $this->pdo->prepare($sql);
