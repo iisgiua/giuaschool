@@ -21,7 +21,7 @@
                   <li>
                     <a class="list-item" href="https://github.com/trinko/giuaschool" target="_blank" title="Vai al progetto su GitHub">
                       <svg class="icon icon-sm icon-light mr-2" aria-hidden="true">
-                        <use xlink:href="/vendor/fontawesome/sprites/brands.svg#github"></use>
+                        <use xlink:href=vendor/fontawesome/sprites/brands.svg#github"></use>
                       </svg><span class="text-white">Codice sorgente su GitHub</span>
                     </a>
                   </li>
@@ -54,15 +54,15 @@
     <!-- link TornaSu  -->
     <a class="back-to-top back-to-top-small shadow" href="#" aria-hidden="true" data-attribute="back-to-top" title="Vai a inizio pagina">
       <svg class="icon icon-light" aria-hidden="true">
-        <use xlink:href="/vendor/fontawesome/sprites/solid.svg#arrow-up"></use>
+        <use xlink:href="../vendor/fontawesome/sprites/solid.svg#arrow-up"></use>
       </svg>
     </a>
     <!-- FINE link TornaSu  -->
 
     <!-- caricamento javascript -->
-    <script>window.__PUBLIC_PATH__ = "/vendor/bootstrap-italia/fonts"</script>
-    <script src="/vendor/bootstrap-italia/js/bootstrap-italia.bundle.min.js"></script>
-    <script src="/js/main.js"></script>
+    <script>window.__PUBLIC_PATH__ = "../vendor/bootstrap-italia/fonts"</script>
+    <script src="../vendor/bootstrap-italia/js/bootstrap-italia.bundle.min.js"></script>
+    <script src="../js/main.js"></script>
     <script>
       $(document).ready(function() {
         $('form').submit(function() {
