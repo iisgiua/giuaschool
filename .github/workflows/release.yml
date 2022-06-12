@@ -55,7 +55,7 @@ jobs:
         with:
           context: .
           file: tests/docker/Dockerfile
-          target: application_prodlatest
+          target: application_prod
           push: true
           tags: |
             ghcr.io/trinko/giuaschool:latest
