@@ -23,6 +23,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Set up docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Generate changelog from latest release
         id: changelog
         uses: metcalfc/changelog-generator@v3.0.0
@@ -40,17 +43,56 @@ jobs:
           draft: false
           prerelease: ${{ github.event.inputs.prerelease == 'TRUE' }}
 
-      - name: Archive release code
-        run: |
-          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/release.sh
-          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-release-latest.zip
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish latest release code
+      - name: Build and publish PROD image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/docker/Dockerfile
+          target: application_prodlatest
+          push: true
+          tags: |
+            ghcr.io/trinko/giuaschool:latest
+            ghcr.io/trinko/giuaschool:${{ github.event.inputs.version }}
+
+      - name: Build and publish DEV image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/docker/Dockerfile
+          target: application_dev
+          push: true
+          tags: |
+            ghcr.io/trinko/giuaschool-dev:latest
+            ghcr.io/trinko/giuaschool-dev:${{ github.event.inputs.version }}
+
+      - name: Build and publish TEST image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: tests/docker/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/trinko/giuaschool-test:latest
+            ghcr.io/trinko/giuaschool-test:${{ github.event.inputs.version }}
+
+      - name: Create archive for release code
+        run: |
+          docker run --name "gs_release" ghcr.io/trinko/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
+          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-release.zip
+
+      - name: Publish release code
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: giuaschool-release-latest.zip
-          asset_name: giuaschool-release-latest.zip
+          file: giuaschool-release.zip
+          asset_name: giuaschool-release-${{ github.event.inputs.version }}.zip
           tag: "v${{ github.event.inputs.version }}"
 
       - name: Add version tag to documentation
@@ -84,7 +126,8 @@ jobs:
           echo "# Ultima versione"  >> docs/latest-release.md
           echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "Versione: {{ site.data.version.tag }}" >> docs/latest-release.md
+          echo "[**Scarica la Versione {{ site.data.version.tag }}**](https://github.com/trinko/giuaschool/releases/download/v{{ site.data.version.tag }}/giuaschool-release-{{ site.data.version.tag }}.zip)" >> docs/latest-release.md
+          echo "{: .text-center .pb-5}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
