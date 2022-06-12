@@ -101,20 +101,11 @@ jobs:
 
       - name: Create archive for update code
         run: |
-          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/release.sh
-          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip
+          docker build -t "gs:prod" --target application_prod -f tests/docker/Dockerfile .
+          docker run --name "gs_update" gs:prod tests/docker/update.sh
+          docker cp gs_update:/var/www/giuaschool/giuaschool-update.zip giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip
 
       - name: Upload update code
-        #-- uses: meeDamian/github-release@2.0
-        #-- with:
-          #-- token: ${{ secrets.GITHUB_TOKEN }}
-          #-- tag: update-${{ steps.get-latest-tag.outputs.tag }}
-          #-- name: "Aggiornamento della versione ${{ steps.get-latest-tag.outputs.tag }}"
-          #-- body: ${{ steps.changelog.outputs.changelog }}
-          #-- prerelease: true
-          #-- files: giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip
-          #-- gzip: false
-          #-- allow_override: true
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -127,9 +118,6 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           replacesArtifacts: true
-
-
-
 
       - name: Generate changelog page
         run: |
