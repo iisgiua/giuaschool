@@ -28,6 +28,7 @@ jobs:
 
       - name: Generate changelog from latest release
         id: changelog
+        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
         uses: metcalfc/changelog-generator@v3.0.0
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
@@ -95,12 +96,14 @@ jobs:
           asset_name: giuaschool-release-${{ github.event.inputs.version }}.zip
           tag: "v${{ github.event.inputs.version }}"
 
-      - name: Add version tag to documentation
+      - name: Create version tag for documentation
+        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
         run: |
           mkdir docs
           echo "tag: ${{ github.event.inputs.version }}" > docs/version.yml
 
       - name: Add version tag to documentation
+        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
@@ -114,6 +117,7 @@ jobs:
           commit_message: 'Add version tag to documentation'
 
       - name: Generate changelog pages
+        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
         run: |
           rm -f docs/*.yml
           #####----- latest release page
@@ -147,6 +151,7 @@ jobs:
           echo "Nessuna modifica dal rilascio dell'ultima versione" >> docs/latest-build.md
 
       - name: Add changelog pages to documentation
+        if: ${{ github.event.inputs.prerelease != 'TRUE' }}
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
