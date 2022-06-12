@@ -21,11 +21,9 @@ jobs:
       - name: Set up docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build docker test image
-        run: docker build -t "gs:test" -f tests/docker/Dockerfile .
-
-      - name: Run phpunit
+      - name: Build docker image and run phpunit
         run: |
+          docker build -t "gs:test" -f tests/docker/Dockerfile .
           docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
           docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
@@ -72,11 +70,10 @@ jobs:
         with:
           swap-size-gb: 5
 
-      - name: Build docker test image
-        run: docker build -t "gs:test" -f tests/docker/Dockerfile .
-
-      - name: Run behat
-        run: docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
+      - name: Build docker image and run behat
+        run: |
+          docker build -t "gs:test" -f tests/docker/Dockerfile .
+          docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
 
   deploy:
     if: ${{ github.event_name == 'push' }}
@@ -90,26 +87,32 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Create archive for build code
-        run: |
-          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/release.sh
-          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-build-latest.zip
-
       - name: Generate changelog from latest release
         id: changelog
         uses: metcalfc/changelog-generator@v3.0.0
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload latest build
+      - name: Get latest release tag
+        id: get-latest-tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        with:
+          semver_only: true
+
+      - name: Create archive for update code
+        run: |
+          docker run --name "gs_release" ghcr.io/trinko/giuaschool:latest tests/docker/release.sh
+          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip
+
+      - name: Upload update code
         uses: meeDamian/github-release@2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: latest-build
-          name: "Ultimo aggiornamento"
+          tag: update-${{ steps.get-latest-tag.outputs.tag }}
+          name: "Aggiornamento della versione ${{ steps.get-latest-tag.outputs.tag }}"
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: true
-          files: giuaschool-build-latest.zip
+          files: giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip
           gzip: false
           allow_override: true
 
@@ -125,7 +128,7 @@ jobs:
           echo "# Ultimo aggiornamento"  >> docs/latest-build.md
           echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
-          echo "[**Scarica l'ultimo aggiornamento**](https://github.com/trinko/giuaschool/releases/download/latest-build/giuaschool-build-latest.zip)" >> docs/latest-build.md
+          echo "[**Scarica l'ultimo aggiornamento**](https://github.com/trinko/giuaschool/releases/download/update-${{ steps.get-latest-tag.outputs.tag }}/giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip)" >> docs/latest-build.md
           echo "{: .text-center .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "Data e ora dell'ultimo aggiornamento: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-build.md
