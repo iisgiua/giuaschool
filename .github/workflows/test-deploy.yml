@@ -94,27 +94,25 @@ jobs:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get latest release tag
-        id: get-latest-tag
-        uses: actions-ecosystem/action-get-latest-tag@v1
-        with:
-          semver_only: true
+        id: latest-release
+        uses: jossef/action-latest-release-info@v1
 
       - name: Create archive for update code
         run: |
           docker build -t "gs:prod" --target application_prod -f tests/docker/Dockerfile .
-          docker run --name "gs_update" gs:prod tests/docker/update.sh
-          docker cp gs_update:/var/www/giuaschool/giuaschool-update.zip giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip
+          docker run --name "gs_update" gs:prod tests/docker/update.sh ${{ steps.latest-release.outputs.created_at }}
+          docker cp gs_update:/var/www/giuaschool/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip
 
       - name: Upload update code
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: update-${{ steps.get-latest-tag.outputs.tag }}
-          name: "Aggiornamento della versione ${{ steps.get-latest-tag.outputs.tag }}"
+          tag: update-${{ steps.latest-release.outputs.tag_name }}
+          name: "Aggiornamento della versione ${{ steps.latest-release.outputs.tag_name }}"
           body: ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: true
-          artifacts: giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip
+          artifacts: giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip
           allowUpdates: true
           artifactErrorsFailBuild: true
           replacesArtifacts: true
@@ -131,7 +129,7 @@ jobs:
           echo "# Ultimo aggiornamento"  >> docs/latest-build.md
           echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
-          echo "[**Scarica l'ultimo aggiornamento**](https://github.com/trinko/giuaschool/releases/download/update-${{ steps.get-latest-tag.outputs.tag }}/giuaschool-update-${{ steps.get-latest-tag.outputs.tag }}.zip)" >> docs/latest-build.md
+          echo "[**Scarica l'ultimo aggiornamento**](https://github.com/trinko/giuaschool/releases/download/update-${{ steps.latest-release.outputs.tag_name }}/giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip)" >> docs/latest-build.md
           echo "{: .text-center .pb-5}" >> docs/latest-build.md
           echo "" >> docs/latest-build.md
           echo "Data e ora dell'ultimo aggiornamento: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-build.md

@@ -93,7 +93,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: giuaschool-release.zip
-          asset_name: giuaschool-release-${{ github.event.inputs.version }}.zip
+          asset_name: giuaschool-release-v${{ github.event.inputs.version }}.zip
           tag: "v${{ github.event.inputs.version }}"
 
       - name: Create version tag for documentation
@@ -130,7 +130,7 @@ jobs:
           echo "# Ultima versione"  >> docs/latest-release.md
           echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "[**Scarica la Versione {{ site.data.version.tag }}**](https://github.com/trinko/giuaschool/releases/download/v{{ site.data.version.tag }}/giuaschool-release-{{ site.data.version.tag }}.zip)" >> docs/latest-release.md
+          echo "[**Scarica la Versione {{ site.data.version.tag }}**](https://github.com/trinko/giuaschool/releases/download/v{{ site.data.version.tag }}/giuaschool-release-v{{ site.data.version.tag }}.zip)" >> docs/latest-release.md
           echo "{: .text-center .pb-5}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-release.md
