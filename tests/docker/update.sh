@@ -14,5 +14,7 @@ rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 mv .env .env-dist
 
 # Create archive for changed files
+echo "$1"
 DATE="${1:0:10} ${1:11:8}"
+echo "$DATE"
 find ./ -type f -newermt $DATE | zip -q -y -9 giuaschool-update.zip -@
