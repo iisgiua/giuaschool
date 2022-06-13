@@ -13,5 +13,8 @@ rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 # Rename .env to avoid overwriting on update
 mv .env .env-dist
 
-# Archive release
-zip -q -y -r -9 giuaschool-update.zip ./
+# Create archive for changed files
+
+#find ./ -newer $DATE > lista.txt
+#zip -q -y -r -9 -i@lista.txt giuaschool-update.zip .
+zip -q -y -r -9 giuaschool-update.zip . 
