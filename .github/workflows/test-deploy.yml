@@ -102,7 +102,7 @@ jobs:
       - name: Create archive for update code
         run: |
           docker build -t "gs:prod" --target application_prod -f tests/docker/Dockerfile .
-          docker run --name "gs_update" gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.created_at }}'
+          docker run --name "gs_update" gs:prod tests/docker/update.sh '${{ steps.latest-release.outputs.tag_name }}'
           docker cp gs_update:/var/www/giuaschool/giuaschool-update.zip giuaschool-update-${{ steps.latest-release.outputs.tag_name }}.zip
 
       - name: Upload update code

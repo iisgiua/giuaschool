@@ -13,7 +13,5 @@ rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 # Rename .env to avoid overwriting on update
 mv .env .env-dist
 
-# Create archive for changed files
-DATE="${1:0:10} ${1:11:8}"
-#-- find ./ -type f -newermt "$DATE" | zip -q -y -9 giuaschool-update.zip -@
-zip -q -y -9 giuaschool-update.zip
+# Create archive for all files
+zip -q -y -9 giuaschool-update.zip .
