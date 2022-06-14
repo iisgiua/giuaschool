@@ -14,4 +14,4 @@ rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 mv .env .env-dist
 
 # Create archive for all files
-zip -q -y -9 giuaschool-update.zip .
+zip -q -r -y -9 giuaschool-update.zip .
