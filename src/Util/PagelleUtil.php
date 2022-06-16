@@ -13,7 +13,7 @@
 namespace App\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

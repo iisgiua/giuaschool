@@ -15,7 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;

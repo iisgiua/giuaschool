@@ -14,7 +14,7 @@ namespace App\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Util\BachecaUtil;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
