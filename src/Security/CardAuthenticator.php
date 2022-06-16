@@ -248,8 +248,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => 'card',
       'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()
-      ));
+      'Ruolo' => $token->getUser()->getRoles()[0]));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare

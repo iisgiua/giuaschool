@@ -250,8 +250,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => 'token',
       'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()
-      ));
+      'Ruolo' => $token->getUser()->getRoles()[0]));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare
