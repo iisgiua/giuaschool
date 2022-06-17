@@ -156,7 +156,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // controlla appId
-    $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
     if (!$app) {
       // app non esiste o non attiva
       $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', array(
@@ -167,7 +167,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.invalid_app');
     }
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App:Utente')->findOneBy(['username' => $credentials['username'],
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['username' => $credentials['username'],
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
@@ -183,7 +183,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       return $user;
     }
     // trova profili attivi
-    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getNome(),
+    $profilo = $this->em->getRepository(Utente::class)->profiliAttivi($user->getNome(),
       $user->getCognome(), $user->getCodiceFiscale());
     if ($profilo) {
       if ($user instanceOf Genitore) {
@@ -237,8 +237,8 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
   public function checkCredentials($credentials, UserInterface $user) {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    $manutenzioneInizio = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di accesso da app durante la modalità manutenzione.', array(
@@ -247,7 +247,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.blocked_login');
     }
     // controlla appId
-    $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
+    $app = $this->em->getRepository(App::class)->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
     if (!$app) {
       // app non esiste o non attiva
       $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', array(

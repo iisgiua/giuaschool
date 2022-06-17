@@ -79,7 +79,7 @@ class ColloquioRepository extends BaseRepository {
    */
   public function findAllNoSede($search=null, $page=1) {
     // legge l'orario
-    $orario = $this->_em->getRepository('App:Orario')->orarioSede(null);
+    $orario = $this->_em->getRepository(Orario::class)->orarioSede(null);
     // crea query base
     $query = $this->createQueryBuilder('c')
       ->select("c AS colloquio,CONCAT(d.cognome,' ',d.nome) AS docente,so.inizio,so.fine")
@@ -105,7 +105,7 @@ class ColloquioRepository extends BaseRepository {
    */
   public function oreNoSede(Docente $docente) {
     // legge l'orario
-    $orario = $this->_em->getRepository('App:Orario')->orarioSede(null);
+    $orario = $this->_em->getRepository(Orario::class)->orarioSede(null);
     // legge ore colloqui
     $colloqui = $this->createQueryBuilder('c')
       ->select('c.frequenza,c.giorno,c.ora,c.note,c.extra,c.dati,so.inizio,so.fine')

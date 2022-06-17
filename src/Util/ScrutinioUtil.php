@@ -118,7 +118,7 @@ class ScrutinioUtil {
   public function periodi(Classe $classe) {
     $lista = array();
     // legge definizione scrutini
-    $periodi = $this->em->getRepository('App:DefinizioneScrutinio')->createQueryBuilder('d')
+    $periodi = $this->em->getRepository(DefinizioneScrutinio::class)->createQueryBuilder('d')
       ->select('d.periodo,s.stato')
       ->leftJoin('App:Scrutinio', 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where('d.dataProposte<=:data')
@@ -149,7 +149,7 @@ class ScrutinioUtil {
     // alunni della classe
     if ($materia->getTipo() == 'R') {
       // religione/att.alt.: solo alunni che si avvalgono
-      $lista_alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $lista_alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id')
         ->where('a.classe=:classe AND a.abilitato=:abilitato AND a.religione IN (:religione)')
         ->setParameters(['classe' => $classe, 'abilitato' => 1,
@@ -158,7 +158,7 @@ class ScrutinioUtil {
         ->getScalarResult();
     } else {
       // non è religione: tutti gli alunni
-      $lista_alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $lista_alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id')
         ->where('a.classe=:classe AND a.abilitato=:abilitato')
         ->setParameters(['classe' => $classe, 'abilitato' => 1])
@@ -166,7 +166,7 @@ class ScrutinioUtil {
         ->getScalarResult();
     }
     // legge i dati degli degli alunni
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->where('a.id IN (:alunni)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['alunni' => $lista_alunni])
@@ -177,7 +177,7 @@ class ScrutinioUtil {
       $elenco['proposte'][$alu->getId()] = null;
     }
     // legge le proposte di voto
-    $proposte = $this->em->getRepository('App:PropostaVoto')->createQueryBuilder('pv')
+    $proposte = $this->em->getRepository(PropostaVoto::class)->createQueryBuilder('pv')
       ->where('pv.alunno IN (:alunni) AND pv.classe=:classe AND pv.materia=:materia AND pv.periodo=:periodo')
       ->setParameters(['alunni' => $lista_alunni, 'classe' => $classe, 'materia' => $materia, 'periodo' => $periodo]);
     if ($materia->getTipo() == 'E') {
@@ -222,7 +222,7 @@ class ScrutinioUtil {
     // data di attivazione
     $dataAttivazione = ($dataProposte ? 'd.data' : 'd.dataProposte');
     // legge definizione scrutini
-    $periodi = $this->em->getRepository('App:DefinizioneScrutinio')->createQueryBuilder('d')
+    $periodi = $this->em->getRepository(DefinizioneScrutinio::class)->createQueryBuilder('d')
       ->select('d.periodo,s.stato')
       ->leftJoin('App:Scrutinio', 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where($dataAttivazione.'<=:data')
@@ -249,7 +249,7 @@ class ScrutinioUtil {
    */
   public function scrutinioChiuso(Classe $classe) {
     // legge periodi per classe
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->select('s.periodo,s.stato')
       ->where('s.classe=:classe AND s.stato=:stato')
       ->setParameters(['classe' => $classe, 'stato' => 'C'])
@@ -570,7 +570,7 @@ class ScrutinioUtil {
    */
   public function passaggioStato(Docente $docente, Request $request, Form $form, Classe $classe, $periodo, $stato) {
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.periodo=:periodo AND s.classe=:classe')
       ->setParameters(['periodo' => $periodo, 'classe' => $classe])
       ->setMaxResults(1)
@@ -578,7 +578,7 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     if (!$scrutinio) {
       $visibile = null;
-      $definizione = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+      $definizione = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo($periodo);
       if ($definizione) {
         $visibile = $definizione->getClassiVisibili()[$classe->getAnno()];
       }
@@ -616,14 +616,14 @@ class ScrutinioUtil {
     if ($periodo == 'P') {
       // alunni in classe alla data di fine periodo
       $data = \DateTime::createFromFormat('Y-m-d', $this->session->get('/CONFIG/SCUOLA/periodo1_fine'));
-      $alunni = $this->em->getRepository('App:Alunno')->alunniInData($data, $classe);
+      $alunni = $this->em->getRepository(Alunno::class)->alunniInData($data, $classe);
     } elseif ($periodo == 'S') {
       // alunni in classe alla data di fine periodo
       $data = \DateTime::createFromFormat('Y-m-d', $this->session->get('/CONFIG/SCUOLA/periodo2_fine'));
-      $alunni = $this->em->getRepository('App:Alunno')->alunniInData($data, $classe);
+      $alunni = $this->em->getRepository(Alunno::class)->alunniInData($data, $classe);
     } else {
       // alunni in classe alla data odierna
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
         ->where('a.classe=:classe AND a.abilitato=:abilitato')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -635,7 +635,7 @@ class ScrutinioUtil {
       $dati['alunni'][$alu['id']] = $alu;
     }
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
       ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno AND m.tipo!=:civica')
@@ -647,7 +647,7 @@ class ScrutinioUtil {
       $dati['materie'][$mat['id']] = $mat;
     }
     // legge le proposte di voto
-    $proposte = $this->em->getRepository('App:PropostaVoto')->createQueryBuilder('pv')
+    $proposte = $this->em->getRepository(PropostaVoto::class)->createQueryBuilder('pv')
       ->join('pv.materia', 'm')
       ->where('pv.classe=:classe AND pv.periodo=:periodo AND pv.unico IS NOT NULL AND m.tipo!=:civica')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'civica' => 'E'])
@@ -664,7 +664,7 @@ class ScrutinioUtil {
         'dati' => $p->getDati());
     }
     // legge le proposte di voto per ed.civica
-    $proposte = $this->em->getRepository('App:PropostaVoto')->createQueryBuilder('pv')
+    $proposte = $this->em->getRepository(PropostaVoto::class)->createQueryBuilder('pv')
       ->join('pv.materia', 'm')
       ->join('pv.docente', 'd')
       ->where('pv.classe=:classe AND pv.periodo=:periodo AND pv.unico IS NOT NULL AND m.tipo=:civica')
@@ -683,10 +683,10 @@ class ScrutinioUtil {
         'dati' => $p->getDati());
     }
     // legge lista valutazioni
-    $valutazioni['R'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_E'));
-    $valutazioni['C'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_C'));
-    $valutazioni['N'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_N'));
+    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
+    $valutazioni['C'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_C'));
+    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
     // retrocompatibilità per A.S 21/22
     if ($periodo == 'P' || $periodo == 'S') {
       $valutazioni['R'] = [
@@ -754,7 +754,7 @@ class ScrutinioUtil {
       }
     }
     // imposta avvisi
-    $defScrutinio = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    $defScrutinio = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo($periodo);
     $oggi = new \DateTime();
     $dati['modifica'] = ($oggi >= $defScrutinio->getData());
     $dati['blocco'] = !$dati['modifica'];
@@ -806,9 +806,9 @@ class ScrutinioUtil {
     }
     $this->session->getFlashBag()->clear();
     // alunni con voto  in scrutinio
-    $alunni_esistenti = $this->em->getRepository('App:VotoScrutinio')->alunni($scrutinio);
+    $alunni_esistenti = $this->em->getRepository(VotoScrutinio::class)->alunni($scrutinio);
     // materia ed. civica
-    $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
     $dati['materie'][$edcivica->getId()] = ['id' => $edcivica->getId(), 'nome' => $edcivica->getNome(),
       'nomeBreve' => $edcivica->getNomeBreve(), 'tipo' => $edcivica->getTipo()];
     // conteggio assenze e inserimento voti
@@ -818,7 +818,7 @@ class ScrutinioUtil {
         // esclude alunni NA per religione
         if (in_array($mat['tipo'], ['N', 'E']) || in_array($alu['religione'], ['S', 'A'])) {
           // calcola assenze di alunno
-          $ore = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+          $ore = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
             ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
@@ -832,7 +832,7 @@ class ScrutinioUtil {
           // inserisce voti e assenze
           if (array_key_exists($alunno, $alunni_esistenti) && in_array($materia, $alunni_esistenti[$alunno])) {
             // aggiorna dati esistenti
-            $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
               ->update()
               ->set('vs.modificato', ':modificato')
               ->set('vs.assenze', ':assenze')
@@ -924,7 +924,7 @@ class ScrutinioUtil {
   public function presenzeDocenti(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
     // legge dati scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.periodo=:periodo AND s.classe=:classe')
       ->setParameters(['periodo' => $periodo, 'classe' => $classe])
       ->setMaxResults(1)
@@ -939,7 +939,7 @@ class ScrutinioUtil {
       foreach ($scrutinio->getDato('docenti') as $id=>$docente) {
         $docenti[] = array_merge(['id' => $id], $docente);
       }
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.id IN (:lista)')
         ->orderBy('m.ordinamento', 'ASC')
@@ -958,7 +958,7 @@ class ScrutinioUtil {
         }
       }
     } else {
-      $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+      $docenti = $this->em->getRepository(Cattedra::class)->docentiScrutinio($classe);
     }
     foreach ($docenti as $doc) {
       // dati per la visualizzazione della pagina
@@ -1104,7 +1104,7 @@ class ScrutinioUtil {
       // se niente errori cambia stato
       if (!$this->session->getFlashBag()->has('errore')) {
         // dati docenti
-        $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+        $docenti = $this->em->getRepository(Cattedra::class)->docentiScrutinio($classe);
         // memorizza dati docenti e materie
         $dati_docenti = array();
         foreach ($docenti as $doc) {
@@ -1188,7 +1188,7 @@ class ScrutinioUtil {
   public function quadroVoti(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
     // legge dati scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.periodo=:periodo AND s.classe=:classe')
       ->setParameters(['periodo' => $periodo, 'classe' => $classe])
       ->setMaxResults(1)
@@ -1202,7 +1202,7 @@ class ScrutinioUtil {
     $dati['valutazioni'] = $scrutinio->getDato('valutazioni');
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, $periodo);
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes')
       ->where('a.id in (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1213,7 +1213,7 @@ class ScrutinioUtil {
       $dati['alunni'][$alu['id']] = $alu;
     }
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
       ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
@@ -1224,14 +1224,14 @@ class ScrutinioUtil {
     foreach ($materie as $mat) {
       $dati['materie'][$mat['id']] = $mat;
     }
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     $dati['materie'][$condotta->getId()] = array(
       'id' => $condotta->getId(),
       'nome' => $condotta->getNome(),
       'nomeBreve' => $condotta->getNomeBreve(),
       'tipo' => $condotta->getTipo());
     // legge i voti
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->where('s.classe=:classe AND s.periodo=:periodo AND vs.unico IS NOT NULL AND vs.alunno IN (:lista)')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'lista' => $lista])
@@ -1264,7 +1264,7 @@ class ScrutinioUtil {
     // esiti
     if ($periodo != 'P' && $periodo != 'S') {
       // legge esiti
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->join('e.scrutinio', 's')
         ->where('e.alunno IN (:lista) AND s.classe=:classe AND s.periodo=:periodo')
         ->setParameters(['lista' => $lista, 'classe' => $classe, 'periodo' => $periodo])
@@ -1289,10 +1289,10 @@ class ScrutinioUtil {
    */
   public function quadroVotiRinviati(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo]);
     // legge alunni
-    $rinviati = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $rinviati = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita')
       ->where('a.id IN (:lista)')
       ->setParameters(['lista' => $scrutinio->getDato('alunni')])
@@ -1304,7 +1304,7 @@ class ScrutinioUtil {
       $dati['alunni'][$alu['id']]['religione'] = $scrutinio->getDato('religione')[$alu['id']];
     }
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.media')
       ->where('m.id IN (:lista) AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
@@ -1315,7 +1315,7 @@ class ScrutinioUtil {
       $dati['materie'][$mat['id']] = $mat;
     }
     // legge i voti
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->where('s.classe=:classe AND s.periodo=:periodo AND vs.unico IS NOT NULL AND vs.alunno IN (:lista)')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'lista' => $scrutinio->getDato('alunni')])
@@ -1346,7 +1346,7 @@ class ScrutinioUtil {
       $dati['medie'][$alu] = number_format($somma[$alu] / $numero[$alu], 2, ',', null);
     }
     // esiti
-    $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+    $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
       ->join('e.scrutinio', 's')
       ->where('e.alunno IN (:lista) AND s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['lista' => $scrutinio->getDato('alunni'), 'classe' => $classe, 'periodo' => $periodo])
@@ -1373,7 +1373,7 @@ class ScrutinioUtil {
     $elenco = array();
     $elenco['voti'] = array();
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo])
       ->setMaxResults(1)
@@ -1381,7 +1381,7 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     // alunni della classe
     $lista_id = $this->alunniInScrutinio($classe, $periodo);
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista_id])
@@ -1396,7 +1396,7 @@ class ScrutinioUtil {
       }
     }
     // legge i voti
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->where('vs.scrutinio=:scrutinio AND vs.materia=:materia AND vs.alunno IN (:lista)')
       ->setParameters(['scrutinio' => $scrutinio, 'materia' => $materia,
         'lista' => array_keys($elenco['alunni'])])
@@ -1442,9 +1442,9 @@ class ScrutinioUtil {
     $elenco = array();
     $elenco['voti'] = array();
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe, 'periodo' => $periodo]);
     // alunni della classe
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita')
       ->where('a.id IN (:lista)')
       ->setParameters(['lista' => $scrutinio->getDato('alunni')])
@@ -1460,7 +1460,7 @@ class ScrutinioUtil {
       }
     }
     // legge i voti
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->where('vs.scrutinio=:scrutinio AND vs.materia=:materia AND vs.alunno IN (:lista)')
       ->setParameters(['scrutinio' => $scrutinio, 'materia' => $materia,
         'lista' => array_keys($elenco['alunni'])])
@@ -1490,7 +1490,7 @@ class ScrutinioUtil {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
     // legge ed.civica
-    $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
     // elenco voti/alunni
     $dati = $this->elencoVoti($docente, $classe, $edcivica, 'P');
     // controlla errori
@@ -1541,7 +1541,7 @@ class ScrutinioUtil {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
     // legge condotta
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     // elenco voti/alunni
     $dati = $this->elencoVoti($docente, $classe, $condotta, 'P');
     // controlla errori
@@ -1676,7 +1676,7 @@ class ScrutinioUtil {
     }
     if (empty($errori)) {
       // legge definizione scrutinio e verbale
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('P');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('P');
       $scrutinio_dati = $scrutinio->getDati();
       foreach ($def->getStruttura() as $step=>$args) {
         if ($args[0] == 'Argomento') {
@@ -1811,7 +1811,7 @@ class ScrutinioUtil {
     // legge voti
     $dati = $this->quadroVoti($docente, $classe, $periodo);
     // legge dati scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.periodo=:periodo AND s.classe=:classe')
       ->setParameters(['periodo' => $periodo, 'classe' => $classe])
       ->setMaxResults(1)
@@ -1820,7 +1820,7 @@ class ScrutinioUtil {
     // esiti
     if ($periodo == 'F' || $periodo == 'E' || $periodo == 'X') {
       $lista = $this->alunniInScrutinio($classe, $periodo);
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
         ->setParameters(['lista' => $lista, 'scrutinio' => $scrutinio])
         ->getQuery()
@@ -1900,7 +1900,7 @@ class ScrutinioUtil {
         $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
       }
       // controlla validazione argomenti
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('P');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('P');
       if (!isset($scrutinio->getDati()['verbale'])) {
         // errore di validazione
         $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
@@ -2007,7 +2007,7 @@ class ScrutinioUtil {
     $lista = $this->alunniInScrutinio($classe, $periodo);
     if ($periodo == 'P' || $periodo == 'S') {
       // dati alunni
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -2018,7 +2018,7 @@ class ScrutinioUtil {
         $dati['alunni'][$alu['id']] = $alu;
       }
       // legge i debiti
-      $debiti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $debiti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
         ->select('DISTINCT a.id,a.nome,a.cognome,a.dataNascita')
         ->join('vs.scrutinio', 's')
         ->join('vs.materia', 'm')
@@ -2034,7 +2034,7 @@ class ScrutinioUtil {
       }
     } elseif ($periodo == 'F') {
       // legge i non ammessi/non scrutinati per assenze
-      $non_ammessi = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $non_ammessi = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id')
         ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
@@ -2043,7 +2043,7 @@ class ScrutinioUtil {
         ->getQuery()
         ->getArrayResult();
       $non_ammessi = array_column($non_ammessi, 'id');
-      $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+      $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
         ->where('s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
         ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
         ->getQuery()
@@ -2054,7 +2054,7 @@ class ScrutinioUtil {
           $non_ammessi[] = $alu;
         }
       }
-      $dati['non_ammessi'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $dati['non_ammessi'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -2063,7 +2063,7 @@ class ScrutinioUtil {
         ->getQuery()
         ->getArrayResult();
       // legge i debiti
-      $dati['debiti']  = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $dati['debiti']  = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
         ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
@@ -2073,7 +2073,7 @@ class ScrutinioUtil {
         ->getQuery()
         ->getArrayResult();
       // legge le carenze
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,e.dati')
         ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
@@ -2091,7 +2091,7 @@ class ScrutinioUtil {
       }
     } elseif ($periodo == 'E' || $periodo == 'X') {
       // legge i non ammessi
-      $dati['non_ammessi'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $dati['non_ammessi'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita')
         ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->join('e.scrutinio', 's')
@@ -2102,7 +2102,7 @@ class ScrutinioUtil {
         ->getArrayResult();
     }
     // legge ammessi
-    $dati['ammessi'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $dati['ammessi'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
       ->join('e.scrutinio', 's')
@@ -2112,7 +2112,7 @@ class ScrutinioUtil {
       ->getQuery()
       ->getSingleScalarResult();
     // controlla se attivare pulsante riapertura o no
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato AND s.sincronizzazione IS NULL')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
       ->getQuery()
@@ -2132,7 +2132,7 @@ class ScrutinioUtil {
    */
   public function alunniInScrutinio(Classe $classe, $periodo) {
     $alunni = array();
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
     if ($periodo == 'P' || $periodo == 'S') {
       // solo gli alunni al momento dello scrutinio
       $alunni = $scrutinio->getDato('alunni');
@@ -2176,9 +2176,9 @@ class ScrutinioUtil {
     }
     $this->session->getFlashBag()->clear();
     // alunni con voto in scrutinio
-    $alunni_esistenti = $this->em->getRepository('App:VotoScrutinio')->alunni($scrutinio);
+    $alunni_esistenti = $this->em->getRepository(VotoScrutinio::class)->alunni($scrutinio);
     // materia ed. civica
-    $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
     $dati['materie'][$edcivica->getId()] = ['id' => $edcivica->getId(), 'nome' => $edcivica->getNome(),
       'nomeBreve' => $edcivica->getNomeBreve(), 'tipo' => $edcivica->getTipo()];
     // conteggio assenze e inserimento voti
@@ -2188,7 +2188,7 @@ class ScrutinioUtil {
         // esclude alunni NA per religione
         if (in_array($mat['tipo'], ['N', 'E']) || in_array($alu['religione'], ['S', 'A'])) {
           // calcola assenze di alunno
-          $ore = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+          $ore = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
             ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
@@ -2201,7 +2201,7 @@ class ScrutinioUtil {
           $ore = ($ore ? ((int) $ore) : 0);
           // controllo ore assenze mat.alt. firmata con altra materia
           if ($mat['tipo'] == 'R' && $alu['religione'] == 'A') {
-            $ore2 = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+            $ore2 = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
               ->select('SUM(al.ore)')
               ->join('al.lezione', 'l')
               ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
@@ -2219,7 +2219,7 @@ class ScrutinioUtil {
           // inserisce voti e assenze
           if (array_key_exists($alunno, $alunni_esistenti) && in_array($materia, $alunni_esistenti[$alunno])) {
             // aggiorna dati esistenti
-            $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
               ->update()
               ->set('vs.modificato', ':modificato')
               ->set('vs.assenze', ':assenze')
@@ -2360,7 +2360,7 @@ class ScrutinioUtil {
       // se niente errori cambia stato
       if (!$this->session->getFlashBag()->has('errore')) {
         // dati docenti
-        $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+        $docenti = $this->em->getRepository(Cattedra::class)->docentiScrutinio($classe);
         // memorizza dati docenti e materie
         $dati_docenti = array();
         foreach ($docenti as $doc) {
@@ -2446,9 +2446,9 @@ class ScrutinioUtil {
     $dati['no_scrutinabili']['form'] = array();
     $dati['estero'] = array();
     // legge scrutinio finale e intermedi
-    $scrutinio_F = $this->em->getRepository('App:Scrutinio')->findOneBy(['periodo' => 'F', 'classe' => $classe]);
-    $scrutinio_S = $this->em->getRepository('App:Scrutinio')->findOneBy(['periodo' => 'S', 'classe' => $classe]);
-    $scrutinio_P = $this->em->getRepository('App:Scrutinio')->findOneBy(['periodo' => 'P', 'classe' => $classe]);
+    $scrutinio_F = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => 'F', 'classe' => $classe]);
+    $scrutinio_S = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => 'S', 'classe' => $classe]);
+    $scrutinio_P = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => 'P', 'classe' => $classe]);
     if (!$scrutinio_F || !$scrutinio_P) {
       // errore
       return null;
@@ -2458,7 +2458,7 @@ class ScrutinioUtil {
     $dati['monteore'] = $classe->getOreSettimanali() * 33;
     $dati['maxassenze'] = (int) ($dati['monteore'] / 4);
     // calcola ore totali assenza alunni (compresi cambi classe in periodi intermedi)
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.sesso,a.dataNascita,SUM(vs.assenze) AS ore')
       ->join('App:VotoScrutinio', 'vs', 'WITH', 'vs.alunno=a.id')
       ->join('vs.scrutinio', 's')
@@ -2501,7 +2501,7 @@ class ScrutinioUtil {
       }
     }
     // alunni all'estero
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.sesso,a.dataNascita,a.bes,cc.note')
       ->join('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id AND cc.classe=:classe')
       ->where('a.frequenzaEstero=:estero AND a.classe IS NULL AND a.abilitato=:abilitato')
@@ -2553,7 +2553,7 @@ class ScrutinioUtil {
       substr($this->session->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15');
     $fine = \DateTime::createFromFormat('!Y-m-d', $this->session->get('/CONFIG/SCUOLA/anno_fine'));
     // festivi
-    $festivi = $this->em->getRepository('App:Festivita')->createQueryBuilder('f')
+    $festivi = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
       ->select('f.data')
       ->where('f.tipo=:festivo AND f.data BETWEEN :inizio AND :fine AND (f.sede IS NULL OR f.sede=:sede)')
       ->orderBy('f.data', 'ASC')
@@ -2598,7 +2598,7 @@ class ScrutinioUtil {
     $inizio = substr($this->session->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15';
     $fine = $this->session->get('/CONFIG/SCUOLA/anno_fine');
     // assenze
-    $giorni_assenza = $this->em->getRepository('App:Assenza')->createQueryBuilder('a')
+    $giorni_assenza = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
       ->select('a.data')
       ->where('a.alunno=:alunno AND a.data BETWEEN :inizio AND :fine')
       ->setParameters(['alunno' => $alunno_id, 'inizio' => $inizio, 'fine' => $fine])
@@ -2614,20 +2614,20 @@ class ScrutinioUtil {
       $dati['giorni'] = array();
     } else {
       // controllo presenze cancellabili
-      $giorni_note = $this->em->getRepository('App:Nota')->createQueryBuilder('n')
+      $giorni_note = $this->em->getRepository(Nota::class)->createQueryBuilder('n')
         ->select('n.data')
         ->join('n.alunni', 'a')
         ->where('a.id=:alunno AND n.tipo=:nota AND n.data IN (:date)')
         ->setParameters(['alunno' => $alunno_id, 'nota' => 'I', 'date' => $giorni_presenza_str])
         ->getQuery()
         ->getScalarResult();
-      $giorni_entrate = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
+      $giorni_entrate = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
         ->select('e.data')
         ->where('e.alunno=:alunno AND e.data IN (:date)')
         ->setParameters(['alunno' => $alunno_id, 'date' => $giorni_presenza_str])
         ->getQuery()
         ->getScalarResult();
-      $giorni_uscite = $this->em->getRepository('App:Uscita')->createQueryBuilder('u')
+      $giorni_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
         ->select('u.data')
         ->where('u.alunno=:alunno AND u.data IN (:date)')
         ->setParameters(['alunno' => $alunno_id, 'date' => $giorni_presenza_str])
@@ -2792,7 +2792,7 @@ class ScrutinioUtil {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
     // legge ed.civica
-    $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
     // elenco voti/alunni
     $dati = $this->elencoVoti($docente, $classe, $edcivica, 'F');
     // controlla errori
@@ -2843,7 +2843,7 @@ class ScrutinioUtil {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
     // legge condotta
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     // elenco voti/alunni
     $dati = $this->elencoVoti($docente, $classe, $condotta, 'F');
     // controlla errori
@@ -2934,7 +2934,7 @@ class ScrutinioUtil {
       return null;
     }
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
       ->setMaxResults(1)
@@ -2942,7 +2942,7 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     $dati['scrutinio'] = $scrutinio;
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
       ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
@@ -2953,14 +2953,14 @@ class ScrutinioUtil {
     foreach ($materie as $mat) {
       $dati['materie'][$mat['id']] = $mat;
     }
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     $dati['materie'][$condotta->getId()] = array(
       'id' => $condotta->getId(),
       'nome' => $condotta->getNome(),
       'nomeBreve' => $condotta->getNomeBreve(),
       'tipo' => $condotta->getTipo());
     // legge i voti
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.materia', 'm')
       ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
       ->orderBy('m.ordinamento', 'ASC')
@@ -2972,7 +2972,7 @@ class ScrutinioUtil {
       $dati['voti'][$v->getMateria()->getId()] = $v;
     }
     // legge esito
-    $esito = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
+    $esito = $this->em->getRepository(Esito::class)->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
     if (!$esito) {
       // crea nuovo esito
       $dati_esito = array(
@@ -3012,7 +3012,7 @@ class ScrutinioUtil {
     $errore_condotta = array();
     foreach ($lista_id as $id) {
       // recupera alunno
-      $alunno = $this->em->getRepository('App:Alunno')->find($id);
+      $alunno = $this->em->getRepository(Alunno::class)->find($id);
       $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $nome = $alunno->getCognome().' '.$alunno->getNome();
       // elenco voti dell'alunno
@@ -3203,7 +3203,7 @@ class ScrutinioUtil {
       ->execute(['scrutinio' => $scrutinio->getId()]);
     if ($classe->getAnno() == 2) {
       // cancella conferma certificazioni
-      $esiti = $this->em->getRepository('App:Esito')->findByScrutinio($scrutinio);
+      $esiti = $this->em->getRepository(Esito::class)->findByScrutinio($scrutinio);
       foreach ($esiti as $e) {
         $datiEsito = $e->getDati();
         if (isset($datiEsito['certificazione']) && $datiEsito['certificazione']) {
@@ -3261,11 +3261,11 @@ class ScrutinioUtil {
       39 => 49,
       40 => 50];
     // legge dati scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
     $dati['scrutinio'] = $scrutinio->getDati();
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, $periodo);
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,a.credito3,a.credito4,e.id AS esito')
       ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
@@ -3283,7 +3283,7 @@ class ScrutinioUtil {
         $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']['religione'][$alu['id']];
       }
       // legge esito
-      $dati['esiti'][$alu['id']] = $this->em->getRepository('App:Esito')->find($alu['esito']);
+      $dati['esiti'][$alu['id']] = $this->em->getRepository(Esito::class)->find($alu['esito']);
       // crediti precedenti
       $dati['esiti'][$alu['id']]->setCreditoPrecedente($classe->getAnno() == 3 ? 0 :
         ($classe->getAnno() == 4 ? $dati['alunni'][$alu['id']]['credito3'] : $alu['credito3'] + $alu['credito4']));
@@ -3314,7 +3314,7 @@ class ScrutinioUtil {
     $dati = array();
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, $periodo);
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,e.id AS esito')
       ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
@@ -3326,7 +3326,7 @@ class ScrutinioUtil {
     foreach ($alunni as $alu) {
       $dati['alunni'][$alu['id']] = $alu;
       // legge esito
-      $dati['esiti'][$alu['id']] = $this->em->getRepository('App:Esito')->find($alu['esito']);
+      $dati['esiti'][$alu['id']] = $this->em->getRepository(Esito::class)->find($alu['esito']);
     }
     // restituisce dati
     return $dati;
@@ -3353,7 +3353,7 @@ class ScrutinioUtil {
     // distingue per classe
     if ($classe->getAnno() == 2) {
       // competenze
-      $competenze = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $competenze = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.cognome,a.nome,a.sesso,a.dataNascita,e.dati')
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso')
@@ -3370,7 +3370,7 @@ class ScrutinioUtil {
       }
     } elseif ($classe->getAnno() != 1) {
       // crediti
-      $crediti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $crediti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.cognome,a.nome,a.sesso,a.dataNascita')
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso AND e.credito IS NULL')
@@ -3424,7 +3424,7 @@ class ScrutinioUtil {
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, $periodo);
     // debiti
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito,m.id AS materia_id,m.nomeBreve AS materia')
       ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
@@ -3438,10 +3438,10 @@ class ScrutinioUtil {
     foreach ($alunni as $alu) {
       $dati['debiti'][$alu['id']][$alu['materia_id']]  = $alu;
       // legge esito
-      $dati['esiti'][$alu['id']] = $this->em->getRepository('App:Esito')->find($alu['esito']);
+      $dati['esiti'][$alu['id']] = $this->em->getRepository(Esito::class)->find($alu['esito']);
     }
     // carenze
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,e.id AS esito,m.id AS materia_id,m.nomeBreve AS materia')
       ->join('App:Esito', 'e', 'WITH', 'a.id=e.alunno')
       ->join('e.scrutinio', 's')
@@ -3458,7 +3458,7 @@ class ScrutinioUtil {
       $dati['carenze'][$alu['id']][$alu['materia_id']] = $alu;
       if (!isset($dati['esiti'][$alu['id']])) {
         // legge esito
-        $dati['esiti'][$alu['id']] = $this->em->getRepository('App:Esito')->find($alu['esito']);
+        $dati['esiti'][$alu['id']] = $this->em->getRepository(Esito::class)->find($alu['esito']);
       }
     }
     // restituisce dati
@@ -3481,7 +3481,7 @@ class ScrutinioUtil {
     // legge alunni
     $lista = $this->alunniInScrutinio($classe, 'F');
     // legge esiti
-    $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+    $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
       ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio AND e.esito IN (:esiti)')
       ->setParameters(['lista' => $lista, 'scrutinio' => $scrutinio, 'esiti' => ['A','S']])
       ->getQuery()
@@ -3525,7 +3525,7 @@ class ScrutinioUtil {
       // errore: alunno non previsto
       return null;
     }
-    $dati['debiti'] = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $dati['debiti'] = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->join('vs.materia', 'm')
       ->join('App:Esito', 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
@@ -3557,7 +3557,7 @@ class ScrutinioUtil {
       return null;
     }
     // legge carenze
-    $dati['carenze'] = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $dati['carenze'] = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->join('vs.materia', 'm')
       ->join('App:Esito', 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=s.id')
@@ -3570,7 +3570,7 @@ class ScrutinioUtil {
       ->getResult();
     // aggiunge proposte
     foreach ($dati['carenze'] as $voto) {
-      $proposta = $this->em->getRepository('App:PropostaVoto')->createQueryBuilder('pv')
+      $proposta = $this->em->getRepository(PropostaVoto::class)->createQueryBuilder('pv')
         ->join('pv.materia', 'm')
         ->where('pv.alunno=:alunno AND pv.classe=:classe AND pv.periodo=:periodo AND m.tipo=:tipo AND m.id=:materia')
         ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo,
@@ -3666,7 +3666,7 @@ class ScrutinioUtil {
   public function passaggioStato_F_8_7(Docente $docente, Request $request, Form $form,
                                         Classe $classe, Scrutinio $scrutinio) {
     // legge definizione scrutinio e verbale
-    $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('F');
+    $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('F');
     $scrutinio_dati = $scrutinio->getDati();
     foreach ($def->getStruttura() as $step=>$args) {
       if ($args[0] == 'Argomento') {
@@ -3719,7 +3719,7 @@ class ScrutinioUtil {
         $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_svolgimento'));
       }
       // controlla validazione argomenti
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('F');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('F');
       foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
         // solo elementi da validare
         if (isset($args['validato']) && !$args['validato']) {
@@ -3823,7 +3823,7 @@ class ScrutinioUtil {
     // legge alunni scrutinati
     $lista = $this->alunniInScrutinio($classe, 'F');
     // considera solo alunni sospesi
-    $sospesi = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+    $sospesi = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note')
       ->join('e.scrutinio', 's')
       ->join('e.alunno', 'a')
@@ -3836,7 +3836,7 @@ class ScrutinioUtil {
       $dati['alunni'][$alu['id']] = $alu;
     }
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
       ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
@@ -3847,14 +3847,14 @@ class ScrutinioUtil {
     foreach ($materie as $mat) {
       $dati['materie'][$mat['id']] = $mat;
     }
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     $dati['materie'][$condotta->getId()] = array(
       'id' => $condotta->getId(),
       'nome' => $condotta->getNome(),
       'nomeBreve' => $condotta->getNomeBreve(),
       'tipo' => $condotta->getTipo());
     // legge i voti dello scrutinio finale
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno IN (:sospesi) AND vs.unico IS NOT NULL')
       ->setParameters(['classe' => $classe, 'periodo' => 'F', 'sospesi' => array_keys($dati['alunni'])])
@@ -3907,18 +3907,18 @@ class ScrutinioUtil {
     // legge dati
     $dati = $this->riepilogoSospesi($docente, $classe, 'E');
     // alunni con voto in scrutinio
-    $alunni_esistenti = $this->em->getRepository('App:VotoScrutinio')->alunni($scrutinio);
+    $alunni_esistenti = $this->em->getRepository(VotoScrutinio::class)->alunni($scrutinio);
     // inserimento voti
     foreach ($dati['alunni'] as $alunno=>$alu) {
-      $alunno_obj = $this->em->getRepository('App:Alunno')->find($alunno);
+      $alunno_obj = $this->em->getRepository(Alunno::class)->find($alunno);
       foreach ($dati['materie'] as $materia=>$mat) {
-        $materia_obj = $this->em->getRepository('App:Materia')->find($materia);
+        $materia_obj = $this->em->getRepository(Materia::class)->find($materia);
         // esclude alunni NA per religione
         if ($mat['tipo'] != 'R' || in_array($alu['religione'], ['S', 'A'])) {
           // inserisce voti e assenze
           if (array_key_exists($alunno, $alunni_esistenti) && in_array($materia, $alunni_esistenti[$alunno])) {
             // aggiorna dati esistenti
-            $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
               ->update()
               ->set('vs.modificato', ':modificato')
               ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.materia=:materia')
@@ -3944,7 +3944,7 @@ class ScrutinioUtil {
     }
     $this->em->flush();
     // legge dati da scrutinio finale
-    $scrutinio_F = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => 'F']);
+    $scrutinio_F = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe, 'periodo' => 'F']);
     $scrutinabili = $scrutinio_F->getDato('scrutinabili');
     // memorizza dati alunni
     $dati_scrutinio = $scrutinio->getDati();
@@ -4055,15 +4055,15 @@ class ScrutinioUtil {
       // se niente errori cambia stato
       if (!$this->session->getFlashBag()->has('errore')) {
         // dati docenti
-        $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+        $docenti = $this->em->getRepository(Cattedra::class)->docentiScrutinio($classe);
         // memorizza dati docenti e materie
         $dati_docenti = array();
         foreach ($docenti as $doc) {
           $dati_docenti[$doc['id']][$doc['materia_id']] = $doc['tipo'];
         }
         // aggiunge ed.civica alle materie
-        $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
-        $sostegno = $this->em->getRepository('App:Materia')->findOneByTipo('S');
+        $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
+        $sostegno = $this->em->getRepository(Materia::class)->findOneByTipo('S');
         foreach ($dati_docenti as $iddoc=>$doc) {
           // controlla se solo su sostegno
           $cattsost = true;
@@ -4162,7 +4162,7 @@ class ScrutinioUtil {
       return null;
     }
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['classe' => $alunno->getClasse(), 'periodo' => $periodo])
       ->setMaxResults(1)
@@ -4170,7 +4170,7 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     $dati['scrutinio'] = $scrutinio;
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
       ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
@@ -4181,14 +4181,14 @@ class ScrutinioUtil {
     foreach ($materie as $mat) {
       $dati['materie'][$mat['id']] = $mat;
     }
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     $dati['materie'][$condotta->getId()] = array(
       'id' => $condotta->getId(),
       'nome' => $condotta->getNome(),
       'nomeBreve' => $condotta->getNomeBreve(),
       'tipo' => $condotta->getTipo());
     // legge solo i voti con debito
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.materia', 'm')
       ->join('App:Scrutinio', 's', 'WITH', 's.classe=:classe AND s.periodo=:periodo')
       ->join('App:VotoScrutinio', 'vsf', 'WITH', 'vsf.scrutinio=s.id AND vsf.materia=m.id AND vsf.alunno=:alunno')
@@ -4203,7 +4203,7 @@ class ScrutinioUtil {
       $dati['voti'][$v->getMateria()->getId()] = $v;
     }
     // legge esito
-    $esito = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
+    $esito = $this->em->getRepository(Esito::class)->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
     if (!$esito) {
       // crea nuovo esito
       $dati_esito = array(
@@ -4242,7 +4242,7 @@ class ScrutinioUtil {
       return null;
     }
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo])
       ->setMaxResults(1)
@@ -4250,7 +4250,7 @@ class ScrutinioUtil {
       ->getOneOrNullResult();
     $dati['scrutinio'] = $scrutinio;
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.media')
       ->where('m.id IN (:lista) AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
@@ -4261,7 +4261,7 @@ class ScrutinioUtil {
       $dati['materie'][$mat['id']] = $mat;
     }
     // legge solo i voti con debito
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
       ->join('vs.materia', 'm')
       ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno'.
         ($tutti ? '' : ' AND vs.debito IS NOT NULL'))
@@ -4274,7 +4274,7 @@ class ScrutinioUtil {
       $dati['voti'][$v->getMateria()->getId()] = $v;
     }
     // legge esito
-    $esito = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
+    $esito = $this->em->getRepository(Esito::class)->findOneBy(['scrutinio' => $scrutinio, 'alunno' => $alunno]);
     if (!$esito) {
       // crea nuovo esito
       $dati_esito = array(
@@ -4316,7 +4316,7 @@ class ScrutinioUtil {
     $lista_id = $this->alunniInScrutinio($classe, 'E');
     foreach ($lista_id as $id) {
       // recupera alunno
-      $alunno = $this->em->getRepository('App:Alunno')->find($id);
+      $alunno = $this->em->getRepository(Alunno::class)->find($id);
       $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $nome = $alunno->getCognome().' '.$alunno->getNome();
       // elenco voti dell'alunno
@@ -4461,7 +4461,7 @@ class ScrutinioUtil {
     // distingue per classe
     if ($classe->getAnno() == 2) {
       // competenze
-      $competenze = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $competenze = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.cognome,a.nome,a.sesso,a.dataNascita,e.dati')
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso')
@@ -4478,7 +4478,7 @@ class ScrutinioUtil {
       }
     } elseif ($classe->getAnno() != 1) {
       // crediti
-      $crediti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $crediti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.cognome,a.nome,a.sesso,a.dataNascita')
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso AND e.credito IS NULL')
@@ -4494,7 +4494,7 @@ class ScrutinioUtil {
     }
     if (empty($errore)) {
       // legge definizione scrutinio e verbale
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('E');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('E');
       $scrutinio_dati = $scrutinio->getDati();
       foreach ($def->getStruttura() as $step=>$args) {
         if ($args[0] == 'Argomento') {
@@ -4578,7 +4578,7 @@ class ScrutinioUtil {
         $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
       }
       // controlla validazione argomenti
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('E');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('E');
       foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
         // solo elementi da validare
         if (isset($args['validato']) && !$args['validato']) {
@@ -4778,14 +4778,14 @@ class ScrutinioUtil {
   public function riepilogoRinviati(Docente $docente, Classe $classe, $periodo) {
     $dati = [];
     $dati['alunni'] = [];
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo]);
     if (!$scrutinio) {
       // nessun dato presente
       return $dati;
     }
     // legge alunni
-    $rinviati = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $rinviati = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita')
       ->where('a.id IN (:lista)')
       ->setParameters(['lista' => $scrutinio->getDato('alunni')])
@@ -4797,7 +4797,7 @@ class ScrutinioUtil {
       $dati['alunni'][$alu['id']]['religione'] = $scrutinio->getDato('religione')[$alu['id']];
     }
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('m.id,m.nome,m.nomeBreve,m.tipo,m.media')
       ->where('m.id IN (:lista) AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
@@ -4853,18 +4853,18 @@ class ScrutinioUtil {
     // legge dati
     $dati = $this->riepilogoRinviati($docente, $classe, 'X');
     // alunni con voto in scrutinio
-    $alunni_esistenti = $this->em->getRepository('App:VotoScrutinio')->alunni($scrutinio);
+    $alunni_esistenti = $this->em->getRepository(VotoScrutinio::class)->alunni($scrutinio);
     // inserimento voti
     foreach ($dati['alunni'] as $alunno=>$alu) {
-      $alunno_obj = $this->em->getRepository('App:Alunno')->find($alunno);
+      $alunno_obj = $this->em->getRepository(Alunno::class)->find($alunno);
       foreach ($dati['materie'] as $materia=>$mat) {
-        $materia_obj = $this->em->getRepository('App:Materia')->find($materia);
+        $materia_obj = $this->em->getRepository(Materia::class)->find($materia);
         // esclude alunni NA per religione
         if ($mat['tipo'] != 'R' || in_array($alu['religione'], ['S', 'A'])) {
           // inserisce voti e assenze
           if (array_key_exists($alunno, $alunni_esistenti) && in_array($materia, $alunni_esistenti[$alunno])) {
             // aggiorna dati esistenti
-            $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
               ->update()
               ->set('vs.modificato', ':modificato')
               ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.materia=:materia')
@@ -5081,7 +5081,7 @@ class ScrutinioUtil {
     $lista_id = $this->alunniInScrutinio($classe, 'X');
     foreach ($lista_id as $id) {
       // recupera alunno
-      $alunno = $this->em->getRepository('App:Alunno')->find($id);
+      $alunno = $this->em->getRepository(Alunno::class)->find($id);
       $sesso = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $nome = $alunno->getCognome().' '.$alunno->getNome();
       // elenco voti dell'alunno
@@ -5222,7 +5222,7 @@ class ScrutinioUtil {
     // distingue per classe
     if ($classe->getAnno() == 2) {
       // competenze
-      $competenze = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $competenze = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.cognome,a.nome,a.sesso,a.dataNascita,e.dati')
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso')
@@ -5239,7 +5239,7 @@ class ScrutinioUtil {
       }
     } elseif ($classe->getAnno() != 1) {
       // crediti
-      $crediti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $crediti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->select('a.cognome,a.nome,a.sesso,a.dataNascita')
         ->join('e.alunno', 'a')
         ->where('e.scrutinio=:scrutinio AND e.alunno IN (:lista) AND e.esito=:ammesso AND e.credito IS NULL')
@@ -5255,7 +5255,7 @@ class ScrutinioUtil {
     }
     if (empty($errore)) {
       // legge definizione scrutinio e verbale
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('X');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('X');
       $scrutinio_dati = $scrutinio->getDati();
       foreach ($def->getStruttura() as $step=>$args) {
         if ($args[0] == 'Argomento') {
@@ -5339,7 +5339,7 @@ class ScrutinioUtil {
         $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
       }
       // controlla validazione argomenti
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('X');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('X');
       foreach ($scrutinio->getDati()['verbale'] as $step=>$args) {
         // solo elementi da validare
         if (isset($args['validato']) && !$args['validato']) {
@@ -5438,7 +5438,7 @@ class ScrutinioUtil {
     $dati = array();
     $dati['alunni'] = array();
     // legge alunni
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.nome,a.cognome,a.dataNascita,a.religione,a.bes,a.note,se.classe,se.esito,se.media,se.periodo,se.dati')
       ->join('App:StoricoEsito', 'se', 'WITH', 'se.alunno=a.id')
       ->where('a.classe=:classe')
@@ -5454,7 +5454,7 @@ class ScrutinioUtil {
       $dati['alunni'][$alu['id']] = $alu;
     }
     // legge i voti
-    $voti = $this->em->getRepository('App:StoricoVoto')->createQueryBuilder('sv')
+    $voti = $this->em->getRepository(StoricoVoto::class)->createQueryBuilder('sv')
       ->select('sv.voto,sv.carenze,sv.dati,a.id AS alunno_id,m.id AS materia_id')
       ->join('sv.materia', 'm')
       ->join('sv.storicoEsito', 'se')
@@ -5482,7 +5482,7 @@ class ScrutinioUtil {
    */
   public function verbale(Docente $docente, Classe $classe, $periodo) {
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBY(['periodo' => $periodo, 'classe' => $classe]);
+    $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBY(['periodo' => $periodo, 'classe' => $classe]);
     $dati_scrutinio = $scrutinio->getDati();
     // legge ora fine
     $ora = \DateTime::createFromFormat('H:i', date('H').':'.((intval(date('i')) < 25) ? '00' : '30'));
@@ -5490,7 +5490,7 @@ class ScrutinioUtil {
     // legge svolgimento scrutinio
     $dati['scrutinio']['in_presenza'] = isset($dati_scrutinio['in_presenza']) ? $dati_scrutinio['in_presenza'] : null;
     // legge definizione scrutinio e verbale
-    $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo($periodo);
     $struttura = array();
     foreach ($def->getStruttura() as $step=>$args) {
       if ($args[1]) {
@@ -5569,9 +5569,9 @@ class ScrutinioUtil {
     }
     $this->session->getFlashBag()->clear();
     // alunni con voto  in scrutinio
-    $alunni_esistenti = $this->em->getRepository('App:VotoScrutinio')->alunni($scrutinio);
+    $alunni_esistenti = $this->em->getRepository(VotoScrutinio::class)->alunni($scrutinio);
     // materia ed. civica
-    $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
     $dati['materie'][$edcivica->getId()] = ['id' => $edcivica->getId(), 'nome' => $edcivica->getNome(),
       'nomeBreve' => $edcivica->getNomeBreve(), 'tipo' => $edcivica->getTipo()];
     // conteggio assenze e inserimento voti
@@ -5581,7 +5581,7 @@ class ScrutinioUtil {
         // esclude alunni NA per religione
         if (in_array($mat['tipo'], ['N', 'E']) || in_array($alu['religione'], ['S', 'A'])) {
           // calcola assenze di alunno
-          $ore = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+          $ore = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
             ->select('SUM(al.ore)')
             ->join('al.lezione', 'l')
             ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
@@ -5595,7 +5595,7 @@ class ScrutinioUtil {
           // inserisce voti e assenze
           if (array_key_exists($alunno, $alunni_esistenti) && in_array($materia, $alunni_esistenti[$alunno])) {
             // aggiorna dati esistenti
-            $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+            $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
               ->update()
               ->set('vs.modificato', ':modificato')
               ->set('vs.assenze', ':assenze')
@@ -5729,7 +5729,7 @@ class ScrutinioUtil {
       // se niente errori cambia stato
       if (!$this->session->getFlashBag()->has('errore')) {
         // dati docenti
-        $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+        $docenti = $this->em->getRepository(Cattedra::class)->docentiScrutinio($classe);
         // memorizza dati docenti e materie
         $dati_docenti = array();
         foreach ($docenti as $doc) {
@@ -5817,7 +5817,7 @@ class ScrutinioUtil {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
     // legge ed.civica
-    $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+    $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
     // elenco voti/alunni
     $dati = $this->elencoVoti($docente, $classe, $edcivica, 'S');
     // controlla errori
@@ -5868,7 +5868,7 @@ class ScrutinioUtil {
     // inizializza messaggi di errore
     $this->session->getFlashBag()->clear();
     // legge condotta
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     // elenco voti/alunni
     $dati = $this->elencoVoti($docente, $classe, $condotta, 'S');
     // controlla errori
@@ -6003,7 +6003,7 @@ class ScrutinioUtil {
     }
     if (empty($errori)) {
       // legge definizione scrutinio e verbale
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('S');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('S');
       $scrutinio_dati = $scrutinio->getDati();
       foreach ($def->getStruttura() as $step=>$args) {
         if ($args[0] == 'Argomento') {
@@ -6149,7 +6149,7 @@ class ScrutinioUtil {
         $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_fine'));
       }
       // controlla validazione argomenti
-      $def = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo('S');
+      $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('S');
       if (!isset($scrutinio->getDati()['verbale'])) {
         // errore di validazione
         $this->session->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',

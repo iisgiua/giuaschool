@@ -182,7 +182,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App:Utente')->findOneBy(['username' => $credentials['username'],
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['username' => $credentials['username'],
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
@@ -196,7 +196,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
       return $user;
     }
     // trova profili attivi
-    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getNome(),
+    $profilo = $this->em->getRepository(Utente::class)->profiliAttivi($user->getNome(),
       $user->getCognome(), $user->getCodiceFiscale());
     if ($profilo) {
       if ($user instanceOf Genitore) {
@@ -248,8 +248,8 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
   public function checkCredentials($credentials, UserInterface $user) {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    $manutenzioneInizio = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine &&
         !($user instanceOf Amministratore)) {
       // errore: modalità manutenzione
@@ -259,7 +259,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.blocked_login');
     }
     // legge configurazione: id_provider
-    $id_provider = $this->em->getRepository('App:Configurazione')->findOneByParametro('id_provider');
+    $id_provider = $this->em->getRepository(Configurazione::class)->findOneByParametro('id_provider');
     // se id_provider controlla tipo utente
     if ($id_provider && $id_provider->getValore() && ($user instanceOf Docente || $user instanceOf Alunno)) {
       // errore: docente/staff/preside/alunno
@@ -300,18 +300,18 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
         throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
       }
       // legge configurazione
-      $time_start_conf = $this->em->getRepository('App:Configurazione')->findOneByParametro('blocco_inizio');
+      $time_start_conf = $this->em->getRepository(Configurazione::class)->findOneByParametro('blocco_inizio');
       $time_start = ($time_start_conf === null ? '' : $time_start_conf->getValore());
-      $time_end_conf = $this->em->getRepository('App:Configurazione')->findOneByParametro('blocco_fine');
+      $time_end_conf = $this->em->getRepository(Configurazione::class)->findOneByParametro('blocco_fine');
       $time_end = ($time_end_conf === null ? '' : $time_end_conf->getValore());
       if (($user instanceof Docente) && !($user instanceof Staff) && !($user instanceof Preside) &&
           ($time_start !== '' || $time_end !== '')) {
         // l'utente è un docente: controllo orario di blocco
         $now = date('H:i');
         if ($now >= $time_start && $now <= $time_end &&
-            !$this->em->getRepository('App:Festivita')->giornoFestivo(new \DateTime())) {
+            !$this->em->getRepository(Festivita::class)->giornoFestivo(new \DateTime())) {
           // in orario di blocco e in un giorno non festivo, controlla giorni settimana
-          $weekdays_conf = $this->em->getRepository('App:Configurazione')->findOneByParametro('giorni_festivi_istituto');
+          $weekdays_conf = $this->em->getRepository(Configurazione::class)->findOneByParametro('giorni_festivi_istituto');
           $weekdays = ($weekdays_conf === null ? array() : explode(',', $weekdays_conf->getValore()));
           if (!in_array(date('w'), $weekdays)) {
             // non è giorno settimanale festivo: blocca

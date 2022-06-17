@@ -32,7 +32,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function piani(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
@@ -58,7 +58,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function programmi(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
@@ -84,7 +84,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function relazioni(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,a.id AS alunno_id,a.cognome AS alunnoCognome,a.nome AS alunnoNome,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
@@ -111,7 +111,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function maggio(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository('App:Classe')->createQueryBuilder('cl')
+    $cattedre = $this->_em->getRepository(Classe::class)->createQueryBuilder('cl')
       ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,d AS documento')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
@@ -136,7 +136,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function docenti($criteri, Sede $sede=null, $pagina) {
     // query base
-    $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
       ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nomeBreve AS materia,d AS documento')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
@@ -226,7 +226,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function bes($criteri, Sede $sede=null, $pagina) {
     // query base
-    $alunni = $this->_em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join('App:Documento', 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
       ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')
@@ -267,7 +267,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function alunni($criteri, Sede $sede=null, $pagina) {
     // query base
-    $alunni = $this->_em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->join('App:Documento', 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
       ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')

@@ -39,7 +39,7 @@ class FirmaFixtures extends Fixture implements DependentFixtureInterface, Fixtur
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(8888);
     // legge lezioni esistenti
-    $lezioni = $em->getRepository('App:Lezione')->findAll();
+    $lezioni = $em->getRepository(Lezione::class)->findAll();
     // carica dati
     foreach ($lezioni as $lez) {
       $materia = $lez->getMateria();
@@ -48,14 +48,14 @@ class FirmaFixtures extends Fixture implements DependentFixtureInterface, Fixtur
         continue;
       } elseif ($materia->getTipo() == 'U') {
         // supplenza
-        $docenti = $em->getRepository('App:Docente')->createQueryBuilder('d')
+        $docenti = $em->getRepository(Docente::class)->createQueryBuilder('d')
           ->where('d.abilitato=:si')
           ->setParameters(['si' => 1])
           ->getQuery()
           ->getResult();
       } else {
         // materia curricolare
-        $docenti = $em->getRepository('App:Docente')->createQueryBuilder('d')
+        $docenti = $em->getRepository(Docente::class)->createQueryBuilder('d')
           ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id')
           ->where('d.abilitato=:si AND c.attiva=:si AND c.materia=:materia AND c.classe=:classe')
           ->setParameters(['si' => 1, 'materia' => $materia, 'classe' => $lez->getClasse()])

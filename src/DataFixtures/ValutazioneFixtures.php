@@ -39,10 +39,10 @@ class ValutazioneFixtures extends Fixture implements DependentFixtureInterface, 
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7171);
     // carica dati
-    $firme = $em->getRepository('App:Firma')->findBy([]);
+    $firme = $em->getRepository(Firma::class)->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $firma = $faker->randomElement($firme);
-      $alunni = $em->getRepository('App:Alunno')->findByClasse($firma->getLezione()->getClasse());
+      $alunni = $em->getRepository(Alunno::class)->findByClasse($firma->getLezione()->getClasse());
       $valutazione = (new Valutazione())
         ->setTipo($faker->randomElement(['S', 'O', 'P']))
         ->setVisibile($faker->randomElement([true, true, false]))

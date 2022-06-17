@@ -39,8 +39,8 @@ class ColloquioFixtures extends Fixture implements DependentFixtureInterface, Fi
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7575);
     // carica dati
-    $orari = $em->getRepository('App:Orario')->findBy([]);
-    $docenti = $em->getRepository('App:Docente')->findBy([]);
+    $orari = $em->getRepository(Orario::class)->findBy([]);
+    $docenti = $em->getRepository(Docente::class)->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $colloquio = (new Colloquio())
         ->setFrequenza($faker->randomElement(['S', '1', '2', '3', '4']))

@@ -253,7 +253,7 @@ class AlunnoRepository extends BaseRepository {
         ->getArrayResult();
     } else {
       // aggiunge alunni attuali che non hanno fatto cambiamenti di classe in quella data
-      $cambio = $this->_em->getRepository('App:CambioClasse')->createQueryBuilder('cc')
+      $cambio = $this->_em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
         ->where('cc.alunno=a.id AND :data BETWEEN cc.inizio AND cc.fine')
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni_id1 = $this->createQueryBuilder('a')

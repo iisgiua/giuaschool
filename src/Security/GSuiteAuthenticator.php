@@ -139,7 +139,7 @@ class GSuiteAuthenticator extends SocialAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // autenticato su Google: controlla se esiste nel registro
-    $user = $this->em->getRepository('App:Utente')->findOneBy(['email' => $userGoogle->getEmail(),
+    $user = $this->em->getRepository(Utente::class)->findOneBy(['email' => $userGoogle->getEmail(),
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste nel registro
@@ -158,7 +158,7 @@ class GSuiteAuthenticator extends SocialAuthenticator {
       return $user;
     }
     // trova profili attivi per docente
-    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getNome(),
+    $profilo = $this->em->getRepository(Utente::class)->profiliAttivi($user->getNome(),
       $user->getCognome(), $user->getCodiceFiscale());
     if ($profilo) {
       // controlla che il profilo sia lo stesso richiesto tramite autenticazione Google
@@ -197,8 +197,8 @@ class GSuiteAuthenticator extends SocialAuthenticator {
   public function checkCredentials($credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    $manutenzioneInizio = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di accesso da Google durante la modalità manutenzione.', array(

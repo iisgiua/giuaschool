@@ -167,7 +167,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App:Utente')->findOneBy(array('codiceFiscale' => $credentials['taxCode']));
+    $user = $this->em->getRepository(Utente::class)->findOneBy(array('codiceFiscale' => $credentials['taxCode']));
     if (!$user) {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login tramite smartcard.', array(
@@ -195,8 +195,8 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
   public function checkCredentials($credentials, UserInterface $user) {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    $manutenzioneInizio = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di accesso da carta durante la modalità manutenzione.', array(

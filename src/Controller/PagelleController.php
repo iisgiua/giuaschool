@@ -57,7 +57,7 @@ class PagelleController extends AbstractController {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -75,7 +75,7 @@ class PagelleController extends AbstractController {
       }
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore
@@ -180,7 +180,7 @@ class PagelleController extends AbstractController {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -203,7 +203,7 @@ class PagelleController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore

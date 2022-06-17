@@ -109,7 +109,7 @@ class AppController extends AbstractController {
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     // controlla utente
-    $user = $em->getRepository('App:Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $user = $em->getRepository(Utente::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
     if ($user) {
       // utente esistente
       if (($profilo == 'G' && $user instanceOf Genitore) || ($profilo == 'A' && $user instanceOf Alunno) ||
@@ -158,7 +158,7 @@ class AppController extends AbstractController {
     // carica configurazione di sistema
     $config->carica();
     // legge app abilitate
-    $apps = $em->getRepository('App:App')->findBy(['attiva' => 1]);
+    $apps = $em->getRepository(App::class)->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
@@ -186,7 +186,7 @@ class AppController extends AbstractController {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
-    $app = $em->getRepository('App:App')->findOneBy(['id' => $id, 'attiva' => 1]);
+    $app = $em->getRepository(App::class)->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -223,7 +223,7 @@ class AppController extends AbstractController {
     // inizializza
     $dati = array();
     // controlla servizio
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if ($app) {
       $dati_app = $app->getDati();
       if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
@@ -271,7 +271,7 @@ class AppController extends AbstractController {
     // legge dati
     $token = $request->request->get('token');
     // controllo app
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -300,7 +300,7 @@ class AppController extends AbstractController {
     $token = $request->headers->get('X-Giuaschool-Token');
     $username = $request->request->get('username');
     // controlla servizio
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository(App::class)->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore: servizio non esiste o non è abilitato
       $dati['stato'] = 'ERRORE';
@@ -316,7 +316,7 @@ class AppController extends AbstractController {
       return new JsonResponse($dati);
     }
     // cerca utente
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $alunno = $em->getRepository(Alunno::class)->findOneBy(['username' => $username, 'abilitato' => 1]);
     if (!$alunno) {
       // errore: utente on valido
       $dati['stato'] = 'ERRORE';

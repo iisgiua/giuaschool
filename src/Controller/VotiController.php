@@ -82,7 +82,7 @@ class VotiController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -102,12 +102,12 @@ class VotiController extends AbstractController {
       $session->set('/APP/DOCENTE/classe_lezione', $classe->getId());
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('U');
+      $materia = $em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -200,7 +200,7 @@ class VotiController extends AbstractController {
       $session->set('/APP/ROUTE/lezioni_voti_classe/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
+    $cattedra = $em->getRepository(Cattedra::class)->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -269,7 +269,7 @@ class VotiController extends AbstractController {
         $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
       }
       // controlla lezione
-      $lezione = $em->getRepository('App:Lezione')->lezioneVoto($form->get('data')->getData(),
+      $lezione = $em->getRepository(Lezione::class)->lezioneVoto($form->get('data')->getData(),
         $this->getUser(), $classe, $cattedra->getMateria());
       if (!$lezione) {
         // lezione non esiste
@@ -305,7 +305,7 @@ class VotiController extends AbstractController {
           }
         }
         $conferma = 1;
-        $assenti = $em->getRepository('App:Lezione')->alunniAssenti($lezione, $alunniVoto);
+        $assenti = $em->getRepository(Lezione::class)->alunniAssenti($lezione, $alunniVoto);
         if (!empty($assenti) && $session->get('/APP/ROUTE/lezioni_voti_classe/conferma', 0) != $conferma) {
           // alunni assenti: richiede conferma
           $session->set('/APP/ROUTE/lezioni_voti_classe/conferma', $conferma);
@@ -319,10 +319,10 @@ class VotiController extends AbstractController {
               $valutazione->setVoto(10);
             }
             // legge alunno
-            $alunno = $em->getRepository('App:Alunno')->find($valutazione->getId());
+            $alunno = $em->getRepository(Alunno::class)->find($valutazione->getId());
             // legge vecchio voto
             $voto = ($elenco_precedente[$key]->getVotoId() ?
-              $em->getRepository('App:Valutazione')->find($elenco_precedente[$key]->getVotoId()) : null);
+              $em->getRepository(Valutazione::class)->find($elenco_precedente[$key]->getVotoId()) : null);
             if (!$voto && ($valutazione->getVoto() > 0 || !empty($valutazione->getGiudizio()))) {
               // valutazione aggiunta
               $voto = (new Valutazione())
@@ -447,7 +447,7 @@ class VotiController extends AbstractController {
       $session->set('/APP/ROUTE/lezioni_voti_alunno/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
+    $cattedra = $em->getRepository(Cattedra::class)->find($cattedra);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -455,7 +455,7 @@ class VotiController extends AbstractController {
     // recupera classe
     $classe = $cattedra->getClasse();
     // controllo alunno
-    $alunno = $em->getRepository('App:Alunno')->find($alunno);
+    $alunno = $em->getRepository(Alunno::class)->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -463,7 +463,7 @@ class VotiController extends AbstractController {
     // controllo voto
     if ($id) {
       // legge voto
-      $valutazione = $em->getRepository('App:Valutazione')->findOneBy(['id' => $id, 'alunno' => $alunno,
+      $valutazione = $em->getRepository(Valutazione::class)->findOneBy(['id' => $id, 'alunno' => $alunno,
         'docente' => $this->getUser(), 'tipo' => $tipo]);
       if ($valutazione) {
         $valutazione_precedente = array($valutazione->getId(), $valutazione->getVisibile(), $valutazione->getArgomento(),
@@ -555,7 +555,7 @@ class VotiController extends AbstractController {
           $form->get('data')->addError(new FormError($trans->trans('exception.data_festiva')));
         }
         // controlla lezione
-        $lezione = $em->getRepository('App:Lezione')->lezioneVoto($form->get('data')->getData(),
+        $lezione = $em->getRepository(Lezione::class)->lezioneVoto($form->get('data')->getData(),
           $this->getUser(), $classe, $cattedra->getMateria());
         if (!$lezione) {
           // lezione non esiste
@@ -579,7 +579,7 @@ class VotiController extends AbstractController {
       if ($form->isValid()) {
         // controlla presenza alunno
         $conferma = 1;
-        $assente = $em->getRepository('App:Lezione')->alunnoAssente($valutazione->getLezione(),
+        $assente = $em->getRepository(Lezione::class)->alunnoAssente($valutazione->getLezione(),
           $valutazione->getAlunno());
         if (!($valutazione_precedente && $form->get('delete')->isClicked()) && $assente &&
             $session->get('/APP/ROUTE/lezioni_voti_alunno/conferma', 0) != $conferma) {
@@ -688,7 +688,7 @@ class VotiController extends AbstractController {
     }
     // parametro alunno
     if ($alunno > 0) {
-      $alunno = $em->getRepository('App:Alunno')->find($alunno);
+      $alunno = $em->getRepository(Alunno::class)->find($alunno);
       if (!$alunno) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -697,7 +697,7 @@ class VotiController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -710,7 +710,7 @@ class VotiController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -718,7 +718,7 @@ class VotiController extends AbstractController {
     }
     if ($cattedra) {
       // lista alunni
-      $alunni = $em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.bes,a.note,a.religione')
         ->where('a.classe=:classe AND a.abilitato=:abilitato')
         ->setParameters(['classe' => $classe, 'abilitato' => 1])
@@ -791,7 +791,7 @@ class VotiController extends AbstractController {
     // controllo cattedra
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -808,7 +808,7 @@ class VotiController extends AbstractController {
     }
     // parametro materia
     if ($materia > 0) {
-      $materia = $em->getRepository('App:Materia')->find($materia);
+      $materia = $em->getRepository(Materia::class)->find($materia);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -899,7 +899,7 @@ class VotiController extends AbstractController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -984,7 +984,7 @@ class VotiController extends AbstractController {
     $formatter->setPattern('EEEE d MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // controllo cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -1039,7 +1039,7 @@ class VotiController extends AbstractController {
   public function votiCancellaAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                      LogHandler $dblogger, $id) {
     // controllo voto
-    $valutazione = $em->getRepository('App:Valutazione')->findOneBy(['id' => $id,
+    $valutazione = $em->getRepository(Valutazione::class)->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
     if (!$valutazione) {
       // errore

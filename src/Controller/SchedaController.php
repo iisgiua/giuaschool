@@ -46,7 +46,7 @@ class SchedaController extends AbstractController {
     $info = null;
     $dati = null;
     // controllo cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -58,7 +58,7 @@ class SchedaController extends AbstractController {
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     $info['edcivica'] = ($cattedra->getMateria()->getTipo() == 'E');
     // controllo alunno
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -80,7 +80,7 @@ class SchedaController extends AbstractController {
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
       $dati['scrutini'][0]['voto'] = null;
-      $voto = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voto = $em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
         ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
@@ -102,7 +102,7 @@ class SchedaController extends AbstractController {
       $dati['scrutini'][0]['voto'] = null;
       $dati['scrutini'][1]['nome'] = 'Scrutinio del '.$periodi[2]['nome'];
       $dati['scrutini'][1]['voto'] = null;
-      $voti = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo IN (:periodi) AND s.stato=:stato')
         ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),

@@ -298,7 +298,7 @@ class LoginController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       $codice = $form->get('otp')->getData();
       $email = $form->get('email')->getData();
-      $utente = $em->getRepository('App:Utente')->findOneByEmail($email);
+      $utente = $em->getRepository(Utente::class)->findOneByEmail($email);
       // legge configurazione: id_provider
       $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
       // se id_provider controlla tipo utente
@@ -464,7 +464,7 @@ class LoginController extends BaseController {
     $lista = [];
     foreach ($session->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
       foreach ($profili as $id) {
-        $utente = $em->getRepository('App:Utente')->find($id);
+        $utente = $em->getRepository(Utente::class)->find($id);
         $nome = $ruolo.' ';
         if ($ruolo == 'GENITORE') {
           // profilo genitore
@@ -497,7 +497,7 @@ class LoginController extends BaseController {
       if ($profiloId && (!$session->get('/APP/UTENTE/profilo_usato') ||
           $session->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
         // legge utente selezionato
-        $utente = $em->getRepository('App:Utente')->find($profiloId);
+        $utente = $em->getRepository(Utente::class)->find($profiloId);
         // imposta ultimo accesso
         $accesso = $utente->getUltimoAccesso();
         $session->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));

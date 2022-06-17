@@ -123,7 +123,7 @@ class ScansioneOrariaRepository extends EntityRepository {
    */
   public function orarioGiorno($giorno, Orario $orario=null) {
     if (!$orario) {
-      $orario = $this->_em->getRepository('App:Orario')->orarioSede(null);
+      $orario = $this->_em->getRepository(Orario::class)->orarioSede(null);
     }
     // legge le ore del giorno
     $ore = $this->createQueryBuilder('s')

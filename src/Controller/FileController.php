@@ -146,7 +146,7 @@ class FileController extends AbstractController {
   public function avvisoAction(EntityManagerInterface $em, BachecaUtil $bac,
                                 $avviso, $allegato) {
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($avviso);
+    $avviso = $em->getRepository(Avviso::class)->find($avviso);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -187,7 +187,7 @@ class FileController extends AbstractController {
    */
   public function downloadSegreteriaAction(EntityManagerInterface $em, $tipo, $id) {
     // controllo
-    $storico = $em->getRepository('App:StoricoEsito')->findOneByAlunno($id);
+    $storico = $em->getRepository(StoricoEsito::class)->findOneByAlunno($id);
     if (!$storico) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -261,7 +261,7 @@ class FileController extends AbstractController {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {
-      $assenza = $em->getRepository('App:Assenza')->find($id);
+      $assenza = $em->getRepository(Assenza::class)->find($id);
       if (!$assenza) {
         // errore assenza non definita
         throw $this->createNotFoundException('exception.id_notfound');

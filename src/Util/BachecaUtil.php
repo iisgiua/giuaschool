@@ -73,7 +73,7 @@ class BachecaUtil {
     $dati['utenti'] = [];
     $dati['materie'] = [];
     // legge sedi
-    $dati['sedi'] = $this->em->getRepository('App:Sede')->createQueryBuilder('s')
+    $dati['sedi'] = $this->em->getRepository(Sede::class)->createQueryBuilder('s')
       ->select('s.citta')
       ->where('s.id IN (:lista)')
       ->setParameters(['lista' => array_map(function ($s) { return $s->getId(); }, $avviso->getSedi()->toArray())])
@@ -83,7 +83,7 @@ class BachecaUtil {
     // legge filtri
     if ($avviso->getFiltroTipo() == 'C') {
       // filtro classi
-      $dati['classi'] = $this->em->getRepository('App:Classe')->createQueryBuilder('c')
+      $dati['classi'] = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
         ->select('c.anno,c.sezione')
         ->where('c.id IN (:lista)')
         ->orderBy('c.anno,c.sezione', 'ASC')
@@ -92,7 +92,7 @@ class BachecaUtil {
         ->getArrayResult();
     } elseif ($avviso->getFiltroTipo() == 'U') {
       // filtro utenti
-      $dati['utenti'] = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $dati['utenti'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('DISTINCT a.cognome,a.nome,a.dataNascita,c.anno,c.sezione,aa.letto,ag1.letto AS letto_genitore1,ag2.letto AS letto_genitore2')
         ->join('a.classe', 'c')
         ->join('App:Genitore', 'g1', 'WITH', 'g1.alunno=a.id')
@@ -107,7 +107,7 @@ class BachecaUtil {
         ->getArrayResult();
     } elseif ($avviso->getFiltroTipo() == 'M') {
       // filtro materie
-      $dati['materie'] = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati['materie'] = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
         ->select('m.nome')
         ->where('m.id IN (:lista)')
         ->setParameters(['lista' => $avviso->getFiltro()])
@@ -184,13 +184,13 @@ class BachecaUtil {
     // legge classi
     if ($avviso->getFiltroTipo() == 'T') {
       // tutte le classi di sedi
-      $classi = $this->em->getRepository('App:Classe')->getIdClasse($sedi, null);
+      $classi = $this->em->getRepository(Classe::class)->getIdClasse($sedi, null);
     } elseif ($avviso->getFiltroTipo() == 'C') {
       // classi del filtro
-      $classi = $this->em->getRepository('App:Classe')->getIdClasse($sedi, $avviso->getFiltro());
+      $classi = $this->em->getRepository(Classe::class)->getIdClasse($sedi, $avviso->getFiltro());
     } elseif ($avviso->getFiltroTipo() == 'U') {
       // classi di alunni/genitori
-      $classi = $this->em->getRepository('App:Classe')->getIdClasseAlunni($sedi, $avviso->getFiltro());
+      $classi = $this->em->getRepository(Classe::class)->getIdClasseAlunni($sedi, $avviso->getFiltro());
     }
     // crea annotazioni
     $testo = $this->testoAvviso($avviso);
@@ -238,7 +238,7 @@ class BachecaUtil {
   public function listaAvvisi($ricerca, $pagina, $limite, Docente $docente, $tipo) {
     $dati = array();
     // legge avvisi
-    $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+    $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->where('a.tipo=:tipo');
     if ($ricerca['docente']) {
       $avvisi = $avvisi->andWhere('a.docente=:docente')->setParameter('docente', $ricerca['docente']);
@@ -308,7 +308,7 @@ class BachecaUtil {
     // destinatari
     $dati = $this->filtriAvviso($avviso);
     // statistiche lettura
-    $dati['statistiche'] = $this->em->getRepository('App:Avviso')->statistiche($avviso);
+    $dati['statistiche'] = $this->em->getRepository(Avviso::class)->statistiche($avviso);
     // dati avviso
     $dati['avviso'] = $avviso;
     $dati['testo'] = $this->testoAvviso($avviso);
@@ -334,7 +334,7 @@ class BachecaUtil {
       return true;
     }
     // controlla destinatario classe
-    if ($utente instanceOf Docente && $this->em->getRepository('App:AvvisoClasse')->findOneByAvviso($avviso)) {
+    if ($utente instanceOf Docente && $this->em->getRepository(AvvisoClasse::class)->findOneByAvviso($avviso)) {
       // docente può leggere gli avvisi rivolti alla classe
       return true;
     }
@@ -356,7 +356,7 @@ class BachecaUtil {
    */
   public function destinatario(Avviso $avviso, Utente $utente) {
     // controlla destinatario
-    $dest = $this->em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+    $dest = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->where('au.avviso=:avviso AND au.utente=:utente')
       ->setParameters(['avviso' => $avviso, 'utente' => $utente])
       ->setMaxResults(1)
@@ -382,7 +382,7 @@ class BachecaUtil {
    */
   public function bachecaAvvisi($search, $pagina, $limite, Utente $utente) {
     // lista avvisi
-    $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+    $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('a as avviso,au.letto')
       ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
       ->where('au.utente=:utente')
@@ -416,7 +416,7 @@ class BachecaUtil {
    */
   public function bachecaNumeroAvvisiAlunni(Classe $classe) {
     // lista avvisi non letti
-    $avvisi = $this->em->getRepository('App:AvvisoClasse')->createQueryBuilder('avc')
+    $avvisi = $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('avc')
       ->select('COUNT(avc.avviso)')
       ->where('avc.classe=:classe AND avc.letto IS NULL')
       ->setParameters(['classe' => $classe])
@@ -435,7 +435,7 @@ class BachecaUtil {
    */
   public function bachecaAvvisiAlunni(Classe $classe) {
     // lista avvisi non letti
-    $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+    $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->join('App:AvvisoClasse', 'avc', 'WITH', 'avc.avviso=a.id')
       ->where('avc.classe=:classe AND avc.letto IS NULL')
       ->orderBy('a.data', 'ASC')
@@ -461,14 +461,14 @@ class BachecaUtil {
   public function letturaAvvisoAlunni(Classe $classe, $id) {
     if ($id == 'ALL') {
       // tutti gli avvisi
-      $avc = $this->em->getRepository('App:AvvisoClasse')->createQueryBuilder('avc')
+      $avc = $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('avc')
         ->where('avc.classe=:classe AND avc.letto IS NULL')
         ->setParameters(['classe' => $classe])
         ->getQuery()
         ->getResult();
     } elseif (intval($id) > 0) {
       // solo avviso indicato
-      $avc = $this->em->getRepository('App:AvvisoClasse')->createQueryBuilder('avc')
+      $avc = $this->em->getRepository(AvvisoClasse::class)->createQueryBuilder('avc')
         ->where('avc.avviso=:avviso AND avc.classe=:classe AND avc.letto IS NULL')
         ->setParameters(['avviso' => $id, 'classe' => $classe])
         ->getQuery()
@@ -493,7 +493,7 @@ class BachecaUtil {
   public function listaAvvisiCoordinatore($pagina, $limite, Docente $docente, Classe $classe) {
     $dati = array();
     // legge avvisi
-    $avvisi = $this->em->getRepository('App:Avviso')->createQueryBuilder('a')
+    $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->join('a.cattedra', 'c')
       ->where('a.tipo=:tipo AND c.classe=:classe')
       ->setParameters(['tipo' => 'O', 'classe' => $classe])
@@ -541,39 +541,39 @@ class BachecaUtil {
     // dsga
     if (in_array('D', $avviso->getDestinatariAta())) {
       // aggiunge DSGA
-      $utenti = $this->em->getRepository('App:Ata')->getIdDsga();
+      $utenti = $this->em->getRepository(Ata::class)->getIdDsga();
     }
     // ata
     if (in_array('A', $avviso->getDestinatariAta())) {
       // aggiunge ATA
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Ata')->getIdAta($sedi));
+      $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdAta($sedi));
     }
     // coordinatori
     if (in_array('C', $avviso->getDestinatari())) {
       // aggiunge coordinatori
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Docente')
+      $utenti = array_merge($utenti, $this->em->getRepository(Docente::class)
         ->getIdCoordinatore($sedi, $avviso->getFiltroTipo() == 'C' ? $avviso->getFiltro() : null));
     }
     // docenti
     if (in_array('D', $avviso->getDestinatari())) {
       // aggiunge docenti
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Docente')
+      $utenti = array_merge($utenti, $this->em->getRepository(Docente::class)
         ->getIdDocente($sedi, $avviso->getFiltroTipo(), $avviso->getFiltro()));
     }
     // genitori
     if (in_array('G', $avviso->getDestinatari())) {
       // aggiunge genitori
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Genitore')
+      $utenti = array_merge($utenti, $this->em->getRepository(Genitore::class)
         ->getIdGenitore($sedi, $avviso->getFiltroTipo(), $avviso->getFiltro()));
     }
     // alunni
     if (in_array('A', $avviso->getDestinatari())) {
       // aggiunge alunni
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Alunno')
+      $utenti = array_merge($utenti, $this->em->getRepository(Alunno::class)
         ->getIdAlunno($sedi, $avviso->getFiltroTipo(), $avviso->getFiltro()));
       if ($avviso->getFiltroTipo() != 'U') {
         // aggiunge classi
-        $classi = array_merge($classi, $this->em->getRepository('App:Classe')
+        $classi = array_merge($classi, $this->em->getRepository(Classe::class)
           ->getIdClasse($sedi, $avviso->getFiltroTipo() == 'C' ? $avviso->getFiltro() : null));
       }
     }
@@ -592,7 +592,7 @@ class BachecaUtil {
    */
   public function letturaAvviso(Avviso $avviso, Utente $utente) {
     // solo avviso indicato
-    $au = $this->em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+    $au = $this->em->getRepository(AvvisoUtente::class)->createQueryBuilder('au')
       ->where('au.avviso=:avviso AND au.utente=:utente AND au.letto IS NULL')
       ->setParameters(['avviso' => $avviso, 'utente' => $utente])
       ->getQuery()

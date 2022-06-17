@@ -58,7 +58,7 @@ class BaseController extends AbstractController {
     $session = $this->get('session');
     list($azione_principale) = explode('_', $azione);
     // legge breadcrumb
-    $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
+    $breadcrumb = $this->em->getRepository(MenuOpzione::class)->breadcrumb($categoria.'_'.$azione_principale,
       $this->getUser(), $session);
     // restituisce vista
     $tema = $session->get('/APP/APP/tema', '');

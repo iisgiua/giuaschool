@@ -129,7 +129,7 @@ class AssenzeController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -142,12 +142,12 @@ class AssenzeController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository(Classe::class)->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('U');
+      $materia = $em->getRepository(Materia::class)->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -161,9 +161,9 @@ class AssenzeController extends AbstractController {
     if ($classe) {
       // data prec/succ
       $data_succ = (clone $data_fine);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository(Festivita::class)->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_inizio);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository(Festivita::class)->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -173,11 +173,11 @@ class AssenzeController extends AbstractController {
         $oggi = new \DateTime();
         $adesso = $oggi->format('H:i');
         if ($oggi->format('w') != 0 &&
-            $adesso >= $em->getRepository('App:ScansioneOraria')->inizioLezioni($oggi, $classe->getSede()) &&
-            $adesso <= $em->getRepository('App:ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
+            $adesso >= $em->getRepository(ScansioneOraria::class)->inizioLezioni($oggi, $classe->getSede()) &&
+            $adesso <= $em->getRepository(ScansioneOraria::class)->fineLezioni($oggi, $classe->getSede())) {
           // avvisi alla classe
           $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
-          $lista_circolari = $em->getRepository('App:Circolare')->listaCircolariClasse($classe);
+          $lista_circolari = $em->getRepository(Circolare::class)->listaCircolariClasse($classe);
         }
         // recupera dati
         $dati = $reg->quadroAssenzeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
@@ -233,7 +233,7 @@ class AssenzeController extends AbstractController {
     // controlla cattedra
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
+      $cattedra = $em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -243,7 +243,7 @@ class AssenzeController extends AbstractController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -256,7 +256,7 @@ class AssenzeController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -264,7 +264,7 @@ class AssenzeController extends AbstractController {
     // controlla assenza
     if ($id > 0) {
       // assenza esistente
-      $assenza = $em->getRepository('App:Assenza')->findOneBy(['id' => $id,
+      $assenza = $em->getRepository(Assenza::class)->findOneBy(['id' => $id,
         'alunno' => $alunno, 'data' => $data_obj]);
       if (!$assenza) {
         // assenza non esiste, niente da fare
@@ -273,7 +273,7 @@ class AssenzeController extends AbstractController {
       $em->remove($assenza);
     } else {
       // controlla se esiste assenza
-      $assenza = $em->getRepository('App:Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+      $assenza = $em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
       if ($assenza) {
         // assenza esiste già, niente da fare
         return $this->redirectToRoute('lezioni_assenze_quadro');
@@ -285,14 +285,14 @@ class AssenzeController extends AbstractController {
         ->setDocente($this->getUser());
       $em->persist($assenza);
       // controlla esistenza ritardo
-      $entrata = $em->getRepository('App:Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+      $entrata = $em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
       if ($entrata) {
         // rimuove ritardo
         $id_entrata = $entrata->getId();
         $em->remove($entrata);
       }
       // controlla esistenza uscita
-      $uscita = $em->getRepository('App:Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+      $uscita = $em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
       if ($uscita) {
         // rimuove uscita
         $id_uscita = $uscita->getId();
@@ -381,7 +381,7 @@ class AssenzeController extends AbstractController {
     $label = array();
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
+      $cattedra = $em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -391,7 +391,7 @@ class AssenzeController extends AbstractController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -404,7 +404,7 @@ class AssenzeController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -412,7 +412,7 @@ class AssenzeController extends AbstractController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla entrata
-    $entrata = $em->getRepository('App:Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $entrata = $em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($entrata) {
       // edit
       $entrata_old['ora'] = $entrata->getOra();
@@ -505,7 +505,7 @@ class AssenzeController extends AbstractController {
               ->setValido(false);
           }
           // controlla se risulta assente
-          $assenza = $em->getRepository('App:Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -599,7 +599,7 @@ class AssenzeController extends AbstractController {
     $label = array();
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
+      $cattedra = $em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -609,7 +609,7 @@ class AssenzeController extends AbstractController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -622,7 +622,7 @@ class AssenzeController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -630,7 +630,7 @@ class AssenzeController extends AbstractController {
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla uscita
-    $uscita = $em->getRepository('App:Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+    $uscita = $em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($uscita) {
       // edit
       $uscita_old['ora'] = $uscita->getOra();
@@ -705,7 +705,7 @@ class AssenzeController extends AbstractController {
           $em->remove($uscita);
         } else {
           // controlla se risulta assente
-          $assenza = $em->getRepository('App:Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+          $assenza = $em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
           if ($assenza) {
             // cancella assenza
             $id_assenza = $assenza->getId();
@@ -795,7 +795,7 @@ class AssenzeController extends AbstractController {
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
+      $cattedra = $em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -805,7 +805,7 @@ class AssenzeController extends AbstractController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -818,7 +818,7 @@ class AssenzeController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla alunno
-    $alunno = $em->getRepository('App:Alunno')->find($alunno);
+    $alunno = $em->getRepository(Alunno::class)->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -833,12 +833,12 @@ class AssenzeController extends AbstractController {
       // modalità assenze orarie
       $giustifica = $reg->assenzeOreDaGiustificare($data_obj, $alunno, $classe);
       $func_convalida = function($value, $key, $index) use($em, $alunno) {
-        $ore = $em->getRepository('App:AssenzaLezione')->alunnoOreAssenze($alunno, $value->data_obj);
+        $ore = $em->getRepository(AssenzaLezione::class)->alunnoOreAssenze($alunno, $value->data_obj);
         $ore_str = implode('ª, ', $ore).'ª';
         return '<strong>'.$value->data.(count($ore) > 0 ? (' - Ore: '.$ore_str) : '').'</strong>'.
           '<br>Motivazione: <em>'.$value->motivazione.'</em>'; };
       $func_assenze = function($value, $key, $index) use($em, $alunno) {
-        $ore = $em->getRepository('App:AssenzaLezione')->alunnoOreAssenze($alunno, $value->data_obj);
+        $ore = $em->getRepository(AssenzaLezione::class)->alunnoOreAssenze($alunno, $value->data_obj);
         $ore_str = implode('ª, ', $ore).'ª';
         return '<strong>'.$value->data.(count($ore) > 0 ? (' - Ore: '.$ore_str) : '').'</strong>'; };
     } else {
@@ -911,7 +911,7 @@ class AssenzeController extends AbstractController {
     if ($form->isSubmitted() && $form->isValid()) {
       // gruppi di assenze
       foreach ($form->get('assenze')->getData() as $ass) {
-        $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')
+        $risultato = $em->getRepository(Assenza::class)->createQueryBuilder('ass')
           ->update()
           ->set('ass.modificato', ':modificato')
           ->set('ass.giustificato', ':giustificato')
@@ -923,7 +923,7 @@ class AssenzeController extends AbstractController {
           ->getResult();
       }
       foreach ($form->get('convalida_assenze')->getData() as $ass) {
-        $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')
+        $risultato = $em->getRepository(Assenza::class)->createQueryBuilder('ass')
           ->update()
           ->set('ass.modificato', ':modificato')
           ->set('ass.docenteGiustifica', ':docenteGiustifica')
@@ -998,7 +998,7 @@ class AssenzeController extends AbstractController {
     $label = array();
     if ($cattedra > 0) {
       // cattedra definita
-      $cattedra = $em->getRepository('App:Cattedra')->find($cattedra);
+      $cattedra = $em->getRepository(Cattedra::class)->find($cattedra);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1008,7 +1008,7 @@ class AssenzeController extends AbstractController {
       $cattedra = null;
     }
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1060,7 +1060,7 @@ class AssenzeController extends AbstractController {
       $orario = $reg->orarioInData($data_obj, $classe->getSede());
       $alunni_assenza = array();
       foreach ($form->get('lista')->getData() as $key=>$appello) {
-        $alunno = $em->getRepository('App:Alunno')->find($appello->getId());
+        $alunno = $em->getRepository(Alunno::class)->find($appello->getId());
         if (!$alunno) {
           // alunno non esiste, salta
           continue;
@@ -1069,7 +1069,7 @@ class AssenzeController extends AbstractController {
         switch ($appello->getPresenza()) {
           case 'A':   // assente
             // controlla se assenza esiste
-            $assenza = $em->getRepository('App:Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $assenza = $em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if (!$assenza) {
               // inserisce nuova assenza
               $assenza = (new Assenza())
@@ -1080,14 +1080,14 @@ class AssenzeController extends AbstractController {
               $log['assenza_create'][] = $assenza;
             }
             // controlla esistenza ritardo
-            $entrata = $em->getRepository('App:Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $entrata = $em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($entrata) {
               // rimuove ritardo
               $log['entrata_delete'][] = array($entrata->getId(), $entrata);
               $em->remove($entrata);
             }
             // controlla esistenza uscita
-            $uscita = $em->getRepository('App:Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $uscita = $em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($uscita) {
               // rimuove uscita
               $log['uscita_delete'][] = array($uscita->getId(), $uscita);
@@ -1096,21 +1096,21 @@ class AssenzeController extends AbstractController {
             break;
           case 'P':   // presente
             // controlla esistenza assenza
-            $assenza = $em->getRepository('App:Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $assenza = $em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($assenza) {
               // rimuove assenza
               $log['assenza_delete'][] = array($assenza->getId(), $assenza);
               $em->remove($assenza);
             }
             // controlla esistenza ritardo
-            $entrata = $em->getRepository('App:Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $entrata = $em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($entrata) {
               // rimuove ritardo
               $log['entrata_delete'][] = array($entrata->getId(), $entrata);
               $em->remove($entrata);
             }
             // controlla esistenza uscita
-            $uscita = $em->getRepository('App:Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $uscita = $em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($uscita) {
               // rimuove uscita
               $log['uscita_delete'][] = array($uscita->getId(), $uscita);
@@ -1126,7 +1126,7 @@ class AssenzeController extends AbstractController {
               continue 2;
             }
             // controlla esistenza ritardo
-            $entrata = $em->getRepository('App:Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $entrata = $em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($entrata) {
               if ($entrata->getOra()->format('H:i') != $appello->getOra()->format('H:i')) {
                 // modifica
@@ -1173,7 +1173,7 @@ class AssenzeController extends AbstractController {
               $log['entrata_create'][] = $entrata;
             }
             // controlla esistenza assenza
-            $assenza = $em->getRepository('App:Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            $assenza = $em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
             if ($assenza) {
               // rimuove assenza
               $log['assenza_delete'][] = array($assenza->getId(), $assenza);

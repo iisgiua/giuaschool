@@ -173,7 +173,7 @@ class DocenteRepository extends BaseRepository {
     // docenti senza cattedra
     if ($tipo == 'T' || $tipo == 'M' || $tipo == 'U') {
       // aggiunge docenti senza cattedra
-      $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.docente=d.id AND c.attiva=:attiva')
         ->getDQL();
@@ -241,7 +241,7 @@ class DocenteRepository extends BaseRepository {
         ->setParameter('classe', $criteri['classe'])
         ->setParameter('attiva', 1);
     } elseif ($criteri['classe'] == -1) {
-      $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.docente=d.id AND c.attiva=:attiva')
         ->getDQL();

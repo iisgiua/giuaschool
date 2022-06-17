@@ -39,8 +39,8 @@ class RichiestaColloquioFixtures extends Fixture implements DependentFixtureInte
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7474);
     // carica dati
-    $alunni = $em->getRepository('App:Alunno')->findBy([]);
-    $colloqui = $em->getRepository('App:Colloquio')->findBy([]);
+    $alunni = $em->getRepository(Alunno::class)->findBy([]);
+    $colloqui = $em->getRepository(Colloquio::class)->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $alunno = $faker->randomElement($alunni);
       $richiesta = (new RichiestaColloquio())

@@ -368,7 +368,7 @@ class UtentiController extends AbstractController {
       $notifica = array();
       if ($form->get('abilita')->getData() === true) {
         // abilita
-        $app = $em->getRepository('App:App')->findOneBy(['notifica' => 'E',
+        $app = $em->getRepository(App::class)->findOneBy(['notifica' => 'E',
           'abilitati' => 'DT', 'attiva' => 1]);
         if ($app) {
           // memorizza servizio invio email

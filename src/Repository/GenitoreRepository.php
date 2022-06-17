@@ -62,7 +62,7 @@ class GenitoreRepository extends UtenteRepository {
    */
   public function datiGenitori(array $alunni) {
     // legge dati
-    $genitori = $this->_em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $genitori = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,g.cognome,g.nome,g.codiceFiscale,g.numeriTelefono,g.spid,g.username,g.email,g.ultimoAccesso')
       ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
       ->where('a.id IN (:alunni)')

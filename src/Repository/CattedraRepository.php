@@ -179,7 +179,7 @@ class CattedraRepository extends BaseRepository {
       $dati['lista'][$cat->getId()]['orario'] = array();
       if ($cat->getMateria()->getTipo() != 'S') {
         // cattedra curricolare
-        $orario = $this->_em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+        $orario = $this->_em->getRepository(OrarioDocente::class)->createQueryBuilder('od')
           ->select('od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
           ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
@@ -194,7 +194,7 @@ class CattedraRepository extends BaseRepository {
         }
       } else {
         // cattedra di sostegno: imposta orari di tutte le materie della classe
-        $orari = $this->_em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+        $orari = $this->_em->getRepository(OrarioDocente::class)->createQueryBuilder('od')
           ->select('(c.id) AS materia,od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
           ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')

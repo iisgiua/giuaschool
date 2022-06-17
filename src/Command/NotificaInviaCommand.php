@@ -171,14 +171,14 @@ class NotificaInviaCommand extends Command {
     // inizializza
     $num = 0;
     // messaggi con priorità
-    $notifiche1 = $this->em->getRepository('App:NotificaInvio')->createQueryBuilder('n')
+    $notifiche1 = $this->em->getRepository(NotificaInvio::class)->createQueryBuilder('n')
       ->where('n.stato=:priorita')
       ->orderBy('n.modificato', 'ASC')
       ->setParameters(['priorita' => 'P'])
       ->getQuery()
       ->getResult();
     // messaggi in attesa
-    $notifiche2 = $this->em->getRepository('App:NotificaInvio')->createQueryBuilder('n')
+    $notifiche2 = $this->em->getRepository(NotificaInvio::class)->createQueryBuilder('n')
       ->where('n.stato=:attesa')
       ->orderBy('n.modificato', 'ASC')
       ->setParameters(['attesa' => 'A'])
