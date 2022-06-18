@@ -127,7 +127,7 @@ class BachecaController extends AbstractController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $em->getRepository(Avviso::class)->find($id);
+    $avviso = $em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -165,7 +165,7 @@ class BachecaController extends AbstractController {
     // inizializza
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository(Classe::class)->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -197,7 +197,7 @@ class BachecaController extends AbstractController {
    */
   public function avvisiAlunniFirmaAction(EntityManagerInterface $em, BachecaUtil $bac, $classe, $id) {
     // controllo classe
-    $classe = $em->getRepository(Classe::class)->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

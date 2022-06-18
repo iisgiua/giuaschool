@@ -81,7 +81,7 @@ class PropostaVotoType extends AbstractType {
         return $alunno->getId();
       },
       function ($id) {
-        return $this->em->getRepository(Alunno::class)->find($id);
+        return $this->em->getRepository('App\Entity\Alunno')->find($id);
       }));
   }
 

@@ -104,7 +104,7 @@ class RegistroUtil {
    */
   public function controlloData(\DateTime $data, Sede $sede=null) {
     // query
-    $lista = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
+    $lista = $this->em->getRepository('App\Entity\Festivita')->createQueryBuilder('f')
       ->where('(f.sede IS NULL OR f.sede=:sede) AND f.tipo=:tipo AND f.data=:data')
       ->setParameters(['sede' => $sede, 'tipo' => 'F', 'data' => $data->format('Y-m-d')])
       ->getQuery()
@@ -114,19 +114,19 @@ class RegistroUtil {
       return $lista[0]->getDescrizione();
     }
     // controllo inizio anno scolastico
-    $inizio = $this->em->getRepository(Configurazione::class)->findOneByParametro('anno_inizio');
+    $inizio = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_inizio');
     if ($inizio && $data->format('Y-m-d') < $inizio->getValore()){
       // prima inizio anno
       return $this->trans->trans('exception.prima_inizio_anno');
     }
     // controllo fine anno scolastico
-    $fine = $this->em->getRepository(Configurazione::class)->findOneByParametro('anno_fine');
+    $fine = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_fine');
     if ($fine && $data->format('Y-m-d') > $fine->getValore()){
       // dopo fine anno
       return $this->trans->trans('exception.dopo_fine_anno');
     }
     // controllo riposo settimanale (domenica e altri)
-    $weekdays = $this->em->getRepository(Configurazione::class)->findOneByParametro('giorni_festivi_istituto');
+    $weekdays = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('giorni_festivi_istituto');
     if ($weekdays && in_array($data->format('w'), explode(',', $weekdays->getValore()))) {
       // domenica
       return $this->trans->trans('exception.giorno_riposo_settimanale');
@@ -147,7 +147,7 @@ class RegistroUtil {
    */
   public function listaFestivi(Sede $sede=null) {
     // query
-    $lista = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
+    $lista = $this->em->getRepository('App\Entity\Festivita')->createQueryBuilder('f')
       ->where('(f.sede IS NULL OR f.sede=:sede) AND f.tipo=:tipo')
       ->setParameters(['sede' => $sede, 'tipo' => 'F'])
       ->orderBy('f.data', 'ASC')
@@ -190,8 +190,8 @@ class RegistroUtil {
         // data non nel futuro
         if (!$lezione) {
           // nuova lezione
-          $altra_lezione = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
-            ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
+          $altra_lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+            ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
             ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente')
             ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente])
             ->setMaxResults(1)
@@ -211,8 +211,8 @@ class RegistroUtil {
       // azione di modifica
       if ($lezione && $firme && count($firme) > 0) {
         // esiste lezione e firme
-        $altra_lezione = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
-          ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
+        $altra_lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+          ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
           ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente AND l.id!=:lezione')
           ->setParameters(['data' => $data->format('Y-m-d'), 'ora' => $ora, 'docente' => $docente,
             'lezione' => $lezione->getId()])
@@ -238,7 +238,7 @@ class RegistroUtil {
           }
           if ($materia->getTipo() == 'R') {
             // controlla se cattedra di materia alternativa
-            $matAlter = $this->em->getRepository(Cattedra::class)->findOneBy(['docente' => $docente,
+            $matAlter = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['docente' => $docente,
               'materia' => $materia, 'classe' => $classe, 'attiva' => 1, 'tipo' => 'A']);
             if ($matAlter) {
               // materia alternaativa con lezione di altra disciplina: ok
@@ -253,7 +253,7 @@ class RegistroUtil {
         // esiste lezione e firme
         if (in_array($docente->getId(), $firme)) {
           // docente ha firmato lezione
-          $voti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
+          $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
             ->select('COUNT(v.id)')
             ->where('v.lezione=:lezione AND v.docente=:docente')
             ->setParameters(['lezione' => $lezione, 'docente' => $docente])
@@ -264,9 +264,9 @@ class RegistroUtil {
             return true;
           } else {
             // sono presenti voti
-            $num_lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+            $num_lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
               ->select('COUNT(l.id)')
-              ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
+              ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
               ->where('l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
               ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe, 'materia' => $materia,
                 'docente' => $docente])
@@ -300,7 +300,7 @@ class RegistroUtil {
     $ora_str = array('1' => 'Prima', '2' => 'Seconda', '3' => 'Terza', '4' => 'Quarta', '5' => 'Quinta', '6' => 'Sesta',
       '7' => 'Settima', '8' => 'Ottava', '9' => 'Nona', '10' => 'Decima');
     // legge ora di inzio
-    $scansione_orario = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('s')
+    $scansione_orario = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora>=:ora')
       ->orderBy('s.ora', 'ASC')
@@ -317,7 +317,7 @@ class RegistroUtil {
         $dati['fine'][$key] = $s->getOra();
       } else {
         // ore successive
-        $lezione = $this->em->getRepository(Lezione::class)->findOneBy(['classe' => $classe,
+        $lezione = $this->em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe,
           'data' => $data, 'ora' => $s->getOra()]);
         if (!$this->azioneLezione('add', $data, $s->getOra(), $docente, $classe, $materia, $lezione)) {
           // operazione non ammessa: esce
@@ -464,7 +464,7 @@ class RegistroUtil {
       $materia = $cattedra->getMateria();
     } else {
       // supplenza
-      $materia = $this->em->getRepository(Materia::class)->findOneByTipo('U');
+      $materia = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore: dati inconsistenti
         throw $this->createNotFoundException('exception.invalid_params');
@@ -490,7 +490,7 @@ class RegistroUtil {
         $dati_lezioni[$ora]['inizio'] = substr($s['inizio'], 0, 5);
         $dati_lezioni[$ora]['fine'] = substr($s['fine'], 0, 5);
         // legge lezione
-        $lezione = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+        $lezione = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->where('l.data=:data AND l.classe=:classe AND l.ora=:ora')
           ->setParameters(['data' => $data_str, 'classe' => $classe, 'ora' => $ora])
           ->getQuery()
@@ -500,7 +500,7 @@ class RegistroUtil {
           $dati_lezioni[$ora]['materia'] = $lezione->getMateria()->getNomeBreve();
           $dati_lezioni[$ora]['argomenti'] = trim($lezione->getArgomento().' '.$lezione->getAttivita());
           // legge firme
-          $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
+          $firme = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
             ->join('f.docente', 'd')
             ->where('f.lezione=:lezione')
             ->orderBy('d.cognome,d.nome', 'ASC')
@@ -555,7 +555,7 @@ class RegistroUtil {
       $dati[$data_str]['lezioni'] = $dati_lezioni;
     }
     // legge annotazioni
-    $annotazioni = $this->em->getRepository(Annotazione::class)->createQueryBuilder('a')
+    $annotazioni = $this->em->getRepository('App\Entity\Annotazione')->createQueryBuilder('a')
       ->join('a.docente', 'd')
       ->where('a.data BETWEEN :data_inizio AND :data_fine AND a.classe=:classe')
       ->orderBy('a.data', 'ASC')
@@ -591,8 +591,8 @@ class RegistroUtil {
       $ann['alunni'] = null;
       if ($a->getAvviso() && in_array('A', $a->getAvviso()->getDestinatari())) {
         // legge alunno destinatario
-        $ann['alunni'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-          ->join('App:AvvisoUtente', 'au', 'WITH', 'au.utente=a.id')
+        $ann['alunni'] = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+          ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.utente=a.id')
           ->join('au.avviso', 'av')
           ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
           ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'A', 'filtro' => 'U'])
@@ -600,9 +600,9 @@ class RegistroUtil {
           ->getResult();
       } elseif ($a->getAvviso() && in_array('G', $a->getAvviso()->getDestinatari())) {
         // legge genitore destinatario
-        $ann['alunni'] = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-          ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id')
-          ->join('App:AvvisoUtente', 'au', 'WITH', 'au.utente=g.id')
+        $ann['alunni'] = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+          ->join('App\Entity\Genitore', 'g', 'WITH', 'g.alunno=a.id')
+          ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.utente=g.id')
           ->join('au.avviso', 'av')
           ->where('av.id=:avviso AND INSTR(av.destinatari, :destinatari)>0 AND av.filtroTipo=:filtro')
           ->setParameters(['avviso' => $a->getAvviso(), 'destinatari' => 'G', 'filtro' => 'U'])
@@ -649,7 +649,7 @@ class RegistroUtil {
       }
     }
     // legge note
-    $note = $this->em->getRepository(Nota::class)->createQueryBuilder('n')
+    $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->where('n.data BETWEEN :data_inizio AND :data_fine AND n.classe=:classe')
@@ -759,13 +759,13 @@ class RegistroUtil {
       // legge alunni di classe
       $lista = $this->alunniInData($data_inizio, $classe);
       // dati GENITORI
-      $genitori = $this->em->getRepository(Genitore::class)->datiGenitori($lista);
+      $genitori = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista);
       // dati alunni/assenze/ritardi/uscite
-      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,e.note AS note_entrata,e.ritardoBreve,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
-        ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-        ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
-        ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+        ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+        ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+        ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['lista' => $lista, 'data' => $data_str])
@@ -774,7 +774,7 @@ class RegistroUtil {
       // dati giustificazioni
       foreach ($alunni as $k=>$alu) {
         // conteggio assenze da giustificare
-        $giustifica_assenze = $this->em->getRepository(Assenza::class)->createQueryBuilder('ass')
+        $giustifica_assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
           ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NULL')
           ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
@@ -782,7 +782,7 @@ class RegistroUtil {
           ->getSingleScalarResult();
         $alunni[$k]['giustifica_assenze'] = $giustifica_assenze;
         // conteggio ritardi da giustificare
-        $giustifica_ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
+        $giustifica_ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
           ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
@@ -790,13 +790,13 @@ class RegistroUtil {
           ->getSingleScalarResult();
         $alunni[$k]['giustifica_ritardi'] = $giustifica_ritardi;
         // conteggio convalide giustificazioni online
-        $convalide_assenze = $this->em->getRepository(Assenza::class)->createQueryBuilder('ass')
+        $convalide_assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
           ->where('ass.alunno=:alunno AND ass.data<:data AND ass.giustificato IS NOT NULL AND ass.docenteGiustifica IS NULL')
           ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
           ->getQuery()
           ->getSingleScalarResult();
-        $convalide_ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
+        $convalide_ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
           ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str, 'breve' => 1])
@@ -804,7 +804,7 @@ class RegistroUtil {
           ->getSingleScalarResult();
         $alunni[$k]['convalide'] = $convalide_assenze + $convalide_ritardi;
         // gestione pulsanti
-        $alunno = $this->em->getRepository(Alunno::class)->find($alu['id_alunno']);
+        $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu['id_alunno']);
         $pulsanti = $this->azioneAssenze($data_inizio, $docente, $alunno, $classe, ($cattedra ? $cattedra->getMateria() : null));
         if ($pulsanti) {
           // pulsante assenza/presenza
@@ -845,7 +845,7 @@ class RegistroUtil {
       $dati[$data_str]['lista'] = $alunni;
       $dati[$data_str]['genitori'] = $genitori;
       if ($this->session->get('/CONFIG/SCUOLA/assenze_ore')) {
-        $dati[$data_str]['ore'] = $this->em->getRepository(AssenzaLezione::class)->assentiOre($classe, $data_inizio);
+        $dati[$data_str]['ore'] = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiOre($classe, $data_inizio);
       }
     } else {
       // vista settimanale/mensile
@@ -863,11 +863,11 @@ class RegistroUtil {
         $lista = $this->alunniInData($data, $classe);
         $lista_alunni = array_unique(array_merge($lista_alunni, $lista));
         // dati assenze/ritardi/uscite
-        $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+        $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
           ->select('a.id AS id_alunno,ass.id AS id_assenza,ass.giustificato AS assenza_giust,(ass.docenteGiustifica) AS assenza_doc,e.id AS id_entrata,e.ora AS ora_entrata,e.ritardoBreve,e.note AS note_entrata,e.giustificato AS entrata_giust,(e.docenteGiustifica) AS entrata_doc,u.id AS id_uscita,u.ora AS ora_uscita,u.note AS note_uscita')
-          ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-          ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
-          ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+          ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+          ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+          ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
           ->where('a.id IN (:lista)')
           ->setParameters(['lista' => $lista, 'data' => $data_str])
           ->getQuery()
@@ -878,7 +878,7 @@ class RegistroUtil {
         }
       }
       // lista alunni (ordinata)
-      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,a.bes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -901,7 +901,7 @@ class RegistroUtil {
    */
   public function orarioInData(\DateTime $data, Sede $sede) {
     // legge orario
-    $scansioneoraria = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('s')
+    $scansioneoraria = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
       ->select('s.giorno,s.ora,s.inizio,s.fine,s.durata')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno')
@@ -923,7 +923,7 @@ class RegistroUtil {
   public function alunniInData(\DateTime $data, Classe $classe) {
     if ($data->format('Y-m-d') >= date('Y-m-d')) {
       // data è quella odierna o successiva, legge classe attuale
-      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
         ->where('a.classe=:classe')
         ->setParameters(['classe' => $classe])
@@ -931,19 +931,19 @@ class RegistroUtil {
         ->getScalarResult();
     } else {
       // aggiunge alunni attuali che non hanno fatto cambiamenti di classe in quella data
-      $cambio = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
+      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
         ->where('cc.alunno=a.id AND :data BETWEEN cc.inizio AND cc.fine')
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
-      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
         ->where('a.classe=:classe AND NOT EXISTS ('.$cambio->getDQL().')')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
         ->getScalarResult();
       // aggiunge altri alunni con cambiamento nella classe in quella data
-      $alunni2 = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
+        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
         ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()
@@ -998,7 +998,7 @@ class RegistroUtil {
       $classe = $alunno->getClasse();
     } else {
       // cerca cambiamenti di classe in quella data
-      $cambio = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
+      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
         ->where('cc.alunno=:alunno AND :data BETWEEN cc.inizio AND cc.fine')
         ->setParameters(['alunno' => $alunno, 'data' => $data->format('Y-m-d')])
         ->getQuery()
@@ -1030,9 +1030,9 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->infoPeriodi();
     // legge assenze
-    $assenze = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $assenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
-      ->join('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
+      ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
       ->where('a.id=:alunno AND a.classe=:classe AND ass.data<:data')
       ->orderBy('ass.data', 'DESC')
       ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'data' => $data->format('Y-m-d')])
@@ -1099,7 +1099,7 @@ class RegistroUtil {
         $dichiarazione = array_merge($dichiarazione, $a['dichiarazione']);
         $certificati = array_merge($certificati, $a['certificati']);
         $ids .= ','.$a['id'];
-        $prec = $this->em->getRepository(Festivita::class)->giornoPrecedente($dataObj, null, $alunno->getClasse());
+        $prec = $this->em->getRepository('App\Entity\Festivita')->giornoPrecedente($dataObj, null, $alunno->getClasse());
       }
       if ($fine && $giustificato != 'D') {
         // termina gruppo precedente
@@ -1115,7 +1115,7 @@ class RegistroUtil {
       }
     }
     // ritardi da giustificare
-    $ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
+    $ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
       ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
       ->orderBy('e.data', 'DESC')
@@ -1123,7 +1123,7 @@ class RegistroUtil {
       ->getResult();
     $dati['ritardi'] = $ritardi;
     // ritardi da convalidare
-    $convalida_ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
+    $convalida_ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
       ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d'), 'breve' => 1])
       ->orderBy('e.data', 'DESC')
@@ -1150,10 +1150,10 @@ class RegistroUtil {
     // alunni della classe
     $alunni = $this->alunniInData($data, $classe);
     // legge la lista degli alunni
-    $lista = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $lista = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,ass.id AS assenza,e.id AS entrata,e.ora')
-      ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->where('a.id IN (:id)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['id' => $alunni, 'data' => $data->format('Y-m-d')])
@@ -1191,7 +1191,7 @@ class RegistroUtil {
    * @return bool Restituisce vero se la cattedra esiste
    */
   public function esisteCattedra(Docente $docente, Classe $classe, Materia $materia) {
-    $cattedra = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $cattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('COUNT(c.id)')
       ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.attiva=:attiva AND c.tipo!=:tipo')
       ->setParameters(['docente' => $docente, 'classe' => $classe, 'materia' => $materia, 'attiva' => 1,
@@ -1254,10 +1254,10 @@ class RegistroUtil {
     // alunni della classe
     $lista_alunni = $this->alunniInData($data, $classe);
     // legge i voti degli degli alunni
-    $voti = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $voti = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
-      ->leftJoin('App:Lezione', 'l', 'WITH', 'l.classe=:classe AND l.data=:data')
-      ->leftJoin('App:Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia')
+      ->leftJoin('App\Entity\Lezione', 'l', 'WITH', 'l.classe=:classe AND l.data=:data')
+      ->leftJoin('App\Entity\Valutazione', 'v', 'WITH', 'v.lezione=l.id AND v.alunno=a.id AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia')
       ->where('a.id IN (:alunni)')
       ->setParameters(['alunni' => $lista_alunni, 'docente' => $docente, 'tipo' => $tipo,
         'materia' => $materia, 'classe' => $classe, 'data' => $data->format('Y-m-d')])
@@ -1365,9 +1365,9 @@ class RegistroUtil {
     // alunni della classe
     $lista_alunni = $this->alunniInPeriodo($data_inizio, $data_fine, $cattedra->getClasse());
     // dati GENITORI
-    $dati['genitori'] = $this->em->getRepository(Genitore::class)->datiGenitori($lista_alunni);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
     // legge i dati degli degli alunni
-    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,(a.classe) AS classe_id')
       ->where('a.id IN (:alunni)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1381,7 +1381,7 @@ class RegistroUtil {
       $dati['voti'][$alu['id']]['P'] = array();
     }
     // legge i voti degli degli alunni
-    $voti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
+    $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('a.id AS alunno_id,v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.alunno', 'a')
       ->join('v.lezione', 'l')
@@ -1457,7 +1457,7 @@ class RegistroUtil {
    */
   public function seRitardoBreve(\DateTime $data, \DateTime $ora, Sede $sede) {
     // legge prima ora
-    $prima = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('s')
+    $prima = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
       ->select('s.inizio')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
@@ -1479,9 +1479,9 @@ class RegistroUtil {
   public function ricalcolaOreAlunno(\DateTime $data, Alunno $alunno) {
     $this->em->getConnection()->beginTransaction();
     // lezioni del giorno
-    $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.id,s.ora,s.inizio,s.fine,s.durata')
-      ->join('App:ScansioneOraria', 's', 'WITH', 'l.ora=s.ora AND s.giorno=:giorno')
+      ->join('App\Entity\ScansioneOraria', 's', 'WITH', 'l.ora=s.ora AND s.giorno=:giorno')
       ->join('s.orario', 'o')
       ->where('l.data=:data AND l.classe=:classe AND :data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
       ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $alunno->getClasse(),
@@ -1494,7 +1494,7 @@ class RegistroUtil {
       ->execute(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d'),
         'classe' => $alunno->getClasse()->getId()]);
     // legge assenza del giorno
-    $assenza = $this->em->getRepository(Assenza::class)->findOneBy(['alunno' => $alunno, 'data' => $data]);
+    $assenza = $this->em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data]);
     if ($assenza) {
       // aggiunge ore assenza
       foreach ($lezioni as $l) {
@@ -1505,8 +1505,8 @@ class RegistroUtil {
       }
     } else {
       // aggiunge ore assenza se esiste ritardo/uscita
-      $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data]);
-      $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data]);
+      $entrata = $this->em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data]);
+      $uscita = $this->em->getRepository('App\Entity\Uscita')->findOneBy(['alunno' => $alunno, 'data' => $data]);
       if ($entrata || $uscita) {
         // calcolo periodo in cui è assente
         foreach ($lezioni as $l) {
@@ -1543,7 +1543,7 @@ class RegistroUtil {
   public function ricalcolaOreLezione(\DateTime $data, Lezione $lezione) {
     $this->em->getConnection()->beginTransaction();
     // orario lezione
-    $ora = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('s')
+    $ora = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('s')
       ->select('s.inizio,s.fine,s.durata')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
@@ -1555,11 +1555,11 @@ class RegistroUtil {
     // legge alunni di classe
     $lista = $this->alunniInData($data, $lezione->getClasse());
     // dati alunni/assenze/ritardi/uscite
-    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id AS id_alunno,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita')
-      ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
-      ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->where('a.id IN (:lista)')
       ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
       ->getQuery()
@@ -1617,13 +1617,13 @@ class RegistroUtil {
     // cattedra non di sostegno
     if ($cattedra->getTipo() == 'A') {
       // cattedra di materia alternaativa
-      $altraCattedra = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
         ->getDql();
-      $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
-        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->join('f.docente', 'd')
         ->join('l.materia', 'm')
         ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.')))')
@@ -1636,9 +1636,9 @@ class RegistroUtil {
         ->getArrayResult();
     } else {
       // cattedra regolare
-      $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->select('l.id,l.data,l.ora,l.argomento,l.attivita,d.id AS docente')
-        ->leftJoin('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->leftJoin('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->leftJoin('f.docente', 'd')
         ->where('l.classe=:classe AND l.materia=:materia')
         ->orderBy('l.data', 'DESC')
@@ -1656,10 +1656,10 @@ class RegistroUtil {
       $firme = '';
       if (!$l['docente']) {
         // legge altre firme
-        $docenti = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
+        $docenti = $this->em->getRepository('App\Entity\Firma')->createQueryBuilder('f')
           ->select('d.nome,d.cognome')
           ->join('f.docente', 'd')
-          ->where('f.lezione=:lezione AND f.docente!=:docente AND f NOT INSTANCE OF App:FirmaSostegno')
+          ->where('f.lezione=:lezione AND f.docente!=:docente AND f NOT INSTANCE OF App\Entity\FirmaSostegno')
           ->orderBy('d.cognome,d.nome', 'ASC')
           ->setParameters(['lezione' => $l['id'], 'docente' => $cattedra->getDocente()])
           ->getQuery()
@@ -1730,10 +1730,10 @@ class RegistroUtil {
     $periodi = $this->infoPeriodi();
     $dati = array();
     // legge lezioni
-    $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.data,l.ora,l.argomento,l.attivita,fs.argomento AS argomento_sost,fs.attivita AS attivita_sost,m.nomeBreve')
       ->join('l.materia', 'm')
-      ->join('App:FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione')
+      ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione')
       ->where('l.classe=:classe AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('m.nomeBreve,l.ora', 'ASC')
@@ -1812,11 +1812,11 @@ class RegistroUtil {
     // legge alunni di classe
     $lista = $this->alunniInData($data, $classe);
     // dati alunni/assenze/ritardi/uscite
-    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,ass.id AS id_assenza,e.id AS id_entrata,e.ora AS ora_entrata,u.id AS id_uscita,u.ora AS ora_uscita')
-      ->leftJoin('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
-      ->leftJoin('App:Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
-      ->leftJoin('App:Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
+      ->leftJoin('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno AND ass.data=:data')
+      ->leftJoin('App\Entity\Entrata', 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
+      ->leftJoin('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->setParameters(['lista' => $lista, 'data' => $data->format('Y-m-d')])
@@ -1854,14 +1854,14 @@ class RegistroUtil {
       return $this->riepilogoSostegno($data, $cattedra);
     }
     // legge lezioni
-    $queryVoti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
+    $queryVoti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('v.id')
       ->where('v.lezione=l.id AND v.materia=:materia AND v.docente=:docente')
       ->getDQL();
-    $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.id,l.data,l.ora,(l.materia) AS materia,so.durata')
-      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
       ->where('l.classe=:classe AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
       ->andWhere('l.materia=:materia OR EXISTS ('.$queryVoti.')')
@@ -1892,7 +1892,7 @@ class RegistroUtil {
       $dati['lista'][$data_str]['durata'] +=
         ($l['materia'] == $cattedra->getMateria()->getId() ? $l['durata'] : 0);
       // legge assenze
-      $assenze = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
+      $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
         ->select('(al.alunno) AS id,al.ore')
         ->where('al.lezione=:lezione')
         ->setParameters(['lezione' => $l['id']])
@@ -1907,7 +1907,7 @@ class RegistroUtil {
         }
       }
       // legge voti
-      $voti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
+      $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
         ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento')
         ->where('v.lezione=:lezione AND v.materia=:materia AND v.docente=:docente')
         ->setParameters(['lezione' => $l['id'], 'materia' => $cattedra->getMateria(),
@@ -1927,7 +1927,7 @@ class RegistroUtil {
       $data_prec = $l['data'];
     }
     // lista alunni (ordinata)
-    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,a.bes,a.note')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1952,10 +1952,10 @@ class RegistroUtil {
     $dati = array();
     $alunno = ($cattedra->getAlunno() ? $cattedra->getAlunno()->getId() : null);
     // legge lezioni
-    $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
       ->select('l.id,l.data,l.ora,so.durata')
-      ->join('App:FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND (fs.alunno=:alunno OR fs.alunno IS NULL)')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
       ->join('so.orario', 'o')
       ->where('l.classe=:classe AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
       ->orderBy('l.data,l.ora', 'ASC')
@@ -1978,7 +1978,7 @@ class RegistroUtil {
       // aggiorna durata lezioni
       $dati['lista'][$data_str]['durata'] += $l['durata'];
       // legge assenze
-      $assenze = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
+      $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
         ->select('al.ore')
         ->where('al.lezione=:lezione AND al.alunno=:alunno')
         ->setParameters(['lezione' => $l['id'], 'alunno' => $alunno])
@@ -1996,7 +1996,7 @@ class RegistroUtil {
       $data_prec = $l['data'];
     }
     // info alunno
-    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,a.bes,a.note')
       ->where('a.id=:alunno')
       ->setParameters(['alunno' => $alunno])
@@ -2073,7 +2073,7 @@ class RegistroUtil {
     $periodi = $this->infoPeriodi();
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge osservazioni per tutte le cattedre
-    $osservazioni = $this->em->getRepository(OsservazioneAlunno::class)->createQueryBuilder('o')
+    $osservazioni = $this->em->getRepository('App\Entity\OsservazioneAlunno')->createQueryBuilder('o')
       ->select('o.id,o.data,o.testo,a.id AS alunno_id,a.cognome,a.nome,a.dataNascita,a.bes,a.note,c.id AS cattedra_id,m.nomeBreve')
       ->join('o.alunno', 'a')
       ->join('o.cattedra', 'c')
@@ -2089,7 +2089,7 @@ class RegistroUtil {
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
       $data_str = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
-      $osservazione = $this->em->getRepository(OsservazioneAlunno::class)->find($o['id']);
+      $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->find($o['id']);
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $osservazione)) {
         $edit = $this->router->generate('lezioni_osservazioni_edit', array(
@@ -2142,7 +2142,7 @@ class RegistroUtil {
     // legge proprie osservazioni
     $dati = $this->osservazioni($data, $docente, $cattedra);
     // legge tutte osservazioni di altri su alunno di cattedra
-    $osservazioni = $this->em->getRepository(OsservazioneAlunno::class)->createQueryBuilder('o')
+    $osservazioni = $this->em->getRepository('App\Entity\OsservazioneAlunno')->createQueryBuilder('o')
       ->select('o.id,o.data,o.testo,c.id AS cattedra_id,d.cognome,d.nome,m.nomeBreve')
       ->join('o.cattedra', 'c')
       ->join('c.docente', 'd')
@@ -2158,7 +2158,7 @@ class RegistroUtil {
       $periodo = ($data_oss <= $periodi[1]['fine'] ? $periodi[1]['nome'] :
         ($data_oss <= $periodi[2]['fine'] ? $periodi[2]['nome'] : $periodi[3]['nome']));
       $data_str = intval(substr($data_oss, 8)).' '.$mesi[intval(substr($data_oss, 5, 2))];
-      $osservazione = $this->em->getRepository(OsservazioneAlunno::class)->find($o['id']);
+      $osservazione = $this->em->getRepository('App\Entity\OsservazioneAlunno')->find($o['id']);
       // controlla pulsante edit
       if ($this->azioneOsservazione('edit', $data, $docente, $cattedra->getClasse(), $osservazione)) {
         $edit = $this->router->generate('lezioni_osservazioni_edit', array(
@@ -2203,8 +2203,8 @@ class RegistroUtil {
     $periodi = $this->infoPeriodi();
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge osservazioni
-    $osservazioni = $this->em->getRepository(OsservazioneClasse::class)->createQueryBuilder('o')
-      ->where('o.cattedra=:cattedra AND o NOT INSTANCE OF App:OsservazioneAlunno')
+    $osservazioni = $this->em->getRepository('App\Entity\OsservazioneClasse')->createQueryBuilder('o')
+      ->where('o.cattedra=:cattedra AND o NOT INSTANCE OF App\Entity\OsservazioneAlunno')
       ->orderBy('o.data', 'DESC')
       ->setParameters(['cattedra' => $cattedra])
       ->getQuery()
@@ -2258,7 +2258,7 @@ class RegistroUtil {
   public function contieneNomiAlunni(\DateTime $data, Classe $classe, $testo) {
     // recupera alunni di classe
     $lista = $this->alunniInData($data, $classe);
-    $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.cognome,a.nome')
       ->where('a.id IN (:lista)')
       ->setParameters(['lista' => $lista])
@@ -2305,7 +2305,7 @@ class RegistroUtil {
     $periodi = $this->infoPeriodi();
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge i voti degli degli alunni
-    $voti = $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
+    $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('v.id,v.tipo,v.argomento,v.visibile,v.media,v.voto,v.giudizio,l.data,d.id AS docente_id,d.nome,d.cognome')
       ->join('v.docente', 'd')
       ->join('v.lezione', 'l')
@@ -2395,9 +2395,9 @@ class RegistroUtil {
     foreach ($periodi as $k=>$periodo) {
       if ($periodo['nome'] != '' && $oggi >= $periodo['inizio']) {
         // lezioni del periodo
-        $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->select('SUM(so.durata)')
-          ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
           ->join('so.orario', 'o')
           ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
           ->setParameters(['classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
@@ -2407,7 +2407,7 @@ class RegistroUtil {
         $ore = $lezioni;
         $dati_periodo[$k]['ore'] = number_format($ore, 1, ',', null);
         // assenze del periodo
-        $assenze = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
+        $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
           ->select('SUM(al.ore)')
           ->join('al.lezione', 'l')
           ->where('al.alunno=:alunno AND l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine')
@@ -2446,7 +2446,7 @@ class RegistroUtil {
       // primo trimestre
       if ($classe) {
         // controllo scrutinio
-        $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => 'P', 'classe' => $classe]);
+        $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'P', 'classe' => $classe]);
         if ($scrutinio && $scrutinio->getStato() != 'N') {
           // scrutinio iniziato: blocca
           return true;
@@ -2459,7 +2459,7 @@ class RegistroUtil {
       // controlla scrutinio finale
       if ($classe) {
         // controllo scrutinio
-        $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => 'F', 'classe' => $classe]);
+        $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => 'F', 'classe' => $classe]);
         if ($scrutinio && $scrutinio->getStato() != 'N') {
           // scrutinio iniziato: blocca
           return true;
@@ -2486,13 +2486,13 @@ class RegistroUtil {
 
     if ($cattedra->getTipo() == 'A') {
       // cattedra di materia alternativa
-      $altraCattedra = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.attiva=:attiva AND c.docente=:docente AND c.classe=:classe AND c.materia=:materia and c.id!=:cattedra')
         ->getDql();
-      $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->select('l.id,l.data,l.ora,l.argomento')
-        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->join('f.docente', 'd')
         ->join('l.materia', 'm')
         ->where('l.classe=:classe AND (l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.')))')
@@ -2504,7 +2504,7 @@ class RegistroUtil {
         ->getArrayResult();
     } else {
       // cattedra normale
-      $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
+      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->select('l.id,l.data,l.ora,l.argomento')
         ->where('l.classe=:classe AND l.materia=:materia')
         ->orderBy('l.data,l.ora', 'ASC')
@@ -2536,7 +2536,7 @@ class RegistroUtil {
       }
     }
     // docenti
-    $docenti = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $docenti = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT d.cognome,d.nome,c.tipo')
       ->join('c.docente', 'd')
       ->where('c.classe=:classe AND c.materia=:materia AND c.attiva=:attiva AND c.tipo!=:potenziamento')
@@ -2561,10 +2561,10 @@ class RegistroUtil {
    */
   public function alunniInPeriodo(\DateTime $inizio, \DateTime $fine, Classe $classe) {
       // aggiunge alunni attuali che non hanno fatto cambiamenti di classe per tutto il periodo
-      $cambio = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
+      $cambio = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
         ->where('cc.alunno=a.id AND cc.inizio<=:inizio AND cc.fine>=:fine')
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
-      $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
         ->where('a.classe=:classe AND a.abilitato=:abilitato AND NOT EXISTS ('.$cambio->getDQL().')')
         ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
@@ -2572,9 +2572,9 @@ class RegistroUtil {
         ->getQuery()
         ->getScalarResult();
       // aggiunge altri alunni con cambiamento nella classe nel periodo
-      $alunni2 = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunni2 = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
+        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
         ->where('cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
         ->setParameters(['inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
           'classe' => $classe])
@@ -2594,7 +2594,7 @@ class RegistroUtil {
    * @param array $assenti Lista di alunni assenti alla lezione
    */
   public function inserisceAssentiLezione(Docente $docente, Lezione $lezione, $assenti) {
-    $scansione_oraria = $this->em->getRepository(ScansioneOraria::class)->oraLezione($lezione);
+    $scansione_oraria = $this->em->getRepository('App\Entity\ScansioneOraria')->oraLezione($lezione);
     $ore = $scansione_oraria->getDurata();
     // inserisce assenti
     foreach ($assenti as $alu) {
@@ -2604,7 +2604,7 @@ class RegistroUtil {
         ->setOre($ore);
       $this->em->persist($assente);
       // controlla assenza giorno
-      $assenza_giorno = $this->em->getRepository(Assenza::class)
+      $assenza_giorno = $this->em->getRepository('App\Entity\Assenza')
         ->findOneBy(['alunno' => $alu, 'data' => $lezione->getData()]);
       if ($assenza_giorno) {
         // resetta situazione a non giustificato
@@ -2629,11 +2629,11 @@ class RegistroUtil {
    * @param array $assenti Lista di alunni assenti da cancellare
    */
   public function cancellaAssentiLezione(Lezione $lezione, $assenti) {
-    $assenti_lezione = $this->em->getRepository(AssenzaLezione::class)->assentiSoloLezione($lezione);
+    $assenti_lezione = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiSoloLezione($lezione);
     $assenti_giorno = array_intersect($assenti, $assenti_lezione);
     if (count($assenti_giorno) > 0) {
       // cancella assenze del giorno
-      $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
+      $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('a')
         ->delete()
         ->where('a.data=:data AND a.alunno IN (:lista)')
         ->setParameters(['data' => $lezione->getData()->format('Y-m-d'), 'lista' => $assenti_giorno])
@@ -2641,7 +2641,7 @@ class RegistroUtil {
         ->execute();
     }
     // cancella assenze alla lezione
-    $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
+    $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
       ->delete()
       ->where('al.lezione=:lezione AND al.alunno IN (:lista)')
       ->setParameters(['lezione' => $lezione, 'lista' => $assenti])
@@ -2681,9 +2681,9 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->infoPeriodi();
     // legge assenze
-    $assenze = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+    $assenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
-      ->join('App:Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
+      ->join('App\Entity\Assenza', 'ass', 'WITH', 'a.id=ass.alunno')
       ->where('a.id=:alunno AND a.classe=:classe AND ass.data<=:data')
       ->orderBy('ass.data', 'DESC')
       ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'data' => $data->format('Y-m-d')])
@@ -2716,7 +2716,7 @@ class RegistroUtil {
       }
     }
     // ritardi da giustificare
-    $ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
+    $ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
       ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
       ->orderBy('e.data', 'DESC')
@@ -2724,7 +2724,7 @@ class RegistroUtil {
       ->getResult();
     $dati['ritardi'] = $ritardi;
     // ritardi da convalidare
-    $convalida_ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
+    $convalida_ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
       ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d'), 'breve' => 1])
       ->orderBy('e.data', 'DESC')

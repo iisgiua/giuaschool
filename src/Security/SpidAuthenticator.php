@@ -122,13 +122,13 @@ class SpidAuthenticator extends AbstractGuardAuthenticator {
     // init
     $user = null;
     // trova utente SPID
-    $spid = $this->em->getRepository(Spid::class)->findOneBy(['responseId' => $credentials, 'state' => 'A']);
+    $spid = $this->em->getRepository('App\Entity\Spid')->findOneBy(['responseId' => $credentials, 'state' => 'A']);
     if ($spid) {
       // autenticato su SPID: controlla se esiste nel registro
       $nome = $spid->getAttrName();
       $cognome = $spid->getAttrFamilyName();
       $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
-      $user = $this->em->getRepository(Utente::class)->profiliAttivi($nome, $cognome, $codiceFiscale, true);
+      $user = $this->em->getRepository('App\Entity\Utente')->profiliAttivi($nome, $cognome, $codiceFiscale, true);
       if (empty($user)) {
         // utente non esiste nel registro
         $spid->setState('E');
@@ -158,9 +158,9 @@ class SpidAuthenticator extends AbstractGuardAuthenticator {
   public function checkCredentials($credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_fine');
-    $spid = $this->em->getRepository(Spid::class)->findOneBy(['responseId' => $credentials, 'state' => 'A']);
+    $manutenzioneInizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine');
+    $spid = $this->em->getRepository('App\Entity\Spid')->findOneBy(['responseId' => $credentials, 'state' => 'A']);
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
       $spid->setState('E');

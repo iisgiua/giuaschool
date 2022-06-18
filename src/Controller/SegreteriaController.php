@@ -61,7 +61,7 @@ class SegreteriaController extends AbstractController {
     $search['nome'] = $session->get('/APP/ROUTE/segreteria_assenze/nome', '');
     $search['cognome'] = $session->get('/APP/ROUTE/segreteria_assenze/cognome', '');
     $search['classe'] = $session->get('/APP/ROUTE/segreteria_assenze/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository(Classe::class)->find($search['classe']) : 0);
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/segreteria_assenze/pagina', 1);
@@ -77,7 +77,7 @@ class SegreteriaController extends AbstractController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $classi = $em->getRepository(Classe::class)->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_assenze', FormType::class)
       ->setAction($this->generateUrl('segreteria_assenze'))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
@@ -122,9 +122,9 @@ class SegreteriaController extends AbstractController {
     }
     // lista alunni
     if ($session->has('/APP/ROUTE/segreteria_assenze/nome')) {
-      $lista = $em->getRepository(Alunno::class)->findAllEnabled($search, $pagina, $limite);
+      $lista = $em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
     } else {
-      $lista = $em->getRepository(Alunno::class)->listaVuota($pagina, $limite);
+      $lista = $em->getRepository('App\Entity\Alunno')->listaVuota($pagina, $limite);
     }
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/assenze.html.twig', array(
@@ -155,7 +155,7 @@ class SegreteriaController extends AbstractController {
    */
   public function assenzeMostraAction(EntityManagerInterface $em, SegreteriaUtil $segr, $alunno) {
     // controlla alunno
-    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -194,7 +194,7 @@ class SegreteriaController extends AbstractController {
    */
   public function assenzeStampaAction(EntityManagerInterface $em, SessionInterface $session, SegreteriaUtil $segr, PdfManager $pdf, $alunno) {
     // controlla alunno
-    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -246,7 +246,7 @@ class SegreteriaController extends AbstractController {
     $search['nome'] = $session->get('/APP/ROUTE/segreteria_scrutini/nome', '');
     $search['cognome'] = $session->get('/APP/ROUTE/segreteria_scrutini/cognome', '');
     $search['classe'] = $session->get('/APP/ROUTE/segreteria_scrutini/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository(Classe::class)->find($search['classe']) : 0);
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/segreteria_scrutini/pagina', 1);
@@ -262,7 +262,7 @@ class SegreteriaController extends AbstractController {
     // form di ricerca
     $limite = 20;
     // tutte le classi
-    $classi = $em->getRepository(Classe::class)->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_scrutini', FormType::class)
       ->setAction($this->generateUrl('segreteria_scrutini'))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
@@ -307,9 +307,9 @@ class SegreteriaController extends AbstractController {
     }
     // lista alunni
     if ($session->has('/APP/ROUTE/segreteria_scrutini/nome')) {
-      $dati['lista'] = $em->getRepository(Alunno::class)->findAllEnabled($search, $pagina, $limite);
+      $dati['lista'] = $em->getRepository('App\Entity\Alunno')->findAllEnabled($search, $pagina, $limite);
     } else {
-      $dati['lista'] = $em->getRepository(Alunno::class)->listaVuota($pagina, $limite);
+      $dati['lista'] = $em->getRepository('App\Entity\Alunno')->listaVuota($pagina, $limite);
     }
     // legge dati pagelle
     $dati['pagelle'] = $segr->pagelleAlunni($dati['lista']);
@@ -345,7 +345,7 @@ class SegreteriaController extends AbstractController {
   public function scrutiniMostraAction(EntityManagerInterface $em, SegreteriaUtil $segr,
                                        $alunno, $periodo, $scrutinio) {
     // controlla alunno
-    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -353,11 +353,11 @@ class SegreteriaController extends AbstractController {
     // controlla scrutinio
     if ($periodo == 'A') {
       // dati storico
-      $scrutinio = $em->getRepository(StoricoEsito::class)->findOneBy(['id' => $scrutinio,
+      $scrutinio = $em->getRepository('App\Entity\StoricoEsito')->findOneBy(['id' => $scrutinio,
         'alunno' => $alunno]);
     } else {
       // dati scrutinio
-      $scrutinio = $em->getRepository(Scrutinio::class)->findOneBy(['id' => $scrutinio,
+      $scrutinio = $em->getRepository('App\Entity\Scrutinio')->findOneBy(['id' => $scrutinio,
         'periodo' => $periodo, 'stato' => 'C']);
     }
     if (!$scrutinio) {
@@ -410,7 +410,7 @@ class SegreteriaController extends AbstractController {
     $search['nome'] = $session->get('/APP/ROUTE/segreteria_genitori/nome', '');
     $search['cognome'] = $session->get('/APP/ROUTE/segreteria_genitori/cognome', '');
     $search['classe'] = $session->get('/APP/ROUTE/segreteria_genitori/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository(Classe::class)->find($search['classe']) : 0);
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/segreteria_genitori/pagina', 1);
@@ -424,7 +424,7 @@ class SegreteriaController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // form di ricerca
-    $classi = $em->getRepository(Classe::class)->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $form = $this->container->get('form.factory')->createNamedBuilder('segreteria_genitori', FormType::class)
       ->setAction($this->generateUrl('segreteria_genitori'))
       ->add('cognome', TextType::class, array('label' => 'label.cognome',
@@ -469,8 +469,8 @@ class SegreteriaController extends AbstractController {
     }
     // lista alunni
     $search['abilitato'] = 1;
-    $lista = $em->getRepository(Alunno::class)->cerca($search, $pagina);
-    $lista['genitori'] = $em->getRepository(Genitore::class)->datiGenitoriPaginator($lista['lista']);
+    $lista = $em->getRepository('App\Entity\Alunno')->cerca($search, $pagina);
+    $lista['genitori'] = $em->getRepository('App\Entity\Genitore')->datiGenitoriPaginator($lista['lista']);
     // mostra la pagina di risposta
     return $this->render('ruolo_ata/genitori.html.twig', array(
       'pagina_titolo' => 'page.segreteria_genitori',
@@ -499,7 +499,7 @@ class SegreteriaController extends AbstractController {
    */
   public function genitoriEditAction(Request $request, EntityManagerInterface $em, $alunno) {
     // controlla alunno
-    $alunno = $em->getRepository(Alunno::class)->findOneBy(['id' => $alunno, 'abilitato' => 1]);
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'abilitato' => 1]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

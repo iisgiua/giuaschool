@@ -168,7 +168,7 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // restituisce l'utente o null
-    $user = $this->em->getRepository(Docente::class)->findOneByUsername($credentials['username']);
+    $user = $this->em->getRepository('App\Entity\Docente')->findOneByUsername($credentials['username']);
     if (!$user) {
       // docente non esiste
       $this->logger->error('Utente di tipo docente non valido nella richiesta di registrazione.', array(
@@ -194,8 +194,8 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
   public function checkCredentials($credentials, UserInterface $user) {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository(Configurazione::class)->getParametro('manutenzione_fine');
+    $manutenzioneInizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di accesso da registrazione durante la modalità manutenzione.', array(
@@ -216,7 +216,7 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
     $plainPassword = $credentials['password'];
     if ($this->encoder->isPasswordValid($user, $plainPassword)) {
       // legge configurazione
-      $ip_conf = $this->em->getRepository(Configurazione::class)->findOneByParametro('ip_scuola');
+      $ip_conf = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('ip_scuola');
       $ip = ($ip_conf === null ? array() : explode(',', $ip_conf->getValore()));
       // controlla IP
       if (!in_array($credentials['ip'], $ip)) {

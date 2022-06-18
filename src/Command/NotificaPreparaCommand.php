@@ -32,7 +32,6 @@ use App\Entity\Configurazione;
 use App\Entity\App;
 use App\Entity\Avviso;
 use App\Entity\Valutazione;
-use App\Entity\Utente;
 use App\Entity\Circolare;
 use App\Util\BachecaUtil;
 use App\Util\ConfigLoader;
@@ -180,7 +179,7 @@ class NotificaPreparaCommand extends Command {
     $dati = array();
     // legge notifiche tranne quelle degli ultimi 15 minuti
     $limite = (new \DateTime())->modify('-15 min');
-    $notifiche = $this->em->getRepository(Notifica::class)->createQueryBuilder('n')
+    $notifiche = $this->em->getRepository('App\Entity\Notifica')->createQueryBuilder('n')
       ->where('n.modificato<:limite')
       ->orderBy('n.modificato', 'ASC')
       ->setParameters(['limite' => $limite->format('Y-m-d H:i:s')])
@@ -203,7 +202,7 @@ class NotificaPreparaCommand extends Command {
       }
     }
     // legge le notifiche modificate negli ultimi 15 minuti
-    $notifiche = $this->em->getRepository(Notifica::class)->createQueryBuilder('n')
+    $notifiche = $this->em->getRepository('App\Entity\Notifica')->createQueryBuilder('n')
       ->where('n.modificato>=:limite')
       ->orderBy('n.modificato', 'ASC')
       ->setParameters(['limite' => $limite->format('Y-m-d H:i:s')])
@@ -238,7 +237,7 @@ class NotificaPreparaCommand extends Command {
   private function creaMessaggi($dati) {
     $num = 0;
     // controlla se è attiva la notifica delle circolari
-    $notifica_circolari = $this->em->getRepository(Configurazione::class)->getParametro('notifica_circolari', []);
+    $notifica_circolari = $this->em->getRepository('App\Entity\Configurazione')->getParametro('notifica_circolari', []);
     $ora_notifica = explode(',', $notifica_circolari);
     $adesso = new \DateTime();
     $attiva_notifica_circolari = in_array($adesso->format('H'), $ora_notifica, true);
@@ -268,11 +267,11 @@ class NotificaPreparaCommand extends Command {
           $app = null;
           if (empty($dati_notifica) && strpos('DT', $tipo) !== false) {
             // forza invio via email per docenti/ata
-            $app = $this->em->getRepository(App::class)->findOneBy(['notifica' => 'E',
+            $app = $this->em->getRepository('App\Entity\App')->findOneBy(['notifica' => 'E',
               'abilitati' => 'DT', 'attiva' => 1]);
           } elseif (!empty($dati_notifica)) {
             // legge app di notifica
-            $app = $this->em->getRepository(App::class)->findOneBy(['id' => $dati_notifica['app'],
+            $app = $this->em->getRepository('App\Entity\App')->findOneBy(['id' => $dati_notifica['app'],
               'attiva' => 1]);
           }
           if ($app && $app->getNotifica() != 'N' && $tipo && strpos($app->getAbilitati(), $tipo) !== false) {
@@ -326,14 +325,14 @@ class NotificaPreparaCommand extends Command {
     $num = 0;
     if ($notifica->getAzione() != 'D') {
       // notifica solo nuovo avviso (anche su modifica)
-      $avviso = $this->em->getRepository(Avviso::class)->find($id);
+      $avviso = $this->em->getRepository('App\Entity\Avviso')->find($id);
       if ($avviso) {
         // solo avvisi esistenti
         $filtri = $this->bac->filtriAvviso($avviso);
         $destinatari = array();
         if ($avviso->getTipo() == 'V' || $avviso->getTipo() == 'P') {
           // destinatari per verifiche o compiti
-          $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+          $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
             ->where('a.notifica IS NOT NULL AND (a.classe IN (:classi) OR a.id IN (:utenti))')
             ->setParameters(['classi' => array_column($filtri['classi'], 'classe'),
               'utenti' => array_column($filtri['utenti'], 'alunno')])
@@ -344,7 +343,7 @@ class NotificaPreparaCommand extends Command {
           // destinatari per altri tipi di avvisi
           //-- if ($avviso->getDestinatariAlunni()) {
             //-- // alunni destinatari
-            //-- $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+            //-- $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
               //-- ->where('a.notifica IS NOT NULL AND a.classe IN (:classi)')
               //-- ->setParameters(['classi' => array_column($filtri['classi'], 'classe')])
               //-- ->getQuery()
@@ -415,7 +414,7 @@ class NotificaPreparaCommand extends Command {
     $num = 0;
     if ($notifica->getAzione() != 'D') {
       // notifica solo nuovo voto (anche su modifica)
-      $valutazione = $this->em->getRepository(Valutazione::class)->find($id);
+      $valutazione = $this->em->getRepository('App\Entity\Valutazione')->find($id);
       if ($valutazione && $valutazione->getVisibile()) {
         // solo valutazioni esistenti e visibili
         $destinatari = array($valutazione->getAlunno());
@@ -460,7 +459,7 @@ class NotificaPreparaCommand extends Command {
     $num = 0;
     if ($notifica->getAzione() != 'D') {
       // notifica solo nuovo utente
-      $utente = $this->em->getRepository(Utente::class)->find($id);
+      $utente = $this->em->getRepository('App\Entity\Utente')->find($id);
       if ($utente && $utente->getAbilitato()) {
         // solo utenti esistenti e abilitati
         $destinatari = array($utente);
@@ -491,13 +490,13 @@ class NotificaPreparaCommand extends Command {
   private function creaMessaggioCircolare($id, $notifica, &$destinatari) {
     if ($notifica->getAzione() != 'D') {
       // notifica solo nuova circolare
-      $circolare = $this->em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+      $circolare = $this->em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id, 'pubblicata' => 1]);
       if ($circolare) {
         // solo circolari esistenti e pubblicate
-        $utenti = $this->em->getRepository(Circolare::class)->notifica($circolare);
+        $utenti = $this->em->getRepository('App\Entity\Circolare')->notifica($circolare);
         foreach ($utenti as $u) {
           // memorizza circolari per utente
-          $utente = $this->em->getRepository(Utente::class)->findOneBy(['id' => $u, 'abilitato' => 1]);
+          $utente = $this->em->getRepository('App\Entity\Utente')->findOneBy(['id' => $u, 'abilitato' => 1]);
           if ($utente && ($circolare->getNotifica() || !empty($utente->getNotifica()))) {
             // solo utenti a cui notificare
             $destinatari[$u][] = array('utente' => $utente, 'numero' => $circolare->getNumero(),
@@ -526,7 +525,7 @@ class NotificaPreparaCommand extends Command {
       ($utente instanceof Docente ? 'D' : ($utente instanceof Ata ? 'T' : ''))));
     $app = null;
     if (isset($dati['app'])) {
-      $app = $this->em->getRepository(App::class)->findOneBy(['id' => $dati['app'], 'attiva' => 1]);
+      $app = $this->em->getRepository('App\Entity\App')->findOneBy(['id' => $dati['app'], 'attiva' => 1]);
     }
     if ($app && $app->getNotifica() != 'N' && $tipo && strpos($app->getAbilitati(), $tipo) !== false) {
       // crea notifica per l'invio
@@ -556,7 +555,7 @@ class NotificaPreparaCommand extends Command {
     $limite = (new \DateTime())->modify('-10 days');
     // cancella messaggi
     $num = $this->em->createQueryBuilder()
-      ->delete('App:NotificaInvio', 'n')
+      ->delete('App\Entity\NotificaInvio', 'n')
       ->where('n.modificato<:limite AND n.stato=:spedito')
       ->setParameters(['limite' => $limite->format('Y-m-d H:i:s'), 'spedito' => 'S'])
       ->getQuery()

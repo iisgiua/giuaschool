@@ -41,7 +41,7 @@ class DocumentoFixtures extends Fixture implements DependentFixtureInterface, Fi
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7979);
     // carica dati
-    $docenti = $em->getRepository(Docente::class)->findBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
     $documento = (new Documento())
       ->setTipo('L')
       ->setDocente($faker->randomElement($docenti))

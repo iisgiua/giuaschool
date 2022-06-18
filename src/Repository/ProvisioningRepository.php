@@ -68,20 +68,20 @@ class ProvisioningRepository extends EntityRepository {
       foreach ($dati['provisioning']->getDati() as $nm=>$dt) {
         switch ($nm) {
           case 'cattedra':
-            $dati[$nm] = $this->_em->getRepository(Cattedra::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Cattedra')->find($dt);
             break;
           case 'docente':
           case 'docente_prec':
-            $dati[$nm] = $this->_em->getRepository(Docente::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Docente')->find($dt);
             break;
           case 'classe':
           case 'classe_prec':
           case 'classe_origine':
           case 'classe_destinazione':
-            $dati[$nm] = $this->_em->getRepository(Classe::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Classe')->find($dt);
             break;
           case 'materia':
-            $dati[$nm] = $this->_em->getRepository(Materia::class)->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Materia')->find($dt);
             break;
         }
       }

@@ -80,17 +80,17 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $banner_login = $em->getRepository(Configurazione::class)->getParametro('banner_login', '');
-    $banner_home = $em->getRepository(Configurazione::class)->getParametro('banner_home', '');
+    $banner_login = $em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
+    $banner_home = $em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'banner',
       'dati' => [$banner_login, $banner_home]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza i parametri
-      $em->getRepository(Configurazione::class)->setParametro('banner_login',
+      $em->getRepository('App\Entity\Configurazione')->setParametro('banner_login',
         $form->get('banner_login')->getData() ? $form->get('banner_login')->getData() : '');
-      $em->getRepository(Configurazione::class)->setParametro('banner_home',
+      $em->getRepository('App\Entity\Configurazione')->setParametro('banner_home',
         $form->get('banner_home')->getData() ? $form->get('banner_home')->getData() : '');
     }
     // mostra la pagina di risposta
@@ -117,8 +117,8 @@ class SistemaController extends BaseController {
     // informazioni passate alla pagina
     $info['logLevel'] = $request->server->get('LOG_LEVEL');
     // legge parametri
-    $manutenzione_inizio = $em->getRepository(Configurazione::class)->getParametro('manutenzione_inizio', null);
-    $manutenzione_fine = $em->getRepository(Configurazione::class)->getParametro('manutenzione_fine', null);
+    $manutenzione_inizio = $em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio', null);
+    $manutenzione_fine = $em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine', null);
     if (!$manutenzione_inizio) {
       // non è impostata una manutenzione
       $manutenzione = false;
@@ -156,8 +156,8 @@ class SistemaController extends BaseController {
         $param_fine = '';
       }
       // memorizza i parametri
-      $em->getRepository(Configurazione::class)->setParametro('manutenzione_inizio', $param_inizio);
-      $em->getRepository(Configurazione::class)->setParametro('manutenzione_fine', $param_fine);
+      $em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $param_inizio);
+      $em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $param_fine);
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'manutenzione', $dati, $info, [$form->createView(), 'message.manutenzione']);
@@ -181,7 +181,7 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $parametri = $em->getRepository(Configurazione::class)->parametriConfigurazione();
+    $parametri = $em->getRepository('App\Entity\Configurazione')->parametriConfigurazione();
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'parametri',
       'dati' => $parametri]);
@@ -223,7 +223,7 @@ class SistemaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
       $username = $form->get('username')->getData();
-      $user = $em->getRepository(Utente::class)->findOneByUsername($username);
+      $user = $em->getRepository('App\Entity\Utente')->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
         $form->get('username')->addError(new FormError($trans->trans('exception.invalid_user')));
@@ -288,7 +288,7 @@ class SistemaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
       $username = $form->get('username')->getData();
-      $user = $em->getRepository(Utente::class)->findOneByUsername($username);
+      $user = $em->getRepository('App\Entity\Utente')->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
         $form->get('username')->addError(new FormError($trans->trans('exception.invalid_user')));
@@ -469,8 +469,8 @@ class SistemaController extends BaseController {
           $stmt = $conn->prepare($sql);
           $stmt->execute();
           foreach ($stmt->fetchAll() as $classe_old) {
-            $sede = $em->getRepository(Sede::class)->findOneByNome($classe_old['s_nome']);
-            $corso = $em->getRepository(Corso::class)->findOneByNome($classe_old['c_nome']);
+            $sede = $em->getRepository('App\Entity\Sede')->findOneByNome($classe_old['s_nome']);
+            $corso = $em->getRepository('App\Entity\Corso')->findOneByNome($classe_old['c_nome']);
             $classe = (new Classe())
               ->setSede($sede)
               ->setCorso($corso)
@@ -627,7 +627,7 @@ class SistemaController extends BaseController {
           $stmt = $conn->prepare($sql);
           $stmt->execute(['ruolo' => 'STA', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
-            $sede = $em->getRepository(Sede::class)->findOneByNome($utente_old['s_nome']);
+            $sede = $em->getRepository('App\Entity\Sede')->findOneByNome($utente_old['s_nome']);
             $staff = (new Staff())
               ->setSede($sede)
               ->setChiave1($utente_old['chiave1'])
@@ -685,7 +685,7 @@ class SistemaController extends BaseController {
           $stmt = $conn->prepare($sql);
           $stmt->execute(['ruolo' => 'ATA', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
-            $sede = $em->getRepository(Sede::class)->findOneByNome($utente_old['s_nome']);
+            $sede = $em->getRepository('App\Entity\Sede')->findOneByNome($utente_old['s_nome']);
             $ata = (new Ata())
               ->setTipo($utente_old['tipo'])
               ->setSegreteria($utente_old['segreteria'])
@@ -712,7 +712,7 @@ class SistemaController extends BaseController {
         if (in_array('E', $form->get('dati')->getData())) {
           // alunni esistenti nel nuovo sistema
           $fs = new Filesystem();
-          $alunni = $em->getRepository(Alunno::class)->createQueryBuilder('a')
+          $alunni = $em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
             ->getQuery()
             ->getResult();
@@ -768,7 +768,7 @@ class SistemaController extends BaseController {
                 $primo = false;
               }
               // imposta voti
-              $materia = $em->getRepository(Materia::class)->findOneByNome($scrutinio['m_nome']);
+              $materia = $em->getRepository('App\Entity\Materia')->findOneByNome($scrutinio['m_nome']);
               $dati = unserialize($scrutinio['dati']);
               $votoDati = array();
               $carenze = null;
@@ -921,7 +921,7 @@ class SistemaController extends BaseController {
           $stmt->execute(['esami' => 'E', 'rinviato' => 'X']);
           $scrutini = $stmt->fetchAll();
           foreach ($scrutini as $scrutinio) {
-            $classe = $em->getRepository(Classe::class)->findOneBy(['anno' => $scrutinio['anno'],
+            $classe = $em->getRepository('App\Entity\Classe')->findOneBy(['anno' => $scrutinio['anno'],
               'sezione' => $scrutinio['sezione']]);
             $dati = [];
             // dati scrutinio svolto
@@ -941,7 +941,7 @@ class SistemaController extends BaseController {
             $materie = array_merge($materie, $stmt->fetchAll());
             $trasformaMateria = [];
             foreach ($materie as $materia) {
-              $mat = $em->getRepository(Materia::class)->findOneByNome($materia['nome']);
+              $mat = $em->getRepository('App\Entity\Materia')->findOneByNome($materia['nome']);
               $trasformaMateria[$materia['id']] = $mat->getId();
             }
             $dati['materie'] = array_values($trasformaMateria);
@@ -956,7 +956,7 @@ class SistemaController extends BaseController {
             $dati['alunni'] = [];
             $datiScrutinabili = unserialize($scrutinio['dati'])['scrutinabili'];
             foreach ($alunni as $alunno) {
-              $alu = $em->getRepository(Alunno::class)->findOneByCodiceFiscale($alunno['codice_fiscale']);
+              $alu = $em->getRepository('App\Entity\Alunno')->findOneByCodiceFiscale($alunno['codice_fiscale']);
               $dati['alunni'][] = $alu->getId();
               $dati['religione'][$alu->getId()] = $alunno['religione'];
               $dati['credito3'][$alu->getId()] = $alunno['credito3'];
@@ -1026,23 +1026,23 @@ class SistemaController extends BaseController {
     // init
     $dati = [];
     $info = [];
-    $lista_docenti = $em->getRepository(Docente::class)->createQueryBuilder('d')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id')
+    $lista_docenti = $em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->setParameters(['tipi' => ['N', 'R', 'E']])
       ->getQuery()
       ->getResult();
-    $lista_sostegno = $em->getRepository(Docente::class)->createQueryBuilder('d')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id')
+    $lista_sostegno = $em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo=:tipo')
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->setParameters(['tipo' => 'S'])
       ->getQuery()
       ->getResult();
-    $lista_classi = $em->getRepository(Classe::class)->createQueryBuilder('c')
+    $lista_classi = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->orderBy('c.anno,c.sezione', 'ASC')
       ->getQuery()
       ->getResult();

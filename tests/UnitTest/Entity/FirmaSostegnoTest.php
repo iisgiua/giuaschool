@@ -56,10 +56,10 @@ class FirmaSostegnoTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertTrue($existent->getId() != null, 'Oggetto esistente');
     // legge lezioni
-    $classe = $this->em->getRepository('App:Classe')->findOneBy(['anno' => '2', 'sezione' => 'A']);
-    $lezioni = $this->em->getRepository('App:Lezione')->findByClasse($classe);
-    $docenti = $this->em->getRepository('App:Docente')->findBy([]);
-    $alunni = $this->em->getRepository('App:Alunno')->findByClasse($classe);
+    $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(['anno' => '2', 'sezione' => 'A']);
+    $lezioni = $this->em->getRepository('App\Entity\Lezione')->findByClasse($classe);
+    $docenti = $this->em->getRepository('App\Entity\Docente')->findBy([]);
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->findByClasse($classe);
     // crea nuovi oggetti
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();

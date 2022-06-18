@@ -60,19 +60,19 @@ class CattedraTest extends DatabaseTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $classe = $this->em->getRepository('App:Classe')->findOneBy([
+        $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy([
           'anno' => $this->faker->randomElement(['1', '2', '3', '4', '5']), 'sezione' => 'B']);
         if ($i == 0) {
           // docente di sostegno
-          $materia = $this->em->getRepository('App:Materia')->findOneBy(['nomeBreve' => 'Sostegno']);
-          $alunno = $this->faker->randomElement($this->em->getRepository('App:Alunno')->findBy(['classe' => $classe]));
+          $materia = $this->em->getRepository('App\Entity\Materia')->findOneBy(['nomeBreve' => 'Sostegno']);
+          $alunno = $this->faker->randomElement($this->em->getRepository('App\Entity\Alunno')->findBy(['classe' => $classe]));
         } else {
           // docente curricolare
-          $materia = $this->em->getRepository('App:Materia')->findOneBy([
+          $materia = $this->em->getRepository('App\Entity\Materia')->findOneBy([
             'nomeBreve' => $this->faker->randomElement(['Italiano', 'Storia', 'Matematica', 'Informatica', 'Religione / Att. alt.'])]);
           $alunno = null;
         }
-        $docente = $this->faker->randomElement($this->em->getRepository('App:Docente')->findBy([]));
+        $docente = $this->faker->randomElement($this->em->getRepository('App\Entity\Docente')->findBy([]));
         $data[$i][$field] =
           $field == 'attiva' ?  $this->faker->randomElement([true, true, false]) :
           ($field == 'supplenza' ? $this->faker->randomElement([false, false, true]) :
@@ -154,21 +154,21 @@ class CattedraTest extends DatabaseTestCase {
     $obj_materia->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::materia - NOT BLANK');
-    $existent->setMateria($this->em->getRepository('App:Materia')->findOneBy(['nome' => 'Informatica']));
+    $existent->setMateria($this->em->getRepository('App\Entity\Materia')->findOneBy(['nome' => 'Informatica']));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::materia - VALID');
     // docente
     $obj_docente = $this->getPrivateProperty($this->entity, 'docente');
     $obj_docente->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::docente - NOT BLANK');
-    $existent->setDocente($this->em->getRepository('App:Docente')->findOneBy([]));
+    $existent->setDocente($this->em->getRepository('App\Entity\Docente')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::docente - VALID');
     // classe
     $obj_classe = $this->getPrivateProperty($this->entity, 'classe');
     $obj_classe->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::classe - NOT BLANK');
-    $existent->setClasse($this->em->getRepository('App:Classe')->findOneBy(['anno' => '1', 'sezione' => 'C']));
+    $existent->setClasse($this->em->getRepository('App\Entity\Classe')->findOneBy(['anno' => '1', 'sezione' => 'C']));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::classe - VALID');
   }
 

@@ -41,8 +41,8 @@ class LogFixtures extends Fixture implements DependentFixtureInterface, FixtureG
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7878);
     // carica dati
-    $docenti = $em->getRepository(Docente::class)->findBy([]);
-    $amministratore = $em->getRepository(Amministratore::class)->findOneBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
+    $amministratore = $em->getRepository('App\Entity\Amministratore')->findOneBy([]);
     for ($i = 0; $i < 10; $i++) {
       $utente = $faker->randomElement($docenti);
       $dati = [

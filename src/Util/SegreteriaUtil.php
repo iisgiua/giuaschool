@@ -108,7 +108,7 @@ class SegreteriaUtil {
       $fine = $oggi;
     }
     // legge assenze
-    $assenze = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
+    $assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('a')
       ->select('a.data')
       ->where('a.alunno=:alunno')
       ->setParameters(['alunno' => $alunno])
@@ -118,7 +118,7 @@ class SegreteriaUtil {
       $dati['lista'][intval($a['data']->format('m'))][intval($a['data']->format('d'))] = 'A';
     }
     // legge ritardi (esclusi brevi)
-    $entrate = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
+    $entrate = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
       ->select('e.data')
       ->where('e.alunno=:alunno AND e.ritardoBreve!=:breve')
       ->setParameters(['alunno' => $alunno, 'breve' => 1])
@@ -128,7 +128,7 @@ class SegreteriaUtil {
       $dati['lista'][intval($e['data']->format('m'))][intval($e['data']->format('d'))] = 'R';
     }
     // legge uscite
-    $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
+    $uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
       ->select('u.data')
       ->where('u.alunno=:alunno')
       ->setParameters(['alunno' => $alunno])
@@ -142,7 +142,7 @@ class SegreteriaUtil {
       }
     }
     // cambio classe
-    $cambi = $this->em->getRepository(CambioClasse::class)->createQueryBuilder('cc')
+    $cambi = $this->em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
       ->where('cc.alunno=:alunno')
       ->setParameters(['alunno' => $alunno])
       ->getQuery()
@@ -183,7 +183,7 @@ class SegreteriaUtil {
       $dati['mese'][$m]['fine'] = ($m == intval($fine->format('m')) ? intval($fine->format('d')) : $mesi[$m][2]);
     }
     // aggiunge festivi
-    $festivi = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
+    $festivi = $this->em->getRepository('App\Entity\Festivita')->createQueryBuilder('f')
       ->where('(f.sede IS NULL OR f.sede=:sede) AND f.tipo=:tipo AND f.data<=:data')
       ->setParameters(['sede' => ($classe ? $classe->getSede() : null), 'tipo' => 'F',
         'data' => $fine->format('Y-m-d')])
@@ -208,9 +208,9 @@ class SegreteriaUtil {
     // trova pagelle di alunni
     foreach ($lista as $alu) {
       // scrutini di classe corrente o altre di cambio classe
-      $scrutini = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
+      $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
         ->leftJoin('s.classe', 'c')
-        ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
+        ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
         ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.periodo!=:rinviato')
         ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(), 'stato' => 'C', 'rinviato' => 'X'])
         ->orderBy('s.data')
@@ -227,7 +227,7 @@ class SegreteriaUtil {
       }
       $dati[$alu->getId()] = $periodi;
       // situazione A.S. precedente
-      $storico = $this->em->getRepository(StoricoEsito::class)->createQueryBuilder('se')
+      $storico = $this->em->getRepository('App\Entity\StoricoEsito')->createQueryBuilder('se')
         ->join('se.alunno', 'a')
         ->where('a.id=:alunno')
         ->setParameters(['alunno' => $alu])
@@ -261,7 +261,7 @@ class SegreteriaUtil {
       // alunno in scrutinio
       if ($scrutinio->getPeriodo() == 'P' || $scrutinio->getPeriodo() == 'S') {
         // legge i debiti
-        $dati['debiti'] = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
+        $dati['debiti'] = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
           ->join('vs.materia', 'm')
           ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND m.tipo IN (:tipo) AND vs.unico IS NOT NULL AND vs.unico<:suff')
           ->orderBy('m.ordinamento', 'ASC')
@@ -274,7 +274,7 @@ class SegreteriaUtil {
         $cessata_frequenza = ($scrutinio->getDato('cessata_frequenza') == null ? [] : $scrutinio->getDato('cessata_frequenza'));
         if (in_array($alunno->getId(), $scrutinati)) {
           // scrutinato
-          $dati['esito'] = $this->em->getRepository(Esito::class)->findOneBy(['scrutinio' => $scrutinio,
+          $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
             'alunno' => $alunno]);
           if ($dati['esito']->getEsito() != 'N') {
             // carenze (esclusi non ammessi)
@@ -290,7 +290,7 @@ class SegreteriaUtil {
         }
       } elseif ($scrutinio->getPeriodo() == 'E' || $scrutinio->getPeriodo() == 'X') {
         // dati esito
-        $dati['esito'] = $this->em->getRepository(Esito::class)->findOneBy(['scrutinio' => $scrutinio,
+        $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
           'alunno' => $alunno]);
       }
     }
@@ -314,7 +314,7 @@ class SegreteriaUtil {
     $percorso = $this->dirProgetto.'/FILES/archivio/scrutini/storico/';
     $fs = new Filesystem();
     // scrutinio rinviato svolto nel corrente A.S.
-    $dati['esitoRinviato'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
+    $dati['esitoRinviato'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
       ->join('e.scrutinio', 's')
       ->join('s.classe', 'cl')
       ->where('e.alunno=:alunno AND cl.anno=:anno AND cl.sezione=:sezione AND s.stato=:stato AND s.periodo=:rinviato')
@@ -371,7 +371,7 @@ class SegreteriaUtil {
       }
       if ($dati['esitoRinviato']) {
         // controlla ammessi
-        $ammessi = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
+        $ammessi = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->where('e.scrutinio=:scrutinio AND e.esito=:ammesso')
           ->setParameters(['scrutinio' => $dati['esitoRinviato']->getScrutinio(), 'ammesso' => 'A'])

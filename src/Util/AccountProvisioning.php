@@ -280,7 +280,7 @@ class AccountProvisioning {
     }
     $this->log[] = 'aggiungeUtenteGruppoGsuite: '.$alunno->getEmail().', '.$gruppo;
     // GSuite: aggiunge ai corsi della classe
-    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
@@ -327,7 +327,7 @@ class AccountProvisioning {
     }
     $this->log[] = 'rimuoveUtenteGruppoGsuite: '.$alunno->getEmail().', '.$gruppo;
     // GSuite: rimuove dai corsi della classe
-    $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT m.nomeBreve')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
@@ -409,7 +409,7 @@ class AccountProvisioning {
     // gestione cattedra di sostegno
     if ($cattedra->getMateria()->getTipo() == 'S') {
       // cattedra di SOSTEGNO: tutte le materie
-      $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+      $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
@@ -446,7 +446,7 @@ class AccountProvisioning {
       }
       if (count($students['students']) == 0) {
         // GSuite: aggiunge studenti al corso
-        $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+        $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
           ->select('a.email')
           ->where('a.abilitato=:abilitato AND a.classe=:classe')
           ->setParameters(['abilitato' => 1, 'classe' => $cattedra->getClasse()])
@@ -520,7 +520,7 @@ class AccountProvisioning {
     $nomeclasse = $classe->getAnno().$classe->getSezione();
     $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // controlla se ha altre materie nella classe
-    $altre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $altre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('COUNT(c.id)')
       ->join('c.classe', 'cl')
       ->join('c.docente', 'd')
@@ -533,7 +533,7 @@ class AccountProvisioning {
     // gestione cattedra di sostegno
     if ($materia->getTipo() == 'S') {
       // cattedra di SOSTEGNO: tutte le materie (anche cattedre/docenti disabilitati)
-      $cattedre = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
+      $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->select('DISTINCT m.nomeBreve')
         ->join('c.classe', 'cl')
         ->join('c.docente', 'd')

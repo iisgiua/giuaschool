@@ -41,8 +41,8 @@ class EntrataFixtures extends Fixture implements DependentFixtureInterface, Fixt
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7777);
     // carica dati
-    $alunni = $em->getRepository(Alunno::class)->findBy([]);
-    $docenti = $em->getRepository(Docente::class)->findBy([]);
+    $alunni = $em->getRepository('App\Entity\Alunno')->findBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
     // ritardi non giustificati
     for ($i = 0; $i < 3; $i++) {
       $ritardo = (new Entrata())

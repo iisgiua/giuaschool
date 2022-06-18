@@ -55,7 +55,7 @@ class CircolareType extends AbstractType {
         'trim' => true,
         'required' => true))
       ->add('sedi', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App:Sede',
+        'class' => 'App\Entity\Sede',
         'choice_label' => function ($obj) {
             return $obj->getCitta();
           },
@@ -130,7 +130,7 @@ class CircolareType extends AbstractType {
         'label_attr' => ['class' => 'gs-checkbox-inline gs-mr-5 gs-pr-5'],
         'required' => false))
       ->add('classi', EntityType::class, array('label' => 'label.scegli_classi',
-        'class' => 'App:Classe',
+        'class' => 'App\Entity\Classe',
         'choice_label' => function ($obj) {
             return $obj->getAnno().'ª '.$obj->getSezione();
           },
@@ -153,7 +153,7 @@ class CircolareType extends AbstractType {
         'required' => false,
         'mapped' => false))
       ->add('materie', EntityType::class, array('label' => 'label.scegli_materie',
-        'class' => 'App:Materia',
+        'class' => 'App\Entity\Materia',
         'choice_label' => function ($obj) {
             return $obj->getNome();
           },
@@ -168,7 +168,7 @@ class CircolareType extends AbstractType {
         'required' => false,
         'mapped' => false))
       ->add('lista_classi', EntityType::class, array('label' => 'label.scegli_classi',
-        'class' => 'App:Classe',
+        'class' => 'App\Entity\Classe',
         'choice_label' => function ($obj) {
             return $obj->getAnno().'ª '.$obj->getSezione();
           },

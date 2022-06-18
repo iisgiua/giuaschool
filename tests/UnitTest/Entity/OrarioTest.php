@@ -57,7 +57,7 @@ class OrarioTest extends DatabaseTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $sede = $this->em->getRepository('App:Sede')->find($this->faker->randomElement(['1', '2']));
+        $sede = $this->em->getRepository('App\Entity\Sede')->find($this->faker->randomElement(['1', '2']));
         $data[$i][$field] =
           $field == 'nome' ? implode(' ', array_map('ucfirst', $this->faker->words(3))) :
           ($field == 'inizio' ? $this->faker->dateTimeBetween('-3 month', 'now') :
@@ -151,7 +151,7 @@ class OrarioTest extends DatabaseTestCase {
     $obj_sede->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sede - NOT BLANK');
-    $existent->setSede($this->em->getRepository('App:Sede')->find(1));
+    $existent->setSede($this->em->getRepository('App\Entity\Sede')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sede - VALID');
   }
 

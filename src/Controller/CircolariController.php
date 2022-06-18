@@ -86,7 +86,7 @@ class CircolariController extends AbstractController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $circolare = $em->getRepository(Circolare::class)->findOneBy(['id' => $id]);
+      $circolare = $em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id]);
       if (!$circolare) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -94,7 +94,7 @@ class CircolariController extends AbstractController {
       $circolare_old = clone $circolare;
     } else {
       // azione add
-      $numero = $em->getRepository(Circolare::class)->prossimoNumero();
+      $numero = $em->getRepository('App\Entity\Circolare')->prossimoNumero();
       $circolare = (new Circolare())
         ->setData(new \DateTime('today'))
         ->setAnno((int) substr($session->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
@@ -162,21 +162,21 @@ class CircolariController extends AbstractController {
     $form->handleRequest($request);
     // visualizzazione filtro coordinatori
     $dati['coordinatori'] = ($form->get('coordinatori')->getData() == 'C' ?
-      $em->getRepository(Classe::class)->listaClassi($form->get('filtroCoordinatori')->getData()) : '');
+      $em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtroCoordinatori')->getData()) : '');
     $dati['docenti'] = ($form->get('docenti')->getData() == 'C' ?
-      $em->getRepository(Classe::class)->listaClassi($form->get('filtroDocenti')->getData()) :
+      $em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtroDocenti')->getData()) :
         ($form->get('docenti')->getData() == 'M' ?
-        $em->getRepository(Materia::class)->listaMaterie($form->get('filtroDocenti')->getData()) :
+        $em->getRepository('App\Entity\Materia')->listaMaterie($form->get('filtroDocenti')->getData()) :
           ($form->get('docenti')->getData() == 'U' ?
-          $em->getRepository(Docente::class)->listaDocenti($form->get('filtroDocenti')->getData(), 'gs-filtroDocenti-') :'')));
+          $em->getRepository('App\Entity\Docente')->listaDocenti($form->get('filtroDocenti')->getData(), 'gs-filtroDocenti-') :'')));
     $dati['genitori'] = ($form->get('genitori')->getData() == 'C' ?
-      $em->getRepository(Classe::class)->listaClassi($form->get('filtroGenitori')->getData()) :
+      $em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtroGenitori')->getData()) :
         ($form->get('genitori')->getData() == 'U' ?
-        $em->getRepository(Alunno::class)->listaAlunni($form->get('filtroGenitori')->getData(), 'gs-filtroGenitori-') :''));
+        $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtroGenitori')->getData(), 'gs-filtroGenitori-') :''));
     $dati['alunni'] = ($form->get('alunni')->getData() == 'C' ?
-      $em->getRepository(Classe::class)->listaClassi($form->get('filtroAlunni')->getData()) :
+      $em->getRepository('App\Entity\Classe')->listaClassi($form->get('filtroAlunni')->getData()) :
         ($form->get('alunni')->getData() == 'U' ?
-        $em->getRepository(Alunno::class)->listaAlunni($form->get('filtroAlunni')->getData(), 'gs-filtroAlunni-') :''));
+        $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtroAlunni')->getData(), 'gs-filtroAlunni-') :''));
     if ($form->isSubmitted()) {
       // lista sedi
       $sedi = array();
@@ -194,7 +194,7 @@ class CircolariController extends AbstractController {
         // data non presente
         $form->addError(new FormError($trans->trans('exception.data_nulla')));
       }
-      if (!$em->getRepository(Circolare::class)->controllaNumero($circolare)) {
+      if (!$em->getRepository('App\Entity\Circolare')->controllaNumero($circolare)) {
         // numero presente
         $form->addError(new FormError($trans->trans('exception.circolare_numero_esiste')));
       }
@@ -221,7 +221,7 @@ class CircolariController extends AbstractController {
       $errore = false;
       if ($circolare->getCoordinatori() == 'C') {
         // controlla classi
-        $lista = $em->getRepository(Classe::class)
+        $lista = $em->getRepository('App\Entity\Classe')
           ->controllaClassi($sedi, $form->get('filtroCoordinatori')->getData(), $errore);
         if ($errore) {
           // classe non valida
@@ -234,7 +234,7 @@ class CircolariController extends AbstractController {
       $errore = false;
       if ($circolare->getDocenti() == 'C') {
         // controlla classi
-        $lista = $em->getRepository(Classe::class)
+        $lista = $em->getRepository('App\Entity\Classe')
           ->controllaClassi($sedi, $form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // classe non valida
@@ -242,14 +242,14 @@ class CircolariController extends AbstractController {
         }
       } elseif ($circolare->getDocenti() == 'M') {
         // controlla materie
-        $lista = $em->getRepository(Materia::class)->controllaMaterie($form->get('filtroDocenti')->getData(), $errore);
+        $lista = $em->getRepository('App\Entity\Materia')->controllaMaterie($form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // materia non valida
           $form->addError(new FormError($trans->trans('exception.filtro_materie_invalido')));
         }
       } elseif ($circolare->getDocenti() == 'U') {
         // controlla utenti
-        $lista = $em->getRepository(Docente::class)
+        $lista = $em->getRepository('App\Entity\Docente')
           ->controllaDocenti($sedi, $form->get('filtroDocenti')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -262,7 +262,7 @@ class CircolariController extends AbstractController {
       $errore = false;
       if ($circolare->getGenitori() == 'C') {
         // controlla classi
-        $lista = $em->getRepository(Classe::class)
+        $lista = $em->getRepository('App\Entity\Classe')
           ->controllaClassi($sedi, $form->get('filtroGenitori')->getData(), $errore);
         if ($errore) {
           // classe non valida
@@ -270,7 +270,7 @@ class CircolariController extends AbstractController {
         }
       } elseif ($circolare->getGenitori() == 'U') {
         // controlla utenti
-        $lista = $em->getRepository(Alunno::class)
+        $lista = $em->getRepository('App\Entity\Alunno')
           ->controllaAlunni($sedi, $form->get('filtroGenitori')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -283,7 +283,7 @@ class CircolariController extends AbstractController {
       $errore = false;
       if ($circolare->getAlunni() == 'C') {
         // controlla classi
-        $lista = $em->getRepository(Classe::class)
+        $lista = $em->getRepository('App\Entity\Classe')
           ->controllaClassi($sedi, $form->get('filtroAlunni')->getData(), $errore);
         if ($errore) {
           // classe non valida
@@ -291,7 +291,7 @@ class CircolariController extends AbstractController {
         }
       } elseif ($circolare->getAlunni() == 'U') {
         // controlla utenti
-        $lista = $em->getRepository(Alunno::class)
+        $lista = $em->getRepository('App\Entity\Alunno')
           ->controllaAlunni($sedi, $form->get('filtroAlunni')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -415,7 +415,7 @@ class CircolariController extends AbstractController {
     $dir = $this->getParameter('dir_circolari').'/';
     $fs = new FileSystem();
     // controllo circolare
-    $circolare = $em->getRepository(Circolare::class)->find($id);
+    $circolare = $em->getRepository('App\Entity\Circolare')->find($id);
     if (!$circolare) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -582,7 +582,7 @@ class CircolariController extends AbstractController {
   public function publishAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                  CircolariUtil $circ, $pubblica, $id) {
     // controllo circolare
-    $circolare = $em->getRepository(Circolare::class)->find($id);
+    $circolare = $em->getRepository('App\Entity\Circolare')->find($id);
     if (!$circolare) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -599,25 +599,25 @@ class CircolariController extends AbstractController {
       foreach ($dest['utenti'] as $u) {
         $obj = (new CircolareUtente())
           ->setCircolare($circolare)
-          ->setUtente($em->getReference('App:Utente', $u));
+          ->setUtente($em->getReference('App\Entity\Utente', $u));
         $em->persist($obj);
       }
       // imposta classi
       foreach ($dest['classi'] as $c) {
         $obj = (new CircolareClasse())
           ->setCircolare($circolare)
-          ->setClasse($em->getReference('App:Classe', $c));
+          ->setClasse($em->getReference('App\Entity\Classe', $c));
         $em->persist($obj);
       }
     } else {
       // rimuove destinatari
-      $query = $em->getRepository(CircolareUtente::class)->createQueryBuilder('ce')
+      $query = $em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('ce')
         ->delete()
         ->where('ce.circolare=:circolare')
         ->setParameters(['circolare' => $circolare])
         ->getQuery()
         ->execute();
-      $query = $em->getRepository(CircolareClasse::class)->createQueryBuilder('cc')
+      $query = $em->getRepository('App\Entity\CircolareClasse')->createQueryBuilder('cc')
         ->delete()
         ->where('cc.circolare=:circolare')
         ->setParameters(['circolare' => $circolare])
@@ -668,7 +668,7 @@ class CircolariController extends AbstractController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
     // controllo circolare
-    $circolare = $em->getRepository(Circolare::class)->find($id);
+    $circolare = $em->getRepository('App\Entity\Circolare')->find($id);
     if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -704,7 +704,7 @@ class CircolariController extends AbstractController {
   public function downloadAction(EntityManagerInterface $em, CircolariUtil $circ, $id, $doc, $tipo) {
     $dir = $this->getParameter('dir_circolari').'/';
     // controllo circolare
-    $circolare = $em->getRepository(Circolare::class)->find($id);
+    $circolare = $em->getRepository('App\Entity\Circolare')->find($id);
     if (!$circolare) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -733,7 +733,7 @@ class CircolariController extends AbstractController {
     // segna lettura implicita
     if ($doc == 0 && !$circolare->getFirma()) {
       // dati di lettura implicita
-      $cu = $em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
+      $cu = $em->getRepository('App\Entity\CircolareUtente')->findOneBy(['circolare' => $circolare,
         'utente' => $this->getUser()]);
       if ($cu && !$cu->getLetta()) {
         // imposta lettura
@@ -833,7 +833,7 @@ class CircolariController extends AbstractController {
       $session->set('/APP/ROUTE/circolari_genitori/pagina', $pagina);
     }
     // legge le circolari
-    $dati = $em->getRepository(Circolare::class)->lista($cerca, $pagina, $limite, $this->getUser());
+    $dati = $em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
     // mostra la pagina di risposta
     return $this->render('circolari/genitori.html.twig', array(
       'pagina_titolo' => 'page.circolari_genitori',
@@ -867,13 +867,13 @@ class CircolariController extends AbstractController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
     // controllo circolare
-    $circolare = $em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+    $circolare = $em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id, 'pubblicata' => 1]);
     if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // dati destinatario
-    $cu = $em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
+    $cu = $em->getRepository('App\Entity\CircolareUtente')->findOneBy(['circolare' => $circolare,
       'utente' => $this->getUser()]);
     // visualizza pagina
     return $this->render('circolari/scheda_dettagli_destinatari.html.twig', array(
@@ -903,7 +903,7 @@ class CircolariController extends AbstractController {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
     // controllo circolare
-    $circolare = $em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+    $circolare = $em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id, 'pubblicata' => 1]);
     if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -911,7 +911,7 @@ class CircolariController extends AbstractController {
     // dati circolare
     $dati = $circ->dettagli($circolare);
     // dati destinatario
-    $cu = $em->getRepository(CircolareUtente::class)->findOneBy(['circolare' => $circolare,
+    $cu = $em->getRepository('App\Entity\CircolareUtente')->findOneBy(['circolare' => $circolare,
       'utente' => $this->getUser()]);
     // visualizza pagina
     return $this->render('circolari/scheda_dettagli_staff.html.twig', array(
@@ -939,13 +939,13 @@ class CircolariController extends AbstractController {
    */
   public function firmaAction(EntityManagerInterface $em, CircolariUtil $circ, $id) {
     // controllo circolare
-    $circolare = $em->getRepository(Circolare::class)->findOneBy(['id' => $id, 'pubblicata' => 1]);
+    $circolare = $em->getRepository('App\Entity\Circolare')->findOneBy(['id' => $id, 'pubblicata' => 1]);
     if (!$circolare || !$circ->permessoLettura($circolare, $this->getUser())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // firma
-    $em->getRepository(Circolare::class)->firma($circolare, $this->getUser());
+    $em->getRepository('App\Entity\Circolare')->firma($circolare, $this->getUser());
     // redirect
     if ($this->getUser() instanceOf Genitore || $this->getUser() instanceOf Alunno) {
       // genitori/alunni
@@ -998,7 +998,7 @@ class CircolariController extends AbstractController {
       $session->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
     }
     // crea lista anni
-    $lista_anni = $em->getRepository(Circolare::class)->anniScolastici();
+    $lista_anni = $em->getRepository('App\Entity\Circolare')->anniScolastici();
     // crea lista mesi
     $lista_mesi = array();
     for ($i=9; $i<=12; $i++) {
@@ -1063,7 +1063,7 @@ class CircolariController extends AbstractController {
       $session->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
     }
     // legge le circolari
-    $dati = $em->getRepository(Circolare::class)->lista($cerca, $pagina, $limite, $this->getUser());
+    $dati = $em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
     $dati['annoCorrente'] = count($lista_anni) > 0 ? array_values($lista_anni)[0] : '';
     if ($this->getUser() instanceOf Staff) {
       // legge dettagli su circolari
@@ -1121,7 +1121,7 @@ class CircolariController extends AbstractController {
       $session->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
     }
     // crea lista anni
-    $lista_anni = $em->getRepository(Circolare::class)->anniScolastici();
+    $lista_anni = $em->getRepository('App\Entity\Circolare')->anniScolastici();
     // crea lista mesi
     $lista_mesi = array();
     for ($i=9; $i<=12; $i++) {
@@ -1185,7 +1185,7 @@ class CircolariController extends AbstractController {
       $session->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
     }
     // legge le circolari
-    $dati = $em->getRepository(Circolare::class)->lista($cerca, $pagina, $limite, $this->getUser());
+    $dati = $em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
     $dati['annoCorrente'] = count($lista_anni) > 0 ? array_values($lista_anni)[0] : '';
     // mostra la pagina di risposta
     return $this->render('circolari/ata.html.twig', array(
@@ -1218,13 +1218,13 @@ class CircolariController extends AbstractController {
     // inizializza
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository(Classe::class)->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge dati
-    $dati = $em->getRepository(Circolare::class)->circolariClasse($classe);
+    $dati = $em->getRepository('App\Entity\Circolare')->circolariClasse($classe);
     // visualizza pagina
     return $this->render('circolari/scheda_dettagli_classe.html.twig', array(
       'dati' => $dati,
@@ -1253,13 +1253,13 @@ class CircolariController extends AbstractController {
   public function firmaClasseAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans, LogHandler $dblogger,
                                      $classe, $id) {
     // controllo classe
-    $classe = $em->getRepository(Classe::class)->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // firma
-    $firme = $em->getRepository(Circolare::class)->firmaClasse($classe, $id);
+    $firme = $em->getRepository('App\Entity\Circolare')->firmaClasse($classe, $id);
     if (count($firme) > 0) {
       // lista circolari
       $lista = implode(', ', array_map(function ($c) { return $c->getNumero(); }, $firme));

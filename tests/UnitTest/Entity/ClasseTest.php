@@ -60,9 +60,9 @@ class ClasseTest extends DatabaseTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $sede = $this->em->getRepository('App:Sede')->find($this->faker->randomElement(['1', '2']));
-        $corso = $this->em->getRepository('App:Corso')->find($this->faker->numberBetween(1, 6));
-        $docenti = $this->em->getRepository('App:Docente')->findBy([]);
+        $sede = $this->em->getRepository('App\Entity\Sede')->find($this->faker->randomElement(['1', '2']));
+        $corso = $this->em->getRepository('App\Entity\Corso')->find($this->faker->numberBetween(1, 6));
+        $docenti = $this->em->getRepository('App\Entity\Docente')->findBy([]);
         $data[$i][$field] =
           $field == 'anno' ? ($i + 1) :
           ($field == 'sezione' ? 'X' :
@@ -163,14 +163,14 @@ class ClasseTest extends DatabaseTestCase {
     $obj_sede->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sede - NOT BLANK');
-    $existent->setSede($this->em->getRepository('App:Sede')->find(1));
+    $existent->setSede($this->em->getRepository('App\Entity\Sede')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sede - VALID');
     // corso
     $obj_corso = $this->getPrivateProperty($this->entity, 'corso');
     $obj_corso->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::corso - NOT BLANK');
-    $existent->setCorso($this->em->getRepository('App:Corso')->find(1));
+    $existent->setCorso($this->em->getRepository('App\Entity\Corso')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::corso - VALID');
     // unique - anno-sezione
     $this->em->flush();

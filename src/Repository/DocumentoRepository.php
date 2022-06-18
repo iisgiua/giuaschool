@@ -34,13 +34,13 @@ class DocumentoRepository extends BaseRepository {
    */
   public function piani(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
       ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND c.docente=:docente')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['documento' => 'L', 'attiva' => 1, 'potenziamento' => 'P', 'materie' => ['S', 'E'],
@@ -60,13 +60,13 @@ class DocumentoRepository extends BaseRepository {
    */
   public function programmi(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+      ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
       ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo NOT IN (:materie) AND cl.anno!=:quinta AND c.docente=:docente')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['documento' => 'P', 'attiva' => 1, 'potenziamento' => 'P', 'materie' => ['S', 'E'],
@@ -86,14 +86,14 @@ class DocumentoRepository extends BaseRepository {
    */
   public function relazioni(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('c.id AS cattedra_id,cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nome AS materia,m.nomeBreve AS materiaBreve,a.id AS alunno_id,a.cognome AS alunnoCognome,a.nome AS alunnoNome,d AS documento')
       ->join('c.materia', 'm')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
       ->leftJoin('c.alunno', 'a')
-      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
+      ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
       ->where('c.attiva=:attiva AND c.tipo!=:potenziamento AND m.tipo!=:materia AND c.docente=:docente AND (cl.anno!=:quinta OR m.tipo=:sostegno)')
       ->orderBy('cl.anno,cl.sezione,m.nome', 'ASC')
       ->setParameters(['documento' => 'R', 'sostegno' => 'S', 'attiva' => 1, 'potenziamento' => 'P',
@@ -113,11 +113,11 @@ class DocumentoRepository extends BaseRepository {
    */
   public function maggio(Docente $docente) {
     // query
-    $cattedre = $this->_em->getRepository(Classe::class)->createQueryBuilder('cl')
+    $cattedre = $this->_em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
       ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,d AS documento')
       ->join('cl.corso', 'co')
       ->join('cl.sede', 's')
-      ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
+      ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
       ->where('cl.anno=:quinta AND cl.coordinatore=:coordinatore')
       ->orderBy('cl.sezione', 'ASC')
       ->setParameters(['documento' => 'M', 'quinta' => 5, 'coordinatore' => $docente])
@@ -138,7 +138,7 @@ class DocumentoRepository extends BaseRepository {
    */
   public function docenti($criteri, Sede $sede=null, $pagina) {
     // query base
-    $cattedre = $this->_em->getRepository(Cattedra::class)->createQueryBuilder('c')
+    $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('cl.id AS classe_id,cl.anno,cl.sezione,co.nomeBreve AS corso,s.citta AS sede,m.id AS materia_id,m.nomeBreve AS materia,d AS documento')
       ->join('c.classe', 'cl')
       ->join('cl.corso', 'co')
@@ -164,7 +164,7 @@ class DocumentoRepository extends BaseRepository {
       case 'L':
         // piani di lavoro (escluso sostegno)
         $cattedre
-          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+          ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
           ->andWhere('m.tipo!=:sostegno')
           ->addGroupBy('m.nomeBreve')
           ->setParameter('documento','L')
@@ -173,7 +173,7 @@ class DocumentoRepository extends BaseRepository {
       case 'P':
         // programmi (escluse quinte e sostegno)
         $cattedre
-          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
+          ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id')
           ->andWhere('m.tipo!=:sostegno AND cl.anno!=:quinta')
           ->addGroupBy('m.nomeBreve')
           ->setParameter('documento','P')
@@ -186,7 +186,7 @@ class DocumentoRepository extends BaseRepository {
         $cattedre
           ->addSelect("a.id AS alunno_id,CONCAT(a.cognome,' ',a.nome) AS alunno")
           ->leftJoin('c.alunno', 'a')
-          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
+          ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id AND d.materia=m.id AND (m.tipo!=:sostegno OR (d.alunno=a.id AND d.docente=c.docente))')
           ->andWhere('cl.anno!=:quinta OR m.tipo=:sostegno')
           ->addGroupBy('m.nomeBreve,a.cognome,a.nome')
           ->addOrderBy('a.cognome,a.nome', 'ASC')
@@ -197,7 +197,7 @@ class DocumentoRepository extends BaseRepository {
       case 'M':
         // documento 15 maggio (solo classi quinte)
         $cattedre
-          ->leftJoin('App:Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
+          ->leftJoin('App\Entity\Documento', 'd', 'WITH', 'd.tipo=:documento AND d.classe=cl.id')
           ->andWhere('cl.anno=:quinta AND cl.coordinatore=c.docente')
           ->setParameter('documento','M')
           ->setParameter('quinta', 5);
@@ -228,8 +228,8 @@ class DocumentoRepository extends BaseRepository {
    */
   public function bes($criteri, Sede $sede=null, $pagina) {
     // query base
-    $alunni = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
-      ->join('App:Documento', 'd', 'WITH', 'd.alunno=a.id')
+    $alunni = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->join('App\Entity\Documento', 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
       ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')
       ->orderBy('cl.anno,cl.sezione,a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -269,8 +269,8 @@ class DocumentoRepository extends BaseRepository {
    */
   public function alunni($criteri, Sede $sede=null, $pagina) {
     // query base
-    $alunni = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
-      ->join('App:Documento', 'd', 'WITH', 'd.alunno=a.id')
+    $alunni = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->join('App\Entity\Documento', 'd', 'WITH', 'd.alunno=a.id')
       ->join('a.classe', 'cl')
       ->where('a.abilitato=:abilitato AND a.classe=d.classe AND d.tipo IN (:tipi)')
       ->orderBy('cl.anno,cl.sezione,a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -313,7 +313,7 @@ class DocumentoRepository extends BaseRepository {
     $documenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d as documento,ldu.letto,ldu.firmato')
       ->join('d.listaDestinatari', 'ld')
-      ->join('App:ListaDestinatariUtente', 'ldu', 'WITH', 'ldu.listaDestinatari=ld.id')
+      ->join('App\Entity\ListaDestinatariUtente', 'ldu', 'WITH', 'ldu.listaDestinatari=ld.id')
       ->leftJoin('d.classe', 'cl')
       ->leftJoin('d.materia', 'm')
       ->leftJoin('d.alunno', 'a')

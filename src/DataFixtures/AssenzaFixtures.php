@@ -41,8 +41,8 @@ class AssenzaFixtures extends Fixture implements DependentFixtureInterface, Fixt
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7676);
     // carica dati
-    $alunni = $em->getRepository(Alunno::class)->findBy([]);
-    $docenti = $em->getRepository(Docente::class)->findBy([]);
+    $alunni = $em->getRepository('App\Entity\Alunno')->findBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
     // assenze non giustificate
     for ($i = 0; $i < 3; $i++) {
       $assenza = (new Assenza())

@@ -77,7 +77,7 @@ class ConfigLoader {
     $this->session->remove('/APP/GENITORE');
     $this->session->remove('/APP/APP');
     // carica dati dall'entità Configurazione (/CONFIG/SISTEMA/*, /CONFIG/SCUOLA/*, /CONFIG/ACCESSO/*)
-    $list = $this->em->getRepository(Configurazione::class)->load();
+    $list = $this->em->getRepository('App\Entity\Configurazione')->load();
     foreach ($list as $item) {
       $this->session->set('/CONFIG/'.$item['categoria'].'/'.$item['parametro'], $item['valore']);
     }
@@ -99,7 +99,7 @@ class ConfigLoader {
    */
   private function caricaIstituto() {
     // carica istituto
-    $istituto = $this->em->getRepository(Istituto::class)->findAll();
+    $istituto = $this->em->getRepository('App\Entity\Istituto')->findAll();
     if (count($istituto) > 0) {
       $this->session->set('/CONFIG/ISTITUTO/tipo', $istituto[0]->getTipo());
       $this->session->set('/CONFIG/ISTITUTO/tipo_sigla', $istituto[0]->getTipoSigla());
@@ -116,7 +116,7 @@ class ConfigLoader {
       $this->session->set('/CONFIG/ISTITUTO/email_notifiche', $istituto[0]->getEmailNotifiche());
     }
     // carica sedi
-    $sedi = $this->em->getRepository(Sede::class)->createQueryBuilder('s')
+    $sedi = $this->em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
       ->select('s.nome,s.nomeBreve,s.citta,s.indirizzo1,s.indirizzo2,s.telefono')
       ->orderBy('s.ordinamento', 'ASC')
       ->getQuery()
@@ -139,9 +139,9 @@ class ConfigLoader {
     // legge utente connesso (null se utente non autenticato)
     $utente = $this->security->getUser();
     // legge menu esistenti
-    $lista_menu = $this->em->getRepository(Menu::class)->listaMenu();
+    $lista_menu = $this->em->getRepository('App\Entity\Menu')->listaMenu();
     foreach ($lista_menu as $m) {
-      $menu = $this->em->getRepository(Menu::class)->menu($m['selettore'], $utente, $this->session);
+      $menu = $this->em->getRepository('App\Entity\Menu')->menu($m['selettore'], $utente, $this->session);
       $this->session->set('/CONFIG/MENU/'.$m['selettore'], $menu);
     }
   }
@@ -154,7 +154,7 @@ class ConfigLoader {
     $utente = $this->security->getUser();
     if ($utente instanceOf Docente) {
       // dati coordinatore
-      $classi = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
+      $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.coordinatore=:docente')
         ->setParameters(['docente' => $utente])

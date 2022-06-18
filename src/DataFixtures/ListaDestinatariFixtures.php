@@ -56,7 +56,7 @@ class ListaDestinatariFixtures extends Fixture implements DependentFixtureInterf
     $em->persist($destinatariUtente);
     $this->addReference('destinatari_dsga', $destinatari);
     // carica dati ATA
-    $ata_s2 = $em->getRepository(Ata::class)->findBy(['sede' => $this->getReference('sede_2')]);
+    $ata_s2 = $em->getRepository('App\Entity\Ata')->findBy(['sede' => $this->getReference('sede_2')]);
     $destinatari = (new ListaDestinatari())
       ->addSede($this->getReference('sede_2'))
       ->setAta(true);
@@ -93,7 +93,7 @@ class ListaDestinatariFixtures extends Fixture implements DependentFixtureInterf
     $em->persist($destinatariUtente);
     $this->addReference('destinatari_coordinatori', $destinatari);
     // carica dati staff
-    $staff_s2 = $em->getRepository(Staff::class)->findBy(['sede' => $this->getReference('sede_2')]);
+    $staff_s2 = $em->getRepository('App\Entity\Staff')->findBy(['sede' => $this->getReference('sede_2')]);
     $destinatari = (new ListaDestinatari())
       ->addSede($this->getReference('sede_2'))
       ->setStaff(true);
@@ -108,7 +108,7 @@ class ListaDestinatariFixtures extends Fixture implements DependentFixtureInterf
     }
     $this->addReference('destinatari_staff', $destinatari);
     // carica dati genitori
-    $alunni_2A = $em->getRepository(Alunno::class)->findBy(['classe' => $this->getReference('classe_2A')]);
+    $alunni_2A = $em->getRepository('App\Entity\Alunno')->findBy(['classe' => $this->getReference('classe_2A')]);
     $destinatari = (new ListaDestinatari())
       ->addSede($this->getReference('sede_1'))
       ->setGenitori('C')
@@ -134,8 +134,8 @@ class ListaDestinatariFixtures extends Fixture implements DependentFixtureInterf
     $em->persist($destinatariClasse);
     $this->addReference('destinatari_genitori', $destinatari);
     // carica dati alunni
-    $alunni_1A = $em->getRepository(Alunno::class)->findBy(['classe' => $this->getReference('classe_1A')]);
-    $alunni_4A = $em->getRepository(Alunno::class)->findBy(['classe' => $this->getReference('classe_4A')]);
+    $alunni_1A = $em->getRepository('App\Entity\Alunno')->findBy(['classe' => $this->getReference('classe_1A')]);
+    $alunni_4A = $em->getRepository('App\Entity\Alunno')->findBy(['classe' => $this->getReference('classe_4A')]);
     $alunno1 = $faker->randomElement($alunni_1A);
     $alunno2 = $faker->randomElement($alunni_4A);
     $destinatari = (new ListaDestinatari())

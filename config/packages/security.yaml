@@ -7,7 +7,7 @@ security:
   providers:
     db_provider:
       entity:
-        class: 'App:Utente'
+        class: 'App\Entity\Utente'
         property: 'username'
   firewalls:
     main:

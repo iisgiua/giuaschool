@@ -41,7 +41,7 @@ class FirmaSostegnoFixtures extends Fixture implements DependentFixtureInterface
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(8989);
     // legge lezioni esistenti
-    $lezioni = $em->getRepository(Lezione::class)->findAll();
+    $lezioni = $em->getRepository('App\Entity\Lezione')->findAll();
     // carica dati
     foreach ($lezioni as $lez) {
       $materia = $lez->getMateria();
@@ -50,7 +50,7 @@ class FirmaSostegnoFixtures extends Fixture implements DependentFixtureInterface
         continue;
       }
       // legge cattedre
-      $cattedre = $em->getRepository(Cattedra::class)->createQueryBuilder('c')
+      $cattedre = $em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->join('c.docente', 'd')
         ->join('c.materia', 'm')
         ->where('c.attiva=:si AND c.classe=:classe AND m.tipo=:sostegno AND d.abilitato=:si')

@@ -96,9 +96,9 @@ class NotificheUtil {
       $dati['compiti']['oggi'] = 0;
       $dati['compiti']['domani'] = 0;
       $dati['giustificazioni'] = null;
-      $alunno = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
+      $alunno = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->join('a.classe', 'c')
-        ->join('App:Genitore', 'g', 'WITH', 'a.id=g.alunno')
+        ->join('App\Entity\Genitore', 'g', 'WITH', 'a.id=g.alunno')
         ->where('g.id=:genitore AND a.abilitato=:abilitato AND g.abilitato=:abilitato')
         ->setParameters(['genitore' => $utente, 'abilitato' => 1])
         ->getQuery()
@@ -109,34 +109,34 @@ class NotificheUtil {
         // legge avvisi
         $dati['avvisi'] = $this->numeroAvvisi($utente);
         // legge circolari
-        $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+        $dati['circolari'] = $this->em->getRepository('App\Entity\Circolare')->numeroCircolariUtente($utente);
         // legge verifiche
         $dati['verifiche'] = $this->numeroVerificheGenitori($alunno);
         // legge compiti
         $dati['compiti'] = $this->numeroCompitiGenitori($alunno);
         // legge assenze da giustificare
-        $dati['giustificazioni'] = $this->em->getRepository(Assenza::class)->assenzeIngiustificate($alunno);
+        $dati['giustificazioni'] = $this->em->getRepository('App\Entity\Assenza')->assenzeIngiustificate($alunno);
       }
     } elseif ($utente instanceof Alunno) {
       // legge avvisi
       $dati['avvisi'] = $this->numeroAvvisi($utente);
       // legge circolari
-      $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+      $dati['circolari'] = $this->em->getRepository('App\Entity\Circolare')->numeroCircolariUtente($utente);
       // legge verifiche
       $dati['verifiche'] = $this->numeroVerificheGenitori($utente);
       // legge compiti
       $dati['compiti'] = $this->numeroCompitiGenitori($utente);
       // legge assenze da giustificare
-      $dati['giustificazioni'] = $this->em->getRepository(Assenza::class)->assenzeIngiustificate($utente);
+      $dati['giustificazioni'] = $this->em->getRepository('App\Entity\Assenza')->assenzeIngiustificate($utente);
     } elseif ($utente instanceof Docente) {
       // notifiche per i docenti
-      $richieste = $this->em->getRepository(RichiestaColloquio::class)->colloquiDocente($utente, ['R']);
+      $richieste = $this->em->getRepository('App\Entity\RichiestaColloquio')->colloquiDocente($utente, ['R']);
       $dati['richieste'] = count($richieste);
       $dati['colloqui'] = $this->colloquiDocente($oggi, $utente);
       // legge avvisi
       $dati['avvisi'] = $this->numeroAvvisi($utente);
       // legge circolari
-      $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+      $dati['circolari'] = $this->em->getRepository('App\Entity\Circolare')->numeroCircolariUtente($utente);
       // legge verifiche
       $dati['verifiche'] = $this->numeroVerifiche($utente);
       // legge compiti
@@ -144,7 +144,7 @@ class NotificheUtil {
     } elseif ($utente instanceof Ata) {
       // notifiche per gli ata
       $dati['avvisi'] = $this->numeroAvvisi($utente);
-      $dati['circolari'] = $this->em->getRepository(Circolare::class)->numeroCircolariUtente($utente);
+      $dati['circolari'] = $this->em->getRepository('App\Entity\Circolare')->numeroCircolariUtente($utente);
     }
     return $dati;
   }
@@ -163,7 +163,7 @@ class NotificheUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
     // legge colloqui esistenti
-    $colloqui = $this->em->getRepository(RichiestaColloquio::class)->createQueryBuilder('rc')
+    $colloqui = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
       ->select('rc.appuntamento,rc.durata,rc.stato,rc.messaggio,c.dati,d.cognome,d.nome,d.sesso')
       ->join('rc.colloquio', 'c')
       ->join('c.docente', 'd')
@@ -196,7 +196,7 @@ class NotificheUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $dati = null;
     // legge colloqui confermati
-    $colloqui = $this->em->getRepository(RichiestaColloquio::class)->colloquiDocente($docente, ['C'], $data);
+    $colloqui = $this->em->getRepository('App\Entity\RichiestaColloquio')->colloquiDocente($docente, ['C'], $data);
     foreach ($colloqui as $c) {
       $c['data_str'] = $settimana[$c['appuntamento']->format('w')].' '.intval($c['appuntamento']->format('d')).' '.
         $mesi[intval($c['appuntamento']->format('m'))].' '.$c['appuntamento']->format('Y');
@@ -217,9 +217,9 @@ class NotificheUtil {
    */
   public function numeroAvvisi(Utente $utente) {
     // conta nuovi avvisi
-    $avvisi = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $avvisi = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
       ->where('au.utente=:utente AND au.letto is NULL')
       ->setParameters(['utente' => $utente])
       ->getQuery()
@@ -240,18 +240,18 @@ class NotificheUtil {
     $ora = new \DateTime();
     $dati['oggi'] = 0;
     // verifiche per giorno di lezione
-    $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['oggi'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:oggi')
       ->setParameters(['tipo' => 'V', 'docente' => $docente, 'oggi' => $ora->format('Y-m-d')])
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge verifiche dell'alunno per cattedre di sostegno
-    $dati['oggi'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['oggi'] += $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
       ->setParameters(['docente' => $docente, 'tipo' => 'V', 'data' => $ora->format('Y-m-d'), 'attiva' => 1])
       ->getQuery()
@@ -261,7 +261,7 @@ class NotificheUtil {
     $inizio->modify('+1 day');
     $fine = clone $inizio;
     $fine->modify('+2 days');
-    $dati['prossime'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['prossime'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data BETWEEN :inizio AND :fine')
       ->setParameters(['tipo' => 'V', 'docente' => $docente, 'inizio' => $inizio->format('Y-m-d'),
@@ -269,11 +269,11 @@ class NotificheUtil {
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge verifiche dell'alunno per cattedre di sostegno
-    $dati['prossime'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['prossime'] += $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND c2.attiva=:attiva')
       ->setParameters(['docente' => $docente, 'tipo' => 'V', 'inizio' => $inizio->format('Y-m-d'),
         'fine' => $fine->format('Y-m-d'), 'attiva' => 1])
@@ -295,9 +295,9 @@ class NotificheUtil {
     $ora = new \DateTime();
     $dati['oggi'] = 0;
     // verifiche per giorno di lezione
-    $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['oggi'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data=:oggi AND au.utente=:alunno')
       ->setParameters(['tipo' => 'V', 'oggi' => $ora->format('Y-m-d'), 'alunno' => $alunno])
       ->getQuery()
@@ -307,9 +307,9 @@ class NotificheUtil {
     $inizio->modify('+1 day');
     $fine = clone $inizio;
     $fine->modify('+2 days');
-    $dati['prossime'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['prossime'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data BETWEEN :inizio AND :fine AND au.utente=:alunno')
       ->setParameters(['tipo' => 'V', 'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d'),
         'alunno' => $alunno])
@@ -331,9 +331,9 @@ class NotificheUtil {
     $ora = new \DateTime();
     $dati['oggi'] = 0;
     // compiti per giorno di lezione
-    $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['oggi'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data=:oggi AND au.utente=:alunno')
       ->setParameters(['tipo' => 'P', 'oggi' => $ora->format('Y-m-d'), 'alunno' => $alunno])
       ->getQuery()
@@ -341,9 +341,9 @@ class NotificheUtil {
     // conta compiti per il giorno dopo
     $domani = clone $ora;
     $domani->modify('+1 day');
-    $dati['domani'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['domani'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
       ->where('a.tipo=:tipo AND a.data=:domani AND au.utente=:alunno')
       ->setParameters(['tipo' => 'P', 'domani' => $domani->format('Y-m-d'), 'alunno' => $alunno])
       ->getQuery()
@@ -364,18 +364,18 @@ class NotificheUtil {
     $ora = new \DateTime();
     $dati['oggi'] = 0;
     // compiti per giorno di lezione
-    $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['oggi'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:oggi')
       ->setParameters(['tipo' => 'P', 'docente' => $docente, 'oggi' => $ora->format('Y-m-d')])
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge compiti dell'alunno per cattedre di sostegno
-    $dati['oggi'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['oggi'] += $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:data AND c2.attiva=:attiva')
       ->setParameters(['docente' => $docente, 'tipo' => 'P', 'data' => $ora->format('Y-m-d'), 'attiva' => 1])
       ->getQuery()
@@ -383,18 +383,18 @@ class NotificheUtil {
     // conta compiti per il giorno dopo
     $domani = clone $ora;
     $domani->modify('+1 day');
-    $dati['domani'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['domani'] = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->where('a.tipo=:tipo AND a.docente=:docente AND a.data=:domani')
       ->setParameters(['tipo' => 'P', 'docente' => $docente, 'domani' => $domani->format('Y-m-d')])
       ->getQuery()
       ->getSingleScalarResult();
     // aggiunge compiti dell'alunno per cattedre di sostegno
-    $dati['domani'] += $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
+    $dati['domani'] += $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
       ->select('COUNT(a.id)')
       ->join('a.cattedra', 'c')
-      ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-      ->join('App:Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
+      ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+      ->join('App\Entity\Cattedra', 'c2', 'WITH', 'c2.classe=c.classe AND c2.docente=:docente AND c2.alunno=au.utente')
       ->where('a.docente!=:docente AND a.tipo=:tipo AND a.data=:domani AND c2.attiva=:attiva')
       ->setParameters(['docente' => $docente, 'tipo' => 'P', 'domani' => $domani->format('Y-m-d'),
         'attiva' => 1])

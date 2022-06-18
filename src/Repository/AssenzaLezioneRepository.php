@@ -60,7 +60,7 @@ class AssenzaLezioneRepository extends BaseRepository {
     $lista = array();
     if ($ora > 1) {
       // recupera lezione precedente
-      $lezione = $this->_em->getRepository(Lezione::class)->createQueryBuilder('l')
+      $lezione = $this->_em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
         ->where('l.classe=:classe AND l.data=:data AND l.ora<:ora')
         ->orderBy('l.ora', 'DESC')
         ->setParameters(['classe' => $classe, 'data' => $data->format('Y-m-d'), 'ora' => $ora])
@@ -69,8 +69,8 @@ class AssenzaLezioneRepository extends BaseRepository {
         ->getOneOrNullResult();
       if ($lezione) {
         // recupera alunni assenti
-        $lista = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
-          ->join('App:AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
+        $lista = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+          ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
           ->join('al.lezione', 'l')
           ->where('l.id=:lezione')
           ->setParameters(['lezione' => $lezione])
@@ -91,8 +91,8 @@ class AssenzaLezioneRepository extends BaseRepository {
    */
   public function assentiLezione(Lezione $lezione) {
     // recupera alunni assenti
-    $lista = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
-      ->join('App:AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
+    $lista = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
       ->join('al.lezione', 'l')
       ->where('l.id=:lezione')
       ->setParameters(['lezione' => $lezione])
@@ -116,8 +116,8 @@ class AssenzaLezioneRepository extends BaseRepository {
       ->where('al2.alunno=al.alunno AND l2.id!=:lezione AND l2.data=l.data')
       ->getDQL();
     // recupera alunni assenti
-    $assenti = $this->_em->getRepository(Alunno::class)->createQueryBuilder('a')
-      ->join('App:AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
+    $assenti = $this->_em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+      ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.alunno=a.id')
       ->join('al.lezione', 'l')
       ->where('l.id=:lezione AND NOT EXISTS ('.$altre.')')
       ->setParameters(['lezione' => $lezione])
