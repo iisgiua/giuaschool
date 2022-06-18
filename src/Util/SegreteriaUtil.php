@@ -20,6 +20,13 @@ use App\Util\RegistroUtil;
 use App\Entity\Alunno;
 use App\Entity\Scrutinio;
 use App\Entity\StoricoEsito;
+use App\Entity\Assenza;
+use App\Entity\CambioClasse;
+use App\Entity\Entrata;
+use App\Entity\Esito;
+use App\Entity\Festivita;
+use App\Entity\Uscita;
+use App\Entity\VotoScrutinio;
 
 
 /**

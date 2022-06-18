@@ -14,6 +14,7 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Docente;
+use App\Entity\Orario;
 
 
 /**

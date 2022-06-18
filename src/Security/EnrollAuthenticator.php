@@ -29,6 +29,8 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use App\Entity\Docente;
+use App\Entity\Configurazione;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 

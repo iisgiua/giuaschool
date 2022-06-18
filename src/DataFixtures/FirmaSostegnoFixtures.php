@@ -19,6 +19,8 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\FirmaSostegno;
+use App\Entity\Cattedra;
+use App\Entity\Lezione;
 
 
 /**

@@ -39,6 +39,13 @@ use App\Entity\Preside;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\DefinizioneScrutinio;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Configurazione;
+use App\Entity\Esito;
+use App\Entity\Materia;
+use App\Entity\PropostaVoto;
+use App\Entity\Scrutinio;
 use App\Form\MessageType;
 
 

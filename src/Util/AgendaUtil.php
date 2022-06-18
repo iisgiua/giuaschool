@@ -23,6 +23,9 @@ use App\Entity\Annotazione;
 use App\Entity\AvvisoIndividuale;
 use App\Entity\AvvisoClasse;
 use App\Entity\Avviso;
+use App\Entity\AvvisoUtente;
+use App\Entity\Festivita;
+use App\Entity\RichiestaColloquio;
 
 
 /**

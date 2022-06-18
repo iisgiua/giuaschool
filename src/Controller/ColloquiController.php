@@ -30,6 +30,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Colloquio;
 use App\Entity\RichiestaColloquio;
+use App\Entity\ScansioneOraria;
 use App\Util\RegistroUtil;
 use App\Util\LogHandler;
 use App\Form\ColloquioType;

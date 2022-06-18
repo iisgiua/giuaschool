@@ -149,7 +149,7 @@ class AtaController extends BaseController {
       $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // recupera dati
-    $dati = $em->getRepository(ATA::class)->cerca($criteri, $pagina);
+    $dati = $em->getRepository(Ata::class)->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('ata', 'modifica', $dati, $info, [$form->createView()]);

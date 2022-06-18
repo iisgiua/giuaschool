@@ -21,6 +21,8 @@ use App\Tests\FakerPerson;
 use App\Entity\Scrutinio;
 use App\Entity\VotoScrutinio;
 use App\Entity\Esito;
+use App\Entity\Alunno;
+use App\Entity\Materia;
 
 
 /**

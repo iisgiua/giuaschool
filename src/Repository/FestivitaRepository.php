@@ -14,6 +14,11 @@ namespace App\Repository;
 
 use App\Entity\Sede;
 use App\Entity\Classe;
+use App\Entity\Assenza;
+use App\Entity\Configurazione;
+use App\Entity\Entrata;
+use App\Entity\Lezione;
+use App\Entity\Uscita;
 
 
 /**

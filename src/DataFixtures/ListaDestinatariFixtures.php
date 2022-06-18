@@ -21,6 +21,9 @@ use App\Tests\FakerPerson;
 use App\Entity\ListaDestinatari;
 use App\Entity\ListaDestinatariUtente;
 use App\Entity\ListaDestinatariClasse;
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Staff;
 
 
 /**

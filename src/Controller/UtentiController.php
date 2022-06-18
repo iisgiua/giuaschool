@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Genitore;
 use App\Entity\Alunno;
 use App\Entity\Docente;
+use App\Entity\App;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
 

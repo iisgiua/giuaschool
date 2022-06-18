@@ -15,6 +15,7 @@ namespace App\Repository;
 use App\Entity\Sede;
 use App\Entity\Classe;
 use App\Entity\Alunno;
+use App\Entity\CambioClasse;
 
 
 /**

@@ -25,7 +25,9 @@ use App\Entity\Avviso;
 use App\Entity\AvvisoClasse;
 use App\Entity\Annotazione;
 use App\Entity\Classe;
-
+use App\Entity\AvvisoUtente;
+use App\Entity\Materia;
+use App\Entity\Sede;
 
 /**
  * BachecaUtil - classe di utilità per le funzioni di gestione della bacheca

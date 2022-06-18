@@ -19,6 +19,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Festivita;
+use App\Entity\Materia;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 

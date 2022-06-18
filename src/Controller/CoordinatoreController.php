@@ -42,6 +42,8 @@ use App\Entity\AvvisoClasse;
 use App\Entity\AvvisoUtente;
 use App\Entity\Notifica;
 use App\Entity\Annotazione;
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
 use App\Form\MessageType;
 use App\Form\AvvisoType;
 

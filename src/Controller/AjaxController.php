@@ -19,8 +19,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-Use App\Entity\Staff;
-Use App\Entity\Classe;
+use App\Entity\Staff;
+use App\Entity\Classe;
+use App\Entity\Alunno;
+use App\Entity\Docente;
 
 
 /**

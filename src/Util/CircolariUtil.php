@@ -20,6 +20,11 @@ use App\Entity\Docente;
 use App\Entity\Staff;
 use App\Entity\Ata;
 use App\Entity\Circolare;
+use App\Entity\Alunno;
+use App\Entity\CircolareUtente;
+use App\Entity\Classe;
+use App\Entity\Genitore;
+use App\Entity\Materia;
 
 
 /**

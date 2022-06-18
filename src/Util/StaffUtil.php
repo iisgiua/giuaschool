@@ -22,6 +22,16 @@ use App\Util\GenitoriUtil;
 use App\Entity\Classe;
 use App\Entity\Alunno;
 use App\Entity\Docente;
+use App\Entity\Assenza;
+use App\Entity\AssenzaLezione;
+use App\Entity\Cattedra;
+use App\Entity\Entrata;
+use App\Entity\Genitore;
+use App\Entity\Materia;
+use App\Entity\Nota;
+use App\Entity\ScansioneOraria;
+use App\Entity\Uscita;
+use App\Entity\Valutazione;
 
 
 /**

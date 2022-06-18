@@ -39,10 +39,17 @@ use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
-use App\Entity\Docente;
-use App\Entity\Cattedra;
-use App\Entity\Colloquio;
 use App\Entity\Provisioning;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Colloquio;
+use App\Entity\Docente;
+use App\Entity\Materia;
+use App\Entity\Orario;
+use App\Entity\RichiestaColloquio;
+use App\Entity\ScansioneOraria;
+use App\Entity\Sede;
+use App\Entity\Staff;
 
 
 /**

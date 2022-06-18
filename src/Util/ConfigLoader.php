@@ -20,6 +20,9 @@ use App\Entity\Configurazione;
 use App\Entity\Istituto;
 use App\Entity\Docente;
 use App\Entity\Amministratore;
+use App\Entity\Classe;
+use App\Entity\Menu;
+use App\Entity\Sede;
 
 
 /**

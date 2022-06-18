@@ -25,6 +25,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use App\Entity\Docente;
+use App\Entity\Configurazione;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 

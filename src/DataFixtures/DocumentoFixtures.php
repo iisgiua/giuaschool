@@ -20,6 +20,7 @@ use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\Documento;
 use App\Entity\File;
+use App\Entity\Docente;
 
 
 /**

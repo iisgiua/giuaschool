@@ -12,6 +12,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Cattedra;
+
 
 /**
  * Docente - repository

@@ -27,6 +27,9 @@ use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\Staff;
 use App\Entity\Alunno;
 use App\Entity\Preside;
+use App\Entity\Assenza;
+use App\Entity\Avviso;
+use App\Entity\StoricoEsito;
 use App\Util\BachecaUtil;
 
 

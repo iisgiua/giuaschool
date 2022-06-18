@@ -28,6 +28,12 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
+use App\Entity\Configurazione;
+use App\Entity\App;
+use App\Entity\Avviso;
+use App\Entity\Valutazione;
+use App\Entity\Utente;
+use App\Entity\Circolare;
 use App\Util\BachecaUtil;
 use App\Util\ConfigLoader;
 

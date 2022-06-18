@@ -22,6 +22,10 @@ use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Docente;
 use App\Entity\Ata;
+use App\Entity\Assenza;
+use App\Entity\Avviso;
+use App\Entity\Circolare;
+use App\Entity\RichiestaColloquio;
 
 
 /**

@@ -38,6 +38,11 @@ use App\Form\VotoClasseType;
 use App\Form\MessageType;
 use App\Entity\Valutazione;
 use App\Entity\Notifica;
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Lezione;
+use App\Entity\Materia;
 
 
 /**

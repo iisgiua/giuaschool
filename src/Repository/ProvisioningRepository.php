@@ -13,6 +13,10 @@
 namespace App\Repository;
 
 use \Doctrine\ORM\EntityRepository;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
+use App\Entity\Materia;
 
 
 /**

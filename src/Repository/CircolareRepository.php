@@ -17,6 +17,9 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Entity\Circolare;
 use App\Entity\Utente;
 use App\Entity\Classe;
+use App\Entity\CircolareClasse;
+use App\Entity\CircolareUtente;
+use App\Entity\Configurazione;
 
 
 /**

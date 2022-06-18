@@ -53,6 +53,8 @@ use App\Entity\StoricoVoto;
 use App\Entity\Documento;
 use App\Entity\Provisioning;
 use App\Entity\Scrutinio;
+use App\Entity\Configurazione;
+use App\Entity\Utente;
 
 
 /**

@@ -16,6 +16,7 @@ use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Cattedra;
 use App\Entity\FirmaSostegno;
+use App\Entity\OrarioDocente;
 
 
 /**

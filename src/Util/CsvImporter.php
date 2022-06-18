@@ -33,6 +33,10 @@ use App\Entity\Colloquio;
 use App\Entity\Orario;
 use App\Entity\OrarioDocente;
 use App\Entity\Provisioning;
+use App\Entity\Cattedra;
+use App\Entity\Colloquio;
+use App\Entity\ScansioneOraria;
+use App\Entity\Sede;
 
 
 /**

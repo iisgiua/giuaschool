@@ -25,6 +25,8 @@ use App\Entity\Docente;
 use App\Entity\Staff;
 use App\Entity\Preside;
 use App\Entity\Ata;
+use App\Entity\Classe;
+use App\Entity\Scrutinio;
 use App\Util\PagelleUtil;
 use App\Util\GenitoriUtil;
 

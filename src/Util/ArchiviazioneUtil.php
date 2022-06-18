@@ -22,6 +22,22 @@ use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Cattedra;
+use App\Entity\Alunno;
+use App\Entity\Annotazione;
+use App\Entity\AssenzaLezione;
+use App\Entity\AvvisoUtente;
+use App\Entity\Circolare;
+use App\Entity\Configurazione;
+use App\Entity\Esito;
+use App\Entity\Festivita;
+use App\Entity\Firma;
+use App\Entity\Lezione;
+use App\Entity\Nota;
+use App\Entity\OsservazioneAlunno;
+use App\Entity\OsservazioneClasse;
+use App\Entity\PropostaVoto;
+use App\Entity\Scrutinio;
+use App\Entity\Valutazione;
 
 
 /**

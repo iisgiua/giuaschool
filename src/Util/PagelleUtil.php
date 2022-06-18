@@ -19,6 +19,12 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Entity\Classe;
 use App\Entity\Alunno;
+use App\Entity\DefinizioneScrutinio;
+use App\Entity\Docente;
+use App\Entity\Esito;
+use App\Entity\Materia;
+use App\Entity\Scrutinio;
+use App\Entity\VotoScrutinio;
 
 
 /**

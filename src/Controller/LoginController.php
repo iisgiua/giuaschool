@@ -51,6 +51,7 @@ use App\Entity\Docente;
 use App\Entity\Ata;
 use App\Entity\Avviso;
 use App\Entity\AvvisoIndividuale;
+use App\Entity\Utente;
 
 
 /**

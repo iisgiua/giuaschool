@@ -37,10 +37,17 @@ use App\Form\RicercaType;
 use App\Form\AlunnoGenitoreType;
 use App\Form\ImportaCsvType;
 use App\Form\CambioClasseType;
-use App\Entity\CambioClasse;
-use App\Entity\Alunno;
-use App\Entity\Genitore;
 use App\Entity\Provisioning;
+use App\Entity\Alunno;
+use App\Entity\Assenza;
+use App\Entity\AssenzaLezione;
+use App\Entity\CambioClasse;
+use App\Entity\Classe;
+use App\Entity\Entrata;
+use App\Entity\Genitore;
+use App\Entity\Nota;
+use App\Entity\Uscita;
+use App\Entity\Valutazione;
 
 
 /**

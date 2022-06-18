@@ -31,6 +31,8 @@ use App\Util\ConfigLoader;
 use App\Entity\Utente;
 use App\Entity\Alunno;
 use App\Entity\Docente;
+use App\Entity\Configurazione;
+use App\Entity\Utente;
 
 
 /**

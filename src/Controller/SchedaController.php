@@ -17,6 +17,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
+use App\Entity\VotoScrutinio;
 use App\Util\RegistroUtil;
 
 

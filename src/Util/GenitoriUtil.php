@@ -26,6 +26,23 @@ use App\Entity\Materia;
 use App\Entity\Colloquio;
 use App\Entity\Scrutinio;
 use App\Entity\StoricoEsito;
+use App\Entity\Annotazione;
+use App\Entity\AssenzaLezione;
+use App\Entity\Cattedra;
+use App\Entity\Configurazione;
+use App\Entity\Esito;
+use App\Entity\Festivita;
+use App\Entity\FirmaSostegno;
+use App\Entity\Lezione;
+use App\Entity\Nota;
+use App\Entity\Orario;
+use App\Entity\OsservazioneAlunno;
+use App\Entity\PropostaVoto;
+use App\Entity\RichiestaColloquio;
+use App\Entity\ScansioneOraria;
+use App\Entity\StoricoVoto;
+use App\Entity\Valutazione;
+use App\Entity\VotoScrutinio;
 
 
 /**

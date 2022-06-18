@@ -23,6 +23,8 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Entity\Avviso;
+use App\Entity\Classe;
 use App\Util\BachecaUtil;
 
 

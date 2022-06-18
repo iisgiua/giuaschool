@@ -16,6 +16,8 @@ use App\Entity\Utente;
 use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Sede;
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
 
 
 /**

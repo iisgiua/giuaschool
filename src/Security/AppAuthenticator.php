@@ -31,6 +31,9 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
+use App\Entity\App;
+use App\Entity\Configurazione;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 

@@ -25,6 +25,12 @@ use App\Entity\ListaDestinatariUtente;
 use App\Entity\ListaDestinatariClasse;
 use App\Entity\File;
 use App\Entity\Sede;
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Genitore;
+use App\Entity\Materia;
 
 
 /**

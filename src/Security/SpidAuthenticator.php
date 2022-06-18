@@ -24,6 +24,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use App\Entity\Configurazione;
+use App\Entity\Spid;
+use App\Entity\Utente;
 use App\Util\LogHandler;
 use App\Util\ConfigLoader;
 

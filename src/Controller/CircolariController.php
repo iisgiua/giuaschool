@@ -42,6 +42,8 @@ use App\Entity\Circolare;
 use App\Entity\CircolareUtente;
 use App\Entity\CircolareClasse;
 use App\Entity\Notifica;
+use App\Entity\Classe;
+use App\Entity\Materia;
 use App\Form\CircolareType;
 use App\Util\RegistroUtil;
 use App\Util\CircolariUtil;

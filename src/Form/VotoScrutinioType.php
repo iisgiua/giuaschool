@@ -21,6 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\CallbackTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\VotoScrutinio;
+use App\Entity\Alunno;
 use App\Form\MessageType;
 
 
