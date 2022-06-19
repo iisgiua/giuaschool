@@ -12,7 +12,8 @@ security:
   firewalls:
     main:
       provider: 'db_provider'
-      anonymous: lazy
+      anonymous: true
+      lazy: true
       switch_user:
         role: 'ROLE_AMMINISTRATORE'
         parameter: '_alias'
