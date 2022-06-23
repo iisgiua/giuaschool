@@ -28,12 +28,12 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, U=sessione supplettiva, X=sessione supplettiva in precedente A.S.]
+   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"P","S","F","E","U","X"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
   private $periodo;
 

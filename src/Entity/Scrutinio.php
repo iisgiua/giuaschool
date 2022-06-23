@@ -55,12 +55,12 @@ class Scrutinio {
   private $modificato;
 
   /**
-  * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, X=rinviato, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+  * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"P","S","F","E","X","1","2"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
   private $periodo;
 

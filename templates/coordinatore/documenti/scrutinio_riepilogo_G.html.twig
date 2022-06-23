@@ -1,0 +1,101 @@
+<table border="0" cellpadding="0" style="font-family:helvetica;font-size:10pt">
+  <tr>
+    <td width="50%" align="left"><strong>Classe: </strong>{{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</td>
+    <td width="50%" align="right"><strong>Anno Scolastico: </strong>{{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} &nbsp;-&nbsp; <strong>GIUDIZIO SOSPESO</strong></td>
+  </tr>
+</table>
+<table border="0.5" cellpadding="0" style="font-family:helvetica;font-size:8pt">
+  <tr style="height:30mm">
+    <td align="center" style="width:6mm">&nbsp;<br style="line-height:20mm"><strong>Pr.</strong></td>
+    <td align="center" style="width:50mm" colspan="2">&nbsp;<br style="line-height:20mm"><strong>Alunno</strong></td>
+{% for idmat,mat in dati.materie %}
+    <td style="width:{{ mat.tipo == 'R' ? 12 : 6 }}mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:{{ mat.tipo == 'R' ? 24 : 12 }}pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params[idmat] }}" /><tcpdf method="StopTransform" /></strong></td>
+{% endfor %}
+{% if dati.classe.anno >= 3 %}
+    <td style="width:6mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:12pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params['credito'] }}" /><tcpdf method="StopTransform" /></strong></td>
+  {% if dati.classe.anno >= 4 %}
+    <td style="width:6mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:12pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params['creditoPrec'] }}" /><tcpdf method="StopTransform" /></strong></td>
+    <td style="width:6mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:12pt">&nbsp;</span><strong style="font-size:8pt"><tcpdf method="StartTransform" /><tcpdf method="Rotate" params="{{ dati.tcpdf_params['rotate'] }}" /><tcpdf method="MultiCell" params="{{ dati.tcpdf_params['creditoTot'] }}" /><tcpdf method="StopTransform" /></strong></td>
+  {% endif %}
+{% endif %}
+    <td align="center" style="width:12mm">&nbsp;<br style="line-height:20mm"><strong>Media</strong></td>
+{% set dimEsito = 190 - (6 + 50 + 12 + 6 * ((dati.materie|length) - 1) + 6 * (dati.classe.anno == 3 ? 1 : (dati.classe.anno == 4 ? 3 : 0)) + 12) %}
+    <td align="center" style="width:{{ dimEsito }}mm">&nbsp;<br style="line-height:20mm"><strong>Esito</strong></td>
+  </tr>
+{% for id,alu in dati.alunni %}
+  <tr nobr="true">
+    <td align="center"><span style="line-height:24pt;">{{ loop.index }}</span></td>
+    <td style="width:45mm;border-right-color:white;border-top-color:black;border-bottom-color:black">&nbsp;{{ alu.cognome|upper }} {{ alu.nome|upper }}
+      <br>&nbsp;{{ alu.dataNascita|date('d/m/Y') }}</td>
+  {% if dati.esiti[id].esito == 'X' %}
+    <td align="center" style="width:5mm;border-left-color:white;border-right-color:black;border-top-color:black;border-bottom-color:black;">&nbsp;</td>
+      {% for idmat,mat in dati.materie %}
+    <td align="center">&nbsp;</td>
+      {% endfor %}
+      {% if dati.classe.anno >= 3 %}
+    <td align="center">&nbsp;</td>
+        {% if dati.classe.anno >= 4 %}
+    <td align="center">&nbsp;</td>
+    <td align="center">&nbsp;</td>
+        {% endif %}
+        {% if dati.classe.anno == 5 %}
+    <td align="center">&nbsp;</td>
+        {% endif %}
+      {% endif %}
+    <td align="center">&nbsp;</td>
+    <td align="center"><span style="{{ dimEsito < 20 ? 'font-size:6pt;' }}line-height:24pt;">RINVIATO</span></td>
+  {% else %}
+    <td align="center" style="width:5mm;border-left-color:white;border-right-color:black;border-top-color:black;border-bottom-color:black;"><span style="font-size:6pt;line-height:10pt;">Voto</span>
+      <br><span style="font-size:6pt;line-height:10pt;">Ass.</span></td>
+    {% for idmat,mat in dati.materie %}
+      {% if mat.tipo == 'R' and alu.religione != 'S' and alu.religione != 'A' %}
+    <td align="center"><span style="line-height:24pt;">///</span></td>
+      {% else %}
+    <td align="center"><span style="{{ dati.voti[id][idmat].unico < dati.scrutinio.dati.valutazioni[mat.tipo].suff ? 'color:red;' }}{{ mat.tipo == 'R' ? 'font-size:6pt;line-height:10pt;' }}">{{ dati.scrutinio.dati.valutazioni[mat.tipo].lista[dati.voti[id][idmat].unico] }}</span>
+      <br><span style="font-size:7pt;line-height:10pt;">{{ mat.tipo != 'C' ? dati.voti[id][idmat].assenze }}</span></td>
+      {% endif %}
+    {% endfor %}
+    {% if dati.classe.anno >= 3 %}
+    <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? dati.esiti[id].credito }}</span></td>
+      {% if dati.classe.anno >= 4 %}
+    <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? dati.esiti[id].creditoPrecedente }}</span></td>
+    <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? (dati.esiti[id].credito + dati.esiti[id].creditoPrecedente) }}</span></td>
+      {% endif %}
+      {% if dati.classe.anno == 5 %}
+    <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].esito == 'A' ? dati.esiti[id].dati.creditoConvertito }}</span></td>
+      {% endif %}
+    {% endif %}
+    <td align="center"><span style="line-height:24pt;">{{ dati.esiti[id].media|number_format(2, ',') }}</span></td>
+    {% if dati.esiti[id].esito == 'A' %}
+    <td align="center"><span style="{{ dimEsito < 20 ? 'font-size:6pt;' }}line-height:24pt;">AMMESS{{ alu.sesso == 'M' ? 'O' : 'A' }}</span></td>
+    {% elseif dati.esiti[id].esito == 'N' %}
+    <td align="center"><span style="{{ dimEsito < 20 ? 'font-size:6pt;' }}line-height:12pt;">NON<br>AMMESS{{ alu.sesso == 'M' ? 'O' : 'A' }}</span></td>
+    {% elseif dati.esiti[id].esito == 'S' %}
+    <td align="center"><span style="{{ dimEsito < 22 ? 'font-size:6pt;' }}line-height:12pt;">SOSPENSIONE<br>DEL GIUDIZIO</span></td>
+    {% endif %}
+  {% endif %}
+  </tr>
+{% endfor %}
+</table>
+<p>&nbsp;</p>
+<table border="0" cellpadding="0" style="font-family:helvetica;font-size:9pt">
+{% for iddoc,doc in dati.docenti %}
+  {% if loop.index0 % 3 == 0 %}
+  <tr nobr="true">
+  {% endif %}
+    <td width="33%" align="center"><em>({{ doc }})</em><br><br>______________________________<br></td>
+  {% if loop.index % 3 == 0 %}
+  </tr>
+  {% endif %}
+{% endfor %}
+{% if dati.docenti|length % 3 > 0 %}
+  </tr>
+{% endif %}
+</table>
+<p>&nbsp;</p><br>
+<table border="0" cellpadding="0" style="font-family:helvetica;font-size:11pt">
+  <tr nobr="true">
+    <td width="55%" align="left">Data &nbsp;&nbsp;<u>&nbsp;&nbsp;{{ dati.scrutinio.data|date('d/m/Y') }}&nbsp;&nbsp;</u></td>
+    <td width="45%" align="center">Il Presidente<br><em>({{ dati.presidente_nome }})</em><br><br>______________________________<br></td>
+  </tr>
+</table>

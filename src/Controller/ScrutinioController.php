@@ -63,7 +63,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/scrutinio/proposte/{cattedra}/{classe}/{periodo}", name="lezioni_scrutinio_proposte",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|E|1|2|0|X"},
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|G|R|X"},
    *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
    *    methods={"GET","POST"})
    *
@@ -88,9 +88,9 @@ class ScrutinioController extends AbstractController {
     $title['F']['N'] = 'message.proposte';
     $title['F']['R'] = 'message.proposte_religione';
     $title['F']['E'] = 'message.proposte';
-    $title['E']['N'] = 'message.proposte_non_previste';
-    $title['E']['R'] = 'message.proposte_non_previste';
-    $title['E']['E'] = 'message.proposte_non_previste';
+    $title['G']['N'] = 'message.proposte_non_previste';
+    $title['G']['R'] = 'message.proposte_non_previste';
+    $title['G']['E'] = 'message.proposte_non_previste';
     $title['X']['N'] = 'message.proposte_non_previste';
     $title['X']['R'] = 'message.proposte_non_previste';
     $title['X']['E'] = 'message.proposte_non_previste';
@@ -178,7 +178,9 @@ class ScrutinioController extends AbstractController {
     if ($cattedra) {
       // legge lista periodi
       $lista_periodi = $scr->periodi($classe);
-      // rimuove eventuale scrutinio supplettivo
+      // rimuove eventuali scrutini di giudizio sospeso e supplettivi
+      unset($lista_periodi['G']);
+      unset($lista_periodi['R']);
       unset($lista_periodi['X']);
       if ($periodo == '0') {
         // cerca periodo attivo
@@ -448,7 +450,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/proposte/{classe}/{materia}/{periodo}/{posizione}", name="coordinatore_scrutinio_proposte",
-   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|E|1|2", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|G|R|X", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -629,7 +631,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/condotta/{classe}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_condotta",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F", "alunno": "\d+", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -758,7 +760,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/voti/{classe}/{materia}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_voti",
-   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|E|1|2|X", "alunno": "\d+", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "materia": "\d+", "periodo": "P|S|F|G|R|X", "alunno": "\d+", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -875,7 +877,7 @@ class ScrutinioController extends AbstractController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/voti_'.($periodo == 'X' ? 'E' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/voti_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
       'classe' => $classe,
       'info' => $info,
       'dati' => $dati,
@@ -897,7 +899,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/lezioni/scrutinio/svolto/{cattedra}/{classe}/{periodo}", name="lezioni_scrutinio_svolto",
-   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|E|1|2|A|X"},
+   *    requirements={"cattedra": "\d+", "classe": "\d+", "periodo": "P|S|F|G|R|X|A"},
    *    defaults={"cattedra": 0, "classe": 0, "periodo": "0"},
    *    methods="GET")
    *
@@ -1012,9 +1014,9 @@ class ScrutinioController extends AbstractController {
         // periodo indicato non valido
         $periodo = null;
       }
-      if ($periodo == 'E' || $periodo == 'X') {
+      if ($periodo == 'G' || $periodo == 'X') {
         // voti
-        $dati = $scr->quadroVoti($this->getUser(), $classe, 'E');
+        $dati = $scr->quadroVoti($this->getUser(), $classe, 'G');
         if (isset($lista_periodi['X']) && $lista_periodi['X'] == 'C') {
           $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'X');
         }
@@ -1056,7 +1058,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/esito/{alunno}/{periodo}/{classe}/{posizione}", name="coordinatore_scrutinio_esito",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2|X", "posizione": "\d+", "classe": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|G|R|X", "posizione": "\d+", "classe": "\d+"},
    *    defaults={"posizione": 0, "classe": 0},
    *    methods={"GET","POST"})
    *
@@ -1095,7 +1097,7 @@ class ScrutinioController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // elenco voti
-    if ($periodo == 'E') {
+    if ($periodo == 'G') {
       // esame alunni sospesi: solo voti insuff.
       $dati = $scr->elencoVotiAlunnoSospeso($this->getUser(), $alunno, $periodo);
     } elseif ($periodo == 'X') {
@@ -1107,7 +1109,7 @@ class ScrutinioController extends AbstractController {
     }
     // esiti possibili
     $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_S' => 'S');
-    if ($periodo == 'E') {
+    if ($periodo == 'G') {
       // esame alunni sospesi
       $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_X' => 'X');
     } elseif ($periodo == 'X') {
@@ -1270,7 +1272,7 @@ class ScrutinioController extends AbstractController {
         'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/esiti_'.($periodo == 'X' ? 'E' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/esiti_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
       'alunno' => $alunno,
       'classe' => $classe,
       'dati' => $dati,
@@ -1291,7 +1293,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/credito/{alunno}/{periodo}/{classe}/{posizione}", name="coordinatore_scrutinio_credito",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2|X", "posizione": "\d+", "classe": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|G|R|X", "posizione": "\d+", "classe": "\d+"},
    *    defaults={"posizione": 0, "classe": 0},
    *    methods={"GET","POST"})
    *
@@ -1351,7 +1353,7 @@ class ScrutinioController extends AbstractController {
     $dati['credito'] = $credito[$classe->getAnno()][$m];
     // credito per sospensione giudizio
     $creditoSospeso = false;
-    if ($periodo == 'E' || $periodo == 'X') {
+    if ($periodo == 'G' || $periodo == 'X') {
       foreach ($dati['voti'] as $voto) {
         if (!empty($voto->getDebito()) && $voto->getUnico() >= 7) {
           $creditoSospeso = true;
@@ -1405,7 +1407,7 @@ class ScrutinioController extends AbstractController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/crediti_'.($periodo == 'X' ? 'E' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/crediti_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
       'alunno' => $alunno,
       'classe' => $classe,
       'credito3' => (($periodo == 'X' && $classe->getAnno() == 4) ? $dati['esito']->getCreditoPrecedente() : $alunno->getCredito3()),
@@ -1429,7 +1431,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/certificazione/{alunno}/{periodo}/{classe}/{posizione}", name="coordinatore_scrutinio_certificazione",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2|X", "posizione": "\d+", "classe": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F|G|R|X", "posizione": "\d+", "classe": "\d+"},
    *    defaults={"posizione": 0, "classe": 0},
    *    methods={"GET","POST"})
    *
@@ -1650,7 +1652,7 @@ class ScrutinioController extends AbstractController {
         'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/certificazioni_'.($periodo == 'X' ? 'E' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/certificazioni_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
       'alunno' => $alunno,
       'classe' => $classe,
       'dati' => $dati,
@@ -1672,7 +1674,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/debiti/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_debiti",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2", "posizione": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -1781,7 +1783,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/carenze/{alunno}/{periodo}/{posizione}", name="coordinatore_scrutinio_carenze",
-   *    requirements={"alunno": "\d+", "periodo": "P|S|F|E|1|2", "posizione": "\d+"},
+   *    requirements={"alunno": "\d+", "periodo": "P|S|F", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *
@@ -1877,7 +1879,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/verbale/{classe}/{periodo}/{step}", name="coordinatore_scrutinio_verbale",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|X|1|2", "step": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|G|R|X", "step": "\d+"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
@@ -1966,7 +1968,7 @@ class ScrutinioController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/coordinatore/scrutinio/edcivica/{classe}/{periodo}/{alunno}/{posizione}", name="coordinatore_scrutinio_edcivica",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|1|2", "alunno": "\d+", "posizione": "\d+"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|G|R|X", "alunno": "\d+", "posizione": "\d+"},
    *    defaults={"posizione": 0},
    *    methods={"GET","POST"})
    *

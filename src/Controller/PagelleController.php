@@ -47,7 +47,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/classe/{classe}/{tipo}/{periodo}", name="pagelle_classe",
-   *    requirements={"classe": "\d+", "periodo": "P|S|F|E|X"},
+   *    requirements={"classe": "\d+", "periodo": "P|S|F|G|R|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
@@ -122,7 +122,7 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->certificazioni($classe, $periodo);
           break;
       }
-    } elseif ($periodo == 'E' || $periodo == 'X') {
+    } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // scrutinio esame alunni sospesi
       switch ($tipo) {
         case 'V':
@@ -170,7 +170,7 @@ class PagelleController extends AbstractController {
    * @return Response Pagina di risposta
    *
    * @Route("/pagelle/alunno/{classe}/{alunno}/{tipo}/{periodo}", name="pagelle_alunno",
-   *    requirements={"classe": "\d+", "alunno": "\d+", "periodo": "P|S|F|E|X"},
+   *    requirements={"classe": "\d+", "alunno": "\d+", "periodo": "P|S|F|G|R|X"},
    *    methods={"GET"})
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
@@ -237,7 +237,7 @@ class PagelleController extends AbstractController {
           // carenze
           $nomefile = $pag->carenze($classe, $alunno, $periodo);
           break;
-        case 'E':
+        case 'G':
           // certificazione
           $nomefile = $pag->certificazione($classe, $alunno, $periodo);
           break;
@@ -250,7 +250,7 @@ class PagelleController extends AbstractController {
           $nomefile = $pag->tabelloneEsiti($classe, $periodo);
           break;
     }
-    } elseif ($periodo == 'E' || $periodo == 'X') {
+  } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // scrutinio esame alunni sospesi
       switch ($tipo) {
         case 'N':
@@ -264,6 +264,10 @@ class PagelleController extends AbstractController {
         case 'P':
           // pagella
           $nomefile = $pag->pagella($classe, $alunno, $periodo);
+          break;
+        case 'T':
+          // tabellone esiti
+          $nomefile = $pag->tabelloneEsiti($classe, $periodo);
           break;
       }
     }

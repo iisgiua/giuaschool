@@ -43,9 +43,9 @@
           <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2,',') }}</strong></td>
           <td>
         {% if dati.esiti[alunno].dati.certificazione is defined and dati.esiti[alunno].dati.certificazione %}
-            <button type="button" class="btn btn-success gs-button-remote" title="Modifica la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'E'}) }}"><strong>COMPILATA</strong></button>
+            <button type="button" class="btn btn-success gs-button-remote" title="Modifica la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><strong>COMPILATA</strong></button>
         {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Compila la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'E'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Compila la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
         {% endif %}
           </td>
         </tr>
@@ -68,9 +68,6 @@
           <th class="col-sm-2 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Credito anni precedenti">Credito anni precedenti</span></small>
           </th>
-          <th class="col-sm-2 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Credito integrativo">Credito integrativo</span></small>
-          </th>
       {% endif %}
           <th class="col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Credito dell'anno scolastico in corso">Credito</span></small>
@@ -89,13 +86,12 @@
           <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2,',') }}</strong></td>
         {% if classe.anno > 3 %}
           <td><strong class="gs-big">{{ dati.esiti[alunno].creditoPrecedente }}</strong></td>
-          <td><strong class="gs-big">{{ dati.esiti[alunno].dati['creditoIntegrativo'] is defined and dati.esiti[alunno].dati['creditoIntegrativo'] ? 1 : '--'}}</strong></td>
         {% endif %}
           <td>
         {% if dati.esiti[alunno].credito %}
-            <button type="button" class="btn btn-xs btn-{{ dati.esiti[alunno].credito == dati.esiti[alunno].dati.creditoMinimo ? 'info' : 'success' }} gs-button-remote" title="Modifica il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'E'}) }}"><strong class="gs-big gs-pl-2 gs-pr-2">{{ dati.esiti[alunno].credito }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.esiti[alunno].credito == dati.esiti[alunno].dati.creditoMinimo ? 'info' : 'success' }} gs-button-remote" title="Modifica il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><strong class="gs-big gs-pl-2 gs-pr-2">{{ dati.esiti[alunno].credito }}</strong></button>
         {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'E'}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
         {% endif %}
           </td>
         </tr>

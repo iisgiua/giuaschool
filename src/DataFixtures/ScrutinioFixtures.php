@@ -179,7 +179,7 @@ class ScrutinioFixtures extends Fixture implements DependentFixtureInterface, Fi
     $dati['sospesi'] = array_map(function($a) { return $a->getId(); }, $sospesi);
     $scrutinio = (new Scrutinio())
       ->setClasse($classe)
-      ->setPeriodo('E')
+      ->setPeriodo('G')
       ->setData(new \DateTime('yesterday'))
       ->setInizio(new \DateTime('15:00:00'))
       ->setFine(new \DateTime('16:00:00'))

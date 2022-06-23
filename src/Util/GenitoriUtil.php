@@ -825,7 +825,7 @@ class GenitoriUtil {
         // non scrutinato
         $dati['noscrutinato'] = 1;
       }
-    } elseif ($periodo == 'E') {
+    } elseif ($periodo == 'G') {
       // scrutinato
       $dati['esito'] = $this->em->getRepository('App:Esito')->findOneBy(['scrutinio' => $scrutinio,
         'alunno' => $alunno]);
@@ -1198,15 +1198,15 @@ class GenitoriUtil {
     $scrutini = $this->em->getRepository('App:Scrutinio')->createQueryBuilder('s')
       ->leftJoin('s.classe', 'c')
       ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
-      ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso AND s.periodo!=:rinviato')
+      ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.visibile<=:adesso AND s.periodo NOT IN (:rinviati)')
       ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(),
-        'stato' => 'C', 'adesso' => $adesso, 'rinviato' => 'X'])
+        'stato' => 'C', 'adesso' => $adesso, 'rinviati' => ['R', 'X']])
       ->orderBy('s.data', 'DESC')
       ->getQuery()
       ->getResult();
     // controlla presenza alunno in scrutinio
     foreach ($scrutini as $sc) {
-      $alunni = ($sc->getPeriodo() == 'E' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
+      $alunni = ($sc->getPeriodo() == 'G' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
       if (in_array($alunno->getId(), $alunni)) {
         $periodi[] = array($sc->getPeriodo(), $sc);
       }

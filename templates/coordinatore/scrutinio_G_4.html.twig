@@ -20,9 +20,9 @@
       <div class="col-sm-10"><em><strong>{{ args.testo|nl2br }}</strong></em></div>
       <div class="col-sm-2">
         {% if args.validato %}
-        <button type="button" class="btn btn-sm btn-default gs-button-remote" title="Modifica il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'E', 'step': step}) }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></button>
+        <button type="button" class="btn btn-sm btn-default gs-button-remote" title="Modifica il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'G', 'step': step}) }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></button>
         {% else %}
-        <button type="button" class="btn btn-sm btn-primary gs-button-remote" title="Conferma il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'E', 'step': step}) }}"><span class="glyphicon glyphicon-check gs-mr-2"></span><strong>Conferma</strong></button>
+        <button type="button" class="btn btn-sm btn-primary gs-button-remote" title="Conferma il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'G', 'step': step}) }}"><span class="glyphicon glyphicon-check gs-mr-2"></span><strong>Conferma</strong></button>
         {% endif %}
       </div>
     </div>
@@ -30,6 +30,14 @@
   </div>
       {% endif %}
     {% endfor %}
+  <div class="gs-mb-5">
+    <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Svolgimento dello scrutinio</label>
+    <div class="form-group">
+      <div class="col-sm-3 gs-ml-5">
+        {{ form_widget(form.in_presenza) }}
+      </div>
+    </div>
+  </div>
   <div class="gs-mb-5">
     <label class="gs-h3 text-info gs-pt-1 gs-pb-1 gs-pr-4 gs-pl-4"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Ora di chiusura</label>
     <div class="form-group">

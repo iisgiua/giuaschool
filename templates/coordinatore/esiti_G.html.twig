@@ -4,20 +4,17 @@
   </div>
   <div class="modal-body">
     <ul id="gs-form-collection" class="list-group">
-  {% set valutazioni = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    null, null, null, null, null, null, null, null, null,
-    'NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
-  {% set valutazioni_civica = [null, null, null, 'NC', 4, 5, 6, 7, 8, 9, 10] %}
   {% for voto in form.lista %}
       <li class="list-group-item gs-pt-2 gs-pb-2">
         <div class="form-group gs-mb-0">
           <label class="control-label col-sm-3 gs-pl-1 gs-pr-1" for="{{ voto.unico.vars.id }}">{{ dati.materie[voto.vars.value.materia.id].nomeBreve }}</label>
           <div class="col-sm-9">
-    {% if dati.materie[voto.vars.value.materia.id].tipo == 'N' or dati.materie[voto.vars.value.materia.id].tipo == 'E' %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.materie[voto.vars.value.materia.id].tipo == 'N' ? valutazioni[voto.unico.vars.value] : valutazioni_civica[voto.unico.vars.value] }}</span>
+            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < dati.valutazioni[dati.materie[voto.vars.value.materia.id].tipo].med ? 'danger' : (voto.unico.vars.value < dati.valutazioni[dati.materie[voto.vars.value.materia.id].tipo].suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni[dati.materie[voto.vars.value.materia.id].tipo].lista[voto.unico.vars.value] }}</span>
+    {% if dati.materie[voto.vars.value.materia.id].tipo == 'E' %}
+            <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider-civica', 'data-slider-value': voto.unico.vars.value}}) }}</div>
+    {% elseif dati.materie[voto.vars.value.materia.id].tipo == 'N' %}
             <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
-            <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < 5 ? 'danger' : (voto.unico.vars.value < 6 ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ (dati.materie[voto.vars.value.materia.id].tipo == 'E' and voto.unico.vars.value == 3) ? 'NC' : valutazioni[voto.unico.vars.value] }}</span>
             {{ form_widget(voto.unico) }}
     {% endif %}
           </div>
@@ -38,7 +35,7 @@
         {{ form_widget(form.giudizio, {'attr': {'rows': 4}}) }}
       </div>
     </div>
-    <div class="form-group gs-mb-2">
+    <div id="gs-delibera" class="form-group gs-mb-2">
       <label class="control-label col-sm-2" >Delibera</label>
       <div id="gs-scrutinio-unanimita" class="col-sm-6">
         {{ form_widget(form.unanimita) }}
@@ -59,48 +56,43 @@
 {{ form_end(form, {'render_rest': false}) }}
 
 <script>
+var votiN = [{{ dati.valutazioni['N'].voti|raw }}];
+var votiE = [{{ dati.valutazioni['E'].voti|raw }}];
+var inizio = 1;
 $(document).ready(function() {
-  // init
-  var inizio = 1;
   $("#gs-form-collection input.slider").slider({
-    min: {{ info.valutazioni.min }},
-    max: {{ info.valutazioni.max }},
+    min: {{ dati.valutazioni['N'].min }},
+    max: {{ dati.valutazioni['N'].max }},
     step: 1,
-    ticks: [{{ info.valutazioni.ticks }}],
-    ticks_labels: [{{ info.valutazioni.labels|raw }}],
+    ticks: [{{ dati.valutazioni['N'].valori }}],
+    ticks_labels: [{{ dati.valutazioni['N'].etichette|raw }}],
     ticks_snap_bounds: 0,
     focus: true,
-    formatter: function(val) {
-      var d = ['Non Classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      return d[val];
-      },
+    formatter: function(val) { return votiN[val - {{ dati.valutazioni['N'].min }}]; },
     natural_arrow_keys: true
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
-    var d = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    var c = (e.value.newValue < 5 ? 'label-danger' : (e.value.newValue < 6 ? 'label-warning' : 'label-success'));
-    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue]);
+    var d = [{{ dati.valutazioni['N'].votiAbbr|raw }}];
+    var c = (e.value.newValue < {{ dati.valutazioni['N'].med }} ? 'label-danger' : (e.value.newValue < {{ dati.valutazioni['N'].suff }} ? 'label-warning' : 'label-success'));
+    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ dati.valutazioni['N'].min }}]);
     inizio = 1;
     $('#esito_esito').change();
   });
-  $("#gs-form-collection input.slider-giudizi").slider({
-    min: {{ info.giudizi.min }},
-    max: {{ info.giudizi.max }},
+  $("#gs-form-collection input.slider-civica").slider({
+    min: {{ dati.valutazioni['E'].min }},
+    max: {{ dati.valutazioni['E'].max }},
     step: 1,
-    ticks: [{{ info.giudizi.ticks }}],
-    ticks_labels: [{{ info.giudizi.labels|raw }}],
+    ticks: [{{ dati.valutazioni['E'].valori }}],
+    ticks_labels: [{{ dati.valutazioni['E'].etichette|raw }}],
     ticks_snap_bounds: 0,
     focus: true,
-    formatter: function(val) {
-      var d = ['Non Classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
-      return d[val-20];
-      },
+    formatter: function(val) { return votiN[val - {{ dati.valutazioni['E'].min }}]; },
     natural_arrow_keys: true
   });
-  $("#gs-form-collection").on("change", "input.slider-giudizi", function(e) {
-    var d = ['NC', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
-    var c = (e.value.newValue < 22 ? 'label-danger' : 'label-success');
-    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue-20]);
+  $("#gs-form-collection").on("change", "input.slider-civica", function(e) {
+    var d = [{{ dati.valutazioni['E'].votiAbbr|raw }}];
+    var c = (e.value.newValue < {{ dati.valutazioni['E'].med }} ? 'label-danger' : (e.value.newValue < {{ dati.valutazioni['E'].suff }} ? 'label-warning' : 'label-success'));
+    $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ dati.valutazioni['E'].min }}]);
     inizio = 1;
     $('#esito_esito').change();
   });
@@ -120,24 +112,23 @@ $(document).ready(function() {
       if ($('#esito_giudizio').val() == '' || !inizio) {
         $('#esito_giudizio').val("{{ 'message.giudizio_non_ammissione_sospeso'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')})|raw }}");
       }
-      $('#gs-scrutinio-unanimita').parent().show();
+      $('#gs-delibera').fadeIn();
       $('#gs-scrutinio-giudizio').fadeIn();
-    } else if ($(this).val() == 'A') {
+    } else if ($(this).val() == 'A')  {
       if (!inizio) {
         $('#esito_giudizio').val('');
       }
-      $('#gs-scrutinio-unanimita').parent().show();
+      $('#gs-delibera').fadeIn();
       $('#gs-scrutinio-giudizio').fadeOut();
     } else if ($(this).val() == 'X') {
-      if ($('#esito_giudizio').val() == '' || !inizio) {
+      if (!inizio) {
         $('#esito_giudizio').val("{{ 'message.giudizio_scrutinio_rinviato'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')})|raw }}");
       }
       $('#gs-esito-label').text("{{ 'label.motivazione_obbligatoria'|trans }}").addClass('text-danger').removeClass('text-success');
-      $('#gs-scrutinio-unanimita').parent().hide();
       $('#gs-scrutinio-giudizio').fadeIn();
+      $('#gs-delibera').fadeOut();
     } else {
       $('#esito_giudizio').val('');
-      $('#gs-scrutinio-unanimita').parent().show();
       $('#gs-scrutinio-giudizio').fadeOut();
     }
     inizio = 0;
