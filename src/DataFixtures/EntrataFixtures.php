@@ -19,6 +19,8 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\Entrata;
+use App\Entity\Alunno;
+use App\Entity\Docente;
 
 
 /**
@@ -39,8 +41,8 @@ class EntrataFixtures extends Fixture implements DependentFixtureInterface, Fixt
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7777);
     // carica dati
-    $alunni = $em->getRepository('App:Alunno')->findBy([]);
-    $docenti = $em->getRepository('App:Docente')->findBy([]);
+    $alunni = $em->getRepository('App\Entity\Alunno')->findBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
     // ritardi non giustificati
     for ($i = 0; $i < 3; $i++) {
       $ritardo = (new Entrata())

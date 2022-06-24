@@ -57,7 +57,7 @@ class ScansioneOrariaTest extends DatabaseTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $orario = $this->faker->randomElement($this->em->getRepository('App:Orario')->findBy([]));
+        $orario = $this->faker->randomElement($this->em->getRepository('App\Entity\Orario')->findBy([]));
         $data[$i][$field] =
           $field == 'giorno' ? $this->faker->randomElement([1, 2, 3, 4, 5, 6]):
           ($field == 'ora' ? $this->faker->randomElement([1, 2, 3, 4]):
@@ -167,7 +167,7 @@ class ScansioneOrariaTest extends DatabaseTestCase {
     $obj_orario->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::orario - NOT BLANK');
-    $existent->setOrario($this->em->getRepository('App:Orario')->find(1));
+    $existent->setOrario($this->em->getRepository('App\Entity\Orario')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::orario - VALID');
   }
 

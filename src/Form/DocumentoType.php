@@ -71,7 +71,7 @@ class DocumentoType extends AbstractType {
           'required' => true))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['values'][3],
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
           'placeholder' => 'label.tutte_classi',
           'query_builder' => $fnSede,
@@ -98,7 +98,7 @@ class DocumentoType extends AbstractType {
           'required' => false))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['values'][2],
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
           'placeholder' => 'label.tutte_classi',
           'query_builder' => $fnSede,
@@ -141,7 +141,7 @@ class DocumentoType extends AbstractType {
         // scelta alunno
         $builder
           ->add('classe', EntityType::class, array('label' => 'label.classe',
-            'class' => 'App:Classe',
+            'class' => 'App\Entity\Classe',
             'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
             'placeholder' => 'label.scegli_classe',
             'query_builder' => $fnSede,

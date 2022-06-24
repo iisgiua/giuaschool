@@ -27,6 +27,9 @@ use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\Staff;
 use App\Entity\Alunno;
 use App\Entity\Preside;
+use App\Entity\Assenza;
+use App\Entity\Avviso;
+use App\Entity\StoricoEsito;
 use App\Util\BachecaUtil;
 
 
@@ -146,7 +149,7 @@ class FileController extends AbstractController {
   public function avvisoAction(EntityManagerInterface $em, BachecaUtil $bac,
                                 $avviso, $allegato) {
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($avviso);
+    $avviso = $em->getRepository('App\Entity\Avviso')->find($avviso);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -187,7 +190,7 @@ class FileController extends AbstractController {
    */
   public function downloadSegreteriaAction(EntityManagerInterface $em, $tipo, $id) {
     // controllo
-    $storico = $em->getRepository('App:StoricoEsito')->findOneByAlunno($id);
+    $storico = $em->getRepository('App\Entity\StoricoEsito')->findOneByAlunno($id);
     if (!$storico) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -261,7 +264,7 @@ class FileController extends AbstractController {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {
-      $assenza = $em->getRepository('App:Assenza')->find($id);
+      $assenza = $em->getRepository('App\Entity\Assenza')->find($id);
       if (!$assenza) {
         // errore assenza non definita
         throw $this->createNotFoundException('exception.id_notfound');

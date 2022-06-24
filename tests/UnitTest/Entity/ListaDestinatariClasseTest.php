@@ -57,8 +57,8 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
-    $destinatari = $this->em->getRepository('App:ListaDestinatari')->findBy([]);
-    $classi = $this->em->getRepository('App:Classe')->findBy(['sezione' => 'B']);
+    $destinatari = $this->em->getRepository('App\Entity\ListaDestinatari')->findBy([]);
+    $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sezione' => 'B']);
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
@@ -127,14 +127,14 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
     $obj_lista->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::listaDestinatari - NOT BLANK');
-    $existent->setListaDestinatari($this->em->getRepository('App:ListaDestinatari')->find(1));
+    $existent->setListaDestinatari($this->em->getRepository('App\Entity\ListaDestinatari')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::listaDestinatari - VALID');
     // classe
     $obj_classe = $this->getPrivateProperty($this->entity, 'classe');
     $obj_classe->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::classe - NOT BLANK');
-    $existent->setClasse($this->em->getRepository('App:Classe')->find(1));
+    $existent->setClasse($this->em->getRepository('App\Entity\Classe')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::classe - VALID');
     // unique - listaDestinatari-classe
     $this->em->flush();

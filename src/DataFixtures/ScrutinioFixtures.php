@@ -21,6 +21,8 @@ use App\Tests\FakerPerson;
 use App\Entity\Scrutinio;
 use App\Entity\VotoScrutinio;
 use App\Entity\Esito;
+use App\Entity\Alunno;
+use App\Entity\Materia;
 
 
 /**
@@ -41,14 +43,14 @@ class ScrutinioFixtures extends Fixture implements DependentFixtureInterface, Fi
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7373);
     $classe = $this->getReference('classe_3A');
-    $alunni = $em->getRepository('App:Alunno')->findBy(['classe' => $classe, 'abilitato' => 1]);
-    $materie = $em->getRepository('App:Materia')->createQueryBuilder('m')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id AND c.classe=:classe')
+    $alunni = $em->getRepository('App\Entity\Alunno')->findBy(['classe' => $classe, 'abilitato' => 1]);
+    $materie = $em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id AND c.classe=:classe')
       ->where('c.attiva=:si AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->setParameters(['classe' => $classe, 'si' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
       ->getQuery()
       ->getResult();
-    $condotta = $em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $em->getRepository('App\Entity\Materia')->findOneByTipo('C');
     $dati['alunni'] = array_map(function($a) { return $a->getId(); }, $alunni);
     // scrutinio primo periodo
     $scrutinio = (new Scrutinio())
@@ -207,7 +209,7 @@ class ScrutinioFixtures extends Fixture implements DependentFixtureInterface, Fi
           ->setDati($datiEsito);
       }
       $em->persist($esito);
-      $votiFinali = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $votiFinali = $em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->where('s.classe=:classe AND s.periodo=:finale AND vs.alunno=:alunno')
         ->setParameters(['classe' => $classe, 'finale' => 'F', 'alunno' => $alu])

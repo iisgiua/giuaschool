@@ -16,7 +16,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -39,6 +39,15 @@ use App\Entity\Lezione;
 use App\Entity\Nota;
 use App\Entity\Notifica;
 use App\Entity\Staff;
+use App\Entity\Alunno;
+use App\Entity\AssenzaLezione;
+use App\Entity\Cattedra;
+use App\Entity\Circolare;
+use App\Entity\Classe;
+use App\Entity\Festivita;
+use App\Entity\Materia;
+use App\Entity\ScansioneOraria;
+use App\Entity\Valutazione;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
@@ -138,7 +147,7 @@ class RegistroController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -150,12 +159,12 @@ class RegistroController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('U');
+      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -168,9 +177,9 @@ class RegistroController extends AbstractController {
     if ($classe) {
       // data prec/succ
       $data_succ = (clone $data_fine);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_inizio);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -180,11 +189,11 @@ class RegistroController extends AbstractController {
         $oggi = new \DateTime();
         $adesso = $oggi->format('H:i');
         if ($oggi->format('w') != 0 &&
-            $adesso >= $em->getRepository('App:ScansioneOraria')->inizioLezioni($oggi, $classe->getSede()) &&
-            $adesso <= $em->getRepository('App:ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
+            $adesso >= $em->getRepository('App\Entity\ScansioneOraria')->inizioLezioni($oggi, $classe->getSede()) &&
+            $adesso <= $em->getRepository('App\Entity\ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
           // avvisi alla classe
           $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
-          $lista_circolari = $em->getRepository('App:Circolare')->listaCircolariClasse($classe);
+          $lista_circolari = $em->getRepository('App\Entity\Circolare')->listaCircolariClasse($classe);
         }
         // recupera dati
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
@@ -192,7 +201,7 @@ class RegistroController extends AbstractController {
           // dati sugli assenti
           if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
             // legge assenze orarie
-            $assenti = $em->getRepository('App:AssenzaLezione')->assentiOre($classe, $data_inizio);
+            $assenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiOre($classe, $data_inizio);
           } else {
             $assenti = $reg->listaAssenti($data_inizio, $classe);
           }
@@ -252,7 +261,7 @@ class RegistroController extends AbstractController {
     // inizializza
     $label = array();
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -260,7 +269,7 @@ class RegistroController extends AbstractController {
     // controlla cattedra
     if ($cattedra > 0) {
       // lezioni di una cattedra esistente
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'classe' => $classe, 'attiva' => 1]);
       if (!$cattedra) {
         // errore: non esiste la cattedra
@@ -270,7 +279,7 @@ class RegistroController extends AbstractController {
     } else {
       // supplenza
       $cattedra = null;
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('U');
+      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore: dati inconsistenti
         throw $this->createNotFoundException('exception.invalid_params');
@@ -293,7 +302,7 @@ class RegistroController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // controlla non esistenza di lezione
-    $lezione = $em->getRepository('App:Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
+    $lezione = $em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
       'ora' => $ora]);
     if ($lezione) {
       // lezione esiste, niente da fare
@@ -329,14 +338,14 @@ class RegistroController extends AbstractController {
         'required' => false));
     if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
       // alunni assenti nell'ora
-      $assenti_precedenti = $em->getRepository('App:AssenzaLezione')->assentiLezionePrecedente($classe, $data_obj, $ora);
+      $assenti_precedenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiLezionePrecedente($classe, $data_obj, $ora);
       // religione/att.alt. o altra materia
       $religione = ($materia->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
         ($materia->getTipo() == 'R' ? 'S' : '');
       $form = $form
         ->add('assenti', EntityType::class, array('label' => 'label.assenti',
           'data' => $assenti_precedenti,
-          'class' => 'App:Alunno',
+          'class' => 'App\Entity\Alunno',
           'choice_label' => function ($obj) {
               return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
             },
@@ -460,7 +469,7 @@ class RegistroController extends AbstractController {
     // inizializza
     $label = array();
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -468,7 +477,7 @@ class RegistroController extends AbstractController {
     // controlla cattedra
     if ($cattedra > 0) {
       // lezioni di una cattedra esistente
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'classe' => $classe, 'attiva' => 1]);
       if (!$cattedra) {
         // errore: non esiste la cattedra
@@ -478,7 +487,7 @@ class RegistroController extends AbstractController {
     } else {
       // supplenza
       $cattedra = null;
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('U');
+      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore: dati inconsistenti
         throw $this->createNotFoundException('exception.invalid_params');
@@ -492,14 +501,14 @@ class RegistroController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla esistenza di lezione
-    $lezione = $em->getRepository('App:Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
+    $lezione = $em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
       'ora' => $ora]);
     if (!$lezione) {
       // errore: lezione non esiste
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla firme di lezione
-    $firme = $em->getRepository('App:Firma')->findByLezione($lezione);
+    $firme = $em->getRepository('App\Entity\Firma')->findByLezione($lezione);
     if (count($firme) == 0) {
       // errore: firme non esistono
       throw $this->createNotFoundException('exception.invalid_params');
@@ -534,7 +543,7 @@ class RegistroController extends AbstractController {
     // lista altre materie
     if ($cattedra) {
       // cattedra normale
-      $altre_materie = $em->getRepository('App:Cattedra')->listaAltreMaterie($cattedra, $firme);
+      $altre_materie = $em->getRepository('App\Entity\Cattedra')->listaAltreMaterie($cattedra, $firme);
     } else {
       // supplenza
       $altre_materie = array();
@@ -567,13 +576,13 @@ class RegistroController extends AbstractController {
     }
     if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
       // alunni assenti nell'ora
-      $assenti_precedenti = $em->getRepository('App:AssenzaLezione')->assentiLezione($lezione);
+      $assenti_precedenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiLezione($lezione);
       $religione = ($materia->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
         ($materia->getTipo() == 'R' ? 'S' : '');
       $form = $form
         ->add('assenti', EntityType::class, array('label' => 'label.assenti',
           'data' => $assenti_precedenti,
-          'class' => 'App:Alunno',
+          'class' => 'App\Entity\Alunno',
           'choice_label' => function ($obj) {
               return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
             },
@@ -599,7 +608,7 @@ class RegistroController extends AbstractController {
       $old_materia = $materia->getId();
       if (count($altre_materie) > 1) {
         // legge input
-        $cattedra = $em->getRepository('App:Cattedra')->find($form->get('materia')->getData());
+        $cattedra = $em->getRepository('App\Entity\Cattedra')->find($form->get('materia')->getData());
         if (!$cattedra || !in_array($form->get('materia')->getData(), array_values($altre_materie))) {
           // errore: cattedra non prevista
           throw $this->createNotFoundException('exception.invalid_params');
@@ -722,7 +731,7 @@ class RegistroController extends AbstractController {
   public function deleteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                RegistroUtil $reg, LogHandler $dblogger, $classe, $data, $ora) {
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -735,14 +744,14 @@ class RegistroController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla esistenza di lezione
-    $lezione = $em->getRepository('App:Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
+    $lezione = $em->getRepository('App\Entity\Lezione')->findOneBy(['classe' => $classe, 'data' => $data_obj,
       'ora' => $ora]);
     if (!$lezione) {
       // lezione non esiste, niente da fare
       return $this->redirectToRoute('lezioni_registro_firme');
     }
     // controlla firme di lezione
-    $firme = $em->getRepository('App:Firma')->findByLezione($lezione);
+    $firme = $em->getRepository('App\Entity\Firma')->findByLezione($lezione);
     if (count($firme) == 0) {
       // errore: firme non esistono
       throw $this->createNotFoundException('exception.invalid_params');
@@ -764,11 +773,11 @@ class RegistroController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // controlla voti
-    $voti = $em->getRepository('App:Valutazione')->findBy(['lezione' => $lezione, 'docente' => $this->getUser()]);
+    $voti = $em->getRepository('App\Entity\Valutazione')->findBy(['lezione' => $lezione, 'docente' => $this->getUser()]);
     if (count($voti) > 0) {
       // altra lezione
-      $altra_lezione = $em->getRepository('App:Lezione')->createQueryBuilder('l')
-        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
+      $altra_lezione = $em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
         ->where('l.id!=:id AND l.data=:data AND l.classe=:classe AND l.materia=:materia AND f.docente=:docente')
         ->setParameters(['id' => $lezione, 'data' => $data, 'classe' => $classe,
           'materia' => $lezione->getMateria(), 'docente' => $this->getUser()])
@@ -802,11 +811,11 @@ class RegistroController extends AbstractController {
       // cancella assenze lezione
       if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
         // modalità assenze orarie
-        $assenti_precedenti = $em->getRepository('App:AssenzaLezione')->assentiLezione($lezione);
+        $assenti_precedenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiLezione($lezione);
         $reg->cancellaAssentiLezione($lezione, $assenti_precedenti);
       } else {
         // modalità assenze giornaliere
-        $assenze_lezione = $em->getRepository('App:AssenzaLezione')->findByLezione($lezione);
+        $assenze_lezione = $em->getRepository('App\Entity\AssenzaLezione')->findByLezione($lezione);
         foreach ($assenze_lezione as $asslez) {
           $em->remove($asslez);
         }
@@ -818,7 +827,7 @@ class RegistroController extends AbstractController {
       $lezione_cancellata['materia'] = $lezione->getMateria()->getId();
       $lezione_cancellata['argomento'] = $lezione->getArgomento();
       $lezione_cancellata['attivita'] = $lezione->getAttivita();
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('S');
+      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('S');
       if (!$materia) {
         // errore: dati inconsistenti
         throw $this->createNotFoundException('exception.invalid_params');
@@ -888,7 +897,7 @@ class RegistroController extends AbstractController {
     $label = array();
     $dest_filtro = [];
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -902,7 +911,7 @@ class RegistroController extends AbstractController {
     }
     if ($id > 0) {
       // azione edit, controlla annotazione
-      $annotazione = $em->getRepository('App:Annotazione')->findOneBy(['id' => $id,
+      $annotazione = $em->getRepository('App\Entity\Annotazione')->findOneBy(['id' => $id,
         'data' => $data_obj, 'classe' => $classe]);
       if (!$annotazione) {
         // errore
@@ -941,7 +950,7 @@ class RegistroController extends AbstractController {
     $alunni = array();
     if (!empty($dest_filtro)) {
       foreach ($dest_filtro as $id) {
-        $alunni[] = $em->getRepository('App:Alunno')->find($id);
+        $alunni[] = $em->getRepository('App\Entity\Alunno')->find($id);
       }
     }
     // form di inserimento
@@ -958,7 +967,7 @@ class RegistroController extends AbstractController {
         'required' => true))
       ->add('filtroIndividuale', EntityType::class, array('label' => false,
         'data' => $alunni,
-        'class' => 'App:Alunno',
+        'class' => 'App\Entity\Alunno',
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
@@ -1016,7 +1025,7 @@ class RegistroController extends AbstractController {
           $log_avviso = $annotazione->getAvviso()->getId();
           $log_avviso_utenti = $annotazione->getAvviso()->getFiltro();
           // cancella destinatari precedenti e dati lettura
-          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+          $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $annotazione->getAvviso()])
@@ -1051,7 +1060,7 @@ class RegistroController extends AbstractController {
           foreach ($dest['utenti'] as $u) {
             $obj = (new AvvisoUtente())
               ->setAvviso($avviso)
-              ->setUtente($em->getReference('App:Utente', $u));
+              ->setUtente($em->getReference('App\Entity\Utente', $u));
             $em->persist($obj);
           }
         }
@@ -1131,7 +1140,7 @@ class RegistroController extends AbstractController {
   public function annotazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                           BachecaUtil $bac, LogHandler $dblogger, $id) {
     // controlla annotazione
-    $annotazione = $em->getRepository('App:Annotazione')->find($id);
+    $annotazione = $em->getRepository('App\Entity\Annotazione')->find($id);
     if (!$annotazione) {
       // annotazione non esiste, niente da fare
       return $this->redirectToRoute('lezioni_registro_firme');
@@ -1157,7 +1166,7 @@ class RegistroController extends AbstractController {
       $log_avviso = $annotazione->getAvviso()->getId();
       $log_avviso_utenti = $annotazione->getAvviso()->getFiltro();
       // cancella destinatari precedenti e dati lettura
-      $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+      $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
         ->delete()
         ->where('au.avviso=:avviso')
         ->setParameters(['avviso' => $annotazione->getAvviso()])
@@ -1221,7 +1230,7 @@ class RegistroController extends AbstractController {
     $label = array();
     $docente_staff = in_array('ROLE_STAFF', $this->getUser()->getRoles());
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1235,7 +1244,7 @@ class RegistroController extends AbstractController {
     }
     if ($id > 0) {
       // azione edit, controlla nota
-      $nota = $em->getRepository('App:Nota')->findOneBy(['id' => $id,
+      $nota = $em->getRepository('App\Entity\Nota')->findOneBy(['id' => $id,
         'data' => $data_obj, 'classe' => $classe]);
       if (!$nota) {
         // errore
@@ -1281,7 +1290,7 @@ class RegistroController extends AbstractController {
         'label_attr' => ['class' => 'radio-inline'],
         'required' => true))
       ->add('alunni', EntityType::class, array('label' => 'label.alunni',
-        'class' => 'App:Alunno',
+        'class' => 'App\Entity\Alunno',
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
@@ -1397,7 +1406,7 @@ class RegistroController extends AbstractController {
   public function notaDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                    LogHandler $dblogger, $id) {
     // controlla nota
-    $nota = $em->getRepository('App:Nota')->find($id);
+    $nota = $em->getRepository('App\Entity\Nota')->find($id);
     if (!$nota) {
       // nota non esiste, niente da fare
       return $this->redirectToRoute('lezioni_registro_firme');

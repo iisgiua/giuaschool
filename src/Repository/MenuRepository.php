@@ -48,7 +48,7 @@ class MenuRepository extends EntityRepository {
     // legge dati
     $menu = $this->createQueryBuilder('m')
       ->select('m.nome AS nome_menu,m.descrizione AS descrizione_menu,m.mega AS megamenu,o.nome,o.descrizione,o.url,o.disabilitato,o.icona,(o.sottoMenu) AS sottomenu')
-      ->join('App:MenuOpzione', 'o', 'WITH', 'o.menu=m.id')
+      ->join('App\Entity\MenuOpzione', 'o', 'WITH', 'o.menu=m.id')
       ->where('m.selettore=:selettore AND o.ruolo=:ruolo AND o.funzione IN (:funzione)')
       ->setParameters(['selettore' => $selettore, 'ruolo' => $ruolo, 'funzione' => $funzione])
       ->orderBy('o.ordinamento', 'ASC')
@@ -153,7 +153,7 @@ class MenuRepository extends EntityRepository {
     // legge dati
     $dati = $this->createQueryBuilder('m')
       ->select('m.mega AS megamenu,o.nome,o.descrizione,o.url,o.disabilitato,o.icona,(o.sottoMenu) AS sottomenu')
-      ->join('App:MenuOpzione', 'o', 'WITH', 'o.menu=m.id')
+      ->join('App\Entity\MenuOpzione', 'o', 'WITH', 'o.menu=m.id')
       ->where('m.id=:id AND o.ruolo=:ruolo AND o.funzione IN (:funzione)')
       ->setParameters(['id' => $id, 'ruolo' => $ruolo, 'funzione' => $funzione])
       ->orderBy('o.ordinamento', 'ASC')

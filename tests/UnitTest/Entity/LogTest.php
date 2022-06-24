@@ -56,8 +56,8 @@ class LogTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
-    $docenti = $this->em->getRepository('App:Docente')->findBy([]);
-    $amministratore = $this->em->getRepository('App:Amministratore')->findOneBy([]);
+    $docenti = $this->em->getRepository('App\Entity\Docente')->findBy([]);
+    $amministratore = $this->em->getRepository('App\Entity\Amministratore')->findOneBy([]);
     for ($i = 0; $i < 3; $i++) {
       $utente = $this->faker->randomElement($docenti);
       $dati = [
@@ -137,7 +137,7 @@ class LogTest extends DatabaseTestCase {
     $obj_utente->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::utente - NOT BLANK');
-    $existent->setUtente($this->em->getRepository('App:Utente')->findOneBy([]));
+    $existent->setUtente($this->em->getRepository('App\Entity\Utente')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::utente - VALID');
     // username
     $existent->setUsername(null);

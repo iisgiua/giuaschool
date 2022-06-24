@@ -96,7 +96,7 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtente($username, $password=null): void {
     $this->assertEmpty($this->vars['sys']['logged']);
-    $user = $this->em->getRepository('App:Utente')->findOneByUsername($username);
+    $user = $this->em->getRepository('App\Entity\Utente')->findOneByUsername($username);
     $this->assertTrue($user && $user->getUsername() == $username);
     $this->paginaAttiva('login_form');
     $this->session->getPage()->fillField('username', $username);
@@ -111,7 +111,7 @@ class BrowserContext extends BaseContext {
     }
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
     $this->vars['sys']['logged'] = $user;
-    $others = $this->em->getRepository('App:Utente')->createQueryBuilder('u')
+    $others = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
       ->where('u.username!=:username AND u.codiceFiscale!=:codFiscale AND u INSTANCE OF '.get_class($user))
       ->setParameters(['username' => $user->getUsername(), 'codFiscale' => $user->getCodiceFiscale()])
       ->getQuery()

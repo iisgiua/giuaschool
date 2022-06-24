@@ -19,7 +19,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -35,6 +35,10 @@ use App\Entity\Genitore;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
 use App\Entity\Scrutinio;
+use App\Entity\Avviso;
+use App\Entity\Colloquio;
+use App\Entity\Festivita;
+use App\Entity\Materia;
 use App\Util\GenitoriUtil;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
@@ -115,12 +119,12 @@ class GenitoriController extends AbstractController {
     if ($classe) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
       if ($data_succ && $data_succ->format('Y-m-d') > (new \DateTime())->format('Y-m-d')) {
         $data_succ = null;
       }
       $data_prec = (clone $data_obj);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -179,7 +183,7 @@ class GenitoriController extends AbstractController {
     $dati = null;
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $em->getRepository('App:Materia')->find($idmateria);
+      $materia = $em->getRepository('App\Entity\Materia')->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -265,7 +269,7 @@ class GenitoriController extends AbstractController {
     $template = 'ruolo_genitore/voti.html.twig';
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $em->getRepository('App:Materia')->find($idmateria);
+      $materia = $em->getRepository('App\Entity\Materia')->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -538,7 +542,7 @@ class GenitoriController extends AbstractController {
         $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
         if (!in_array($periodo, ['P', 'S', 'A'])) {
           // legge dati valutazioni
-          $dati['valutazioni'] = $em->getRepository('App:Scrutinio')
+          $dati['valutazioni'] = $em->getRepository('App\Entity\Scrutinio')
             ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
             ->getDato('valutazioni');
         }
@@ -628,7 +632,7 @@ class GenitoriController extends AbstractController {
     $dati['lista'] = array();
     $label = array();
     // controlla colloquio
-    $colloquio = $em->getRepository('App:Colloquio')->find($colloquio);
+    $colloquio = $em->getRepository('App\Entity\Colloquio')->find($colloquio);
     if (!$colloquio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -667,7 +671,7 @@ class GenitoriController extends AbstractController {
     $form->handleRequest($request);
     if (!$dati['errore'] && $form->isSubmitted() && $form->isValid()) {
       $data = explode('|', $form->get('data')->getData());
-      $richiesta = $em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
+      $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
         ->where('rc.colloquio=:colloquio AND rc.alunno=:alunno AND rc.appuntamento=:appuntamento AND rc.stato!=:stato')
         ->setParameters(['colloquio' => $colloquio, 'alunno' => $alunno,
           'appuntamento' => $data[0], 'stato' => 'A'])
@@ -737,7 +741,7 @@ class GenitoriController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla richiesta
-    $richiesta = $em->getRepository('App:RichiestaColloquio')->findOneBy(['id' => $richiesta, 'alunno' => $alunno]);
+    $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->findOneBy(['id' => $richiesta, 'alunno' => $alunno]);
     if (!$richiesta) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -853,7 +857,7 @@ class GenitoriController extends AbstractController {
     $dati = null;
     $letto = null;
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($id);
+    $avviso = $em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -919,10 +923,10 @@ class GenitoriController extends AbstractController {
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
     $data_succ = (clone $data_fine);
-    $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
     $info['url_succ'] = ($data_succ ? $data_succ->format('Y-m') : null);
     $data_prec = (clone $data_inizio);
-    $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
     $info['url_prec'] = ($data_prec ? $data_prec->format('Y-m') : null);
     // presentazione calendario
     $info['inizio'] = (intval($mese->format('w')) - 1);
@@ -1215,7 +1219,7 @@ class GenitoriController extends AbstractController {
         $certificati = array();
       }
       // aggiorna dati
-      $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')
+      $risultato = $em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
         ->update()
         ->set('ass.modificato', ':modificato')
         ->set('ass.giustificato', ':giustificato')

@@ -61,7 +61,7 @@ class AtaType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('sede', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App:Sede',
+        'class' => 'App\Entity\Sede',
         'choice_label' => function ($obj) {
             return $obj->getCitta();
           },

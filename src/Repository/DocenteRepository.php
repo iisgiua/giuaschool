@@ -12,6 +12,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Cattedra;
+
 
 /**
  * Docente - repository
@@ -30,7 +32,7 @@ class DocenteRepository extends BaseRepository {
   public function findAll($search=null, $page=1, $limit=10) {
     // crea query
     $query = $this->createQueryBuilder('d')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App:Preside)')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside)')
       ->orderBy('d.cognome, d.nome, d.username', 'ASC')
       ->setParameter(':nome', $search['nome'].'%')
       ->setParameter(':cognome', $search['cognome'].'%')
@@ -52,7 +54,7 @@ class DocenteRepository extends BaseRepository {
   public function findEnabled($search=null, $page=1, $limit=10) {
     // crea query
     $query = $this->createQueryBuilder('d')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App:Preside) AND d.abilitato=:abilitato')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside) AND d.abilitato=:abilitato')
       ->orderBy('d.cognome, d.nome, d.username', 'ASC')
       ->setParameter('nome', $search['nome'].'%')
       ->setParameter('cognome', $search['cognome'].'%')
@@ -76,10 +78,10 @@ class DocenteRepository extends BaseRepository {
     // legge docenti validi
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->leftJoin('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
       ->where('d.id IN (:lista) AND d.abilitato=:abilitato')
-      ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App:Staff)')
+      ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App\Entity\Staff)')
       ->setParameters(['attiva' => 1, 'lista' => $lista, 'abilitato' => 1, 'sedi' => $sedi])
       ->getQuery()
       ->getArrayResult();
@@ -122,7 +124,7 @@ class DocenteRepository extends BaseRepository {
   public function getIdCoordinatore($sedi, $filtro) {
     $coordinatori = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->join('App:Classe', 'c', 'WITH', 'd.id=c.coordinatore')
+      ->join('App\Entity\Classe', 'c', 'WITH', 'd.id=c.coordinatore')
       ->where('d.abilitato=:abilitato AND c.sede IN (:sedi)')
       ->setParameters(['abilitato' => 1, 'sedi' => $sedi]);
     if ($filtro) {
@@ -149,7 +151,7 @@ class DocenteRepository extends BaseRepository {
     // docenti con cattedra
     $docenti = $this->createQueryBuilder('d')
       ->select('DISTINCT d.id')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->join('c.classe', 'cl')
       ->where('d.abilitato=:abilitato AND cl.sede IN (:sedi)')
       ->setParameters(['attiva' => 1, 'abilitato' => 1, 'sedi' => $sedi]);
@@ -173,13 +175,13 @@ class DocenteRepository extends BaseRepository {
     // docenti senza cattedra
     if ($tipo == 'T' || $tipo == 'M' || $tipo == 'U') {
       // aggiunge docenti senza cattedra
-      $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.docente=d.id AND c.attiva=:attiva')
         ->getDQL();
       $docenti = $this->createQueryBuilder('d')
         ->select('DISTINCT d.id')
-        ->where('d NOT INSTANCE OF App:Preside AND d.abilitato=:abilitato AND NOT EXISTS ('.$cattedre.')')
+        ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=:abilitato AND NOT EXISTS ('.$cattedre.')')
         ->setParameters(['attiva' => 1, 'abilitato' => 1 ]);
       if ($tipo == 'U') {
         // filtro utente
@@ -207,10 +209,10 @@ class DocenteRepository extends BaseRepository {
   public function cercaSede($cerca, $pagina, $limite) {
     // crea query
     $query = $this->createQueryBuilder('d')
-      ->leftJoin('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->leftJoin('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
       ->leftJoin('c.classe', 'cl')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App:Preside) AND d.abilitato=:abilitato')
-      ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App:Staff)')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside) AND d.abilitato=:abilitato')
+      ->andWhere('cl.sede IN (:sedi) OR (cl.id IS NULL AND d INSTANCE OF App\Entity\Staff)')
       ->setParameters(['attiva' => 1, 'nome' => $cerca['nome'].'%', 'cognome' => $cerca['cognome'].'%',
         'abilitato' => 1, 'sedi' => $cerca['sede']])
       ->orderBy('d.cognome,d.nome,d.username', 'ASC')
@@ -231,17 +233,17 @@ class DocenteRepository extends BaseRepository {
   public function cerca($criteri, $pagina=1) {
     // crea query
     $query = $this->createQueryBuilder('d')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App:Preside)')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside)')
       ->orderBy('d.cognome,d.nome,d.username', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
       ->setParameter('cognome', $criteri['cognome'].'%');
     if ($criteri['classe'] > 0) {
       $query
-        ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.attiva=:attiva')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.attiva=:attiva')
         ->setParameter('classe', $criteri['classe'])
         ->setParameter('attiva', 1);
     } elseif ($criteri['classe'] == -1) {
-      $cattedre = $this->_em->getRepository('App:Cattedra')->createQueryBuilder('c')
+      $cattedre = $this->_em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.docente=d.id AND c.attiva=:attiva')
         ->getDQL();

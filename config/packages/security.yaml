@@ -7,12 +7,13 @@ security:
   providers:
     db_provider:
       entity:
-        class: 'App:Utente'
+        class: 'App\Entity\Utente'
         property: 'username'
   firewalls:
     main:
       provider: 'db_provider'
-      anonymous: lazy
+      anonymous: true
+      lazy: true
       switch_user:
         role: 'ROLE_AMMINISTRATORE'
         parameter: '_alias'

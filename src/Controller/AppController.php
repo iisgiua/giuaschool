@@ -14,7 +14,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,6 +32,8 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
+use App\Entity\App;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 
 
@@ -109,7 +111,7 @@ class AppController extends AbstractController {
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     // controlla utente
-    $user = $em->getRepository('App:Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $user = $em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
     if ($user) {
       // utente esistente
       if (($profilo == 'G' && $user instanceOf Genitore) || ($profilo == 'A' && $user instanceOf Alunno) ||
@@ -158,7 +160,7 @@ class AppController extends AbstractController {
     // carica configurazione di sistema
     $config->carica();
     // legge app abilitate
-    $apps = $em->getRepository('App:App')->findBy(['attiva' => 1]);
+    $apps = $em->getRepository('App\Entity\App')->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
@@ -186,7 +188,7 @@ class AppController extends AbstractController {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
-    $app = $em->getRepository('App:App')->findOneBy(['id' => $id, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -223,7 +225,7 @@ class AppController extends AbstractController {
     // inizializza
     $dati = array();
     // controlla servizio
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if ($app) {
       $dati_app = $app->getDati();
       if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
@@ -236,8 +238,8 @@ class AppController extends AbstractController {
           $dql = "SELECT CONCAT(c.anno,c.sezione) AS classe,a.nome,a.cognome,DATE_FORMAT(a.dataNascita,'%d/%m/%Y') AS dataNascita,DATE_FORMAT(e.ora,'%H:%i') AS entrata,DATE_FORMAT(u.ora,'%H:%i') AS uscita
                   FROM App\Entity\Alunno a
                   INNER JOIN a.classe c
-                  LEFT JOIN App:Entrata e WITH e.alunno=a.id AND e.data=:oggi
-                  LEFT JOIN App:Uscita u WITH u.alunno=a.id AND u.data=:oggi
+                  LEFT JOIN App\Entity\Entrata e WITH e.alunno=a.id AND e.data=:oggi
+                  LEFT JOIN App\Entity\Uscita u WITH u.alunno=a.id AND u.data=:oggi
                   WHERE a.abilitato=1
                   AND (NOT EXISTS (SELECT ass FROM App\Entity\Assenza ass WHERE ass.alunno=a.id AND ass.data=:oggi))
                   ORDER BY classe,a.cognome,a.nome,a.dataNascita ASC";
@@ -271,7 +273,7 @@ class AppController extends AbstractController {
     // legge dati
     $token = $request->request->get('token');
     // controllo app
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -300,7 +302,7 @@ class AppController extends AbstractController {
     $token = $request->headers->get('X-Giuaschool-Token');
     $username = $request->request->get('username');
     // controlla servizio
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore: servizio non esiste o non è abilitato
       $dati['stato'] = 'ERRORE';
@@ -316,7 +318,7 @@ class AppController extends AbstractController {
       return new JsonResponse($dati);
     }
     // cerca utente
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
     if (!$alunno) {
       // errore: utente on valido
       $dati['stato'] = 'ERRORE';

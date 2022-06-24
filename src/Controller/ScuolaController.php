@@ -17,7 +17,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Form\FormError;
 use App\Entity\DefinizioneScrutinio;
@@ -30,6 +30,9 @@ use App\Entity\Classe;
 use App\Entity\Festivita;
 use App\Entity\Orario;
 use App\Entity\ScansioneOraria;
+use App\Entity\Amministratore;
+use App\Entity\Configurazione;
+use App\Entity\Scrutinio;
 use App\Form\DefinizioneScrutinioType;
 use App\Form\AmministratoreType;
 use App\Form\PresideType;
@@ -71,17 +74,17 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // lista periodi scrutinio
-    $info['listaPeriodi'] = $em->getRepository('App:Configurazione')->infoScrutini();
+    $info['listaPeriodi'] = $em->getRepository('App\Entity\Configurazione')->infoScrutini();
     $info['listaPeriodi']['G'] = $trans->trans('label.scrutini_periodo_G');
     $info['listaPeriodi']['U'] = $trans->trans('label.scrutini_periodo_U');
     // periodo predefinito
     if (empty($periodo)) {
       // ultimo periodo configurato
-      $periodo = $em->getRepository('App:DefinizioneScrutinio')->ultimo();
+      $periodo = $em->getRepository('App\Entity\DefinizioneScrutinio')->ultimo();
     }
     $info['periodo'] = $periodo;
     // legge dati
-    $definizione = $em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    $definizione = $em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
     if ($definizione) {
       // controlla dati mancanti
       $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
@@ -130,12 +133,12 @@ class ScuolaController extends BaseController {
       }
       $definizione->setClassiVisibili($classiVisibili);
       // aggiorna classi visibili di scrutini
-      $subquery = $em->getRepository('App:Classe')->createQueryBuilder('c')
+      $subquery = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
         ->select('c.id')
         ->where('c.anno=:anno')
         ->getDQL();
       for ($cl = 1; $cl <= 5; $cl++) {
-        $risultato = $em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+        $risultato = $em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
           ->update()
           ->set('s.modificato', ':modificato')
           ->set('s.visibile', ':visibile')
@@ -172,7 +175,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // legge dati
-    $amministratore = $em->getRepository('App:Amministratore')->findOneBy([]);
+    $amministratore = $em->getRepository('App\Entity\Amministratore')->findOneBy([]);
     if (!$amministratore) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -207,7 +210,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // legge dati
-    $preside = $em->getRepository('App:Preside')->findOneBy([]);
+    $preside = $em->getRepository('App\Entity\Preside')->findOneBy([]);
     if (!$preside) {
       // crea nuovo utente
       $preside = (new Preside())
@@ -245,7 +248,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // legge dati
-    $istituto = $em->getRepository('App:Istituto')->findOneBy([]);
+    $istituto = $em->getRepository('App\Entity\Istituto')->findOneBy([]);
     if (!$istituto) {
       // crea nuovo utente
       $istituto = new Istituto();
@@ -280,7 +283,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App:Sede')->findBY([], ['ordinamento' => 'ASC']);
+    $dati = $em->getRepository('App\Entity\Sede')->findBY([], ['ordinamento' => 'ASC']);
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'sedi', $dati, $info);
   }
@@ -307,7 +310,7 @@ class ScuolaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $sede = $em->getRepository('App:Sede')->find($id);
+      $sede = $em->getRepository('App\Entity\Sede')->find($id);
       if (!$sede) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -348,7 +351,7 @@ class ScuolaController extends BaseController {
    */
   public function sediDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
     // controlla sede
-    $sede = $em->getRepository('App:Sede')->find($id);
+    $sede = $em->getRepository('App\Entity\Sede')->find($id);
     if (!$sede) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -386,7 +389,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App:Corso')->findBY([], ['nome' => 'ASC']);
+    $dati = $em->getRepository('App\Entity\Corso')->findBY([], ['nome' => 'ASC']);
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'corsi', $dati, $info);
   }
@@ -413,7 +416,7 @@ class ScuolaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $corso = $em->getRepository('App:Corso')->find($id);
+      $corso = $em->getRepository('App\Entity\Corso')->find($id);
       if (!$corso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -454,7 +457,7 @@ class ScuolaController extends BaseController {
    */
   public function corsiDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
     // controlla corso
-    $corso = $em->getRepository('App:Corso')->find($id);
+    $corso = $em->getRepository('App\Entity\Corso')->find($id);
     if (!$corso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -492,7 +495,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App:Materia')->findBY([], ['ordinamento' => 'ASC', 'nome' => 'ASC']);
+    $dati = $em->getRepository('App\Entity\Materia')->findBY([], ['ordinamento' => 'ASC', 'nome' => 'ASC']);
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'materie', $dati, $info);
   }
@@ -519,7 +522,7 @@ class ScuolaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $materia = $em->getRepository('App:Materia')->find($id);
+      $materia = $em->getRepository('App\Entity\Materia')->find($id);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -560,7 +563,7 @@ class ScuolaController extends BaseController {
    */
   public function materieDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
     // controlla materia
-    $materia = $em->getRepository('App:Materia')->find($id);
+    $materia = $em->getRepository('App\Entity\Materia')->find($id);
     if (!$materia) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -611,7 +614,7 @@ class ScuolaController extends BaseController {
       $session->set('/APP/ROUTE/scuola_classi/pagina', $pagina);
     }
     // recupera dati
-    $dati = $em->getRepository('App:Classe')->cerca($pagina);
+    $dati = $em->getRepository('App\Entity\Classe')->cerca($pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'classi', $dati, $info);
@@ -639,7 +642,7 @@ class ScuolaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $classe = $em->getRepository('App:Classe')->find($id);
+      $classe = $em->getRepository('App\Entity\Classe')->find($id);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -680,7 +683,7 @@ class ScuolaController extends BaseController {
    */
   public function classiDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($id);
+    $classe = $em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -731,7 +734,7 @@ class ScuolaController extends BaseController {
       $session->set('/APP/ROUTE/scuola_festivita/pagina', $pagina);
     }
     // recupera dati
-    $dati = $em->getRepository('App:Festivita')->cerca($pagina);
+    $dati = $em->getRepository('App\Entity\Festivita')->cerca($pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'festivita', $dati, $info);
@@ -761,7 +764,7 @@ class ScuolaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $festivita = $em->getRepository('App:Festivita')->find($id);
+      $festivita = $em->getRepository('App\Entity\Festivita')->find($id);
       if (!$festivita) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -823,7 +826,7 @@ class ScuolaController extends BaseController {
    */
   public function festivitaDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
     // controlla festività
-    $festivita = $em->getRepository('App:Festivita')->find($id);
+    $festivita = $em->getRepository('App\Entity\Festivita')->find($id);
     if (!$festivita) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -861,7 +864,7 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // recupera dati
-    $dati = $em->getRepository('App:Orario')->createQueryBuilder('o')
+    $dati = $em->getRepository('App\Entity\Orario')->createQueryBuilder('o')
       ->join('o.sede', 's')
       ->orderBy('o.inizio,s.ordinamento', 'ASC')
       ->getQuery()
@@ -894,7 +897,7 @@ class ScuolaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $orario = $em->getRepository('App:Orario')->find($id);
+      $orario = $em->getRepository('App\Entity\Orario')->find($id);
       if (!$orario) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -912,7 +915,7 @@ class ScuolaController extends BaseController {
       if ($form->get('inizio')->getData() > $form->get('fine')->getData()) {
         // errore: intervallo non valido
         $form->addError(new FormError($trans->trans('exception.intervallo_date_invalido')));
-      } elseif ($em->getRepository('App:Orario')->sovrapposizioni($orario)) {
+      } elseif ($em->getRepository('App\Entity\Orario')->sovrapposizioni($orario)) {
         // errore: sovrapposizione con un periodo esistente
         $form->addError(new FormError($trans->trans('exception.periodo_sovrapposto')));
       }
@@ -945,7 +948,7 @@ class ScuolaController extends BaseController {
    */
   public function orarioDeleteAction(Request $request, EntityManagerInterface $em, $id): Response {
     // controlla orario
-    $orario = $em->getRepository('App:Orario')->find($id);
+    $orario = $em->getRepository('App\Entity\Orario')->find($id);
     if (!$orario) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -987,13 +990,13 @@ class ScuolaController extends BaseController {
     $dati = [];
     $info = [];
     // controlla orario
-    $orario = $em->getRepository('App:Orario')->find($id);
+    $orario = $em->getRepository('App\Entity\Orario')->find($id);
     if (!$orario) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge scansione oraria
-    $scansione = $em->getRepository('App:ScansioneOraria')->orario($orario);
+    $scansione = $em->getRepository('App\Entity\ScansioneOraria')->orario($orario);
     // form
     $form = $this->createForm(ScansioneOrariaSettimanaleType::class, null,
       ['returnUrl' => $this->generateUrl('scuola_orario'), 'data' => $scansione]);

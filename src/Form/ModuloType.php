@@ -111,20 +111,20 @@ class ModuloType extends AbstractType {
       $builder
         ->add('docente', EntityType::class, array('label' => 'label.docente',
           'data' => $options['dati'][0],
-          'class' => 'App:Docente',
+          'class' => 'App\Entity\Docente',
           'choice_label' => function ($obj) {
               return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'placeholder' => 'label.choose_option',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('d')
-              ->where('d.abilitato=1 AND d NOT INSTANCE OF App:Preside')
+              ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
               ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
           'attr' => ['widget' => 'search'],
           'disabled' => ($options['dati'][0] != null),
           'required' => true))
         ->add('sede', EntityType::class, array('label' => 'label.sede',
           'data' => $options['dati'][1],
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'placeholder' => 'label.qualsiasi_sede',
           'query_builder' => function (EntityRepository $er) {
@@ -135,7 +135,7 @@ class ModuloType extends AbstractType {
       $builder
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['dati'][0],
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('c')
               ->orderBy('c.anno,c.sezione', 'ASC'); },
@@ -150,10 +150,10 @@ class ModuloType extends AbstractType {
           'required' => true))
         ->add('docente', EntityType::class, array('label' => 'label.docente',
           'data' => $options['dati'][1],
-          'class' => 'App:Docente',
+          'class' => 'App\Entity\Docente',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('d')
-              ->where('d.abilitato=1 AND d NOT INSTANCE OF App:Preside')
+              ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
               ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
           'choice_label' => function ($obj) {
               return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },

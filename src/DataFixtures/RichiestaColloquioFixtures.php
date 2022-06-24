@@ -19,6 +19,8 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\RichiestaColloquio;
+use App\Entity\Alunno;
+use App\Entity\Colloquio;
 
 
 /**
@@ -39,8 +41,8 @@ class RichiestaColloquioFixtures extends Fixture implements DependentFixtureInte
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7474);
     // carica dati
-    $alunni = $em->getRepository('App:Alunno')->findBy([]);
-    $colloqui = $em->getRepository('App:Colloquio')->findBy([]);
+    $alunni = $em->getRepository('App\Entity\Alunno')->findBy([]);
+    $colloqui = $em->getRepository('App\Entity\Colloquio')->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $alunno = $faker->randomElement($alunni);
       $richiesta = (new RichiestaColloquio())

@@ -25,6 +25,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use App\Entity\Docente;
+use App\Entity\Configurazione;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 
@@ -167,7 +169,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App:Utente')->findOneBy(array('codiceFiscale' => $credentials['taxCode']));
+    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(array('codiceFiscale' => $credentials['taxCode']));
     if (!$user) {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login tramite smartcard.', array(
@@ -195,8 +197,8 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
   public function checkCredentials($credentials, UserInterface $user) {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    $manutenzioneInizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di accesso da carta durante la modalità manutenzione.', array(
@@ -248,8 +250,7 @@ class CardAuthenticator extends AbstractGuardAuthenticator {
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => 'card',
       'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()
-      ));
+      'Ruolo' => $token->getUser()->getRoles()[0]));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare

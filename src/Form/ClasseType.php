@@ -48,7 +48,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('corso', EntityType::class, array('label' => 'label.corso',
-        'class' => 'App:Corso',
+        'class' => 'App\Entity\Corso',
         'choice_label' => function ($obj) {
             return $obj->getNomeBreve();
           },
@@ -59,7 +59,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('sede', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App:Sede',
+        'class' => 'App\Entity\Sede',
         'choice_label' => function ($obj) {
             return $obj->getNomeBreve();
           },
@@ -70,7 +70,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('coordinatore', EntityType::class, array('label' => 'label.coordinatore',
-        'class' => 'App:Docente',
+        'class' => 'App\Entity\Docente',
         'placeholder' => 'label.nessuno',
         'choice_label' => function ($obj) {
             return $obj->getNome().' '.$obj->getCognome();
@@ -82,7 +82,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-start'],
         'required' => false))
       ->add('segretario', EntityType::class, array('label' => 'label.segretario',
-        'class' => 'App:Docente',
+        'class' => 'App\Entity\Docente',
         'placeholder' => 'label.nessuno',
         'choice_label' => function ($obj) {
             return $obj->getNome().' '.$obj->getCognome();

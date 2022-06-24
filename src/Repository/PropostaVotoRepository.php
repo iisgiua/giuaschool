@@ -14,6 +14,7 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Classe;
+use App\Entity\Scrutinio;
 
 
 /**
@@ -32,7 +33,7 @@ class PropostaVotoRepository extends EntityRepository {
    */
   public function proposteEdCivica(Classe $classe, $periodo, $alunni) {
     // dati valutazioni
-    $scrutinio = $this->_em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->_em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo])
       ->setMaxResults(1)
