@@ -74,12 +74,12 @@ class StoricoEsito {
   private $esito;
 
   /**
-   * @var string $periodo Periodo dello scrutinio [F=scrutinio finale, E=esame sospesi, X=rinviato]
+   * @var string $periodo Periodo dello scrutinio [F=scrutinio finale, G=esame giudizio sospeso, X=rinviato in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"F","E","X"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"F","G","X"}, strict=true, message="field.choice")
    */
   private $periodo;
 

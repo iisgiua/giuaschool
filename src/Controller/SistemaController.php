@@ -915,10 +915,10 @@ class SistemaController extends BaseController {
           // legge scrutini rinviati
           $sql = "SELECT s.*,c.anno,c.sezione
             FROM gs_scrutinio AS s,gs_classe AS c
-            WHERE s.classe_id=c.id AND s.periodo=:esami AND s.id IN
+            WHERE s.classe_id=c.id AND s.periodo=:giudizio AND s.id IN
               (SELECT scrutinio_id FROM gs_esito WHERE esito=:rinviato)";
           $stmt = $conn->prepare($sql);
-          $stmt->execute(['esami' => 'E', 'rinviato' => 'X']);
+          $stmt->execute(['giudizio' => 'G', 'rinviato' => 'X']);
           $scrutini = $stmt->fetchAll();
           foreach ($scrutini as $scrutinio) {
             $classe = $em->getRepository('App\Entity\Classe')->findOneBy(['anno' => $scrutinio['anno'],

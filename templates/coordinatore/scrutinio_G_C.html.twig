@@ -28,7 +28,7 @@
             Formato del documento: <em>PDF</em>
           <td>
             <div class="gs-mb-2">
-              <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+              <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': 'G'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
             </div>
           </td>
         </tr>
@@ -41,19 +41,7 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
-          </td>
-        </tr>
-        <tr>
-          <td><strong>Tabellone esiti</strong></td>
-          <td>
-            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica: sarà firmata dal Dirigente ed esposta all'albo.<br>
-            <strong><em>Controllare che non ci siano errori.</em></strong><br>
-            <br>
-            Formato del documento: <em>PDF</em>
-          </td>
-          <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': 'G'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
         <tr>
@@ -65,34 +53,46 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': 'G'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
     {% if classe.anno == 2 %}
         <tr>
           <td><strong>Certificazione competenze</strong></td>
           <td>
-            Sarà stampata conservata agli atti dalla Segreteria Didattica<br>
+            Stampare in un'<strong>unica copia</strong> e consegnare in Segreteria Didattica, dove sarà conservata agli atti.<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': 'G'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </td>
         </tr>
     {% endif %}
         <tr>
+          <td><strong>Tabellone esiti</strong></td>
+          <td>
+            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
+            <strong><em>Controllare che non ci siano errori.</em></strong><br>
+            <br>
+            Formato del documento: <em>PDF</em>
+          </td>
+          <td>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': 'G'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          </td>
+        </tr>
+        <tr>
           <td><strong>Comunicazione Non Ammessi</strong></td>
           <td>
-            Documento mostrato direttamente ai genitori sul Registro Elettronico.<br>
+            Documento pubblicato direttamente sul Registro Elettronico (<em>non stampare</em>).<br>
             <strong><em>Controllare che non ci siano errori.</em></strong><br>
             <br>
             Formato del documento: <em>PDF</em>
           </td>
           <td>
     {% for a in dati.non_ammessi %}
-            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'N', 'periodo': 'E'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'N', 'periodo': 'G'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
     {% else %}
             <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
     {% endfor %}

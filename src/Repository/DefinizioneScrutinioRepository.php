@@ -33,11 +33,13 @@ class DefinizioneScrutinioRepository extends EntityRepository {
       ->getArrayResult();
     $periodi = array_column($periodi, 'periodo');
     // determina ultimo
-    $ultimo = in_array('U', $periodi) ? 'U' :
-      (in_array('E', $periodi) ? 'E' :
+    $ultimo = in_array('R', $periodi) ? 'R' :
+      (in_array('G', $periodi) ? 'G' :
       (in_array('F', $periodi) ? 'F' :
       (in_array('S', $periodi) ? 'S' :
-      'P')));
+      (in_array('P', $periodi) ? 'P' :
+      (in_array('X', $periodi) ? 'X' :
+      '')))));
     // restituisce dato
     return $ultimo;
   }

@@ -220,8 +220,8 @@
       {% endif %}
     </tbody>
   </table>
-    {% elseif periodo == 'E' or periodo == 'X' %}
-  <div class="text-center text-info"><strong class="gs-big">Integrazione scrutinio finale svolta in data {{ scrutinio.data|date('d/m/Y') }}</strong></div>
+    {% elseif periodo == 'G' or periodo == 'X' %}
+  <div class="text-center text-info"><strong class="gs-big">Scrutinio svolto in data {{ scrutinio.data|date('d/m/Y') }}</strong></div>
   <table class="table table-bordered table-hover table-striped gs-mt-4">
     <caption class="text-center text-info"><strong class="gs-big">Documenti della classe</strong></caption>
     <thead class="bg-success">
@@ -246,7 +246,7 @@
         </td>
       </tr>
       <tr>
-        <td><strong>Tabellone degli esiti da esporre</strong></td>
+        <td><strong>Tabellone degli esiti finali</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'T', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>

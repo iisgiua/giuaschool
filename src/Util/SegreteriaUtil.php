@@ -219,7 +219,7 @@ class SegreteriaUtil {
       // controlla presenza alunno in scrutinio
       $periodi = array();
       foreach ($scrutini as $sc) {
-        $alunni = ($sc->getPeriodo() == 'E' ? $sc->getDato('sospesi') :
+        $alunni = ($sc->getPeriodo() == 'G' ? $sc->getDato('sospesi') :
           ($sc->getPeriodo() == 'X' ? $sc->getDato('alunni') : $sc->getDato('alunni')));
         if (in_array($alu->getId(), $alunni)) {
           $periodi[] = array($sc->getPeriodo(), $sc->getId());
@@ -254,7 +254,7 @@ class SegreteriaUtil {
     $dati = array();
     // legge dati
     $dati_scrutinio = $scrutinio->getDati();
-    $alunni = ($scrutinio->getPeriodo() == 'E' ? $dati_scrutinio['sospesi'] :
+    $alunni = ($scrutinio->getPeriodo() == 'G' ? $dati_scrutinio['sospesi'] :
       ($scrutinio->getPeriodo() == 'X' ? $dati_scrutinio['rinviati'] : $dati_scrutinio['alunni']));
     // controlla alunno
     if (in_array($alunno->getId(), $alunni)) {
@@ -288,7 +288,7 @@ class SegreteriaUtil {
           // non scrutinato
           $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
         }
-      } elseif ($scrutinio->getPeriodo() == 'E' || $scrutinio->getPeriodo() == 'X') {
+      } elseif ($scrutinio->getPeriodo() == 'G' || $scrutinio->getPeriodo() == 'X') {
         // dati esito
         $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
           'alunno' => $alunno]);

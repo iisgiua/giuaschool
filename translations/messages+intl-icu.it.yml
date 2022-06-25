@@ -228,11 +228,11 @@ label.periodo_1: Valutazione Intermedia
 label.periodo_2: ~
 label.periodo_A: A.S. Precedente
 label.periodo_F: Scrutinio Finale
-label.periodo_E: Scrutinio esami giudizio sospeso
+label.periodo_G: Scrutinio esami giudizio sospeso
 label.periodo_P: Primo Quadrimestre
 label.periodo_S: Secondo Quadrimestre
 label.periodo_X: Scrutinio Rinviato
-label.scrutini_periodo_E: Esami giudizio sospeso
+label.scrutini_periodo_G: Esami giudizio sospeso
 label.scrutini_periodo_U: Sessione supplettiva
 label.piani: Piani di lavoro
 label.precedente: Precedente
@@ -460,8 +460,8 @@ label.verbale_situazioni_particolari: Situazioni particolari da segnalare
 label.verbale_scrutinio_P: "Scrutinio del {periodo}"
 label.verbale_scrutinio_S: "Scrutinio del {periodo}"
 label.verbale_scrutinio_F: Scrutinio finale
-label.verbale_scrutinio_E: Scrutinio per gli esami degli studenti con sospensione del giudizio
-label.verbale_scrutinio_U: Scrutinio per gli esami degli studenti con sospensione del giudizio - sessione supplettiva
+label.verbale_scrutinio_G: Scrutinio per gli esami degli studenti con sospensione del giudizio
+label.verbale_scrutinio_R: Scrutinio per gli esami degli studenti con sospensione del giudizio - sessione supplettiva
 label.verbale_scrutinio_X: Scrutinio per gli esami degli studenti con sospensione del giudizio - sessione supplettiva
 label.scrutinio_visibile_classe_1: Pubblicazione esiti classi prime
 label.scrutinio_visibile_classe_2: Pubblicazione esiti classi seconde
@@ -1377,3 +1377,4 @@ exception.svuota_cache: "Impossibile eseguire i comandi per svuotare la cache.<b
 exception.orari_sovrapposti: L'orario si sovrappone al precedente
 exception.log_errori_vuoto: Non sono presenti messaggi di errore per la data e ora indicate.
 exception.scrutinio_svolgimento: Non è stata inserito il tipo di scrutinio svolto
+exception.voto_sospeso_inferiore_a_finale: Il voto dell'alunn{sex} {alunno} per la materia {materia} è inferiore a quello deliberato nello scrutinio finale.
