@@ -3893,10 +3893,10 @@ class ScrutinioUtil {
         'dati' => $v->getDati());
     }
     // legge lista valutazioni
-    $valutazioni['R'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_E'));
-    $valutazioni['C'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_C'));
-    $valutazioni['N'] = unserialize($this->em->getRepository('App:Configurazione')->getParametro('voti_finali_N'));
+    $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
+    $valutazioni['C'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_C'));
+    $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -3920,7 +3920,7 @@ class ScrutinioUtil {
     }
     $dati['valutazioni'] = $valutazioni;
     // imposta blocco
-    $defScrutinio = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    $defScrutinio = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
     $oggi = new \DateTime();
     $dati['blocco'] = ($oggi < $defScrutinio->getData());
     // restituisce dati
@@ -4470,7 +4470,7 @@ class ScrutinioUtil {
       ->execute(['scrutinio' => $scrutinio->getId()]);
     if ($classe->getAnno() == 2) {
       // cancella conferma certificazioni
-      $esiti = $this->em->getRepository('App:Esito')->findByScrutinio($scrutinio);
+      $esiti = $this->em->getRepository('App\Entity\Esito')->findByScrutinio($scrutinio);
       foreach ($esiti as $e) {
         $datiEsito = $e->getDati();
         if (isset($datiEsito['certificazione']) && $datiEsito['certificazione']) {
