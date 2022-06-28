@@ -4,7 +4,7 @@
 <tcpdf method="AddPage" />
 <div style="text-align:center;font-family:times;font-size:11pt">
   <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
-  <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
+  <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
 </div>
 <div style="font-family:times;font-size:11pt">
   <p style="text-align:center"><strong><span style="font-size:14pt">CERTIFICATO delle COMPETENZE DI BASE</span>

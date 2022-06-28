@@ -12,8 +12,8 @@
     <thead class="bg-success">
       <tr>
         <th class="col-sm-4">{{ 'label.alunno'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.classe'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.action'|trans }}</th>
+        <th class="col-sm-1">{{ 'label.classe'|trans }}</th>
+        <th class="col-sm-7">{{ 'label.action'|trans }}</th>
       </tr>
     </thead>
     <tbody>
@@ -23,18 +23,16 @@
         <td>{{ u.classe ? u.classe.anno~'ª '~u.classe.sezione : 'Non definita' }}</td>
         <td>
       {% for periodo in dati.pagelle[u.id] %}
-        {% if periodo[0] == 'A' %}
-          <a class="btn btn-warning btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>A.S. precedente</strong></a>
-        {% elseif periodo[0] == 'P' %}
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>{{ app.session.get('/CONFIG/SCUOLA/periodo1_nome') }}</strong></a>
-        {% elseif periodo[0] == 'S' %}
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>{{ app.session.get('/CONFIG/SCUOLA/periodo2_nome') }}</strong></a>
+        {% if periodo[0] == 'G' or periodo[0] == 'R' %}
+          <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Esame giudizio sospeso</strong></a>
         {% elseif periodo[0] == 'F' %}
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio finale</strong></a>
-        {% elseif periodo[0] == 'G' %}
-          <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Esame  giudizio sospeso</strong></a>
-        {#-- {% elseif periodo[0] == 'X' %} #}
-          {#-- <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio rinviato</strong></a> #}
+        {% elseif periodo[0] == 'S' %}
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>{{ app.session.get('/CONFIG/SCUOLA/periodo2_nome') }}</strong></a>
+        {% elseif periodo[0] == 'P' %}
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>{{ app.session.get('/CONFIG/SCUOLA/periodo1_nome') }}</strong></a>
+        {% elseif periodo[0] == 'A' %}
+          <a class="btn btn-warning btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {'alunno': u.id, 'periodo': periodo[0], 'scrutinio': periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>A.S. precedente</strong></a>
         {% endif %}
       {% endfor %}
         </td>

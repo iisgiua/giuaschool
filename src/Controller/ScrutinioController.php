@@ -392,7 +392,8 @@ class ScrutinioController extends AbstractController {
           }
         }
         // imposta il template
-        $template = 'coordinatore/scrutinio_'.$scrutinio['periodo'].'_'.$scrutinio['stato'].'.html.twig';
+        $template = 'coordinatore/scrutinio_'.(in_array($scrutinio['periodo'], ['R', 'X']) ? 'G' : $scrutinio['periodo']).
+          '_'.$scrutinio['stato'].'.html.twig';
       } else {
         // scrutinio o chiuso o inesitente
         $scrutinio = $scr->scrutinioChiuso($classe);
@@ -420,7 +421,8 @@ class ScrutinioController extends AbstractController {
             }
           }
           // imposta il template
-          $template = 'coordinatore/scrutinio_'.$scrutinio['periodo'].'_'.$scrutinio['stato'].'.html.twig';
+          $template = 'coordinatore/scrutinio_'.(in_array($scrutinio['periodo'], ['R', 'X']) ? 'G' : $scrutinio['periodo']).
+            '_'.$scrutinio['stato'].'.html.twig';
         }
       }
     }
@@ -787,10 +789,12 @@ class ScrutinioController extends AbstractController {
         throw $this->createNotFoundException('exception.invalid_params');
       }
     }
-    // controllo materia (scrutiono rinviato da A.S. precedente)
+    // controllo materia
     if ($periodo == 'X') {
+      // scrutinio rinviato da prec. A.S. (legge dati da scrutinio)
       $materia = $em->getRepository('App:Materia')->find($materia);
     } else {
+      // scrutini altri periodi
       $materia = $em->getRepository('App:Materia')->createQueryBuilder('m')
         ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('m.id=:materia AND c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
@@ -877,7 +881,7 @@ class ScrutinioController extends AbstractController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/voti_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/voti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
       'classe' => $classe,
       'info' => $info,
       'dati' => $dati,
@@ -1014,12 +1018,13 @@ class ScrutinioController extends AbstractController {
         // periodo indicato non valido
         $periodo = null;
       }
-      if ($periodo == 'G' || $periodo == 'X') {
+      if ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
         // voti
         $dati = $scr->quadroVoti($this->getUser(), $classe, 'G');
-        if (isset($lista_periodi['X']) && $lista_periodi['X'] == 'C') {
-          $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'X');
+        if (isset($lista_periodi['R']) && $lista_periodi['R'] == 'C') {
+          $dati['rinviati'] = $scr->quadroVoti($this->getUser(), $classe, 'R');
         }
+        $periodo = 'G';
       } elseif ($periodo == 'A') {
         // situazione precedente A.S.
         $dati = $scr->quadroVotiPrecedente($this->getUser(), $classe);
@@ -1097,7 +1102,7 @@ class ScrutinioController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // elenco voti
-    if ($periodo == 'G') {
+    if ($periodo == 'G' || $periodo == 'R') {
       // esame alunni sospesi: solo voti insuff.
       $dati = $scr->elencoVotiAlunnoSospeso($this->getUser(), $alunno, $periodo);
     } elseif ($periodo == 'X') {
@@ -1112,7 +1117,7 @@ class ScrutinioController extends AbstractController {
     if ($periodo == 'G') {
       // esame alunni sospesi
       $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N', 'label.esito_X' => 'X');
-    } elseif ($periodo == 'X') {
+    } elseif ($periodo == 'R' || $periodo == 'X') {
       // rinvio esame alunni sospesi
       $lista_esiti = array('label.esito_A' => 'A', 'label.esito_N' => 'N');
     }
@@ -1272,7 +1277,7 @@ class ScrutinioController extends AbstractController {
         'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/esiti_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/esiti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
       'alunno' => $alunno,
       'classe' => $classe,
       'dati' => $dati,
@@ -1353,7 +1358,7 @@ class ScrutinioController extends AbstractController {
     $dati['credito'] = $credito[$classe->getAnno()][$m];
     // credito per sospensione giudizio
     $creditoSospeso = false;
-    if ($periodo == 'G' || $periodo == 'X') {
+    if ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       foreach ($dati['voti'] as $voto) {
         if (!empty($voto->getDebito()) && $voto->getUnico() >= 7) {
           $creditoSospeso = true;
@@ -1407,7 +1412,7 @@ class ScrutinioController extends AbstractController {
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/crediti_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/crediti_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
       'alunno' => $alunno,
       'classe' => $classe,
       'credito3' => (($periodo == 'X' && $classe->getAnno() == 4) ? $dati['esito']->getCreditoPrecedente() : $alunno->getCredito3()),
@@ -1652,7 +1657,7 @@ class ScrutinioController extends AbstractController {
         'posizione' => $posizione]);
     }
     // visualizza pagina
-    return $this->render('coordinatore/certificazioni_'.($periodo == 'X' ? 'G' : $periodo).'.html.twig', array(
+    return $this->render('coordinatore/certificazioni_'.(in_array($periodo, ['R', 'X']) ? 'G' : $periodo).'.html.twig', array(
       'alunno' => $alunno,
       'classe' => $classe,
       'dati' => $dati,

@@ -832,13 +832,13 @@ class GenitoriUtil {
       if ($dati['esito'] && $dati['esito']->getEsito() == 'X') {
         // scrutinio rinviato
         $scrutinio_rinviato = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
-          'periodo' => 'X', 'stato' => 'C']);
+          'periodo' => 'R', 'stato' => 'C']);
         if ($scrutinio_rinviato) {
           // legge voti
           $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
             ->join('vs.scrutinio', 's')
             ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno AND vs.unico IS NOT NULL')
-            ->setParameters(['classe' => $classe, 'periodo' => 'X', 'alunno' => $alunno])
+            ->setParameters(['classe' => $classe, 'periodo' => 'R', 'alunno' => $alunno])
             ->getQuery()
             ->getResult();
           foreach ($voti as $v) {

@@ -8,6 +8,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  {% if dati.periodo is defined and dati.periodo != 'G' %}<h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Sessione supplettiva</h2>{% endif %}
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 4: verbale e chiusura</h2>
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
@@ -20,9 +21,9 @@
       <div class="col-sm-10"><em><strong>{{ args.testo|nl2br }}</strong></em></div>
       <div class="col-sm-2">
         {% if args.validato %}
-        <button type="button" class="btn btn-sm btn-default gs-button-remote" title="Modifica il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'G', 'step': step}) }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></button>
+        <button type="button" class="btn btn-sm btn-default gs-button-remote" title="Modifica il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': dati.periodo, 'step': step}) }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></button>
         {% else %}
-        <button type="button" class="btn btn-sm btn-primary gs-button-remote" title="Conferma il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': 'G', 'step': step}) }}"><span class="glyphicon glyphicon-check gs-mr-2"></span><strong>Conferma</strong></button>
+        <button type="button" class="btn btn-sm btn-primary gs-button-remote" title="Conferma il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {'classe': classe.id, 'periodo': dati.periodo, 'step': step}) }}"><span class="glyphicon glyphicon-check gs-mr-2"></span><strong>Conferma</strong></button>
         {% endif %}
       </div>
     </div>
@@ -35,7 +36,7 @@
     <div class="form-group">
       <div class="col-sm-3 gs-ml-5">
         {{ form_widget(form.in_presenza) }}
-      </div>
+      </div>  
     </div>
   </div>
   <div class="gs-mb-5">

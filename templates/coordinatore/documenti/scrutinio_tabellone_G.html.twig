@@ -1,8 +1,13 @@
-{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
+  <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
+  <br><br>
+</div>
 <div style="text-align:center;">
   <strong>
     CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}
     <br>SCRUTINIO PER GLI ESAMI DEGLI STUDENTI CON SOSPENSIONE DEL GIUDIZIO
+    {% if dati.scrutinio.periodo != 'G' %}<br>SESSIONE SUPPLETTIVA{% endif %}
   </strong>
 </div>
 <br>

@@ -220,8 +220,11 @@
       {% endif %}
     </tbody>
   </table>
-    {% elseif periodo == 'G' or periodo == 'X' %}
+    {% elseif periodo == 'G' %}
   <div class="text-center text-info"><strong class="gs-big">Scrutinio svolto in data {{ scrutinio.data|date('d/m/Y') }}</strong></div>
+      {% if dati.rinviato.scrutinio is defined %}
+  <div class="text-center text-info"><strong class="gs-big">Scrutinio rinviato svolto in data {{ dati.rinviato.scrutinio.data|date('d/m/Y') }}</strong></div>
+      {% endif %}
   <table class="table table-bordered table-hover table-striped gs-mt-4">
     <caption class="text-center text-info"><strong class="gs-big">Documenti della classe</strong></caption>
     <thead class="bg-success">
@@ -239,18 +242,44 @@
           </div>
         </td>
       </tr>
+      {% if dati.rinviato.scrutinio is defined %}
+      <tr>
+        <td><strong>Verbale dello scrutinio rinviato</strong></td>
+        <td>
+          <div class="gs-mb-2">
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'V', 'periodo': 'R'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          </div>
+        </td>
+      </tr>
+      {% endif %}
       <tr>
         <td><strong>Quadro di riepilogo dei voti</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'R', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
+      {% if dati.rinviato.scrutinio is defined %}
+      <tr>
+        <td><strong>Quadro di riepilogo dei voti dello scrutinio rinviato</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'R', 'periodo': 'R'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        </td>
+      </tr>
+      {% endif %}
       <tr>
         <td><strong>Tabellone degli esiti finali</strong></td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'T', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
+      {% if dati.rinviato.scrutinio is defined %}
+      <tr>
+        <td><strong>Tabellone degli esiti finali dello scrutinio rinviato</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'T', 'periodo': 'R'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        </td>
+      </tr>
+      {% endif %}
       {% if scrutinio.classe.anno == 2 %}
       <tr>
         <td><strong>Certificazione delle competenze</strong></td>
@@ -258,6 +287,14 @@
           <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'C', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica tutte le certficazioni della classe</strong></a>
         </td>
       </tr>
+        {% if dati.rinviato.scrutinio is defined %}
+      <tr>
+        <td><strong>Certificazione delle competenze dello scrutinio rinviato</strong></td>
+        <td>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': scrutinio.classe.id, 'tipo': 'C', 'periodo': 'R'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica tutte le certficazioni della classe</strong></a>
+        </td>
+      </tr>
+        {% endif %}
       {% endif %}
     </tbody>
   </table>
@@ -270,32 +307,30 @@
       </tr>
     </thead>
     <tbody>
-      {% if dati.esito is defined and dati.esito.esito != 'N' and dati.esito.esito != 'X'  %}
+      {% if dati.esito.esito == 'A' or (dati.esito.esito == 'X' and dati.rinviato.esito is defined and dati.rinviato.esito.esito == 'A') %}
       <tr>
         <td><strong>Comunicazione dei voti</strong></td>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': dati.esito.esito == 'A' ? periodo : 'R'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
-      {% endif %}
-      {% if dati.esito.esito == 'N' %}
+      {% elseif dati.esito.esito == 'N' or (dati.esito.esito == 'X' and dati.rinviato.esito is defined and dati.rinviato.esito.esito == 'N') %}
       <tr>
         <td><strong>Comunicazione di non ammissione</strong></td>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': dati.esito.esito == 'N' ? periodo : 'R'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
-      {% endif %}
-      {% if dati.esito.esito == 'X' %}
+      {% elseif dati.esito.esito == 'X' %}
       <tr>
         <td colspan="2" class="text-center gs-big"><strong>SCRUTINIO RINVIATO</strong></td>
       </tr>
       {% endif %}
-      {% if dati.esito.esito == 'A' and scrutinio.classe.anno == 2 %}
+      {% if scrutinio.classe.anno == 2 and (dati.esito.esito == 'A' or (dati.esito.esito == 'X' and dati.rinviato.esito is defined and dati.rinviato.esito.esito == 'A')) %}
       <tr>
         <td><strong>Certificazione delle competenze</strong></td>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'E', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': scrutinio.classe.id, 'alunno': alunno.id, 'tipo': 'E', 'periodo': dati.esito.esito == 'A' ? periodo : 'R'}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
       {% endif %}

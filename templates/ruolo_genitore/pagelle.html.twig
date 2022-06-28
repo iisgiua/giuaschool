@@ -329,17 +329,17 @@
         {% if dati.esito.esito == 'A' %}
       <tr class="gs-big">
         <td class="col-sm-6"><strong>Comunicazione dei voti</strong></td>
-        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione dei voti"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
+        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'P', 'periodo': dati.rinviato is defined ? 'R' : periodo}) }}" role="button" title="Scarica la comunicazione dei voti"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
         {% elseif dati.esito.esito == 'N' %}
       <tr class="gs-big">
         <td class="col-sm-6"><strong>Comunicazione di non ammissione</strong></td>
-        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
+        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'N', 'periodo': dati.rinviato is defined ? 'R' : periodo}) }}" role="button" title="Scarica la comunicazione di non ammissione"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
         {% endif %}
       <tr class="gs-big">
         <td class="col-sm-6"><strong>Tabellone degli esiti della classe</strong></td>
-        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'T', 'periodo': periodo}) }}" role="button" title="Scarica il tabellone degli esiti della classe"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
+        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno.id, 'tipo': 'T', 'periodo': dati.rinviato is defined ? 'R' : periodo}) }}" role="button" title="Scarica il tabellone degli esiti della classe"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Scarica la comunicazione</strong></a></td>
       </tr>
     </tbody>
   </table>

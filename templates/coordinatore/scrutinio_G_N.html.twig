@@ -13,7 +13,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Alunni con giudizio sospeso</h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">{% if dati.periodo == 'G' %}Alunni con giudizio sospeso{% else %}Sessione supplettiva per gli alunni con giudizio sospeso{% endif %}</h2>
     {% include 'include/modal-error.html.twig' %}
     {% for messaggio in app.flashes('avviso') %}
       {% if loop.first %}
