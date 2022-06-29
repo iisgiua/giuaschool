@@ -19,6 +19,8 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\Log;
+use App\Entity\Amministratore;
+use App\Entity\Docente;
 
 
 /**
@@ -39,8 +41,8 @@ class LogFixtures extends Fixture implements DependentFixtureInterface, FixtureG
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7878);
     // carica dati
-    $docenti = $em->getRepository('App:Docente')->findBy([]);
-    $amministratore = $em->getRepository('App:Amministratore')->findOneBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
+    $amministratore = $em->getRepository('App\Entity\Amministratore')->findOneBy([]);
     for ($i = 0; $i < 10; $i++) {
       $utente = $faker->randomElement($docenti);
       $dati = [

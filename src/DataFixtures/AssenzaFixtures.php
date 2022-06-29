@@ -19,6 +19,8 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\Assenza;
+use App\Entity\Alunno;
+use App\Entity\Docente;
 
 
 /**
@@ -39,8 +41,8 @@ class AssenzaFixtures extends Fixture implements DependentFixtureInterface, Fixt
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7676);
     // carica dati
-    $alunni = $em->getRepository('App:Alunno')->findBy([]);
-    $docenti = $em->getRepository('App:Docente')->findBy([]);
+    $alunni = $em->getRepository('App\Entity\Alunno')->findBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
     // assenze non giustificate
     for ($i = 0; $i < 3; $i++) {
       $assenza = (new Assenza())

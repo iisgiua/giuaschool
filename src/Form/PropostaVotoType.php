@@ -20,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\CallbackTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\PropostaVoto;
+use App\Entity\Alunno;
 use App\Form\MessageType;
 
 
@@ -80,7 +81,7 @@ class PropostaVotoType extends AbstractType {
         return $alunno->getId();
       },
       function ($id) {
-        return $this->em->getRepository('App:Alunno')->find($id);
+        return $this->em->getRepository('App\Entity\Alunno')->find($id);
       }));
   }
 

@@ -19,6 +19,8 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\Valutazione;
+use App\Entity\Alunno;
+use App\Entity\Firma;
 
 
 /**
@@ -39,10 +41,10 @@ class ValutazioneFixtures extends Fixture implements DependentFixtureInterface, 
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7171);
     // carica dati
-    $firme = $em->getRepository('App:Firma')->findBy([]);
+    $firme = $em->getRepository('App\Entity\Firma')->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $firma = $faker->randomElement($firme);
-      $alunni = $em->getRepository('App:Alunno')->findByClasse($firma->getLezione()->getClasse());
+      $alunni = $em->getRepository('App\Entity\Alunno')->findByClasse($firma->getLezione()->getClasse());
       $valutazione = (new Valutazione())
         ->setTipo($faker->randomElement(['S', 'O', 'P']))
         ->setVisibile($faker->randomElement([true, true, false]))

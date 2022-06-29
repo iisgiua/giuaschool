@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -39,10 +39,17 @@ use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
 use App\Util\StaffUtil;
-use App\Entity\Docente;
-use App\Entity\Cattedra;
-use App\Entity\Colloquio;
 use App\Entity\Provisioning;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Colloquio;
+use App\Entity\Docente;
+use App\Entity\Materia;
+use App\Entity\Orario;
+use App\Entity\RichiestaColloquio;
+use App\Entity\ScansioneOraria;
+use App\Entity\Sede;
+use App\Entity\Staff;
 
 
 /**
@@ -142,7 +149,7 @@ class DocentiController extends BaseController {
     $criteri['nome'] = $session->get('/APP/ROUTE/docenti_modifica/nome', '');
     $criteri['cognome'] = $session->get('/APP/ROUTE/docenti_modifica/cognome', '');
     $criteri['classe'] = $session->get('/APP/ROUTE/docenti_modifica/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App:Classe')->find($criteri['classe']) : 0);
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/docenti_modifica/pagina', 1);
@@ -151,7 +158,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App:Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $lista_classi[] = -1;
     $label_classe = $trans->trans('label.nessuna_classe');
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
@@ -170,7 +177,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // lista docenti
-    $dati = $em->getRepository('App:Docente')->cerca($criteri, $pagina);
+    $dati = $em->getRepository('App\Entity\Docente')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'modifica', $dati, $info, [$form->createView()]);
@@ -193,7 +200,7 @@ class DocentiController extends BaseController {
    */
   public function abilitaAction(EntityManagerInterface $em, $id, $abilita): Response {
     // controllo docente
-    $docente = $em->getRepository('App:Docente')->find($id);
+    $docente = $em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -234,7 +241,7 @@ class DocentiController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $docente = $em->getRepository('App:Docente')->find($id);
+      $docente = $em->getRepository('App\Entity\Docente')->find($id);
       if (!$docente) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -308,7 +315,7 @@ class DocentiController extends BaseController {
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla docente
-    $docente = $em->getRepository('App:Docente')->find($id);
+    $docente = $em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -396,7 +403,7 @@ class DocentiController extends BaseController {
   public function resetAction(Request $request, EntityManagerInterface $em,
                               LogHandler $dblogger, $id): Response {
     // controlla docente
-    $docente = $em->getRepository('App:Docente')->find($id);
+    $docente = $em->getRepository('App\Entity\Docente')->find($id);
     if (!$docente) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -462,7 +469,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
     }
     // lista staff
-    $dati = $em->getRepository('App:Staff')->cerca($criteri, $pagina);
+    $dati = $em->getRepository('App\Entity\Staff')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'staff', $dati, $info, [$form->createView()]);
@@ -488,7 +495,7 @@ class DocentiController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $staff = $em->getRepository('App:Staff')->find($id);
+      $staff = $em->getRepository('App\Entity\Staff')->find($id);
       if (!$staff) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -541,7 +548,7 @@ class DocentiController extends BaseController {
    */
    public function staffDeleteAction(EntityManagerInterface $em, $id): Response {
     // controlla utente staff
-    $staff = $em->getRepository('App:Staff')->find($id);
+    $staff = $em->getRepository('App\Entity\Staff')->find($id);
     if (!$staff) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -583,7 +590,7 @@ class DocentiController extends BaseController {
     $criteri['nome'] = $session->get('/APP/ROUTE/docenti_coordinatori/nome', '');
     $criteri['cognome'] = $session->get('/APP/ROUTE/docenti_coordinatori/cognome', '');
     $criteri['classe'] = $session->get('/APP/ROUTE/docenti_coordinatori/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App:Classe')->find($criteri['classe']) : 0);
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/docenti_coordinatori/pagina', 1);
@@ -592,7 +599,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App:Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
       'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, null]]);
     $form->handleRequest($request);
@@ -609,7 +616,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // lista coordinatori
-    $dati = $em->getRepository('App:Classe')->cercaCoordinatori($criteri, $pagina);
+    $dati = $em->getRepository('App\Entity\Classe')->cercaCoordinatori($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'coordinatori', $dati, $info, [$form->createView()]);
@@ -635,7 +642,7 @@ class DocentiController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $classe = $em->getRepository('App:Classe')->find($id);
+      $classe = $em->getRepository('App\Entity\Classe')->find($id);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -699,7 +706,7 @@ class DocentiController extends BaseController {
    */
   public function coordinatoriDeleteAction(EntityManagerInterface $em, $id) {
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($id);
+    $classe = $em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -748,7 +755,7 @@ class DocentiController extends BaseController {
     $criteri['nome'] = $session->get('/APP/ROUTE/docenti_segretari/nome', '');
     $criteri['cognome'] = $session->get('/APP/ROUTE/docenti_segretari/cognome', '');
     $criteri['classe'] = $session->get('/APP/ROUTE/docenti_segretari/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App:Classe')->find($criteri['classe']) : 0);
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/docenti_segretari/pagina', 1);
@@ -757,7 +764,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
     }
     // form di ricerca
-    $lista_classi = $em->getRepository('App:Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
+    $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-alunni',
       'dati' => [$criteri['cognome'], $criteri['nome'], $classe, $lista_classi, null]]);
     $form->handleRequest($request);
@@ -774,7 +781,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_segretari/classe', $criteri['classe']);
     }
     // lista segretari
-    $dati = $em->getRepository('App:Classe')->cercaSegretari($criteri, $pagina);
+    $dati = $em->getRepository('App\Entity\Classe')->cercaSegretari($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'segretari', $dati, $info, [$form->createView()]);
@@ -800,7 +807,7 @@ class DocentiController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $classe = $em->getRepository('App:Classe')->find($id);
+      $classe = $em->getRepository('App\Entity\Classe')->find($id);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -865,7 +872,7 @@ class DocentiController extends BaseController {
    */
   public function segretariDeleteAction(EntityManagerInterface $em, $id) {
     // controlla classe
-    $classe = $em->getRepository('App:Classe')->find($id);
+    $classe = $em->getRepository('App\Entity\Classe')->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -912,9 +919,9 @@ class DocentiController extends BaseController {
     $criteri['classe'] = $session->get('/APP/ROUTE/docenti_cattedre/classe', 0);
     $criteri['materia'] = $session->get('/APP/ROUTE/docenti_cattedre/materia', 0);
     $criteri['docente'] = $session->get('/APP/ROUTE/docenti_cattedre/docente', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App:Classe')->find($criteri['classe']) : 0);
-    $materia = ($criteri['materia'] > 0 ? $em->getRepository('App:Materia')->find($criteri['materia']) : 0);
-    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App:Docente')->find($criteri['docente']) : 0);
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $materia = ($criteri['materia'] > 0 ? $em->getRepository('App\Entity\Materia')->find($criteri['materia']) : 0);
+    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/docenti_cattedre/pagina', 1);
@@ -938,7 +945,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
     }
     // lista cattedre
-    $dati = $em->getRepository('App:Cattedra')->cerca($criteri, $pagina);
+    $dati = $em->getRepository('App\Entity\Cattedra')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'cattedre', $dati, $info, [$form->createView()]);
@@ -964,7 +971,7 @@ class DocentiController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $cattedra = $em->getRepository('App:Cattedra')->find($id);
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->find($id);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -993,7 +1000,7 @@ class DocentiController extends BaseController {
       }
       if ($id == 0) {
         // controlla esistenza di cattedra
-        $lista = $em->getRepository('App:Cattedra')->findBy(array(
+        $lista = $em->getRepository('App\Entity\Cattedra')->findBy(array(
           'docente' => $cattedra->getDocente(),
           'classe' => $cattedra->getClasse(),
           'materia' => $cattedra->getMateria(),
@@ -1053,7 +1060,7 @@ class DocentiController extends BaseController {
    */
   public function cattedreEnableAction(EntityManagerInterface $em, $id, $abilita): Response {
     // controllo cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->find($id);
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->find($id);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1111,9 +1118,9 @@ class DocentiController extends BaseController {
     $criteri['sede'] = $session->get('/APP/ROUTE/docenti_colloqui/sede', 0);
     $criteri['classe'] = $session->get('/APP/ROUTE/docenti_colloqui/classe', 0);
     $criteri['docente'] = $session->get('/APP/ROUTE/docenti_colloqui/docente', 0);
-    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App:Sede')->find($criteri['sede']) : 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App:Classe')->find($criteri['classe']) : 0);
-    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App:Docente')->find($criteri['docente']) : 0);
+    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : 0);
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/docenti_colloqui/pagina', 1);
@@ -1137,7 +1144,7 @@ class DocentiController extends BaseController {
       $session->set('/APP/ROUTE/docenti_colloqui/pagina', $pagina);
     }
     // lista colloqui
-    $dati = $em->getRepository('App:Colloquio')->cerca($criteri, $pagina);
+    $dati = $em->getRepository('App\Entity\Colloquio')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'colloqui', $dati, $info, [$form->createView()]);
@@ -1165,7 +1172,7 @@ class DocentiController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $colloquio = $em->getRepository('App:Colloquio')->find($id);
+      $colloquio = $em->getRepository('App\Entity\Colloquio')->find($id);
       if (!$colloquio) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -1175,7 +1182,7 @@ class DocentiController extends BaseController {
     } else {
       // azione add
       $colloquio = new Colloquio();
-      $orario = $em->getRepository('App:Orario')->orarioSede();
+      $orario = $em->getRepository('App\Entity\Orario')->orarioSede();
       $colloquio->setOrario($orario);
       $em->persist($colloquio);
       $sede = null;
@@ -1187,7 +1194,7 @@ class DocentiController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta orario di sede
-      $orario = $em->getRepository('App:Orario')->orarioSede($form->get('sede')->getData());
+      $orario = $em->getRepository('App\Entity\Orario')->orarioSede($form->get('sede')->getData());
       if (!$orario) {
         // errore: orario di sede non esiste
         $form->addError(new FormError($trans->trans('exception.orario_sede_invalido')));
@@ -1196,7 +1203,7 @@ class DocentiController extends BaseController {
         $colloquio->setOrario($orario);
       }
       // controlla se esiste orario indicato
-      $ora = $em->getRepository('App:ScansioneOraria')->findOneBy(['orario' => $orario,
+      $ora = $em->getRepository('App\Entity\ScansioneOraria')->findOneBy(['orario' => $orario,
         'giorno' => $colloquio->getGiorno(), 'ora' => $colloquio->getOra()]);
       if (!$ora) {
         // errore: ora non esiste
@@ -1204,7 +1211,7 @@ class DocentiController extends BaseController {
       }
       if ($id == 0 && $orario) {
         // controlla se esiste già il colloquio
-        $col = $em->getRepository('App:Colloquio')->findOneBy(['orario' => $orario,
+        $col = $em->getRepository('App\Entity\Colloquio')->findOneBy(['orario' => $orario,
           'docente' => $colloquio->getDocente()]);
         if ($col) {
           // errore: ora non esiste
@@ -1240,13 +1247,13 @@ class DocentiController extends BaseController {
    */
   public function colloquiDeleteAction(EntityManagerInterface $em, $id) {
     // controlla colloquio
-    $colloquio = $em->getRepository('App:Colloquio')->find($id);
+    $colloquio = $em->getRepository('App\Entity\Colloquio')->find($id);
     if (!$colloquio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla presenza di richieste
-    $ric = $em->getRepository('App:RichiestaColloquio')->findOneByColloquio($colloquio);
+    $ric = $em->getRepository('App\Entity\RichiestaColloquio')->findOneByColloquio($colloquio);
     if ($ric) {
       // errore
       $this->addFlash('danger', 'exception.dati_presenti');

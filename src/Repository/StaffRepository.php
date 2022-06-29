@@ -28,7 +28,7 @@ class StaffRepository extends BaseRepository {
   public function getIdStaff($sedi) {
     $staff = $this->createQueryBuilder('s')
       ->select('DISTINCT s.id')
-      ->where('s.abilitato=:abilitato AND NOT s INSTANCE OF App:Preside')
+      ->where('s.abilitato=:abilitato AND NOT s INSTANCE OF App\Entity\Preside')
       ->andWhere('s.sede IS NULL OR s.sede IN (:sedi)')
       ->setParameters(['abilitato' => 1, 'sedi' => $sedi])
       ->getQuery()
@@ -48,7 +48,7 @@ class StaffRepository extends BaseRepository {
   public function cerca($criteri, $pagina=1) {
     // crea query
     $query = $this->createQueryBuilder('d')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato AND (NOT d INSTANCE OF App:Preside)')
+      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND d.abilitato=:abilitato AND (NOT d INSTANCE OF App\Entity\Preside)')
       ->orderBy('d.cognome,d.nome,d.username', 'ASC')
       ->setParameter('nome', $criteri['nome'].'%')
       ->setParameter('cognome', $criteri['cognome'].'%')

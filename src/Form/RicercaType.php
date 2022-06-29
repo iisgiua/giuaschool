@@ -91,7 +91,7 @@ class RicercaType extends AbstractType {
       $builder
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['dati'][0],
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
           'group_by' => function ($obj) {
@@ -104,7 +104,7 @@ class RicercaType extends AbstractType {
           'required' => false))
         ->add('materia', EntityType::class, array('label' => 'label.materia',
           'data' => $options['dati'][1],
-          'class' => 'App:Materia',
+          'class' => 'App\Entity\Materia',
           'choice_label' => 'nome',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('c')
@@ -116,12 +116,12 @@ class RicercaType extends AbstractType {
           'required' => false))
         ->add('docente', EntityType::class, array('label' => 'label.docente',
           'data' => $options['dati'][2],
-          'class' => 'App:Docente',
+          'class' => 'App\Entity\Docente',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('d')
-                ->where('d.abilitato=1 AND d NOT INSTANCE OF App:Preside')
+                ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
                 ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
           'placeholder' => 'label.qualsiasi_docente',
           'choice_translation_domain' => false,
@@ -132,7 +132,7 @@ class RicercaType extends AbstractType {
       $builder
         ->add('sede', EntityType::class, array('label' => 'label.sede',
           'data' => $options['dati'][0],
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('s')->orderBy('s.ordinamento', 'ASC'); },
@@ -140,7 +140,7 @@ class RicercaType extends AbstractType {
           'required' => false))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['dati'][1],
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
           'group_by' => 'sede.citta',
@@ -151,12 +151,12 @@ class RicercaType extends AbstractType {
           'required' => false))
         ->add('docente', EntityType::class, array('label' => 'label.docente',
           'data' => $options['dati'][2],
-          'class' => 'App:Docente',
+          'class' => 'App\Entity\Docente',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('d')
-                ->where('d.abilitato=1 AND d NOT INSTANCE OF App:Preside')
+                ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
                 ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
           'placeholder' => 'label.qualsiasi_docente',
           'attr' => ['widget' => 'search'],

@@ -26,6 +26,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Festivita;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Form\MessageType;
@@ -101,7 +104,7 @@ class OsservazioniController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -113,7 +116,7 @@ class OsservazioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -132,9 +135,9 @@ class OsservazioniController extends AbstractController {
       }
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -188,7 +191,7 @@ class OsservazioniController extends AbstractController {
     // inizializza
     $label = array();
     // controlla cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -203,7 +206,7 @@ class OsservazioniController extends AbstractController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $em->getRepository('App:OsservazioneAlunno')->findOneBy(['id' => $id,
+      $osservazione = $em->getRepository('App\Entity\OsservazioneAlunno')->findOneBy(['id' => $id,
         'data' => $data_obj]);
       if (!$osservazione) {
         // errore
@@ -243,7 +246,7 @@ class OsservazioniController extends AbstractController {
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_edit', FormType::class, $osservazione)
       ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-        'class' => 'App:Alunno',
+        'class' => 'App\Entity\Alunno',
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
@@ -323,7 +326,7 @@ class OsservazioniController extends AbstractController {
   public function osservazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                             LogHandler $dblogger, $id) {
     // controlla osservazione
-    $osservazione = $em->getRepository('App:OsservazioneAlunno')->find($id);
+    $osservazione = $em->getRepository('App\Entity\OsservazioneAlunno')->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni');
@@ -412,7 +415,7 @@ class OsservazioniController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -424,7 +427,7 @@ class OsservazioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -435,9 +438,9 @@ class OsservazioniController extends AbstractController {
     if ($cattedra) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -492,7 +495,7 @@ class OsservazioniController extends AbstractController {
     // inizializza
     $label = array();
     // controlla cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -507,7 +510,7 @@ class OsservazioniController extends AbstractController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $em->getRepository('App:OsservazioneClasse')->findOneBy(['id' => $id,
+      $osservazione = $em->getRepository('App\Entity\OsservazioneClasse')->findOneBy(['id' => $id,
         'data' => $data_obj, 'cattedra' => $cattedra]);
       if (!$osservazione) {
         // errore
@@ -597,7 +600,7 @@ class OsservazioniController extends AbstractController {
   public function osservazionePersonaleDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                             LogHandler $dblogger, $id) {
     // controlla osservazione
-    $osservazione = $em->getRepository('App:OsservazioneClasse')->find($id);
+    $osservazione = $em->getRepository('App\Entity\OsservazioneClasse')->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni_personali');

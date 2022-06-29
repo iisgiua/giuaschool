@@ -57,9 +57,9 @@ class LezioneTest extends DatabaseTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $classe = $this->em->getRepository('App:Classe')->findOneBy([
+        $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy([
           'anno' => $this->faker->randomElement(['1', '2', '3', '4', '5']), 'sezione' => 'B']);
-        $materia = $this->em->getRepository('App:Materia')->findOneBy([
+        $materia = $this->em->getRepository('App\Entity\Materia')->findOneBy([
           'nomeBreve' => $this->faker->randomElement(['Italiano', 'Storia', 'Matematica', 'Informatica', 'Religione / Att. alt.', 'Sostegno', 'Supplenza'])]);
         $data[$i][$field] =
           $field == 'data' ?  $this->faker->dateTimeBetween('-1 month', 'now') :
@@ -144,14 +144,14 @@ class LezioneTest extends DatabaseTestCase {
     $obj_classe->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::classe - NOT BLANK');
-    $existent->setClasse($this->em->getRepository('App:Classe')->findOneBy(['anno' => '1', 'sezione' => 'C']));
+    $existent->setClasse($this->em->getRepository('App\Entity\Classe')->findOneBy(['anno' => '1', 'sezione' => 'C']));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::classe - VALID');
     // materia
     $obj_materia = $this->getPrivateProperty($this->entity, 'materia');
     $obj_materia->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::materia - NOT BLANK');
-    $existent->setMateria($this->em->getRepository('App:Materia')->findOneBy(['nome' => 'Informatica']));
+    $existent->setMateria($this->em->getRepository('App\Entity\Materia')->findOneBy(['nome' => 'Informatica']));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::materia - VALID');
   }
 

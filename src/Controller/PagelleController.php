@@ -25,6 +25,8 @@ use App\Entity\Docente;
 use App\Entity\Staff;
 use App\Entity\Preside;
 use App\Entity\Ata;
+use App\Entity\Classe;
+use App\Entity\Scrutinio;
 use App\Util\PagelleUtil;
 use App\Util\GenitoriUtil;
 
@@ -57,7 +59,7 @@ class PagelleController extends AbstractController {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -75,7 +77,7 @@ class PagelleController extends AbstractController {
       }
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore
@@ -180,7 +182,7 @@ class PagelleController extends AbstractController {
     // inizializza
     $nomefile = null;
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -203,7 +205,7 @@ class PagelleController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo periodo (scrutinio deve essere chiuso)
-    $scrutinio = $em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $scrutinio = $em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore

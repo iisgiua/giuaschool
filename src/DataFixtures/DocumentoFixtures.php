@@ -20,6 +20,7 @@ use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\Documento;
 use App\Entity\File;
+use App\Entity\Docente;
 
 
 /**
@@ -40,7 +41,7 @@ class DocumentoFixtures extends Fixture implements DependentFixtureInterface, Fi
     $faker->addProvider(new FakerPerson($faker));
     $faker->seed(7979);
     // carica dati
-    $docenti = $em->getRepository('App:Docente')->findBy([]);
+    $docenti = $em->getRepository('App\Entity\Docente')->findBy([]);
     $documento = (new Documento())
       ->setTipo('L')
       ->setDocente($faker->randomElement($docenti))

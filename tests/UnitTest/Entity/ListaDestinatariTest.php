@@ -58,8 +58,8 @@ class ListaDestinatariTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
-    $sede1 = [$this->em->getRepository('App:Sede')->find(1)];
-    $sede2 = [$this->em->getRepository('App:Sede')->find(2)];
+    $sede1 = [$this->em->getRepository('App\Entity\Sede')->find(1)];
+    $sede2 = [$this->em->getRepository('App\Entity\Sede')->find(2)];
     $sede0 = array_merge($sede1, $sede2);
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
@@ -159,7 +159,7 @@ class ListaDestinatariTest extends DatabaseTestCase {
     $dt['filtroGenitori'] = [1, 2];
     $existent->setGenitori('C')->setFiltroGenitori([1, 2]);
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $sedi = $this->em->getRepository('App:Sede')->findBy([]);
+    $sedi = $this->em->getRepository('App\Entity\Sede')->findBy([]);
     $existent->setSedi(new ArrayCollection($sedi));
     $dt['sedi'] = array_map(function($ogg) { return $ogg->getId(); }, $sedi);
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
@@ -177,7 +177,7 @@ class ListaDestinatariTest extends DatabaseTestCase {
     $obj_sede->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sedi - NOT BLANK');
-    $existent->setSedi(new ArrayCollection([$this->em->getRepository('App:Sede')->find(1)]));
+    $existent->setSedi(new ArrayCollection([$this->em->getRepository('App\Entity\Sede')->find(1)]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sedi - VALID');
     // docenti
     $existent->setDocenti(null);

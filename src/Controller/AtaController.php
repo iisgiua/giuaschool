@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
@@ -121,7 +121,7 @@ class AtaController extends BaseController {
     $criteri['nome'] = $session->get('/APP/ROUTE/ata_modifica/nome', '');
     $criteri['cognome'] = $session->get('/APP/ROUTE/ata_modifica/cognome', '');
     $criteri['sede'] = $session->get('/APP/ROUTE/ata_modifica/sede', 0);
-    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App:Sede')->find($criteri['sede']) : 0);
+    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $session->get('/APP/ROUTE/ata_modifica/pagina', 1);
@@ -130,7 +130,7 @@ class AtaController extends BaseController {
       $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
-    $lista_sedi = $em->getRepository('App:Sede')->findBy([], ['ordinamento' =>'ASC']);
+    $lista_sedi = $em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
     $lista_sedi[] = -1;
     $label_sede = $trans->trans('label.nessuna_sede');
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'ata',
@@ -149,7 +149,7 @@ class AtaController extends BaseController {
       $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // recupera dati
-    $dati = $em->getRepository('App:ATA')->cerca($criteri, $pagina);
+    $dati = $em->getRepository('App\Entity\Ata')->cerca($criteri, $pagina);
     $info['pagina'] = $pagina;
     // mostra la pagina di risposta
     return $this->renderHtml('ata', 'modifica', $dati, $info, [$form->createView()]);
@@ -172,7 +172,7 @@ class AtaController extends BaseController {
    */
   public function abilitaAction(EntityManagerInterface $em, $id, $abilita): Response {
     // controlla ata
-    $ata = $em->getRepository('App:Ata')->find($id);
+    $ata = $em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -206,7 +206,7 @@ class AtaController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $ata = $em->getRepository('App:Ata')->find($id);
+      $ata = $em->getRepository('App\Entity\Ata')->find($id);
       if (!$ata) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -261,7 +261,7 @@ class AtaController extends BaseController {
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla ata
-    $ata = $em->getRepository('App:Ata')->find($id);
+    $ata = $em->getRepository('App\Entity\Ata')->find($id);
     if (!$ata) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

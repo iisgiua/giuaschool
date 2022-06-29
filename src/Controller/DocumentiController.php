@@ -14,7 +14,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -92,7 +92,7 @@ class DocumentiController extends AbstractController {
       $session->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'P',
+    $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'P',
       'classe' => $classe, 'materia' => $materia]);
     if ($documentoEsistente) {
       // errore
@@ -267,7 +267,7 @@ class DocumentiController extends AbstractController {
       $session->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'R',
+    $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'R',
       'classe' => $classe, 'materia' => $materia, 'alunno' => $alunno, 'docente' => $this->getUser()]);
     if ($documentoEsistente) {
       // errore
@@ -375,7 +375,7 @@ class DocumentiController extends AbstractController {
       $session->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'L',
+    $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'L',
       'classe' => $classe, 'materia' => $materia]);
     if ($documentoEsistente) {
       // errore
@@ -480,7 +480,7 @@ class DocumentiController extends AbstractController {
       $session->set($varSessione, []);
     }
     // controlla azione
-    $documentoEsistente = $em->getRepository('App:Documento')->findOneBy(['tipo' => 'M',
+    $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'M',
       'classe' => $classe]);
     if ($documentoEsistente) {
       // errore
@@ -597,7 +597,7 @@ class DocumentiController extends AbstractController {
     $criteri = array();
     $criteri['filtro'] = $session->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
     $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
-    $criteri['classe'] = $em->getRepository('App:Classe')->find(
+    $criteri['classe'] = $em->getRepository('App\Entity\Classe')->find(
       (int) $session->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -674,7 +674,7 @@ class DocumentiController extends AbstractController {
     // recupera criteri dalla sessione
     $criteri = array();
     $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_bes/tipo', '');
-    $criteri['classe'] = $em->getRepository('App:Classe')->find(
+    $criteri['classe'] = $em->getRepository('App\Entity\Classe')->find(
       (int) $session->get('/APP/ROUTE/documenti_bes/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
@@ -749,7 +749,7 @@ class DocumentiController extends AbstractController {
      // controlla azione
      $listaTipi = ['B', 'H', 'D'];
      if ($alunno) {
-       $documentiEsistenti = $em->getRepository('App:Documento')->findBy(['alunno' => $alunno]);
+       $documentiEsistenti = $em->getRepository('App\Entity\Documento')->findBy(['alunno' => $alunno]);
        $tipiEsistenti = [];
        foreach ($documentiEsistenti as $des) {
          $tipiEsistenti[] = $des->getTipo();
@@ -792,11 +792,11 @@ class DocumentiController extends AbstractController {
        $allegati = $session->get($varSessione, []);
        $tipo = $form->get('tipo')->getData();
        $alunnoIndividuale = $alunno ? null :
-         $em->getRepository('App:Alunno')->findOneBy(['abilitato' => 1,
+         $em->getRepository('App\Entity\Alunno')->findOneBy(['abilitato' => 1,
          'id' => $form->get('alunno')->getData()]);
        if (!$alunno) {
          $controllaTipi = ($tipo == 'H' || $tipo == 'D') ? ['H', 'D'] : ['B'];
-         $documentiEsistenti = $em->getRepository('App:Documento')->findBy(['alunno' => $alunnoIndividuale,
+         $documentiEsistenti = $em->getRepository('App\Entity\Documento')->findBy(['alunno' => $alunnoIndividuale,
            'tipo' => $controllaTipi]);
        }
        if (count($allegati) < 1) {
@@ -881,7 +881,7 @@ class DocumentiController extends AbstractController {
      // recupera criteri dalla sessione
      $criteri = array();
      $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_alunni/tipo', '');
-     $criteri['classe'] = $em->getRepository('App:Classe')->find(
+     $criteri['classe'] = $em->getRepository('App\Entity\Classe')->find(
        (int) $session->get('/APP/ROUTE/documenti_alunni/classe', 0));
      if ($pagina == 0) {
        // pagina non definita: la cerca in sessione
@@ -976,7 +976,7 @@ class DocumentiController extends AbstractController {
        $session->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
      }
      // recupera dati
-     $dati = $em->getRepository('App:Documento')->lista($criteri, $this->getUser(), $pagina);
+     $dati = $em->getRepository('App\Entity\Documento')->lista($criteri, $this->getUser(), $pagina);
      // informazioni di visualizzazione
      $info['pagina'] = $pagina;
      // mostra la pagina di risposta

@@ -14,6 +14,7 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Docente;
+use App\Entity\Orario;
 
 
 /**
@@ -36,7 +37,7 @@ class ColloquioRepository extends BaseRepository {
       ->join('c.docente', 'd')
       ->join('c.orario', 'o')
       ->join('o.sede', 's')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
       ->where('d.abilitato=:abilitato')
       ->orderBy('s.id,d.cognome,d.nome', 'ASC')
       ->setParameter('abilitato', 1);
@@ -60,7 +61,7 @@ class ColloquioRepository extends BaseRepository {
       ->select('c.frequenza,c.giorno,c.ora,c.note,c.extra,c.dati,s.citta,so.inizio,so.fine')
       ->join('c.orario', 'o')
       ->join('o.sede', 's')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
       ->where('c.docente=:docente')
       ->orderBy('s.id', 'ASC')
       ->setParameters(['docente' => $docente])
@@ -79,12 +80,12 @@ class ColloquioRepository extends BaseRepository {
    */
   public function findAllNoSede($search=null, $page=1) {
     // legge l'orario
-    $orario = $this->_em->getRepository('App:Orario')->orarioSede(null);
+    $orario = $this->_em->getRepository('App\Entity\Orario')->orarioSede(null);
     // crea query base
     $query = $this->createQueryBuilder('c')
       ->select("c AS colloquio,CONCAT(d.cognome,' ',d.nome) AS docente,so.inizio,so.fine")
       ->join('c.docente', 'd')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.giorno=c.giorno AND so.ora=c.ora')
       ->where('d.abilitato=:abilitato AND so.orario=:orario')
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->setParameters(['abilitato' => 1, 'orario' => $orario]);
@@ -105,11 +106,11 @@ class ColloquioRepository extends BaseRepository {
    */
   public function oreNoSede(Docente $docente) {
     // legge l'orario
-    $orario = $this->_em->getRepository('App:Orario')->orarioSede(null);
+    $orario = $this->_em->getRepository('App\Entity\Orario')->orarioSede(null);
     // legge ore colloqui
     $colloqui = $this->createQueryBuilder('c')
       ->select('c.frequenza,c.giorno,c.ora,c.note,c.extra,c.dati,so.inizio,so.fine')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.giorno=c.giorno AND so.ora=c.ora')
       ->where('c.docente=:docente AND so.orario=:orario')
       ->setParameters(['docente' => $docente, 'orario' => $orario])
       ->getQuery()
@@ -132,7 +133,7 @@ class ColloquioRepository extends BaseRepository {
       ->join('c.docente', 'd')
       ->join('c.orario', 'o')
       ->join('o.sede', 's')
-      ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=c.giorno AND so.ora=c.ora')
       ->where('d.abilitato=:abilitato')
       ->orderBy('s.ordinamento,d.cognome,d.nome,d.username', 'ASC')
       ->setParameter('abilitato', 1);
@@ -140,7 +141,7 @@ class ColloquioRepository extends BaseRepository {
       $query->andWhere('s.id=:sede')->setParameter('sede', $criteri['sede']);
     } elseif ($criteri['classe'] > 0) {
       $query
-        ->join('App:Cattedra', 'ct', 'WITH', 'ct.docente=d.id AND ct.classe=:classe AND ct.attiva=:attiva')
+        ->join('App\Entity\Cattedra', 'ct', 'WITH', 'ct.docente=d.id AND ct.classe=:classe AND ct.attiva=:attiva')
         ->setParameter('classe', $criteri['classe'])
         ->setParameter('attiva', 1);
     } elseif ($criteri['docente'] > 0) {

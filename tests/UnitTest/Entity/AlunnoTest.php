@@ -15,6 +15,7 @@ namespace App\Tests\UnitTest\Entity;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Tests\DatabaseTestCase;
+use App\Entity\Classe;
 
 
 /**
@@ -77,7 +78,7 @@ class AlunnoTest extends DatabaseTestCase {
       list($nome, $cognome, $username) = $this->faker->unique()->utente($sesso);
       $email = $username.'.u@lovelace.edu.it';
       foreach ($this->fields as $field) {
-        $classe = $this->em->getRepository('App:Classe')->findOneBy([
+        $classe = $this->em->getRepository(Classe::class)->findOneBy([
           'anno' => $this->faker->randomElement(['1', '2', '3', '4', '5']),
           'sezione' => $this->faker->randomElement(['A', 'B', 'C', 'D', 'E'])]);
         $data[$i][$field] =

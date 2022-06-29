@@ -60,8 +60,8 @@ class MenuOpzioneTest extends DatabaseTestCase {
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $menu = $this->faker->randomElement($this->em->getRepository('App:Menu')->findBy([]));
-        $sottomenu = $this->faker->optional(0.3, null)->randomElement($this->em->getRepository('App:Menu')->findBy([]));
+        $menu = $this->faker->randomElement($this->em->getRepository('App\Entity\Menu')->findBy([]));
+        $sottomenu = $this->faker->optional(0.3, null)->randomElement($this->em->getRepository('App\Entity\Menu')->findBy([]));
         $data[$i][$field] =
           $field == 'ruolo' ? $this->faker->randomElement(["NESSUNO", "ROLE_UTENTE", "ROLE_ALUNNO", "ROLE_GENITORE", "ROLE_ATA", "ROLE_DOCENTE", "ROLE_STAFF", "ROLE_PRESIDE", "ROLE_AMMINISTRATORE"]) :
           ($field == 'funzione' ? $this->faker->randomElement(["NESSUNA","SEGRETERIA","COORDINATORE"]) :
@@ -196,7 +196,7 @@ class MenuOpzioneTest extends DatabaseTestCase {
     $obj_menu->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::menu - NOT BLANK');
-    $existent->setMenu($this->em->getRepository('App:Menu')->find(1));
+    $existent->setMenu($this->em->getRepository('App\Entity\Menu')->find(1));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::menu - VALID');
   }
 
