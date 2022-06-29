@@ -1,6 +1,11 @@
-{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
+  <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
+  <br><br>
+</div>
 <p style="text-align:center;">
   <strong>VERBALE DELLO SCRUTINIO PER GLI ESAMI<br>DEGLI STUDENTI CON SOSPENSIONE DEL GIUDIZIO</strong><br>
+  {% if dati.scrutinio.periodo != 'G' %}SESSIONE SUPPLETTIVA<br>{% endif %}
   <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} - {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
@@ -18,7 +23,7 @@
     ordine del giorno:
   </p>
   <ol>
-    <li><strong>Scrutinio per gli esami degli studenti con sospensione del giudizio;</strong></li>
+    <li><strong>Scrutinio per gli esami degli studenti con sospensione del giudizio{% if dati.scrutinio.periodo != 'G' %} - sessione supplettiva{% endif %};</strong></li>
     <li><strong>Situazioni particolari da segnalare.</strong></li>
   </ol>
   <p>Presiede la riunione {{ dati.presidente }}; funge da segretario verbalizzante {{ dati.segretario }}.
@@ -87,7 +92,7 @@
   </div>
 {% endif %}
   <p>&nbsp;</p>
-  <p><strong>Punto primo. Scrutinio per gli esami degli studenti con sospensione del giudizio.</strong></p>
+  <p><strong>Punto primo. Scrutinio per gli esami degli studenti con sospensione del giudizio{% if dati.scrutinio.periodo != 'G' %} - sessione supplettiva{% endif %}.</strong></p>
   <p>Si passa, quindi, seguendo l'ordine alfabetico, alla valutazione di ogni singolo alunno, tenuto conto
     delle norme sopra riportate, sulla base di giudizi ampiamente motivati.
     Il riepilogo dei voti deliberati per ciascun alunno viene allegato al presente verbale,

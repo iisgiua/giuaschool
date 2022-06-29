@@ -1,4 +1,8 @@
-{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
+  <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
+  <br><br>
+</div>
 <table style="font-family:times;font-size:12pt" border="0" cellpadding="3" nobr="true">
   <tr nobr="true">
     <td width="55%">&nbsp;</td>
@@ -11,11 +15,11 @@
 </table>
 <p>&nbsp;</p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
-  <p><strong>OGGETTO: Scrutinio per gli esami degli studenti con sospensione del giudizio A.S.
-    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione dei voti</strong></p>
+  <p><strong>OGGETTO: Scrutinio per gli esami{% if dati.scrutinio.periodo != 'G' %} supplettivi{% endif %} degli studenti con sospensione del giudizio A.S.
+    {{ dati.annoScolastico }} - Comunicazione dei voti</strong></p>
   <br>
-  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio per gli esami degli studenti con sospensione del giudizio dell’Anno Scolastico
-    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
+  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio per gli esami{% if dati.scrutinio.periodo != 'G' %} supplettivi{% endif %} degli studenti con sospensione del giudizio dell’Anno Scolastico
+    {{ dati.annoScolastico }}, tenutasi il giorno
     {{ dati.scrutinio.data|date('d/m/Y') }},
     ha attribuito all'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}
     le valutazioni che vengono di seguito riportate:

@@ -61,7 +61,7 @@ class ScuolaController extends BaseController {
    * @param string $periodo Periodo dello scrutinio
    *
    * @Route("/scuola/scrutini/{periodo}", name="scuola_scrutini",
-   *    requirements={"periodo": "P|S|F|G|R|X|U"},
+   *    requirements={"periodo": "P|S|F|G|R|X"},
    *    defaults={"periodo": ""},
    *    methods={"GET", "POST"})
    *
@@ -76,7 +76,7 @@ class ScuolaController extends BaseController {
     // lista periodi scrutinio
     $info['listaPeriodi'] = $em->getRepository('App\Entity\Configurazione')->infoScrutini();
     $info['listaPeriodi']['G'] = $trans->trans('label.scrutini_periodo_G');
-    $info['listaPeriodi']['U'] = $trans->trans('label.scrutini_periodo_U');
+    $info['listaPeriodi']['R'] = $trans->trans('label.scrutini_periodo_R');
     // periodo predefinito
     if (empty($periodo)) {
       // ultimo periodo configurato

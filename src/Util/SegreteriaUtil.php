@@ -207,19 +207,20 @@ class SegreteriaUtil {
     $dati = array();
     // trova pagelle di alunni
     foreach ($lista as $alu) {
-      // scrutini di classe corrente o altre di cambio classe
+      // scrutini di classe corrente o altre di cambio classe (esclude scrutini rinviati da prec. A.S.)
       $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
         ->leftJoin('s.classe', 'c')
         ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno')
-        ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.periodo!=:rinviato')
-        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(), 'stato' => 'C', 'rinviato' => 'X'])
-        ->orderBy('s.data')
+        ->where('(s.classe=:classe OR s.classe=cc.classe) AND s.stato=:stato AND s.periodo NOT IN (:rinviati)')
+        ->setParameters(['alunno' => $alu, 'classe' => $alu->getClasse(), 'stato' => 'C',
+          'rinviati' => ['R', 'X']])
+        ->orderBy('s.data', 'DESC')
         ->getQuery()
         ->getResult();
       // controlla presenza alunno in scrutinio
       $periodi = array();
       foreach ($scrutini as $sc) {
-        $alunni = ($sc->getPeriodo() == 'G' ? $sc->getDato('sospesi') :
+        $alunni = (($sc->getPeriodo() == 'G' || $sc->getPeriodo() == 'R') ? $sc->getDato('sospesi') :
           ($sc->getPeriodo() == 'X' ? $sc->getDato('alunni') : $sc->getDato('alunni')));
         if (in_array($alu->getId(), $alunni)) {
           $periodi[] = array($sc->getPeriodo(), $sc->getId());
@@ -254,8 +255,7 @@ class SegreteriaUtil {
     $dati = array();
     // legge dati
     $dati_scrutinio = $scrutinio->getDati();
-    $alunni = ($scrutinio->getPeriodo() == 'G' ? $dati_scrutinio['sospesi'] :
-      ($scrutinio->getPeriodo() == 'X' ? $dati_scrutinio['rinviati'] : $dati_scrutinio['alunni']));
+    $alunni = ($scrutinio->getPeriodo() == 'G' ? $dati_scrutinio['sospesi'] : $dati_scrutinio['alunni']);
     // controlla alunno
     if (in_array($alunno->getId(), $alunni)) {
       // alunno in scrutinio
@@ -288,10 +288,22 @@ class SegreteriaUtil {
           // non scrutinato
           $dati['noscrutinato'] = (in_array($alunno->getId(), $cessata_frequenza) ? 'C' : 'A');
         }
-      } elseif ($scrutinio->getPeriodo() == 'G' || $scrutinio->getPeriodo() == 'X') {
+      } elseif ($scrutinio->getPeriodo() == 'G') {
         // dati esito
         $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy(['scrutinio' => $scrutinio,
           'alunno' => $alunno]);
+        // controlla esistenza di scrutinio rinviato
+        if ($dati['esito']->getEsito() == 'X') {
+          // scrutinio rinviato
+          $scrutinioRinviato = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $scrutinio->getClasse(),
+            'periodo' => 'R', 'stato' => 'C']);
+          if ($scrutinioRinviato) {
+            // carica esito definitivo
+            $dati['rinviato']['scrutinio'] = $scrutinioRinviato;
+            $dati['rinviato']['esito'] = $this->em->getRepository('App:Esito')->findOneBy([
+              'scrutinio' => $scrutinioRinviato, 'alunno' => $alunno]);
+          }
+        }
       }
     }
     // restituisce dati come array associativo

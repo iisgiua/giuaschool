@@ -1,4 +1,8 @@
-{{ include('coordinatore/documenti/intestazione.html.twig') }}
+<div style="text-align:center;font-family:times;font-size:11pt">
+  <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
+  <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
+  <br><br>
+</div>
 <table style="font-family:times;font-size:12pt" border="0" cellpadding="3" nobr="true">
   <tr nobr="true">
     <td width="55%">&nbsp;</td>
@@ -12,11 +16,11 @@
 <p>&nbsp;</p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
   <p><strong>OGGETTO: Scrutinio per gli esami degli studenti con sospensione del giudizio A.S.
-    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione esito di non ammissione</strong></p>
+    {{ dati.annoScolastico }}{% if dati.scrutinio.periodo != 'G' %} - sessione supplettiva{% endif %} - Comunicazione esito di non ammissione</strong></p>
   <br>
-  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio per gli esami degli studenti con sospensione del giudizio dell’Anno Scolastico
-    {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
-    {{ dati.scrutinio.data|date('d/m/Y') }},
+  <p>Si comunica che il Consiglio di Classe, nella seduta dello scrutinio per gli esami degli studenti con sospensione del giudizio
+    dell’Anno Scolastico {{ dati.annoScolastico }}{% if dati.scrutinio.periodo != 'G' %} - sessione supplettiva{% endif %},
+    tenutasi il giorno {{ dati.scrutinio.data|date('d/m/Y') }},
     ha deliberato <strong>la NON AMMISSIONE alla classe successiva</strong>
     dell'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}, con la seguente motivazione:
   </p>

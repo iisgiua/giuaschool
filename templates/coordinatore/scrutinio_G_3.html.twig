@@ -8,6 +8,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe.anno }}ª {{ classe.sezione }}</h1>
+  {% if dati.periodo is defined and dati.periodo != 'G' %}<h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Sessione supplettiva</h2>{% endif %}
     {% include 'include/modal-error.html.twig' %}
     {{ form_start(form) }}
     {% if classe.anno == 1 %}
@@ -43,9 +44,9 @@
           <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2,',') }}</strong></td>
           <td>
         {% if dati.esiti[alunno].dati.certificazione is defined and dati.esiti[alunno].dati.certificazione %}
-            <button type="button" class="btn btn-success gs-button-remote" title="Modifica la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><strong>COMPILATA</strong></button>
+            <button type="button" class="btn btn-success gs-button-remote" title="Modifica la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': dati.periodo, 'classe': classe.id}) }}"><strong>COMPILATA</strong></button>
         {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Compila la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Compila la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': dati.periodo, 'classe': classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
         {% endif %}
           </td>
         </tr>
@@ -89,9 +90,9 @@
         {% endif %}
           <td>
         {% if dati.esiti[alunno].credito %}
-            <button type="button" class="btn btn-xs btn-{{ dati.esiti[alunno].credito == dati.esiti[alunno].dati.creditoMinimo ? 'info' : 'success' }} gs-button-remote" title="Modifica il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><strong class="gs-big gs-pl-2 gs-pr-2">{{ dati.esiti[alunno].credito }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.esiti[alunno].credito == dati.esiti[alunno].dati.creditoMinimo ? 'info' : 'success' }} gs-button-remote" title="Modifica il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': dati.periodo, 'classe': classe.id}) }}"><strong class="gs-big gs-pl-2 gs-pr-2">{{ dati.esiti[alunno].credito }}</strong></button>
         {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'G', 'classe': classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': dati.periodo, 'classe': classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
         {% endif %}
           </td>
         </tr>
