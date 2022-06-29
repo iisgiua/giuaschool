@@ -39,9 +39,9 @@ $(document).ready(function() {
     $(el).show();
   });
   // init
+  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
   $('.gs-giorno').append(button);
   $('.gs-giorno button.gs-remove-item').html('<svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#minus') }}"></use></svg>');
-  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
   $('input[disabled="disabled"]').each(function() {
     var o = $(this).val();
     var v = $('#'+$(this).attr('id').slice(0, -3)+'visibile');
