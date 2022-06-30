@@ -214,6 +214,7 @@ class ScuolaController extends BaseController {
     if (!$preside) {
       // crea nuovo utente
       $preside = (new Preside())
+        ->setPassword('NOPASSWORD')
         ->setAbilitato(true);
       $em->persist($preside);
     }
