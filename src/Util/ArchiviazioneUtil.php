@@ -142,7 +142,7 @@ class ArchiviazioneUtil {
       mb_strtoupper($docente->getNome(), 'UTF-8').'.pdf';
     $nomefile = str_replace(['À','È','É','Ì','Ò','Ù',' ','"','\'','`'],
                             ['A','E','E','I','O','U','-','' ,''  ,'' ], $nomefile);
-    // lista cattedre
+    // lista cattedre (escluso sostegno)
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->join('c.docente', 'd')
       ->join('c.materia', 'm')
@@ -171,14 +171,17 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
     $this->pdf->getHandler()->setPrintFooter(true);
     // scansione cattedre
+    $datiPeriodi = $this->regUtil->infoPeriodi();
     foreach ($cattedre as $cat) {
       // inizializza
       $this->copertinaRegistroDocente($docente, $cat);
       $pagina = $this->pdf->getHandler()->PageNo();
-      // primo periodo
-      $this->scriveRegistroDocente($docente, $cat, 1);
-      // secondo periodo
-      $this->scriveRegistroDocente($docente, $cat, 2);
+      foreach ($datiPeriodi as $periodo) {
+        if (!empty($periodo['nome'])) {
+          // registro per il periodo indicato
+          $this->scriveRegistroDocente($docente, $cat, $periodo);
+        }
+      }
       // controlla dati presenti
       if ($pagina == $this->pdf->getHandler()->PageNo()) {
         // stessa pagina: nessun dato aggiunto
@@ -258,14 +261,17 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
     $this->pdf->getHandler()->setPrintFooter(true);
     // scansione cattedre
+    $datiPeriodi = $this->regUtil->infoPeriodi();
     foreach ($cattedre as $cat) {
       // inizializza
       $this->copertinaRegistroSostegno($docente, $cat);
       $pagina = $this->pdf->getHandler()->PageNo();
-      // primo periodo
-      $this->scriveRegistroSostegno($docente, $cat, 1);
-      // secondo periodo
-      $this->scriveRegistroSostegno($docente, $cat, 2);
+      foreach ($datiPeriodi as $periodo) {
+        if (!empty($periodo['nome'])) {
+          // registro per il periodo indicato
+          $this->scriveRegistroSostegno($docente, $cat, $periodo);
+        }
+      }
       // controlla dati presenti
       if ($pagina == $this->pdf->getHandler()->PageNo()) {
         // stessa pagina: nessun dato aggiunto
@@ -324,12 +330,15 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
     $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
     $this->pdf->getHandler()->setPrintFooter(true);
-    // primo periodo
-    $this->copertinaRegistroClasse($classe, 1);
-    $this->scriveRegistroClasse($classe, 1);
-    // secondo periodo
-    $this->copertinaRegistroClasse($classe, 2);
-    $this->scriveRegistroClasse($classe, 2);
+    // scansione periodi
+    $datiPeriodi = $this->regUtil->infoPeriodi();
+    foreach ($datiPeriodi as $periodo) {
+      if (!empty($periodo['nome'])) {
+        // registro per il periodo indicato
+        $this->copertinaRegistroClasse($classe, $periodo);
+        $this->scriveRegistroClasse($classe, $periodo);
+      }
+    }
     // salva il documento
     $this->pdf->save($percorso.'/'.$nomefile);
     // registro creato
@@ -385,7 +394,7 @@ class ArchiviazioneUtil {
    *
    * @param Docente $docente Docente di cui creare il registro
    * @param Cattedra $cattedra Cattedra del docente
-   * @param int $periodo Periodo di riferimento
+   * @param array $periodo Informazioni sul periodo di riferimento
    */
   public function scriveRegistroDocente(Docente $docente, Cattedra $cattedra, $periodo) {
     // inizializza dati
@@ -394,83 +403,144 @@ class ArchiviazioneUtil {
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
     $materia_s = $cattedra->getMateria()->getNome();
-    $dati_periodi = $this->regUtil->infoPeriodi();
-    $periodo_s = $dati_periodi[$periodo]['nome'];
+    $periodo_s = $periodo['nome'];
     $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
-    $info_voti['N'] = [0 => 'N.C.', 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['E'] = [3 => 'N.C.', 4 => '4', 5 => '5', 6 => '6', 7 => '7', 8 => '8', 9 => '9', 10 => '10'];
-    $info_voti['R'] = [20 => 'N.C.', 21 => 'Insuff.', 22 => 'Suff.', 23 => 'Discr.', 24 => 'Buono', 25 => 'Dist.', 26 => 'Ottimo'];
     $dati['lezioni'] = array();
     $dati['argomenti'] = array();
     $dati['voti'] = array();
     $dati['alunni'] = array();
     $dati['osservazioni'] = array();
     $dati['personali'] = array();
-    // ore totali (in unità orarie, non minuti effettivi)
-    $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-      ->select('SUM(so.durata)')
-      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-      ->join('so.orario', 'o')
-      ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-      ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-        'inizio' => $dati_periodi[$periodo]['inizio'], 'fine' => $dati_periodi[$periodo]['fine'],
-        'sede' => $cattedra->getClasse()->getSede()])
-      ->getQuery()
-      ->getSingleScalarResult();
-    $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
-    // voti in lezione di altra materia
-    $votiNoLezione = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
-      ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento,l.data')
-      ->join('v.lezione', 'l')
-      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-      ->join('so.orario', 'o')
-      ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.materia!=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-      ->orderBy('l.data,l.ora', 'ASC')
-      ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
-        'classe' => $cattedra->getClasse(), 'inizio' => $dati_periodi[$periodo]['inizio'],
-        'fine' => $dati_periodi[$periodo]['fine'], 'sede' => $cattedra->getClasse()->getSede()])
-      ->getQuery()
-      ->getArrayResult();
-    foreach ($votiNoLezione as $v) {
-      if ($v['voto'] > 0) {
-        $voto_int = (int) ($v['voto'] + 0.25);
-        $voto_dec = $v['voto'] - ((int) $v['voto']);
-        $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
-      }
-      $dati['voti'][$v['id']][$v['data']->format('d/m/Y')][] = $v;
-      // aggiunge dati alunno
-      $lista = array_intersect([$v['id']], $this->regUtil->alunniInData($v['data'], $cattedra->getClasse()));
-      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,(a.classe) AS idclasse')
-        ->where('a.id IN (:lista)')
-        ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameters(['lista' => $lista])
-        ->getQuery()
-        ->getArrayResult();
-      foreach ($alunni as $alu) {
-        $dati['alunni'][$alu['id']] = $alu;
-      }
+    // valutazioni
+    $valutazioni['R'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
+    $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
+    $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
+    // retrocompatibilità per A.S 21/22
+    if ($periodo['scrutinio'] == 'P' || $periodo['scrutinio'] == 'S') {
+      $valutazioni['R'] = [
+        'min' => 20,
+        'max' => 26,
+        'suff' => 22,
+        'med' => 22,
+        'valori' => '20,21,22,23,24,25,26',
+        'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
+        'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
+        'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
+      $valutazioni['E'] = [
+        'min' => 3,
+        'max' => 10,
+        'suff' => 6,
+        'med' => 5,
+        'valori' => '3,4,5,6,7,8,9,10',
+        'etichette' => '"NC",4,5,6,7,8,9,10',
+        'voti' => '"Non Classificato",4,5,6,7,8,9,10',
+        'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
     }
-    if ($ore > 0 || !empty($votiNoLezione)) {
-      // legge lezioni del periodo
-      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
+    // crea lista voti
+    $listaValori = explode(',', $valutazioni['R']['valori']);
+    $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+    foreach ($listaValori as $key=>$val) {
+      $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
+    }
+    $listaValori = explode(',', $valutazioni['E']['valori']);
+    $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+    foreach ($listaValori as $key=>$val) {
+      $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
+    }
+    $listaValori = explode(',', $valutazioni['N']['valori']);
+    $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+    foreach ($listaValori as $key=>$val) {
+      $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
+    }
+    // ore totali (in unità orarie, non minuti effettivi)
+    if ($cattedra->getTipo() == 'A' && $cattedra->getMateria()->getTipo() == 'R') {
+      // materia alternativa: aggiunge ore firmate con altra disciplina
+      $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+        ->select('c.id')
+        ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.id!=:cattedra')
+        ->getDql();
+      $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+        ->select('SUM(so.durata)')
+        ->join('l.materia', 'm')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('so.orario', 'o')
+        ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+        ->andWhere('l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))')
+        ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(),
+          'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
+          'sede' => $cattedra->getClasse()->getSede(), 'materia' => $cattedra->getMateria(),
+          'civica' => 'E', 'cattedra' => $cattedra->getId()])
+        ->getQuery()
+        ->getSingleScalarResult();
+    } else {
+      // altro tipo di cattedra
+      $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+        ->select('SUM(so.durata)')
         ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->orderBy('l.data,l.ora', 'ASC')
         ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
-          'inizio' => $dati_periodi[$periodo]['inizio'], 'fine' => $dati_periodi[$periodo]['fine'],
+          'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
           'sede' => $cattedra->getClasse()->getSede()])
         ->getQuery()
-        ->getArrayResult();
-      // legge assenze/voti
+        ->getSingleScalarResult();
+    }
+    $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
+    // voti in lezione di altra materia
+    $votiNoLezione = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+      ->select('COUNT(v.id)')
+      ->join('v.lezione', 'l')
+      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.materia!=:materia AND l.data BETWEEN :inizio AND :fine')
+      ->orderBy('l.data', 'ASC')
+      ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
+        'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
+      ->getQuery()
+      ->getSingleScalarResult();
+    if ($ore > 0 || $votiNoLezione > 0) {
+      // legge lezioni del periodo
+      if ($cattedra->getTipo() == 'A' && $cattedra->getMateria()->getTipo() == 'R') {
+        // materia alternativa: aggiunge ore firmate con altra disciplina
+        $altraCattedra = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+          ->select('c.id')
+          ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.id!=:cattedra')
+          ->getDql();
+        $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+          ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
+          ->join('l.materia', 'm')
+          ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+          ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+          ->join('so.orario', 'o')
+          ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+          ->andWhere('l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))')
+          ->orderBy('l.data,l.ora', 'ASC')
+          ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(),
+            'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
+            'sede' => $cattedra->getClasse()->getSede(), 'materia' => $cattedra->getMateria(),
+            'civica' => 'E', 'cattedra' => $cattedra->getId()])
+          ->getQuery()
+          ->getArrayResult();
+      } else {
+        // altro tipo di cattedra
+        $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+          ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
+          ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+          ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+          ->join('so.orario', 'o')
+          ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+          ->orderBy('l.data,l.ora', 'ASC')
+          ->setParameters(['docente' => $docente, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
+            'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
+            'sede' => $cattedra->getClasse()->getSede()])
+          ->getQuery()
+          ->getArrayResult();
+      }
+      // legge assenze
       $lista = array();
       $lista_alunni = array();
       $data_prec = null;
@@ -506,30 +576,12 @@ class ArchiviazioneUtil {
             $dati['lezioni'][$mese][$giorno][$a['id']]['assenze'] = $a['ore'];
           }
         }
-        // legge voti
-        $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
-          ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento')
-          ->where('v.lezione=:lezione AND v.materia=:materia AND v.docente=:docente')
-          ->setParameters(['lezione' => $l['id'], 'materia' => $cattedra->getMateria(),
-            'docente' => $docente])
-          ->getQuery()
-          ->getArrayResult();
-        // voti per alunno
-        foreach ($voti as $v) {
-          if ($v['voto'] > 0) {
-            $voto_int = (int) ($v['voto'] + 0.25);
-            $voto_dec = $v['voto'] - ((int) $v['voto']);
-            $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
-          }
-          $dati['lezioni'][$mese][$giorno][$v['id']]['voti'][] = $v;
-          $dati['voti'][$v['id']][$l['data']->format('d/m/Y')][] = $v;
-        }
         // memorizza data precedente
         $data_prec = $l['data'];
       }
       // lista alunni (ordinata)
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-        ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,(a.classe) AS idclasse')
+        ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,a.frequenzaEstero,(a.classe) AS idclasse')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['lista' => $lista_alunni])
@@ -544,7 +596,7 @@ class ArchiviazioneUtil {
         ->select('(pv.alunno) AS idalunno,pv.unico')
         ->where('pv.alunno IN (:alunni) AND pv.classe=:classe AND pv.materia=:materia AND pv.periodo=:periodo')
         ->setParameters(['alunni' => $lista_alunni, 'classe' => $cattedra->getClasse(),
-          'materia' => $cattedra->getMateria(), 'periodo' => ($periodo == 1 ? 'P' : 'F')]);
+          'materia' => $cattedra->getMateria(), 'periodo' => $periodo['scrutinio']]);
       if ($cattedra->getMateria()->getTipo() == 'E') {
         // proposte multiple per Ed.civica: aggiunge condizione su docente
         $proposte = $proposte
@@ -612,14 +664,14 @@ class ArchiviazioneUtil {
             // nome
             $html .= '<tr nobr="true" style="font-size:9pt">'.
               '<td align="left"> '.
-              ($alu['idclasse'] != $cattedra->getClasse()->getId() ? '* ' : '').
+              (($alu['idclasse'] != $cattedra->getClasse()->getId() || $alu['frequenzaEstero']) ? '* ' : '').
               $alu['cognome'].' '.$alu['nome'].' ('.$alu['dataNascita']->format('d/m/Y').')'.
               '</td>';
-            if ($alu['idclasse'] != $cattedra->getClasse()->getId()) {
-              // segnala presenza di alunni ritirati
+            if ($alu['idclasse'] != $cattedra->getClasse()->getId() || $alu['frequenzaEstero']) {
+              // segnala presenza di alunni ritirati/estero
               $aluritirati = true;
             }
-            // assenze e voti
+            // assenze
             for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
               $g = $giornilezione[$ng];
               $gg = $g->format('j');
@@ -633,14 +685,6 @@ class ArchiviazioneUtil {
                   $html .= str_repeat('A', intval($ass)).(($ass - intval($ass)) > 0 ? 'a' : '');
                   $dati['alunni'][$idalu]['assenze'] += $ass;
                 }
-                // voti
-                if (isset($dati['lezioni'][$gm][$gg][$idalu]['voti'])) {
-                  foreach ($dati['lezioni'][$gm][$gg][$idalu]['voti'] as $voti) {
-                    if (isset($voti['voto_str'])) {
-                      $html .= ' <b>'.$voti['voto_str'].'</b><sub>&nbsp;'.$voti['tipo'].'</sub>';
-                    }
-                  }
-                }
                 $html .= '</td>';
               } else {
                 // alunno non inserito in classe
@@ -652,7 +696,7 @@ class ArchiviazioneUtil {
               $html .= '<td>'.rtrim(rtrim(number_format($dati['alunni'][$idalu]['assenze'], 1, ',', ''), '0'), ',').'</td>';
               // proposte voto
               if (isset($dati['alunni'][$idalu]['proposte'])) {
-                $html .= '<td><b>'.$info_voti[$cattedra->getMateria()->getTipo()][$dati['alunni'][$idalu]['proposte']].'</b></td>';
+                $html .= '<td><b>'.$valutazioni[$cattedra->getMateria()->getTipo()]['lista'][$dati['alunni'][$idalu]['proposte']].'</b></td>';
               } else {
                 $html .= '<td style="width:20mm">&nbsp;</td>';
               }
@@ -665,9 +709,7 @@ class ArchiviazioneUtil {
           if ($html_col == '') {
             $html = '';
           } else {
-            $html =
-              '<b>A</b> = assenza di un\'ora; <b>a</b> = assenza di mezzora; '.
-              '<b>S</b> = voto scritto; <b>O</b> = voto orale; <b>P</b> = voto pratico';
+            $html = '<b>A</b> = assenza di un\'ora; <b>a</b> = assenza di mezzora.';
           }
           if ($aluritirati) {
             $html .= '<br><b>*</b> Alunno ritirato/trasferito/frequenta l\'anno all\'estero';
@@ -675,48 +717,10 @@ class ArchiviazioneUtil {
           $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
         }
         // legge argomenti e attività
-        $data_prec = null;
-        $num_arg = 0;
-        $num_att = 0;
         foreach ($lezioni as $l) {
           $data = $l['data']->format('d/m/Y');
-          if ($data_prec && $data != $data_prec) {
-            if ($num_arg == 0) {
-              // nessun argomento in data precedente
-              $dati['argomenti'][$data_prec]['argomento'][0] = '';
-            }
-            if ($num_att == 0) {
-              // nessuna attività in data precedente
-              $dati['argomenti'][$data_prec]['attivita'][0] = '';
-            }
-            // fa ripartire contatori
-            $num_arg = 0;
-            $num_att = 0;
-          }
-          $testo = $this->ripulisceTesto($l['argomento']);
-          if ($testo != '' && ($num_arg == 0 ||
-              strcasecmp($testo, $dati['argomenti'][$data]['argomento'][$num_arg - 1]) != 0)) {
-            // evita ripetizioni identiche degli argomenti
-            $dati['argomenti'][$data]['argomento'][$num_arg] = $testo;
-            $num_arg++;
-          }
-          $testo = $this->ripulisceTesto($l['attivita']);
-          if ($testo != '' && ($num_att == 0 ||
-              strcasecmp($testo, $dati['argomenti'][$data]['attivita'][$num_att - 1]) != 0)) {
-            // evita ripetizioni identiche delle attività
-            $dati['argomenti'][$data]['attivita'][$num_att] = $testo;
-            $num_att++;
-          }
-          // memorizza data attuale
-          $data_prec = $data;
-        }
-        if ($data_prec && $num_arg == 0) {
-            // nessun argomento in data precedente
-            $dati['argomenti'][$data_prec]['argomento'][0] = '';
-        }
-        if ($data_prec && $num_att == 0) {
-          // nessuna attività in data precedente
-          $dati['argomenti'][$data_prec]['attivita'][0] = '';
+          $dati['argomenti'][$data]['argomento'][] = $this->ripulisceTesto($l['argomento']);
+          $dati['argomenti'][$data]['attivita'][] = $this->ripulisceTesto($l['attivita']);
         }
         // scrive argomenti e attività
         $this->intestazionePagina('Argomenti e attivit&agrave; della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
@@ -728,12 +732,32 @@ class ArchiviazioneUtil {
           </tr>';
         foreach ($dati['argomenti'] as $d=>$arg) {
           $html .= '<tr nobr="true"><td>'.$d.'</td>'.
-            '<td align="left">'.implode('<br>', $arg['argomento']).'</td>'.
-            '<td align="left">'.implode('<br>', $arg['attivita']).'</td>'.
+            '<td align="left">'.implode('<br>', $this->eliminaRipetizioni($arg['argomento'])).'</td>'.
+            '<td align="left">'.implode('<br>', $this->eliminaRipetizioni($arg['attivita'])).'</td>'.
             '</tr>';
         }
         $html .= '</table>';
         $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
+      }
+      // legge voti
+      $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+        ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento,l.data')
+        ->join('v.lezione', 'l')
+        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
+        ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
+          'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
+        ->orderBy('l.data', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      // voti per alunno
+      foreach ($voti as $v) {
+        if ($v['voto'] > 0) {
+          $voto_int = (int) ($v['voto'] + 0.25);
+          $voto_dec = $v['voto'] - ((int) $v['voto']);
+          $v['voto_str'] = $voto_int.($voto_dec == 0.25 ? '+' : ($voto_dec == 0.75 ? '-' : ($voto_dec == 0.5 ? '½' : '')));
+        }
+        $dati['voti'][$v['id']][$v['data']->format('d/m/Y')][] = $v;
       }
       // scrive dettaglio voti
       if (count($dati['voti']) > 0) {
@@ -752,9 +776,8 @@ class ArchiviazioneUtil {
               <td width="8%" style="border:1pt solid #000"><strong>Tipo</strong></td>
               <td width="40%" style="border:1pt solid #000"><strong>Argomenti o descrizione della prova</strong></td>
               <td width="6%" style="border:1pt solid #000"><strong>Voto</strong></td>
-              <td width="36%" style="border:1pt solid #000"><strong>Giudizio</strong></td>
+              <td width="36%" style="border:1pt solid #000"><strong>Giudizio o commento</strong></td>
             </tr>';
-
           foreach ($dati['voti'][$idalu] as $dt=>$vv) {
             foreach ($vv as $v) {
               $argomento = $this->ripulisceTesto($v['argomento']);
@@ -779,8 +802,8 @@ class ArchiviazioneUtil {
       ->join('o.alunno', 'a')
       ->where('o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $dati_periodi[$periodo]['inizio'],
-        'fine' => $dati_periodi[$periodo]['fine']])
+      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
+        'fine' => $periodo['fine']])
       ->getQuery()
       ->getArrayResult();
     foreach ($osservazioni as $o) {
@@ -815,8 +838,8 @@ class ArchiviazioneUtil {
       ->select('o.data,o.testo')
       ->where('NOT (o INSTANCE OF App\Entity\OsservazioneAlunno) AND o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $dati_periodi[$periodo]['inizio'],
-        'fine' => $dati_periodi[$periodo]['fine']])
+      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
+        'fine' => $periodo['fine']])
       ->getQuery()
       ->getArrayResult();
     foreach ($personali as $p) {
@@ -900,7 +923,7 @@ class ArchiviazioneUtil {
    *
    * @param Docente $docente Docente di cui creare il registro
    * @param Cattedra $cattedra Cattedra del docente
-   * @param int $periodo Periodo di riferimento
+   * @param array $periodo Informazioni sul periodo di riferimento
    */
   public function scriveRegistroSostegno(Docente $docente, Cattedra $cattedra, $periodo) {
     // inizializza dati
@@ -908,251 +931,206 @@ class ArchiviazioneUtil {
     $docente_sesso = $docente->getSesso();
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
+    $materia_s = 'Sostegno';
     $alunno_s = $cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().
       ' ('.$cattedra->getAlunno()->getDataNascita()->format('d/m/Y').')';
-    $dati_periodi = $this->regUtil->infoPeriodi();
-    $periodo_s = $dati_periodi[$periodo]['nome'];
+    $periodo_s = $periodo['nome'];
     $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
-    // suddivide per materia
-    $materie = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
-      ->select('DISTINCT m.id,m.nome')
-      ->join('c.materia', 'm')
-      ->where('c.classe=:classe')
-      ->orderBy('m.ordinamento', 'ASC')
-      ->setParameters(['classe' => $cattedra->getClasse()])
+    $dati['lezioni'] = array();
+    $dati['argomenti'] = array();
+    $dati['osservazioni'] = array();
+    $dati['personali'] = array();
+    $dati['assenze'] = 0;
+    // ore totali
+    $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+      ->select('SUM(so.durata)')
+      ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND fs.alunno=:alunno')
+      ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+      ->join('so.orario', 'o')
+      ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->setParameters(['docente' => $docente, 'alunno' => $cattedra->getAlunno(),
+        'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
+        'sede' => $cattedra->getClasse()->getSede()])
       ->getQuery()
-      ->getArrayResult();
-    foreach ($materie as $mat) {
-      $dati['lezioni'] = array();
-      $dati['argomenti'] = array();
-      $dati['osservazioni'] = array();
-      $dati['personali'] = array();
-      $dati['assenze'] = 0;
-      $materia_s = $mat['nome'];
-      // ore totali
-      $ore = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-        ->select('SUM(so.durata)')
+      ->getSingleScalarResult();
+    $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
+    if ($ore > 0) {
+      // legge lezioni del periodo
+      $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
+        ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita,fs.argomento AS argomento_sos,fs.attivita AS attivita_sos,m.nomeBreve AS materia')
+        ->join('l.materia', 'm')
         ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND fs.alunno=:alunno')
         ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
-        ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+        ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+        ->orderBy('l.data,l.ora', 'ASC')
         ->setParameters(['docente' => $docente, 'alunno' => $cattedra->getAlunno(),
-          'classe' => $cattedra->getClasse(), 'materia' => $mat['id'],
-          'inizio' => $dati_periodi[$periodo]['inizio'], 'fine' => $dati_periodi[$periodo]['fine'],
+          'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine'],
           'sede' => $cattedra->getClasse()->getSede()])
         ->getQuery()
-        ->getSingleScalarResult();
-      $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
-      if ($ore > 0) {
-        // legge lezioni del periodo
-        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
-          ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita,fs.argomento AS argomento_sos,fs.attivita AS attivita_sos')
-          ->join('App\Entity\FirmaSostegno', 'fs', 'WITH', 'l.id=fs.lezione AND fs.docente=:docente AND fs.alunno=:alunno')
-          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
-          ->join('so.orario', 'o')
-          ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-          ->orderBy('l.data,l.ora', 'ASC')
-          ->setParameters(['docente' => $docente, 'alunno' => $cattedra->getAlunno(),
-            'classe' => $cattedra->getClasse(), 'materia' => $mat['id'],
-            'inizio' => $dati_periodi[$periodo]['inizio'], 'fine' => $dati_periodi[$periodo]['fine'],
-            'sede' => $cattedra->getClasse()->getSede()])
-          ->getQuery()
-          ->getArrayResult();
+        ->getArrayResult();
+      // legge assenze
+      $data_prec = null;
+      $giornilezione = array();
+      foreach ($lezioni as $l) {
+        if (!$data_prec || $l['data'] != $data_prec) {
+          // cambio di data
+          $giornilezione[] = $l['data'];
+          $mese = (int) $l['data']->format('m');
+          $giorno = (int) $l['data']->format('d');
+          $dati['lezioni'][$mese][$giorno]['durata'] = 0;
+          // controlla se alunno in classe per data
+          $lista = $this->regUtil->alunniInData($l['data'], $cattedra->getClasse());
+          if (in_array($cattedra->getAlunno()->getId(), $lista)) {
+            $dati['lezioni'][$mese][$giorno]['classe'] = 1;
+          }
+        }
+        // aggiorna durata lezioni
+        $dati['lezioni'][$mese][$giorno]['durata'] += $l['durata'];
         // legge assenze
-        $data_prec = null;
-        $giornilezione = array();
-        foreach ($lezioni as $l) {
-          if (!$data_prec || $l['data'] != $data_prec) {
-            // cambio di data
-            $giornilezione[] = $l['data'];
-            $mese = (int) $l['data']->format('m');
-            $giorno = (int) $l['data']->format('d');
-            $dati['lezioni'][$mese][$giorno]['durata'] = 0;
-            // controlla se alunno in classe per data
-            $lista = $this->regUtil->alunniInData($l['data'], $cattedra->getClasse());
-            if (in_array($cattedra->getAlunno()->getId(), $lista)) {
-              $dati['lezioni'][$mese][$giorno]['classe'] = 1;
-            }
-          }
-          // aggiorna durata lezioni
-          $dati['lezioni'][$mese][$giorno]['durata'] += $l['durata'];
-          // legge assenze
-          $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
-            ->select('SUM(al.ore)')
-            ->where('al.lezione=:lezione AND al.alunno=:alunno')
-            ->setParameters(['lezione' => $l['id'], 'alunno' => $cattedra->getAlunno()])
-            ->getQuery()
-            ->getSingleScalarResult();
-          // somma ore di assenza per alunno
-          if ($assenze > 0) {
-            if (isset($dati['lezioni'][$mese][$giorno]['assenze'])) {
-              $dati['lezioni'][$mese][$giorno]['assenze'] += $assenze;
-            } else {
-              $dati['lezioni'][$mese][$giorno]['assenze'] = $assenze;
-            }
-          }
-          // memorizza data precedente
-          $data_prec = $l['data'];
-        }
-        // imposta lezioni per pagina
-        $numerotbl_lezioni = count($giornilezione);
-        $lezperpag = 20;
-        $colfinali = 2; // solo assenze
-        $colresidue = ($numerotbl_lezioni + $colfinali) % $lezperpag;
-        $numeropagine = (int)(($numerotbl_lezioni + $colfinali) / $lezperpag);
-        if ($colresidue > 0) {
-          $numeropagine++;
-        }
-        // cicla per ogni pagina
-        for ($np = 0; $np < $numeropagine; $np++) {
-          if ($np == 0) {
-            // prima pagina
-            $this->intestazionePagina('Lezioni della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
-            $html = '<br>Totale ore di lezione: '.$ore;
-            $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
-            $numero_tabelle = 1;
-          } elseif ($numero_tabelle == 5) {
-            // cambio pagina
-            $this->intestazionePagina('Lezioni della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
-            $numero_tabelle = 1;
+        $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+          ->select('SUM(al.ore)')
+          ->where('al.lezione=:lezione AND al.alunno=:alunno')
+          ->setParameters(['lezione' => $l['id'], 'alunno' => $cattedra->getAlunno()])
+          ->getQuery()
+          ->getSingleScalarResult();
+        // somma ore di assenza per alunno
+        if ($assenze > 0) {
+          if (isset($dati['lezioni'][$mese][$giorno]['assenze'])) {
+            $dati['lezioni'][$mese][$giorno]['assenze'] += $assenze;
           } else {
-            // nuova tabella nella stessa pagina
-            $numero_tabelle++;
-            $html = '<br><br>';
-            $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
-          }
-          // intestazione tabella
-          $html_col = '';
-          $html_inizio = '<table border="1"><tr><td style="width:75mm"><b>Alunno</b></td>';
-          $html_inizio_rs = '<table border="1"><tr><td style="width:75mm" rowspan="2"><b>Alunno</b></td>';
-          $html = '';
-          for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
-            $g = $giornilezione[$ng];
-            $gs = $nomesett[$g->format('w')];
-            $gg = $g->format('j');
-            $gm = $nomemesi[$g->format('n')];
-            $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
-            $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
-            $html_col .= '<td><i>'.$strore.'</i></td>';
-          }
-          if ($np == $numeropagine - 1) {
-            $rspan = ($html_col == '' ? '' : ' rowspan="2"');
-            $html .= '<td style="width:20mm"'.$rspan.'><b>Totale<br>ore di<br>assenza</b></td>';
-          }
-          $html = ($html_col == '' ? $html_inizio : $html_inizio_rs).$html.'</tr>'.
-            ($html_col == '' ? '' : '<tr>'.$html_col.'</tr>');
-          // dati alunno
-          $html .= '<tr nobr="true" style="font-size:9pt">'.
-            '<td align="left"> '.
-            ((!$cattedra->getAlunno()->getClasse() || $cattedra->getAlunno()->getClasse()->getId() != $cattedra->getClasse()->getId()) ? '* ' : '').
-            $alunno_s.'</td>';
-          // assenze
-          for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
-            $g = $giornilezione[$ng];
-            $gg = $g->format('j');
-            $gm = $g->format('n');
-            if (isset($dati['lezioni'][$gm][$gg]['classe'])) {
-              // alunno inserito in classe
-              $html .= '<td>';
-              // assenze
-              if (isset($dati['lezioni'][$gm][$gg]['assenze'])) {
-                $ass = $dati['lezioni'][$gm][$gg]['assenze'];
-                $html .= str_repeat('A', intval($ass)).(($ass - intval($ass)) > 0 ? 'a' : '');
-                $dati['assenze'] += $ass;
-              }
-              $html .= '</td>';
-            } else {
-              // alunno non inserito in classe
-              $html .= '<td style="background-color:#CCCCCC">&nbsp;</td>';
-            }
-          }
-          if ($np == $numeropagine - 1) {
-            // tot. assenze
-            $html .= '<td>'.rtrim(rtrim(number_format($dati['assenze'], 1, ',', ''), '0'), ',').'</td>';
-          }
-          $html .= '</tr>';
-          // fine tabella
-          $html .= '</table>';
-          $this->pdf->getHandler()->writeHTML($html, false, false, false, false, 'C');
-          if ($np == $numeropagine -1) {
-            // ultima pagina
-            $html = '<b>A</b> = assenza di un\'ora; <b>a</b> = assenza di mezzora';
-            if (!$cattedra->getAlunno()->getClasse() || $cattedra->getAlunno()->getClasse()->getId() != $cattedra->getClasse()->getId()) {
-              $html .= '<br><b>*</b> Alunno ritirato/trasferito/frequenta l\'anno all\'estero';
-            }
-            $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
+            $dati['lezioni'][$mese][$giorno]['assenze'] = $assenze;
           }
         }
-        // legge argomenti e attività
-        $data_prec = null;
-        $num_mat = 0;
-        $num_sos = 0;
-        foreach ($lezioni as $l) {
-          $data = $l['data']->format('d/m/Y');
-          if ($data_prec && $data != $data_prec) {
-            if ($num_mat == 0) {
-              // nessun argomento/attività della materia in data precedente
-              $dati['argomenti'][$data_prec]['materia'][0] = '';
+        // memorizza data precedente
+        $data_prec = $l['data'];
+      }
+      // imposta lezioni per pagina
+      $numerotbl_lezioni = count($giornilezione);
+      $lezperpag = 20;
+      $colfinali = 2; // solo assenze
+      $colresidue = ($numerotbl_lezioni + $colfinali) % $lezperpag;
+      $numeropagine = (int)(($numerotbl_lezioni + $colfinali) / $lezperpag);
+      if ($colresidue > 0) {
+        $numeropagine++;
+      }
+      // cicla per ogni pagina
+      for ($np = 0; $np < $numeropagine; $np++) {
+        if ($np == 0) {
+          // prima pagina
+          $this->intestazionePagina('Lezioni della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
+          $html = '<br>Totale ore di lezione: '.$ore;
+          $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
+          $numero_tabelle = 1;
+        } elseif ($numero_tabelle == 4) {
+          // cambio pagina
+          $this->intestazionePagina('Lezioni della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
+          $numero_tabelle = 1;
+        } else {
+          // nuova tabella nella stessa pagina
+          $numero_tabelle++;
+          $html = '<br><br>';
+          $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
+        }
+        // intestazione tabella
+        $html_col = '';
+        $html_inizio = '<table border="1"><tr><td style="width:75mm"><b>Alunno</b></td>';
+        $html_inizio_rs = '<table border="1"><tr><td style="width:75mm" rowspan="2"><b>Alunno</b></td>';
+        $html = '';
+        for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
+          $g = $giornilezione[$ng];
+          $gs = $nomesett[$g->format('w')];
+          $gg = $g->format('j');
+          $gm = $nomemesi[$g->format('n')];
+          $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
+          $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
+          $html_col .= '<td><i>'.$strore.'</i></td>';
+        }
+        if ($np == $numeropagine - 1) {
+          $rspan = ($html_col == '' ? '' : ' rowspan="2"');
+          $html .= '<td style="width:20mm"'.$rspan.'><b>Totale<br>ore di<br>assenza</b></td>';
+        }
+        $html = ($html_col == '' ? $html_inizio : $html_inizio_rs).$html.'</tr>'.
+          ($html_col == '' ? '' : '<tr>'.$html_col.'</tr>');
+        // dati alunno
+        $html .= '<tr nobr="true" style="font-size:9pt">'.
+          '<td align="left"> '.
+          ((!$cattedra->getAlunno()->getClasse() || $cattedra->getAlunno()->getClasse()->getId() != $cattedra->getClasse()->getId()) ? '* ' : '').
+          $alunno_s.'</td>';
+        // assenze
+        for ($ng = $np * $lezperpag; $ng < min(($np + 1) * $lezperpag, $numerotbl_lezioni); $ng++) {
+          $g = $giornilezione[$ng];
+          $gg = $g->format('j');
+          $gm = $g->format('n');
+          if (isset($dati['lezioni'][$gm][$gg]['classe'])) {
+            // alunno inserito in classe
+            $html .= '<td>';
+            // assenze
+            if (isset($dati['lezioni'][$gm][$gg]['assenze'])) {
+              $ass = $dati['lezioni'][$gm][$gg]['assenze'];
+              $html .= str_repeat('A', intval($ass)).(($ass - intval($ass)) > 0 ? 'a' : '');
+              $dati['assenze'] += $ass;
             }
-            if ($num_sos == 0) {
-              // nessuna argomento/attività di sostegno in data precedente
-              $dati['argomenti'][$data_prec]['sostegno'][0] = '';
-            }
-            // fa ripartire contatori
-            $num_mat = 0;
-            $num_sos = 0;
+            $html .= '</td>';
+          } else {
+            // alunno non inserito in classe
+            $html .= '<td style="background-color:#CCCCCC">&nbsp;</td>';
           }
-          // materia
-          $testo1 = $this->ripulisceTesto($l['argomento']);
-          $testo2 = $this->ripulisceTesto($l['attivita']);
-          $testo = $testo1.(($testo1 != '' && $testo2 != '') ? ' - ' : '').$testo2;
-          if ($testo != '' && ($num_mat == 0 ||
-              strcasecmp($testo, $dati['argomenti'][$data]['materia'][$num_mat - 1]) != 0)) {
-            // evita ripetizioni identiche degli argomenti
-            $dati['argomenti'][$data]['materia'][$num_mat] = $testo;
-            $num_mat++;
+        }
+        if ($np == $numeropagine - 1) {
+          // tot. assenze
+          $html .= '<td>'.rtrim(rtrim(number_format($dati['assenze'], 1, ',', ''), '0'), ',').'</td>';
+        }
+        $html .= '</tr>';
+        // fine tabella
+        $html .= '</table>';
+        $this->pdf->getHandler()->writeHTML($html, false, false, false, false, 'C');
+        if ($np == $numeropagine -1) {
+          // ultima pagina
+          $html = '<b>A</b> = assenza di un\'ora; <b>a</b> = assenza di mezzora';
+          if (!$cattedra->getAlunno()->getClasse() || $cattedra->getAlunno()->getClasse()->getId() != $cattedra->getClasse()->getId()) {
+            $html .= '<br><b>*</b> Alunno ritirato/trasferito/frequenta l\'anno all\'estero';
           }
-          // sostegno
-          $testo1 = $this->ripulisceTesto($l['argomento_sos']);
-          $testo2 = $this->ripulisceTesto($l['attivita_sos']);
-          $testo = $testo1.(($testo1 != '' && $testo2 != '') ? ' - ' : '').$testo2;
-          if ($testo != '' && ($num_sos == 0 ||
-              strcasecmp($testo, $dati['argomenti'][$data]['sostegno'][$num_sos - 1]) != 0)) {
-            // evita ripetizioni identiche degli argomenti
-            $dati['argomenti'][$data]['sostegno'][$num_sos] = $testo;
-            $num_sos++;
-          }
-          // memorizza data attuale
-          $data_prec = $data;
+          $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
         }
-        if ($data_prec && $num_mat == 0) {
-          // nessun argomento/attività della materia in data precedente
-          $dati['argomenti'][$data_prec]['materia'][0] = '';
-        }
-        if ($data_prec && $num_sos == 0) {
-          // nessuna argomento/attività di sostegno in data precedente
-          $dati['argomenti'][$data_prec]['sostegno'][0] = '';
-        }
-        // scrive argomenti e attività
-        $this->intestazionePagina('Argomenti e attivit&agrave; della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
-        $html = '<table border="1" style="left-padding:2mm">
-          <tr>
-            <td style="width:10%"><b>Data</b></td>
-            <td style="width:45%"><b>Argomenti/Attivit&agrave; della materia</b></td>
-            <td style="width:45%"><b>Argomenti/Attivit&agrave; di sostegno</b></td>
-          </tr>';
-        foreach ($dati['argomenti'] as $d=>$arg) {
+      }
+      // legge argomenti e attività
+      foreach ($lezioni as $l) {
+        $data = $l['data']->format('d/m/Y');
+        // materia
+        $testo1 = $this->ripulisceTesto($l['argomento']);
+        $testo2 = $this->ripulisceTesto($l['attivita']);
+        $testo = $testo1.(($testo1 != '' && $testo2 != '') ? ' - ' : '').$testo2;
+        $dati['argomenti'][$data][$l['materia']]['materia'][] = $testo;
+        // sostegno
+        $testo1 = $this->ripulisceTesto($l['argomento_sos']);
+        $testo2 = $this->ripulisceTesto($l['attivita_sos']);
+        $testo = $testo1.(($testo1 != '' && $testo2 != '') ? ' - ' : '').$testo2;
+        $dati['argomenti'][$data][$l['materia']]['sostegno'][] = $testo;
+      }
+      // scrive argomenti e attività
+      $this->intestazionePagina('Argomenti e attivit&agrave; della classe', $docente_s, $classe_s, $corso_s, $materia_s, $annoscolastico);
+      $html = '<table border="1" style="left-padding:2mm">
+        <tr>
+          <td style="width:8%"><b>Data</b></td>
+          <td style="width:12%"><b>Materia</b></td>
+          <td style="width:40%"><b>Argomenti/Attivit&agrave; della materia</b></td>
+          <td style="width:40%"><b>Argomenti/Attivit&agrave; di sostegno</b></td>
+        </tr>';
+      foreach ($dati['argomenti'] as $d=>$mat) {
+        foreach ($mat as $m=>$arg) {
           $html .= '<tr nobr="true"><td>'.$d.'</td>'.
-              '<td align="left">'.implode('<br>', $arg['materia']).'</td>'.
-              '<td align="left">'.implode('<br>', $arg['sostegno']).'</td>'.
+              '<td align="left">'.$m.'</td>'.
+              '<td align="left">'.implode('<br>', $this->eliminaRipetizioni($arg['materia'])).'</td>'.
+              '<td align="left">'.implode('<br>', $this->eliminaRipetizioni($arg['sostegno'])).'</td>'.
             '</tr>';
         }
-        $html .= '</table>';
-        $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
       }
+      $html .= '</table>';
+      $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     }
     // legge osservazioni sugli alunni
     $osservazioni = $this->em->getRepository('App\Entity\OsservazioneAlunno')->createQueryBuilder('o')
@@ -1160,8 +1138,8 @@ class ArchiviazioneUtil {
       ->join('o.alunno', 'a')
       ->where('o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data,a.cognome,a.nome,a.dataNascita', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $dati_periodi[$periodo]['inizio'],
-        'fine' => $dati_periodi[$periodo]['fine']])
+      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
+        'fine' => $periodo['fine']])
       ->getQuery()
       ->getArrayResult();
     foreach ($osservazioni as $o) {
@@ -1196,8 +1174,8 @@ class ArchiviazioneUtil {
       ->select('o.data,o.testo')
       ->where('NOT (o INSTANCE OF App\Entity\OsservazioneAlunno) AND o.cattedra=:cattedra AND o.data BETWEEN :inizio AND :fine')
       ->orderBy('o.data', 'ASC')
-      ->setParameters(['cattedra' => $cattedra, 'inizio' => $dati_periodi[$periodo]['inizio'],
-        'fine' => $dati_periodi[$periodo]['fine']])
+      ->setParameters(['cattedra' => $cattedra, 'inizio' => $periodo['inizio'],
+        'fine' => $periodo['fine']])
       ->getQuery()
       ->getArrayResult();
     foreach ($personali as $p) {
@@ -1229,7 +1207,7 @@ class ArchiviazioneUtil {
    * Crea la pagina iniziale del registro di classe
    *
    * @param Classe $classe Classe di cui creare il registro
-   * @param int $periodo Periodo di riferimento
+   * @param array $periodo Informazioni sul periodo di riferimento
    */
   public function copertinaRegistroClasse(Classe $classe, $periodo) {
     // nuova pagina
@@ -1242,8 +1220,7 @@ class ArchiviazioneUtil {
       </div>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
-    $dati_periodi = $this->regUtil->infoPeriodi();
-    $periodo_s = $dati_periodi[$periodo]['nome'];
+    $periodo_s = $periodo['nome'];
     $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1262,12 +1239,11 @@ class ArchiviazioneUtil {
    * Scrive il registro di classe
    *
    * @param Classe $classe Classe di cui creare il registro
-   * @param int $periodo Periodo di riferimento
+   * @param array $periodo Informazioni sul periodo di riferimento
    */
   public function scriveRegistroClasse(Classe $classe, $periodo) {
     // inizializza dati
-    $dati_periodi = $this->regUtil->infoPeriodi();
-    $periodo_s = $dati_periodi[$periodo]['nome'];
+    $periodo_s = $periodo['nome'];
     $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
@@ -1287,8 +1263,8 @@ class ArchiviazioneUtil {
       $giorni_festivi[] = $f['data']->format('Y-m-d');
     }
     // elenco giorni
-    $data = \DateTime::createFromFormat('Y-m-d H:i', $dati_periodi[$periodo]['inizio'].' 00:00');
-    $data_fine = \DateTime::createFromFormat('Y-m-d H:i', $dati_periodi[$periodo]['fine'].' 00:00');
+    $data = \DateTime::createFromFormat('Y-m-d H:i', $periodo['inizio'].' 00:00');
+    $data_fine = \DateTime::createFromFormat('Y-m-d H:i', $periodo['fine'].' 00:00');
     for ( ; $data <= $data_fine; $data->modify('+1 day')) {
       $dati['lezioni'] = array();
       $dati['note'] = array();
@@ -1549,15 +1525,16 @@ class ArchiviazioneUtil {
         $alunni = array();
         if ($a->getAvviso() && $a->getVisibile()) {
           // legge alunni destinatari
-          $ann_alunni = $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
-            ->join('au.utente', 'u')
-            ->where('au.avviso=:avviso AND (u INSTANCE OF App\Entity\Genitore)')
-            ->setParameters(['avviso' => $a->getAvviso()])
-            ->orderBy('u.cognome,u.nome', 'ASC')
+          $ann_alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+            ->join('App\Entity\Genitore', 'g', 'WITH', 'g.alunno=a.id')
+            ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.utente=g.id')
+            ->where('au.avviso=:avviso AND a.id IN (:lista)')
+            ->setParameters(['avviso' => $a->getAvviso(), 'lista' => $lista])
+            ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
             ->getQuery()
             ->getResult();
-          foreach ($ann_alunni as $ann) {
-            $alunni[] = $ann->getUtente()->getCognome().' '.$ann->getUtente()->getNome();
+          foreach ($ann_alunni as $alu) {
+            $alunni[] = $alu->getCognome().' '.$alu->getNome();
           }
         }
         $dati['annotazioni'][] = array(
@@ -1639,6 +1616,7 @@ class ArchiviazioneUtil {
       $periodo = $scrut->getPeriodo();
       switch ($periodo) {
         case 'P': // scrutinio primo periodo
+        case 'S': // scrutinio secondo periodo (se trimestri)
           // riepilogo voti
           if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
             // errore
@@ -1789,7 +1767,8 @@ class ArchiviazioneUtil {
             $carenze_num.' ('.$carenze_nuovi.' NUOVI)';
           break;
         case 'G': // esame sospesi
-        case 'X': // scrutinio rimandato
+        case 'R': // scrutinio rinviato
+        case 'X': // scrutinio rinviato da prec. A.S.
           // riepilogo voti
           if (!($file = $this->pag->riepilogoVoti($classe, $periodo))) {
             // errore
@@ -1849,6 +1828,35 @@ class ArchiviazioneUtil {
   }
 
   /**
+   * Restituisce un insieme di righe di testo senza elementi ripetuti
+   *
+   * @param array $testo Righe di testo da controllare
+   * @return array Righe di testo senza ripetizioni
+   */
+  public function eliminaRipetizioni($testo) {
+    // no duplicati se solo una riga
+    if (count($testo) < 2) {
+      // solo una riga
+      return $testo;
+    }
+    // ordina righe
+    sort($testo);
+    // elimina duplicati
+    $tmp = array();
+    $nuovoTesto = array_filter($testo, function($riga) use (&$tmp) {
+        if (empty($riga) || in_array(strtolower($riga), $tmp)) {
+          // riga già presente
+          return false;
+        }
+        // aggiunge riga testo minuscolo
+        $tmp[] = strtolower($riga);
+        return true;
+      });
+    // restituisce il nuovo testo
+    return count($nuovoTesto) == 0 ? [''] : $nuovoTesto;
+  }
+
+  /**
    * Crea l'archivio delle circolari
    *
    */
@@ -1862,8 +1870,9 @@ class ArchiviazioneUtil {
       // crea directory
       $fs->mkdir($percorso, 0775);
     }
-    // legge circolari
-    $circolari = $this->em->getRepository('App\Entity\Circolare')->findBy(['pubblicata' => true],
+    // legge circolari dell'A.S.
+    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+    $circolari = $this->em->getRepository('App\Entity\Circolare')->findBy(['pubblicata' => true, 'anno' => $anno],
       ['numero' => 'ASC']);
     $numCircolari = 0;
     foreach ($circolari as $circolare) {

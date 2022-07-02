@@ -1425,21 +1425,26 @@ class RegistroUtil {
     $dati[1]['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo1_nome');
     $dati[1]['inizio'] = $this->session->get('/CONFIG/SCUOLA/anno_inizio');
     $dati[1]['fine'] = $this->session->get('/CONFIG/SCUOLA/periodo1_fine');
+    $dati[1]['scrutinio'] = 'P';
     // secondo periodo
     $dati[2]['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo2_nome');
     $data = \DateTime::createFromFormat('Y-m-d H:i', $dati[1]['fine'].' 00:00');
     $data->modify('+1 day');
     $dati[2]['inizio'] = $data->format('Y-m-d');
     $dati[2]['fine'] = $this->session->get('/CONFIG/SCUOLA/periodo2_fine');
+    $dati[2]['scrutinio'] = 'F';
     // terzo periodo
     if ($this->session->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
       $dati[3]['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo3_nome');
       $data = \DateTime::createFromFormat('Y-m-d H:i', $dati[2]['fine'].' 00:00');
       $data->modify('+1 day');
       $dati[3]['inizio'] = $data->format('Y-m-d');
+      $dati[2]['scrutinio'] = 'S';
+      $dati[3]['scrutinio'] = 'F';
     } else {
       $dati[3]['nome'] = '';
       $dati[3]['inizio'] = $this->session->get('/CONFIG/SCUOLA/anno_fine');
+      $dati[3]['scrutinio'] = '';
     }
     $dati[3]['fine'] = $this->session->get('/CONFIG/SCUOLA/anno_fine');
     // restituisce dati

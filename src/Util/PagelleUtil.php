@@ -2481,6 +2481,8 @@ class PagelleUtil {
       foreach ($alunni as $alu) {
         $dati['ammessi'][$alu['id']] = $alu;
       }
+      // anno scolastico
+      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // scrutinio
       $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
