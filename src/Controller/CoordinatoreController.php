@@ -16,7 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,6 +42,8 @@ use App\Entity\AvvisoClasse;
 use App\Entity\AvvisoUtente;
 use App\Entity\Notifica;
 use App\Entity\Annotazione;
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
 use App\Form\MessageType;
 use App\Form\AvvisoType;
 
@@ -98,7 +100,7 @@ class CoordinatoreController extends AbstractController {
    */
   public function classeAction(EntityManagerInterface $em, SessionInterface $session) {
     // lista classi coordinatore
-    $classi = $em->getRepository('App:Classe')->createQueryBuilder('c')
+    $classi = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->where('c.id IN (:lista)')
       ->orderBy('c.sede,c.anno,c.sezione', 'ASC')
       ->setParameters(['lista' => explode(',', $session->get('/APP/DOCENTE/coordinatore'))])
@@ -109,7 +111,7 @@ class CoordinatoreController extends AbstractController {
     if ($this->getUser() instanceOf Staff) {
       if ($this->getUser()->getSede()) {
         // solo classi della sede
-        $lista = $em->getRepository('App:Classe')->createQueryBuilder('c')
+        $lista = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
           ->where('c.sede=:sede')
           ->orderBy('c.sede,c.sezione,c.anno', 'ASC')
           ->setParameters(['sede' => $this->getUser()->getSede()])
@@ -117,7 +119,7 @@ class CoordinatoreController extends AbstractController {
           ->getResult();
       } else {
         // tutte le classi
-        $lista = $em->getRepository('App:Classe')->createQueryBuilder('c')
+        $lista = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
           ->orderBy('c.sede,c.sezione,c.anno', 'ASC')
           ->getQuery()
           ->getResult();
@@ -165,7 +167,7 @@ class CoordinatoreController extends AbstractController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -220,7 +222,7 @@ class CoordinatoreController extends AbstractController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -275,7 +277,7 @@ class CoordinatoreController extends AbstractController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -331,7 +333,7 @@ class CoordinatoreController extends AbstractController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -384,7 +386,7 @@ class CoordinatoreController extends AbstractController {
     $info['condotta']['1'] = [40 => 'NC', 41 => 'Scorretta', 42 => 'Non sempre adeguata', 43 => 'Corretta'];
     $info['giudizi']['F']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
     // controllo alunno
-    $alunno = $em->getRepository('App:Alunno')->find($alunno);
+    $alunno = $em->getRepository('App\Entity\Alunno')->find($alunno);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -463,7 +465,7 @@ class CoordinatoreController extends AbstractController {
     // inizializza variabili
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -514,7 +516,7 @@ class CoordinatoreController extends AbstractController {
     // inizializza variabili
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -565,7 +567,7 @@ class CoordinatoreController extends AbstractController {
     // inizializza variabili
     $dati = null;
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -637,7 +639,7 @@ class CoordinatoreController extends AbstractController {
     }
     // controllo classe
     if ($classe > 0) {
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -691,7 +693,7 @@ class CoordinatoreController extends AbstractController {
                                    TranslatorInterface $trans, BachecaUtil $bac, RegistroUtil $reg,
                                    LogHandler $dblogger, $classe, $id) {
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -709,7 +711,7 @@ class CoordinatoreController extends AbstractController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -725,7 +727,7 @@ class CoordinatoreController extends AbstractController {
         ->addSede($classe->getSede());
       $em->persist($avviso);
       // imposta classe tramite cattedra
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);
       $avviso->setCattedra($cattedra);
     }
     // imposta autore dell'avviso
@@ -738,7 +740,7 @@ class CoordinatoreController extends AbstractController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted()) {
       // controllo errori
@@ -754,7 +756,7 @@ class CoordinatoreController extends AbstractController {
       $lista = array();
       $errore = false;
       if ($avviso->getFiltroTipo() == 'U') {
-        $lista = $em->getRepository('App:Alunno')
+        $lista = $em->getRepository('App\Entity\Alunno')
           ->controllaAlunni([$classe->getSede()], $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -784,13 +786,13 @@ class CoordinatoreController extends AbstractController {
         // gestione destinatari
         if ($id) {
           // cancella destinatari precedenti e dati lettura
-          $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+          $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
             ->delete()
             ->where('au.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
             ->getQuery()
             ->execute();
-          $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+          $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
             ->delete()
             ->where('ac.avviso=:avviso')
             ->setParameters(['avviso' => $avviso])
@@ -810,14 +812,14 @@ class CoordinatoreController extends AbstractController {
         foreach ($dest['utenti'] as $u) {
           $obj = (new AvvisoUtente())
             ->setAvviso($avviso)
-            ->setUtente($em->getReference('App:Utente', $u));
+            ->setUtente($em->getReference('App\Entity\Utente', $u));
           $em->persist($obj);
         }
         // imposta classe
         foreach ($dest['classi'] as $c) {
           $obj = (new AvvisoClasse())
             ->setAvviso($avviso)
-            ->setClasse($em->getReference('App:Classe', $c));
+            ->setClasse($em->getReference('App\Entity\Classe', $c));
           $em->persist($obj);
         }
         // annotazione
@@ -910,13 +912,13 @@ class CoordinatoreController extends AbstractController {
     // inizializza
     $dati = null;
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($id);
+    $avviso = $em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -965,13 +967,13 @@ class CoordinatoreController extends AbstractController {
   public function avvisoDeleteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
                                      LogHandler $dblogger, BachecaUtil $bac, RegistroUtil $reg, $classe, $id) {
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
+    $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'O']);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo classe
-    $classe = $em->getRepository('App:Classe')->find($classe);
+    $classe = $em->getRepository('App\Entity\Classe')->find($classe);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1004,13 +1006,13 @@ class CoordinatoreController extends AbstractController {
       $em->remove($a);
     }
     // cancella destinatari
-    $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+    $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
       ->getQuery()
       ->execute();
-    $em->getRepository('App:AvvisoClasse')->createQueryBuilder('ac')
+    $em->getRepository('App\Entity\AvvisoClasse')->createQueryBuilder('ac')
       ->delete()
       ->where('ac.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])

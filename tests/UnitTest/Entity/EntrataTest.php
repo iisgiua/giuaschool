@@ -56,8 +56,8 @@ class EntrataTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertNotEmpty($existent, 'Oggetto esistente');
     // crea nuovi oggetti
-    $alunni = $this->em->getRepository('App:Alunno')->findBy([]);
-    $docenti = $this->em->getRepository('App:Docente')->findBy([]);
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->findBy([]);
+    $docenti = $this->em->getRepository('App\Entity\Docente')->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       $alunno = $this->faker->unique()->randomElement($alunni);
@@ -161,14 +161,14 @@ class EntrataTest extends DatabaseTestCase {
     $obj_alunno->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunno - NOT BLANK');
-    $existent->setAlunno($this->em->getRepository('App:Alunno')->findOneBy([]));
+    $existent->setAlunno($this->em->getRepository('App\Entity\Alunno')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::alunno - VALID');
     // docente
     $obj_docente = $this->getPrivateProperty($this->entity, 'docente');
     $obj_docente->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::docente - NOT BLANK');
-    $existent->setDocente($this->em->getRepository('App:Docente')->findOneBy([]));
+    $existent->setDocente($this->em->getRepository('App\Entity\Docente')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::docente - VALID');
     // unique - data-alunno
     $this->em->flush();

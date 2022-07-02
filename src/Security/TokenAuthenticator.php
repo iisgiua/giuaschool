@@ -28,6 +28,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use App\Entity\Docente;
+use App\Entity\Configurazione;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 
@@ -162,7 +163,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
    */
   public function getUser($credentials, UserProviderInterface $userProvider) {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App:Docente')->findOneBy(array(
+    $user = $this->em->getRepository('App\Entity\Docente')->findOneBy(array(
       'chiave1' => $credentials['token1'],
       'chiave2' => $credentials['token2'],
       'chiave3' => $credentials['token3']));
@@ -193,8 +194,8 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
   public function checkCredentials($credentials, UserInterface $user) {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
+    $manutenzioneInizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
+    $manutenzioneFine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine');
     if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di accesso da token durante la modalità manutenzione.', array(
@@ -212,7 +213,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // legge configurazione
-    $ip_conf = $this->em->getRepository('App:Configurazione')->findOneByParametro('ip_scuola');
+    $ip_conf = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('ip_scuola');
     $ip = ($ip_conf === null ? array() : explode(',', $ip_conf->getValore()));
     // controlla IP
     if (!in_array($credentials['ip'], $ip)) {
@@ -250,8 +251,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
     $this->dblogger->logAzione('ACCESSO', 'Login', array(
       'Login' => 'token',
       'Username' => $token->getUsername(),
-      'Ruolo' => $token->getRoles()[0]->getRole()
-      ));
+      'Ruolo' => $token->getUser()->getRoles()[0]));
     // carica configurazione
     $this->config->carica();
     // redirect alla pagina da visualizzare

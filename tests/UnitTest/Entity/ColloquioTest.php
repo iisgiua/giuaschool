@@ -66,8 +66,8 @@ class ColloquioTest extends DatabaseTestCase {
     $extra[0] = [];
     $extra[1] = [$this->faker->dateTimeBetween('now', '+1 month')];
     $extra[2] = [$this->faker->dateTimeBetween('now', '+3 month')];
-    $docenti = $this->em->getRepository('App:Docente')->findBy([]);
-    $orari = $this->em->getRepository('App:Orario')->findBy([]);
+    $docenti = $this->em->getRepository('App\Entity\Docente')->findBy([]);
+    $orari = $this->em->getRepository('App\Entity\Orario')->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
@@ -189,7 +189,7 @@ class ColloquioTest extends DatabaseTestCase {
     $obj_docente->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::docente - NOT BLANK');
-    $existent->setDocente($this->em->getRepository('App:Docente')->findOneBy([]));
+    $existent->setDocente($this->em->getRepository('App\Entity\Docente')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::docente - VALID');
     // giorno
     $existent->setGiorno(null);

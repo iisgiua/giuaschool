@@ -18,7 +18,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -171,14 +171,14 @@ class NotificaInviaCommand extends Command {
     // inizializza
     $num = 0;
     // messaggi con priorità
-    $notifiche1 = $this->em->getRepository('App:NotificaInvio')->createQueryBuilder('n')
+    $notifiche1 = $this->em->getRepository('App\Entity\NotificaInvio')->createQueryBuilder('n')
       ->where('n.stato=:priorita')
       ->orderBy('n.modificato', 'ASC')
       ->setParameters(['priorita' => 'P'])
       ->getQuery()
       ->getResult();
     // messaggi in attesa
-    $notifiche2 = $this->em->getRepository('App:NotificaInvio')->createQueryBuilder('n')
+    $notifiche2 = $this->em->getRepository('App\Entity\NotificaInvio')->createQueryBuilder('n')
       ->where('n.stato=:attesa')
       ->orderBy('n.modificato', 'ASC')
       ->setParameters(['attesa' => 'A'])

@@ -14,7 +14,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Genitore;
 use App\Entity\Alunno;
 use App\Entity\Docente;
+use App\Entity\App;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
 
@@ -368,7 +369,7 @@ class UtentiController extends AbstractController {
       $notifica = array();
       if ($form->get('abilita')->getData() === true) {
         // abilita
-        $app = $em->getRepository('App:App')->findOneBy(['notifica' => 'E',
+        $app = $em->getRepository('App\Entity\App')->findOneBy(['notifica' => 'E',
           'abilitati' => 'DT', 'attiva' => 1]);
         if ($app) {
           // memorizza servizio invio email

@@ -15,6 +15,7 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use App\Entity\MenuOpzione;
 
 
 /**
@@ -58,7 +59,7 @@ class BaseController extends AbstractController {
     $session = $this->get('session');
     list($azione_principale) = explode('_', $azione);
     // legge breadcrumb
-    $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
+    $breadcrumb = $this->em->getRepository('App\Entity\MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
       $this->getUser(), $session);
     // restituisce vista
     $tema = $session->get('/APP/APP/tema', '');

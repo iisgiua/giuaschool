@@ -19,8 +19,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-Use App\Entity\Staff;
-Use App\Entity\Classe;
+use App\Entity\Staff;
+use App\Entity\Classe;
+use App\Entity\Alunno;
+use App\Entity\Docente;
 
 
 /**
@@ -57,7 +59,7 @@ class AjaxController extends AbstractController {
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $docenti = $em->getRepository('App:Docente')->cercaSede($search, $pagina, 20);
+    $docenti = $em->getRepository('App\Entity\Docente')->cercaSede($search, $pagina, 20);
     foreach ($docenti as $doc) {
       $dati['lista'][] = array(
         'id' => $doc->getId(),
@@ -112,7 +114,7 @@ class AjaxController extends AbstractController {
       $search['sede'] = explode('-', substr(substr($sede, 1), 0, -1));
     }
     // esegue la ricerca
-    $alunni = $em->getRepository('App:Alunno')->iscritti($search, $pagina, 20);
+    $alunni = $em->getRepository('App\Entity\Alunno')->iscritti($search, $pagina, 20);
     foreach ($alunni as $alu) {
       $dati['lista'][] = array(
         'id' => $alu->getId(),
@@ -187,7 +189,7 @@ class AjaxController extends AbstractController {
    */
   public function classeAjaxAction(EntityManagerInterface $em, Classe $classe) {
     // legge alunni
-    $dati = $em->getRepository('App:Alunno')->classe($classe->getId());
+    $dati = $em->getRepository('App\Entity\Alunno')->classe($classe->getId());
     // restituisce dati
     return new JsonResponse($dati);
   }

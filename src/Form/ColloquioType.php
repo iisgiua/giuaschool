@@ -45,7 +45,7 @@ class ColloquioType extends AbstractType {
       $builder
         ->add('sede', EntityType::class, array('label' => 'label.sede',
           'data' => $options['dati'][0],
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('s')->orderBy('s.ordinamento', 'ASC'); },
@@ -54,12 +54,12 @@ class ColloquioType extends AbstractType {
           'disabled' => ($options['dati'][0] !== null),
           'required' => true))
         ->add('docente', EntityType::class, array('label' => 'label.docente',
-          'class' => 'App:Docente',
+          'class' => 'App\Entity\Docente',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('d')
-              ->where('d.abilitato=1 AND d NOT INSTANCE OF App:Preside')
+              ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
               ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
           'placeholder' => 'label.choose_option',
           'disabled' => ($options['dati'][1] !== null),

@@ -19,6 +19,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Festivita;
+use App\Entity\Materia;
 use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 
@@ -69,7 +73,7 @@ class LezioniController extends AbstractController {
    */
   public function classeAction(Request $request, EntityManagerInterface $em) {
     // lista cattedre
-    $lista = $em->getRepository('App:Cattedra')->createQueryBuilder('c')
+    $lista = $em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->join('c.classe', 'cl')
       ->join('c.materia', 'm')
       ->where('c.docente=:docente AND c.attiva=:attiva')
@@ -83,7 +87,7 @@ class LezioniController extends AbstractController {
       $cattedre[$c->getClasse()->getId()][] = $c;
     }
     // lista tutte le classi
-    $lista = $em->getRepository('App:Classe')->createQueryBuilder('cl')
+    $lista = $em->getRepository('App\Entity\Classe')->createQueryBuilder('cl')
       ->orderBy('cl.sede,cl.sezione,cl.anno', 'ASC')
       ->getQuery()
       ->getResult();
@@ -138,7 +142,7 @@ class LezioniController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -151,12 +155,12 @@ class LezioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('U');
+      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -227,7 +231,7 @@ class LezioniController extends AbstractController {
     $formatter->setPattern('MMMM yyyy');
     $info['data_label'] =  $formatter->format($data_obj);
     // lezione in propria cattedra: controlla esistenza
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -243,8 +247,8 @@ class LezioniController extends AbstractController {
     $data_inizio = \DateTime::createFromFormat('Y-m-d', $data_obj->format('Y-m-01'));
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
-    $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_fine);
-    $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_inizio);
+    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_fine);
+    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_inizio);
     // recupera dati
     $dati = $reg->riepilogo($data_obj, $cattedra);
     // visualizza pagina
@@ -298,7 +302,7 @@ class LezioniController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -310,12 +314,12 @@ class LezioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      $materia = $em->getRepository('App:Materia')->findOneByTipo('U');
+      $materia = $em->getRepository('App\Entity\Materia')->findOneByTipo('U');
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -366,7 +370,7 @@ class LezioniController extends AbstractController {
     $dir = $this->getParameter('dir_tmp').'/';
     $nomefile = md5(uniqid()).'-'.rand(1,1000).'.docx';
     // controlla cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra || $cattedra->getMateria()->getTipo() == 'S') {
       // errore

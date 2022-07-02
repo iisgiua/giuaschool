@@ -69,16 +69,16 @@ class DocumentoTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
-    $docenti = $this->em->getRepository('App:Docente')->findBy([]);
-    $destinatari = $this->em->getRepository('App:ListaDestinatari')->createQueryBuilder('ld')
+    $docenti = $this->em->getRepository('App\Entity\Docente')->findBy([]);
+    $destinatari = $this->em->getRepository('App\Entity\ListaDestinatari')->createQueryBuilder('ld')
       ->where('ld.docenti=:nessuno AND ld.genitori=:nessuno')
       ->setParameters(['nessuno' => 'N'])
       ->getQuery()
       ->getResult();
-    $materie = $this->em->getRepository('App:Materia')->findBy([]);
-    $classi = $this->em->getRepository('App:Classe')->findBy([]);
-    $alunni = $this->em->getRepository('App:Alunno')->findBy([]);
-    $file = $this->em->getRepository('App:File')->findBy(['estensione' => 'docx']);
+    $materie = $this->em->getRepository('App\Entity\Materia')->findBy([]);
+    $classi = $this->em->getRepository('App\Entity\Classe')->findBy([]);
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->findBy([]);
+    $file = $this->em->getRepository('App\Entity\File')->findBy(['estensione' => 'docx']);
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
@@ -167,7 +167,7 @@ class DocumentoTest extends DatabaseTestCase {
     $dt['tipo'] = 'P';
     $existent->setTipo('P');
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $materia = $this->em->getRepository('App:Materia')->find(1);
+    $materia = $this->em->getRepository('App\Entity\Materia')->find(1);
     $existent->setMateria($materia);
     $dt['materia'] = $materia->getId();
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
@@ -200,21 +200,21 @@ class DocumentoTest extends DatabaseTestCase {
     $obj_docente->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::docente - NOT BLANK');
-    $existent->setDocente($this->em->getRepository('App:Docente')->findOneBy([]));
+    $existent->setDocente($this->em->getRepository('App\Entity\Docente')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::docente - VALID');
     // listaDestinatari
     $obj_destinatari = $this->getPrivateProperty($this->entity, 'listaDestinatari');
     $obj_destinatari->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::listaDestinatari - NOT BLANK');
-    $existent->setListaDestinatari($this->em->getRepository('App:ListaDestinatari')->findOneBy([]));
+    $existent->setListaDestinatari($this->em->getRepository('App\Entity\ListaDestinatari')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::listaDestinatari - VALID');
     // allegati
     $obj_allegati = $this->getPrivateProperty($this->entity, 'allegati');
     $obj_allegati->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::allegati - NOT BLANK');
-    $existent->setAllegati(new ArrayCollection([$this->em->getRepository('App:File')->find(5)]));
+    $existent->setAllegati(new ArrayCollection([$this->em->getRepository('App\Entity\File')->find(5)]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::allegati - VALID');
     // cifrato
     $existent->setCifrato(null);

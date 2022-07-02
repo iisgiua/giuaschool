@@ -59,8 +59,8 @@ class RichiestaColloquioTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertNotEmpty($existent, 'Oggetto esistente');
     // crea nuovi oggetti
-    $alunni = $this->em->getRepository('App:Alunno')->findBy([]);
-    $colloqui = $this->em->getRepository('App:Colloquio')->findBy([]);
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->findBy([]);
+    $colloqui = $this->em->getRepository('App\Entity\Colloquio')->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $alunno = $this->faker->randomElement($alunni);
       $o[$i] = new $this->entity();
@@ -155,7 +155,7 @@ class RichiestaColloquioTest extends DatabaseTestCase {
     $obj_colloquio->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::colloquio - NOT BLANK');
-    $existent->setColloquio($this->em->getRepository('App:Colloquio')->findOneBy([]));
+    $existent->setColloquio($this->em->getRepository('App\Entity\Colloquio')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::colloquio - VALID');
     // stato
     $existent->setStato(null);

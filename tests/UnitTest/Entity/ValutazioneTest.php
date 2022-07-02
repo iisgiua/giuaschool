@@ -59,12 +59,12 @@ class ValutazioneTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->find(1);
     $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
     // crea nuovi oggetti
-    $firme = $this->em->getRepository('App:Firma')->findBy([]);
+    $firme = $this->em->getRepository('App\Entity\Firma')->findBy([]);
     for ($i = 0; $i < 3; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $firma = $this->faker->randomElement($firme);
-        $alunni = $this->em->getRepository('App:Alunno')->findByClasse($firma->getLezione()->getClasse());
+        $alunni = $this->em->getRepository('App\Entity\Alunno')->findByClasse($firma->getLezione()->getClasse());
         $data[$i][$field] =
           $field == 'tipo' ? $this->faker->randomElement(['S', 'O', 'P']) :
           ($field == 'visibile' ? $this->faker->randomElement([true, true, false]) :
@@ -149,21 +149,21 @@ class ValutazioneTest extends DatabaseTestCase {
     $obj_docente->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::docente - NOT BLANK');
-    $existent->setDocente($this->em->getRepository('App:Docente')->findOneBy([]));
+    $existent->setDocente($this->em->getRepository('App\Entity\Docente')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::docente - VALID');
     // alunno
     $obj_alunno = $this->getPrivateProperty($this->entity, 'alunno');
     $obj_alunno->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunno - NOT BLANK');
-    $existent->setAlunno($this->em->getRepository('App:Alunno')->findOneBy([]));
+    $existent->setAlunno($this->em->getRepository('App\Entity\Alunno')->findOneBy([]));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::alunno - VALID');
     // materia
     $obj_materia = $this->getPrivateProperty($this->entity, 'materia');
     $obj_materia->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::materia - NOT BLANK');
-    $existent->setMateria($this->em->getRepository('App:Materia')->findOneBy(['nome' => 'Informatica']));
+    $existent->setMateria($this->em->getRepository('App\Entity\Materia')->findOneBy(['nome' => 'Informatica']));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::materia - VALID');
   }
 

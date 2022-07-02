@@ -88,7 +88,7 @@ class AlunnoType extends AbstractType {
         'attr' => ['min' => 0, 'widget' => 'gs-row-end'],
         'required' => false))
       ->add('classe', EntityType::class, array('label' => 'label.classe',
-        'class' => 'App:Classe',
+        'class' => 'App\Entity\Classe',
         'choice_label' => function ($obj) {
             return $obj->getAnno().'ª '.$obj->getSezione().' - '.$obj->getCorso()->getNomeBreve();
           },
