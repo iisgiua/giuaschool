@@ -1,4 +1,6 @@
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master ]
 
 jobs:
   publiccode_yml_validation:

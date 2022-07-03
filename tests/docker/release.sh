@@ -15,3 +15,4 @@ mv .env .env-dist
 
 # Archive release
 zip -q -y -r -9 giuaschool-release.zip ./
+tar -czf giuaschool-release.tgz --exclude=giuaschool-release.zip ./
