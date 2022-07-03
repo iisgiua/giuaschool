@@ -86,14 +86,16 @@ jobs:
       - name: Create archive for release code
         run: |
           docker run --name "gs_release" ghcr.io/trinko/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
-          docker cp gs_release:/var/www/giuaschool/giuaschool-release.zip giuaschool-release.zip
+          docker cp gs_release:/var/www/giuaschool-release.zip giuaschool-release-v${{ github.event.inputs.version }}.zip
+          docker cp gs_release:/var/www/giuaschool-release.md5 giuaschool-release-v${{ github.event.inputs.version }}.md5
 
       - name: Publish release code
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: giuaschool-release.zip
-          asset_name: giuaschool-release-v${{ github.event.inputs.version }}.zip
+          file: giuaschool-release-v${{ github.event.inputs.version }}.*
+          file_glob: true
+          #-- asset_name: giuaschool-release-v${{ github.event.inputs.version }}.zip
           tag: "v${{ github.event.inputs.version }}"
 
       - name: Create version tag for documentation
