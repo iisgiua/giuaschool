@@ -44,7 +44,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setCategoria('SISTEMA')
       ->setParametro('versione')
       ->setDescrizione("Numero di versione dell'applicazione<br>[testo]")
-      ->setValore('1.4.2')
+      ->setValore('1.4.5')
       ->setGestito(true);
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')

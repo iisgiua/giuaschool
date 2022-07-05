@@ -172,6 +172,7 @@ class Installer {
       "INSERT INTO `gs_configurazione` VALUES (NULL,NOW(),NOW(),'SCUOLA','voti_finali_C','Lista dei voti finali per Condotta<br>[lista serializzata]','a:8:{s:3:\"min\";i:4;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:6;s:6:\"valori\";s:14:\"4,5,6,7,8,9,10\";s:9:\"etichette\";s:17:\"\"NC\",5,6,7,8,9,10\";s:4:\"voti\";s:31:\"\"Non Classificato\",5,6,7,8,9,10\";s:8:\"votiAbbr\";s:17:\"\"NC\",5,6,7,8,9,10\";}',1);",
       "INSERT INTO `gs_configurazione` VALUES (NULL,NOW(),NOW(),'SCUOLA','voti_finali_N','Lista dei voti finali per le altre materie<br>[lista serializzata]','a:8:{s:3:\"min\";i:0;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:5;s:6:\"valori\";s:22:\"0,1,2,3,4,5,6,7,8,9,10\";s:9:\"etichette\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";s:4:\"voti\";s:39:\"\"Non Classificato\",1,2,3,4,5,6,7,8,9,10\";s:8:\"votiAbbr\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";}',1);",
     ],
+    '1.4.5' => [],
     'build' => []
   ];
 
@@ -192,6 +193,7 @@ class Installer {
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_C';",
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_N';"
     ],
+    '1.4.5' => [],
     'build' => [
     ]
   ];
