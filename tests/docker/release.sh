@@ -14,4 +14,6 @@ rm -f -r ./*/*/.gitkeep ./*/*/*/.gitkeep
 mv .env .env-dist
 
 # Archive release
-zip -q -y -r -9 giuaschool-release.zip ./
+zip -q -y -r -9 ../giuaschool-release.zip ./
+find ./ -type f -exec md5sum {} + | sort -k 2 > giuaschool-release.md5
+zip -q -9 ../giuaschool-release.md5.zip giuaschool-release.md5
