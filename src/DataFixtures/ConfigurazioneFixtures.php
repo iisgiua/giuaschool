@@ -49,12 +49,12 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
       ->setParametro('manutenzione_inizio')
-      ->setDescrizione("Inizio della modalità manutenzione durante la quale il registro è offline<br>[formato: 'AAAA-MM-GG HH:MM']")
+      ->setDescrizione("Inizio della modalit&agrave; manutenzione durante la quale il registro &egrave; offline<br>[formato: 'AAAA-MM-GG HH:MM']")
       ->setGestito(true);
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
       ->setParametro('manutenzione_fine')
-      ->setDescrizione("Fine della modalità manutenzione durante la quale il registro è offline<br>[formato: 'AAAA-MM-GG HH:MM']")
+      ->setDescrizione("Fine della modalit&agrave; manutenzione durante la quale il registro &egrave; offline<br>[formato: 'AAAA-MM-GG HH:MM']")
       ->setGestito(true);
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
@@ -85,7 +85,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
       ->setParametro('spid')
-      ->setDescrizione("Indica la modalità dell'accesso SPID: 'no' = non utilizzato, 'si' = utilizzato, 'validazione' = utilizzato in validazione.<br>[si|no|validazione]")
+      ->setDescrizione("Indica la modalit&agrave; dell'accesso SPID: 'no' = non utilizzato, 'si' = utilizzato, 'validazione' = utilizzato in validazione.<br>[si|no|validazione]")
       ->setGestito(true)
       ->setValore('no');
     //--- categoria SCUOLA
@@ -122,12 +122,12 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo2_fine')
-      ->setDescrizione("Data della fine del secondo periodo, da 'periodo1_fine'+1 sino al giorno indicato incluso (se non è usato un terzo periodo, la data dovrà essere uguale a 'anno_fine')<br>[formato 'AAAA-MM-GG']")
+      ->setDescrizione("Data della fine del secondo periodo, da 'periodo1_fine'+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a 'anno_fine')<br>[formato 'AAAA-MM-GG']")
       ->setValore('2022-06-12');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('periodo3_nome')
-      ->setDescrizione("Nome del terzo periodo dell'anno scolastico (terzo trimestre) o vuoto se non usato (se è usato un terzo periodo, inizia a 'periodo2_fine'+1 e finisce a 'anno_fine')<br>[testo]")
+      ->setDescrizione("Nome del terzo periodo dell'anno scolastico (terzo trimestre) o vuoto se non usato (se &egrave; usato un terzo periodo, inizia a 'periodo2_fine'+1 e finisce a 'anno_fine')<br>[testo]")
       ->setValore('');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
@@ -137,7 +137,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
       ->setParametro('mesi_colloqui')
-      ->setDescrizione("Mesi con i colloqui generali, nei quali non si può prenotare il colloquio individuale<br>[lista separata da virgola dei numeri dei mesi]")
+      ->setDescrizione("Mesi con i colloqui generali, nei quali non si pu&ograve; prenotare il colloquio individuale<br>[lista separata da virgola dei numeri dei mesi]")
       ->setValore('12,3');
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
@@ -202,12 +202,12 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('ACCESSO')
       ->setParametro('blocco_inizio')
-      ->setDescrizione("Inizio orario del blocco di alcune modalità di accesso per i docenti<br>[formato: 'HH:MM', vuoto se nessun blocco]")
+      ->setDescrizione("Inizio orario del blocco di alcune modalit&agrave; di accesso per i docenti<br>[formato: 'HH:MM', vuoto se nessun blocco]")
       ->setValore('');
     $param[] = (new Configurazione())
       ->setCategoria('ACCESSO')
       ->setParametro('blocco_fine')
-      ->setDescrizione("Fine orario del blocco di alcune modalità di accesso per i docenti<br>[formato 'HH:MM', vuoto se nessun blocco]")
+      ->setDescrizione("Fine orario del blocco di alcune modalit&agrave; di accesso per i docenti<br>[formato 'HH:MM', vuoto se nessun blocco]")
       ->setValore('');
     $param[] = (new Configurazione())
       ->setCategoria('ACCESSO')
@@ -218,12 +218,12 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
     $param[] = (new Configurazione())
       ->setCategoria('ACCESSO')
       ->setParametro('giorni_festivi_istituto')
-      ->setDescrizione("Indica i giorni festivi settimanali per l'intero istituto<br>[lista separata da virgole nel formato: 0=domenica, 1=lunedì, ... 6=sabato]")
+      ->setDescrizione("Indica i giorni festivi settimanali per l'intero istituto<br>[lista separata da virgole nel formato: 0=domenica, 1=luned&igrave;, ... 6=sabato]")
       ->setValore('0');
     $param[] = (new Configurazione())
       ->setCategoria('ACCESSO')
       ->setParametro('giorni_festivi_classi')
-      ->setDescrizione("Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato 'giorno:classe'; giorno: 0=domenica, 1=lunedì, ... 6=sabato; classe: 1A, 2A, ...]")
+      ->setDescrizione("Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato 'giorno:classe'; giorno: 0=domenica, 1=luned&igrave;, ... 6=sabato; classe: 1A, 2A, ...]")
       ->setValore('');
     // rende persistenti i parametri
     foreach ($param as $obj) {
@@ -240,6 +240,7 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
    */
   public static function getGroups(): array {
     return array(
+      'App', // dati iniziali dell'applicazione
       'Test', // dati per i test dell'applicazione
     );
   }
