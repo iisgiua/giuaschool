@@ -79,11 +79,11 @@ class MenuFixtures extends Fixture implements FixtureGroupInterface {
     $menu['sistema'] = [null, null, 0, [
         ['Parametri', 'Configura i parametri dell\'applicazione', 'sistema_parametri', null, 0, null, 'M'],
         ['Banner', 'Visualizza un banner sulle pagine principali', 'sistema_banner', null, 0, null, 'M'],
-        ['Manutenzione', 'Imposta la modalità di manutenzione', 'sistema_manutenzione', null, 0, null, 'M'],
+        ['Manutenzione', 'Imposta la modalit&agrave; di manutenzione', 'sistema_manutenzione', null, 0, null, 'M'],
         ['Importazione&nbsp;iniziale', 'Importa i dati dall\'A.S. precedente', 'sistema_importa', null, 0, null, 'M'],
         ['Archiviazione', 'Archivia i registri e i documenti delle classi', 'sistema_archivia', null, 0, null, 'M'],
         [null, null, null, null, 0, null, 'M'],
-        ['Alias', 'Assumi l\'identità di un altro utente', 'sistema_alias', null, 0, null, 'M'],
+        ['Alias', 'Assumi l\'identit&agrave; di un altro utente', 'sistema_alias', null, 0, null, 'M'],
         ['Password', 'Cambia la password di un utente', 'sistema_password', null, 0, null, 'M'],
       ]];
     //--- sottomenu scuola
@@ -95,7 +95,7 @@ class MenuFixtures extends Fixture implements FixtureGroupInterface {
         ['Corsi', 'Configura i corsi di studio', 'scuola_corsi', null, 0, null, 'M'],
         ['Materie', 'Configura le materie scolastiche', 'scuola_materie', null, 0, null, 'M'],
         ['Classi', 'Configura le classi', 'scuola_classi', null, 0, null, 'M'],
-        ['Festività', 'Configura il calendario delle festività', 'scuola_festivita', null, 0, null, 'M'],
+        ['Festivit&agrave;', 'Configura il calendario delle festivit&agrave;', 'scuola_festivita', null, 0, null, 'M'],
         ['Orario', 'Configura la scansione oraria delle lezioni', 'scuola_orario', null, 0, null, 'M'],
         ['Scrutini', 'Configura gli scrutini', 'scuola_scrutini', null, 0, null, 'M'],
       ]];
@@ -280,6 +280,7 @@ class MenuFixtures extends Fixture implements FixtureGroupInterface {
    */
   public static function getGroups(): array {
     return array(
+      'App', // dati iniziali dell'applicazione
       'Test', // dati per i test dell'applicazione
     );
   }

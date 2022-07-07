@@ -81,7 +81,7 @@ RUN \
   php bin/console doctrine:database:create -n -q && \
   php bin/console doctrine:schema:update -f -q && \
 # init database
-  mysql -uroot -proot giuaschool < src/Install/init-db.sql && \
+  mysql -uroot -proot --default-character-set=utf8 giuaschool < src/Install/init-db.sql && \
   php bin/console security:encode-password -n admin App\\Entity\\Amministratore 2> /dev/null | grep "Encoded password" | sed -r -e "s/^\s*Encoded password\s+(\S+)\s*$/UPDATE gs_utente SET password='\1' where username='admin';/" > admin-pswd && \
   mysql -uroot -proot giuaschool < admin-pswd && \
   rm -f admin-pswd && \

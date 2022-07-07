@@ -1,23 +1,23 @@
 -- TABELLA CONFIGURAZIONE --
-INSERT INTO `gs_configurazione` VALUES (  1,NOW(),NOW(),'SISTEMA','versione','Numero di versione dell\'applicazione<br>[testo]','1.4.4',1);
-INSERT INTO `gs_configurazione` VALUES (  2,NOW(),NOW(),'SISTEMA','manutenzione_inizio','Inizio della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
-INSERT INTO `gs_configurazione` VALUES (  3,NOW(),NOW(),'SISTEMA','manutenzione_fine','Fine della modalità manutenzione durante la quale il registro è offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
+INSERT INTO `gs_configurazione` VALUES (  1,NOW(),NOW(),'SISTEMA','versione','Numero di versione dell\'applicazione<br>[testo]','1.4.5',1);
+INSERT INTO `gs_configurazione` VALUES (  2,NOW(),NOW(),'SISTEMA','manutenzione_inizio','Inizio della modalit&agrave; manutenzione durante la quale il registro &egrave; offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
+INSERT INTO `gs_configurazione` VALUES (  3,NOW(),NOW(),'SISTEMA','manutenzione_fine','Fine della modalit&agrave; manutenzione durante la quale il registro &egrave; offline<br>[formato: \'AAAA-MM-GG HH:MM\']','',1);
 INSERT INTO `gs_configurazione` VALUES (  4,NOW(),NOW(),'SISTEMA','banner_login','Messaggio da visualizzare nella pagina pubblica di login<br>[testo HTML]','',1);
 INSERT INTO `gs_configurazione` VALUES (  5,NOW(),NOW(),'SISTEMA','banner_home','Messaggio da visualizzare nella pagina home degli utenti autenticati<br>[testo HTML]','',1);
 INSERT INTO `gs_configurazione` VALUES (  6,NOW(),NOW(),'SISTEMA','id_provider','Se presente, indica l\'uso di un identity provider esterno (es. SSO su Google)<br>[testo]','',0);
 INSERT INTO `gs_configurazione` VALUES (  7,NOW(),NOW(),'SISTEMA','dominio_default','Indica il dominio di posta predefinito per le email degli utenti (usato nell\'importazione)<br>[testo]','noemail.local',0);
 INSERT INTO `gs_configurazione` VALUES (  8,NOW(),NOW(),'SISTEMA','dominio_id_provider','Nel caso si utilizzi un identity provider esterno, indica il dominio di posta predefinito per le email degli utenti (usato nell\'importazione)<br>[testo]','',0);
-INSERT INTO `gs_configurazione` VALUES (  9,NOW(),NOW(),'SISTEMA','spid','Indica la modalità dell\'accesso SPID: \'no\' = non utilizzato, \'si\' = utilizzato, \'validazione\' = utilizzato in validazione.<br>[si|no|validazione]', 'no', 1);
+INSERT INTO `gs_configurazione` VALUES (  9,NOW(),NOW(),'SISTEMA','spid','Indica la modalit&agrave; dell\'accesso SPID: \'no\' = non utilizzato, \'si\' = utilizzato, \'validazione\' = utilizzato in validazione.<br>[si|no|validazione]', 'no', 1);
 INSERT INTO `gs_configurazione` VALUES (101,NOW(),NOW(),'SCUOLA','anno_scolastico','Anno scolastico corrente<br>[formato: \'AAAA/AAAA\']','2021/2022',0);
 INSERT INTO `gs_configurazione` VALUES (102,NOW(),NOW(),'SCUOLA','anno_inizio','Data dell\'inizio dell\'anno scolastico<br>[formato: \'AAAA-MM-GG\']','2021-09-22',0);
 INSERT INTO `gs_configurazione` VALUES (103,NOW(),NOW(),'SCUOLA','anno_fine','Data della fine dell\'anno scolastico<br>[formato: \'AAAA-MM-GG\']','2022-06-12',0);
 INSERT INTO `gs_configurazione` VALUES (104,NOW(),NOW(),'SCUOLA','periodo1_nome','Nome del primo periodo dell\'anno scolastico (primo trimestre/quadrimestre)<br>[testo]','Primo Quadrimestre',0);
 INSERT INTO `gs_configurazione` VALUES (105,NOW(),NOW(),'SCUOLA','periodo1_fine','Data della fine del primo periodo, da \'anno_inizio\' sino al giorno indicato incluso<br>[formato: \'AAAA-MM-GG\']','2022-01-31',0);
 INSERT INTO `gs_configurazione` VALUES (106,NOW(),NOW(),'SCUOLA','periodo2_nome','Nome del secondo periodo dell\'anno scolastico (secondo trimestre/quadrimestre/pentamestre)<br>[testo]','Secondo Quadrimestre',0);
-INSERT INTO `gs_configurazione` VALUES (107,NOW(),NOW(),'SCUOLA','periodo2_fine','Data della fine del secondo periodo, da \'periodo1_fine\'+1 sino al giorno indicato incluso (se non è usato un terzo periodo, la data dovrà essere uguale a \'anno_fine\')<br>[formato \'AAAA-MM-GG\']','2022-06-12',0);
-INSERT INTO `gs_configurazione` VALUES (108,NOW(),NOW(),'SCUOLA','periodo3_nome','Nome del terzo periodo dell\'anno scolastico (terzo trimestre) o vuoto se non usato (se è usato un terzo periodo, inizia a \'periodo2_fine\'+1 e finisce a \'anno_fine\')<br>[testo]','',0);
+INSERT INTO `gs_configurazione` VALUES (107,NOW(),NOW(),'SCUOLA','periodo2_fine','Data della fine del secondo periodo, da \'periodo1_fine\'+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a \'anno_fine\')<br>[formato \'AAAA-MM-GG\']','2022-06-12',0);
+INSERT INTO `gs_configurazione` VALUES (108,NOW(),NOW(),'SCUOLA','periodo3_nome','Nome del terzo periodo dell\'anno scolastico (terzo trimestre) o vuoto se non usato (se &egrave; usato un terzo periodo, inizia a \'periodo2_fine\'+1 e finisce a \'anno_fine\')<br>[testo]','',0);
 INSERT INTO `gs_configurazione` VALUES (109,NOW(),NOW(),'SCUOLA','ritardo_breve','Numero di minuti per la definizione di ritardo breve (non richiede giustificazione)<br>[intero]','10',0);
-INSERT INTO `gs_configurazione` VALUES (110,NOW(),NOW(),'SCUOLA','mesi_colloqui','Mesi con i colloqui generali, nei quali non si può prenotare il colloquio individuale<br>[lista separata da virgola dei numeri dei mesi]','12,3',0);
+INSERT INTO `gs_configurazione` VALUES (110,NOW(),NOW(),'SCUOLA','mesi_colloqui','Mesi con i colloqui generali, nei quali non si pu&ograve; prenotare il colloquio individuale<br>[lista separata da virgola dei numeri dei mesi]','12,3',0);
 INSERT INTO `gs_configurazione` VALUES (111,NOW(),NOW(),'SCUOLA','notifica_circolari','Ore di notifica giornaliera delle nuove circolari<br>[lista separata da virgola delle ore in formato HH]','15,18,20',0);
 INSERT INTO `gs_configurazione` VALUES (112,NOW(),NOW(),'SCUOLA','assenze_dichiarazione','Indica se le assenze online devono inglobare l\'autodichiarazione NO-COVID<br>[booleano, 0 o 1]','0',0);
 INSERT INTO `gs_configurazione` VALUES (113,NOW(),NOW(),'SCUOLA','assenze_ore','Indica se le assenze devono essere gestite su base oraria e non giornaliera<br>[booleano, 0 o 1]','0',0);
@@ -25,11 +25,11 @@ INSERT INTO `gs_configurazione` VALUES (114,NOW(),NOW(),'SCUOLA','voti_finali_R'
 INSERT INTO `gs_configurazione` VALUES (115,NOW(),NOW(),'SCUOLA','voti_finali_E','Lista dei voti finali per Educazione Civica<br>[lista serializzata]','a:8:{s:3:\"min\";i:2;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:5;s:6:\"valori\";s:18:\"2,3,4,5,6,7,8,9,10\";s:9:\"etichette\";s:21:\"\"NC\",3,4,5,6,7,8,9,10\";s:4:\"voti\";s:35:\"\"Non Classificato\",3,4,5,6,7,8,9,10\";s:8:\"votiAbbr\";s:21:\"\"NC\",3,4,5,6,7,8,9,10\";}',1);
 INSERT INTO `gs_configurazione` VALUES (116,NOW(),NOW(),'SCUOLA','voti_finali_C','Lista dei voti finali per Condotta<br>[lista serializzata]','a:8:{s:3:\"min\";i:4;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:6;s:6:\"valori\";s:14:\"4,5,6,7,8,9,10\";s:9:\"etichette\";s:17:\"\"NC\",5,6,7,8,9,10\";s:4:\"voti\";s:31:\"\"Non Classificato\",5,6,7,8,9,10\";s:8:\"votiAbbr\";s:17:\"\"NC\",5,6,7,8,9,10\";}',1);
 INSERT INTO `gs_configurazione` VALUES (117,NOW(),NOW(),'SCUOLA','voti_finali_N','Lista dei voti finali per le altre materie<br>[lista serializzata]','a:8:{s:3:\"min\";i:0;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:5;s:6:\"valori\";s:22:\"0,1,2,3,4,5,6,7,8,9,10\";s:9:\"etichette\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";s:4:\"voti\";s:39:\"\"Non Classificato\",1,2,3,4,5,6,7,8,9,10\";s:8:\"votiAbbr\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";}',1);
-INSERT INTO `gs_configurazione` VALUES (201,NOW(),NOW(),'ACCESSO','blocco_inizio','Inizio orario del blocco di alcune modalità di accesso per i docenti<br>[formato: \'HH:MM\', vuoto se nessun blocco]','',0);
-INSERT INTO `gs_configurazione` VALUES (202,NOW(),NOW(),'ACCESSO','blocco_fine','Fine orario del blocco di alcune modalità di accesso per i docenti<br>[formato \'HH:MM\', vuoto se nessun blocco]','',0);
+INSERT INTO `gs_configurazione` VALUES (201,NOW(),NOW(),'ACCESSO','blocco_inizio','Inizio orario del blocco di alcune modalit&agrave; di accesso per i docenti<br>[formato: \'HH:MM\', vuoto se nessun blocco]','',0);
+INSERT INTO `gs_configurazione` VALUES (202,NOW(),NOW(),'ACCESSO','blocco_fine','Fine orario del blocco di alcune modalit&agrave; di accesso per i docenti<br>[formato \'HH:MM\', vuoto se nessun blocco]','',0);
 INSERT INTO `gs_configurazione` VALUES (203,NOW(),NOW(),'ACCESSO','ip_scuola','Lista degli IP dei router di scuola (accerta che login provenga da dentro l\'istituto)<br>[lista separata da virgole degli IP]','127.0.0.1',0);
-INSERT INTO `gs_configurazione` VALUES (204,NOW(),NOW(),'ACCESSO','giorni_festivi_istituto','Indica i giorni festivi settimanali per l\'intero istituto<br>[lista separata da virgole nel formato: 0=domenica, 1=lunedì, ... 6=sabato]','0',0);
-INSERT INTO `gs_configurazione` VALUES (205,NOW(),NOW(),'ACCESSO','giorni_festivi_classi','Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato \'giorno:classe\'; giorno: 0=domenica, 1=lunedì, ... 6=sabato; classe: 1A, 2A, ...]','',0);
+INSERT INTO `gs_configurazione` VALUES (204,NOW(),NOW(),'ACCESSO','giorni_festivi_istituto','Indica i giorni festivi settimanali per l\'intero istituto<br>[lista separata da virgole nel formato: 0=domenica, 1=luned&igrave;, ... 6=sabato]','0',0);
+INSERT INTO `gs_configurazione` VALUES (205,NOW(),NOW(),'ACCESSO','giorni_festivi_classi','Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato \'giorno:classe\'; giorno: 0=domenica, 1=luned&igrave;, ... 6=sabato; classe: 1A, 2A, ...]','',0);
 
 
 -- TABELLA MENU --
@@ -92,11 +92,11 @@ INSERT INTO `gs_menu_opzione` VALUES (45,3,NULL,NOW(),NOW(),'ROLE_STAFF','NESSUN
 INSERT INTO `gs_menu_opzione` VALUES (46,3,NULL,NOW(),NOW(),'ROLE_PRESIDE','NESSUNA','Credits','Mostra i credits','info_credits',4,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (47,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Parametri','Configura i parametri dell\'applicazione','sistema_parametri',1,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (48,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Banner','Visualizza un banner sulle pagine principali','sistema_banner',2,0,NULL);
-INSERT INTO `gs_menu_opzione` VALUES (49,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Manutenzione','Imposta la modalità di manutenzione','sistema_manutenzione',3,0,NULL);
+INSERT INTO `gs_menu_opzione` VALUES (49,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Manutenzione','Imposta la modalit&agrave; di manutenzione','sistema_manutenzione',3,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (50,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Importazione&nbsp;iniziale','Importa i dati dall\'A.S. precedente','sistema_importa',4,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (51,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Archiviazione','Archivia i registri e i documenti delle classi','sistema_archivia',5,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (52,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','__SEPARATORE__','__SEPARATORE__',NULL,6,0,NULL);
-INSERT INTO `gs_menu_opzione` VALUES (53,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Alias','Assumi l\'identità di un altro utente','sistema_alias',7,0,NULL);
+INSERT INTO `gs_menu_opzione` VALUES (53,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Alias','Assumi l\'identit&agrave; di un altro utente','sistema_alias',7,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (54,4,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Password','Cambia la password di un utente','sistema_password',8,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (55,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Amministratore','Configura i dati dell\'amministratore','scuola_amministratore',1,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (57,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Istituto','Configura i dati dell\'Istituto','scuola_istituto',3,0,NULL);
@@ -105,7 +105,7 @@ INSERT INTO `gs_menu_opzione` VALUES (58,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE
 INSERT INTO `gs_menu_opzione` VALUES (59,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Corsi','Configura i corsi di studio','scuola_corsi',5,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (60,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Materie','Configura le materie scolastiche','scuola_materie',6,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (61,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Classi','Configura le classi','scuola_classi',7,0,NULL);
-INSERT INTO `gs_menu_opzione` VALUES (62,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Festività','Configura il calendario delle festività','scuola_festivita',8,0,NULL);
+INSERT INTO `gs_menu_opzione` VALUES (62,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Festivit&agrave;','Configura il calendario delle festivit&agrave;','scuola_festivita',8,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (63,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Orario','Configura la scansione oraria delle lezioni','scuola_orario',9,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (64,5,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Scrutini','Configura gli scrutini','scuola_scrutini',10,0,NULL);
 INSERT INTO `gs_menu_opzione` VALUES (65,6,NULL,NOW(),NOW(),'ROLE_AMMINISTRATORE','NESSUNA','Importa','Importa da file i dati del personale ATA','ata_importa',1,0,NULL);
