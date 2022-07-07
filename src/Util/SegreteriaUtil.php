@@ -295,12 +295,12 @@ class SegreteriaUtil {
         // controlla esistenza di scrutinio rinviato
         if ($dati['esito']->getEsito() == 'X') {
           // scrutinio rinviato
-          $scrutinioRinviato = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $scrutinio->getClasse(),
+          $scrutinioRinviato = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $scrutinio->getClasse(),
             'periodo' => 'R', 'stato' => 'C']);
           if ($scrutinioRinviato) {
             // carica esito definitivo
             $dati['rinviato']['scrutinio'] = $scrutinioRinviato;
-            $dati['rinviato']['esito'] = $this->em->getRepository('App:Esito')->findOneBy([
+            $dati['rinviato']['esito'] = $this->em->getRepository('App\Entity\Esito')->findOneBy([
               'scrutinio' => $scrutinioRinviato, 'alunno' => $alunno]);
           }
         }

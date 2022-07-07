@@ -1774,7 +1774,7 @@ class PagelleUtil {
       // legge valutazioni
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
@@ -1787,7 +1787,7 @@ class PagelleUtil {
         $dati['errore'] = true;
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameters(['tipi' => ['S'], 'lista' => $dati['scrutinio']->getDato('materie')])

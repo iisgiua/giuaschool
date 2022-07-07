@@ -492,10 +492,10 @@ class ArchiviazioneUtil {
     }
     $ore = rtrim(rtrim(number_format($ore, 1, ',', ''), '0'), ',');
     // voti in lezione di altra materia
-    $votiNoLezione = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+    $votiNoLezione = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('COUNT(v.id)')
       ->join('v.lezione', 'l')
-      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
       ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.materia!=:materia AND l.data BETWEEN :inizio AND :fine')
       ->orderBy('l.data', 'ASC')
       ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
@@ -510,11 +510,11 @@ class ArchiviazioneUtil {
           ->select('c.id')
           ->where('c.docente=:docente AND c.classe=:classe AND c.materia=:materia AND c.id!=:cattedra')
           ->getDql();
-        $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
           ->join('l.materia', 'm')
-          ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-          ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+          ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
           ->join('so.orario', 'o')
           ->where('l.classe=:classe AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
           ->andWhere('l.materia=:materia OR (m.tipo!=:civica AND NOT EXISTS ('.$altraCattedra.'))')
@@ -527,10 +527,10 @@ class ArchiviazioneUtil {
           ->getArrayResult();
       } else {
         // altro tipo di cattedra
-        $lezioni = $this->em->getRepository('App:Lezione')->createQueryBuilder('l')
+        $lezioni = $this->em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->select('l.id,l.data,l.ora,so.durata,l.argomento,l.attivita')
-          ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
-          ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+          ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
           ->join('so.orario', 'o')
           ->where('l.classe=:classe AND l.materia=:materia AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
           ->orderBy('l.data,l.ora', 'ASC')
@@ -740,10 +740,10 @@ class ArchiviazioneUtil {
         $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
       }
       // legge voti
-      $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+      $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
         ->select('(v.alunno) AS id,v.id AS voto_id,v.tipo,v.visibile,v.voto,v.giudizio,v.argomento,l.data')
         ->join('v.lezione', 'l')
-        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione AND f.docente=:docente')
         ->where('v.materia=:materia AND v.docente=:docente AND l.classe=:classe AND l.data BETWEEN :inizio AND :fine')
         ->setParameters(['docente' => $docente, 'materia' => $cattedra->getMateria(),
           'classe' => $cattedra->getClasse(), 'inizio' => $periodo['inizio'], 'fine' => $periodo['fine']])
@@ -991,7 +991,7 @@ class ArchiviazioneUtil {
         // aggiorna durata lezioni
         $dati['lezioni'][$mese][$giorno]['durata'] += $l['durata'];
         // legge assenze
-        $assenze = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+        $assenze = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
           ->select('SUM(al.ore)')
           ->where('al.lezione=:lezione AND al.alunno=:alunno')
           ->setParameters(['lezione' => $l['id'], 'alunno' => $cattedra->getAlunno()])

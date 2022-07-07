@@ -4056,7 +4056,7 @@ class ScrutinioUtil {
           $dati_docenti = $scrutinio->getDato('docenti');
         } else {
           // altri periodi
-          $docenti = $this->em->getRepository('App:Cattedra')->docentiScrutinio($classe);
+          $docenti = $this->em->getRepository('App\Entity\Cattedra')->docentiScrutinio($classe);
           // memorizza dati docenti e materie
           foreach ($docenti as $doc) {
             $dati_docenti[$doc['id']][$doc['materia_id']] = $doc['tipo'];
