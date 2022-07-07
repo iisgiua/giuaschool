@@ -138,7 +138,7 @@ INSERT INTO `gs_utente` (creato, modificato, username, password, email, abilitat
 
 -- TABELLA MATERIA --
 INSERT INTO `gs_materia` VALUES (1, NOW(), NOW(), 'Supplenza', 'Supplenza', 'U', 'A', 0, 0);
-INSERT INTO `gs_materia` VALUES (2, NOW(), NOW(), 'Religione Cattolica o attivit&agrave; alternative', 'Religione / Att. alt.', 'R', 'G', 0, 10);
+INSERT INTO `gs_materia` VALUES (2, NOW(), NOW(), 'Religione Cattolica o attività alternative', 'Religione / Att. alt.', 'R', 'G', 0, 10);
 INSERT INTO `gs_materia` VALUES (3, NOW(), NOW(), 'Educazione civica', 'Ed. civica', 'E', 'N', 1, 800);
 INSERT INTO `gs_materia` VALUES (4, NOW(), NOW(), 'Condotta', 'Condotta', 'C', 'N', 1, 900);
 INSERT INTO `gs_materia` VALUES (5, NOW(), NOW(), 'Sostegno', 'Sostegno', 'S', 'A', 0, 999);

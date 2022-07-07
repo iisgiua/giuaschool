@@ -126,7 +126,7 @@ class GiuaschoolFixtures extends Fixture implements FixtureGroupInterface {
       ->setMedia(false)
       ->setOrdinamento(0);
     $dati[] = (new Materia())
-      ->setNome('Religione Cattolica o attivit&agrave; alternative')
+      ->setNome('Religione Cattolica o attività alternative')
       ->setNomeBreve('Religione / Att. alt.')
       ->setTipo('R')
       ->setValutazione('G')
