@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Form\FormError;
 use App\Entity\DefinizioneScrutinio;
 use App\Entity\Preside;
@@ -56,7 +56,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param string $periodo Periodo dello scrutinio
    *
@@ -68,7 +68,7 @@ class ScuolaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function scrutiniAction(Request $request, EntityManagerInterface $em,
-                                 SessionInterface $session, TranslatorInterface $trans,
+                                 RequestStack $reqstack, TranslatorInterface $trans,
                                  $periodo): Response {
     // init
     $dati = [];
@@ -88,8 +88,8 @@ class ScuolaController extends BaseController {
     if ($definizione) {
       // controlla dati mancanti
       $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
-        ['periodo' => ($periodo == 'P' ? $session->get('/CONFIG/SCUOLA/periodo1_nome') :
-        ($periodo == 'S' ? $session->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
+        ['periodo' => ($periodo == 'P' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :
+        ($periodo == 'S' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
       $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
       $struttura[1] = ['ScrutinioInizio', false, []];
       $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
@@ -102,8 +102,8 @@ class ScuolaController extends BaseController {
     } else {
       // nuova definizione
       $argomenti[1] = $trans->trans('label.verbale_scrutinio_'.$periodo,
-        ['periodo' => ($periodo == 'P' ? $session->get('/CONFIG/SCUOLA/periodo1_nome') :
-        ($periodo == 'S' ? $session->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
+        ['periodo' => ($periodo == 'P' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome') :
+        ($periodo == 'S' ? $reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome') : ''))]);
       $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
       $struttura[1] = ['ScrutinioInizio', false, []];
       $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
@@ -589,7 +589,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -601,7 +601,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function classiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function classiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                $pagina): Response {
     // init
     $dati = [];
@@ -609,10 +609,10 @@ class ScuolaController extends BaseController {
     // recupera pagina di visualizzazione
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/scuola_classi/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/scuola_classi/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/scuola_classi/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/scuola_classi/pagina', $pagina);
     }
     // recupera dati
     $dati = $em->getRepository('App\Entity\Classe')->cerca($pagina);
@@ -709,7 +709,7 @@ class ScuolaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -721,7 +721,7 @@ class ScuolaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function festivitaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function festivitaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                   $pagina): Response {
     // init
     $dati = [];
@@ -729,10 +729,10 @@ class ScuolaController extends BaseController {
     // recupera pagina di visualizzazione
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/scuola_festivita/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/scuola_festivita/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/scuola_festivita/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/scuola_festivita/pagina', $pagina);
     }
     // recupera dati
     $dati = $em->getRepository('App\Entity\Festivita')->cerca($pagina);

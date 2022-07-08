@@ -19,7 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Notifica;
 use App\Entity\NotificaInvio;
@@ -56,9 +56,9 @@ class NotificaPreparaCommand extends Command {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var \Twig\Environment $tpl Gestione template
@@ -88,18 +88,18 @@ class NotificaPreparaCommand extends Command {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param \Twig\Environment $tpl Gestione template
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,  SessionInterface $session,
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,  RequestStack $reqstack,
                               \Twig\Environment $tpl, BachecaUtil $bac, ConfigLoader $config, LoggerInterface $logger) {
     parent::__construct();
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->tpl = $tpl;
     $this->bac = $bac;
     $this->config = $config;
@@ -281,12 +281,12 @@ class NotificaPreparaCommand extends Command {
               // notifica via email
               $testo = $this->tpl->render('email/notifica_circolari.html.twig', array(
                 'circolari' => $circ,
-                'intestazione_istituto_breve' => $this->session->get('/CONFIG/ISTITUTO/intestazione_breve'),
-                'url_registro' => $this->session->get('/CONFIG/ISTITUTO/url_registro'),
-                'email_amministratore' => $this->session->get('/CONFIG/ISTITUTO/email_amministratore')));
+                'intestazione_istituto_breve' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve'),
+                'url_registro' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/url_registro'),
+                'email_amministratore' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_amministratore')));
               // aggiunge dati
               $dati_notifica['oggetto'] = $this->trans->trans('message.notifica_circolare_oggetto', [
-                'intestazione_istituto_breve' => $this->session->get('/CONFIG/ISTITUTO/intestazione_breve')]);
+                'intestazione_istituto_breve' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')]);
               $dati_notifica['email'] = $utente->getEmail();
               // imposta la precedenza su altri messaggi
               $stato = 'P';

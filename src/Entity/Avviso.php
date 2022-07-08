@@ -81,9 +81,9 @@ class Avviso {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var \DateTime $ora Ora associata all'evento dell'avviso
@@ -331,7 +331,7 @@ class Avviso {
    *
    * @return Avviso Oggetto Avviso
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }

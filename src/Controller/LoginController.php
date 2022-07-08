@@ -20,7 +20,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -29,7 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,7 +62,7 @@ class LoginController extends BaseController {
   /**
    * Login dell'utente attraverso username e password
    *
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    *
@@ -71,7 +71,7 @@ class LoginController extends BaseController {
    * @Route("/login/form/", name="login_form",
    *    methods={"GET", "POST"})
    */
-  public function formAction(SessionInterface $session, AuthenticationUtils $auth,
+  public function formAction(RequestStack $reqstack, AuthenticationUtils $auth,
                              ConfigLoader $config) {
     if ($this->isGranted('ROLE_UTENTE')) {
       // reindirizza a pagina HOME
@@ -81,9 +81,9 @@ class LoginController extends BaseController {
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // conserva ultimo errore del login, se presente
     $errore = $auth->getLastAuthenticationError();
     // conserva ultimo username inserito
@@ -110,7 +110,7 @@ class LoginController extends BaseController {
   /**
    * Registra docente per l'uso dei token (tramite lettore di impronte)
    *
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    *
@@ -119,14 +119,14 @@ class LoginController extends BaseController {
    * @Route("/login/registrazione/", name="login_registrazione",
    *    methods={"GET", "POST"})
    */
-  public function registrazioneAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
+  public function registrazioneAction(RequestStack $reqstack, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // conserva ultimo errore del login, se presente
     $errore = $auth->getLastAuthenticationError();
     // conserva ultimo username inserito
@@ -143,7 +143,7 @@ class LoginController extends BaseController {
   /**
    * Login dell'utente tramite token (inviato dal lettore di impronte).
    *
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    *
    * @return Response Pagina di risposta
@@ -151,11 +151,11 @@ class LoginController extends BaseController {
    * @Route("/login/token/", name="login_token",
    *    methods={"GET", "POST"})
    */
-  public function tokenAction(SessionInterface $session, AuthenticationUtils $auth) {
+  public function tokenAction(RequestStack $reqstack, AuthenticationUtils $auth) {
     // legge sessione
-    $token1 = $session->get('/APP/UTENTE/token1');
-    $token2 = $session->get('/APP/UTENTE/token2');
-    $token3 = $session->get('/APP/UTENTE/token3');
+    $token1 = $reqstack->getSession()->get('/APP/UTENTE/token1');
+    $token2 = $reqstack->getSession()->get('/APP/UTENTE/token2');
+    $token3 = $reqstack->getSession()->get('/APP/UTENTE/token3');
     if (!$token1 || !$token2 || !$token3) {
       // esegue autenticazione
       $errore = $auth->getLastAuthenticationError();
@@ -194,7 +194,7 @@ class LoginController extends BaseController {
    * Login dell'utente tramite smartcard: pagina con messaggio di errore.
    * Sono necessari due url per evitare errore del server "too many redirections".
    *
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    *
@@ -203,14 +203,14 @@ class LoginController extends BaseController {
    * @Route("/login/card-errore/", name="login_cardErrore",
    *    methods={"GET"})
    */
-  public function cardErroreAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config) {
+  public function cardErroreAction(RequestStack $reqstack, AuthenticationUtils $auth, ConfigLoader $config) {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     // legge ultimo errore del login
     $errore = $auth->getLastAuthenticationError();
     // mostra la pagina di risposta
@@ -255,9 +255,9 @@ class LoginController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ConfigLoader $config Gestore della configurazione su database
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
    * @param OtpUtil $otp Gestione del codice OTP
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
@@ -269,17 +269,17 @@ class LoginController extends BaseController {
    * @Route("/login/recovery/", name="login_recovery",
    *    methods={"GET", "POST"})
    */
-  public function recoveryAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
-                                 ConfigLoader $config, UserPasswordEncoderInterface $encoder, OtpUtil $otp,
+  public function recoveryAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
+                                 ConfigLoader $config, UserPasswordHasherInterface $encoder, OtpUtil $otp,
                                  StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger) {
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     $errore = null;
     $successo = null;
     // crea form inserimento email
@@ -301,7 +301,7 @@ class LoginController extends BaseController {
       $email = $form->get('email')->getData();
       $utente = $em->getRepository('App\Entity\Utente')->findOneByEmail($email);
       // legge configurazione: id_provider
-      $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+      $id_provider = $reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider');
       // se id_provider controlla tipo utente
       if ($id_provider && ($utente instanceOf Docente || $utente instanceOf Alunno)) {
         // errore: docente/staff/preside/alunno
@@ -402,9 +402,9 @@ class LoginController extends BaseController {
           ));
         // crea messaggio
         $message = (new Email())
-          ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+          ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
           ->to($email)
-          ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
+          ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
           ->text($this->renderView($template_txt,
             array(
               'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
@@ -449,7 +449,7 @@ class LoginController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -459,11 +459,11 @@ class LoginController extends BaseController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function profiloAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function profiloAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                 EventDispatcherInterface $disp, LogHandler $dblogger) {
     // imposta profili
     $lista = [];
-    foreach ($session->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
+    foreach ($reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
       foreach ($profili as $id) {
         $utente = $em->getRepository('App\Entity\Utente')->find($id);
         $nome = $ruolo.' ';
@@ -495,13 +495,13 @@ class LoginController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       $utenteIniziale = $this->getUser();
       $profiloId = (int) $form->get('profilo')->getData();
-      if ($profiloId && (!$session->get('/APP/UTENTE/profilo_usato') ||
-          $session->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
+      if ($profiloId && (!$reqstack->getSession()->get('/APP/UTENTE/profilo_usato') ||
+          $reqstack->getSession()->get('/APP/UTENTE/profilo_usato') != $profiloId)) {
         // legge utente selezionato
         $utente = $em->getRepository('App\Entity\Utente')->find($profiloId);
         // imposta ultimo accesso
         $accesso = $utente->getUltimoAccesso();
-        $session->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
+        $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
         $utente->setUltimoAccesso(new \DateTime());
         // log azione
         $dblogger->logAzione('ACCESSO', 'Cambio profilo', array(
@@ -514,7 +514,7 @@ class LoginController extends BaseController {
         $event = new InteractiveLoginEvent($request, $token);
         $disp->dispatch('security.interactive_login', $event);
         // memorizza profilo in uso
-        $session->set('/APP/UTENTE/profilo_usato', $profiloId);
+        $reqstack->getSession()->set('/APP/UTENTE/profilo_usato', $profiloId);
       }
       // redirezione alla pagina iniziale
       return $this->redirectToRoute('login_home', ['reload' => 'yes']);

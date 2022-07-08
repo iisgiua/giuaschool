@@ -15,7 +15,7 @@ namespace App\Util;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Form\Form;
 use App\Entity\Alunno;
 use App\Entity\Annotazione;
@@ -69,9 +69,9 @@ class RegistroUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -82,14 +82,14 @@ class RegistroUtil {
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session) {
+                               RequestStack $reqstack) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
   }
 
   /**
@@ -844,7 +844,7 @@ class RegistroUtil {
       // imposta vettore associativo
       $dati[$data_str]['lista'] = $alunni;
       $dati[$data_str]['genitori'] = $genitori;
-      if ($this->session->get('/CONFIG/SCUOLA/assenze_ore')) {
+      if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
         $dati[$data_str]['ore'] = $this->em->getRepository('App\Entity\AssenzaLezione')->assentiOre($classe, $data_inizio);
       }
     } else {
@@ -1316,29 +1316,29 @@ class RegistroUtil {
   public function periodo(\DateTime $data) {
     $dati = array();
     $data_str = $data->format('Y-m-d');
-    if ($data_str <= $this->session->get('/CONFIG/SCUOLA/periodo1_fine')) {
+    if ($data_str <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')) {
       // primo periodo
       $dati['periodo'] = 1;
-      $dati['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo1_nome');
-      $dati['inizio'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_inizio').' 00:00');
-      $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
-    } elseif ($data_str <= $this->session->get('/CONFIG/SCUOLA/periodo2_fine') ||
-              ($data_str > $this->session->get('/CONFIG/SCUOLA/anno_fine') && $this->session->get('/CONFIG/SCUOLA/periodo3_nome') == '')) {
+      $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
+      $dati['inizio'] = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00');
+      $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
+    } elseif ($data_str <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine') ||
+              ($data_str > $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine') && $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') == '')) {
       // secondo periodo
       $dati['periodo'] = 2;
-      $dati['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo2_nome');
-      $data = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
+      $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
+      $data = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
       $data->modify('+1 day');
       $dati['inizio'] = $data;
-      $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/periodo2_fine').' 00:00');
-    } elseif ($this->session->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
+      $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine').' 00:00');
+    } elseif ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
       // terzo periodo
       $dati['periodo'] = 3;
-      $dati['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo3_nome');
-      $data = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/periodo2_fine').' 00:00');
+      $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
+      $data = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine').' 00:00');
       $data->modify('+1 day');
       $dati['inizio'] = $data;
-      $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
+      $dati['fine'] = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
     } else {
       // errore (non deve mai capitare)
       $dati = null;
@@ -1422,20 +1422,20 @@ class RegistroUtil {
   public function infoPeriodi() {
     $dati = array();
     // primo periodo
-    $dati[1]['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo1_nome');
-    $dati[1]['inizio'] = $this->session->get('/CONFIG/SCUOLA/anno_inizio');
-    $dati[1]['fine'] = $this->session->get('/CONFIG/SCUOLA/periodo1_fine');
+    $dati[1]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
+    $dati[1]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
+    $dati[1]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine');
     $dati[1]['scrutinio'] = 'P';
     // secondo periodo
-    $dati[2]['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo2_nome');
+    $dati[2]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
     $data = \DateTime::createFromFormat('Y-m-d H:i', $dati[1]['fine'].' 00:00');
     $data->modify('+1 day');
     $dati[2]['inizio'] = $data->format('Y-m-d');
-    $dati[2]['fine'] = $this->session->get('/CONFIG/SCUOLA/periodo2_fine');
+    $dati[2]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine');
     $dati[2]['scrutinio'] = 'F';
     // terzo periodo
-    if ($this->session->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
-      $dati[3]['nome'] = $this->session->get('/CONFIG/SCUOLA/periodo3_nome');
+    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
+      $dati[3]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
       $data = \DateTime::createFromFormat('Y-m-d H:i', $dati[2]['fine'].' 00:00');
       $data->modify('+1 day');
       $dati[3]['inizio'] = $data->format('Y-m-d');
@@ -1443,10 +1443,10 @@ class RegistroUtil {
       $dati[3]['scrutinio'] = 'F';
     } else {
       $dati[3]['nome'] = '';
-      $dati[3]['inizio'] = $this->session->get('/CONFIG/SCUOLA/anno_fine');
+      $dati[3]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
       $dati[3]['scrutinio'] = '';
     }
-    $dati[3]['fine'] = $this->session->get('/CONFIG/SCUOLA/anno_fine');
+    $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     // restituisce dati
     return $dati;
   }
@@ -1471,7 +1471,7 @@ class RegistroUtil {
       ->getArrayResult();
     // controlla ritardo breve
     $inizio = $prima[0]['inizio'];
-    $inizio->modify('+' . $this->session->get('/CONFIG/SCUOLA/ritardo_breve', 0) . ' minutes');
+    $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . ' minutes');
     return ($ora <= $inizio);
   }
 
@@ -2446,8 +2446,8 @@ class RegistroUtil {
     // blocco scrutinio
     $oggi = (new \DateTime())->format('Y-m-d');
     $modifica = $data->format('Y-m-d');
-    if ($oggi >= $this->session->get('/CONFIG/SCUOLA/periodo1_fine') &&
-        $modifica <= $this->session->get('/CONFIG/SCUOLA/periodo1_fine')) {
+    if ($oggi >= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine') &&
+        $modifica <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')) {
       // primo trimestre
       if ($classe) {
         // controllo scrutinio
@@ -2456,11 +2456,11 @@ class RegistroUtil {
           // scrutinio iniziato: blocca
           return true;
         }
-      } elseif ($oggi > $this->session->get('/CONFIG/SCUOLA/periodo1_fine')) {
+      } elseif ($oggi > $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')) {
         // classe non definita (a trimestre chiuso): blocca
         return true;
       }
-    } elseif ($modifica > $this->session->get('/CONFIG/SCUOLA/periodo1_fine')) {
+    } elseif ($modifica > $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')) {
       // controlla scrutinio finale
       if ($classe) {
         // controllo scrutinio
@@ -2469,7 +2469,7 @@ class RegistroUtil {
           // scrutinio iniziato: blocca
           return true;
         }
-      } elseif ($oggi > $this->session->get('/CONFIG/SCUOLA/anno_fine')) {
+      } elseif ($oggi > $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine')) {
         // classe non definita: blocca
         return true;
       }

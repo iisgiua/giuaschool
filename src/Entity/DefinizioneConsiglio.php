@@ -60,10 +60,10 @@ class DefinizioneConsiglio {
    *
    * @ORM\Column(type="date", nullable=false)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var array $argomenti Lista degli argomenti dell'ordine del giorno [array($id_numerico => $stringa_argomento, ...)]
@@ -148,7 +148,7 @@ class DefinizioneConsiglio {
    *
    * @return DefinizioneConsiglio Oggetto DefinizioneConsiglio
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }

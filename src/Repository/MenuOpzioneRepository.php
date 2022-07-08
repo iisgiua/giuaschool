@@ -13,7 +13,7 @@
 namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Utente;
 
 
@@ -27,18 +27,18 @@ class MenuOpzioneRepository extends EntityRepository {
      *
      * @param string $url Pagina da cercare
      * @param Utente $utente Utente per il quale restituire il menu
-     * @param SessionInterface $session Gestore delle sessioni
+     * @param RequestStack $reqstack Gestore dello stack delle variabili globali
      *
      * @return array Array associativo con la struttura del menu
      */
-    public function breadcrumb($url, Utente $utente=null, SessionInterface $session) {
+    public function breadcrumb($url, Utente $utente=null, RequestStack $reqstack) {
       $dati = array();
       // imposta ruolo e funzione
       $ruolo = $utente ? $utente->getRoles()[0] : 'NESSUNO';
       if ($ruolo == 'ROLE_ATA' && $utente->getSegreteria()) {
         // abilita funzioni di segreteria per gli ATA
         $funzione = array('SEGRETERIA', 'NESSUNA');
-      } elseif ($ruolo == 'ROLE_DOCENTE' && $session->get('/APP/DOCENTE/coordinatore')) {
+      } elseif ($ruolo == 'ROLE_DOCENTE' && $reqstack->getSession()->get('/APP/DOCENTE/coordinatore')) {
         // abilita funzioni di coordinatore per i docenti
         $funzione = array('COORDINATORE', 'NESSUNA');
       } else {

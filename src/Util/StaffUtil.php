@@ -16,7 +16,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Util\RegistroUtil;
 use App\Util\GenitoriUtil;
 use App\Entity\Classe;
@@ -58,9 +58,9 @@ class StaffUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var RegistroUtil $regUtil Funzioni di utilità per il registro
@@ -81,16 +81,16 @@ class StaffUtil {
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param GenitoriUtil $genUtil Funzioni di utilità per i genitori
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session, RegistroUtil $regUtil, GenitoriUtil $genUtil) {
+                               RequestStack $reqstack, RegistroUtil $regUtil, GenitoriUtil $genUtil) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->regUtil = $regUtil;
     $this->genUtil = $genUtil;
   }

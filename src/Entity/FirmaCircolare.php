@@ -79,18 +79,18 @@ class FirmaCircolare {
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
-   * @Assert\DateTime(message="field.datetime")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $letto;
+  private ?\DateTime $letto;
 
   /**
    * @var \DateTime $firmato Data e ora della firma della circolare [conferma di lettura esplicita]
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
-   * @Assert\DateTime(message="field.datetime")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $firmato;
+  private ?\DateTime $firmato;
 
 
   //==================== EVENTI ORM ====================
@@ -204,7 +204,7 @@ class FirmaCircolare {
    *
    * @return Circolare Oggetto Circolare
    */
-  public function setLetto($letto) {
+  public function setLetto(\DateTime $letto=null) {
     $this->letto = $letto;
     return $this;
   }
@@ -225,7 +225,7 @@ class FirmaCircolare {
    *
    * @return FirmaCircolare Oggetto FirmaCircolare
    */
-  public function setFirmato($firmato) {
+  public function setFirmato(\DateTime $firmato=null) {
     $this->firmato = $firmato;
     return $this;
   }

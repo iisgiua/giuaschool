@@ -23,7 +23,7 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
 use App\Entity\Cattedra;
@@ -44,7 +44,7 @@ class OsservazioniController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
@@ -59,7 +59,7 @@ class OsservazioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function osservazioniAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                       RegistroUtil $reg, $cattedra, $classe, $data) {
     // inizializza variabili
     $lista_festivi = null;
@@ -75,19 +75,19 @@ class OsservazioniController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($session->get('/APP/DOCENTE/data_lezione')) {
+      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -95,7 +95,7 @@ class OsservazioniController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $session->set('/APP/DOCENTE/data_lezione', $data);
+      $reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -148,7 +148,7 @@ class OsservazioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render($template, array(
       'pagina_titolo' => 'page.lezioni_osservazioni',
@@ -359,7 +359,7 @@ class OsservazioniController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
@@ -374,7 +374,7 @@ class OsservazioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniPersonaliAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function osservazioniPersonaliAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                                RegistroUtil $reg, $cattedra, $classe, $data) {
     // inizializza variabili
     $lista_festivi = null;
@@ -386,19 +386,19 @@ class OsservazioniController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($session->get('/APP/DOCENTE/data_lezione')) {
+      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -406,7 +406,7 @@ class OsservazioniController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $session->set('/APP/DOCENTE/data_lezione', $data);
+      $reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -452,7 +452,7 @@ class OsservazioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/osservazioni_personali.html.twig', array(
       'pagina_titolo' => 'page.lezioni_osservazioni_personali',

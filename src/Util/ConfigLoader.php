@@ -13,8 +13,7 @@
 namespace App\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 use App\Entity\Configurazione;
 use App\Entity\Istituto;
@@ -39,9 +38,9 @@ class ConfigLoader {
   private $em;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var Security $security Gestore dell'autenticazione degli utenti
@@ -55,13 +54,13 @@ class ConfigLoader {
    * Construttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param Security $security Gestore dell'autenticazione degli utenti
    */
-  public function __construct(EntityManagerInterface $em, SessionInterface $session,
+  public function __construct(EntityManagerInterface $em, RequestStack $reqstack,
                               Security $security) {
     $this->em = $em;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->security = $security;
   }
 
@@ -70,23 +69,23 @@ class ConfigLoader {
    */
   public function carica() {
     // rimuove i dati esistenti
-    $this->session->remove('/CONFIG');
-    $this->session->remove('/APP/ROUTE');
-    $this->session->remove('/APP/FILE');
-    $this->session->remove('/APP/DOCENTE');
-    $this->session->remove('/APP/GENITORE');
-    $this->session->remove('/APP/APP');
+    foreach ($this->reqstack->getSession()->all() as $k => $v) {
+      if (substr($k, 0, 8) == '/CONFIG/' ||
+          (substr($k, 0, 5) == '/APP/' && substr($k, 0, 12) != '/APP/UTENTE/')) {
+        $this->reqstack->getSession()->remove($k);
+      }
+    }
     // carica dati dall'entità Configurazione (/CONFIG/SISTEMA/*, /CONFIG/SCUOLA/*, /CONFIG/ACCESSO/*)
     $list = $this->em->getRepository('App\Entity\Configurazione')->load();
     foreach ($list as $item) {
-      $this->session->set('/CONFIG/'.$item['categoria'].'/'.$item['parametro'], $item['valore']);
+      $this->reqstack->getSession()->set('/CONFIG/'.$item['categoria'].'/'.$item['parametro'], $item['valore']);
     }
     // carica dati dall'entità Istituto (/CONFIG/ISTITUTO/*)
     $this->caricaIstituto();
     // carica i menu (/CONFIG/MENU/*)
     $this->caricaMenu();
     // carica dati dell'utente (/APP/<tipo_utente>/*)
-    if (!$this->session->get('/APP/UTENTE/lista_profili') || $this->session->get('/APP/UTENTE/profilo_usato')) {
+    if (!$this->reqstack->getSession()->get('/APP/UTENTE/lista_profili') || $this->reqstack->getSession()->get('/APP/UTENTE/profilo_usato')) {
       // se c'è un solo profilo oppure è stato scelto il profilo: carica dati utente
       $this->caricaUtente();
     }
@@ -101,19 +100,19 @@ class ConfigLoader {
     // carica istituto
     $istituto = $this->em->getRepository('App\Entity\Istituto')->findAll();
     if (count($istituto) > 0) {
-      $this->session->set('/CONFIG/ISTITUTO/tipo', $istituto[0]->getTipo());
-      $this->session->set('/CONFIG/ISTITUTO/tipo_sigla', $istituto[0]->getTipoSigla());
-      $this->session->set('/CONFIG/ISTITUTO/nome', $istituto[0]->getNome());
-      $this->session->set('/CONFIG/ISTITUTO/nome_breve', $istituto[0]->getNomeBreve());
-      $this->session->set('/CONFIG/ISTITUTO/intestazione', $istituto[0]->getIntestazione());
-      $this->session->set('/CONFIG/ISTITUTO/intestazione_breve', $istituto[0]->getIntestazioneBreve());
-      $this->session->set('/CONFIG/ISTITUTO/email', $istituto[0]->getEmail());
-      $this->session->set('/CONFIG/ISTITUTO/pec', $istituto[0]->getPec());
-      $this->session->set('/CONFIG/ISTITUTO/url_sito', $istituto[0]->getUrlSito());
-      $this->session->set('/CONFIG/ISTITUTO/url_registro', $istituto[0]->getUrlRegistro());
-      $this->session->set('/CONFIG/ISTITUTO/firma_preside', $istituto[0]->getFirmaPreside());
-      $this->session->set('/CONFIG/ISTITUTO/email_amministratore', $istituto[0]->getEmailAmministratore());
-      $this->session->set('/CONFIG/ISTITUTO/email_notifiche', $istituto[0]->getEmailNotifiche());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/tipo', $istituto[0]->getTipo());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/tipo_sigla', $istituto[0]->getTipoSigla());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/nome', $istituto[0]->getNome());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/nome_breve', $istituto[0]->getNomeBreve());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/intestazione', $istituto[0]->getIntestazione());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/intestazione_breve', $istituto[0]->getIntestazioneBreve());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/email', $istituto[0]->getEmail());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/pec', $istituto[0]->getPec());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/url_sito', $istituto[0]->getUrlSito());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/url_registro', $istituto[0]->getUrlRegistro());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/firma_preside', $istituto[0]->getFirmaPreside());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/email_amministratore', $istituto[0]->getEmailAmministratore());
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/email_notifiche', $istituto[0]->getEmailNotifiche());
     }
     // carica sedi
     $sedi = $this->em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
@@ -121,14 +120,14 @@ class ConfigLoader {
       ->orderBy('s.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();
-    $this->session->set('/CONFIG/ISTITUTO/num_sedi', count($sedi));
+    $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/num_sedi', count($sedi));
     foreach ($sedi as $key=>$sede) {
-      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_nome', $sede['nome']);
-      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_nome_breve', $sede['nomeBreve']);
-      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_citta', $sede['citta']);
-      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_indirizzo1', $sede['indirizzo1']);
-      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_indirizzo2', $sede['indirizzo2']);
-      $this->session->set('/CONFIG/ISTITUTO/sede_'.$key.'_telefono', $sede['telefono']);
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/sede_'.$key.'_nome', $sede['nome']);
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/sede_'.$key.'_nome_breve', $sede['nomeBreve']);
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/sede_'.$key.'_citta', $sede['citta']);
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/sede_'.$key.'_indirizzo1', $sede['indirizzo1']);
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/sede_'.$key.'_indirizzo2', $sede['indirizzo2']);
+      $this->reqstack->getSession()->set('/CONFIG/ISTITUTO/sede_'.$key.'_telefono', $sede['telefono']);
     }
   }
 
@@ -141,8 +140,8 @@ class ConfigLoader {
     // legge menu esistenti
     $lista_menu = $this->em->getRepository('App\Entity\Menu')->listaMenu();
     foreach ($lista_menu as $m) {
-      $menu = $this->em->getRepository('App\Entity\Menu')->menu($m['selettore'], $utente, $this->session);
-      $this->session->set('/CONFIG/MENU/'.$m['selettore'], $menu);
+      $menu = $this->em->getRepository('App\Entity\Menu')->menu($m['selettore'], $utente, $this->reqstack);
+      $this->reqstack->getSession()->set('/CONFIG/MENU/'.$m['selettore'], $menu);
     }
   }
 
@@ -161,7 +160,7 @@ class ConfigLoader {
         ->getQuery()
         ->getArrayResult();
       $lista = implode(',', array_column($classi, 'id'));
-      $this->session->set('/APP/DOCENTE/coordinatore', $lista);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/coordinatore', $lista);
     }
   }
 
@@ -179,7 +178,7 @@ class ConfigLoader {
       $tema = 'tema-new';
     }
     // imposta tema
-    $this->session->set('/APP/APP/tema', $tema);
+    $this->reqstack->getSession()->set('/APP/APP/tema', $tema);
   }
 
 }

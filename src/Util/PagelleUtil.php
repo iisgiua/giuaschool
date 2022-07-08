@@ -14,7 +14,7 @@ namespace App\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Entity\Classe;
@@ -46,9 +46,9 @@ class PagelleUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var \Twig\Environment $tpl Gestione template
@@ -78,16 +78,16 @@ class PagelleUtil {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param \Twig\Environment $tpl Gestione template
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param string $root Directory principale dell'applicazione
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session, \Twig\Environment $tpl, PdfManager $pdf, $root) {
+                               RequestStack $reqstack, \Twig\Environment $tpl, PdfManager $pdf, $root) {
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->tpl = $tpl;
     $this->pdf = $pdf;
     $this->root = $root;
@@ -201,7 +201,7 @@ class PagelleUtil {
       }
       // presidente
       if ($scrutinio->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $scrutinio->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -310,7 +310,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -404,7 +404,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -416,7 +416,7 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviati
       $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
@@ -486,7 +486,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -522,13 +522,13 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-riepilogo-voti-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -549,7 +549,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(10, 20, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
@@ -557,7 +557,7 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetFooterMargin(10);
         $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 6));
         $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
-        $this->pdf->getHandler()->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintHeader(true);
         $this->pdf->getHandler()->setPrintFooter(true);
@@ -601,7 +601,7 @@ class PagelleUtil {
         '-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(10, 20, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
@@ -609,7 +609,7 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetFooterMargin(10);
         $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 6));
         $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
-        $this->pdf->getHandler()->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintHeader(true);
         $this->pdf->getHandler()->setPrintFooter(true);
@@ -670,7 +670,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -683,7 +683,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'PRIMO QUADRIMESTRE', 0, 'R', 'B');
@@ -890,7 +890,7 @@ class PagelleUtil {
     $dati = array();
     if ($periodo == 'P' || $periodo == 'S') {
       // dati scrutinio
-      $dati['periodo'] = $this->session->get('/CONFIG/SCUOLA/'.
+      $dati['periodo'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
@@ -1023,7 +1023,7 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviati
       $dati['periodo'] = 'SCRUTINIO ESAMI GIUDIZIO SOSPESO SESSIONE SUPPLETTIVA';
@@ -1086,14 +1086,14 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-firme-registro-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Foglio firme Registro '.$nome_classe);
         $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
@@ -1127,7 +1127,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Foglio firme Registro '.$nome_classe);
         $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
@@ -1162,7 +1162,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Foglio firme Registro '.$nome_classe);
         $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
@@ -1274,7 +1274,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1334,7 +1334,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1491,7 +1491,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1568,7 +1568,7 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // legge materie
       $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
@@ -1595,7 +1595,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1767,7 +1767,7 @@ class PagelleUtil {
         $dati['errore'] = true;
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviato
       $dati['religione'] = $dati['scrutinio']->getDato('religione')[$alunno->getId()];
@@ -1823,13 +1823,13 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-pagella-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -1862,7 +1862,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione dei voti - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -1902,7 +1902,7 @@ class PagelleUtil {
         '-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Comunicazione dei voti - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2064,13 +2064,13 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-debiti-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2103,7 +2103,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione debiti formativi - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2274,7 +2274,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-tabellone-esiti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2308,7 +2308,7 @@ class PagelleUtil {
         '-tabellone-esiti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2362,7 +2362,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
@@ -2408,7 +2408,7 @@ class PagelleUtil {
         '-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
@@ -2482,7 +2482,7 @@ class PagelleUtil {
         $dati['ammessi'][$alu['id']] = $alu;
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // scrutinio
       $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
@@ -2503,7 +2503,7 @@ class PagelleUtil {
         $dati['ammessi'][$alu['id']] = $alu;
       }
       // anno scolastico
-      $dati['annoScolastico'] = ($periodo == 'X' ? '2021/2022' : $this->session->get('/CONFIG/SCUOLA/anno_scolastico'));
+      $dati['annoScolastico'] = ($periodo == 'X' ? '2021/2022' : $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'));
     }
     // restituisce dati
     return $dati;
@@ -2531,7 +2531,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione di non ammissione - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2572,7 +2572,7 @@ class PagelleUtil {
         '-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Comunicazione di non ammissione - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2736,7 +2736,7 @@ class PagelleUtil {
           'assenze' => $v->getAssenze());
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviato
       $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
@@ -2811,7 +2811,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-carenze-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione per il recupero autonomo - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2935,14 +2935,14 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2976,7 +2976,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -3011,7 +3011,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -3066,7 +3066,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazione-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Certificazione delle competenze - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
@@ -3118,7 +3118,7 @@ class PagelleUtil {
         '-certificazione-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Certificazione delle competenze - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
@@ -3189,7 +3189,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -3202,10 +3202,10 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 0, 5, 0, 0, $this->session->get('/CONFIG/SCUOLA/periodo2_nome'), 0, 'R', 'B');
+    $this->cella($pdf, 0, 5, 0, 0, $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome'), 0, 'R', 'B');
     $this->acapo($pdf, 5);
     // intestazione tabella
     $pdf->SetFont('helvetica', 'B', 8);

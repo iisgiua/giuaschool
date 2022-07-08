@@ -22,7 +22,7 @@ use Google_Service_Classroom_Student as GStudent;
 use Google_Service_Classroom_Teacher as GTeacher;
 use Google_Service_Classroom_Course as GCourse;
 use GuzzleHttp\Client;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Utente;
 use App\Entity\Alunno;
@@ -47,9 +47,9 @@ class AccountProvisioning {
   private $em;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var string $dirProgetto Percorso per i file dell'applicazione
@@ -78,12 +78,12 @@ class AccountProvisioning {
    * Construttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
-  public function __construct(EntityManagerInterface $em, SessionInterface $session, $dirProgetto) {
+  public function __construct(EntityManagerInterface $em, RequestStack $reqstack, $dirProgetto) {
     $this->em = $em;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->dirProgetto = $dirProgetto;
     $this->serviceGsuite = null;
     $this->serviceMoodle = null;
@@ -269,9 +269,9 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function aggiungeAlunnoClasse(Alunno $alunno, Classe $classe) {
-    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
     $nomeclasse = $classe->getAnno().$classe->getSezione();
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // GSuite: aggiunge a gruppo classe
     $gruppo = 'studenti'.strtolower($nomeclasse).'@'.$dominio;
     if (($errore = $this->aggiungeUtenteGruppoGsuite($alunno->getEmail(), $gruppo))) {
@@ -316,9 +316,9 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function rimuoveAlunnoClasse(Alunno $alunno, Classe $classe) {
-    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
     $nomeclasse = $classe->getAnno().$classe->getSezione();
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // GSuite: rimuove da gruppo classe
     $gruppo = 'studenti'.strtolower($nomeclasse).'@'.$dominio;
     if (($errore = $this->rimuoveUtenteGruppoGsuite($alunno->getEmail(), $gruppo))) {
@@ -400,7 +400,7 @@ class AccountProvisioning {
   public function aggiungeCattedra(Cattedra $cattedra) {
     $docente = $cattedra->getDocente()->getEmail();
     $nomeclasse = $cattedra->getClasse()->getAnno().$cattedra->getClasse()->getSezione();
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     $coordinatore = ($cattedra->getClasse()->getCoordinatore() == $cattedra->getDocente()) ||
       ($cattedra->getClasse()->getSegretario() == $cattedra->getDocente());
     $docente_username = $cattedra->getDocente()->getUsername();
@@ -518,7 +518,7 @@ class AccountProvisioning {
     $docente_email = $docente->getEmail();
     $docente_username = $docente->getUsername();
     $nomeclasse = $classe->getAnno().$classe->getSezione();
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // controlla se ha altre materie nella classe
     $altre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('COUNT(c.id)')
@@ -626,7 +626,7 @@ class AccountProvisioning {
   public function aggiungeCoordinatore(Docente $docente, Classe $classe) {
     $docente_email = $docente->getEmail();
     $nomeclasse = $classe->getAnno().$classe->getSezione();
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // GSuite: aggiunge docente a CdC come coordinatore/segretario
     if (($errore = $this->aggiungeDocenteCdcGsuite($docente_email, $nomeclasse, $anno, true))) {
       // errore
@@ -648,7 +648,7 @@ class AccountProvisioning {
   public function rimuoveCoordinatore(Docente $docente, Classe $classe) {
     $docente_email = $docente->getEmail();
     $nomeclasse = $classe->getAnno().$classe->getSezione();
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // GSuite: aggiunge docente a CdC
     if (($errore = $this->aggiungeDocenteCdcGsuite($docente_email, $nomeclasse, $anno, false))) {
       // errore
@@ -701,7 +701,7 @@ class AccountProvisioning {
     try {
       $client = new GClient();
       $client->setAuthConfig($this->dirProgetto.'/config/secrets/registro-elettronico-utenti-gsuite.json');
-      $client->setSubject($this->session->get('/CONFIG/ISTITUTO/email_amministratore'));
+      $client->setSubject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_amministratore'));
       $client->setApplicationName("Registro Elettronico Utenti");
       $client->addScope('https://www.googleapis.com/auth/admin.directory.user');
       $client->addScope('https://www.googleapis.com/auth/admin.directory.user.security');
@@ -794,8 +794,8 @@ class AccountProvisioning {
   private function creaUtenteGsuite($nome, $cognome, $sesso, $email, $password, $tipo) {
     // init
     $errore = null;
-    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // controlla esistenza
     try {
       $esistente = $this->serviceGsuite['directory']->users->get($email);
@@ -927,8 +927,8 @@ class AccountProvisioning {
   private function sospendeUtenteGsuite($email, $tipo, $sospeso) {
     // init
     $errore = null;
-    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     try {
       if ($tipo == 'D') {
         // docenti/staff/preside
@@ -981,7 +981,7 @@ class AccountProvisioning {
   private function creaCorsoGsuite($docente, $classe, $materia, $anno) {
     // init
     $errore = null;
-    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
     $nomecorso = "$classe - $materia - $anno";
     $corso = strtoupper($classe.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
     try {
@@ -1106,7 +1106,7 @@ class AccountProvisioning {
   private function rimuoveDocenteCorsoGsuite($docente, $corso, $cancellagruppo) {
     // init
     $errore = null;
-    $dominio = $this->session->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
     $classe = substr($corso, 0, 2);
     try {
       // lista docenti del corso
@@ -1463,7 +1463,7 @@ class AccountProvisioning {
         'password' => $password,
         'email' => $email,
         'mailformat' => 1,
-        'city' => $this->session->get('/CONFIG/ISTITUTO/sede_0_citta'),
+        'city' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/sede_0_citta'),
         'country' => 'IT');
       $ris = $this->serviceMoodle['client']->post($url, ['form_params' => ['users' => [$user]]]);
       $msg = json_decode($ris->getBody());

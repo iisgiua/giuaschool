@@ -57,9 +57,9 @@ class DerogaAssenza {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var Alunno $alunno Alunno al quale si riferisce l'assenza
@@ -148,7 +148,7 @@ class DerogaAssenza {
    *
    * @return DerogaAssenza Oggetto DerogaAssenza
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }

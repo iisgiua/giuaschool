@@ -16,7 +16,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Faker\Factory;
 use App\Tests\FakerPerson;
 use App\Entity\Docente;
@@ -31,7 +31,7 @@ class DocenteFixtures extends Fixture implements DependentFixtureInterface, Fixt
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
    */
   private $encoder;
 
@@ -41,9 +41,9 @@ class DocenteFixtures extends Fixture implements DependentFixtureInterface, Fixt
   /**
    * Costruttore
    *
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
    */
-  public function __construct(UserPasswordEncoderInterface $encoder=null) {
+  public function __construct(UserPasswordHasherInterface $encoder=null) {
     $this->encoder = $encoder;
   }
 

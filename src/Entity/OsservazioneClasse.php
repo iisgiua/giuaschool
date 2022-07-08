@@ -60,9 +60,9 @@ class OsservazioneClasse {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var string $testo Testo dell'osservazione
@@ -153,7 +153,7 @@ class OsservazioneClasse {
    *
    * @return OsservazioneClasse Oggetto OsservazioneClasse
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }

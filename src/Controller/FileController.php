@@ -13,7 +13,7 @@
 namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -42,7 +42,7 @@ class FileController extends AbstractController {
    * Esegue l'upload di un file tramite chiamata AJAX.
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param string $pagina Nome della pagina di invio del form
    * @param string $param Nome del parametro usato nel form
    *
@@ -54,7 +54,7 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function uploadAction(Request $request, SessionInterface $session, $pagina, $param) {
+  public function uploadAction(Request $request, RequestStack $reqstack, $pagina, $param) {
     $risposta = array();
     // legge file
     $files = $request->files->get($param);
@@ -79,7 +79,7 @@ class FileController extends AbstractController {
     }
     // memorizza in sessione
     $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
-    $session->set($var_sessione, array_merge($risposta, $session->get($var_sessione, [])));
+    $reqstack->getSession()->set($var_sessione, array_merge($risposta, $reqstack->getSession()->get($var_sessione, [])));
     // restituisce risposta
     return new JsonResponse($risposta);
   }
@@ -88,7 +88,7 @@ class FileController extends AbstractController {
    * Rimuove il file caricato tramite chiamata AJAX.
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param string $pagina Nome della pagina di invio del form
    * @param string $param Nome del parametro usato nel form
    *
@@ -100,7 +100,7 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function removeAction(Request $request, SessionInterface $session, $pagina, $param) {
+  public function removeAction(Request $request, RequestStack $reqstack, $pagina, $param) {
     // legge file
     $file = $request->request->get($param);
     // imposta directory temporanea
@@ -109,7 +109,7 @@ class FileController extends AbstractController {
     if ($file) {
       $fs = new Filesystem();
       $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
-      $vs = $session->get($var_sessione, []);
+      $vs = $reqstack->getSession()->get($var_sessione, []);
       foreach ($vs as $k=>$f) {
         if ($f['type'] == 'uploaded' && $f['temp'] == $file['temp']) {
           // trovato: cancella
@@ -124,7 +124,7 @@ class FileController extends AbstractController {
         }
       }
       // memorizza sessione
-      $session->set($var_sessione, $vs);
+      $reqstack->getSession()->set($var_sessione, $vs);
     }
     // restituisce risposta vuota
     return new JsonResponse([]);

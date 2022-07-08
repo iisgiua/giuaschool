@@ -20,10 +20,10 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
@@ -61,7 +61,7 @@ class DocentiController extends BaseController {
    * Importa docenti da file
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
@@ -71,7 +71,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, SessionInterface $session, CsvImporter $importer): Response {
+  public function importaAction(Request $request, RequestStack $reqstack, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
@@ -79,7 +79,7 @@ class DocentiController extends BaseController {
     $fs = new FileSystem();
     if (!$request->isMethod('POST')) {
       // cancella dati sessione
-      $session->remove($var_sessione);
+      $reqstack->getSession()->remove($var_sessione);
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -93,7 +93,7 @@ class DocentiController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
       $file = null;
-      foreach ($session->get($var_sessione.'/file', []) as $f) {
+      foreach ($reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
         $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
       }
       // importa file
@@ -117,7 +117,7 @@ class DocentiController extends BaseController {
       }
       $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
-      $session->remove($var_sessione);
+      $reqstack->getSession()->remove($var_sessione);
     }
     // visualizza pagina
     return $this->renderHtml('docenti', 'importa', $dati, $info, [$form->createView(),  'message.importa_docenti']);
@@ -128,7 +128,7 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
@@ -139,23 +139,23 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function modificaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                  TranslatorInterface $trans, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $session->get('/APP/ROUTE/docenti_modifica/nome', '');
-    $criteri['cognome'] = $session->get('/APP/ROUTE/docenti_modifica/cognome', '');
-    $criteri['classe'] = $session->get('/APP/ROUTE/docenti_modifica/classe', 0);
+    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/nome', '');
+    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/cognome', '');
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/classe', 0);
     $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/docenti_modifica/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // form di ricerca
     $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
@@ -171,10 +171,10 @@ class DocentiController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $session->set('/APP/ROUTE/docenti_modifica/nome', $criteri['nome']);
-      $session->set('/APP/ROUTE/docenti_modifica/cognome', $criteri['cognome']);
-      $session->set('/APP/ROUTE/docenti_modifica/classe', $criteri['classe']);
-      $session->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/nome', $criteri['nome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/cognome', $criteri['cognome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/classe', $criteri['classe']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_modifica/pagina', $pagina);
     }
     // lista docenti
     $dati = $em->getRepository('App\Entity\Docente')->cerca($criteri, $pagina);
@@ -292,8 +292,8 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
@@ -311,7 +311,7 @@ class DocentiController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordEncoderInterface $encoder, SessionInterface $session,
+                                 UserPasswordHasherInterface $encoder, RequestStack $reqstack,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla docente
@@ -339,7 +339,7 @@ class DocentiController extends BaseController {
       'Ruolo' => $docente->getRoles()[0],
       'ID' => $docente->getId()));
     // crea documento PDF
-    $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_docenti.html.twig', array(
@@ -353,9 +353,9 @@ class DocentiController extends BaseController {
     if ($tipo == 'E') {
       // invia per email
       $message = (new Email())
-        ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($docente->getEmail())
-        ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
         ->text($this->renderView('email/credenziali.txt.twig'))
         ->html($this->renderView('email/credenziali.html.twig'))
         ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');
@@ -427,7 +427,7 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -439,21 +439,21 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function staffAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function staffAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                               $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $session->get('/APP/ROUTE/docenti_staff/nome', '');
-    $criteri['cognome'] = $session->get('/APP/ROUTE/docenti_staff/cognome', '');
+    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_staff/nome', '');
+    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_staff/cognome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/docenti_staff/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_staff/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'utenti',
@@ -464,9 +464,9 @@ class DocentiController extends BaseController {
       $criteri['nome'] = trim($form->get('nome')->getData());
       $criteri['cognome'] = trim($form->get('cognome')->getData());
       $pagina = 1;
-      $session->set('/APP/ROUTE/docenti_staff/nome', $criteri['nome']);
-      $session->set('/APP/ROUTE/docenti_staff/cognome', $criteri['cognome']);
-      $session->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/nome', $criteri['nome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/cognome', $criteri['cognome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_staff/pagina', $pagina);
     }
     // lista staff
     $dati = $em->getRepository('App\Entity\Staff')->cerca($criteri, $pagina);
@@ -568,7 +568,7 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -580,23 +580,23 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function coordinatoriAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function coordinatoriAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                      $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $session->get('/APP/ROUTE/docenti_coordinatori/nome', '');
-    $criteri['cognome'] = $session->get('/APP/ROUTE/docenti_coordinatori/cognome', '');
-    $criteri['classe'] = $session->get('/APP/ROUTE/docenti_coordinatori/classe', 0);
+    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/nome', '');
+    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/cognome', '');
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/classe', 0);
     $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/docenti_coordinatori/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // form di ricerca
     $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
@@ -610,10 +610,10 @@ class DocentiController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $session->set('/APP/ROUTE/docenti_coordinatori/nome', $criteri['nome']);
-      $session->set('/APP/ROUTE/docenti_coordinatori/cognome', $criteri['cognome']);
-      $session->set('/APP/ROUTE/docenti_coordinatori/classe', $criteri['classe']);
-      $session->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/nome', $criteri['nome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/cognome', $criteri['cognome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/classe', $criteri['classe']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_coordinatori/pagina', $pagina);
     }
     // lista coordinatori
     $dati = $em->getRepository('App\Entity\Classe')->cercaCoordinatori($criteri, $pagina);
@@ -733,7 +733,7 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @return Response Pagina di risposta
@@ -745,23 +745,23 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function segretariAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function segretariAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                   $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $session->get('/APP/ROUTE/docenti_segretari/nome', '');
-    $criteri['cognome'] = $session->get('/APP/ROUTE/docenti_segretari/cognome', '');
-    $criteri['classe'] = $session->get('/APP/ROUTE/docenti_segretari/classe', 0);
+    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/nome', '');
+    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/cognome', '');
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/classe', 0);
     $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/docenti_segretari/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
     }
     // form di ricerca
     $lista_classi = $em->getRepository('App\Entity\Classe')->findBy([], ['anno' =>'ASC', 'sezione' =>'ASC']);
@@ -775,10 +775,10 @@ class DocentiController extends BaseController {
       $criteri['classe'] = (is_object($form->get('classe')->getData()) ? $form->get('classe')->getData()->getId() :
         intval($form->get('classe')->getData()));
       $pagina = 1;
-      $session->set('/APP/ROUTE/docenti_segretari/nome', $criteri['nome']);
-      $session->set('/APP/ROUTE/docenti_segretari/cognome', $criteri['cognome']);
-      $session->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
-      $session->set('/APP/ROUTE/docenti_segretari/classe', $criteri['classe']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/nome', $criteri['nome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/cognome', $criteri['cognome']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_segretari/classe', $criteri['classe']);
     }
     // lista segretari
     $dati = $em->getRepository('App\Entity\Classe')->cercaSegretari($criteri, $pagina);
@@ -899,7 +899,7 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
    * @Route("/docenti/cattedre/{pagina}", name="docenti_cattedre",
@@ -909,25 +909,25 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function cattedreAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function cattedreAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                  $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['classe'] = $session->get('/APP/ROUTE/docenti_cattedre/classe', 0);
-    $criteri['materia'] = $session->get('/APP/ROUTE/docenti_cattedre/materia', 0);
-    $criteri['docente'] = $session->get('/APP/ROUTE/docenti_cattedre/docente', 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/classe', 0);
+    $criteri['materia'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/materia', 0);
+    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/docente', 0);
     $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     $materia = ($criteri['materia'] > 0 ? $em->getRepository('App\Entity\Materia')->find($criteri['materia']) : 0);
     $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/docenti_cattedre/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'cattedre',
@@ -939,10 +939,10 @@ class DocentiController extends BaseController {
       $criteri['materia'] = ($form->get('materia')->getData() ? $form->get('materia')->getData()->getId() : 0);
       $criteri['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : 0);
       $pagina = 1;
-      $session->set('/APP/ROUTE/docenti_cattedre/classe', $criteri['classe']);
-      $session->set('/APP/ROUTE/docenti_cattedre/materia', $criteri['materia']);
-      $session->set('/APP/ROUTE/docenti_cattedre/docente', $criteri['docente']);
-      $session->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/classe', $criteri['classe']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/materia', $criteri['materia']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/docente', $criteri['docente']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/pagina', $pagina);
     }
     // lista cattedre
     $dati = $em->getRepository('App\Entity\Cattedra')->cerca($criteri, $pagina);
@@ -1097,7 +1097,7 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
@@ -1108,25 +1108,25 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function colloquiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function colloquiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                  TranslatorInterface $trans, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['sede'] = $session->get('/APP/ROUTE/docenti_colloqui/sede', 0);
-    $criteri['classe'] = $session->get('/APP/ROUTE/docenti_colloqui/classe', 0);
-    $criteri['docente'] = $session->get('/APP/ROUTE/docenti_colloqui/docente', 0);
+    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/sede', 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/classe', 0);
+    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/docente', 0);
     $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : 0);
     $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
     $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/docenti_colloqui/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/docenti_colloqui/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-sedi',
@@ -1138,10 +1138,10 @@ class DocentiController extends BaseController {
       $criteri['classe'] = ($form->get('classe')->getData() ? $form->get('classe')->getData()->getId() : 0);
       $criteri['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : 0);
       $pagina = 1;
-      $session->set('/APP/ROUTE/docenti_colloqui/sede', $criteri['sede']);
-      $session->set('/APP/ROUTE/docenti_colloqui/classe', $criteri['classe']);
-      $session->set('/APP/ROUTE/docenti_colloqui/docente', $criteri['docente']);
-      $session->set('/APP/ROUTE/docenti_colloqui/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/sede', $criteri['sede']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/classe', $criteri['classe']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/docente', $criteri['docente']);
+      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/pagina', $pagina);
     }
     // lista colloqui
     $dati = $em->getRepository('App\Entity\Colloquio')->cerca($criteri, $pagina);

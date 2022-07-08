@@ -20,7 +20,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -54,7 +54,7 @@ class AgendaController extends AbstractController {
    * Visualizza gli eventi destinati ai docenti
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
    * @param string $mese Anno e mese della pagina da visualizzare dell'agenda
@@ -68,15 +68,15 @@ class AgendaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiAction(EntityManagerInterface $em, SessionInterface $session, AgendaUtil $age, $mese) {
+  public function eventiAction(EntityManagerInterface $em, RequestStack $reqstack, AgendaUtil $age, $mese) {
     $dati = null;
     $info = null;
     // parametro data
     if ($mese == '0000-00') {
       // mese non specificato
-      if ($session->get('/APP/ROUTE/agenda_eventi/mese')) {
+      if ($reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese')) {
         // recupera data da sessione
-        $mese = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/agenda_eventi/mese').'-01');
+        $mese = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese').'-01');
       } else {
         // imposta data odierna
         $mese = (new \DateTime())->modify('first day of this month');
@@ -84,7 +84,7 @@ class AgendaController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $mese = \DateTime::createFromFormat('Y-m-d', $mese.'-01');
-      $session->set('/APP/ROUTE/agenda_eventi/mese', $mese->format('Y-m'));
+      $reqstack->getSession()->set('/APP/ROUTE/agenda_eventi/mese', $mese->format('Y-m'));
     }
     // nome/url mese
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -150,7 +150,7 @@ class AgendaController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -167,7 +167,7 @@ class AgendaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verificaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function verificaEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                      TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
@@ -177,7 +177,7 @@ class AgendaController extends AbstractController {
     $materia_sostegno = null;
     if ($request->isMethod('GET')) {
       // inizializza sessione
-      $session->set('/APP/ROUTE/agenda_verifica_edit/conferma', 0);
+      $reqstack->getSession()->set('/APP/ROUTE/agenda_verifica_edit/conferma', 0);
     }
     // controlla azione
     if ($id > 0) {
@@ -193,9 +193,9 @@ class AgendaController extends AbstractController {
       // azione add
       $oggi = new \DateTime();
       $mese = $oggi;
-      if ($session->get('/APP/ROUTE/agenda_eventi/mese')) {
+      if ($reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese')) {
         // recupera data da sessione
-        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/agenda_eventi/mese').'-01');
+        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese').'-01');
         if ($mese_sessione > $oggi) {
           // ultimo giorno di mese precedente
           $mese = $mese_sessione;
@@ -290,9 +290,9 @@ class AgendaController extends AbstractController {
         // controllo verifiche esistenti
         $verifiche = $age->controlloVerifiche($avviso);
         $data_classe = $avviso->getData()->format('Y-m-d').'|'.$avviso->getCattedra()->getClasse()->getId();
-        if (count($verifiche) > 0 && $session->get('/APP/ROUTE/agenda_verifica_edit/conferma', 0) != $data_classe) {
+        if (count($verifiche) > 0 && $reqstack->getSession()->get('/APP/ROUTE/agenda_verifica_edit/conferma', 0) != $data_classe) {
           // richiede conferma
-          $session->set('/APP/ROUTE/agenda_verifica_edit/conferma', $data_classe);
+          $reqstack->getSession()->set('/APP/ROUTE/agenda_verifica_edit/conferma', $data_classe);
         } else {
           // imposta sede
           $avviso->setSedi(new ArrayCollection([$avviso->getCattedra()->getClasse()->getSede()]));
@@ -531,7 +531,7 @@ class AgendaController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -548,7 +548,7 @@ class AgendaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function compitoEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                     TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac,
                                     AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
@@ -559,7 +559,7 @@ class AgendaController extends AbstractController {
     $materia_sostegno = null;
     if ($request->isMethod('GET')) {
       // inizializza sessione
-      $session->set('/APP/ROUTE/agenda_compito_edit/conferma', 0);
+      $reqstack->getSession()->set('/APP/ROUTE/agenda_compito_edit/conferma', 0);
     }
     // controlla azione
     if ($id > 0) {
@@ -575,9 +575,9 @@ class AgendaController extends AbstractController {
       // azione add
       $oggi = new \DateTime();
       $mese = $oggi;
-      if ($session->get('/APP/ROUTE/agenda_eventi/mese')) {
+      if ($reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese')) {
         // recupera data da sessione
-        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/agenda_eventi/mese').'-01');
+        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese').'-01');
         if ($mese_sessione > $oggi) {
           // ultimo giorno di mese precedente
           $mese = $mese_sessione;
@@ -661,9 +661,9 @@ class AgendaController extends AbstractController {
         // controllo compiti esistenti
         $compiti = $age->controlloCompiti($avviso);
         $data_classe = $avviso->getData()->format('Y-m-d').'|'.$avviso->getCattedra()->getClasse()->getId();
-        if (count($compiti) > 0 && $session->get('/APP/ROUTE/agenda_compito_edit/conferma', 0) != $data_classe) {
+        if (count($compiti) > 0 && $reqstack->getSession()->get('/APP/ROUTE/agenda_compito_edit/conferma', 0) != $data_classe) {
           // richiede conferma
-          $session->set('/APP/ROUTE/agenda_compito_edit/conferma', $data_classe);
+          $reqstack->getSession()->set('/APP/ROUTE/agenda_compito_edit/conferma', $data_classe);
         } else {
           // imposta sede
           $avviso->setSedi(new ArrayCollection([$avviso->getCattedra()->getClasse()->getSede()]));

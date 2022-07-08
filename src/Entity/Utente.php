@@ -16,6 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 
 /**
@@ -32,7 +33,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @UniqueEntity(fields="username", message="field.unique", entityClass="App\Entity\Utente")
  * @UniqueEntity(fields="email", message="field.unique", entityClass="App\Entity\Utente")
  */
-class Utente implements UserInterface, \Serializable {
+class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -182,9 +183,9 @@ class Utente implements UserInterface, \Serializable {
    *
    * @ORM\Column(name="data_nascita", type="date", nullable=true)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $dataNascita;
+  private ?\DateTime $dataNascita;
 
   /**
    * @var string $comuneNascita Comune di nascita dell'utente
@@ -289,7 +290,7 @@ class Utente implements UserInterface, \Serializable {
    *
    * @return string Password dell'utente
    */
-  public function getPassword() {
+  public function getPassword(): ?string {
     return $this->password;
   }
 
@@ -673,7 +674,7 @@ class Utente implements UserInterface, \Serializable {
    *
    * @return Utente Oggetto Utente
    */
-  public function setDataNascita($dataNascita) {
+  public function setDataNascita(\DateTime $dataNascita=null) {
     $this->dataNascita = $dataNascita;
     return $this;
   }

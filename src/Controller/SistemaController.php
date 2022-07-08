@@ -19,8 +19,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -199,7 +199,7 @@ class SistemaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
@@ -212,7 +212,7 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordEncoderInterface $encoder, TranslatorInterface $trans,
+                                 UserPasswordHasherInterface $encoder, TranslatorInterface $trans,
                                  ValidatorInterface $validator, LogHandler $dblogger): Response {
     // init
     $dati = [];
@@ -266,7 +266,7 @@ class SistemaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -277,7 +277,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aliasAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function aliasAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                               TranslatorInterface $trans, LogHandler $dblogger): Response {
     // init
     $dati = [];
@@ -294,14 +294,14 @@ class SistemaController extends BaseController {
         $form->get('username')->addError(new FormError($trans->trans('exception.invalid_user')));
       } else {
         // memorizza dati in sessione
-        $session->set('/APP/UTENTE/tipo_accesso_reale', $session->get('/APP/UTENTE/tipo_accesso'));
-        $session->set('/APP/UTENTE/ultimo_accesso_reale', $session->get('/APP/UTENTE/ultimo_accesso'));
-        $session->set('/APP/UTENTE/username_reale', $this->getUser()->getUsername());
-        $session->set('/APP/UTENTE/ruolo_reale', $this->getUser()->getRoles()[0]);
-        $session->set('/APP/UTENTE/id_reale', $this->getUser()->getId());
-        $session->set('/APP/UTENTE/ultimo_accesso',
+        $reqstack->getSession()->set('/APP/UTENTE/tipo_accesso_reale', $reqstack->getSession()->get('/APP/UTENTE/tipo_accesso'));
+        $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso_reale', $reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso'));
+        $reqstack->getSession()->set('/APP/UTENTE/username_reale', $this->getUser()->getUsername());
+        $reqstack->getSession()->set('/APP/UTENTE/ruolo_reale', $this->getUser()->getRoles()[0]);
+        $reqstack->getSession()->set('/APP/UTENTE/id_reale', $this->getUser()->getId());
+        $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso',
           ($user->getUltimoAccesso() ? $user->getUltimoAccesso()->format('d/m/Y H:i:s') : null));
-        $session->set('/APP/UTENTE/tipo_accesso', 'alias');
+        $reqstack->getSession()->set('/APP/UTENTE/tipo_accesso', 'alias');
         // log azione
         $dblogger->logAzione('ACCESSO', 'Alias', array(
           'Username' => $user->getUsername(),
@@ -319,7 +319,7 @@ class SistemaController extends BaseController {
    * Disconnette l'alias in uso e ritorna all'utente iniziale
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -327,23 +327,23 @@ class SistemaController extends BaseController {
    * @Route("/sistema/alias/exit", name="sistema_alias_exit",
    *    methods={"GET"})
    */
-  public function aliasExitAction(Request $request, SessionInterface $session, LogHandler $dblogger): Response  {
+  public function aliasExitAction(Request $request, RequestStack $reqstack, LogHandler $dblogger): Response  {
     // log azione
     $dblogger->logAzione('ACCESSO', 'Alias Exit', array(
       'Username' => $this->getUser()->getUsername(),
       'Ruolo' => $this->getUser()->getRoles()[0],
-      'Username reale' => $session->get('/APP/UTENTE/username_reale'),
-      'Ruolo reale' => $session->get('/APP/UTENTE/ruolo_reale'),
-      'ID reale' => $session->get('/APP/UTENTE/id_reale')
+      'Username reale' => $reqstack->getSession()->get('/APP/UTENTE/username_reale'),
+      'Ruolo reale' => $reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
+      'ID reale' => $reqstack->getSession()->get('/APP/UTENTE/id_reale')
       ));
     // ricarica dati in sessione
-    $session->set('/APP/UTENTE/ultimo_accesso', $session->get('/APP/UTENTE/ultimo_accesso_reale'));
-    $session->set('/APP/UTENTE/tipo_accesso', $session->get('/APP/UTENTE/tipo_accesso_reale'));
-    $session->remove('/APP/UTENTE/tipo_accesso_reale');
-    $session->remove('/APP/UTENTE/ultimo_accesso_reale');
-    $session->remove('/APP/UTENTE/username_reale');
-    $session->remove('/APP/UTENTE/ruolo_reale');
-    $session->remove('/APP/UTENTE/id_reale');
+    $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', $reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso_reale'));
+    $reqstack->getSession()->set('/APP/UTENTE/tipo_accesso', $reqstack->getSession()->get('/APP/UTENTE/tipo_accesso_reale'));
+    $reqstack->getSession()->remove('/APP/UTENTE/tipo_accesso_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/ultimo_accesso_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/username_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/ruolo_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/id_reale');
     // disconnette l'alias in uso e redirect alla home
     return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => '_exit'));
   }

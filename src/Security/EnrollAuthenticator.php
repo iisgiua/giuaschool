@@ -16,10 +16,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Security;
@@ -54,12 +54,12 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
   private $em;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
-   * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
    */
   private $encoder;
 
@@ -91,19 +91,19 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
    * @param CsrfTokenManagerInterface $csrf Gestore dei token CRSF
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, SessionInterface $session,
-                               UserPasswordEncoderInterface $encoder, CsrfTokenManagerInterface $csrf,
+  public function __construct(RouterInterface $router, EntityManagerInterface $em, RequestStack $reqstack,
+                               UserPasswordHasherInterface $encoder, CsrfTokenManagerInterface $csrf,
                                LoggerInterface $logger, LogHandler $dblogger, ConfigLoader $config) {
     $this->router = $router;
     $this->em = $em;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->encoder = $encoder;
     $this->csrf = $csrf;
     $this->logger = $logger;
@@ -236,9 +236,9 @@ class EnrollAuthenticator extends AbstractGuardAuthenticator {
         $this->em->flush();
       }
       // memorizza token in sessione
-      $this->session->set('/APP/UTENTE/token1', $token_list[0]);
-      $this->session->set('/APP/UTENTE/token2', $token_list[1]);
-      $this->session->set('/APP/UTENTE/token3', $token_list[2]);
+      $this->reqstack->getSession()->set('/APP/UTENTE/token1', $token_list[0]);
+      $this->reqstack->getSession()->set('/APP/UTENTE/token2', $token_list[1]);
+      $this->reqstack->getSession()->set('/APP/UTENTE/token3', $token_list[2]);
       // log azione
       $this->logger->warning('Registrazione docente avvenuta correttamente', array(
         'username' => $user->getUsername(),

@@ -15,7 +15,7 @@ namespace App\Util;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Utente;
 use App\Entity\Genitore;
 use App\Entity\Alunno;
@@ -52,9 +52,9 @@ class NotificheUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -65,14 +65,14 @@ class NotificheUtil {
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session) {
+                               RequestStack $reqstack) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
   }
 
   /**

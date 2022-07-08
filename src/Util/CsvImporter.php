@@ -17,8 +17,8 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Validator\ValidatorBuilder;
 use Symfony\Component\Validator\ValidatorInterface;
@@ -56,12 +56,12 @@ class CsvImporter {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
-   * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
    */
   private $encoder;
 
@@ -93,16 +93,16 @@ class CsvImporter {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
    * @param ValidatorBuilder $valbuilder Costruttore per il gestore della validazione dei dati
    * @param StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, SessionInterface $session,
-                              UserPasswordEncoderInterface $encoder, ValidatorBuilder $valbuilder, StaffUtil $staff) {
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, RequestStack $reqstack,
+                              UserPasswordHasherInterface $encoder, ValidatorBuilder $valbuilder, StaffUtil $staff) {
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->encoder = $encoder;
     $this->validator = $valbuilder->getValidator();
     $this->staff = $staff;
@@ -196,8 +196,8 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
-          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->session->get('/CONFIG/SISTEMA/dominio_default'));
+        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider') ?
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       // controlla esistenza di docente
       $docente = $this->em->getRepository('App\Entity\Docente')->findOneByUsername($fields['username']);
@@ -685,9 +685,9 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
-          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') :
-          $this->session->get('/CONFIG/SISTEMA/dominio_default'));
+        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider') ?
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider') :
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       if (empty($fields['genitore1Cognome'])) {
         // default genitore1Cognome
@@ -722,7 +722,7 @@ class CsvImporter {
         // default genitore1Email
         $empty_fields['genitore1Email'] = true;
         $fields['genitore1Email'] = $fields['genitore1Username'].'@'.
-          $this->session->get('/CONFIG/SISTEMA/dominio_default');
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default');
       }
       if (empty($fields['genitore2Cognome'])) {
         // default genitore2Cognome
@@ -757,7 +757,7 @@ class CsvImporter {
         // default genitore2Email
         $empty_fields['genitore2Email'] = true;
         $fields['genitore2Email'] = $fields['genitore2Username'].'@'.
-          $this->session->get('/CONFIG/SISTEMA/dominio_default');
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default');
       }
       // controlla modalità di modifica
       $alunno = null;
@@ -1129,7 +1129,7 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.$this->session->get('/CONFIG/SISTEMA/dominio_default');
+        $fields['email'] = $fields['username'].'@'.$this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default');
       }
       if (empty($fields['tipo'])) {
         // default: amministrativo

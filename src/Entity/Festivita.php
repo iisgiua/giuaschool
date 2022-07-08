@@ -57,9 +57,9 @@ class Festivita {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var string $descrizione Descrizione della festività
@@ -159,7 +159,7 @@ class Festivita {
    *
    * @return Festivita Oggetto Festivita
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }

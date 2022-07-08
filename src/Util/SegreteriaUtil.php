@@ -14,7 +14,7 @@ namespace App\Util;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Util\RegistroUtil;
 use App\Entity\Alunno;
@@ -43,9 +43,9 @@ class SegreteriaUtil {
   private $em;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var RegistroUtil $regUtil Funzioni di utilità per il registro
@@ -64,14 +64,14 @@ class SegreteriaUtil {
    * Construttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
-  public function __construct(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $regUtil,
+  public function __construct(EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $regUtil,
                               $dirProgetto) {
     $this->em = $em;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->regUtil = $regUtil;
     $this->dirProgetto = $dirProgetto;
   }
@@ -88,8 +88,8 @@ class SegreteriaUtil {
     $dati = array();
     $dati['mese'] = array();
     $classe = $alunno->getClasse();
-    $inizio = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_inizio').'00:00');
-    $fine = \DateTime::createFromFormat('Y-m-d H:i', $this->session->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
+    $inizio = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').'00:00');
+    $fine = \DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
     $mesi = array(
       1 => ['Gennaio', 1, 31],
       2 => ['Febbraio', 1, 28],

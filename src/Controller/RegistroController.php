@@ -29,7 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Annotazione;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
@@ -64,7 +64,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $cattedra Identificativo della cattedra
@@ -81,7 +81,7 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function firmeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function firmeAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                               RegistroUtil $reg, BachecaUtil $bac, $cattedra, $classe, $data, $vista) {
     // inizializza variabili
     $lista_festivi = null;
@@ -99,19 +99,19 @@ class RegistroController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($session->get('/APP/DOCENTE/data_lezione')) {
+      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -119,7 +119,7 @@ class RegistroController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $session->set('/APP/DOCENTE/data_lezione', $data);
+      $reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -199,7 +199,7 @@ class RegistroController extends AbstractController {
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
         if ($vista == 'G') {
           // dati sugli assenti
-          if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+          if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
             // legge assenze orarie
             $assenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiOre($classe, $data_inizio);
           } else {
@@ -210,7 +210,7 @@ class RegistroController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/registro_firme_'.$vista.'.html.twig', array(
       'pagina_titolo' => 'page.lezioni_registro',
@@ -238,7 +238,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -255,7 +255,7 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function addAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function addAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                             ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
                             $cattedra, $classe, $data, $ora) {
     // inizializza
@@ -336,7 +336,7 @@ class RegistroController extends AbstractController {
         'label' => ($materia->getTipo() == 'S' ? 'label.attivita_sostegno' : 'label.attivita'),
         'trim' => true,
         'required' => false));
-    if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+    if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
       // alunni assenti nell'ora
       $assenti_precedenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiLezionePrecedente($classe, $data_obj, $ora);
       // religione/att.alt. o altra materia
@@ -414,7 +414,7 @@ class RegistroController extends AbstractController {
         }
         // ok: memorizza dati
         $em->flush();
-        if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+        if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
           // gestione assenze orarie
           $reg->inserisceAssentiLezione($this->getUser(), $lezione, $form->get('assenti')->getData());
         } else {
@@ -446,7 +446,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
@@ -463,7 +463,7 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function editAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function editAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                              ValidatorInterface $validator, RegistroUtil $reg, LogHandler $dblogger,
                              $cattedra, $classe, $data, $ora) {
     // inizializza
@@ -574,7 +574,7 @@ class RegistroController extends AbstractController {
           'disabled' => false,
           'required' => true));
     }
-    if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+    if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
       // alunni assenti nell'ora
       $assenti_precedenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiLezione($lezione);
       $religione = ($materia->getTipo() == 'R' && $cattedra->getTipo() == 'A') ? 'A' :
@@ -679,7 +679,7 @@ class RegistroController extends AbstractController {
         } else {
           // ok: memorizza dati
           $em->flush();
-          if ($session->get('/CONFIG/SCUOLA/assenze_ore') && $assenti_precedenti !==  $form->get('assenti')->getData()) {
+          if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore') && $assenti_precedenti !==  $form->get('assenti')->getData()) {
             // gestione assenze orarie
             $reg->modificaAssentiLezione($this->getUser(), $lezione, $assenti_precedenti,
               $form->get('assenti')->getData());
@@ -691,7 +691,7 @@ class RegistroController extends AbstractController {
             'Firma' => $firma->getId(),
             'Argomento' => $argomenti_old,
             'Attivita' =>  $attivita_old,
-            'Assenti Lezione' => $session->get('/CONFIG/SCUOLA/assenze_ore') ?
+            'Assenti Lezione' => $reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore') ?
               array_map(function($o) { return $o->getId(); }, $assenti_precedenti) : '***',
             ));
           // redirezione
@@ -713,7 +713,7 @@ class RegistroController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -728,7 +728,7 @@ class RegistroController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function deleteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function deleteAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                RegistroUtil $reg, LogHandler $dblogger, $classe, $data, $ora) {
     // controlla classe
     $classe = $em->getRepository('App\Entity\Classe')->find($classe);
@@ -809,7 +809,7 @@ class RegistroController extends AbstractController {
       $lezione_cancellata['argomento'] = $lezione->getArgomento();
       $lezione_cancellata['attivita'] = $lezione->getAttivita();
       // cancella assenze lezione
-      if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+      if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
         // modalità assenze orarie
         $assenti_precedenti = $em->getRepository('App\Entity\AssenzaLezione')->assentiLezione($lezione);
         $reg->cancellaAssentiLezione($lezione, $assenti_precedenti);
@@ -853,7 +853,7 @@ class RegistroController extends AbstractController {
         'Attività' =>  $lezione_cancellata['attivita'],
         'Argomento sostegno' => ($firma_cancellata ? $firma_cancellata['argomento'] : ''),
         'Attività sostegno' => ($firma_cancellata ? $firma_cancellata['attivita'] : ''),
-        'Assenti Lezione' => $session->get('/CONFIG/SCUOLA/assenze_ore') ?
+        'Assenti Lezione' => $reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore') ?
           array_map(function($o) { return $o->getId(); }, $assenti_precedenti) : '***',
         ));
     } else {

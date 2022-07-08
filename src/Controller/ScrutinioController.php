@@ -20,7 +20,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -59,7 +59,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param LogHandler $dblogger Gestore dei log su database
@@ -76,7 +76,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function proposteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function proposteAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                  TranslatorInterface $trans, ScrutinioUtil $scr, LogHandler $dblogger,
                                  $cattedra, $classe, $periodo) {
     // inizializza variabili
@@ -146,12 +146,12 @@ class ScrutinioController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
@@ -173,7 +173,7 @@ class ScrutinioController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
       $info['valutazioni'] = $valutazioni[$cattedra->getMateria()->getTipo()];
       // imposta sessione
-      $session->set('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni', $info['valutazioni']);
+      $reqstack->getSession()->set('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni', $info['valutazioni']);
     } elseif ($classe > 0) {
       // supplenza
       $classe = $em->getRepository('App\Entity\Classe')->find($classe);
@@ -310,7 +310,7 @@ class ScrutinioController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/proposte_'.($periodo ? $periodo : 'P').'.html.twig', array(
       'pagina_titolo' => 'page.lezioni_proposte',
@@ -330,7 +330,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $stato Stato dello scrutinio (serve per passaggi tra stati)
@@ -346,7 +346,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                    ScrutinioUtil $scr, $classe, $stato, $posizione) {
     // inizializza variabili
     $dati = null;
@@ -355,10 +355,10 @@ class ScrutinioController extends AbstractController {
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
-      $classe = $session->get('/APP/DOCENTE/classe_coordinatore');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/classe_coordinatore', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
     }
     // controllo classe
     if ($classe > 0) {
@@ -370,7 +370,7 @@ class ScrutinioController extends AbstractController {
       // controllo accesso alla funzione
       if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
         // coordinatore
-        $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+        $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
         if (!in_array($classe->getId(), $classi)) {
           // errore
           throw $this->createNotFoundException('exception.invalid_params');
@@ -448,7 +448,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $classe Identificativo della classe
@@ -465,7 +465,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioProposteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioProposteAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                           ScrutinioUtil $scr, LogHandler $dblogger, $classe, $materia, $periodo,
                                           $posizione) {
     // inizializza variabili
@@ -523,7 +523,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -629,7 +629,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
@@ -646,7 +646,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCondottaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioCondottaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                           TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $dati = array();
@@ -660,7 +660,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -730,7 +730,7 @@ class ScrutinioController extends AbstractController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore', $trans->trans($msg));
+        $reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg));
       }
       // ok: memorizza dati (anche errati)
       $em->flush();
@@ -739,7 +739,7 @@ class ScrutinioController extends AbstractController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $session->getFlashBag()->add('errore', $error->getMessage());
+        $reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
@@ -757,7 +757,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
@@ -775,7 +775,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioVotiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioVotiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                        TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $materia, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $info = array();
@@ -790,7 +790,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -871,7 +871,7 @@ class ScrutinioController extends AbstractController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore',
+        $reqstack->getSession()->getFlashBag()->add('errore',
           $trans->trans($msg, ['materia' => $materia->getNomeBreve()]));
       }
       // memorizza dati (anche se errati)
@@ -881,7 +881,7 @@ class ScrutinioController extends AbstractController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $session->getFlashBag()->add('errore', $error->getMessage());
+        $reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);
@@ -900,7 +900,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $cattedra Identificativo della cattedra (nullo se supplenza)
    * @param int $classe Identificativo della classe
@@ -915,7 +915,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioSvoltoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioSvoltoAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                         ScrutinioUtil $scr, $cattedra, $classe, $periodo) {
     // inizializza variabili
     $dati = array();
@@ -924,12 +924,12 @@ class ScrutinioController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
@@ -1041,7 +1041,7 @@ class ScrutinioController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/tabellone.html.twig', array(
       'pagina_titolo' => 'page.lezioni_tabellone',
@@ -1059,7 +1059,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
@@ -1075,7 +1075,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-   public function scrutinioEsitoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+   public function scrutinioEsitoAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                         TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo,
                                         $classe, $posizione) {
     // inizializza variabili
@@ -1095,7 +1095,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1256,7 +1256,7 @@ class ScrutinioController extends AbstractController {
       }
       // imposta eventuali messaggi di errore
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore', $trans->trans($msg, [
+        $reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg, [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1276,7 +1276,7 @@ class ScrutinioController extends AbstractController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $session->getFlashBag()->add('errore', $error->getMessage());
+        $reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(),
@@ -1296,7 +1296,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -1310,7 +1310,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCreditoAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioCreditoAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                           ScrutinioUtil $scr, $alunno, $periodo, $classe, $posizione) {
     // inizializza variabili
     $credito = array();
@@ -1333,7 +1333,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1432,7 +1432,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
@@ -1448,7 +1448,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCertificazioneAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioCertificazioneAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                                  TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo,
                                                  $classe, $posizione) {
     // inizializza variabili
@@ -1468,7 +1468,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1637,7 +1637,7 @@ class ScrutinioController extends AbstractController {
       }
       if ($err_motivazione) {
         // errore: motivazione non inserita
-        $session->getFlashBag()->add('errore', $trans->trans('exception.no_motivazione_certificazione', [
+        $reqstack->getSession()->getFlashBag()->add('errore', $trans->trans('exception.no_motivazione_certificazione', [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1676,7 +1676,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
@@ -1691,7 +1691,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioDebitiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioDebitiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                         TranslatorInterface $trans, ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $dati = array();
@@ -1704,7 +1704,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($alunno->getClasse()->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1746,7 +1746,7 @@ class ScrutinioController extends AbstractController {
       }
       // messaggi di errore
       foreach ($errore as $msg=>$val) {
-        $session->getFlashBag()->add('errore', $trans->trans($msg, [
+        $reqstack->getSession()->getFlashBag()->add('errore', $trans->trans($msg, [
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
@@ -1786,7 +1786,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -1800,7 +1800,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioCarenzeAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioCarenzeAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                          ScrutinioUtil $scr, $alunno, $periodo, $posizione) {
     // inizializza variabili
     $dati = array();
@@ -1813,7 +1813,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($alunno->getClasse()->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1881,7 +1881,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
@@ -1895,7 +1895,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verbaleAction(Request $request, EntityManagerInterface $em, SessionInterface $session, ScrutinioUtil $scr,
+  public function verbaleAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack, ScrutinioUtil $scr,
                                  $classe, $periodo, $step) {
     // inizializza variabili
     $dati = null;
@@ -1923,7 +1923,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -1943,7 +1943,7 @@ class ScrutinioController extends AbstractController {
       // validazione
       $scr->$func_valida($this->getUser(), $request, $scrutinio, $form, $step, $passo_verbale);
       // se errori indica non validato
-      if ($session->getFlashBag()->has('errore')) {
+      if ($reqstack->getSession()->getFlashBag()->has('errore')) {
         // modifica validazione
         $scrutinio_dati = $scrutinio->getDati();
         $scrutinio_dati['verbale'][$step]['validato'] = false;
@@ -1968,7 +1968,7 @@ class ScrutinioController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param int $classe Identificativo della classe
@@ -1985,7 +1985,7 @@ class ScrutinioController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function scrutinioEdcivicaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function scrutinioEdcivicaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                           TranslatorInterface $trans, ScrutinioUtil $scr, $classe, $periodo, $alunno, $posizione) {
     // inizializza variabili
     $dati = array();
@@ -1999,7 +1999,7 @@ class ScrutinioController extends AbstractController {
     // controllo accesso alla funzione
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
@@ -2069,7 +2069,7 @@ class ScrutinioController extends AbstractController {
         }
       }
       foreach ($errore as $msg=>$v) {
-        $session->getFlashBag()->add('errore',
+        $reqstack->getSession()->getFlashBag()->add('errore',
           $trans->trans($msg, ['materia' => $edcivica->getNomeBreve()]));
       }
       // ok: memorizza dati (anche errati)
@@ -2079,7 +2079,7 @@ class ScrutinioController extends AbstractController {
     } elseif ($form->isSubmitted() && !$form->isValid()) {
       // mostra altri errori
       foreach ($form->getErrors() as $error) {
-        $session->getFlashBag()->add('errore', $error->getMessage());
+        $reqstack->getSession()->getFlashBag()->add('errore', $error->getMessage());
       }
       // redirect
       return $this->redirectToRoute('coordinatore_scrutinio', ['classe' => $classe->getId(), 'posizione' => $posizione]);

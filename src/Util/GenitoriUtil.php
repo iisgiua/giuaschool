@@ -15,7 +15,7 @@ namespace App\Util;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\Genitore;
 use App\Entity\Utente;
@@ -69,9 +69,9 @@ class GenitoriUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var RegistroUtil $regUtil Funzioni di utilità per il registro
@@ -92,16 +92,16 @@ class GenitoriUtil {
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                              SessionInterface $session, RegistroUtil $regUtil, $dirProgetto) {
+                              RequestStack $reqstack, RegistroUtil $regUtil, $dirProgetto) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->regUtil = $regUtil;
     $this->dirProgetto = $dirProgetto;
   }
@@ -465,7 +465,7 @@ class GenitoriUtil {
     $dati['lista'] = array();
     $dati_periodo = array();
     // raggruppa assenze continuative
-    if ($this->session->get('/CONFIG/SCUOLA/assenze_ore')) {
+    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
       // gestione assenze orarie, senza raggruppamento
       $dati_assenze = $this->raggruppaAssenzeOre($alunno);
     } else {

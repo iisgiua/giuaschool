@@ -22,9 +22,9 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
@@ -48,7 +48,7 @@ class AtaController extends BaseController {
    * Importa ATA da file
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param CsvImporter $importer Servizio per l'importazione dei dati da file CSV
    *
    * @return Response Pagina di risposta
@@ -58,7 +58,7 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function importaAction(Request $request, SessionInterface $session, CsvImporter $importer): Response {
+  public function importaAction(Request $request, RequestStack $reqstack, CsvImporter $importer): Response {
     // init
     $dati = [];
     $info = [];
@@ -66,7 +66,7 @@ class AtaController extends BaseController {
     $fs = new FileSystem();
     if (!$request->isMethod('POST')) {
       // cancella dati sessione
-      $session->remove($var_sessione);
+      $reqstack->getSession()->remove($var_sessione);
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -80,14 +80,14 @@ class AtaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // trova file caricato
       $file = null;
-      foreach ($session->get($var_sessione.'/file', []) as $f) {
+      foreach ($reqstack->getSession()->get($var_sessione.'/file', []) as $f) {
         $file = new File($this->getParameter('dir_tmp').'/'.$f['temp']);
       }
       // importa file
       $dati = $importer->importaAta($file, $form);
       $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
-      $session->remove($var_sessione);
+      $reqstack->getSession()->remove($var_sessione);
     }
     // visualizza pagina
     return $this->renderHtml('ata', 'importa', $dati, $info, [$form->createView(),  'message.importa_ata']);
@@ -98,7 +98,7 @@ class AtaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param int $pagina Numero di pagina per la lista degli utenti
    *
@@ -111,23 +111,23 @@ class AtaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function modificaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function modificaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                  TranslatorInterface $trans, $pagina): Response {
     // init
     $dati = [];
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['nome'] = $session->get('/APP/ROUTE/ata_modifica/nome', '');
-    $criteri['cognome'] = $session->get('/APP/ROUTE/ata_modifica/cognome', '');
-    $criteri['sede'] = $session->get('/APP/ROUTE/ata_modifica/sede', 0);
+    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
+    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
+    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede', 0);
     $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : 0);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/ata_modifica/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // form di ricerca
     $lista_sedi = $em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
@@ -143,10 +143,10 @@ class AtaController extends BaseController {
       $criteri['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() :
         intval($form->get('sede')->getData()));
       $pagina = 1;
-      $session->set('/APP/ROUTE/ata_modifica/nome', $criteri['nome']);
-      $session->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
-      $session->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
-      $session->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/nome', $criteri['nome']);
+      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/cognome', $criteri['cognome']);
+      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/sede', $criteri['sede']);
+      $reqstack->getSession()->set('/APP/ROUTE/ata_modifica/pagina', $pagina);
     }
     // recupera dati
     $dati = $em->getRepository('App\Entity\Ata')->cerca($criteri, $pagina);
@@ -238,8 +238,8 @@ class AtaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
@@ -257,7 +257,7 @@ class AtaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordEncoderInterface $encoder, SessionInterface $session,
+                                 UserPasswordHasherInterface $encoder, RequestStack $reqstack,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla ata
@@ -279,7 +279,7 @@ class AtaController extends BaseController {
       'Ruolo' => $ata->getRoles()[0],
       'ID' => $ata->getId()));
     // crea documento PDF
-    $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
+    $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
     // contenuto in formato HTML
     $html = $this->renderView('pdf/credenziali_ata.html.twig', array(
@@ -294,9 +294,9 @@ class AtaController extends BaseController {
     if ($tipo == 'E') {
       // invia per email
       $message = (new Email())
-        ->from(new Address($session->get('/CONFIG/ISTITUTO/email_notifiche'), $session->get('/CONFIG/ISTITUTO/intestazione_breve')))
+        ->from(new Address($reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
         ->to($ata->getEmail())
-        ->subject($session->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
+        ->subject($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Credenziali di accesso al Registro Elettronico")
         ->text($this->renderView('email/credenziali.txt.twig'))
         ->html($this->renderView('email/credenziali.html.twig'))
         ->attach($doc, 'credenziali_registro.pdf', 'application/pdf');

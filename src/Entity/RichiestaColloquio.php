@@ -57,9 +57,9 @@ class RichiestaColloquio {
    * @ORM\Column(type="datetime", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.datetime")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $appuntamento;
+  private \DateTime $appuntamento;
 
   /**
    * @var int $durata Durata del colloquio (in minuti)
@@ -191,7 +191,7 @@ class RichiestaColloquio {
    *
    * @return RichiestaColloquio Oggetto RichiestaColloquio
    */
-  public function setAppuntamento($appuntamento) {
+  public function setAppuntamento(\DateTime $appuntamento) {
     $this->appuntamento = $appuntamento;
     return $this;
   }

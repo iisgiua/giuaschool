@@ -14,7 +14,7 @@ namespace App\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -59,9 +59,9 @@ class ArchiviazioneUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var PdfManager $pdf Gestore dei documenti PDF
@@ -101,7 +101,7 @@ class ArchiviazioneUtil {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param PagelleUtil $pag Funzioni di utilità per le pagelle
    * @param PdfManager $pdf Gestore dei documenti PDF
@@ -110,11 +110,11 @@ class ArchiviazioneUtil {
    * @param string $localpath Directory per le immagini locali
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session, PdfManager $pdf, RegistroUtil $regUtil,
+                               RequestStack $reqstack, PdfManager $pdf, RegistroUtil $regUtil,
                                PagelleUtil $pag, $root, $dirCircolari, $localpath) {
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->pdf = $pdf;
     $this->regUtil = $regUtil;
     $this->pag = $pag;
@@ -154,12 +154,12 @@ class ArchiviazioneUtil {
       ->getResult();
     if (empty($cattedre)) {
       // errore
-      $this->session->getFlashBag()->add('danger', 'Il docente '.$docente->getCognome().' '.$docente->getNome().
+      $this->reqstack->getSession()->getFlashBag()->add('danger', 'Il docente '.$docente->getCognome().' '.$docente->getNome().
         ' non è associato a nessuna cattedra.');
       return;
     }
     // crea documento
-    $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+    $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Registro del docente - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -192,11 +192,11 @@ class ArchiviazioneUtil {
     if ($this->pdf->getHandler()->PageNo() > 0) {
       $this->pdf->save($percorso.'/'.$nomefile);
       // registro creato
-      $this->session->getFlashBag()->add('success', 'Registro del docente '.$docente->getCognome().' '.$docente->getNome().
+      $this->reqstack->getSession()->getFlashBag()->add('success', 'Registro del docente '.$docente->getCognome().' '.$docente->getNome().
         ' archiviato.');
     } else {
       // registro non creato
-      $this->session->getFlashBag()->add('warning', 'Registro del docente '.$docente->getCognome().' '.$docente->getNome().
+      $this->reqstack->getSession()->getFlashBag()->add('warning', 'Registro del docente '.$docente->getCognome().' '.$docente->getNome().
         ' non creato per mancanza di dati.');
     }
   }
@@ -244,12 +244,12 @@ class ArchiviazioneUtil {
       ->getResult();
     if (empty($cattedre)) {
       // errore
-      $this->session->getFlashBag()->add('danger', 'Il docente '.$docente->getCognome().' '.$docente->getNome().
+      $this->reqstack->getSession()->getFlashBag()->add('danger', 'Il docente '.$docente->getCognome().' '.$docente->getNome().
         ' non è associato a nessuna cattedra.');
       return;
     }
     // crea documento
-    $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+    $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Registro di sostegno - '.$docente->getNome().' '.$docente->getCognome());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -282,11 +282,11 @@ class ArchiviazioneUtil {
     if ($this->pdf->getHandler()->PageNo() > 0) {
       $this->pdf->save($percorso.'/'.$nomefile);
       // registro creato
-      $this->session->getFlashBag()->add('success', 'Registro di sostegno di '.$docente->getCognome().' '.$docente->getNome().
+      $this->reqstack->getSession()->getFlashBag()->add('success', 'Registro di sostegno di '.$docente->getCognome().' '.$docente->getNome().
         ' archiviato.');
     } else {
       // registro non creato
-      $this->session->getFlashBag()->add('warning', 'Registro di sostegno di '.$docente->getCognome().' '.$docente->getNome().
+      $this->reqstack->getSession()->getFlashBag()->add('warning', 'Registro di sostegno di '.$docente->getCognome().' '.$docente->getNome().
         ' non creato per mancanza di dati.');
     }
   }
@@ -319,7 +319,7 @@ class ArchiviazioneUtil {
     // nome documento
     $nomefile = 'registro-classe-'.$classe->getAnno().$classe->getSezione().'.pdf';
     // crea documento
-    $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+    $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Registro di classe - '.$classe->getAnno().'ª '.$classe->getSezione());
     // impostazioni PDF
     $this->pdf->getHandler()->SetMargins(10, 15, 10, true);
@@ -342,7 +342,7 @@ class ArchiviazioneUtil {
     // salva il documento
     $this->pdf->save($percorso.'/'.$nomefile);
     // registro creato
-    $this->session->getFlashBag()->add('success', 'Registro di classe '.$classe->getAnno().'ª '.$classe->getSezione().
+    $this->reqstack->getSession()->getFlashBag()->add('success', 'Registro di classe '.$classe->getAnno().'ª '.$classe->getSezione().
       ' archiviato.');
   }
 
@@ -374,7 +374,7 @@ class ArchiviazioneUtil {
       </div>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
-    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
@@ -404,7 +404,7 @@ class ArchiviazioneUtil {
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
     $materia_s = $cattedra->getMateria()->getNome();
     $periodo_s = $periodo['nome'];
-    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
+    $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
@@ -902,7 +902,7 @@ class ArchiviazioneUtil {
       </div>';
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
-    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $docente_s = $docente->getNome().' '.$docente->getCognome();
     $classe_s = $cattedra->getClasse()->getAnno().'ª '.$cattedra->getClasse()->getSezione();
     $corso_s = $cattedra->getClasse()->getCorso()->getNome().' - Sede di '.$cattedra->getClasse()->getSede()->getCitta();
@@ -935,7 +935,7 @@ class ArchiviazioneUtil {
     $alunno_s = $cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().
       ' ('.$cattedra->getAlunno()->getDataNascita()->format('d/m/Y').')';
     $periodo_s = $periodo['nome'];
-    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
+    $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $nomemesi = array('', 'GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC');
     $nomesett = array('Dom','Lun','Mar','Mer','Gio','Ven','Sab');
@@ -1221,7 +1221,7 @@ class ArchiviazioneUtil {
     $this->pdf->getHandler()->writeHTML($html, true, false, false, false, 'C');
     $this->pdf->getHandler()->SetFont('helvetica', 'B', 18);
     $periodo_s = $periodo['nome'];
-    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
+    $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
     $corso_s = $classe->getCorso()->getNome();
@@ -1244,7 +1244,7 @@ class ArchiviazioneUtil {
   public function scriveRegistroClasse(Classe $classe, $periodo) {
     // inizializza dati
     $periodo_s = $periodo['nome'];
-    $annoscolastico = $this->session->get('/CONFIG/SCUOLA/anno_scolastico').
+    $annoscolastico = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico').
       ' - '.$periodo_s;
     $classe_s = $classe->getAnno().'ª '.$classe->getSezione();
     $corso_s = $classe->getCorso()->getNome().' - Sede di '.$classe->getSede()->getCitta();
@@ -1810,7 +1810,7 @@ class ArchiviazioneUtil {
     // crea messaggi
     foreach ($msg as $c=>$m1) {
       foreach ($m1 as $m) {
-        $this->session->getFlashBag()->add($c, $m);
+        $this->reqstack->getSession()->getFlashBag()->add($c, $m);
       }
     }
   }
@@ -1871,7 +1871,7 @@ class ArchiviazioneUtil {
       $fs->mkdir($percorso, 0775);
     }
     // legge circolari dell'A.S.
-    $anno = substr($this->session->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
+    $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4);
     $circolari = $this->em->getRepository('App\Entity\Circolare')->findBy(['pubblicata' => true, 'anno' => $anno],
       ['numero' => 'ASC']);
     $numCircolari = 0;
@@ -1919,7 +1919,7 @@ class ArchiviazioneUtil {
     // crea messaggi
     foreach ($msg as $c=>$m1) {
       foreach ($m1 as $m) {
-        $this->session->getFlashBag()->add($c, $m);
+        $this->reqstack->getSession()->getFlashBag()->add($c, $m);
       }
     }
   }

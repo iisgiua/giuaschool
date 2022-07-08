@@ -69,9 +69,9 @@ class Scrutinio {
    *
    * @ORM\Column(type="date", nullable=true)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private ?\DateTime $data;
 
   /**
    * @var \DateTime $inizio Ora dell'apertura dello scrutinio
@@ -123,9 +123,9 @@ class Scrutinio {
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
-   * @Assert\DateTime(format="d/m/Y H:i", message="field.datetime")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $visibile;
+  private ?\DateTime $visibile;
 
   /**
    * @var string $stato Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
@@ -227,7 +227,7 @@ class Scrutinio {
    *
    * @return Scrutinio Oggetto Scrutinio
    */
-  public function setData($data) {
+  public function setData(\DateTime $data=null) {
     $this->data = $data;
     return $this;
   }
@@ -400,7 +400,7 @@ class Scrutinio {
    *
    * @return Scrutinio Oggetto Scrutinio
    */
-  public function setVisibile($visibile) {
+  public function setVisibile(\DateTime $visibile=null) {
     $this->visibile = $visibile;
     return $this;
   }

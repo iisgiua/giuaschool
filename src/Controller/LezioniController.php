@@ -18,7 +18,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Festivita;
@@ -35,7 +35,7 @@ class LezioniController extends AbstractController {
   /**
    * Gestione delle lezioni
    *
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return Response Pagina di risposta
    *
@@ -44,14 +44,14 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function lezioniAction(SessionInterface $session) {
-    if (!$session->get('/APP/DOCENTE/cattedra_lezione') && !$session->get('/APP/DOCENTE/classe_lezione')) {
+  public function lezioniAction(RequestStack $reqstack) {
+    if (!$reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione') && !$reqstack->getSession()->get('/APP/DOCENTE/classe_lezione')) {
       // scelta classe
       return $this->redirectToRoute('lezioni_classe');
     }
-    if ($session->get('/APP/DOCENTE/menu_lezione')) {
+    if ($reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')) {
       // vai all'ultima pagina visitata
-      return $this->redirectToRoute($session->get('/APP/DOCENTE/menu_lezione')['name'], $session->get('/APP/DOCENTE/menu_lezione')['param']);
+      return $this->redirectToRoute($reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')['name'], $reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')['param']);
     } else {
       // vai al registro
       return $this->redirectToRoute('lezioni_registro_firme');
@@ -110,7 +110,7 @@ class LezioniController extends AbstractController {
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
    *
@@ -123,7 +123,7 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiAction(Request $request, EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+  public function argomentiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $reg,
                                    $cattedra, $classe) {
     // inizializza variabili
     $info = null;
@@ -132,12 +132,12 @@ class LezioniController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
@@ -176,7 +176,7 @@ class LezioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render($template, array(
       'pagina_titolo' => 'page.lezioni_argomenti',
@@ -191,7 +191,7 @@ class LezioniController extends AbstractController {
    * Mostra il riepilogo mensile delle lezioni svolte.
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    * @param string $data Data del giorno da visualizzare (AAAA-MM-GG)
@@ -205,7 +205,7 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiRiepilogoAction(EntityManagerInterface $em, SessionInterface $session,
+  public function argomentiRiepilogoAction(EntityManagerInterface $em, RequestStack $reqstack,
                                             RegistroUtil $reg, $cattedra, $data) {
     // inizializza variabili
     $dati = null;
@@ -215,9 +215,9 @@ class LezioniController extends AbstractController {
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($session->get('/APP/DOCENTE/data_lezione')) {
+      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -270,7 +270,7 @@ class LezioniController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe
@@ -284,7 +284,7 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function noteAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function noteAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                               StaffUtil $staff, $cattedra, $classe) {
     // inizializza variabili
     $dati = null;
@@ -292,12 +292,12 @@ class LezioniController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
@@ -335,7 +335,7 @@ class LezioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/note.html.twig', array(
       'pagina_titolo' => 'page.lezioni_note',
@@ -350,7 +350,7 @@ class LezioniController extends AbstractController {
    * Crea automaticamente il programma svolto.
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    *
@@ -362,7 +362,7 @@ class LezioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function argomentiProgrammaAction(EntityManagerInterface $em, SessionInterface $session, RegistroUtil $reg,
+  public function argomentiProgrammaAction(EntityManagerInterface $em, RequestStack $reqstack, RegistroUtil $reg,
                                             $cattedra) {
     // inizializza
     $info = null;
@@ -398,7 +398,7 @@ class LezioniController extends AbstractController {
     \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
     $properties = $phpWord->getDocInfo();
-    $properties->setCreator($session->get('/CONFIG/ISTITUTO/intestazione'));
+    $properties->setCreator($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'));
     $properties->setTitle('Programma svolto - '.$info['classe'].' - '.$info['materia']);
     $properties->setDescription('');
     $properties->setSubject('');
@@ -445,14 +445,14 @@ class LezioniController extends AbstractController {
     $section->addText('ISTITUTO DI ISTRUZIONE SUPERIORE',
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText($session->get('/CONFIG/ISTITUTO/nome'),
+    $section->addText($reqstack->getSession()->get('/CONFIG/ISTITUTO/nome'),
       array('bold' => true, 'italic' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
-    $section->addText($session->get('/CONFIG/ISTITUTO/sede_0_citta'),
+    $section->addText($reqstack->getSession()->get('/CONFIG/ISTITUTO/sede_0_citta'),
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));
     $section->addTextBreak(1);
-    $as = $session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $as = $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $section->addText('ANNO SCOLASTICO '.$as,
       array('bold' => true),
       array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 0));

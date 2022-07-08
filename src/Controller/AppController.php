@@ -18,8 +18,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\File\File;
@@ -45,7 +45,7 @@ class AppController extends AbstractController {
   /**
    * Login dell'utente tramite l'app
    *
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param string $codice Codifica delle credenziali in BASE64
@@ -60,16 +60,16 @@ class AppController extends AbstractController {
    *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
    *    methods={"GET"})
    */
-  public function loginAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config,
+  public function loginAction(RequestStack $reqstack, AuthenticationUtils $auth, ConfigLoader $config,
                               $codice, $lusr, $lpsw, $lapp) {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     if (!$manutenzione) {
       // conserva ultimo errore del login, se presente
       $errore = $auth->getLastAuthenticationError();
@@ -87,7 +87,7 @@ class AppController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
    * @param UriSafeTokenGenerator $tok Generatore di token per CSRF
    *
    * @return JsonResponse Informazioni di risposta
@@ -95,7 +95,7 @@ class AppController extends AbstractController {
    * @Route("/app/prelogin/", name="app_prelogin",
    *    methods={"POST"})
    */
-  public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder) {
+  public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $encoder) {
     $risposta = array();
     $risposta['errore'] = 0;
     $risposta['token'] = null;

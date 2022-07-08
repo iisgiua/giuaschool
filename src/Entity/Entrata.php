@@ -60,9 +60,9 @@ class Entrata {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var \DateTime $ora Ora di entrata in ritardo
@@ -109,9 +109,9 @@ class Entrata {
    *
    * @ORM\Column(type="date", nullable=true)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $giustificato;
+  private ?\DateTime $giustificato;
 
   /**
    * @var Alunno $alunno Alunno al quale si riferisce l'entrata in ritardo
@@ -219,7 +219,7 @@ class Entrata {
    *
    * @return Entrata Oggetto Entrata
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }
@@ -345,7 +345,7 @@ class Entrata {
    *
    * @return Entrata Oggetto Entrata
    */
-  public function setGiustificato($giustificato) {
+  public function setGiustificato(\DateTime $giustificato=null) {
     $this->giustificato = $giustificato;
     return $this;
   }

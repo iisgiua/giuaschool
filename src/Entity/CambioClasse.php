@@ -67,9 +67,9 @@ class CambioClasse {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $inizio;
+  private \DateTime $inizio;
 
   /**
    * @var \DateTime $fine Data finale della permanenza nella classe indicata
@@ -77,9 +77,9 @@ class CambioClasse {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $fine;
+  private \DateTime $fine;
 
   /**
    * @var Classe $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
@@ -189,7 +189,7 @@ class CambioClasse {
    *
    * @return CambioClasse Oggetto CambioClasse
    */
-  public function setInizio($inizio) {
+  public function setInizio(\DateTime $inizio) {
     $this->inizio = $inizio;
     return $this;
   }
@@ -210,7 +210,7 @@ class CambioClasse {
    *
    * @return CambioClasse Oggetto CambioClasse
    */
-  public function setFine($fine) {
+  public function setFine(\DateTime $fine) {
     $this->fine = $fine;
     return $this;
   }

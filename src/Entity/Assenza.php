@@ -61,18 +61,18 @@ class Assenza {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var \DateTime $giustificato Data della giustificazione
    *
    * @ORM\Column(type="date", nullable=true)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $giustificato;
+  private ?\DateTime $giustificato;
 
   /**
    * @var string $motivazione Motivazione dell'assenza
@@ -224,7 +224,7 @@ class Assenza {
    *
    * @return Assenza Oggetto Assenza
    */
-  public function setGiustificato($giustificato) {
+  public function setGiustificato(\DateTime $giustificato=null) {
     $this->giustificato = $giustificato;
     return $this;
   }

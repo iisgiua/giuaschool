@@ -56,13 +56,13 @@ class BaseController extends AbstractController {
    */
   protected function renderHtml(string $categoria, string $azione, array $dati=[],
                                 array $info=[], array $form=[]): Response {
-    $session = $this->get('session');
+    $reqstack = $this->get('request_stack');
     list($azione_principale) = explode('_', $azione);
     // legge breadcrumb
     $breadcrumb = $this->em->getRepository('App\Entity\MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
-      $this->getUser(), $session);
+      $this->getUser(), $reqstack);
     // restituisce vista
-    $tema = $session->get('/APP/APP/tema', '');
+    $tema = $reqstack->getSession()->get('/APP/APP/tema', '');
     return $this->render($tema.'/'.$categoria.'/'.$azione.'.html.twig', array(
       'pagina_titolo' => 'page.'.$categoria.'.'.$azione_principale,
       'titolo' => 'title.'.$categoria.'.'.$azione,

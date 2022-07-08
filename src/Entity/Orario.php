@@ -65,9 +65,9 @@ class Orario {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $inizio;
+  private \DateTime $inizio;
 
   /**
    * @var \DateTime $fine Data finale dell'entrata in vigore dell'orario
@@ -75,9 +75,9 @@ class Orario {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $fine;
+  private \DateTime $fine;
 
   /**
    * @var Sede $sede Sede a cui appartiene l'orario
@@ -180,7 +180,7 @@ class Orario {
    *
    * @return Orario Oggetto Orario
    */
-  public function setInizio($inizio) {
+  public function setInizio(\DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -201,7 +201,7 @@ class Orario {
    *
    * @return Orario Oggetto Orario
    */
-  public function setFine($fine) {
+  public function setFine(\DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }

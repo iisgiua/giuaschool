@@ -19,7 +19,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use App\Entity\Documento;
 use App\Entity\ListaDestinatari;
@@ -66,7 +66,7 @@ class DocumentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
@@ -81,7 +81,7 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function programmiAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function programmiAddAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                      TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
                                      Classe $classe, Materia $materia) {
     // inizializza
@@ -89,7 +89,7 @@ class DocumentiController extends AbstractController {
     $varSessione = '/APP/FILE/documenti_programmi_add/files';
     if ($request->isMethod('GET')) {
       // inizializza sessione per allegati
-      $session->set($varSessione, []);
+      $reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
     $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'P',
@@ -120,7 +120,7 @@ class DocumentiController extends AbstractController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
-      $allegati = $session->get($varSessione, []);
+      $allegati = $reqstack->getSession()->get($varSessione, []);
       if (count($allegati) < 1) {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
@@ -131,7 +131,7 @@ class DocumentiController extends AbstractController {
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
-        $session->remove($varSessione);
+        $reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $dblogger->logCreazione('DOCUMENTI', 'Inserimento programma svolto', $documento);
         // redirezione
@@ -239,7 +239,7 @@ class DocumentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
@@ -256,7 +256,7 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function relazioniAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function relazioniAddAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                      TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
                                      Classe $classe, Materia $materia, Alunno $alunno=null) {
     // inizializza
@@ -264,7 +264,7 @@ class DocumentiController extends AbstractController {
     $varSessione = '/APP/FILE/documenti_relazioni_add/files';
     if ($request->isMethod('GET')) {
       // inizializza sessione per allegati
-      $session->set($varSessione, []);
+      $reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
     $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'R',
@@ -297,7 +297,7 @@ class DocumentiController extends AbstractController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
-      $allegati = $session->get($varSessione, []);
+      $allegati = $reqstack->getSession()->get($varSessione, []);
       if (count($allegati) < 1) {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
@@ -308,7 +308,7 @@ class DocumentiController extends AbstractController {
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
-        $session->remove($varSessione);
+        $reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $dblogger->logCreazione('DOCUMENTI', 'Inserimento relazione finale', $documento);
         // redirezione
@@ -349,7 +349,7 @@ class DocumentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
@@ -364,7 +364,7 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function pianiAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function pianiAddAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                  TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
                                  CLasse $classe, Materia $materia) {
     // inizializza
@@ -372,7 +372,7 @@ class DocumentiController extends AbstractController {
     $varSessione = '/APP/FILE/documenti_piani_add/files';
     if ($request->isMethod('GET')) {
       // inizializza sessione per allegati
-      $session->set($varSessione, []);
+      $reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
     $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'L',
@@ -403,7 +403,7 @@ class DocumentiController extends AbstractController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
-      $allegati = $session->get($varSessione, []);
+      $allegati = $reqstack->getSession()->get($varSessione, []);
       if (count($allegati) < 1) {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
@@ -414,7 +414,7 @@ class DocumentiController extends AbstractController {
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
-        $session->remove($varSessione);
+        $reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $dblogger->logCreazione('DOCUMENTI', 'Inserimento piano di lavoro', $documento);
         // redirezione
@@ -455,7 +455,7 @@ class DocumentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param LogHandler $dblogger Gestore dei log su database
@@ -469,7 +469,7 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function maggioAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function maggioAddAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                   TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
                                   Classe $classe) {
     // inizializza
@@ -477,7 +477,7 @@ class DocumentiController extends AbstractController {
     $varSessione = '/APP/FILE/documenti_maggio_add/files';
     if ($request->isMethod('GET')) {
       // inizializza sessione per allegati
-      $session->set($varSessione, []);
+      $reqstack->getSession()->set($varSessione, []);
     }
     // controlla azione
     $documentoEsistente = $em->getRepository('App\Entity\Documento')->findOneBy(['tipo' => 'M',
@@ -506,7 +506,7 @@ class DocumentiController extends AbstractController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
-      $allegati = $session->get($varSessione, []);
+      $allegati = $reqstack->getSession()->get($varSessione, []);
       if (count($allegati) < 1) {
         $form->addError(new FormError($trans->trans('exception.file_mancante')));
       } else {
@@ -517,7 +517,7 @@ class DocumentiController extends AbstractController {
         // imposta allegato
         $doc->impostaUnAllegato($documento, $file, $estensione, $allegati[0]['size']);
         // rimuove sessione con gli allegati
-        $session->remove($varSessione);
+        $reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento del 15 maggio', $documento);
         // redirezione
@@ -578,7 +578,7 @@ class DocumentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
@@ -591,20 +591,20 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function docentiAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function docentiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                 DocumentiUtil $doc, $pagina) {
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['filtro'] = $session->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
-    $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
+    $criteri['filtro'] = $reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
+    $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
     $criteri['classe'] = $em->getRepository('App\Entity\Classe')->find(
-      (int) $session->get('/APP/ROUTE/documenti_docenti/classe', 0));
+      (int) $reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/documenti_docenti/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // form filtro
     $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'docenti',
@@ -617,11 +617,11 @@ class DocumentiController extends AbstractController {
       $criteri['classe'] = $form->get('classe')->getData();
       $pagina = 1;
       // memorizza in sessione
-      $session->set('/APP/ROUTE/documenti_docenti/filtro', $criteri['filtro']);
-      $session->set('/APP/ROUTE/documenti_docenti/tipo', $criteri['tipo']);
-      $session->set('/APP/ROUTE/documenti_docenti/classe',
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/filtro', $criteri['filtro']);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/tipo', $criteri['tipo']);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/classe',
         is_object($criteri['classe']) ? $criteri['classe']->getId() : null);
-      $session->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
     }
     // recupera dati
     $dati = $doc->docenti($criteri, $this->getUser()->getSede(), $pagina);
@@ -643,7 +643,7 @@ class DocumentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
    * @param int $pagina Numero di pagina per la lista visualizzata
    *
@@ -656,7 +656,7 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function besAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function besAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                             DocumentiUtil $doc, $pagina) {
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
@@ -666,22 +666,22 @@ class DocumentiController extends AbstractController {
     // recupera pagina dalla sessione
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/documenti_bes/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/documenti_bes/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_bes/tipo', '');
+    $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/documenti_bes/tipo', '');
     $criteri['classe'] = $em->getRepository('App\Entity\Classe')->find(
-      (int) $session->get('/APP/ROUTE/documenti_bes/classe', 0));
+      (int) $reqstack->getSession()->get('/APP/ROUTE/documenti_bes/classe', 0));
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/documenti_bes/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/documenti_bes/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // form filtro
     $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'alunni',
@@ -693,10 +693,10 @@ class DocumentiController extends AbstractController {
       $criteri['classe'] = $form->get('classe')->getData();
       $pagina = 1;
       // memorizza in sessione
-      $session->set('/APP/ROUTE/documenti_bes/tipo', $criteri['tipo']);
-      $session->set('/APP/ROUTE/documenti_bes/classe',
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_bes/tipo', $criteri['tipo']);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_bes/classe',
         is_object($criteri['classe']) ? $criteri['classe']->getId() : null);
-      $session->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/documenti_bes/pagina', $pagina);
     }
     // recupera dati
     $dati = $doc->besDocente($criteri, $this->getUser(), $pagina);
@@ -725,7 +725,7 @@ class DocumentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-   public function besAddAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+   public function besAddAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                 TranslatorInterface $trans, DocumentiUtil $doc, LogHandler $dblogger,
                                 Alunno $alunno=null) {
      // inizializza
@@ -734,7 +734,7 @@ class DocumentiController extends AbstractController {
      $varSessione = '/APP/FILE/documenti_bes_add/files';
      if ($request->isMethod('GET')) {
        // inizializza sessione per allegati
-       $session->set($varSessione, []);
+       $reqstack->getSession()->set($varSessione, []);
      }
      // controlla accesso a funzione
      if (!$this->getUser()->getResponsabileBes()) {
@@ -789,7 +789,7 @@ class DocumentiController extends AbstractController {
      $form->handleRequest($request);
      if ($form->isSubmitted() && $form->isValid()) {
        // controllo errori
-       $allegati = $session->get($varSessione, []);
+       $allegati = $reqstack->getSession()->get($varSessione, []);
        $tipo = $form->get('tipo')->getData();
        $alunnoIndividuale = $alunno ? null :
          $em->getRepository('App\Entity\Alunno')->findOneBy(['abilitato' => 1,
@@ -838,7 +838,7 @@ class DocumentiController extends AbstractController {
          // protegge documento
          if ($doc->codificaDocumento($documento)) {
            // rimuove sessione con gli allegati
-           $session->remove($varSessione);
+           $reqstack->getSession()->remove($varSessione);
            // ok: memorizzazione e log
            $dblogger->logCreazione('DOCUMENTI', 'Inserimento documento BES', $documento);
            // redirezione
@@ -863,7 +863,7 @@ class DocumentiController extends AbstractController {
     *
     * @param Request $request Pagina richiesta
     * @param EntityManagerInterface $em Gestore delle entità
-    * @param SessionInterface $session Gestore delle sessioni
+    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
     * @param DocumentiUtil $doc Funzioni di utilità per la gestione dei documenti di classe
     * @param int $pagina Numero di pagina per la lista visualizzata
     *
@@ -876,19 +876,19 @@ class DocumentiController extends AbstractController {
     *
     * @IsGranted("ROLE_STAFF")
     */
-   public function alunniAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+   public function alunniAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                 DocumentiUtil $doc, $pagina) {
      // recupera criteri dalla sessione
      $criteri = array();
-     $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_alunni/tipo', '');
+     $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/tipo', '');
      $criteri['classe'] = $em->getRepository('App\Entity\Classe')->find(
-       (int) $session->get('/APP/ROUTE/documenti_alunni/classe', 0));
+       (int) $reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/classe', 0));
      if ($pagina == 0) {
        // pagina non definita: la cerca in sessione
-       $pagina = $session->get('/APP/ROUTE/documenti_alunni/pagina', 1);
+       $pagina = $reqstack->getSession()->get('/APP/ROUTE/documenti_alunni/pagina', 1);
      } else {
        // pagina specificata: la conserva in sessione
-       $session->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
      }
      // form filtro
      $form = $this->createForm(DocumentoType::class, null, ['formMode' => 'alunni',
@@ -900,10 +900,10 @@ class DocumentiController extends AbstractController {
        $criteri['classe'] = $form->get('classe')->getData();
        $pagina = 1;
        // memorizza in sessione
-       $session->set('/APP/ROUTE/documenti_alunni/tipo', $criteri['tipo']);
-       $session->set('/APP/ROUTE/documenti_alunni/classe',
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/tipo', $criteri['tipo']);
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/classe',
          is_object($criteri['classe']) ? $criteri['classe']->getId() : null);
-       $session->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_alunni/pagina', $pagina);
      }
      // recupera dati
      $dati = $doc->alunni($criteri, $this->getUser()->getSede(), $pagina);
@@ -924,7 +924,7 @@ class DocumentiController extends AbstractController {
     *
     * @param Request $request Pagina richiesta
     * @param EntityManagerInterface $em Gestore delle entità
-    * @param SessionInterface $session Gestore delle sessioni
+    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
     * @param int $pagina Numero di pagina per la lista visualizzata
     *
     * @return Response Pagina di risposta
@@ -936,18 +936,18 @@ class DocumentiController extends AbstractController {
     *
     * @IsGranted("ROLE_UTENTE")
     */
-   public function bachecaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+   public function bachecaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                  $pagina) {
      // recupera criteri dalla sessione
      $criteri = array();
-     $criteri['tipo'] = $session->get('/APP/ROUTE/documenti_bacheca/tipo', '');
-     $criteri['titolo'] = $session->get('/APP/ROUTE/documenti_bacheca/titolo', '');
+     $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/tipo', '');
+     $criteri['titolo'] = $reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/titolo', '');
      if ($pagina == 0) {
        // pagina non definita: la cerca in sessione
-       $pagina = $session->get('/APP/ROUTE/documenti_bacheca/pagina', 1);
+       $pagina = $reqstack->getSession()->get('/APP/ROUTE/documenti_bacheca/pagina', 1);
      } else {
        // pagina specificata: la conserva in sessione
-       $session->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
      }
      // opzioni tipi predefiniti
      $opzioni = ['label.documenti_da_leggere' => 'X'];
@@ -971,9 +971,9 @@ class DocumentiController extends AbstractController {
        $criteri['titolo'] = $form->get('titolo')->getData();
        $pagina = 1;
        // memorizza in sessione
-       $session->set('/APP/ROUTE/documenti_bacheca/tipo', $criteri['tipo']);
-       $session->set('/APP/ROUTE/documenti_bacheca/titolo', $criteri['titolo']);
-       $session->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/tipo', $criteri['tipo']);
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/titolo', $criteri['titolo']);
+       $reqstack->getSession()->set('/APP/ROUTE/documenti_bacheca/pagina', $pagina);
      }
      // recupera dati
      $dati = $em->getRepository('App\Entity\Documento')->lista($criteri, $this->getUser(), $pagina);

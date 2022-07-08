@@ -60,9 +60,9 @@ class Uscita {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var \DateTime $ora Ora dell'uscita anticipata
@@ -178,7 +178,7 @@ class Uscita {
    *
    * @return Uscita Oggetto Uscita
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }

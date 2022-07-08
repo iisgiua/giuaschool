@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -37,7 +37,7 @@ class BachecaController extends AbstractController {
    * Visualizza gli avvisi destinati ai docenti
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -50,20 +50,20 @@ class BachecaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function avvisiAction(Request $request, SessionInterface $session, BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, RequestStack $reqstack, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'T');
-    $cerca['oggetto'] = $session->get('/APP/ROUTE/bacheca_avvisi/oggetto', '');
+    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/visualizza', 'T');
+    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/bacheca_avvisi/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi', FormType::class)
@@ -90,9 +90,9 @@ class BachecaController extends AbstractController {
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $session->set('/APP/ROUTE/bacheca_avvisi/visualizza', $cerca['visualizza']);
-      $session->set('/APP/ROUTE/bacheca_avvisi/oggetto', $cerca['oggetto']);
-      $session->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/visualizza', $cerca['visualizza']);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/oggetto', $cerca['oggetto']);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
@@ -214,7 +214,7 @@ class BachecaController extends AbstractController {
    * Visualizza gli avvisi destinati al personale ATA
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -227,20 +227,20 @@ class BachecaController extends AbstractController {
    *
    * @IsGranted("ROLE_ATA")
    */
-  public function avvisiATAAction(Request $request, SessionInterface $session, BachecaUtil $bac, $pagina) {
+  public function avvisiATAAction(Request $request, RequestStack $reqstack, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'T');
-    $cerca['oggetto'] = $session->get('/APP/ROUTE/bacheca_avvisi_ata/oggetto', '');
+    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/visualizza', 'T');
+    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/bacheca_avvisi_ata/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/bacheca_avvisi_ata/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi_ata', FormType::class)
@@ -266,9 +266,9 @@ class BachecaController extends AbstractController {
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $session->set('/APP/ROUTE/bacheca_avvisi_ata/visualizza', $cerca['visualizza']);
-      $session->set('/APP/ROUTE/bacheca_avvisi_ata/oggetto', $cerca['oggetto']);
-      $session->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/visualizza', $cerca['visualizza']);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/oggetto', $cerca['oggetto']);
+      $reqstack->getSession()->set('/APP/ROUTE/bacheca_avvisi_ata/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());

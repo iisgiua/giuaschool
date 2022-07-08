@@ -18,7 +18,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -45,7 +45,7 @@ class ColloquiController extends AbstractController {
    * Visualizza le richieste di colloquio
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return Response Pagina di risposta
    *
@@ -54,14 +54,14 @@ class ColloquiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function colloquiAction(EntityManagerInterface $em, SessionInterface $session) {
+  public function colloquiAction(EntityManagerInterface $em, RequestStack $reqstack) {
     // inizializza variabili
     $errore = null;
     $dati = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // controllo fine colloqui
-    $fine = \DateTime::createFromFormat('Y-m-d H:i:s', $session->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
+    $fine = \DateTime::createFromFormat('Y-m-d H:i:s', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
     $fine->modify('-30 days');    // controllo fine
     $oggi = new \DateTime('today');
     if ($oggi > $fine) {

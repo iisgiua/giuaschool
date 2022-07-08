@@ -21,7 +21,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Filesystem\Filesystem;
@@ -60,7 +60,7 @@ class CircolariController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
@@ -76,7 +76,7 @@ class CircolariController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function editAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function editAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                               TranslatorInterface $trans, RegistroUtil $reg, CircolariUtil $circ, LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
@@ -97,7 +97,7 @@ class CircolariController extends AbstractController {
       $numero = $em->getRepository('App\Entity\Circolare')->prossimoNumero();
       $circolare = (new Circolare())
         ->setData(new \DateTime('today'))
-        ->setAnno((int) substr($session->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
+        ->setAnno((int) substr($reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
         ->setNumero($numero);
       if ($this->getUser()->getSede()) {
         $circolare->addSede($this->getUser()->getSede());
@@ -114,13 +114,13 @@ class CircolariController extends AbstractController {
     $allegati = array();
     if ($request->isMethod('POST')) {
       // pagina inviata
-      foreach ($session->get($var_sessione.'documento', []) as $f) {
+      foreach ($reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
         if ($f['type'] != 'removed') {
           // aggiunge allegato
           $documento[] = $f;
         }
       }
-      foreach ($session->get($var_sessione.'allegati', []) as $f) {
+      foreach ($reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
         if ($f['type'] != 'removed') {
           // aggiunge allegato
           $allegati[] = $f;
@@ -145,10 +145,10 @@ class CircolariController extends AbstractController {
         $allegati[$k]['size'] = $f->getSize();
       }
       // modifica dati sessione
-      $session->remove($var_sessione.'documento');
-      $session->remove($var_sessione.'allegati');
-      $session->set($var_sessione.'documento', $documento);
-      $session->set($var_sessione.'allegati', $allegati);
+      $reqstack->getSession()->remove($var_sessione.'documento');
+      $reqstack->getSession()->remove($var_sessione.'allegati');
+      $reqstack->getSession()->set($var_sessione.'documento', $documento);
+      $reqstack->getSession()->set($var_sessione.'allegati', $allegati);
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -321,7 +321,7 @@ class CircolariController extends AbstractController {
       // modifica dati
       if ($form->isValid()) {
         // documento
-        foreach ($session->get($var_sessione.'documento', []) as $f) {
+        foreach ($reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
           if ($f['type'] == 'uploaded') {
             // aggiunge documento
             $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'], $this->getParameter('dir_circolari').'/'.
@@ -333,7 +333,7 @@ class CircolariController extends AbstractController {
           }
         }
         // allegati
-        foreach ($session->get($var_sessione.'allegati', []) as $f) {
+        foreach ($reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
           if ($f['type'] == 'uploaded') {
             // aggiunge allegato
             $fs->rename($this->getParameter('dir_tmp').'/'.$f['temp'], $this->getParameter('dir_circolari').'/'.
@@ -470,7 +470,7 @@ class CircolariController extends AbstractController {
    * Gestione delle circolari
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -483,19 +483,19 @@ class CircolariController extends AbstractController {
    *
    * @IsGranted("ROLE_STAFF")
    */
-  public function gestioneAction(Request $request, SessionInterface $session, CircolariUtil $circ, $pagina) {
+  public function gestioneAction(Request $request, RequestStack $reqstack, CircolariUtil $circ, $pagina) {
     // inizializza variabili
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
     $search = array();
-    $search['inizio'] = $session->get('/APP/ROUTE/circolari_gestione/inizio', null);
-    $search['fine'] = $session->get('/APP/ROUTE/circolari_gestione/fine', null);
-    $search['oggetto'] = $session->get('/APP/ROUTE/circolari_gestione/oggetto', '');
+    $search['inizio'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_gestione/inizio', null);
+    $search['fine'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_gestione/fine', null);
+    $search['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_gestione/oggetto', '');
     if ($search['inizio']) {
       $inizio = \DateTime::createFromFormat('Y-m-d', $search['inizio']);
     } else {
-      $inizio = \DateTime::createFromFormat('Y-m-d H:i', $session->get('/CONFIG/SCUOLA/anno_inizio').' 00:00')
+      $inizio = \DateTime::createFromFormat('Y-m-d H:i', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00')
         ->modify('first day of this month');
       $search['inizio'] = $inizio->format('Y-m-d');
     }
@@ -507,10 +507,10 @@ class CircolariController extends AbstractController {
     }
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/circolari_gestione/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/circolari_gestione/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/circolari_gestione/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_gestione/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_gestione', FormType::class)
@@ -542,10 +542,10 @@ class CircolariController extends AbstractController {
       $search['fine'] = ($form->get('fine')->getData() ? $form->get('fine')->getData()->format('Y-m-d') : 0);
       $search['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $session->set('/APP/ROUTE/circolari_gestione/inizio', $search['inizio']);
-      $session->set('/APP/ROUTE/circolari_gestione/fine', $search['fine']);
-      $session->set('/APP/ROUTE/circolari_gestione/oggetto', $search['oggetto']);
-      $session->set('/APP/ROUTE/circolari_gestione/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_gestione/inizio', $search['inizio']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_gestione/fine', $search['fine']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_gestione/oggetto', $search['oggetto']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_gestione/pagina', $pagina);
     }
     // recupera dati
     $dati = $circ->listaCircolari($search, $pagina, $limite, $this->getUser());
@@ -752,7 +752,7 @@ class CircolariController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
    * @return Response Pagina di risposta
@@ -765,12 +765,12 @@ class CircolariController extends AbstractController {
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
   public function genitoriAction(Request $request, EntityManagerInterface $em,
-                                 SessionInterface $session, $pagina) {
+                                 RequestStack $reqstack, $pagina) {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // crea lista mesi
-    $anno_inizio = substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);
+    $anno_inizio = substr($reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4);
     $anno_fine = $anno_inizio + 1;
     $lista_mesi = array();
     for ($i=9; $i<=12; $i++) {
@@ -781,15 +781,15 @@ class CircolariController extends AbstractController {
     }
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/circolari_genitori/visualizza', 'P');
-    $cerca['mese'] = $session->get('/APP/ROUTE/circolari_genitori/mese', null);
-    $cerca['oggetto'] = $session->get('/APP/ROUTE/circolari_genitori/oggetto', '');
+    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_genitori/visualizza', 'P');
+    $cerca['mese'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_genitori/mese', null);
+    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_genitori/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/circolari_genitori/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/circolari_genitori/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/circolari_genitori/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_genitori/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('circolari_genitori', FormType::class)
@@ -827,10 +827,10 @@ class CircolariController extends AbstractController {
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $session->set('/APP/ROUTE/circolari_genitori/visualizza', $cerca['visualizza']);
-      $session->set('/APP/ROUTE/circolari_genitori/mese', $cerca['mese']);
-      $session->set('/APP/ROUTE/circolari_genitori/oggetto', $cerca['oggetto']);
-      $session->set('/APP/ROUTE/circolari_genitori/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_genitori/visualizza', $cerca['visualizza']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_genitori/mese', $cerca['mese']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_genitori/oggetto', $cerca['oggetto']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_genitori/pagina', $pagina);
     }
     // legge le circolari
     $dati = $em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
@@ -964,7 +964,7 @@ class CircolariController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param CircolariUtil $circ Funzioni di utilità per le circolari
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -978,24 +978,24 @@ class CircolariController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function docentiAction(Request $request, EntityManagerInterface $em,
-                                SessionInterface $session, CircolariUtil $circ, $pagina) {
+                                RequestStack $reqstack, CircolariUtil $circ, $pagina) {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['anno'] = $session->get('/APP/ROUTE/circolari_docenti/anno',
-      substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/circolari_docenti/visualizza',
+    $cerca['anno'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/anno',
+      substr($reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
+    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/visualizza',
       ($this->getUser() instanceOf Staff ? 'T' : 'P'));
-    $cerca['mese'] = $session->get('/APP/ROUTE/circolari_docenti/mese', null);
-    $cerca['oggetto'] = $session->get('/APP/ROUTE/circolari_docenti/oggetto', '');
+    $cerca['mese'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/mese', null);
+    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/circolari_docenti/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/circolari_docenti/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
     }
     // crea lista anni
     $lista_anni = $em->getRepository('App\Entity\Circolare')->anniScolastici();
@@ -1056,11 +1056,11 @@ class CircolariController extends AbstractController {
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $session->set('/APP/ROUTE/circolari_docenti/anno', $cerca['anno']);
-      $session->set('/APP/ROUTE/circolari_docenti/visualizza', $cerca['visualizza']);
-      $session->set('/APP/ROUTE/circolari_docenti/mese', $cerca['mese']);
-      $session->set('/APP/ROUTE/circolari_docenti/oggetto', $cerca['oggetto']);
-      $session->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/anno', $cerca['anno']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/visualizza', $cerca['visualizza']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/mese', $cerca['mese']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/oggetto', $cerca['oggetto']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_docenti/pagina', $pagina);
     }
     // legge le circolari
     $dati = $em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());
@@ -1089,7 +1089,7 @@ class CircolariController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
    * @return Response Pagina di risposta
@@ -1102,23 +1102,23 @@ class CircolariController extends AbstractController {
    * @IsGranted("ROLE_ATA")
    */
   public function ataAction(Request $request, EntityManagerInterface $em,
-                            SessionInterface $session, $pagina) {
+                            RequestStack $reqstack, $pagina) {
     // inizializza
     $limite = 20;
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['anno'] = $session->get('/APP/ROUTE/circolari_ata/anno',
-      substr($session->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/circolari_ata/visualizza', 'T');
-    $cerca['mese'] = $session->get('/APP/ROUTE/circolari_ata/mese', null);
-    $cerca['oggetto'] = $session->get('/APP/ROUTE/circolari_ata/oggetto', '');
+    $cerca['anno'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_ata/anno',
+      substr($reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio', '2000'), 0, 4));
+    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_ata/visualizza', 'T');
+    $cerca['mese'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_ata/mese', null);
+    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/circolari_ata/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/circolari_ata/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/circolari_ata/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
     }
     // crea lista anni
     $lista_anni = $em->getRepository('App\Entity\Circolare')->anniScolastici();
@@ -1178,11 +1178,11 @@ class CircolariController extends AbstractController {
       $cerca['mese'] = $form->get('mese')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $session->set('/APP/ROUTE/circolari_ata/anno', $cerca['anno']);
-      $session->set('/APP/ROUTE/circolari_ata/visualizza', $cerca['visualizza']);
-      $session->set('/APP/ROUTE/circolari_ata/mese', $cerca['mese']);
-      $session->set('/APP/ROUTE/circolari_ata/oggetto', $cerca['oggetto']);
-      $session->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_ata/anno', $cerca['anno']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_ata/visualizza', $cerca['visualizza']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_ata/mese', $cerca['mese']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_ata/oggetto', $cerca['oggetto']);
+      $reqstack->getSession()->set('/APP/ROUTE/circolari_ata/pagina', $pagina);
     }
     // legge le circolari
     $dati = $em->getRepository('App\Entity\Circolare')->lista($cerca, $pagina, $limite, $this->getUser());

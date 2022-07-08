@@ -92,9 +92,9 @@ class Circolare {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private \DateTime $data;
 
   /**
    * @var string $oggetto Oggetto della circolare
@@ -389,7 +389,7 @@ class Circolare {
    *
    * @return Circolare Oggetto Circolare
    */
-  public function setData($data) {
+  public function setData(\DateTime $data) {
     $this->data = $data;
     return $this;
   }

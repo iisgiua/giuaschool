@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Security;
@@ -56,7 +56,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
   private $em;
 
   /**
-   * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
    */
   private $encoder;
 
@@ -88,13 +88,13 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
    * @param CsrfTokenManagerInterface $csrf Gestore dei token CRSF
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
+  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordHasherInterface $encoder,
                                CsrfTokenManagerInterface $csrf, LoggerInterface $logger, LogHandler $dblogger,
                                ConfigLoader $config) {
     $this->router = $router;

@@ -18,7 +18,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
@@ -40,7 +40,7 @@ class PagelleController extends AbstractController {
    * Scarica il documento della classe generato per lo scrutinio.
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PagelleUtil $pag Funzioni di utilità per le pagelle/comunicazioni
    * @param int $classe Identificativo della classe
    * @param string $tipo Tipo del documento da scaricare
@@ -54,7 +54,7 @@ class PagelleController extends AbstractController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA')")
    */
-  public function documentoClasseAction(EntityManagerInterface $em, SessionInterface $session, PagelleUtil $pag,
+  public function documentoClasseAction(EntityManagerInterface $em, RequestStack $reqstack, PagelleUtil $pag,
                                          $classe, $tipo, $periodo) {
     // inizializza
     $nomefile = null;
@@ -70,7 +70,7 @@ class PagelleController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     } elseif (($this->getUser() instanceOf Docente) && !($this->getUser() instanceOf Staff)) {
       // coordinatore
-      $classi = explode(',', $session->get('/APP/DOCENTE/coordinatore'));
+      $classi = explode(',', $reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
       if (!in_array($classe->getId(), $classi)) {
         // docente non abilitato
         throw $this->createNotFoundException('exception.invalid_params');
@@ -162,7 +162,7 @@ class PagelleController extends AbstractController {
    * Scarica il documento dell'alunno generato per lo scrutinio.
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PagelleUtil $pag Funzioni di utilità per le pagelle/comunicazioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param int $classe Identificativo della classe
@@ -177,7 +177,7 @@ class PagelleController extends AbstractController {
    *
    * @Security("is_granted('ROLE_DOCENTE') or is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') or is_granted('ROLE_ATA')")
    */
-  public function documentoAlunnoAction(EntityManagerInterface $em, SessionInterface $session, PagelleUtil $pag,
+  public function documentoAlunnoAction(EntityManagerInterface $em, RequestStack $reqstack, PagelleUtil $pag,
                                          GenitoriUtil $gen, $classe, $alunno, $tipo, $periodo) {
     // inizializza
     $nomefile = null;

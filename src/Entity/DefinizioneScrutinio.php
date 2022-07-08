@@ -42,10 +42,10 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    *
    * @ORM\Column(name="data_proposte", type="date", nullable=false)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $dataProposte;
+  private \DateTime $dataProposte;
 
   /**
    * @var array $struttura Lista delle parti dello scrutinio [array($passo_numerico => array($nome_funzione,$da_validare,array(args)), ...)]
@@ -106,7 +106,7 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    *
    * @return DefinizioneScrutinio Oggetto DefinizioneScrutinio
    */
-  public function setDataProposte($dataProposte) {
+  public function setDataProposte(\DateTime $dataProposte) {
     $this->dataProposte = $dataProposte;
     return $this;
   }
