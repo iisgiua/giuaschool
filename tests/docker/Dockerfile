@@ -61,8 +61,8 @@ FROM system_builder as symfony_builder
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data composer.* symfony.lock ./
 RUN \
-  composer -q install --no-dev --no-progress --prefer-dist --optimize-autoloader --no-plugins --no-scripts && \
-  composer -q clear-cache --no-plugins
+  composer -q install --no-dev --no-progress && \
+  composer -q clear-cache
 
 
 ########## Third Step - Build Application for PROD environment
@@ -90,10 +90,10 @@ RUN \
   cd vendor/italia && \
   tar -zxf ../../tests/docker/spid-php.tgz && \
   cd spid-php && \
-  composer -q install --no-dev --no-progress --prefer-dist --no-plugins --no-scripts && \
-  composer -q clear-cache --no-plugins && \
+  composer -q install --no-dev --no-progress && \
+  composer -q clear-cache && \
   cd vendor/simplesamlphp/simplesamlphp/modules && \
-  tar -zxf ../../../../../../../tests/docker/spid-theme.tgz && \
+  tar -zxf /var/www/giuaschool/tests/docker/spid-theme.tgz && \
   cd .. && \
   mkdir log cert && \
   cp ../../.gitkeep log/ && \
@@ -118,7 +118,7 @@ WORKDIR /var/www/giuaschool
 RUN \
 # Set DEV environment
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=dev/" .env && \
-  composer -q install --no-progress --prefer-dist --no-suggest --optimize-autoloader --no-plugins --no-scripts && \
+  composer -q install --no-progress && \
   composer clear-cache && \
   chown -R www-data:www-data .
 
