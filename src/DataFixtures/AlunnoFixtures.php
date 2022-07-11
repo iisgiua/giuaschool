@@ -32,9 +32,9 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -42,10 +42,10 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
   /**
    * Costruttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder=null) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher=null) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -97,7 +97,7 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
             ->setCredito3($anno < 4 ? 0 : $faker->numberBetween(5, 10))
             ->setCredito4($anno < 5 ? 0 : $faker->numberBetween(5, 10))
             ->setClasse($classe);
-          $password = $this->encoder->encodePassword($alunno, $username.'.s1');
+          $password = $this->hasher->hashPassword($alunno, $username.'.s1');
           $alunno->setPassword($password);
           $em->persist($alunno);
           // genitore1
@@ -113,7 +113,7 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
             ->setUltimoAccesso($faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now'))
             ->setAlunno($alunno);
           $em->persist($genitore1);
-          $password = $this->encoder->encodePassword($genitore1, $username.'.f1');
+          $password = $this->hasher->hashPassword($genitore1, $username.'.f1');
           $genitore1->setPassword($password);
           // genitore2
           list($nome, $cognome) = $faker->unique()->utente('F');
@@ -128,7 +128,7 @@ class AlunnoFixtures extends Fixture implements DependentFixtureInterface, Fixtu
             ->setUltimoAccesso($faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now'))
             ->setAlunno($alunno);
           $em->persist($genitore2);
-          $password = $this->encoder->encodePassword($genitore2, $username.'.g1');
+          $password = $this->hasher->hashPassword($genitore2, $username.'.g1');
           $genitore2->setPassword($password);
           // imposta alunno H
           if ($sezione == 'A' && $anno == 3 && $n == 1) {

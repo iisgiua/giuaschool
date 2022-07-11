@@ -292,7 +292,7 @@ class DocentiController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
@@ -311,7 +311,7 @@ class DocentiController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordHasherInterface $encoder, RequestStack $reqstack,
+                                 UserPasswordHasherInterface $hasher, RequestStack $reqstack,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla docente
@@ -323,7 +323,7 @@ class DocentiController extends BaseController {
     // crea password
     $password = $staff->creaPassword(10);
     $docente->setPasswordNonCifrata($password);
-    $pswd = $encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
+    $pswd = $hasher->hashPassword($docente, $docente->getPasswordNonCifrata());
     $docente->setPassword($pswd);
     // provisioning
     $provisioning = (new Provisioning())

@@ -30,9 +30,9 @@ class UtenteFixtures extends Fixture implements FixtureGroupInterface {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -40,10 +40,10 @@ class UtenteFixtures extends Fixture implements FixtureGroupInterface {
   /**
    * Costruttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder=null) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher=null) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -80,7 +80,7 @@ class UtenteFixtures extends Fixture implements FixtureGroupInterface {
         ->setCitta($faker->city())
         ->setIndirizzo($faker->streetAddress())
         ->setNumeriTelefono($faker->telefono($faker->numberBetween(0, 3)));
-      $password = $this->encoder->encodePassword($utente, $username.'.u');
+      $password = $this->hasher->hashPassword($utente, $username.'.u');
       $utente->setPassword($password);
       $em->persist($utente);
     }

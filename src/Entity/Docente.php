@@ -50,20 +50,6 @@ class Docente extends Utente {
   private $chiave3;
 
   /**
-   * @var string $otp Codice segreto per accesso con OTP (se NULL non è attivato)
-   *
-   * @ORM\Column(type="string", length=128, nullable=true)
-   */
-  private $otp;
-
-  /**
-   * @var string $ultimoOtp Codice OTP usato l'ultima volta (per evitare replay attack)
-   *
-   * @ORM\Column(name="ultimo_otp", type="string", length=16, nullable=true)
-   */
-  private $ultimoOtp;
-
-  /**
    * @var boolean $responsabileBes Indica se il docente ha accesso alle funzioni di responsabile BES
    *
    * @ORM\Column(name="responsabile_bes", type="boolean", nullable=false)
@@ -145,48 +131,6 @@ class Docente extends Utente {
   }
 
   /**
-   * Restituisce il token segreto per l'accesso con OTP (se NULL non è attivato)
-   *
-   * @return string Token segreto per l'accesso con OTP
-   */
-  public function getOtp() {
-    return $this->otp;
-  }
-
-  /**
-   * Modifica il token segreto per l'accesso con OTP (se NULL non è attivato)
-   *
-   * @param string $otp Token segreto per l'accesso con OTP
-   *
-   * @return Docente Oggetto Docente
-   */
-  public function setOtp($otp) {
-    $this->otp = $otp;
-    return $this;
-  }
-
-  /**
-   * Restituisce il codice OTP usato l'ultima volta (per evitare replay attack)
-   *
-   * @return string Codice OTP usato l'ultima volta
-   */
-  public function getUltimoOtp() {
-    return $this->ultimoOtp;
-  }
-
-  /**
-   * Modifica il codice OTP usato l'ultima volta (per evitare replay attack)
-   *
-   * @param string $ultimoOtp Codice OTP usato l'ultima volta
-   *
-   * @return Docente Oggetto Docente
-   */
-  public function setUltimoOtp($ultimoOtp) {
-    $this->ultimoOtp = $ultimoOtp;
-    return $this;
-  }
-
-  /**
    * Restituisce se il docente abbia accesso o no alle funzioni di responsabile BES
    *
    * @return boolean Vero se il docente ha accesso alle funzioni di responsabile BES, falso altrimenti
@@ -247,6 +191,17 @@ class Docente extends Utente {
    */
   public function getRoles() {
     return ['ROLE_DOCENTE', 'ROLE_UTENTE'];
+  }
+
+  /**
+   * Restituisce il codice corrispondente al ruolo dell'utente
+   * I codici utilizzati sono:
+   *    U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore
+   *
+   * @return string Codifica del ruolo dell'utente
+   */
+  public function getCodiceRuolo(): string {
+    return 'D';
   }
 
   /**

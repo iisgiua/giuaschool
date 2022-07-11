@@ -31,9 +31,9 @@ class StaffFixtures extends Fixture implements DependentFixtureInterface, Fixtur
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -41,10 +41,10 @@ class StaffFixtures extends Fixture implements DependentFixtureInterface, Fixtur
   /**
    * Costruttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder=null) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher=null) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -72,7 +72,7 @@ class StaffFixtures extends Fixture implements DependentFixtureInterface, Fixtur
         ->setUltimoAccesso($faker->dateTimeBetween('-1 week', 'now'))
         ->setSede($i % 3 == 0 ? null : $this->getReference('sede_'.($i % 3)));
       $em->persist($staff[$i]);
-      $password = $this->encoder->encodePassword($staff[$i], $username);
+      $password = $this->hasher->hashPassword($staff[$i], $username);
       $staff[$i]->setPassword($password);
       // aggiunge riferimenti condivisi
       $this->addReference('staff_'.$i, $staff[$i]);

@@ -61,9 +61,9 @@ class CsvImporter {
   private $reqstack;
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
   /**
    * @var ValidatorInterface $validator Gestore della validazione dei dati
@@ -94,16 +94,16 @@ class CsvImporter {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param ValidatorBuilder $valbuilder Costruttore per il gestore della validazione dei dati
    * @param StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, RequestStack $reqstack,
-                              UserPasswordHasherInterface $encoder, ValidatorBuilder $valbuilder, StaffUtil $staff) {
+                              UserPasswordHasherInterface $hasher, ValidatorBuilder $valbuilder, StaffUtil $staff) {
     $this->em = $em;
     $this->trans = $trans;
     $this->reqstack = $reqstack;
-    $this->encoder = $encoder;
+    $this->hasher = $hasher;
     $this->validator = $valbuilder->getValidator();
     $this->staff = $staff;
     $this->fh = null;
@@ -196,8 +196,8 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider') ?
-          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
+        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider') ?
+          $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio') : $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       // controlla esistenza di docente
       $docente = $this->em->getRepository('App\Entity\Docente')->findOneByUsername($fields['username']);
@@ -685,8 +685,8 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider') ?
-          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider') :
+        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider') ?
+          $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio') :
           $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       if (empty($fields['genitore1Cognome'])) {
@@ -1494,7 +1494,7 @@ class CsvImporter {
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso'])
       ->setCodiceFiscale($fields['codiceFiscale']);
-    $password = $this->encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($docente, $docente->getPasswordNonCifrata());
     $docente->setPassword($password);
     // valida dati
     $errors = $this->validator->validate($docente);
@@ -1544,7 +1544,7 @@ class CsvImporter {
     }
     if (!isset($empty_fields['password'])) {
       $docente->setPasswordNonCifrata($fields['password']);
-      $password = $this->encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($docente, $docente->getPasswordNonCifrata());
       $docente->setPassword($password);
     } else {
       unset($fields['password']);
@@ -1644,7 +1644,7 @@ class CsvImporter {
       ->setCredito3($fields['credito3'])
       ->setCredito4($fields['credito4'])
       ->setClasse($fields['classe']);
-    $password = $this->encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($alunno, $alunno->getPasswordNonCifrata());
     $alunno->setPassword($password);
     // valida dati alunno
     $errors = $this->validator->validate($alunno);
@@ -1666,7 +1666,7 @@ class CsvImporter {
       ->setCodiceFiscale($fields['genitore1CodiceFiscale'])
       ->setNumeriTelefono($fields['genitore1Telefono'])
       ->setAlunno($alunno);
-    $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
     // valida dati genitore
     $errors = $this->validator->validate($genitore);
@@ -1688,7 +1688,7 @@ class CsvImporter {
       ->setCodiceFiscale($fields['genitore2CodiceFiscale'])
       ->setNumeriTelefono($fields['genitore2Telefono'])
       ->setAlunno($alunno);
-    $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
     // valida dati genitore
     $errors = $this->validator->validate($genitore);
@@ -1732,7 +1732,7 @@ class CsvImporter {
     // modifica dati di alunno
     if (!$empty_fields['password']) {
       $alunno->setPasswordNonCifrata($fields['password']);
-      $password = $this->encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($alunno, $alunno->getPasswordNonCifrata());
       $alunno->setPassword($password);
     }
     if (!$empty_fields['email']) {
@@ -1794,7 +1794,7 @@ class CsvImporter {
     // modifica dati di genitore1
     if (!$empty_fields['genitore1Password']) {
       $genitore1->setPasswordNonCifrata($fields['genitore1Password']);
-      $password = $this->encoder->encodePassword($genitore1, $genitore1->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($genitore1, $genitore1->getPasswordNonCifrata());
       $genitore1->setPassword($password);
     }
     if (!$empty_fields['genitore1Email']) {
@@ -1822,7 +1822,7 @@ class CsvImporter {
     // modifica dati di genitore2
     if (!$empty_fields['genitore2Password']) {
       $genitore2->setPasswordNonCifrata($fields['genitore2Password']);
-      $password = $this->encoder->encodePassword($genitore2, $genitore2->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($genitore2, $genitore2->getPasswordNonCifrata());
       $genitore2->setPassword($password);
     }
     if (!$empty_fields['genitore2Email']) {
@@ -1978,7 +1978,7 @@ class CsvImporter {
       ->setSede($sede)
       ->setTipo($fields['tipo'])
       ->setSegreteria($fields['segreteria']);
-    $password = $this->encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($ata, $ata->getPasswordNonCifrata());
     $ata->setPassword($password);
     // valida dati
     $errors = $this->validator->validate($ata);
@@ -2016,7 +2016,7 @@ class CsvImporter {
     }
     if (!isset($empty_fields['password'])) {
       $ata->setPasswordNonCifrata($fields['password']);
-      $password = $this->encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($ata, $ata->getPasswordNonCifrata());
       $ata->setPassword($password);
     } else {
       unset($fields['password']);

@@ -12,14 +12,15 @@
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use App\Entity\Alunno;
 use App\Entity\Amministratore;
 use App\Entity\Ata;
 use App\Entity\Docente;
 use App\Entity\Genitore;
-use App\Entity\Alunno;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
 
 /**
@@ -120,6 +121,19 @@ class UtenteRepository extends EntityRepository {
       $utente->setListaProfili($numDati > 1 ? $dati : []);
     }
     return $utente;
+  }
+
+  /**
+   * Implementazione dell'interfaccia PasswordUpgraderInterface per l'aggiornamento del codice hash della password
+   *
+   * @param UserInterface $user Utente che deve aggiornare il codice hash della password
+   * @param string $newHashedPassword Nuovo codice hash della password
+   */
+  public function upgradePassword(UserInterface $user, string $newHashedPassword): void {
+     // imposta il nuovo codice hash per la password
+     $user->setPassword($newHashedPassword);
+     // memorizza su db
+     $this->getEntityManager()->flush();
   }
 
 }

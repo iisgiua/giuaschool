@@ -18,7 +18,7 @@
     </p>
   </div>
   {% endif %}
-  {% if not manutenzione and app.session.get('/CONFIG/SISTEMA/id_provider') %}
+  {% if not manutenzione and app.session.get('/CONFIG/ACCESSO/id_provider') %}
   {% if errore %}<div class="alert alert-danger gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>{% endif %}
   <div class="gs-row-eq-container gs-mb-2">
     <div class="panel panel-success gs-mb-2 gs-row-eq-col2">
@@ -66,7 +66,7 @@
       </div>
     </div>
   </div>
-    {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}
+    {% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
   <div class="panel panel-primary">
     <div class="panel-body gs-pt-2 gs-pb-2">
     {{ include('login/form-spid.html.twig') }}
@@ -110,11 +110,11 @@
           </div>
           <input type="hidden" id="csrf_token" name="_csrf_token" value="authenticate">
         </form>
-        {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}
+        {% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
           {{ include('login/form-spid.html.twig') }}
         {% endif %}
       </div>
-      {% if app.session.get('/CONFIG/SISTEMA/spid') != 'no' %}
+      {% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
         {{ include('login/form-agid.html.twig') }}
       {% endif %}
     </div>

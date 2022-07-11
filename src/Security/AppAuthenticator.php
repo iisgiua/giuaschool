@@ -60,9 +60,9 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
   private $em;
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
   /**
    * @var LoggerInterface $logger Gestore dei log su file
@@ -87,16 +87,16 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordHasherInterface $encoder,
+  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordHasherInterface $hasher,
                                LoggerInterface $logger, LogHandler $dblogger, ConfigLoader $config) {
     $this->router = $router;
     $this->em = $em;
-    $this->encoder = $encoder;
+    $this->hasher = $hasher;
     $this->logger = $logger;
     $this->dblogger = $dblogger;
     $this->config = $config;
@@ -262,7 +262,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
     }
     // controllo username/password
     $plainPassword = $credentials['password'];
-    if ($this->encoder->isPasswordValid($user, $plainPassword)) {
+    if ($this->hasher->isPasswordValid($user, $plainPassword)) {
       // password ok, controlla codice prelogin
       if ($user->getPrelogin() != $credentials['prelogin']) {
         // codice prelogin errato

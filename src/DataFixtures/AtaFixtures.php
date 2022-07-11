@@ -31,9 +31,9 @@ class AtaFixtures extends Fixture implements DependentFixtureInterface, FixtureG
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -41,10 +41,10 @@ class AtaFixtures extends Fixture implements DependentFixtureInterface, FixtureG
   /**
    * Costruttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder=null) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher=null) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -73,7 +73,7 @@ class AtaFixtures extends Fixture implements DependentFixtureInterface, FixtureG
         ->setSegreteria($tipo == 'A' ? true : false)
         ->setSede($this->getReference('sede_'.$faker->randomElement(['1', '2'])))
         ->setUltimoAccesso($faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now'));
-      $password = $this->encoder->encodePassword(${'utente_ata'.$tipo}, $username);
+      $password = $this->hasher->hashPassword(${'utente_ata'.$tipo}, $username);
       ${'utente_ata'.$tipo}->setPassword($password);
       $em->persist(${'utente_ata'.$tipo});
       // aggiunge riferimenti condivisi

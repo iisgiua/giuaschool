@@ -199,7 +199,7 @@ class SistemaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
@@ -212,7 +212,7 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordHasherInterface $encoder, TranslatorInterface $trans,
+                                 UserPasswordHasherInterface $hasher, TranslatorInterface $trans,
                                  ValidatorInterface $validator, LogHandler $dblogger): Response {
     // init
     $dati = [];
@@ -236,7 +236,7 @@ class SistemaController extends BaseController {
           $form->get('password')->get('first')->addError(new FormError($errors[0]->getMessage()));
         } else {
           // codifica password
-          $password = $encoder->encodePassword($user, $user->getPasswordNonCifrata());
+          $password = $hasher->hashPassword($user, $user->getPasswordNonCifrata());
           $user->setPassword($password);
           // provisioning
           if (($user instanceOf Docente) || ($user instanceOf Alunno)) {

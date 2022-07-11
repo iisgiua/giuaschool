@@ -1,32 +1,28 @@
 # config/packages/security.yaml
 
 security:
-  encoders:
+  enable_authenticator_manager: true
+  password_hashers:
     App\Entity\Utente:
-      algorithm: 'auto'
+      algorithm: auto
   providers:
     db_provider:
       entity:
-        class: 'App\Entity\Utente'
-        property: 'username'
+        class: App\Entity\Utente
+        property: username
   firewalls:
     main:
-      provider: 'db_provider'
-      anonymous: true
       lazy: true
+      provider: db_provider
       switch_user:
         role: 'ROLE_AMMINISTRATORE'
         parameter: '_alias'
       logout:
         path: '/logout/'
         invalidate_session: false
-        success_handler: 'App\Security\LogoutHandler'
-      guard:
-        authenticators:
-          - 'App\Security\GSuiteAuthenticator'
-          - 'App\Security\FormAuthenticator'
-          - 'App\Security\AppAuthenticator'
-          - 'App\Security\SpidAuthenticator'
-          - 'App\Security\TokenAuthenticator'
-          - 'App\Security\EnrollAuthenticator'
-        entry_point: 'App\Security\GSuiteAuthenticator'
+      custom_authenticators:
+        #-- - 'App\Security\GSuiteAuthenticator'
+        - 'App\Security\FormAuthenticator'
+        #-- - 'App\Security\SpidAuthenticator'
+        #-- - 'App\Security\AppAuthenticator'
+      #-- entry_point: 'App\Security\GSuiteAuthenticator'

@@ -257,7 +257,7 @@ class LoginController extends BaseController {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param ConfigLoader $config Gestore della configurazione su database
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param OtpUtil $otp Gestione del codice OTP
    * @param StaffUtil $staff Funzioni disponibili allo staff
    * @param MailerInterface $mailer Gestore della spedizione delle email
@@ -270,7 +270,7 @@ class LoginController extends BaseController {
    *    methods={"GET", "POST"})
    */
   public function recoveryAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                 ConfigLoader $config, UserPasswordHasherInterface $encoder, OtpUtil $otp,
+                                 ConfigLoader $config, UserPasswordHasherInterface $hasher, OtpUtil $otp,
                                  StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger) {
     // carica configurazione di sistema
@@ -301,7 +301,7 @@ class LoginController extends BaseController {
       $email = $form->get('email')->getData();
       $utente = $em->getRepository('App\Entity\Utente')->findOneByEmail($email);
       // legge configurazione: id_provider
-      $id_provider = $reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider');
+      $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
       // se id_provider controlla tipo utente
       if ($id_provider && ($utente instanceOf Docente || $utente instanceOf Alunno)) {
         // errore: docente/staff/preside/alunno
@@ -390,7 +390,7 @@ class LoginController extends BaseController {
         // ok: genera password
         $password = $staff->creaPassword($num_pwdchars);
         $utente->setPasswordNonCifrata($password);
-        $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
+        $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
         $utente->setPassword($pswd);
         // memorizza su db
         $em->flush();

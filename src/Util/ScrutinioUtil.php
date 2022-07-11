@@ -2486,8 +2486,8 @@ class ScrutinioUtil {
       ->getQuery()
       ->getScalarResult();
     $giorni_festivi = array_column($festivi, 'data');
-    $giorni_settimana = array($this->reqstack->getSession()->get('/CONFIG/ACCESSO/giorni_festivi_istituto'));
-    $altri_festivi = explode(',', $this->reqstack->getSession()->get('/CONFIG/ACCESSO/giorni_festivi_classi'));
+    $giorni_settimana = array($this->reqstack->getSession()->get('/CONFIG/SCUOLA/giorni_festivi_istituto'));
+    $altri_festivi = explode(',', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/giorni_festivi_classi'));
     foreach($altri_festivi  as $f) {
       // formato <settimana>:<classe_anno><classe_sezione>
       if (strlen($f) > 0 && $classe->getAnno() == $f[2] && $classe->getSezione() == $f[3]) {

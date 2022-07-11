@@ -87,7 +87,7 @@ class AppController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param UriSafeTokenGenerator $tok Generatore di token per CSRF
    *
    * @return JsonResponse Informazioni di risposta
@@ -95,7 +95,7 @@ class AppController extends AbstractController {
    * @Route("/app/prelogin/", name="app_prelogin",
    *    methods={"POST"})
    */
-  public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $encoder) {
+  public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher) {
     $risposta = array();
     $risposta['errore'] = 0;
     $risposta['token'] = null;
@@ -120,7 +120,7 @@ class AppController extends AbstractController {
         if (($profilo == 'A' || $profilo == 'D') && empty($password)) {
           // credenziali corrette: genera token fittizio
           $risposta['token'] = 'OK';
-        } elseif (($profilo == 'G' || $profilo == 'T') && $encoder->isPasswordValid($user, $password)) {
+        } elseif (($profilo == 'G' || $profilo == 'T') && $hasher->isPasswordValid($user, $password)) {
           // credenziali corrette: genera token
           $token = (new UriSafeTokenGenerator())->generateToken();
           $risposta['token'] = rtrim(strtr(base64_encode($profilo.$username.$password.$appId.$token), '+/', '-_'), '=');

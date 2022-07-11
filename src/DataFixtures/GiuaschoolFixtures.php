@@ -31,9 +31,9 @@ class GiuaschoolFixtures extends Fixture implements FixtureGroupInterface {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -41,10 +41,10 @@ class GiuaschoolFixtures extends Fixture implements FixtureGroupInterface {
   /**
    * Construttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -97,7 +97,7 @@ class GiuaschoolFixtures extends Fixture implements FixtureGroupInterface {
       ->setNome('Amministratore')
       ->setCognome('Registro')
       ->setSesso('M');
-    $password = $this->encoder->encodePassword($utente, 'admin');
+    $password = $this->hasher->hashPassword($utente, 'admin');
     $utente->setPassword($password);
     $em->persist($utente);
     // memorizza dati

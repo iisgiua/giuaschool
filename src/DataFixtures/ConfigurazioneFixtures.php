@@ -68,26 +68,10 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setGestito(true);
     $param[] = (new Configurazione())
       ->setCategoria('SISTEMA')
-      ->setParametro('id_provider')
-      ->setDescrizione("Se presente, indica l'uso di un identity provider esterno (es. SSO su Google)<br>[testo]")
-      ->setGestito(false);
-    $param[] = (new Configurazione())
-      ->setCategoria('SISTEMA')
       ->setParametro('dominio_default')
       ->setDescrizione("Indica il dominio di posta predefinito per le email degli utenti (usato nell'importazione)<br>[testo]")
       ->setGestito(false)
       ->setValore('noemail.local');
-    $param[] = (new Configurazione())
-      ->setCategoria('SISTEMA')
-      ->setParametro('dominio_id_provider')
-      ->setDescrizione("Nel caso si utilizzi un identity provider esterno, indica il dominio di posta predefinito per le email degli utenti (usato nell'importazione)<br>[testo]")
-      ->setGestito(false);
-    $param[] = (new Configurazione())
-      ->setCategoria('SISTEMA')
-      ->setParametro('spid')
-      ->setDescrizione("Indica la modalit&agrave; dell'accesso SPID: 'no' = non utilizzato, 'si' = utilizzato, 'validazione' = utilizzato in validazione.<br>[si|no|validazione]")
-      ->setGestito(true)
-      ->setValore('no');
     //--- categoria SCUOLA
     $param[] = (new Configurazione())
       ->setCategoria('SCUOLA')
@@ -198,33 +182,44 @@ class ConfigurazioneFixtures extends Fixture implements FixtureGroupInterface {
       ->setDescrizione("Lista dei voti finali per le altre materie<br>[lista serializzata]")
       ->setGestito(true)
       ->setValore(serialize($lista));
-    //--- categoria ACCESSO
     $param[] = (new Configurazione())
-      ->setCategoria('ACCESSO')
-      ->setParametro('blocco_inizio')
-      ->setDescrizione("Inizio orario del blocco di alcune modalit&agrave; di accesso per i docenti<br>[formato: 'HH:MM', vuoto se nessun blocco]")
-      ->setValore('');
-    $param[] = (new Configurazione())
-      ->setCategoria('ACCESSO')
-      ->setParametro('blocco_fine')
-      ->setDescrizione("Fine orario del blocco di alcune modalit&agrave; di accesso per i docenti<br>[formato 'HH:MM', vuoto se nessun blocco]")
-      ->setValore('');
-    $param[] = (new Configurazione())
-      ->setCategoria('ACCESSO')
-      ->setParametro('ip_scuola')
-      ->setDescrizione("Lista degli IP dei router di scuola (accerta che login provenga da dentro l'istituto)<br>[lista separata da virgole degli IP]")
-      // localhost: 127.0.0.1
-      ->setValore('127.0.0.1');
-    $param[] = (new Configurazione())
-      ->setCategoria('ACCESSO')
+      ->setCategoria('SCUOLA')
       ->setParametro('giorni_festivi_istituto')
       ->setDescrizione("Indica i giorni festivi settimanali per l'intero istituto<br>[lista separata da virgole nel formato: 0=domenica, 1=luned&igrave;, ... 6=sabato]")
       ->setValore('0');
     $param[] = (new Configurazione())
-      ->setCategoria('ACCESSO')
+      ->setCategoria('SCUOLA')
       ->setParametro('giorni_festivi_classi')
       ->setDescrizione("Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)<br>[lista separata da virgole nel formato 'giorno:classe'; giorno: 0=domenica, 1=luned&igrave;, ... 6=sabato; classe: 1A, 2A, ...]")
       ->setValore('');
+    //--- categoria ACCESSO
+    $param[] = (new Configurazione())
+      ->setCategoria('ACCESSO')
+      ->setParametro('id_provider')
+      ->setDescrizione("Se presente, indica l'uso di un identity provider esterno (es. SSO su Google)<br>[testo]")
+      ->setGestito(false);
+    $param[] = (new Configurazione())
+      ->setCategoria('ACCESSO')
+      ->setParametro('id_provider_dominio')
+      ->setDescrizione("Nel caso si utilizzi un identity provider esterno, indica il dominio di posta predefinito per le email degli utenti (usato nell'importazione)<br>[testo]")
+      ->setGestito(false);
+    $param[] = (new Configurazione())
+      ->setCategoria('ACCESSO')
+      ->setParametro('id_provider_tipo')
+      ->setDescrizione("Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore)<br>[testo]")
+      ->setGestito(false);
+    $param[] = (new Configurazione())
+      ->setCategoria('ACCESSO')
+      ->setParametro('otp_tipo')
+      ->setDescrizione("Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all'uso dell'OTP (U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore)<br>[testo]")
+      ->setValore('DS')
+      ->setGestito(false);
+    $param[] = (new Configurazione())
+      ->setCategoria('ACCESSO')
+      ->setParametro('spid')
+      ->setDescrizione("Indica la modalit&agrave; dell'accesso SPID: 'no' = non utilizzato, 'si' = utilizzato, 'validazione' = utilizzato in validazione.<br>[si|no|validazione]")
+      ->setGestito(true)
+      ->setValore('no');
     // rende persistenti i parametri
     foreach ($param as $obj) {
       $em->persist($obj);

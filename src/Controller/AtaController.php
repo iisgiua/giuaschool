@@ -238,7 +238,7 @@ class AtaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
@@ -257,7 +257,7 @@ class AtaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordHasherInterface $encoder, RequestStack $reqstack,
+                                 UserPasswordHasherInterface $hasher, RequestStack $reqstack,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $id, $tipo): Response {
     // controlla ata
@@ -269,7 +269,7 @@ class AtaController extends BaseController {
     // crea password
     $password = $staff->creaPassword(8);
     $ata->setPasswordNonCifrata($password);
-    $pswd = $encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
+    $pswd = $hasher->hashPassword($ata, $ata->getPasswordNonCifrata());
     $ata->setPassword($pswd);
     // memorizza su db
     $em->flush();

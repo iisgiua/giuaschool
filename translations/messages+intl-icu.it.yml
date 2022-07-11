@@ -1230,7 +1230,7 @@ exception.invalid_params: Dati errati.
 exception.invalid_recovery_email: L'indirizzo email indicato non è presente nel sistema.
 exception.invalid_recovery_type: Utente non abilitato all'utilizzo della procedura di recupero password.
 exception.invalid_user_type: Tipo di utente non ammesso.
-exception.invalid_user_type_idprovider: "Tipo di utente non ammesso: usare l'autenticazione tramite GSuite."
+exception.invalid_user_type_idprovider: "Tipo di utente non valido: usare l'autenticazione tramite GOOGLE."
 exception.invalid_user: Utente sconosciuto.
 exception.manca_esito: Non è stato indicato l'esito dell'alunn{sex} {alunno}.
 exception.missing_otp_credentials: Non hai inserito il codice OTP.

@@ -61,7 +61,7 @@ FROM system_builder as symfony_builder
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data composer.* symfony.lock ./
 RUN \
-  composer -q install --no-dev --no-progress && \
+  composer -q install --no-dev --no-progress --no-scripts && \
   composer -q clear-cache
 
 
@@ -90,7 +90,7 @@ RUN \
   cd vendor/italia && \
   tar -zxf ../../tests/docker/spid-php.tgz && \
   cd spid-php && \
-  composer -q install --no-dev --no-progress && \
+  composer -q install --no-dev --no-progress --no-scripts && \
   composer -q clear-cache && \
   cd vendor/simplesamlphp/simplesamlphp/modules && \
   tar -zxf /var/www/giuaschool/tests/docker/spid-theme.tgz && \
@@ -118,7 +118,7 @@ WORKDIR /var/www/giuaschool
 RUN \
 # Set DEV environment
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=dev/" .env && \
-  composer -q install --no-progress && \
+  composer -q install --no-progress --no-scripts && \
   composer clear-cache && \
   chown -R www-data:www-data .
 

@@ -31,9 +31,9 @@ class DocenteFixtures extends Fixture implements DependentFixtureInterface, Fixt
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -41,10 +41,10 @@ class DocenteFixtures extends Fixture implements DependentFixtureInterface, Fixt
   /**
    * Costruttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder=null) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher=null) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -71,7 +71,7 @@ class DocenteFixtures extends Fixture implements DependentFixtureInterface, Fixt
         ->setCodiceFiscale($faker->unique()->taxId())
         ->setUltimoAccesso($faker->dateTimeBetween('-1 week', 'now'));
       $em->persist($docente[$i]);
-      $password = $this->encoder->encodePassword($docente[$i], $username);
+      $password = $this->hasher->hashPassword($docente[$i], $username);
       $docente[$i]->setPassword($password);
       $this->setReference('docente_'.$i, $docente[$i]);
     }

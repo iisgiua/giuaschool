@@ -28,9 +28,9 @@ class PresideFixtures extends Fixture implements FixtureGroupInterface {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -38,10 +38,10 @@ class PresideFixtures extends Fixture implements FixtureGroupInterface {
   /**
    * Costruttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder=null) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher=null) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -59,7 +59,7 @@ class PresideFixtures extends Fixture implements FixtureGroupInterface {
       ->setCognome('Turing')
       ->setSesso('M')
       ->setCodiceFiscale('TRNLNA12H23Z114P');
-    $password = $this->encoder->encodePassword($utente, 'dirigente');
+    $password = $this->hasher->hashPassword($utente, 'dirigente');
     $utente->setPassword($password);
     $em->persist($utente);
     // memorizza dati

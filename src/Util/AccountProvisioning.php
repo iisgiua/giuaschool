@@ -269,7 +269,7 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function aggiungeAlunnoClasse(Alunno $alunno, Classe $classe) {
-    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio');
     $nomeclasse = $classe->getAnno().$classe->getSezione();
     $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // GSuite: aggiunge a gruppo classe
@@ -316,7 +316,7 @@ class AccountProvisioning {
    * @return string Eventuale messaggio di errore (stringa nulla se tutto OK)
    */
   public function rimuoveAlunnoClasse(Alunno $alunno, Classe $classe) {
-    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio');
     $nomeclasse = $classe->getAnno().$classe->getSezione();
     $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // GSuite: rimuove da gruppo classe
@@ -794,7 +794,7 @@ class AccountProvisioning {
   private function creaUtenteGsuite($nome, $cognome, $sesso, $email, $password, $tipo) {
     // init
     $errore = null;
-    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio');
     $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     // controlla esistenza
     try {
@@ -927,7 +927,7 @@ class AccountProvisioning {
   private function sospendeUtenteGsuite($email, $tipo, $sospeso) {
     // init
     $errore = null;
-    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio');
     $anno = substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'), 0, 4);
     try {
       if ($tipo == 'D') {
@@ -981,7 +981,7 @@ class AccountProvisioning {
   private function creaCorsoGsuite($docente, $classe, $materia, $anno) {
     // init
     $errore = null;
-    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio');
     $nomecorso = "$classe - $materia - $anno";
     $corso = strtoupper($classe.'-'.str_replace([' ','.',',','(',')'], '', $materia).'-'.$anno);
     try {
@@ -1106,7 +1106,7 @@ class AccountProvisioning {
   private function rimuoveDocenteCorsoGsuite($docente, $corso, $cancellagruppo) {
     // init
     $errore = null;
-    $dominio = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_id_provider');
+    $dominio = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio');
     $classe = substr($corso, 0, 2);
     try {
       // lista docenti del corso

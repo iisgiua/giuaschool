@@ -13,10 +13,10 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
@@ -149,6 +149,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private $ultimoAccesso;
 
   /**
+   * @var string $otp Codice segreto per accesso con OTP (se NULL non è attivato)
+   *
+   * @ORM\Column(type="string", length=128, nullable=true)
+   */
+  private $otp;
+
+  /**
+   * @var string $ultimoOtp Codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @ORM\Column(name="ultimo_otp", type="string", length=16, nullable=true)
+   */
+  private $ultimoOtp;
+
+  /**
    * @var string $nome Nome dell'utente
    *
    * @ORM\Column(type="string", length=64, nullable=false)
@@ -277,11 +291,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   //==================== IMPLEMENTAZIONE DI USERINTERFACE ====================
 
   /**
-   * Restituisce la username dell'utente
+   * Restituisce l'identificativo dell'utente
    *
-   * @return string Username dell'utente
+   * @return string Identificativo dell'utente
    */
-  public function getUsername() {
+  public function getUserIdentifier(): string {
     return $this->username;
   }
 
@@ -380,6 +394,15 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    */
   public function getModificato() {
     return $this->modificato;
+  }
+
+  /**
+   * Restituisce la username dell'utente
+   *
+   * @return string Username dell'utente
+   */
+  public function getUsername() {
+    return $this->username;
   }
 
   /**
@@ -592,6 +615,48 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    */
   public function setUltimoAccesso($ultimoAccesso) {
     $this->ultimoAccesso = $ultimoAccesso;
+    return $this;
+  }
+
+  /**
+   * Restituisce il token segreto per l'accesso con OTP (se NULL non è attivato)
+   *
+   * @return string Token segreto per l'accesso con OTP
+   */
+  public function getOtp() {
+    return $this->otp;
+  }
+
+  /**
+   * Modifica il token segreto per l'accesso con OTP (se NULL non è attivato)
+   *
+   * @param string $otp Token segreto per l'accesso con OTP
+   *
+   * @return Utente Oggetto modificato
+   */
+  public function setOtp($otp) {
+    $this->otp = $otp;
+    return $this;
+  }
+
+  /**
+   * Restituisce il codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @return string Codice OTP usato l'ultima volta
+   */
+  public function getUltimoOtp() {
+    return $this->ultimoOtp;
+  }
+
+  /**
+   * Modifica il codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @param string $ultimoOtp Codice OTP usato l'ultima volta
+   *
+   * @return Utente Oggetto modificato
+   */
+  public function setUltimoOtp($ultimoOtp) {
+    $this->ultimoOtp = $ultimoOtp;
     return $this;
   }
 
@@ -869,6 +934,17 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
     $this->spid = false;
     $this->listaProfili = array();
     $this->infoLogin = array();
+  }
+
+  /**
+   * Restituisce il codice corrispondente al ruolo dell'utente
+   * I codici utilizzati sono:
+   *    U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore
+   *
+   * @return string Codifica del ruolo dell'utente
+   */
+  public function getCodiceRuolo(): string {
+    return 'U';
   }
 
   /**

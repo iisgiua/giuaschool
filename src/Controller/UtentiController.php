@@ -95,7 +95,7 @@ class UtentiController extends AbstractController {
     if ($form->isSubmitted() && $form->isValid()) {
       $vecchia_email = $this->getUser()->getEmail();
       // legge configurazione: id_provider
-      $id_provider = $reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider');
+      $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
       // validazione
       $this->getUser()->setEmail($form->get('email')->getData());
       $errors = $validator->validate($this->getUser());
@@ -129,7 +129,7 @@ class UtentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
@@ -143,7 +143,7 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $encoder,
+  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher,
                                  TranslatorInterface $trans, ValidatorInterface $validator, RequestStack $reqstack,
                                  OtpUtil $otp, LogHandler $dblogger) {
     $success = null;
@@ -184,13 +184,13 @@ class UtentiController extends AbstractController {
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
         // legge configurazione: id_provider
-        $id_provider = $reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider');
+        $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
         if ($id_provider && ($this->getUser() instanceOf Docente || $this->getUser() instanceOf Alunno)) {
           // errore: docente/staff/preside/alunno
           $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
         }
         // controllo password esistente
-        if (!$encoder->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
+        if (!$hasher->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
           // vecchia password errata
           $form->get('current_password')->addError(
             new FormError($trans->trans('password.wrong', [], 'validators')));
@@ -223,7 +223,7 @@ class UtentiController extends AbstractController {
         }
         if ($form->isValid()) {
           // codifica password
-          $password = $encoder->encodePassword($this->getUser(), $psw);
+          $password = $hasher->hashPassword($this->getUser(), $psw);
           $this->getUser()->setPassword($password);
           if ($this->getUser() instanceOf Docente) {
             // memorizza ultimo OTP
@@ -274,7 +274,7 @@ class UtentiController extends AbstractController {
     $qrcode = null;
     $form = null;
     // legge configurazione: id_provider
-    $id_provider = $reqstack->getSession()->get('/CONFIG/SISTEMA/id_provider');
+    $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
     if ($id_provider) {
       // errore: docente/staff/preside/alunno
       $msg = array('tipo' => 'danger', 'messaggio' => 'exception.invalid_user_type_recovery');

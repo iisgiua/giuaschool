@@ -28,9 +28,9 @@ class AmministratoreFixtures extends Fixture implements FixtureGroupInterface {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -38,10 +38,10 @@ class AmministratoreFixtures extends Fixture implements FixtureGroupInterface {
   /**
    * Costruttore
    *
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  public function __construct(UserPasswordHasherInterface $encoder=null) {
-    $this->encoder = $encoder;
+  public function __construct(UserPasswordHasherInterface $hasher=null) {
+    $this->hasher = $hasher;
   }
 
   /**
@@ -59,7 +59,7 @@ class AmministratoreFixtures extends Fixture implements FixtureGroupInterface {
       ->setCognome('Babbage')
       ->setSesso('M')
       ->setCodiceFiscale('BBBCRL91T26Z114G');
-    $password = $this->encoder->encodePassword($utente, 'admin');
+    $password = $this->hasher->hashPassword($utente, 'admin');
     $utente->setPassword($password);
     $em->persist($utente);
     // memorizza dati

@@ -506,6 +506,17 @@ class Alunno extends Utente {
   }
 
   /**
+   * Restituisce il codice corrispondente al ruolo dell'utente
+   * I codici utilizzati sono:
+   *    U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore
+   *
+   * @return string Codifica del ruolo dell'utente
+   */
+  public function getCodiceRuolo(): string {
+    return 'A';
+  }
+
+  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo

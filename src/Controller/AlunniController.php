@@ -347,7 +347,7 @@ class AlunniController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
@@ -366,7 +366,7 @@ class AlunniController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordHasherInterface $encoder, RequestStack $reqstack,
+                                 UserPasswordHasherInterface $hasher, RequestStack $reqstack,
                                  PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer, LoggerInterface $logger,
                                  LogHandler $dblogger, $tipo, $username=null): Response {
     // controlla alunno
@@ -382,7 +382,7 @@ class AlunniController extends BaseController {
     // crea password
     $password = $staff->creaPassword(8);
     $utente->setPasswordNonCifrata($password);
-    $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
+    $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
     $utente->setPassword($pswd);
     // provisioning
     if ($utente instanceOf Alunno) {
@@ -754,7 +754,7 @@ class AlunniController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
@@ -771,7 +771,7 @@ class AlunniController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordFiltroAction(Request $request, EntityManagerInterface $em,
-                                       UserPasswordHasherInterface $encoder, RequestStack $reqstack,
+                                       UserPasswordHasherInterface $hasher, RequestStack $reqstack,
                                        PdfManager $pdf, StaffUtil $staff,
                                        LoggerInterface $logger, LogHandler $dblogger, $genitore): Response {
     // recupera criteri dalla sessione
@@ -801,7 +801,7 @@ class AlunniController extends BaseController {
         // crea password
         $password = $staff->creaPassword(8);
         $utente->setPasswordNonCifrata($password);
-        $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
+        $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
         $utente->setPassword($pswd);
         // provisioning
         if (!$genitore) {

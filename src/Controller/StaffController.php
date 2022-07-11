@@ -2621,7 +2621,7 @@ class StaffController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param StaffUtil $staff Funzioni di utilità per lo staff
    * @param LogHandler $dblogger Gestore dei log su database
@@ -2640,7 +2640,7 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function passwordCreateAction(Request $request, EntityManagerInterface $em,
-                                       UserPasswordHasherInterface $encoder, RequestStack $reqstack,
+                                       UserPasswordHasherInterface $hasher, RequestStack $reqstack,
                                        StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
                                        PdfManager $pdf, MailerInterface $mailer, $tipo, $username=null) {
      // controlla alunno
@@ -2656,7 +2656,7 @@ class StaffController extends AbstractController {
     // crea password
     $password = $staff->creaPassword(8);
     $utente->setPasswordNonCifrata($password);
-    $pswd = $encoder->encodePassword($utente, $utente->getPasswordNonCifrata());
+    $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
     $utente->setPassword($pswd);
     // provisioning
     if ($utente instanceOf Alunno) {

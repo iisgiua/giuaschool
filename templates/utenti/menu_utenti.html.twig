@@ -2,12 +2,12 @@
   <ul class="nav nav-tabs">
     <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_profilo' ? ' class="active"' }}><a href="{{ path('utenti_profilo') }}" title="Visualizza il profilo dell'utente">Profilo</a></li>
 
-  {% if app.session.get('CONFIG/SISTEMA/id_provider') is empty or (not is_granted('ROLE_DOCENTE') and not is_granted('ROLE_ALUNNO')) %}
+  {% if app.session.get('CONFIG/ACCESSO/id_provider') is empty or (not is_granted('ROLE_DOCENTE') and not is_granted('ROLE_ALUNNO')) %}
     <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_email' ? ' class="active"' }}><a href="{{ path('utenti_email') }}" title="Modifica l'indirizzo di posta elettronica">Cambia email</a></li>
     <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_password' ? ' class="active"' }}><a href="{{ path('utenti_password') }}" title="Modifica la password di accesso">Cambia password</a></li>
   {% endif %}
 
-  {% if is_granted('ROLE_DOCENTE') and app.session.get('CONFIG/SISTEMA/id_provider') is empty %}
+  {% if is_granted('ROLE_DOCENTE') and app.session.get('CONFIG/ACCESSO/id_provider') is empty %}
     <li role="presentation"{{ app.request.attributes.get('_route') == 'utenti_otp' ? ' class="active"' }}><a href="{{ path('utenti_otp') }}" title="Abilita all'uso del codice OTP per l'accesso sicuro">Attiva OTP</a></li>
   {% endif %}
   {#-- {% if is_granted('ROLE_DOCENTE') or is_granted('ROLE_ATA') %} #}

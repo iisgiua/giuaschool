@@ -12,49 +12,40 @@
 
 namespace App\Security;
 
+use App\Util\ConfigLoader;
+use App\Util\LogHandler;
+use App\Util\OtpUtil;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
-use App\Entity\Amministratore;
-use App\Entity\Docente;
-use App\Entity\Staff;
-use App\Entity\Preside;
-use App\Entity\Genitore;
-use App\Entity\Alunno;
-use App\Entity\Configurazione;
-use App\Entity\Festivita;
-use App\Entity\Utente;
-use App\Util\ConfigLoader;
-use App\Util\LogHandler;
-use App\Util\OtpUtil;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 
 /**
  * FormAuthenticator - servizio usato per l'autenticazione di un utente tramite form
  *
  * Senza identity provider esterno:
- *    - utente Docente: blocco orario secondo parametri nei giorni di lezione,
- *                      per impedire uso di password in classe (se usato OTP nessun blocco)
- *    - utente Staff/Preside/Ata/Alunno/Genitore: nessun blocco
- *    - utente Docente/Staff/Preside: possibilità di uso dell'OTP tramite Google Authenticator
- *
- * Con identity provider esterno:
- *    - utente Docente/Staff/Preside/Alunno: autentificazione tramite email da GSuite
- *    - utente Ata/Genitore: autenticazione interna senza modifiche
+ *    - utente qualsiasi: autenticazione tramite form
+ *    - utente di tipo previsto (otp_tipo): possibilità di uso dell'OTP se l'utente è abilitato
+ * Con identity provider esterno (id_provider):
+ *    - utente di tipo previsto (id_provider_tipo): autentificazione tramite Google
+ *    - altro tipo di utente: autenticazione tramite form
  */
-class FormAuthenticator extends AbstractGuardAuthenticator {
+class FormAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -62,42 +53,37 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
   /**
    * @var RouterInterface $router Gestore delle URL
    */
-  private $router;
+  private RouterInterface $router;
 
   /**
    * @var EntityManagerInterface $em Gestore delle entità
    */
-  private $em;
+  private EntityManagerInterface $em;
 
   /**
-   * @var UserPasswordHasherInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
-
-  /**
-   * @var CsrfTokenManagerInterface $csrf Gestore dei token CRSF
-   */
-  private $csrf;
+  private UserPasswordHasherInterface $hasher;
 
   /**
    * @var OtpUtil $otp Gestione del codice OTP
    */
-  private $otp;
+  private OtpUtil $otp;
 
   /**
    * @var LoggerInterface $logger Gestore dei log su file
    */
-  private $logger;
+  private LoggerInterface $logger;
 
   /**
    * @var LogHandler $dblogger Gestore dei log su database
    */
-  private $dblogger;
+  private LogHandler $dblogger;
 
   /**
    * @var ConfigLoader $config Gestore della configurazione su database
    */
-  private $config;
+  private ConfigLoader $config;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -107,20 +93,18 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordHasherInterface $encoder Gestore della codifica delle password
-   * @param CsrfTokenManagerInterface $csrf Gestore dei token CRSF
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordHasherInterface $encoder,
-                              CsrfTokenManagerInterface $csrf, OtpUtil $otp, LoggerInterface $logger, LogHandler $dblogger,
+  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordHasherInterface $hasher,
+                              OtpUtil $otp, LoggerInterface $logger, LogHandler $dblogger,
                               ConfigLoader $config) {
     $this->router = $router;
     $this->em = $em;
-    $this->encoder = $encoder;
-    $this->csrf = $csrf;
+    $this->hasher = $hasher;
     $this->otp = $otp;
     $this->logger = $logger;
     $this->dblogger = $dblogger;
@@ -128,70 +112,59 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
   }
 
   /**
-   * Restituisce una pagina che invita l'utente ad autenticarsi.
-   * Il metodo è eseguito quando un utente anonimo accede a risorse che richiedono l'autenticazione.
-   * Lo scopo del metodo è restituire una pagina che permetta all'utente di iniziare il processo di autenticazione.
+   * Indica se l'autenticatore supporta o meno la richiesta attuale.
    *
    * @param Request $request Pagina richiesta
-   * @param AuthenticationException $authException Eccezione che inizia il processo di autenticazione
    *
-   * @return Response Pagina di risposta
+   * @return bool|null Se vero o nullo è supportata, altrimenti no.
    */
-  public function start(Request $request, AuthenticationException $authException = null) {
-    // eccezione che ha richiesto l'autenticazione
-    $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
-    // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('login_form'));
+  public function supports(Request $request): ?bool {
+    return ($request->getPathInfo() == '/login/form/' && $request->isMethod('POST'));
   }
 
   /**
-   * Recupera le credenziali di autenticazione dalla pagina richiesta e le restituisce come un array associativo.
-   * Se si restituisce null, l'autenticazione viene annullata.
+   * Esegue l'autenticazione e crea un passaporto che contiene: l'utente, le credenziali e altre
+   * informazioni (es. il token CSRF).
    *
    * @param Request $request Pagina richiesta
    *
-   * @return mixed|null Le credenziali dell'autenticazione o null
+   * @return Passport Passaporto creato per la richiesta corrente
+   *
+   * @throws AuthenticationException Eccezione lanciata per ogni tipo di errore di autenticazione
    */
-  public function getCredentials(Request $request) {
-    // protezione CSRF
-    $csrfToken = $request->get('_csrf_token');
-    $intention = 'authenticate';
-    if (!$this->csrf->isTokenValid(new CsrfToken($intention, $csrfToken))) {
-      $this->logger->error('Token CSRF non valido nella richiesta di login.', array(
-        'username' => $request->request->get('_username'),
-        'ip' => $request->getClientIp()));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_csrf');
-    }
-    // restituisce le credenziali
+  public function authenticate(Request $request): Passport {
+    // legge le credenziali
     $username = $request->request->get('_username');
-    $password = $request->request->get('_password');
-    $otp = $request->request->get('_otp');
+    $credentials = [
+      'password' => $request->request->get('_password'),
+      'otp' => $request->request->get('_otp'),
+      'ip' => $request->getClientIp()];
+    // salva la username usata
     $request->getSession()->set(Security::LAST_USERNAME, $username);
-    return array(
-      'username' => $username,
-      'password' => $password,
-      'otp' => $otp,
-      'ip' => $request->getClientIp());
+    // crea e restituisce il passaporto
+    return new Passport(
+      new UserBadge($username, [$this, 'getUser']),
+      new CustomCredentials([$this, 'checkCredentials'], $credentials),
+      [ new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')) ]);
   }
 
   /**
-   * Restituisce l'utente corrispondente alle credenziali fornite
+   * Restituisce l'utente corrispondente all'identificatore fornito
    *
-   * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserProviderInterface $userProvider Gestore degli utenti
+   * @param string $username Identificatore dell'utente
    *
-   * @return UserInterface|null L'utente trovato o null
+   * @return UserInterface|null L'utente trovato o null se errore
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function getUser($credentials, UserProviderInterface $userProvider) {
+  public function getUser(string $username): ?UserInterface {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['username' => $credentials['username'],
+    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username,
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login.', array(
-        'username' => $credentials['username'],
-        'ip' => $credentials['ip']));
+        'username' => $username));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     if (empty($user->getCodiceFiscale())) {
@@ -233,8 +206,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
     }
     // errore: utente disabilitato
     $this->logger->error('Utente disabilitato nella richiesta di login.', array(
-      'username' => $credentials['username'],
-      'ip' => $credentials['ip']));
+      'username' => $username));
     throw new CustomUserMessageAuthenticationException('exception.invalid_user');
   }
 
@@ -244,11 +216,13 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * Si può anche generare un'eccezione per far fallire l'autenticazione.
    *
    * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserInterface $user Utente corripondente alle credenziali
+   * @param UserInterface $user Utente corripondente all'identificatore fornito
    *
    * @return bool Vero se le credenziali sono valide, falso altrimenti
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function checkCredentials($credentials, UserInterface $user) {
+  public function checkCredentials($credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
     $manutenzioneInizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
@@ -257,25 +231,28 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
         !($user instanceOf Amministratore)) {
       // errore: modalità manutenzione
       $this->logger->error('Tentativo di accesso da form durante la modalità manutenzione.', array(
-        'username' => $credentials['username'],
+        'username' => $user->getUsername(),
+        'ruolo' => $user->getCodiceRuolo(),
         'ip' => $credentials['ip']));
       throw new CustomUserMessageAuthenticationException('exception.blocked_login');
     }
     // legge configurazione: id_provider
-    $id_provider = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('id_provider');
-    // se id_provider controlla tipo utente
-    if ($id_provider && $id_provider->getValore() && ($user instanceOf Docente || $user instanceOf Alunno)) {
-      // errore: docente/staff/preside/alunno
+    $idProvider = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider');
+    $idProviderTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider_tipo');
+    // se id_provider controlla ruolo utente
+    if ($idProvider && strpos($user->getCodiceRuolo(), $idProviderTipo) !== false) {
+      // errore: utente deve usare accesso con id provider
       $this->logger->error('Tipo di utente non valido nella richiesta di login.', array(
-        'username' => $credentials['username'],
+        'username' => $user->getUsername(),
+        'ruolo' => $user->getCodiceRuolo(),
         'ip' => $credentials['ip']));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
     }
-    // controlla username/password
-    $plainPassword = $credentials['password'];
-    if ($this->encoder->isPasswordValid($user, $plainPassword)) {
+    // controlla password
+    if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
       // password ok
-      if (($user instanceof Docente) && $user->getOtp()) {
+      $otpTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('otp_tipo');
+      if ($user->getOtp() && strpos($user->getCodiceRuolo(), $otpTipo) !== false) {
         // controlla otp
         if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
           // otp corretto
@@ -283,7 +260,7 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
             // ok
             return true;
           } else {
-            // otp riusato (replay attack)
+            // otp riusato (replay attack?)
             $otp_errore_log = 'OTP riusato (replay attack) nella richiesta di login.';
             $otp_errore_messaggio = 'exception.invalid_credentials';
           }
@@ -298,39 +275,18 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
         }
         // validazione fallita
         $this->logger->error($otp_errore_log, array(
-          'username' => $credentials['username'],
+          'username' => $user->getUsername(),
+          'ruolo' => $user->getCodiceRuolo(),
           'ip' => $credentials['ip']));
         throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
-      }
-      // legge configurazione
-      $time_start_conf = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('blocco_inizio');
-      $time_start = ($time_start_conf === null ? '' : $time_start_conf->getValore());
-      $time_end_conf = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('blocco_fine');
-      $time_end = ($time_end_conf === null ? '' : $time_end_conf->getValore());
-      if (($user instanceof Docente) && !($user instanceof Staff) && !($user instanceof Preside) &&
-          ($time_start !== '' || $time_end !== '')) {
-        // l'utente è un docente: controllo orario di blocco
-        $now = date('H:i');
-        if ($now >= $time_start && $now <= $time_end &&
-            !$this->em->getRepository('App\Entity\Festivita')->giornoFestivo(new \DateTime())) {
-          // in orario di blocco e in un giorno non festivo, controlla giorni settimana
-          $weekdays_conf = $this->em->getRepository('App\Entity\Configurazione')->findOneByParametro('giorni_festivi_istituto');
-          $weekdays = ($weekdays_conf === null ? array() : explode(',', $weekdays_conf->getValore()));
-          if (!in_array(date('w'), $weekdays)) {
-            // non è giorno settimanale festivo: blocca
-            $this->logger->error('Docente in orario di blocco nella richiesta di login.', array(
-              'username' => $credentials['username'],
-              'ip' => $credentials['ip']));
-            throw new CustomUserMessageAuthenticationException('exception.blocked_time');
-          }
-        }
       }
       // validazione corretta
       return true;
     }
     // validazione fallita
     $this->logger->error('Password errata nella richiesta di login.', array(
-      'username' => $credentials['username'],
+      'username' => $user->getUsername(),
+      'ruolo' => $user->getCodiceRuolo(),
       'ip' => $credentials['ip']));
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
   }
@@ -340,26 +296,28 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param Request $request Pagina richiesta
    * @param TokenInterface $token Token di autenticazione (contiene l'utente)
-   * @param string $providerKey Chiave usata dal gestore della sicurezza (definita nel firewall)
+   * @param string $firewallName Nome del firewall usato per la richiesta
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta come utente autenticato
    */
-  public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
+  public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
-    $tipo_accesso = (($token->getUser() instanceof Docente) && $token->getUser()->getOtp()) ? 'form/OTP' : 'form';
+    $otpTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('otp_tipo');
+    $tipo_accesso = ($token->getUser()->getOtp() && strpos($token->getUser()->getCodiceRuolo(), $otpTipo) !== false) ?
+      'form/OTP' : 'form';
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
+    if ($tipo_accesso != 'form') {
+      // memorizza ultimo codice OTP usato (replay attack check)
+      $token->getUser()->setUltimoOtp($request->request->get('_otp'));
+    }
     // controlla presenza altri profili
     if (empty($token->getUser()->getListaProfili())) {
       // non sono presenti altri profili: imposta ultimo accesso dell'utente
       $accesso = $token->getUser()->getUltimoAccesso();
       $request->getSession()->set('/APP/UTENTE/ultimo_accesso', ($accesso ? $accesso->format('d/m/Y H:i:s') : null));
       $token->getUser()->setUltimoAccesso(new \DateTime());
-      if ($tipo_accesso != 'form') {
-        // memorizza ultimo codice OTP usato
-        $token->getUser()->setUltimoOtp($request->request->get('_otp'));
-      }
     } else {
       // sono presenti altri profili: li memorizza in sessione
       $request->getSession()->set('/APP/UTENTE/lista_profili', $token->getUser()->getListaProfili());
@@ -382,9 +340,9 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
    * @param Request $request Pagina richiesta
    * @param AuthenticationException $exception Eccezione di autenticazione
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
-  public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
+  public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
     // messaggio di errore
     $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
@@ -392,24 +350,21 @@ class FormAuthenticator extends AbstractGuardAuthenticator {
   }
 
   /**
-   * Indica se l'autenticatore supporta o meno la gestione del cookie RICORDAMI.
-   *
-   * @return bool Vero se supportato il cookie RICORDAMI, falso altrimenti
-   */
-  public function supportsRememberMe() {
-    // nessun supporto per il cookie RICORDAMI
-    return false;
-  }
-
-  /**
-   * Indica se l'autenticatore supporta o meno la richiesta attuale.
+   * Restituisce una pagina che invita l'utente ad autenticarsi.
+   * Il metodo è eseguito quando un utente anonimo accede a risorse che richiedono l'autenticazione.
+   * Lo scopo del metodo è restituire una pagina che permetta all'utente di iniziare il processo di autenticazione.
    *
    * @param Request $request Pagina richiesta
+   * @param AuthenticationException $authException Eccezione che inizia il processo di autenticazione
    *
-   * @return bool Vero se supportato, falso altrimenti
+   * @return Response Pagina di risposta
    */
-  public function supports(Request $request) {
-    return ($request->getPathInfo() == '/login/form/' && $request->isMethod('POST'));
+  public function start(Request $request, AuthenticationException $authException = null): Response {
+    // eccezione che ha richiesto l'autenticazione
+    $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
+    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    // redirect alla pagina di login
+    return new RedirectResponse($this->router->generate('login_form'));
   }
 
 }

@@ -37,4 +37,15 @@ class Amministratore extends Utente {
     return ['ROLE_AMMINISTRATORE', 'ROLE_UTENTE'];
   }
 
+  /**
+   * Restituisce il codice corrispondente al ruolo dell'utente
+   * I codici utilizzati sono:
+   *    U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore
+   *
+   * @return string Codifica del ruolo dell'utente
+   */
+  public function getCodiceRuolo(): string {
+    return 'M';
+  }
+
 }

@@ -33,7 +33,7 @@
            <li class="spid-idp-button-link" data-idp="timid">
              <a href="{{ path('spid_login', {idp: 'IdTim'}) }}"><span class="spid-sr-only">Tim ID</span><img src="{{ asset('spid/spid-sp-access-button/img/spid-idp-timid.svg') }}" onerror="this.src='{{ asset('spid/spid-sp-access-button/img/spid-idp-timid.png') }}'; this.onerror=null;" alt="Tim ID" /></a>
            </li>
-           {% if app.session.get('/CONFIG/SISTEMA/spid') == 'validazione' %}
+           {% if app.session.get('/CONFIG/ACCESSO/spid') == 'validazione' %}
            <!-- AGID-VALIDATORE-INIZIO -->
            <li class="spid-idp-support-link">
              <a href="{{ path('spid_login', {idp: 'VALIDATOR'}) }}">AgID Validator</a>

@@ -193,9 +193,7 @@ class Installer {
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_C';",
       "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_N';"
     ],
-    '1.4.5' => [],
-    'build' => [
-    ]
+    'build' => []
   ];
 
 
