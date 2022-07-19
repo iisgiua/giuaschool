@@ -47,7 +47,8 @@ RUN \
   sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/apache2/php.ini && \
   sed -r -i -e 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/7.4/apache2/php.ini && \
   sed -r -i -e 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/7.4/cli/php.ini && \
-  rm -f /etc/apache2/sites-available/default-ssl.conf
+  rm -f /etc/apache2/sites-available/default-ssl.conf \
+  echo echo 'Mutex posixsem' >> /etc/apache2/apache2.conf
 COPY ./tests/docker/apache2-certificate.crt /etc/ssl/cert/apache2-certificate.crt
 COPY ./tests/docker/apache2-certificate.key /etc/ssl/private/apache2-certificate.key
 COPY ./tests/docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
