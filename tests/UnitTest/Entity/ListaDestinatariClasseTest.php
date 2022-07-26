@@ -16,8 +16,9 @@ use App\Tests\DatabaseTestCase;
 
 
 /**
- * Unit test della classe
- */
+* Unit test dell'entità ListaDestinatariClasse
+*
+*/
 class ListaDestinatariClasseTest extends DatabaseTestCase {
 
   /**
@@ -31,85 +32,89 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
     $this->entity = '\App\Entity\ListaDestinatariClasse';
     // campi da testare
     $this->fields = ['listaDestinatari', 'classe', 'letto', 'firmato'];
+    $this->noStoredFields = [];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['g:Test'];
+    $this->fixtures = ['ListaDestinatariClasseFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id',
-        'letto', 'firmato'],
-      'gs_lista_destinatari' => '*',
-      'gs_classe' => '*',
-      'gs_utente' => '*'];
+    $this->canRead = ['gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id', 'letto', 'firmato']];
     // SQL write
-    $this->canWrite = [
-      'gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id',
-        'letto', 'firmato']];
+    $this->canWrite = ['gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id', 'letto', 'firmato']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    $destinatari = $this->em->getRepository('App\Entity\ListaDestinatari')->findBy([]);
-    $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sezione' => 'B']);
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'listaDestinatari' ? $this->faker->unique()->randomElement($destinatari) :
-          ($field == 'classe' ? $this->faker->randomElement($classi) :
-          ($field == 'letto' ? $this->faker->dateTimeBetween('-1 month', 'now') :
-          $this->faker->dateTimeBetween('-1 month', 'now')));
+          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_1") :
+          ($field == 'classe' ? $this->getReference("classe_".($i + 1)) :
+          ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'firmato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          null))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[2])}(new \DateTime());
+      $data[$i]['listaDestinatari'] = $this->getReference("lista_destinatari_10");
+      $o[$i]->setListaDestinatari($data[$i]['listaDestinatari']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[2])}($data[$i][$this->fields[2]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
+      foreach ($this->fields as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+    }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame('Destinatari ('.$existent->getListaDestinatari()->getId().') - Classe ('.$existent->getClasse().')',
       (string) $existent, $this->entity.'::toString');
@@ -118,32 +123,53 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
   /**
    * Test validazione dei dati
    */
-  public function testValidazione() {
+  public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // listaDestinatari
-    $obj_lista = $this->getPrivateProperty($this->entity, 'listaDestinatari');
-    $obj_lista->setValue($existent, null);
+    $property = $this->getPrivateProperty('App\Entity\ListaDestinatariClasse', 'listaDestinatari');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::listaDestinatari - NOT BLANK');
-    $existent->setListaDestinatari($this->em->getRepository('App\Entity\ListaDestinatari')->find(1));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::listaDestinatari - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
+    $existent->setListaDestinatari($this->getReference("lista_destinatari_10"));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // classe
-    $obj_classe = $this->getPrivateProperty($this->entity, 'classe');
-    $obj_classe->setValue($existent, null);
+    $property = $this->getPrivateProperty('App\Entity\ListaDestinatariClasse', 'classe');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::classe - NOT BLANK');
-    $existent->setClasse($this->em->getRepository('App\Entity\Classe')->find(1));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::classe - VALID');
-    // unique - listaDestinatari-classe
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
+    $existent->setClasse($this->getReference("classe_10"));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
+    // letto
+    $existent->setLetto(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Letto - VALID NULL');
+    // firmato
+    $existent->setFirmato(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Firmato - VALID NULL');
+    // legge dati esistenti
     $this->em->flush();
-    $o = $this->em->getRepository($this->entity)->find(2);
-    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
-    $o->setListaDestinatari($existent->getListaDestinatari());
-    $o->setClasse($existent->getClasse());
-    $err = $this->val->validate($o);
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    // unique listaDestinatari-classe
+    $listaDestinatariSaved = $objects[1]->getListaDestinatari();
+    $objects[1]->setListaDestinatari($objects[0]->getListaDestinatari());
+    $classeSaved = $objects[1]->getClasse();
+    $objects[1]->setClasse($objects[0]->getClasse());
+    $err = $this->val->validate($objects[1]);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::listaDestinatari-classe - UNIQUE');
+    $objects[1]->setListaDestinatari($listaDestinatariSaved);
+    $objects[1]->setClasse($classeSaved);
+    // unique
+    $newObject = new \App\Entity\ListaDestinatariClasse();
+    foreach ($this->fields as $field) {
+      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+    }
+    $err = $this->val->validate($newObject);
+    $msgs = [];
+    foreach ($err as $e) {
+      $msgs[] = $e->getMessageTemplate();
+    }
+    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

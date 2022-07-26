@@ -724,7 +724,7 @@ class CoordinatoreController extends AbstractController {
         ->setOggetto($trans->trans('message.avviso_coordinatore_oggetto',
           ['classe' => $classe->getAnno().'ª '.$classe->getSezione()]))
         ->setData(new \DateTime('today'))
-        ->addSede($classe->getSede());
+        ->addSedi($classe->getSede());
       $em->persist($avviso);
       // imposta classe tramite cattedra
       $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1, 'classe' => $classe]);

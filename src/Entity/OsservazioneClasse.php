@@ -32,27 +32,27 @@ class OsservazioneClasse {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'osservazione
+   * @var int|null $id Identificativo univoco per l'osservazione
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var \DateTime $data Data dell'osservazione
@@ -91,7 +91,7 @@ class OsservazioneClasse {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -102,7 +102,7 @@ class OsservazioneClasse {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -113,27 +113,27 @@ class OsservazioneClasse {
   /**
    * Restituisce l'identificativo univoco per l'osservazione
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -151,9 +151,9 @@ class OsservazioneClasse {
    *
    * @param \DateTime $data Data dell'osservazione
    *
-   * @return OsservazioneClasse Oggetto OsservazioneClasse
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -172,9 +172,9 @@ class OsservazioneClasse {
    *
    * @param string $testo Testo dell'osservazione
    *
-   * @return OsservazioneClasse Oggetto OsservazioneClasse
+   * @return self Oggetto modificato
    */
-  public function setTesto($testo) {
+  public function setTesto($testo): self {
     $this->testo = $testo;
     return $this;
   }
@@ -193,9 +193,9 @@ class OsservazioneClasse {
    *
    * @param Cattedra $cattedra Cattedra del docente che inserisce l'osservazione
    *
-   * @return OsservazioneClasse Oggetto OsservazioneClasse
+   * @return self Oggetto modificato
    */
-  public function setCattedra(Cattedra $cattedra) {
+  public function setCattedra(Cattedra $cattedra): self {
     $this->cattedra = $cattedra;
     return $this;
   }
@@ -208,7 +208,7 @@ class OsservazioneClasse {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').' - '.$this->cattedra.': '.$this->testo;
   }
 

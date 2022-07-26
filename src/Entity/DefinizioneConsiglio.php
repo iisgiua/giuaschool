@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * DefinizioneConsiglio - entità
+ * DefinizioneConsiglio - dati per lo svolgimento dei consigli di classe
  *
  * @ORM\Entity(repositoryClass="App\Repository\DefinizioneConsiglioRepository")
  * @ORM\Table(name="gs_definizione_consiglio")
@@ -33,51 +33,51 @@ class DefinizioneConsiglio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per lo scrutinio
+   * @var int|null $id Identificativo univoco per lo scrutinio
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data per lo svolgimento della riunione
+   * @var \DateTime|null $data Data per lo svolgimento della riunione
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\Type(type="\DateTime", message="field.type")
    * @Assert\NotBlank(message="field.notblank")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var array $argomenti Lista degli argomenti dell'ordine del giorno [array($id_numerico => $stringa_argomento, ...)]
+   * @var array|null $argomenti Lista degli argomenti dell'ordine del giorno [array($id_numerico => $stringa_argomento, ...)]
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $argomenti;
+  private ?array $argomenti = array();
 
   /**
-   * @var array $dati Lista di dati utili per la verbalizzazione
+   * @var array|null $dati Lista di dati utili per la verbalizzazione
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
   //==================== EVENTI ORM ====================
 
@@ -86,7 +86,7 @@ class DefinizioneConsiglio {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -97,7 +97,7 @@ class DefinizioneConsiglio {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -108,36 +108,36 @@ class DefinizioneConsiglio {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data per lo svolgimento della riunione
    *
-   * @return \DateTime Data per lo svolgimento della riunione
+   * @return \DateTime|null Data per lo svolgimento della riunione
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -146,9 +146,9 @@ class DefinizioneConsiglio {
    *
    * @param \DateTime $data Data per lo svolgimento della riunione
    *
-   * @return DefinizioneConsiglio Oggetto DefinizioneConsiglio
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -156,9 +156,9 @@ class DefinizioneConsiglio {
   /**
    * Restituisce la lista degli argomenti dell'ordine del giorno
    *
-   * @return array Lista degli argomenti dell'ordine del giorno
+   * @return array|null Lista degli argomenti dell'ordine del giorno
    */
-  public function getArgomenti() {
+  public function getArgomenti(): ?array {
     return $this->argomenti;
   }
 
@@ -167,9 +167,9 @@ class DefinizioneConsiglio {
    *
    * @param array $dati Lista degli argomenti dell'ordine del giorno
    *
-   * @return DefinizioneConsiglio Oggetto DefinizioneConsiglio
+   * @return self Oggetto modificato
    */
-  public function setArgomenti($argomenti) {
+  public function setArgomenti(array $argomenti): self {
     if ($argomenti === $this->argomenti) {
       // clona array per forzare update su doctrine
       $argomenti = unserialize(serialize($argomenti));
@@ -181,9 +181,9 @@ class DefinizioneConsiglio {
   /**
    * Restituisce la lista di dati utili per la verbalizzazione
    *
-   * @return array Lista di dati utili per la verbalizzazione
+   * @return array|null Lista di dati utili per la verbalizzazione
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -192,9 +192,9 @@ class DefinizioneConsiglio {
    *
    * @param array $dati Lista di dati utili per la verbalizzazione
    *
-   * @return DefinizioneConsiglio Oggetto DefinizioneConsiglio
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -207,19 +207,11 @@ class DefinizioneConsiglio {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->argomenti = array();
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return 'Consiglio di Classe per il '.$this->data->format('d/m/Y');
   }
 

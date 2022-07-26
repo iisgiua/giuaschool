@@ -1,0 +1,23 @@
+####################
+# SpidFixtures - dati di test
+#
+# Dati per la gestione dello SPID:
+#   idp: Identity provider che ha inviato la risposta
+#   responseId: Identificativo univoco della risposta
+#   attrName: Nome dell'utente autenticato
+#   attrFamilyName: Cognome dell'utente autenticato
+#   attrFiscalNumber: Codice fiscale dell'utente autenticato
+#   logoutUrl: Url per effettuare il logout sull'identity provider
+#   state: Stato del processo di autenticazione [A=autenticato su SPID, L=login su applicazione, E=utente applicazione non valido]
+####################
+
+
+App\Entity\Spid:
+  spid_{1..10}:
+    idp: '<words(3, true)>'
+    responseId (unique): '<uuid()>'
+    attrName: '<nome()>'
+    attrFamilyName: '<cognome()>'
+    attrFiscalNumber: '<taxId()>'
+    logoutUrl: '<url()>'
+    state: '<randomElement(["A", "L", "E"])>'

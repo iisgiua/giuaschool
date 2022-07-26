@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * File - entità
+ * File - dati per la gestione di un file
  *
  * @ORM\Entity(repositoryClass="App\Repository\FileRepository")
  * @ORM\Table(name="gs_file")
@@ -29,27 +29,27 @@ class File {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var string $titolo Nome da visualizzare per il file
@@ -59,7 +59,7 @@ class File {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $titolo;
+  private string $titolo = '';
 
   /**
    * @var string $nome Nome per il salvataggio del file sul client
@@ -69,7 +69,7 @@ class File {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $nome;
+  private string $nome = '';
 
   /**
    * @var string $estensione Estensione del file per il salvataggio sul client (indica anche il tipo)
@@ -79,17 +79,16 @@ class File {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=16,maxMessage="field.maxlength")
    */
-  private $estensione;
+  private string $estensione = '';
 
   /**
-   * @var integer $dimensione Dimensione del file
+   * @var int $dimensione Dimensione del file
    *
    * @ORM\Column(type="integer", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Positive(message="field.positive")
    */
-  private $dimensione;
+  private int $dimensione = 0;
 
   /**
    * @var string $file File memorizzato sul server
@@ -99,7 +98,7 @@ class File {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $file;
+  private string $file = '';
 
 
   //==================== EVENTI ORM ====================
@@ -109,7 +108,7 @@ class File {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -120,7 +119,7 @@ class File {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -131,27 +130,27 @@ class File {
   /**
    * Restituisce l'identificativo univoco per il documento
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -160,7 +159,7 @@ class File {
    *
    * @return string Nome da visualizzare per il file
    */
-  public function getTitolo() {
+  public function getTitolo(): string {
     return $this->titolo;
   }
 
@@ -169,9 +168,9 @@ class File {
    *
    * @param string $titolo Nome da visualizzare per il file
    *
-   * @return File Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setTitolo($titolo) {
+  public function setTitolo(string $titolo): self {
     $this->titolo = $titolo;
     return $this;
   }
@@ -181,7 +180,7 @@ class File {
    *
    * @return string Nome per il salvataggio del file sul client
    */
-  public function getNome() {
+  public function getNome(): string {
     return $this->nome;
   }
 
@@ -190,9 +189,9 @@ class File {
    *
    * @param string $nome Nome per il salvataggio del file sul client
    *
-   * @return File Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setNome($nome) {
+  public function setNome(string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -202,7 +201,7 @@ class File {
    *
    * @return string Estensione del file per il salvataggio sul client (indica anche il tipo)
    */
-  public function getEstensione() {
+  public function getEstensione(): string {
     return $this->estensione;
   }
 
@@ -211,9 +210,9 @@ class File {
    *
    * @param string $estensione Estensione del file per il salvataggio sul client (indica anche il tipo)
    *
-   * @return File Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setEstensione($estensione) {
+  public function setEstensione(string $estensione): self {
     $this->estensione = $estensione;
     return $this;
   }
@@ -221,20 +220,20 @@ class File {
   /**
    * Restituisce la dimensione del file
    *
-   * @return integer Dimensione del file
+   * @return int Dimensione del file
    */
-  public function getDimensione() {
+  public function getDimensione(): int {
     return $this->dimensione;
   }
 
   /**
    * Modifica la dimensione del file
    *
-   * @param integer $dimensione Dimensione del file
+   * @param int $dimensione Dimensione del file
    *
-   * @return File Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setDimensione($dimensione) {
+  public function setDimensione(int $dimensione): self {
     $this->dimensione = $dimensione;
     return $this;
   }
@@ -244,7 +243,7 @@ class File {
    *
    * @return string File memorizzato sul server
    */
-  public function getFile() {
+  public function getFile(): string {
     return $this->file;
   }
 
@@ -253,9 +252,9 @@ class File {
    *
    * @param string $file File memorizzato sul server
    *
-   * @return File Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setFile($file) {
+  public function setFile(string $file): self {
     $this->file = $file;
     return $this;
   }
@@ -268,7 +267,7 @@ class File {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->titolo;
   }
 

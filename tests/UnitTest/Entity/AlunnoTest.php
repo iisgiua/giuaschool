@@ -12,15 +12,13 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Filesystem\Filesystem;
 use App\Tests\DatabaseTestCase;
-use App\Entity\Classe;
 
 
 /**
- * Unit test della classe
- */
+* Unit test dell'entità Alunno
+*
+*/
 class AlunnoTest extends DatabaseTestCase {
 
   /**
@@ -33,246 +31,223 @@ class AlunnoTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Alunno';
     // campi da testare
-    $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato',
-      'abilitato', 'spid', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
-      'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica',
-      'bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero',
-      'religione', 'credito3', 'credito4', 'giustificaOnline', 'richiestaCertificato', 'foto', 'classe'];
+    $this->fields = ['bes', 'noteBes', 'autorizzaEntrata', 'autorizzaUscita', 'note', 'frequenzaEstero', 'religione', 'credito3', 'credito4', 'giustificaOnline', 'richiestaCertificato', 'foto', 'classe', 'username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica'];
+    $this->noStoredFields = ['genitori'];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['g:Test'];
+    $this->fixtures = ['AlunnoFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
-        'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
-        'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
-        'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto',
-        'sede_id', 'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id'],
-      'gs_classe' => '*'];
+    $this->canRead = ['gs_utente' => ['bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'alunno_id', 'ruolo']];
     // SQL write
-    $this->canWrite = [
-      'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
-        'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
-        'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
-        'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto',
-        'sede_id', 'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id']];
+    $this->canWrite = ['gs_utente' => ['bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'alunno_id', 'ruolo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    $this->assertNotEmpty($existent->getId(), 'Oggetto esistente');
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
-      $sesso = $this->faker->randomElement(['M', 'F']);
-      list($nome, $cognome, $username) = $this->faker->unique()->utente($sesso);
-      $email = $username.'.u@lovelace.edu.it';
       foreach ($this->fields as $field) {
-        $classe = $this->em->getRepository(Classe::class)->findOneBy([
-          'anno' => $this->faker->randomElement(['1', '2', '3', '4', '5']),
-          'sezione' => $this->faker->randomElement(['A', 'B', 'C', 'D', 'E'])]);
         $data[$i][$field] =
-          $field == 'username' ? $username.'.u' :
-          ($field == 'password' ? $this->encoder->encodePassword($o[$i], $username.'.u') :
-          ($field == 'email' ? $email :
-          ($field == 'token' ? $this->faker->optional(0.5, null)->md5() :
-          ($field == 'tokenCreato' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
-          ($field == 'prelogin' ? $this->faker->optional(0.5, null)->md5() :
-          ($field == 'preloginCreato' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
-          ($field == 'abilitato' ? $this->faker->randomElement([true, true, true, true, false]) :
-          ($field == 'spid' ? $this->faker->randomElement([true, true, false]) :
-          ($field == 'ultimoAccesso' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
-          ($field == 'nome' ? $nome :
-          ($field == 'cognome' ? $cognome :
-          ($field == 'sesso' ? $sesso :
-          ($field == 'dataNascita' ? $this->faker->dateTimeBetween('-60 years', '-14 years') :
-          ($field == 'comuneNascita' ? $this->faker->city() :
-          ($field == 'codiceFiscale' ? $this->faker->unique()->taxId() :
-          ($field == 'citta' ?  $this->faker->city() :
-          ($field == 'indirizzo' ? $this->faker->streetAddress() :
-          ($field == 'numeriTelefono' ? $this->faker->telefono($this->faker->numberBetween(0, 3)) :
-          ($field == 'notifica' ? null :
-          ($field == 'bes' ? $this->faker->randomElement(['N', 'H', 'D', 'B']) :
-          ($field == 'noteBes' ? $this->faker->optional(0.3, null)->paragraph(2, false) :
-          ($field == 'autorizzaUscita' ? $this->faker->optional(0.3, null)->paragraph(1, false) :
-          ($field == 'autorizzaUscita' ? $this->faker->optional(0.3, null)->paragraph(1, false) :
-          ($field == 'note' ? $this->faker->optional(0.3, null)->paragraph(1, true) :
-          ($field == 'frequenzaEstero' ? $this->faker->randomElement([false, false, true]) :
-          ($field == 'religione' ? $this->faker->randomElement(['S', 'U', 'I', 'D', 'A']) :
-          ($field == 'credito3' ? $this->faker->optional(0.5, null)->numberBetween(5, 10) :
-          ($field == 'credito4' ? $this->faker->optional(0.5, null)->numberBetween(5, 10) :
-          ($field == 'giustificaOnline' ? $this->faker->randomElement([false, true]) :
-          ($field == 'richiestaCertificato' ? $this->faker->randomElement([false, true]) :
-          ($field == 'foto' ? $this->faker->randomElement([null, new File(__DIR__.'/../../temp/'.$this->faker->file('tests', 'tests/temp', false))]) :
-          $classe)))))))))))))))))))))))))))))));
+          ($field == 'bes' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'noteBes' ? $this->faker->optional($weight = 50, $default = '')->text() :
+          ($field == 'autorizzaEntrata' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 2048)) :
+          ($field == 'autorizzaUscita' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 2048)) :
+          ($field == 'note' ? $this->faker->optional($weight = 50, $default = '')->text() :
+          ($field == 'frequenzaEstero' ? $this->faker->boolean() :
+          ($field == 'religione' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'credito3' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
+          ($field == 'credito4' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
+          ($field == 'giustificaOnline' ? $this->faker->boolean() :
+          ($field == 'richiestaCertificato' ? $this->faker->boolean() :
+          ($field == 'foto' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'classe' ? $this->getReference("classe_1") :
+          ($field == 'username' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128)) :
+          ($field == 'password' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'email' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'token' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'tokenCreato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'prelogin' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'preloginCreato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'abilitato' ? $this->faker->boolean() :
+          ($field == 'spid' ? $this->faker->boolean() :
+          ($field == 'ultimoAccesso' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'otp' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 128)) :
+          ($field == 'ultimoOtp' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 128)) :
+          ($field == 'nome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'cognome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'sesso' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'dataNascita' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'comuneNascita' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'codiceFiscale' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 16)) :
+          ($field == 'citta' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 32)) :
+          ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          null)))))))))))))))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[0])}(!$data[$i][$this->fields[0]]);
+      $data[$i]['token'] = substr($this->faker->text(), 0, 255);
+      $o[$i]->setToken($data[$i]['token']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[0])}($data[$i][$this->fields[0]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    $fs = new Filesystem();
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
-        // funzione get/is
+      foreach ($this->fields as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
-    // rimuove file temporanei
-    for ($i = 0; $i < 3; $i++) {
-      $fs->remove($data[$i]['foto']);
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
     }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // getRoles
     $this->assertSame(['ROLE_ALUNNO', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
+    // getCodiceRuolo
+    $this->assertSame('AU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // getCodiceFunzione
+    $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getDataNascita()->format('d/m/Y').')', (string) $existent, $this->entity.'::toString');
-    // istanza di classe
-    $this->assertTrue($existent instanceOf \App\Entity\Utente, $this->entity.'instanceOf Utente');
-    $this->assertTrue($existent instanceOf \App\Entity\Alunno, $this->entity.'instanceOf Alunno');
-    $this->assertFalse($existent instanceOf \App\Entity\Genitore, $this->entity.'instanceOf Genitore');
-    $this->assertFalse($existent instanceOf \App\Entity\Ata, $this->entity.'instanceOf Ata');
-    $this->assertFalse($existent instanceOf \App\Entity\Docente, $this->entity.'instanceOf Docente');
-    $this->assertFalse($existent instanceOf \App\Entity\Staff, $this->entity.'instanceOf Staff');
-    $this->assertFalse($existent instanceOf \App\Entity\Preside, $this->entity.'instanceOf Preside');
-    $this->assertFalse($existent instanceOf \App\Entity\Amministratore, $this->entity.'instanceOf Amministratore');
-    $this->assertTrue(is_a($existent, 'App\Entity\Utente'), $this->entity.'is_a Utente');
-    $this->assertTrue(is_a($existent, 'App\Entity\Alunno'), $this->entity.'is_a Alunno');
-    $this->assertFalse(is_a($existent, 'App\Entity\Genitore'), $this->entity.'is_a Genitore');
-    $this->assertFalse(is_a($existent, 'App\Entity\Ata'), $this->entity.'is_a Ata');
-    $this->assertFalse(is_a($existent, 'App\Entity\Docente'), $this->entity.'is_a Docente');
-    $this->assertFalse(is_a($existent, 'App\Entity\Staff'), $this->entity.'is_a Staff');
-    $this->assertFalse(is_a($existent, 'App\Entity\Preside'), $this->entity.'is_a Preside');
-    $this->assertFalse(is_a($existent, 'App\Entity\Amministratore'), $this->entity.'is_a Amministratore');
+    // addGenitori
+    $items = $existent->getGenitori()->toArray();
+    $item = new \App\Entity\Genitore();
+    $existent->addGenitori($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getGenitori()->toArray()), $this->entity.'::addGenitori');
+    $existent->addGenitori($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getGenitori()->toArray()), $this->entity.'::addGenitori');
+    // removeGenitori
+    $items = $existent->getGenitori()->toArray();
+    if (count($items) == 0) {
+      $item = new \App\Entity\Genitore();
+    } else {
+      $item = $items[0];
+    }
+    $existent->removeGenitori($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getGenitori()->toArray()), $this->entity.'::removeGenitori');
+    $existent->removeGenitori($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getGenitori()->toArray()), $this->entity.'::removeGenitori');
   }
 
   /**
    * Test validazione dei dati
    */
-  public function testValidazione() {
+  public function testValidation() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // bes
-    $existent->setBes(null);
+    $existent->setBes('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::bes - NOT BLANK');
-    $existent->setBes('2');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::bes - CHOICE');
-    $existent->setBes('n');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::bes - CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Bes - CHOICE');
     $existent->setBes('N');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::bes - VALID CHOICE');
-    $existent->setBes('H');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::bes - VALID CHOICE');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Bes - VALID CHOICE');
     // autorizzaEntrata
-    $existent->setAutorizzaEntrata(null);
+    $existent->setAutorizzaEntrata(str_repeat('*', 2049));
     $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaEntrata - VALID');
-    $existent->setAutorizzaEntrata(str_repeat('X', 2049));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::autorizzaEntrata - MAX LENGTH');
-    $existent->setAutorizzaEntrata(str_repeat('X', 2048));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaEntrata - VALID MAX LENGTH');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::AutorizzaEntrata - MAX LENGTH');
+    $existent->setAutorizzaEntrata(str_repeat('*', 2048));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::AutorizzaEntrata - VALID MAX LENGTH');
     // autorizzaUscita
-    $existent->setAutorizzaUscita(null);
+    $existent->setAutorizzaUscita(str_repeat('*', 2049));
     $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaUscita - VALID');
-    $existent->setAutorizzaUscita(str_repeat('X', 2049));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::autorizzaUscita - MAX LENGTH');
-    $existent->setAutorizzaUscita(str_repeat('X', 2048));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::autorizzaUscita - VALID MAX LENGTH');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::AutorizzaUscita - MAX LENGTH');
+    $existent->setAutorizzaUscita(str_repeat('*', 2048));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::AutorizzaUscita - VALID MAX LENGTH');
     // religione
-    $existent->setReligione(null);
+    $existent->setReligione('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::religione - NOT BLANK');
-    $existent->setReligione('X');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::religione - CHOICE');
-    $existent->setReligione('s');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::religione - CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Religione - CHOICE');
     $existent->setReligione('S');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::religione - VALID CHOICE');
-    $existent->setReligione('U');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::religione - VALID CHOICE');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Religione - VALID CHOICE');
     // foto
-    $f = new File(__FILE__);
+    $f = new \Symfony\Component\HttpFoundation\File\File(__FILE__);
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.type', $this->entity.'::foto - IMAGE TYPE');
-    $f = new File(__DIR__.'/../../data/image1.png');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.type', $this->entity.'::Foto - IMAGE TYPE');
+    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image2.png');
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.width', $this->entity.'::foto - IMAGE WIDTH');
-    $f = new File(__DIR__.'/../../data/image2.png');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.notsquare', $this->entity.'::Foto - IMAGE SQUARE');
+    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image3.png');
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.notsquare', $this->entity.'::foto - IMAGE NOSQUARE');
-    $f = new File(__DIR__.'/../../data/image3.png');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.notsquare', $this->entity.'::Foto - IMAGE NOT SQUARE');
+    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image1.png');
     $existent->setFoto($f);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.notsquare', $this->entity.'::foto - IMAGE NOSQUARE');
-    $f = new File(__DIR__.'/../../data/image0.png');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'image.width', $this->entity.'::Foto - IMAGE WIDTH');
+    $f = new \Symfony\Component\HttpFoundation\File\File(__DIR__.'/../../data/image0.png');
     $existent->setFoto($f);
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::foto - VALID IMAGE');
-    // unique - codiceFiscale
-    if (!$existent->getCodiceFiscale()) {
-      $existent->setCodiceFiscale('XCODE-0001');
-      $this->em->flush();
-    }
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
-    $o = $this->em->getRepository($this->entity)->findBy([])[1];
-    $o->setCodiceFiscale('XCODE-0002');
-    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
-    $o->setCodiceFiscale($existent->getCodiceFiscale());
-    $err = $this->val->validate($o);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Foto - VALID IMAGE');
+    // classe
+    $existent->setClasse(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NULL');
+    // legge dati esistenti
+    $this->em->flush();
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    // unique codiceFiscale
+    $codiceFiscaleSaved = $objects[1]->getCodiceFiscale();
+    $objects[1]->setCodiceFiscale($objects[0]->getCodiceFiscale());
+    $err = $this->val->validate($objects[1]);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::codiceFiscale - UNIQUE');
+    $objects[1]->setCodiceFiscale($codiceFiscaleSaved);
+    // unique
+    $newObject = new \App\Entity\Alunno();
+    foreach ($this->fields as $field) {
+      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+    }
+    $err = $this->val->validate($newObject);
+    $msgs = [];
+    foreach ($err as $e) {
+      $msgs[] = $e->getMessageTemplate();
+    }
+    $this->assertEquals(array_fill(0, 3, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

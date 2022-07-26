@@ -12,23 +12,25 @@
 
 namespace App\Tests;
 
-use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Symfony\Bridge\Doctrine\DataFixtures\ContainerAwareLoader;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Validator\ValidatorBuilder;
-use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Logging\DebugStack;
+use Doctrine\ORM\EntityManager;
+use Faker\Factory;
+use Faker\Generator;
+use Fidry\AliceDataFixtures\Loader\PurgerLoader;
+use function Symfony\Component\String\u;
+use PhpMyAdmin\SqlParser\Parser;
+use PhpMyAdmin\SqlParser\Statements\DeleteStatement;
+use PhpMyAdmin\SqlParser\Statements\InsertStatement;
+use PhpMyAdmin\SqlParser\Statements\SelectStatement;
+use PhpMyAdmin\SqlParser\Statements\UpdateStatement;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\ValidatorBuilder;
 use Symfony\Component\VarDumper\Cloner\Data;
-use Symfony\Component\Filesystem\Filesystem;
-use PhpMyAdmin\SqlParser\Parser;
-use PhpMyAdmin\SqlParser\Statements\InsertStatement;
-use PhpMyAdmin\SqlParser\Statements\UpdateStatement;
-use PhpMyAdmin\SqlParser\Statements\DeleteStatement;
-use PhpMyAdmin\SqlParser\Statements\SelectStatement;
-use Faker\Factory;
 
 
 /**
@@ -41,28 +43,37 @@ class DatabaseTestCase extends KernelTestCase {
   /**
    * Servizio per l'utilizzo delle entità su database
    *
-   * @var EntityManager $em Gestore delle entità
+   * @var EntityManager|null $em Gestore delle entità
    */
-  protected $em;
+  protected ?EntityManager $em;
 
   /**
-   * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * Servizio per la codifica delle password
+   *
+   * @var UserPasswordHasherInterface|null $hasher Gestore della codifica delle password
    */
-  protected $encoder;
+  protected ?UserPasswordHasherInterface $hasher;
 
   /**
    * Servizio di validazione dei dati
    *
-   * @var ValidatorBuilder $val Validatore dei dati
+   * @var ValidatorInterface|null $val Validatore dei dati
    */
-  protected $val;
+  protected ?ValidatorInterface $val;
 
   /**
    * Generatore automatico di dati fittizi
    *
-   * @var Factory $faker Generatore automatico di dati fittizi
+   * @var Generator|null $faker Generatore automatico di dati fittizi
    */
-  protected $faker;
+  protected ?Generator $faker;
+
+  /**
+   * Generatore di fixtures con memmorizzazione su database
+   *
+   * @var PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
+   */
+  protected ?PurgerLoader $alice;
 
   /**
    * Tabelle e campi che possono essere letti nel database (SELECT)
@@ -74,7 +85,7 @@ class DatabaseTestCase extends KernelTestCase {
    *
    * @var array $canRead Lista delle tabelle e campi che possono essere letti
    */
-  protected $canRead;
+  protected array $canRead;
 
   /**
    * Tabelle e campi che possono essere modificati nel database (INSERT, UPDATE, DELETE)
@@ -86,7 +97,7 @@ class DatabaseTestCase extends KernelTestCase {
    *
    * @var array $canWrite Lista delle tabelle e campi che possono essere modificati
    */
-  protected $canWrite;
+  protected array $canWrite;
 
   /**
    * Altri comandi che possono essere eseguiti nel database
@@ -97,49 +108,45 @@ class DatabaseTestCase extends KernelTestCase {
    *
    * @var array $canExecute Lista di altri comandi che possono essere eseguiti
    */
-  protected $canExecute;
+  protected array $canExecute;
 
   /**
    * Nome dell'entità da testare
    *
    * @var string $entity Nome dell'entità
    */
-  protected $entity;
+  protected string $entity;
 
   /**
    * Lista degli attributi dell'entità da testare
    *
    * @var array $fields Lista degli attributi dell'entità
    */
-  protected $fields;
+  protected array $fields;
 
   /**
-   * Lista degli insiemi di dati fissi (fixture) da caricare nell'ambiente di test
-   * La lista ha la seguente sintassi:
-   *    ['g:nome'] = carica le fixtures del gruppo indicato
-   *    [nome::class] = istanzia e carica la fixtures indicata
-   *    [[nome::class, 'parametro']] = istanzia la fixture con il parametro e la carica
+   * Lista dei file di dati fissi (fixture) da caricare nell'ambiente di test
    *
    * @var array $fixtures Lista delle fixtures da caricare
    */
-  protected $fixtures;
+  protected array $fixtures;
+
+  /**
+   * Lista dei file oggetti creati dalle fixtures
+   *
+   * @var array $objects Lista degli oggetti creati dalle fixtures
+   */
+  protected array $objects;
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
-
-  /**
-   * Gestore dei riferimenti usati nelle fixture
-   *
-   * @var ReferenceRepository $references Gestore dei riferimenti usati nelle fixture
-   */
-  private $references;
 
   /**
    * Comandi SQL eseguiti
    *
    * @var DebugStack $sqlTrace Lista dei comandi SQL eseguiti
    */
-  private $sqlTrace;
+  private ?DebugStack $sqlTrace;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -152,16 +159,16 @@ class DatabaseTestCase extends KernelTestCase {
     // esegue il setup standard
     parent::setUp();
     // inizializza le variabili
-    $this->references = null;
     $this->sqlTrace = null;
     // inizializza i servizi
     $kernel = self::bootKernel();
     $this->em = $kernel->getContainer()->get('doctrine')->getManager();
-    $this->encoder = $kernel->getContainer()->get('security.password_encoder');
+    $this->hasher = $kernel->getContainer()->get('security.user_password_hasher');
     $this->val = $kernel->getContainer()->get('validator');
-    $this->faker = Factory::create('it_IT');
-    $this->faker->addProvider(new FakerPerson($this->faker));
-    $this->faker->seed(9999);
+    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
+    $this->faker->addProvider(new CustomProvider());
+    $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
     // svuota database e carica dati fissi
     $this->addFixtures();
     // inizia tracciamento SQL
@@ -181,16 +188,17 @@ class DatabaseTestCase extends KernelTestCase {
     $this->em->close();
     // libera memoria
     $this->em = null;
-    $this->encoder = null;
+    $this->hasher = null;
     $this->val = null;
     $this->faker = null;
-    $this->canRead = null;
-    $this->canWrite = null;
-    $this->canExecute = null;
+    $this->alice = null;
+    $this->canRead = [];
+    $this->canWrite = [];
+    $this->canExecute = [];
     $this->sqlTrace = null;
-    $this->entity = null;
-    $this->fields = null;
-    $this->fixtures = null;
+    $this->entity = '';
+    $this->fields = [];
+    $this->fixtures = [];
   }
 
   /**
@@ -198,76 +206,44 @@ class DatabaseTestCase extends KernelTestCase {
    *
    */
   protected function addFixtures(): void {
-    // gestore di servizi
-    $loader = new ContainerAwareLoader(static::$kernel->getContainer());
-    // servizio per l'inserimento dei dati
-    $executor = new ORMExecutor($this->em);
-    // svuota il database
-    $connection = $this->em->getConnection();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
-    $purger = new ORMPurger($this->em);
-    $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
-    $purger->purge();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
-    // carica i dati
-    $params = $this->em->getConnection()->getParams();
-    $db_name = $params['dbname'];
-    $db_user = $params['user'];
-    $db_pass = $params['password'];
-    $fs = new Filesystem();
-    if (count($this->fixtures) > 0) {
-      // carica i dati
-      $fixture_caricate = false;
-      foreach ($this->fixtures as $fix) {
-        if (is_array($fix)) {
-          // fixture con parametri
-          $obj = new $fix[0]($this->{$fix[1]});
-          $loader->addFixture($obj);
-          $fixture_caricate = true;
-        } elseif (substr($fix, 0, 2) !== 'g:') {
-          // fixture senza parametri
-          $obj = new $fix();
-          $loader->addFixture($obj);
-          $fixture_caricate = true;
-        } else {
-          // gruppo di fixtures
-          $gruppo = substr($fix, 2);
-          if ($fs->exists(__DIR__.'/temp/'.$gruppo.'.fixtures')) {
-            // carica da file
-            $file = file(__DIR__.'/temp/'.$gruppo.'.fixtures', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
-            foreach ($file as $sql) {
-              $connection->exec($sql);
-            }
-            $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
-            $this->em->flush();
-          } else {
-            // carica dati di gruppo definito
-            $process = new Process(['php', 'bin/console', 'doctrine:fixtures:load',
-              '--append', '--env=test', '--group='.$gruppo]);
-            $process->setTimeout(0);
-            $process->run();
-            if (!$process->isSuccessful()) {
-              throw new ProcessFailedException($process);
-            }
-            // memorizza su file i dati
-            $process = new Process(['mysqldump', '-u'.$db_user, '-p'.$db_pass, $db_name,
-            '-t', '-n', '--compact', '--result-file='.__DIR__.'/temp/'.$gruppo.'.fixtures']);
-            $process->setTimeout(0);
-            $process->run();
-            if (!$process->isSuccessful()) {
-              throw new ProcessFailedException($process);
-            }
-          }
-        }
+    // carica fixture alice
+    $path = dirname(__DIR__).'/src/DataFixtures/';
+    $this->objects = $this->alice->load(array_map(function($f) use ($path) {
+        return $path.$f.'.yml';
+      }, $this->fixtures));
+    // aggiunge alias per i riferimenti agli oggetti
+    $typesCount = [];
+    foreach ($this->objects as $name => $object) {
+      // determina classe e numero di istanza
+      $parts = explode('\\', get_class($object));
+      $type = ''.u($parts[count($parts) - 1])->snake();
+      if (!isset($typesCount[$type])) {
+        $typesCount[$type] = 1;
+      } else {
+        $typesCount[$type]++;
       }
-      if ($fixture_caricate) {
-        // inserisce i dati nel database
-        $executor->execute($loader->getFixtures(), true);
-        // conserva gestore dei riferimenti usati nelle fixture
-        $this->references = $executor->getReferenceRepository();
+      // crea alias
+      $alias = $type.'_'.$typesCount[$type];
+      if ($alias !== $name) {
+        $this->objects[$alias] = $object;
       }
     }
+  }
+
+  /**
+   * Restituisce l'oggetto relativo al riferimento indicato
+   *
+   * @param string $name Nome del riferimento all'oggetto creato dalle fixtures
+   *
+   * @return mixed|null Oggetto relativo al riferimento indicato o null se riferimento non definito
+   */
+  protected function getReference(string $name): object {
+    // carica fixture alice
+    if (isset($this->objects[$name])) {
+      return $this->objects[$name];
+    }
+    // riferimento non definito
+    return null;
   }
 
   /**
@@ -299,19 +275,6 @@ class DatabaseTestCase extends KernelTestCase {
   }
 
   /**
-   * Restituisce l'oggetto relativo al riferimento usato nelle fixture
-   *
-   * @param string $nome Nome del riferimento
-   *
-   * @return mixed Oggetto relativo al riferimento indicato
-   */
-  protected function getReference(string $nome) {
-    $obj = $this->references->getReference($nome);
-    $this->em->refresh($obj);
-    return $obj;
-  }
-
-  /**
  	 * Restituisce l'attributo privato di una classe in modo che sia leggibile e modificabile.
    * Usare $property->getValue($object) e $property->setValue($object, $value) per leggere/modificare l'attributo.
  	 *
@@ -320,7 +283,7 @@ class DatabaseTestCase extends KernelTestCase {
  	 * @param string $propertyName Nome dell'attributo
  	 * @return ReflectionProperty L'attributo richiesto
  	 */
-  protected function getPrivateProperty($className, $propertyName) {
+  protected function getPrivateProperty(string $className, string $propertyName): \ReflectionProperty {
 		$reflector = new \ReflectionClass($className);
 		$property = $reflector->getProperty($propertyName);
 		$property->setAccessible(true);
@@ -336,7 +299,7 @@ class DatabaseTestCase extends KernelTestCase {
  	 * @param string $propertyName Nome dell'attributo
  	 * @return ReflectionMethod Il metodo richiesto
  	 */
-	public function getPrivateMethod($className, $methodName) {
+	protected function getPrivateMethod(string $className, string $methodName): \ReflectionMethod {
 		$reflector = new \ReflectionClass($className);
 		$method = $reflector->getMethod($methodName);
 		$method->setAccessible(true);
@@ -396,7 +359,7 @@ class DatabaseTestCase extends KernelTestCase {
    *
    * @return string Comando SQL con sostituzione dei parametri
    */
-  private function runnableSql($sql, $params): string {
+  private function runnableSql(string $sql, $params): string {
     // rimuove caratteri inutili
     $sql = trim($sql, " \r\n\t\"");
     // se il parametro è un oggetto legge il valore
@@ -433,7 +396,7 @@ class DatabaseTestCase extends KernelTestCase {
    *
    * @return bool Vero se il comando SQL è ammissibile
    */
-  private function isValidSql($sql): bool {
+  private function isValidSql(string $sql): bool {
     // effettua il parsing del comando
     $parser = new Parser($sql);
     $stmt = isset($parser->statements[0]) ? $parser->statements[0] : null;

@@ -1,0 +1,85 @@
+####################
+# ClasseFixtures - dati di test
+#
+# dati delle classi:
+#   anno: anno della classe
+#   sezione: sezione della classe
+#   oreSettimanali: numero di ore settimanali della classe
+#   sede: sede a cui appartiene la classe
+#   corso: corso a cui appartiene classe
+#   coordinatore: coordinatore di classe
+#   segretario: segretario del consiglio di classe
+####################
+
+
+include:
+  - SedeFixtures.yml
+  - CorsoFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Classe:
+  classe_{1..2}A:
+    anno: '<current()>'
+    sezione: 'A'
+    oreSettimanali: '<( $anno == 1 ? 33 : 32 )>'
+    sede: '@sede_1'
+    corso: '@corso_BIN'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'
+  classe_{3..5}A:
+    anno: '<current()>'
+    sezione: 'A'
+    oreSettimanali: 32
+    sede: '@sede_1'
+    corso: '@corso_INF'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'
+  classe_{1..2}B:
+    anno: '<current()>'
+    sezione: 'B'
+    oreSettimanali: '<( $anno == 1 ? 33 : 32 )>'
+    sede: '@sede_1'
+    corso: '@corso_BCH'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'
+  classe_{3..5}B:
+    anno: '<current()>'
+    sezione: 'B'
+    oreSettimanali: 32
+    sede: '@sede_1'
+    corso: '@corso_CHI'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'
+  classe_{1..5}C:
+    anno: '<current()>'
+    sezione: 'C'
+    oreSettimanali: '<( $anno < 3 ? 27 : 30 )>'
+    sede: '@sede_1'
+    corso: '@corso_LSA'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'
+  classe_{1..2}D:
+    anno: '<current()>'
+    sezione: 'D'
+    oreSettimanali: '<( $anno == 1 ? 33 : 32 )>'
+    sede: '@sede_2'
+    corso: '@corso_BIN'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'
+  classe_{3..5}D:
+    anno: '<current()>'
+    sezione: 'D'
+    oreSettimanali: 32
+    sede: '@sede_2'
+    corso: '@corso_INF'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'
+  classe_{1..5}E:
+    anno: '<current()>'
+    sezione: 'E'
+    oreSettimanali: '<( $anno < 3 ? 27 : 30 )>'
+    sede: '@sede_2'
+    corso: '@corso_LSA'
+    coordinatore: '@docente_*'
+    segretario: '50%? @docente_*: <(null)>'

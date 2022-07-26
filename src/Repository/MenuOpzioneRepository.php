@@ -34,23 +34,14 @@ class MenuOpzioneRepository extends EntityRepository {
     public function breadcrumb($url, Utente $utente=null, RequestStack $reqstack) {
       $dati = array();
       // imposta ruolo e funzione
-      $ruolo = $utente ? $utente->getRoles()[0] : 'NESSUNO';
-      if ($ruolo == 'ROLE_ATA' && $utente->getSegreteria()) {
-        // abilita funzioni di segreteria per gli ATA
-        $funzione = array('SEGRETERIA', 'NESSUNA');
-      } elseif ($ruolo == 'ROLE_DOCENTE' && $reqstack->getSession()->get('/APP/DOCENTE/coordinatore')) {
-        // abilita funzioni di coordinatore per i docenti
-        $funzione = array('COORDINATORE', 'NESSUNA');
-      } else {
-        // nessuna funzione aggiuntiva
-        $funzione = array('NESSUNA');
-      }
+      $ruolo = $utente ? $utente->getCodiceRuolo() : 'N';
+      $funzione = $utente ? $utente->getCodiceFunzione() : 'N';
       // legge dati
       $dati = $this->createQueryBuilder('o')
         ->select('o.nome,o.descrizione,o.url,(o.sottoMenu) AS sottomenu,o2.nome AS nome2,o2.descrizione AS descrizione2,o2.url AS url2,o3.nome AS nome3,o3.descrizione AS descrizione3,o3.url AS url3')
-        ->leftJoin('App\Entity\MenuOpzione', 'o2', 'WITH', 'o.menu=o2.sottoMenu AND o2.ruolo=:ruolo AND o2.funzione IN (:funzione)')
-        ->leftJoin('App\Entity\MenuOpzione', 'o3', 'WITH', 'o2.menu=o3.sottoMenu AND o3.ruolo=:ruolo AND o3.funzione IN (:funzione)')
-        ->where('o.url=:url AND o.ruolo=:ruolo AND o.funzione IN (:funzione)')
+        ->leftJoin('App\Entity\MenuOpzione', 'o2', 'WITH', 'o.menu=o2.sottoMenu AND INSTR(:ruolo, o2.ruolo) > 0 AND INSTR(:funzione, o2.funzione) > 0')
+        ->leftJoin('App\Entity\MenuOpzione', 'o3', 'WITH', 'o2.menu=o3.sottoMenu AND INSTR(:ruolo, o3.ruolo) > 0 AND INSTR(:funzione, o3.funzione) > 0')
+        ->where('o.url=:url AND INSTR(:ruolo, o.ruolo) > 0 AND INSTR(:funzione, o.funzione) > 0')
         ->setParameters(['url' => $url, 'ruolo' => $ruolo, 'funzione' => $funzione])
         ->setMaxResults(1)
         ->getQuery()

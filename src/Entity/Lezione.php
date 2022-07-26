@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Lezione - entità
+ * Lezione - dati delle ore di lezione
  *
  * @ORM\Entity(repositoryClass="App\Repository\LezioneRepository")
  * @ORM\Table(name="gs_lezione")
@@ -29,80 +29,78 @@ class Lezione {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la lezione
+   * @var int|null $id Identificativo univoco per la lezione
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data della lezione
+   * @var \DateTime|null $data Data della lezione
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var integer $ora Numero dell'ora di lezione [1,2,...]
+   * @var int $ora Numero dell'ora di lezione [1,2,...]
    *
    * @ORM\Column(type="smallint", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $ora;
+  private int $ora = 1;
 
   /**
-   * @var Classe $classe Classe della lezione
+   * @var Classe|null $classe Classe della lezione
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var Materia $materia Materia della lezione
+   * @var Materia|null $materia Materia della lezione
    *
    * @ORM\ManyToOne(targetEntity="Materia")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $materia;
+  private ?Materia $materia = null;
 
   /**
-   * @var string $argomento Argomento della lezione
+   * @var string|null $argomento Argomento della lezione
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $argomento;
+  private ?string $argomento = '';
 
   /**
-   * @var string $attivita Attività della lezione
+   * @var string|null $attivita Attività della lezione
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $attivita;
+  private ?string $attivita = '';
 
 
   //==================== EVENTI ORM ====================
@@ -112,7 +110,7 @@ class Lezione {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -123,7 +121,7 @@ class Lezione {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -134,36 +132,36 @@ class Lezione {
   /**
    * Restituisce l'identificativo univoco per la lezione
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data della lezione
    *
-   * @return \DateTime Data della lezione
+   * @return \DateTime|null Data della lezione
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -172,9 +170,9 @@ class Lezione {
    *
    * @param \DateTime $data Data della lezione
    *
-   * @return Lezione Oggetto Lezione
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -182,20 +180,20 @@ class Lezione {
   /**
    * Restituisce il numero dell'ora di lezione [1,2,...]
    *
-   * @return integer Numero dell'ora di lezione
+   * @return int Numero dell'ora di lezione
    */
-  public function getOra() {
+  public function getOra(): int {
     return $this->ora;
   }
 
   /**
    * Modifica il numero dell'ora di lezione [1,2,...]
    *
-   * @param integer $ora Numero dell'ora di lezione
+   * @param int $ora Numero dell'ora di lezione
    *
-   * @return Lezione Oggetto Lezione
+   * @return self Oggetto modificato
    */
-  public function setOra($ora) {
+  public function setOra(int $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -203,9 +201,9 @@ class Lezione {
   /**
    * Restituisce la classe della lezione
    *
-   * @return Classe Classe della lezione
+   * @return Classe|null Classe della lezione
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
@@ -214,9 +212,9 @@ class Lezione {
    *
    * @param Classe $classe Classe della lezione
    *
-   * @return Lezione Oggetto Lezione
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe) {
+  public function setClasse(Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -224,9 +222,9 @@ class Lezione {
   /**
    * Restituisce la materia della lezione
    *
-   * @return Materia Materia della lezione
+   * @return Materia|null Materia della lezione
    */
-  public function getMateria() {
+  public function getMateria(): ?Materia {
     return $this->materia;
   }
 
@@ -235,9 +233,9 @@ class Lezione {
    *
    * @param Materia $materia Materia della lezione
    *
-   * @return Lezione Oggetto Lezione
+   * @return self Oggetto modificato
    */
-  public function setMateria(Materia $materia) {
+  public function setMateria(Materia $materia): self {
     $this->materia = $materia;
     return $this;
   }
@@ -245,9 +243,9 @@ class Lezione {
   /**
    * Restituisce l'argomento della lezione
    *
-   * @return string Argomento della lezione
+   * @return string|null Argomento della lezione
    */
-  public function getArgomento() {
+  public function getArgomento(): ?string {
     return $this->argomento;
   }
 
@@ -256,9 +254,9 @@ class Lezione {
    *
    * @param string $argomento Argomento della lezione
    *
-   * @return Lezione Oggetto Lezione
+   * @return self Oggetto modificato
    */
-  public function setArgomento($argomento) {
+  public function setArgomento(string $argomento): self {
     $this->argomento = $argomento;
     return $this;
   }
@@ -266,9 +264,9 @@ class Lezione {
   /**
    * Restituisce le attività della lezione
    *
-   * @return string Attività della lezione
+   * @return string|null Attività della lezione
    */
-  public function getAttivita() {
+  public function getAttivita(): ?string {
     return $this->attivita;
   }
 
@@ -277,9 +275,9 @@ class Lezione {
    *
    * @param string $attivita Attività della lezione
    *
-   * @return Lezione Oggetto Lezione
+   * @return self Oggetto modificato
    */
-  public function setAttivita($attivita) {
+  public function setAttivita(string $attivita): self {
     $this->attivita = $attivita;
     return $this;
   }
@@ -292,7 +290,7 @@ class Lezione {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').': '.$this->ora.' - '.$this->classe.' '.$this->materia;
   }
 

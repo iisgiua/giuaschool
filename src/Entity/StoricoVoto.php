@@ -32,30 +32,30 @@ class StoricoVoto {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per il voto assegnato allo scrutinio
+   * @var int|null $id Identificativo univoco per il voto assegnato allo scrutinio
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var integer $voto Valutazione della materia
+   * @var int $voto Valutazione della materia
    *
    * @ORM\Column(type="integer", nullable=false)
    */
@@ -103,7 +103,7 @@ class StoricoVoto {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -114,7 +114,7 @@ class StoricoVoto {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -125,34 +125,34 @@ class StoricoVoto {
   /**
    * Restituisce l'identificativo univoco per il voto
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la valutazione della materia
    *
-   * @return integer Valutazione della materia
+   * @return int Valutazione della materia
    */
   public function getVoto() {
     return $this->voto;
@@ -161,11 +161,11 @@ class StoricoVoto {
   /**
    * Modifica la valutazione della materia
    *
-   * @param integer $voto Valutazione della materia
+   * @param int $voto Valutazione della materia
    *
-   * @return StoricoVoto Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setVoto($voto) {
+  public function setVoto($voto): self {
     $this->voto = $voto;
     return $this;
   }
@@ -184,9 +184,9 @@ class StoricoVoto {
    *
    * @param string $carenze Carenze segnalate allo scrutinio finale
    *
-   * @return StoricoVoto Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setCarenze($carenze) {
+  public function setCarenze($carenze): self {
     $this->carenze = $carenze;
     return $this;
   }
@@ -205,9 +205,9 @@ class StoricoVoto {
    *
    * @param array $dati Dati aggiuntivi sulla valutazione
    *
-   * @return StoricoVoto Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati($dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -230,9 +230,9 @@ class StoricoVoto {
    *
    * @param StoricoEsito $storicoEsito Esito dello storico a cui si riferisce il voto
    *
-   * @return StoricoVoto Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setStoricoEsito(StoricoEsito $storicoEsito) {
+  public function setStoricoEsito(StoricoEsito $storicoEsito): self {
     $this->storicoEsito = $storicoEsito;
     return $this;
   }
@@ -251,9 +251,9 @@ class StoricoVoto {
    *
    * @param Materia $materia Materia della valutazione
    *
-   * @return StoricoVoto Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setMateria(Materia $materia) {
+  public function setMateria(Materia $materia): self {
     $this->materia = $materia;
     return $this;
   }
@@ -274,7 +274,7 @@ class StoricoVoto {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->materia.': '.$this->voto;
   }
 

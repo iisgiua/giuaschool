@@ -18,7 +18,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Firma - entità
+ * Firma - dati della firma del docente per una lezione
  *
  * @ORM\Entity(repositoryClass="App\Repository\FirmaRepository")
  * @ORM\Table(name="gs_firma", uniqueConstraints={@ORM\UniqueConstraint(columns={"lezione_id","docente_id"})})
@@ -35,47 +35,47 @@ class Firma {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la firma
+   * @var int|null $id Identificativo univoco per la firma
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var Lezione $lezione Lezione firmata dal docente
+   * @var Lezione|null $lezione Lezione firmata dal docente
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $lezione;
+  private ?Lezione $lezione = null;
 
   /**
-   * @var Docente $docente Docente che firma la lezione
+   * @var Docente|null $docente Docente che firma la lezione
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
 
   //==================== EVENTI ORM ====================
@@ -85,7 +85,7 @@ class Firma {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -96,7 +96,7 @@ class Firma {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -107,36 +107,36 @@ class Firma {
   /**
    * Restituisce l'identificativo univoco per la firma
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la lezione firmata dal docente
    *
-   * @return Lezione Lezione firmata dal docente
+   * @return Lezione|null Lezione firmata dal docente
    */
-  public function getLezione() {
+  public function getLezione(): ?Lezione {
     return $this->lezione;
   }
 
@@ -145,9 +145,9 @@ class Firma {
    *
    * @param Lezione $lezione Lezione firmata dal docente
    *
-   * @return Firma Oggetto Firma
+   * @return self Oggetto modificato
    */
-  public function setLezione(Lezione $lezione) {
+  public function setLezione(Lezione $lezione): self {
     $this->lezione = $lezione;
     return $this;
   }
@@ -155,9 +155,9 @@ class Firma {
   /**
    * Restituisce il docente che firma la lezione
    *
-   * @return Docente Docente che firma la lezione
+   * @return Docente|null Docente che firma la lezione
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 
@@ -166,9 +166,9 @@ class Firma {
    *
    * @param Docente $docente Docente che firma la lezione
    *
-   * @return Firma Oggetto Firma
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -181,7 +181,7 @@ class Firma {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->lezione.' ('.$this->docente.')';
   }
 

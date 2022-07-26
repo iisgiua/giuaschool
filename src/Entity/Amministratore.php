@@ -17,11 +17,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Amministratore - entità
+ * Amministratore - dati dell'amministratore
  *
  * @ORM\Entity(repositoryClass="App\Repository\AmministratoreRepository")
- *
- * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Amministratore")
  */
 class Amministratore extends Utente {
 
@@ -33,19 +31,28 @@ class Amministratore extends Utente {
    *
    * @return array Lista di ruoli
    */
-  public function getRoles() {
+  public function getRoles(): array {
     return ['ROLE_AMMINISTRATORE', 'ROLE_UTENTE'];
   }
 
   /**
    * Restituisce il codice corrispondente al ruolo dell'utente
    * I codici utilizzati sono:
-   *    U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'M';
+    return 'MU';
+  }
+
+  /**
+   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   *
+   * @return string Codifica della funzione
+   */
+  public function getCodiceFunzione(): string {
+    return 'N';
   }
 
 }

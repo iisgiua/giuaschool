@@ -1,0 +1,618 @@
+####################
+# MenuFixtures - dati iniziali dell'applicazione e di test
+#
+# Dati per i menu dell'applicazione:
+#   ruolo: ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di uno) [N=nessuno (utente anonino), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore]
+#   funzione: funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di una) [S=segreteria, C=coordinatore, B=responsabile BES]
+#   nome: nome dell'opzione
+#   descrizione: descrizione dell'opzione
+#   url: indirizzo pagina (codificato come route)
+#   ordinamento: numero d'ordine per la visualizzazione dell'opzione nel menu
+#   abilitato: indica se l'opzione è abilitata o meno
+#   icona: nome dell'eventuale icona dell'opzione
+#   menu: menu a cui appartiene l'opzione
+#   sottoMenu: eventuale sottomenu collegato all'opzione
+####################
+
+
+include:
+  - MenuFixtures.yml
+
+
+App\Entity\MenuOpzione:
+
+  # ----- opzioni menu AIUTO -----
+  #-- menu_opzione_HELP1:
+    #-- ruolo: 'U'
+    #-- funzione: 'N'
+    #-- nome: 'Guida'
+    #-- descrizione: 'Mostra la guida per le funzioni presenti nella pagina corrente'
+    #-- url: ''
+    #-- ordinamento: 1
+    #-- abilitato: false
+    #-- icona: ''
+    #-- menu: '@menu_HELP'
+    #-- sottoMenu:
+  menu_opzione_HELP2:
+    ruolo: 'U'
+    funzione: 'N'
+    nome: 'Manuale'
+    descrizione: 'Scarica il manuale d''uso dell''applicazione'
+    url: ''
+    ordinamento: 2
+    abilitato: false
+    icona: ''
+    menu: '@menu_HELP'
+    sottoMenu:
+  #-- menu_opzione_HELP3:
+    #-- ruolo: 'U'
+    #-- funzione: 'N'
+    #-- nome: 'FAQ'
+    #-- descrizione: 'Mostra la pagina delle domande frequenti'
+    #-- url: ''
+    #-- ordinamento: 3
+    #-- abilitato: true
+    #-- icona: ''
+    #-- menu: '@menu_HELP'
+    #-- sottoMenu:
+  #-- menu_opzione_HELP4:
+    #-- ruolo: 'U'
+    #-- funzione: 'N'
+    #-- nome: 'Segnalazioni'
+    #-- descrizione: 'Mostra la pagina delle segnalazioni'
+    #-- url: ''
+    #-- ordinamento: 4
+    #-- abilitato: true
+    #-- icona: ''
+    #-- menu: '@menu_HELP'
+    #-- sottoMenu:
+
+  # ----- opzioni menu UTENTE -----
+  menu_opzione_UTENTE1:
+    ruolo: 'U'
+    funzione: 'N'
+    nome: 'Profilo'
+    descrizione: 'Gestione del profilo dell''utente'
+    url: 'utenti_profilo'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_UTENTE'
+    sottoMenu:
+
+  # ----- opzioni menu INFO - PUBBLICO -----
+  menu_opzione_INFO1:
+    ruolo: 'N'
+    funzione: 'N'
+    nome: 'Note&nbsp;legali'
+    descrizione: 'Mostra le note legali'
+    url: 'info_noteLegali'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+  menu_opzione_INFO2:
+    ruolo: 'N'
+    funzione: 'N'
+    nome: 'Privacy'
+    descrizione: 'Mostra l''informativa sulla privacy'
+    url: 'info_privacy'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+  menu_opzione_INFO3:
+    ruolo: 'N'
+    funzione: 'N'
+    nome: 'Cookie'
+    descrizione: 'Mostra l''informativa sui cookie'
+    url: 'info_cookie'
+    ordinamento: 3
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+  menu_opzione_INFO4:
+    ruolo: 'N'
+    funzione: 'N'
+    nome: 'Credits'
+    descrizione: 'Mostra i credits'
+    url: 'info_credits'
+    ordinamento: 4
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+
+  # ----- opzioni menu INFO - UTENTE -----
+  menu_opzione_INFO10:
+    ruolo: 'U'
+    funzione: 'N'
+    nome: 'Note&nbsp;legali'
+    descrizione: 'Mostra le note legali'
+    url: 'info_noteLegali'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+  menu_opzione_INFO11:
+    ruolo: 'U'
+    funzione: 'N'
+    nome: 'Privacy'
+    descrizione: 'Mostra l''informativa sulla privacy'
+    url: 'info_privacy'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+  menu_opzione_INFO12:
+    ruolo: 'U'
+    funzione: 'N'
+    nome: 'Cookie'
+    descrizione: 'Mostra l''informativa sui cookie'
+    url: 'info_cookie'
+    ordinamento: 3
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+  menu_opzione_INFO13:
+    ruolo: 'U'
+    funzione: 'N'
+    nome: 'Credits'
+    descrizione: 'Mostra i credits'
+    url: 'info_credits'
+    ordinamento: 4
+    abilitato: true
+    icona: ''
+    menu: '@menu_INFO'
+    sottoMenu:
+
+  # ----- opzioni menu PRINCIPALE - PUBBLICO -----
+  menu_opzione_PRINCIPALE1:
+    ruolo: 'N'
+    funzione: 'N'
+    nome: 'Accesso'
+    descrizione: 'Accedi al registro'
+    url: 'login_form'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_PRINCIPALE'
+    sottoMenu:
+  menu_opzione_PRINCIPALE2:
+    ruolo: 'N'
+    funzione: 'N'
+    nome: 'Recupero&nbsp;Password'
+    descrizione: 'Recupera la password di accesso tramite la posta elettronica'
+    url: 'login_recovery'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_PRINCIPALE'
+    sottoMenu:
+  menu_opzione_PRINCIPALE3:
+    ruolo: 'N'
+    funzione: 'N'
+    nome: 'App&nbsp;e&nbsp;Servizi'
+    descrizione: 'Informazioni su app e servizi disponibili'
+    url: 'app_info'
+    ordinamento: 3
+    abilitato: true
+    icona: ''
+    menu: '@menu_PRINCIPALE'
+    sottoMenu:
+
+  # ----- opzioni menu PRINCIPALE - UTENTI -----
+  menu_opzione_PRINCIPALE10:
+    ruolo: 'U'
+    funzione: 'N'
+    nome: 'Home'
+    descrizione: 'Pagina principale'
+    url: 'login_home'
+    ordinamento: 10
+    abilitato: true
+    icona: ''
+    menu: '@menu_PRINCIPALE'
+    sottoMenu:
+
+  # ----- opzioni menu PRINCIPALE - AMMINISTRATORE -----
+  menu_opzione_PRINCIPALE20:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Sistema'
+    descrizione: 'Gestione generale del sistema'
+    url: ''
+    ordinamento: 20
+    abilitato: true
+    icona: 'cog'
+    menu: '@menu_PRINCIPALE'
+    sottoMenu: '@menu_SISTEMA'
+  menu_opzione_PRINCIPALE21:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Scuola'
+    descrizione: 'Configurazione dei dati della scuola'
+    url: ''
+    ordinamento: 21
+    abilitato: true
+    icona: 'school'
+    menu: '@menu_PRINCIPALE'
+    sottoMenu: '@menu_SCUOLA'
+  menu_opzione_PRINCIPALE22:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'ATA'
+    descrizione: 'Gestione del personale ATA'
+    url: ''
+    ordinamento: 22
+    abilitato: true
+    icona: 'user-tie'
+    menu: '@menu_PRINCIPALE'
+    sottoMenu: '@menu_ATA'
+  menu_opzione_PRINCIPALE23:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Docenti'
+    descrizione: 'Gestione dei docenti'
+    url: ''
+    ordinamento: 23
+    abilitato: true
+    icona: 'user-graduate'
+    menu: '@menu_PRINCIPALE'
+    sottoMenu: '@menu_DOCENTI'
+  menu_opzione_PRINCIPALE24:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Alunni'
+    descrizione: 'Gestione degli alunni'
+    url: ''
+    ordinamento: 24
+    abilitato: true
+    icona: 'child'
+    menu: '@menu_PRINCIPALE'
+    sottoMenu: '@menu_ALUNNI'
+
+  # ----- opzioni sottomenu SISTEMA - AMMINISTRATORE -----
+  menu_opzione_SISTEMA1:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Parametri'
+    descrizione: 'Configura i parametri dell''applicazione'
+    url: 'sistema_parametri'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA2:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Banner'
+    descrizione: 'Visualizza un banner sulle pagine principali'
+    url: 'sistema_banner'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA3:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Manutenzione'
+    descrizione: 'Imposta la modalit&agrave; di manutenzione'
+    url: 'sistema_manutenzione'
+    ordinamento: 3
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA4:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Importazione&nbsp;iniziale'
+    descrizione: 'Importa i dati dall''A.S. precedente'
+    url: 'sistema_importa'
+    ordinamento: 4
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA5:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Archiviazione'
+    descrizione: 'Archivia i registri e i documenti delle classi'
+    url: 'sistema_archivia'
+    ordinamento: 5
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA6:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: '__SEPARATORE__'
+    descrizione: '__SEPARATORE__'
+    url: ''
+    ordinamento: 6
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA7:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Alias'
+    descrizione: 'Assumi l''identit&agrave; di un altro utente'
+    url: 'sistema_alias'
+    ordinamento: 7
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA8:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Password'
+    descrizione: 'Cambia la password di un utente'
+    url: 'sistema_password'
+    ordinamento: 8
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+
+  # ----- opzioni sottomenu SCUOLA - AMMINISTRATORE -----
+  menu_opzione_SCUOLA1:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Amministratore'
+    descrizione: 'Configura i dati dell''amministratore'
+    url: 'scuola_amministratore'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA2:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Dirigente&nbsp;scolastico'
+    descrizione: 'Configura i dati del dirigente scolastico'
+    url: 'scuola_dirigente'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA3:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Istituto'
+    descrizione: 'Configura i dati dell''Istituto'
+    url: 'scuola_istituto'
+    ordinamento: 3
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA4:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Sedi'
+    descrizione: 'Configura i dati delle sedi scolastiche'
+    url: 'scuola_sedi'
+    ordinamento: 4
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA5:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Corsi'
+    descrizione: 'Configura i corsi di studio'
+    url: 'scuola_corsi'
+    ordinamento: 5
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA6:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Materie'
+    descrizione: 'Configura le materie scolastiche'
+    url: 'scuola_materie'
+    ordinamento: 6
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA7:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Classi'
+    descrizione: 'Configura le classi'
+    url: 'scuola_classi'
+    ordinamento: 7
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA8:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Festivit&agrave;'
+    descrizione: 'Configura il calendario delle festivit&agrave;'
+    url: 'scuola_festivita'
+    ordinamento: 8
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA9:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Orario'
+    descrizione: 'Configura la scansione oraria delle lezioni'
+    url: 'scuola_orario'
+    ordinamento: 9
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+  menu_opzione_SCUOLA10:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Scrutini'
+    descrizione: 'Configura gli scrutini'
+    url: 'scuola_scrutini'
+    ordinamento: 10
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
+
+  # ----- opzioni sottomenu ATA - AMMINISTRATORE -----
+  menu_opzione_ATA1:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Importa'
+    descrizione: 'Importa da file i dati del personale ATA'
+    url: 'ata_importa'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_ATA'
+    sottoMenu:
+  menu_opzione_ATA2:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Modifica'
+    descrizione: 'Modifica i dati del personale ATA'
+    url: 'ata_modifica'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_ATA'
+    sottoMenu:
+
+  # ----- opzioni sottomenu DOCENTI - AMMINISTRATORE -----
+  menu_opzione_DOCENTI1:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Importa'
+    descrizione: 'Importa da file i dati dei docenti'
+    url: 'docenti_importa'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+  menu_opzione_DOCENTI2:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Modifica'
+    descrizione: 'Modifica i dati dei docenti'
+    url: 'docenti_modifica'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+  menu_opzione_DOCENTI3:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Staff'
+    descrizione: 'Configura i componenti dello staff della dirigenza'
+    url: 'docenti_staff'
+    ordinamento: 3
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+  menu_opzione_DOCENTI4:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Coordinatori'
+    descrizione: 'Configura i coordinatori del Consiglio di Classe'
+    url: 'docenti_coordinatori'
+    ordinamento: 4
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+  menu_opzione_DOCENTI5:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Segretari'
+    descrizione: 'Configura i segretari del Consiglio di Classe'
+    url: 'docenti_segretari'
+    ordinamento: 5
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+  menu_opzione_DOCENTI6:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Cattedre'
+    descrizione: 'Configura le cattedre dei docenti'
+    url: 'docenti_cattedre'
+    ordinamento: 6
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+  menu_opzione_DOCENTI7:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Colloqui'
+    descrizione: 'Configura i colloqui dei docenti'
+    url: 'docenti_colloqui'
+    ordinamento: 7
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
+
+  # ----- opzioni sottomenu ALUNNI - AMMINISTRATORE -----
+  menu_opzione_ALUNNI1:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Importa'
+    descrizione: 'Importa da file i dati degli alunni'
+    url: 'alunni_importa'
+    ordinamento: 1
+    abilitato: true
+    icona: ''
+    menu: '@menu_ALUNNI'
+    sottoMenu:
+  menu_opzione_ALUNNI2:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Modifica'
+    descrizione: 'Modifica i dati degli alunni'
+    url: 'alunni_modifica'
+    ordinamento: 2
+    abilitato: true
+    icona: ''
+    menu: '@menu_ALUNNI'
+    sottoMenu:
+  menu_opzione_ALUNNI3:
+    ruolo: 'M'
+    funzione: 'N'
+    nome: 'Cambio&nbsp;classe'
+    descrizione: 'Configura il cambio di classe degli alunnii'
+    url: 'alunni_classe'
+    ordinamento: 3
+    abilitato: true
+    icona: ''
+    menu: '@menu_ALUNNI'
+    sottoMenu:

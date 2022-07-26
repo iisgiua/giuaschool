@@ -12,14 +12,13 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\DataFixtures\UtenteFixtures;
 use App\Tests\DatabaseTestCase;
-use App\Entity\Utente;
 
 
 /**
- * Unit test della classe
- */
+* Unit test dell'entità Utente
+*
+*/
 class UtenteTest extends DatabaseTestCase {
 
   /**
@@ -32,123 +31,110 @@ class UtenteTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Utente';
     // campi da testare
-    $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato',
-      'abilitato', 'spid', 'ultimoAccesso', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita',
-      'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica'];
+    $this->fields = ['username', 'password', 'email', 'token', 'tokenCreato', 'prelogin', 'preloginCreato', 'abilitato', 'spid', 'ultimoAccesso', 'otp', 'ultimoOtp', 'nome', 'cognome', 'sesso', 'dataNascita', 'comuneNascita', 'codiceFiscale', 'citta', 'indirizzo', 'numeriTelefono', 'notifica'];
+    $this->noStoredFields = ['passwordNonCifrata', 'listaProfili', 'infoLogin'];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = [[UtenteFixtures::class, 'encoder']];
+    $this->fixtures = ['UtenteFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
-        'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
-        'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
-        'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
-        'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id']];
+    $this->canRead = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
     // SQL write
-    $this->canWrite = [
-      'gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato',
-        'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'nome', 'cognome', 'sesso',
-        'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono',
-        'notifica', 'ruolo', 'tipo', 'segreteria', 'chiave1', 'chiave2', 'chiave3', 'otp', 'ultimo_otp',
-        'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero',
-        'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'sede_id',
-        'classe_id', 'alunno_id', 'responsabile_bes', 'responsabile_bes_sede_id']];
+    $this->canWrite = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
-      $sesso = $this->faker->randomElement(['M', 'F']);
-      list($nome, $cognome, $username) = $this->faker->unique()->utente($sesso);
-      $email = $username.'.u@lovelace.edu.it';
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'username' ? $username.'.u' :
-          ($field == 'password' ? $this->encoder->encodePassword($o[$i], $username.'.u') :
-          ($field == 'email' ? $email :
-          ($field == 'token' ? $this->faker->optional(0.5, null)->md5() :
-          ($field == 'tokenCreato' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
-          ($field == 'prelogin' ? $this->faker->optional(0.5, null)->md5() :
-          ($field == 'preloginCreato' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
-          ($field == 'abilitato' ? $this->faker->randomElement([true, true, true, true, false]) :
-          ($field == 'spid' ? $this->faker->randomElement([true, true, false]) :
-          ($field == 'ultimoAccesso' ? $this->faker->optional(0.5, null)->dateTimeBetween('-1 month', 'now') :
-          ($field == 'nome' ? $nome :
-          ($field == 'cognome' ? $cognome :
-          ($field == 'sesso' ? $sesso :
-          ($field == 'dataNascita' ? $this->faker->dateTimeBetween('-60 years', '-14 years') :
-          ($field == 'comuneNascita' ? $this->faker->city() :
-          ($field == 'codiceFiscale' ? $this->faker->unique()->taxId() :
-          ($field == 'citta' ? substr($this->faker->city(), 0, 32) :
-          ($field == 'indirizzo' ? $this->faker->streetAddress() :
-          ($field == 'numeriTelefono' ? $this->faker->telefono($this->faker->numberBetween(0, 3)) :
-          array($this->faker->words(1, true) => $this->faker->words(1, true))))))))))))))))))));
+          ($field == 'username' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128)) :
+          ($field == 'password' ? $this->faker->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'email' ? $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'token' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'tokenCreato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'prelogin' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'preloginCreato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'abilitato' ? $this->faker->boolean() :
+          ($field == 'spid' ? $this->faker->boolean() :
+          ($field == 'ultimoAccesso' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'otp' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 128)) :
+          ($field == 'ultimoOtp' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 128)) :
+          ($field == 'nome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'cognome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'sesso' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'dataNascita' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          ($field == 'comuneNascita' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'codiceFiscale' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 16)) :
+          ($field == 'citta' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 32)) :
+          ($field == 'indirizzo' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'numeriTelefono' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'notifica' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          null))))))))))))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[0])}(!$data[$i][$this->fields[0]]);
+      $data[$i]['username'] = $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128));
+      $o[$i]->setUsername($data[$i]['username']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[0])}($data[$i][$this->fields[0]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
+      foreach ($this->fields as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
-        if ($field == 'notifica') {
-          // test modifica array
-          $obj = new \stdClass();
-          $obj->var = 1;
-          $array = ['obj' => $obj];
-          $created->setNotifica($array);
-          $this->assertTrue($created->getNotifica() === $array, $this->entity.'::setNotifica');
-          $obj->var = 0;
-          $created->setNotifica($array);
-          $this->assertFalse($created->getNotifica() === $array, $this->entity.'::setNotifica - confronto');
-        }
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+    }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    // getUserIdentifier
+    $this->assertSame($existent->getUsername(), $existent->getUserIdentifier(), $this->entity.'::getUserIdentifier');
     // getSalt
     $this->assertSame(null, $existent->getSalt(), $this->entity.'::getSalt');
     // getRoles
@@ -156,195 +142,186 @@ class UtenteTest extends DatabaseTestCase {
     // eraseCredentials
     $existent->setPasswordNonCifrata('prova');
     $existent->eraseCredentials();
-    $this->assertSame(null, $existent->getPasswordNonCifrata(), $this->entity.'::eraseCredentials');
+    $this->assertSame('', $existent->getPasswordNonCifrata(), $this->entity.'::eraseCredentials');
     // serialize
     $this->assertSame(serialize(array($existent->getId(), $existent->getUsername(), $existent->getPassword(), $existent->getEmail(), $existent->getAbilitato())), $existent->serialize(), $this->entity.'::serialize');
     // unserialize
     $s = $existent->serialize();
-    $o = new Utente();
+    $o = new \App\Entity\Utente();
     $o->unserialize($s);
     $this->assertSame(serialize(array($o->getId(), $o->getUsername(), $o->getPassword(), $o->getEmail(), $o->getAbilitato())), $o->serialize(), $this->entity.'::serialize');
+    // getCodiceRuolo
+    $this->assertSame('U', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // getCodiceFunzione
+    $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getUsername().')', (string) $existent, $this->entity.'::toString');
     // creaToken
     $ora = new \DateTime();
-    $existent->setToken(null);
+    $existent->setToken('');
     $existent->setTokenCreato(null);
     $existent->creaToken();
     $this->assertTrue(strlen($existent->getToken()) >= 16 && $existent->getTokenCreato() >= $ora, $this->entity.'::creaToken');
     // cancellaToken
     $existent->cancellaToken();
-    $this->assertTrue($existent->getToken() === null && $existent->getTokenCreato() === null, $this->entity.'::cancellaToken');
-    // istanza di classe
-    $this->assertTrue($existent instanceOf \App\Entity\Utente, $this->entity.'instanceOf Utente');
-    $this->assertFalse($existent instanceOf \App\Entity\Alunno, $this->entity.'instanceOf Alunno');
-    $this->assertFalse($existent instanceOf \App\Entity\Genitore, $this->entity.'instanceOf Genitore');
-    $this->assertFalse($existent instanceOf \App\Entity\Ata, $this->entity.'instanceOf Ata');
-    $this->assertFalse($existent instanceOf \App\Entity\Docente, $this->entity.'instanceOf Docente');
-    $this->assertFalse($existent instanceOf \App\Entity\Staff, $this->entity.'instanceOf Staff');
-    $this->assertFalse($existent instanceOf \App\Entity\Preside, $this->entity.'instanceOf Preside');
-    $this->assertFalse($existent instanceOf \App\Entity\Amministratore, $this->entity.'instanceOf Amministratore');
-    $this->assertTrue(is_a($existent, 'App\Entity\Utente'), $this->entity.'is_a Utente');
-    $this->assertFalse(is_a($existent, 'App\Entity\Alunno'), $this->entity.'is_a Alunno');
-    $this->assertFalse(is_a($existent, 'App\Entity\Genitore'), $this->entity.'is_a Genitore');
-    $this->assertFalse(is_a($existent, 'App\Entity\Ata'), $this->entity.'is_a Ata');
-    $this->assertFalse(is_a($existent, 'App\Entity\Docente'), $this->entity.'is_a Docente');
-    $this->assertFalse(is_a($existent, 'App\Entity\Staff'), $this->entity.'is_a Staff');
-    $this->assertFalse(is_a($existent, 'App\Entity\Preside'), $this->entity.'is_a Preside');
-    $this->assertFalse(is_a($existent, 'App\Entity\Amministratore'), $this->entity.'is_a Amministratore');
+    $this->assertTrue($existent->getToken() === '' && $existent->getTokenCreato() === null, $this->entity.'::cancellaToken');
   }
 
   /**
    * Test validazione dei dati
    */
-  public function testValidazione() {
+  public function testValidation() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // username
-    $existent->setUsername(null);
+    $existent->setUsername(str_repeat('a', 2));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::username - NOT BLANK');
-    $existent->setUsername('A1');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.minlength', $this->entity.'::Username - MIN LENGTH');
+    $existent->setUsername(str_repeat('a', 3));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID MIN LENGTH');
+    $existent->setUsername(str_repeat('a', 129));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.minlength', $this->entity.'::username - MIN LENGTH');
-    $existent->setUsername('A12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Username - MAX LENGTH');
+    $existent->setUsername(str_repeat('a', 128));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID MAX LENGTH');
+    $existent->setUsername($this->faker->regexify('(?!/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/)'));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::username - MAX LENGTH');
-    $existent->setUsername('1user');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.regex', $this->entity.'::username - REGEX 1');
-    $existent->setUsername('user:1');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.regex', $this->entity.'::username - REGEX 2');
-    $existent->setUsername('user1.');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.regex', $this->entity.'::username - REGEX 3');
-    $existent->setUsername('user.1');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::username - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.regex', $this->entity.'::Username - REGEX');
+    $existent->setUsername($this->faker->regexify('/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/'));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID REGEX');
     // password
-    $existent->setPassword(null);
+    $property = $this->getPrivateProperty('App\Entity\Utente', 'password');
+    $property->setValue($existent, '');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::password - NOT BLANK');
-    $existent->setPassword('123456');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::password - VALID');
-    // passwordNonCifrata
-    $existent->setPasswordNonCifrata('1234567');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.minlength', $this->entity.'::passwordNonCifrata - MIN LENGTH');
-    $existent->setPasswordNonCifrata('1234567890123456789012345678901234567890123456789012345678901234567890123');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::passwordNonCifrata - MAX LENGTH');
-    $existent->setPasswordNonCifrata('123456789012345678901234567890123456789012345678901234567890123456789012');
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::passwordNonCifrata - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Password - NOT BLANK');
+    $existent->setPassword($this->faker->randomLetter());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Password - VALID NOT BLANK');
     // email
-    $existent->setEmail(null);
+    $property = $this->getPrivateProperty('App\Entity\Utente', 'email');
+    $property->setValue($existent, '');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::email - NOT BLANK');
-    $existent->setEmail('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789@123456789.123456');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Email - NOT BLANK');
+    $existent->setEmail('user@domain.com');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Email - VALID NOT BLANK');
+    $existent->setEmail(str_repeat("a", 245)."@domain.com");
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::email - MAX LENGTH');
-    $existent->setEmail('12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789@123456789.12345');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::email - VALID MAX LENGTH');
-    $existent->setEmail('nome');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Email - MAX LENGTH');
+    $existent->setEmail(str_repeat("a", 244)."@domain.com");
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Email - VALID MAX LENGTH');
+    $existent->setEmail('user');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.email', $this->entity.'::email - EMAIL');
-    $existent->setEmail('nome@dominio');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.email', $this->entity.'::Email - EMAIL');
+    $existent->setEmail('user@domain');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.email', $this->entity.'::email - EMAIL');
-    $existent->setEmail('nome@dominio.it');
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::email - VALID EMAIL');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.email', $this->entity.'::Email - EMAIL');
+    $existent->setEmail('user@domain.com');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Email - VALID EMAIL');
+    // tokenCreato
+    $existent->setTokenCreato(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::TokenCreato - VALID NULL');
+    // preloginCreato
+    $existent->setPreloginCreato(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::PreloginCreato - VALID NULL');
+    // ultimoAccesso
+    $existent->setUltimoAccesso(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::UltimoAccesso - VALID NULL');
     // nome
-    $existent->setNome(null);
+    $property = $this->getPrivateProperty('App\Entity\Utente', 'nome');
+    $property->setValue($existent, '');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::nome - NOT BLANK');
-    $existent->setNome('12345678901234567890123456789012345678901234567890123456789012345');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
+    $existent->setNome($this->faker->randomLetter());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID NOT BLANK');
+    $existent->setNome(str_repeat('*', 65));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::nome - MAX LENGTH');
-    $existent->setNome('1234567890123456789012345678901234567890123456789012345678901234');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Nome - MAX LENGTH');
+    $existent->setNome(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // cognome
-    $existent->setCognome(null);
+    $property = $this->getPrivateProperty('App\Entity\Utente', 'cognome');
+    $property->setValue($existent, '');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::cognome - NOT BLANK');
-    $existent->setCognome('12345678901234567890123456789012345678901234567890123456789012345');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Cognome - NOT BLANK');
+    $existent->setCognome($this->faker->randomLetter());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Cognome - VALID NOT BLANK');
+    $existent->setCognome(str_repeat('*', 65));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::cognome - MAX LENGTH');
-    $existent->setCognome('1234567890123456789012345678901234567890123456789012345678901234');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::cognome - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Cognome - MAX LENGTH');
+    $existent->setCognome(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Cognome - VALID MAX LENGTH');
     // sesso
-    $existent->setSesso(null);
+    $existent->setSesso('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sesso - NOT BLANK');
-    $existent->setSesso('X');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::sesso - CHOICE');
-    $existent->setSesso('f');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::sesso - CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Sesso - CHOICE');
     $existent->setSesso('M');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sesso - VALID');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sesso - VALID CHOICE');
     // dataNascita
-    $existent->setDataNascita('13/33/2012');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.date', $this->entity.'::dataNascita - DATE');
     $existent->setDataNascita(new \DateTime());
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::dataNascita - VALID');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataNascita - VALID TYPE');
     $existent->setDataNascita(null);
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::dataNascita - VALID');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DataNascita - VALID NULL');
     // comuneNascita
-    $existent->setComuneNascita('12345678901234567890123456789012345678901234567890123456789012345');
+    $existent->setComuneNascita(str_repeat('*', 65));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::comuneNascita - MAX LENGTH');
-    $existent->setComuneNascita('1234567890123456789012345678901234567890123456789012345678901234');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::comuneNascita - VALID');
-    $existent->setComuneNascita(null);
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::comuneNascita - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::ComuneNascita - MAX LENGTH');
+    $existent->setComuneNascita(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ComuneNascita - VALID MAX LENGTH');
     // codiceFiscale
-    $existent->setCodiceFiscale('12345678901234567');
+    $existent->setCodiceFiscale(str_repeat('*', 17));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::codiceFiscale - MAX LENGTH');
-    $existent->setCodiceFiscale('1234567890123456');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::codiceFiscale - VALID');
-    $existent->setCodiceFiscale(null);
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::codiceFiscale - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::CodiceFiscale - MAX LENGTH');
+    $existent->setCodiceFiscale(str_repeat('*', 16));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::CodiceFiscale - VALID MAX LENGTH');
     // citta
-    $existent->setCitta('123456789012345678901234567890123');
+    $existent->setCitta(str_repeat('*', 33));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::citta - MAX LENGTH');
-    $existent->setCitta('12345678901234567890123456789012');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::citta - VALID');
-    $existent->setCitta(null);
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::citta - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Citta - MAX LENGTH');
+    $existent->setCitta(str_repeat('*', 32));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Citta - VALID MAX LENGTH');
     // indirizzo
-    $existent->setIndirizzo('12345678901234567890123456789012345678901234567890123456789012345');
+    $existent->setIndirizzo(str_repeat('*', 65));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::indirizzo - MAX LENGTH');
-    $existent->setIndirizzo('1234567890123456789012345678901234567890123456789012345678901234');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::indirizzo - VALID');
-    $existent->setIndirizzo(null);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Indirizzo - MAX LENGTH');
+    $existent->setIndirizzo(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Indirizzo - VALID MAX LENGTH');
+    // passwordNonCifrata
+    $existent->setPasswordNonCifrata(str_repeat('*', 7));
     $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::indirizzo - VALID');
-    // unique - username
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.minlength', $this->entity.'::PasswordNonCifrata - MIN LENGTH');
+    $existent->setPasswordNonCifrata(str_repeat('*', 8));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::PasswordNonCifrata - VALID MIN LENGTH');
+    $existent->setPasswordNonCifrata(str_repeat('*', 73));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::PasswordNonCifrata - MAX LENGTH');
+    $existent->setPasswordNonCifrata(str_repeat('*', 72));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::PasswordNonCifrata - VALID MAX LENGTH');
+    // legge dati esistenti
     $this->em->flush();
-    $o = $this->em->getRepository($this->entity)->findBy([])[1];
-    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
-    $o->setUsername($existent->getUsername());
-    $err = $this->val->validate($o);
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    // unique username
+    $usernameSaved = $objects[1]->getUsername();
+    $objects[1]->setUsername($objects[0]->getUsername());
+    $err = $this->val->validate($objects[1]);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::username - UNIQUE');
-    // unique - email
-    $o->setUsername($existent->getUsername().'.xxx');
-    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
-    $o->setEmail($existent->getEmail());
-    $err = $this->val->validate($o);
+    $objects[1]->setUsername($usernameSaved);
+    // unique email
+    $emailSaved = $objects[1]->getEmail();
+    $objects[1]->setEmail($objects[0]->getEmail());
+    $err = $this->val->validate($objects[1]);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::email - UNIQUE');
+    $objects[1]->setEmail($emailSaved);
+    // unique
+    $newObject = new \App\Entity\Utente();
+    foreach ($this->fields as $field) {
+      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+    }
+    $err = $this->val->validate($newObject);
+    $msgs = [];
+    foreach ($err as $e) {
+      $msgs[] = $e->getMessageTemplate();
+    }
+    $this->assertEquals(array_fill(0, 2, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

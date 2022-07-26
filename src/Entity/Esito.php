@@ -32,27 +32,27 @@ class Esito {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'esito
+   * @var int|null $id Identificativo univoco per l'esito
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var string $esito Esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
@@ -67,19 +67,19 @@ class Esito {
   /**
    * @var float $media Media dei voti
    *
-   * @ORM\Column(type="float", precision=4, scale=2, nullable=true)
+   * @ORM\Column(type="float", nullable=true)
    */
   private $media;
 
   /**
-   * @var integer $credito Punteggio di credito
+   * @var int $credito Punteggio di credito
    *
    * @ORM\Column(type="integer", nullable=true)
    */
   private $credito;
 
   /**
-   * @var integer $creditoPrecedente Punteggio di credito degli anni precedenti
+   * @var int $creditoPrecedente Punteggio di credito degli anni precedenti
    *
    * @ORM\Column(name="credito_precedente", type="integer", nullable=true)
    */
@@ -120,7 +120,7 @@ class Esito {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -131,7 +131,7 @@ class Esito {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -142,27 +142,27 @@ class Esito {
   /**
    * Restituisce l'identificativo univoco per l'esito
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -180,9 +180,9 @@ class Esito {
    *
    * @param string $esito Esito dello scrutinio
    *
-   * @return Esito Oggetto Esito
+   * @return self Oggetto modificato
    */
-  public function setEsito($esito) {
+  public function setEsito($esito): self {
     $this->esito = $esito;
     return $this;
   }
@@ -201,9 +201,9 @@ class Esito {
    *
    * @param float $media Media dei voti
    *
-   * @return Esito Oggetto Esito
+   * @return self Oggetto modificato
    */
-  public function setMedia($media) {
+  public function setMedia($media): self {
     $this->media = $media;
     return $this;
   }
@@ -211,7 +211,7 @@ class Esito {
   /**
    * Restituisce il punteggio di credito
    *
-   * @return integer Punteggio di credito
+   * @return int Punteggio di credito
    */
   public function getCredito() {
     return $this->credito;
@@ -220,11 +220,11 @@ class Esito {
   /**
    * Modifica il punteggio di credito
    *
-   * @param integer $credito Punteggio di credito
+   * @param int $credito Punteggio di credito
    *
-   * @return Esito Oggetto Esito
+   * @return self Oggetto modificato
    */
-  public function setCredito($credito) {
+  public function setCredito($credito): self {
     $this->credito = $credito;
     return $this;
   }
@@ -232,7 +232,7 @@ class Esito {
   /**
    * Restituisce il punteggio di credito degli anni precedenti
    *
-   * @return integer Punteggio di credito degli anni precedenti
+   * @return int Punteggio di credito degli anni precedenti
    */
   public function getCreditoPrecedente() {
     return $this->creditoPrecedente;
@@ -241,11 +241,11 @@ class Esito {
   /**
    * Modifica il punteggio di credito degli anni precedenti
    *
-   * @param integer $creditoPrecedente Punteggio di credito degli anni precedenti
+   * @param int $creditoPrecedente Punteggio di credito degli anni precedenti
    *
-   * @return Esito Oggetto Esito
+   * @return self Oggetto modificato
    */
-  public function setCreditoPrecedente($creditoPrecedente) {
+  public function setCreditoPrecedente($creditoPrecedente): self {
     $this->creditoPrecedente = $creditoPrecedente;
     return $this;
   }
@@ -264,9 +264,9 @@ class Esito {
    *
    * @param array $dati Lista dei dati sull'esito
    *
-   * @return Esito Oggetto Esito
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati($dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -289,9 +289,9 @@ class Esito {
    *
    * @param Scrutinio $scrutinio Scrutinio a cui si riferisce l'esito
    *
-   * @return Esito Oggetto Esito
+   * @return self Oggetto modificato
    */
-  public function setScrutinio(Scrutinio $scrutinio) {
+  public function setScrutinio(Scrutinio $scrutinio): self {
     $this->scrutinio = $scrutinio;
     return $this;
   }
@@ -310,9 +310,9 @@ class Esito {
    *
    * @param Alunno $alunno Alunno a cui si attribuisce l'esito
    *
-   * @return Esito Oggetto Esito
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -325,7 +325,7 @@ class Esito {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->scrutinio.' - '.$this->alunno.': '.$this->esito;
   }
 

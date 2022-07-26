@@ -341,7 +341,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @Given istanze di tipo :classe:
    */
   public function istanzeDiTipo($classe, TableNode $tabella) {
-    $oggetti = $this->em->getRepository('App:'.$classe)->findBy([]);
+    $oggetti = $this->em->getRepository("App\\Entity\\".$classe)->findBy([]);
     $this->assertNotEmpty($oggetti);
     $listaId = [];
     foreach ($tabella->getHash() as $row) {
@@ -385,7 +385,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
           $cerca[$key] = $this->convertText($val);
         }
       }
-      $oggetti = $this->em->getRepository('App:'.$classe)->findBy($cerca);
+      $oggetti = $this->em->getRepository("App\\Entity\\".$classe)->findBy($cerca);
       $this->assertNotEmpty($oggetti);
       $istanza = null;
       foreach ($oggetti as $ogg) {
@@ -447,7 +447,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
           $modifica[trim(substr($key, 1))] = $this->convertText($val);
         }
       }
-      $oggetti = $this->em->getRepository('App:'.$classe)->findBy($cerca);
+      $oggetti = $this->em->getRepository("App\\Entity\\".$classe)->findBy($cerca);
       foreach ($oggetti as $istanza) {
         foreach ($modifica as $key=>$val) {
           $istanza->{'set'.ucfirst($key)}($val);

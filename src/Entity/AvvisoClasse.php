@@ -33,27 +33,27 @@ class AvvisoClasse {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var Avviso $avviso Avviso a cui ci si riferisce
@@ -90,7 +90,7 @@ class AvvisoClasse {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -101,7 +101,7 @@ class AvvisoClasse {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -112,27 +112,27 @@ class AvvisoClasse {
   /**
    * Restituisce l'identificativo univoco per l'avviso
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -150,9 +150,9 @@ class AvvisoClasse {
    *
    * @param Avviso $avviso Avviso a cui ci si riferisce
    *
-   * @return AvvisoClasse Oggetto AvvisoClasse
+   * @return self Oggetto modificato
    */
-  public function setAvviso(Avviso $avviso) {
+  public function setAvviso(Avviso $avviso): self {
     $this->avviso = $avviso;
     return $this;
   }
@@ -171,9 +171,9 @@ class AvvisoClasse {
    *
    * @param Classe $classe Classe a cui è indirizzato l'avviso
    *
-   * @return AvvisoClasse Oggetto AvvisoClasse
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe) {
+  public function setClasse(Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -192,9 +192,9 @@ class AvvisoClasse {
    *
    * @param \DateTime $letto Data e ora di lettura dell'avviso in classe
    *
-   * @return AvvisoClasse Oggetto AvvisoClasse
+   * @return self Oggetto modificato
    */
-  public function setLetto($letto) {
+  public function setLetto($letto): self {
     $this->letto = $letto;
     return $this;
   }

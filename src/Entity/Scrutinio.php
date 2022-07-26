@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Scrutinio - entità
+ * Scrutinio - dati per la gestione di uno scrutinio
  *
  * @ORM\Entity(repositoryClass="App\Repository\ScrutinioRepository")
  * @ORM\Table(name="gs_scrutinio", uniqueConstraints={@ORM\UniqueConstraint(columns={"periodo","classe_id"})})
@@ -32,109 +32,107 @@ class Scrutinio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per lo scrutinio
+   * @var int|null $id Identificativo univoco per lo scrutinio
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
-  private $periodo;
+  private string $periodo = 'P';
 
   /**
-   * @var \DateTime $data Data dello scrutinio
+   * @var \DateTime|null $data Data dello scrutinio
    *
    * @ORM\Column(type="date", nullable=true)
    *
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private ?\DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var \DateTime $inizio Ora dell'apertura dello scrutinio
+   * @var \DateTime|null $inizio Ora dell'apertura dello scrutinio
    *
    * @ORM\Column(type="time", nullable=true)
    *
-   * @Assert\Time(message="field.time")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $inizio;
+  private ?\DateTime $inizio = null;
 
   /**
-   * @var \DateTime $fine Ora della chiusura dello scrutinio
+   * @var \DateTime|null $fine Ora della chiusura dello scrutinio
    *
    * @ORM\Column(type="time", nullable=true)
    *
-   * @Assert\Time(message="field.time")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $fine;
+  private ?\DateTime $fine = null;
 
   /**
    * @var string $stato Stato dello scrutinio [N=non aperto, C=chiuso, 1..9=avanzamento]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","C","1","2","3","4","5","6","7","8","9"}, strict=true, message="field.choice")
    */
-  private $stato;
+  private string $stato = 'N';
 
   /**
-   * @var Classe $classe Classe dello scrutinio
+   * @var Classe|null $classe Classe dello scrutinio
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var array $dati Lista dei dati dello scrutinio
+   * @var array|null $dati Lista dei dati dello scrutinio
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
   /**
-   * @var \DateTime $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   * @var \DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private ?\DateTime $visibile;
+  private ?\DateTime $visibile = null;
 
   /**
-   * @var string $stato Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
+   * @var string|null $stato Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
    *
    * @ORM\Column(type="string", length=1, nullable=true)
    *
    * @Assert\Choice(choices={"E","C","V","B"}, strict=true, message="field.choice")
    */
-  private $sincronizzazione;
+  private ?string $sincronizzazione = '';
 
 
   //==================== EVENTI ORM ====================
@@ -144,7 +142,7 @@ class Scrutinio {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -155,7 +153,7 @@ class Scrutinio {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -166,27 +164,27 @@ class Scrutinio {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -195,7 +193,7 @@ class Scrutinio {
    *
    * @return string Periodo dello scrutinio
    */
-  public function getPeriodo() {
+  public function getPeriodo(): string {
     return $this->periodo;
   }
 
@@ -204,9 +202,9 @@ class Scrutinio {
    *
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function setPeriodo($periodo) {
+  public function setPeriodo(string $periodo): self {
     $this->periodo = $periodo;
     return $this;
   }
@@ -214,20 +212,20 @@ class Scrutinio {
   /**
    * Restituisce la data dello scrutinio
    *
-   * @return \DateTime Data dello scrutinio
+   * @return \DateTime|null Data dello scrutinio
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
   /**
    * Modifica la data dello scrutinio
    *
-   * @param \DateTime $data Data dello scrutinio
+   * @param \DateTime|null $data Data dello scrutinio
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data=null) {
+  public function setData(?\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -235,20 +233,20 @@ class Scrutinio {
   /**
    * Restituisce l'ora dell'apertura dello scrutinio
    *
-   * @return \DateTime Ora dell'apertura dello scrutinio
+   * @return \DateTime|null Ora dell'apertura dello scrutinio
    */
-  public function getInizio() {
+  public function getInizio(): ?\DateTime {
     return $this->inizio;
   }
 
   /**
    * Modifica l'ora dell'apertura dello scrutinio
    *
-   * @param \DateTime $inizio Ora dell'apertura dello scrutinio
+   * @param \DateTime|null $inizio Ora dell'apertura dello scrutinio
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function setInizio($inizio) {
+  public function setInizio(?\DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -256,20 +254,20 @@ class Scrutinio {
   /**
    * Restituisce l'ora della chiusura dello scrutinio
    *
-   * @return \DateTime Ora della chiusura dello scrutinio
+   * @return \DateTime|null Ora della chiusura dello scrutinio
    */
-  public function getFine() {
+  public function getFine(): ?\DateTime {
     return $this->fine;
   }
 
   /**
    * Modifica l'ora della chiusura dello scrutinio
    *
-   * @param \DateTime $fine Ora della chiusura dello scrutinio
+   * @param \DateTime|null $fine Ora della chiusura dello scrutinio
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function setFine($fine) {
+  public function setFine(?\DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }
@@ -279,7 +277,7 @@ class Scrutinio {
    *
    * @return string Stato dello scrutinio
    */
-  public function getStato() {
+  public function getStato(): string {
     return $this->stato;
   }
 
@@ -288,9 +286,9 @@ class Scrutinio {
    *
    * @param string $stato Stato dello scrutinio
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function setStato($stato) {
+  public function setStato(string $stato): self {
     $this->stato = $stato;
     return $this;
   }
@@ -298,9 +296,9 @@ class Scrutinio {
   /**
    * Restituisce la classe dello scrutinio
    *
-   * @return Classe Classe dello scrutinio
+   * @return Classe|null Classe dello scrutinio
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
@@ -309,9 +307,9 @@ class Scrutinio {
    *
    * @param Classe $classe Classe dello scrutinio
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe) {
+  public function setClasse(Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -319,9 +317,9 @@ class Scrutinio {
   /**
    * Restituisce la lista dei dati dello scrutinio
    *
-   * @return array Lista dei dati dello scrutinio
+   * @return array|null Lista dei dati dello scrutinio
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -330,9 +328,9 @@ class Scrutinio {
    *
    * @param array $dati Lista dei dati dello scrutinio
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -342,13 +340,58 @@ class Scrutinio {
   }
 
   /**
+   * Restituisce la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   *
+   * @return \DateTime|null Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   */
+  public function getVisibile(): ?\DateTime {
+    return $this->visibile;
+  }
+
+  /**
+   * Modifica la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   *
+   * @param \DateTime|null $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
+   *
+   * @return self Oggetto modificato
+   */
+  public function setVisibile(?\DateTime $visibile): self {
+    $this->visibile = $visibile;
+    return $this;
+  }
+
+  /**
+   * Restituisce lo stato della sincronizzazione dei dati dello scrutinio [N=non esportato, E=esportato, C=caricato, V=validato]
+   *
+   * @return string|null Stato della sincronizzazione dei dati dello scrutinio
+   */
+  public function getSincronizzazione(): ?string {
+    return $this->sincronizzazione;
+  }
+
+  /**
+   * Modifica lo stato della sincronizzazione dei dati dello scrutinio [N=non esportato, E=esportato, C=caricato, V=validato]
+   *
+   * @param string|null $sincronizzazione Stato della sincronizzazione dei dati dello scrutinio
+   *
+   * @return self Oggetto modificato
+   */
+  public function setSincronizzazione(?string $sincronizzazione): self {
+    $this->sincronizzazione = $sincronizzazione;
+    return $this;
+  }
+
+
+  //==================== METODI DELLA CLASSE ====================
+
+  /**
    * Restituisce il valore del dato indicato presente nella lista dei dati dello scrutinio
    *
    * @param string $nome Nome identificativo del dato
    *
-   * @return mixed Valore del dato o null se non esiste
+   * @return mixed|null Valore del dato o null se non esiste
    */
-  public function getDato($nome) {
+  public function getDato(string $nome) {
     if (isset($this->dati[$nome])) {
       return $this->dati[$nome];
     }
@@ -361,9 +404,9 @@ class Scrutinio {
    * @param string $nome Nome identificativo del dato
    * @param mixed $valore Valore del dato
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function addDato($nome, $valore) {
+  public function addDato(string $nome, $valore): self {
     if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
       // clona array per forzare update su doctrine
       $valore = unserialize(serialize($valore));
@@ -377,64 +420,11 @@ class Scrutinio {
    *
    * @param string $nome Nome identificativo del dato
    *
-   * @return Scrutinio Oggetto Scrutinio
+   * @return self Oggetto modificato
    */
-  public function removeDato($nome) {
+  public function removeDato(string $nome): self {
     unset($this->dati[$nome]);
     return $this;
-  }
-
-  /**
-   * Restituisce la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
-   *
-   * @return \DateTime Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
-   */
-  public function getVisibile() {
-    return $this->visibile;
-  }
-
-  /**
-   * Modifica la data e ora della pubblicazione dell'esito dello scrutinio ai genitori
-   *
-   * @param \DateTime $visibile Data e ora della pubblicazione dell'esito dello scrutinio ai genitori
-   *
-   * @return Scrutinio Oggetto Scrutinio
-   */
-  public function setVisibile(\DateTime $visibile=null) {
-    $this->visibile = $visibile;
-    return $this;
-  }
-
-  /**
-   * Restituisce lo stato della sincronizzazione dei dati dello scrutinio [N=non esportato, E=esportato, C=caricato, V=validato]
-   *
-   * @return string Stato della sincronizzazione dei dati dello scrutinio
-   */
-  public function getSincronizzazione() {
-    return $this->sincronizzazione;
-  }
-
-  /**
-   * Modifica lo stato della sincronizzazione dei dati dello scrutinio [N=non esportato, E=esportato, C=caricato, V=validato]
-   *
-   * @param string $sincronizzazione Stato della sincronizzazione dei dati dello scrutinio
-   *
-   * @return Scrutinio Oggetto Scrutinio
-   */
-  public function setSincronizzazione($sincronizzazione) {
-    $this->sincronizzazione = $sincronizzazione;
-    return $this;
-  }
-
-
-  //==================== METODI DELLA CLASSE ====================
-
-  /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->dati = array();
   }
 
   /**
@@ -442,7 +432,7 @@ class Scrutinio {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').' '.$this->classe.': '.$this->stato;
   }
 

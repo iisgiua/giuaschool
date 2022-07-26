@@ -30,27 +30,27 @@ class Provisioning {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per le istanze della classe
+   * @var int|null $id Identificativo univoco per le istanze della classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var Utente $utente Utente del quale deve essere eseguito il provisioning
@@ -96,7 +96,7 @@ class Provisioning {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -107,7 +107,7 @@ class Provisioning {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -118,27 +118,27 @@ class Provisioning {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -156,9 +156,9 @@ class Provisioning {
    *
    * @param Utente $utente Utente del quale deve essere eseguito il provisioning
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setUtente(Utente $utente) {
+  public function setUtente(Utente $utente): self {
     $this->utente = $utente;
     return $this;
   }
@@ -177,9 +177,9 @@ class Provisioning {
    *
    * @param array $dati Lista dei dati necessari per il provisioning
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati($dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -202,9 +202,9 @@ class Provisioning {
    *
    * @param string $funzione Funzione da eseguire
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setFunzione($funzione) {
+  public function setFunzione($funzione): self {
     $this->funzione = $funzione;
     return $this;
   }
@@ -223,9 +223,9 @@ class Provisioning {
    *
    * @param string $stato Stato del provisioning [A=attesa,P=processato,E=errore]
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setStato($stato) {
+  public function setStato($stato): self {
     $this->stato = $stato;
     return $this;
   }
@@ -247,7 +247,7 @@ class Provisioning {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->funzione.':'.$this->stato;
   }
 

@@ -18,13 +18,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Classe - entità
+ * Classe - dati delle classi
  *
  * @ORM\Entity(repositoryClass="App\Repository\ClasseRepository")
- * @ORM\Table(name="gs_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","sezione"})})
+ * @ORM\Table(name="gs_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","sezione","corso_id"})})
  * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"anno","sezione"}, message="field.unique")
+ * @UniqueEntity(fields={"anno","sezione","corso"}, message="field.unique")
  */
 class Classe {
 
@@ -32,77 +32,75 @@ class Classe {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la classe
+   * @var int|null $id Identificativo univoco per la classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var integer $anno Anno della classe
+   * @var int $anno Anno della classe
    *
    * @ORM\Column(type="smallint", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={1,2,3,4,5}, strict=true, message="field.choice")
    */
-  private $anno;
+  private int $anno = 1;
 
   /**
    * @var string $sezione Sezione della classe
    *
-   * @ORM\Column(type="string", length=1, nullable=false)
+   * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"}, strict=true, message="field.choice")
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $sezione;
+  private string $sezione = 'A';
 
   /**
-   * @var integer $oreSettimanali Numero di ore settimanali della classe
+   * @var int $oreSettimanali Numero di ore settimanali della classe
    *
    * @ORM\Column(name="ore_settimanali", type="smallint", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Positive(message="field.positive")
    */
-  private $oreSettimanali;
+  private int $oreSettimanali = 0;
 
   /**
-   * @var Sede $sede Sede a cui appartiene la classe
+   * @var Sede|null $sede Sede a cui appartiene la classe
    *
    * @ORM\ManyToOne(targetEntity="Sede")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $sede;
+  private ?Sede $sede = null;
 
   /**
-   * @var Corso $corso Corso a cui appartiene classe
+   * @var Corso|null $corso Corso a cui appartiene classe
    *
    * @ORM\ManyToOne(targetEntity="Corso")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $corso;
+  private ?Corso $corso = null;
 
   /**
    * @var Docente $coordinatore Coordinatore di classe
@@ -110,7 +108,7 @@ class Classe {
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $coordinatore;
+  private ?Docente $coordinatore = null;
 
   /**
    * @var Docente $segretario Segretario del consiglio di classe
@@ -118,7 +116,7 @@ class Classe {
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $segretario;
+  private ?Docente $segretario = null;
 
 
   //==================== EVENTI ORM ====================
@@ -128,7 +126,7 @@ class Classe {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -139,7 +137,7 @@ class Classe {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -150,47 +148,47 @@ class Classe {
   /**
    * Restituisce l'identificativo univoco per la classe
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'anno della classe
    *
-   * @return integer Anno della classe
+   * @return int Anno della classe
    */
-  public function getAnno() {
+  public function getAnno(): int {
     return $this->anno;
   }
 
   /**
    * Modifica l'anno della classe
    *
-   * @param integer $anno Anno della classe
+   * @param int $anno Anno della classe
    *
-   * @return Classe Oggetto Classe
+   * @return self Oggetto modificato
    */
-  public function setAnno($anno) {
+  public function setAnno(int $anno): self {
     $this->anno = $anno;
     return $this;
   }
@@ -200,7 +198,7 @@ class Classe {
    *
    * @return string Sezione della classe
    */
-  public function getSezione() {
+  public function getSezione(): string {
     return $this->sezione;
   }
 
@@ -209,9 +207,9 @@ class Classe {
    *
    * @param string $sezione Sezione della classe
    *
-   * @return Classe Oggetto Classe
+   * @return self Oggetto modificato
    */
-  public function setSezione($sezione) {
+  public function setSezione(string $sezione): self {
     $this->sezione = $sezione;
     return $this;
   }
@@ -219,20 +217,20 @@ class Classe {
   /**
    * Restituisce le ore settimanali della classe
    *
-   * @return integer Ore settimanali della classe
+   * @return int Ore settimanali della classe
    */
-  public function getOreSettimanali() {
+  public function getOreSettimanali(): int {
     return $this->oreSettimanali;
   }
 
   /**
    * Modifica le ore settimanali della classe
    *
-   * @param integer $oreSettimanali Ore settimanali della classe
+   * @param int $oreSettimanali Ore settimanali della classe
    *
-   * @return Classe Oggetto Classe
+   * @return self Oggetto modificato
    */
-  public function setOreSettimanali($oreSettimanali) {
+  public function setOreSettimanali(int $oreSettimanali): self {
     $this->oreSettimanali = $oreSettimanali;
     return $this;
   }
@@ -240,9 +238,9 @@ class Classe {
   /**
    * Restituisce la sede della classe
    *
-   * @return Sede Sede della classe
+   * @return Sede|null Sede della classe
    */
-  public function getSede() {
+  public function getSede(): ?Sede {
     return $this->sede;
   }
 
@@ -251,9 +249,9 @@ class Classe {
    *
    * @param Sede $sede Sede della classe
    *
-   * @return Classe Oggetto Classe
+   * @return self Oggetto modificato
    */
-  public function setSede(Sede $sede) {
+  public function setSede(Sede $sede): self {
     $this->sede = $sede;
     return $this;
   }
@@ -261,9 +259,9 @@ class Classe {
   /**
    * Restituisce il corso della classe
    *
-   * @return Corso Corso della classe
+   * @return Corso|null Corso della classe
    */
-  public function getCorso() {
+  public function getCorso(): ?Corso {
     return $this->corso;
   }
 
@@ -272,9 +270,9 @@ class Classe {
    *
    * @param Corso $corso Corso della classe
    *
-   * @return Classe Oggetto Classe
+   * @return self Oggetto modificato
    */
-  public function setCorso(Corso $corso) {
+  public function setCorso(Corso $corso): self {
     $this->corso = $corso;
     return $this;
   }
@@ -282,20 +280,20 @@ class Classe {
   /**
    * Restituisce il coordinatore di classe
    *
-   * @return Docente Coordinatore di classe
+   * @return Docente|null Coordinatore di classe
    */
-  public function getCoordinatore() {
+  public function getCoordinatore(): ?Docente {
     return $this->coordinatore;
   }
 
   /**
    * Modifica il coordinatore di classe
    *
-   * @param Docente $coordinatore Coordinatore di classe
+   * @param Docente|null $coordinatore Coordinatore di classe
    *
-   * @return Classe Oggetto Classe
+   * @return self Oggetto modificato
    */
-  public function setCoordinatore(Docente $coordinatore = null) {
+  public function setCoordinatore(?Docente $coordinatore): self {
     $this->coordinatore = $coordinatore;
     return $this;
   }
@@ -303,20 +301,20 @@ class Classe {
   /**
    * Restituisce il segretario del consiglio di classe
    *
-   * @return Docente Segretario del consiglio di classe
+   * @return Docente|null Segretario del consiglio di classe
    */
-  public function getSegretario() {
+  public function getSegretario(): ?Docente {
     return $this->segretario;
   }
 
   /**
    * Modifica il segretario del consiglio di classe
    *
-   * @param Docente $segretario Segretario del consiglio di classe
+   * @param Docente|null $segretario Segretario del consiglio di classe
    *
-   * @return Classe Oggetto Classe
+   * @return self Oggetto modificato
    */
-  public function setSegretario(Docente $segretario = null) {
+  public function setSegretario(?Docente $segretario): self {
     $this->segretario = $segretario;
     return $this;
   }
@@ -329,7 +327,7 @@ class Classe {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->anno.'ª '.$this->sezione;
   }
 

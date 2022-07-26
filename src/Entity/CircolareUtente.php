@@ -33,27 +33,27 @@ class CircolareUtente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var Circolare $circolare Circolare a cui ci si riferisce
@@ -97,7 +97,7 @@ class CircolareUtente {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -108,7 +108,7 @@ class CircolareUtente {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -119,27 +119,27 @@ class CircolareUtente {
   /**
    * Restituisce l'identificativo univoco per l'avviso
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -157,9 +157,9 @@ class CircolareUtente {
    *
    * @param Circolare $circolare Circolare a cui ci si riferisce
    *
-   * @return CircolareUtente Oggetto CircolareUtente
+   * @return self Oggetto modificato
    */
-  public function setCircolare(Circolare $circolare) {
+  public function setCircolare(Circolare $circolare): self {
     $this->circolare = $circolare;
     return $this;
   }
@@ -178,9 +178,9 @@ class CircolareUtente {
    *
    * @param Utente $utente Utente destinatario della circolare
    *
-   * @return CircolareUtente Oggetto CircolareUtente
+   * @return self Oggetto modificato
    */
-  public function setUtente(Utente $utente) {
+  public function setUtente(Utente $utente): self {
     $this->utente = $utente;
     return $this;
   }
@@ -199,9 +199,9 @@ class CircolareUtente {
    *
    * @param \DateTime $letta Data e ora di lettura implicita della circolare
    *
-   * @return CircolareUtente Oggetto CircolareUtente
+   * @return self Oggetto modificato
    */
-  public function setLetta($letta) {
+  public function setLetta($letta): self {
     $this->letta = $letta;
     return $this;
   }
@@ -220,9 +220,9 @@ class CircolareUtente {
    *
    * @param \DateTime $confermata Data e ora di conferma esplicita della lettura della circolare
    *
-   * @return CircolareUtente Oggetto CircolareUtente
+   * @return self Oggetto modificato
    */
-  public function setConfermata($confermata) {
+  public function setConfermata($confermata): self {
     $this->confermata = $confermata;
     return $this;
   }

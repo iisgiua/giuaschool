@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Orario - entità
+ * Orario - dati dell'orario scolastico
  *
  * @ORM\Entity(repositoryClass="App\Repository\OrarioRepository")
  * @ORM\Table(name="gs_orario")
@@ -27,27 +27,27 @@ class Orario {
 
 
   /**
-   * @var integer $id Identificativo univoco per l'orario
+   * @var int|null $id Identificativo univoco per l'orario
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var string $nome Nome descrittivo dell'orario
@@ -57,37 +57,35 @@ class Orario {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $nome;
+  private string $nome = '';
 
   /**
-   * @var \DateTime $inizio Data iniziale dell'entrata in vigore dell'orario
+   * @var \DateTime|null $inizio Data iniziale dell'entrata in vigore dell'orario
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $inizio;
+  private ?\DateTime $inizio = null;
 
   /**
-   * @var \DateTime $fine Data finale dell'entrata in vigore dell'orario
+   * @var \DateTime|null $fine Data finale dell'entrata in vigore dell'orario
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $fine;
+  private ?\DateTime $fine = null;
 
   /**
-   * @var Sede $sede Sede a cui appartiene l'orario
+   * @var Sede|null $sede Sede a cui appartiene l'orario
    *
    * @ORM\ManyToOne(targetEntity="Sede")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $sede;
+  private ?Sede $sede = null;
 
 
   //==================== EVENTI ORM ====================
@@ -97,7 +95,7 @@ class Orario {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -108,7 +106,7 @@ class Orario {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -119,27 +117,27 @@ class Orario {
   /**
    * Restituisce l'identificativo univoco per l'orario
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -148,7 +146,7 @@ class Orario {
    *
    * @return string Nome descrittivo dell'orario
    */
-  public function getNome() {
+  public function getNome(): string {
     return $this->nome;
   }
 
@@ -157,9 +155,9 @@ class Orario {
    *
    * @param string $nome Nome descrittivo dell'orario
    *
-   * @return Orario Oggetto Orario
+   * @return self Oggetto modificato
    */
-  public function setNome($nome) {
+  public function setNome(string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -167,9 +165,9 @@ class Orario {
   /**
    * Restituisce la data iniziale dell'entrata in vigore dell'orario
    *
-   * @return \DateTime Data iniziale dell'entrata in vigore dell'orario
+   * @return \DateTime|null Data iniziale dell'entrata in vigore dell'orario
    */
-  public function getInizio() {
+  public function getInizio(): ?\DateTime {
     return $this->inizio;
   }
 
@@ -178,7 +176,7 @@ class Orario {
    *
    * @param \DateTime $inizio Data iniziale dell'entrata in vigore dell'orario
    *
-   * @return Orario Oggetto Orario
+   * @return self Oggetto modificato
    */
   public function setInizio(\DateTime $inizio): self {
     $this->inizio = $inizio;
@@ -188,9 +186,9 @@ class Orario {
   /**
    * Restituisce la data finale dell'entrata in vigore dell'orario
    *
-   * @return \DateTime Data finale dell'entrata in vigore dell'orario
+   * @return \DateTime|null Data finale dell'entrata in vigore dell'orario
    */
-  public function getFine() {
+  public function getFine(): ?\DateTime {
     return $this->fine;
   }
 
@@ -199,7 +197,7 @@ class Orario {
    *
    * @param \DateTime $fine Data finale dell'entrata in vigore dell'orario
    *
-   * @return Orario Oggetto Orario
+   * @return self Oggetto modificato
    */
   public function setFine(\DateTime $fine): self {
     $this->fine = $fine;
@@ -209,9 +207,9 @@ class Orario {
   /**
    * Restituisce la sede a cui appartiene l'orario
    *
-   * @return Sede Sede a cui appartiene l'orario
+   * @return Sede|null Sede a cui appartiene l'orario
    */
-  public function getSede() {
+  public function getSede(): ?Sede {
     return $this->sede;
   }
 
@@ -220,9 +218,9 @@ class Orario {
    *
    * @param Sede $sede Sede a cui appartiene l'orario
    *
-   * @return Orario Oggetto Orario
+   * @return self Oggetto modificato
    */
-  public function setSede(Sede $sede) {
+  public function setSede(Sede $sede): self {
     $this->sede = $sede;
     return $this;
   }
@@ -235,7 +233,7 @@ class Orario {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->nome;
   }
 

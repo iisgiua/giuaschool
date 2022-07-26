@@ -1,0 +1,93 @@
+####################
+# AtaFixtures - dati di test
+#
+# Dati del personale ATA: gli stessi degli utenti più i seguenti
+#   tipo: mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, U=autista, D=DSGA]
+#   segreteria: indica se il dipendente ATA ha accesso alle funzioni della segreteria
+#   sede: la sede di riferimento del dipendente ATA (se definita)
+####################
+
+
+include:
+  - SedeFixtures.yml
+
+
+App\Entity\Ata:
+  ata_D:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".a")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: '70%? 1: 0'
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <city()>: <strval("")>'
+    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
+    citta: '50%? <city()>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    tipo: 'D'
+    segreteria: true
+    sede: 
+  ata_{A, T, C, U}1:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".a")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: '90%? 1: 0'
+    spid: '70%? 1: 0'
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <city()>: <strval("")>'
+    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
+    citta: '50%? <city()>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    tipo: '<current()>'
+    segreteria: '<($tipo == "A" || $tipo == "D" ? true : false)>'
+    sede: '@sede_1'
+  ata_{T, C}2:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".a")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: '90%? 1: 0'
+    spid: '70%? 1: 0'
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <city()>: <strval("")>'
+    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
+    citta: '50%? <city()>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    tipo: '<current()>'
+    segreteria: false
+    sede: '@sede_2'

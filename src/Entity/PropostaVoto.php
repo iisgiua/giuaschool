@@ -30,27 +30,27 @@ class PropostaVoto {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la proposta di voto
+   * @var int|null $id Identificativo univoco per la proposta di voto
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, I=scrutinio integrativo, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
@@ -63,28 +63,28 @@ class PropostaVoto {
   private $periodo;
 
   /**
-   * @var integer $orale Proposta di voto per la valutazione orale
+   * @var int $orale Proposta di voto per la valutazione orale
    *
    * @ORM\Column(type="integer", nullable=true)
    */
   private $orale;
 
   /**
-   * @var integer $scritto Proposta di voto per la valutazione scritta
+   * @var int $scritto Proposta di voto per la valutazione scritta
    *
    * @ORM\Column(type="integer", nullable=true)
    */
   private $scritto;
 
   /**
-   * @var integer $pratico Proposta di voto per la valutazione pratica
+   * @var int $pratico Proposta di voto per la valutazione pratica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
   private $pratico;
 
   /**
-   * @var integer $unico Proposta di voto per la valutazione unica
+   * @var int $unico Proposta di voto per la valutazione unica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
@@ -107,7 +107,7 @@ class PropostaVoto {
   private $recupero;
 
   /**
-   * @var integer $assenze Numero di ore di assenza nel periodo
+   * @var int $assenze Numero di ore di assenza nel periodo
    *
    * @ORM\Column(type="integer", nullable=true)
    */
@@ -168,7 +168,7 @@ class PropostaVoto {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -179,7 +179,7 @@ class PropostaVoto {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -190,20 +190,20 @@ class PropostaVoto {
   /**
    * Restituisce l'identificativo univoco per la proposta di voto
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Modifica l'identificativo univoco per la proposta di voto
    *
-   * @param integer $id Identificativo univoco per la proposta di voto
+   * @param int $id Identificativo univoco per la proposta di voto
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setId($id) {
+  public function setId($id): self {
     $this->id = $id;
     return $this;
   }
@@ -211,18 +211,18 @@ class PropostaVoto {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -240,9 +240,9 @@ class PropostaVoto {
    *
    * @param string $periodo Periodo dello scrutinio
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setPeriodo($periodo) {
+  public function setPeriodo($periodo): self {
     $this->periodo = "".$periodo; // deve essere una stringa
     return $this;
   }
@@ -250,7 +250,7 @@ class PropostaVoto {
   /**
    * Restituisce la proposta di voto per la valutazione orale
    *
-   * @return integer Proposta di voto per la valutazione orale
+   * @return int Proposta di voto per la valutazione orale
    */
   public function getOrale() {
     return $this->orale;
@@ -259,11 +259,11 @@ class PropostaVoto {
   /**
    * Modifica la proposta di voto per la valutazione orale
    *
-   * @param integer $orale Proposta di voto per la valutazione orale
+   * @param int $orale Proposta di voto per la valutazione orale
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setOrale($orale) {
+  public function setOrale($orale): self {
     $this->orale = $orale;
     return $this;
   }
@@ -271,7 +271,7 @@ class PropostaVoto {
   /**
    * Restituisce la proposta di voto per la valutazione scritta
    *
-   * @return integer Proposta di voto per la valutazione scritta
+   * @return int Proposta di voto per la valutazione scritta
    */
   public function getScritto() {
     return $this->scritto;
@@ -280,11 +280,11 @@ class PropostaVoto {
   /**
    * Modifica la proposta di voto per la valutazione scritta
    *
-   * @param integer $scritto Proposta di voto per la valutazione scritta
+   * @param int $scritto Proposta di voto per la valutazione scritta
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setScritto($scritto) {
+  public function setScritto($scritto): self {
     $this->scritto = $scritto;
     return $this;
   }
@@ -292,7 +292,7 @@ class PropostaVoto {
   /**
    * Restituisce la proposta di voto per la valutazione pratica
    *
-   * @return integer Proposta di voto per la valutazione pratica
+   * @return int Proposta di voto per la valutazione pratica
    */
   public function getPratico() {
     return $this->pratico;
@@ -301,11 +301,11 @@ class PropostaVoto {
   /**
    * Modifica la proposta di voto per la valutazione pratica
    *
-   * @param integer $pratico Proposta di voto per la valutazione pratica
+   * @param int $pratico Proposta di voto per la valutazione pratica
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setPratico($pratico) {
+  public function setPratico($pratico): self {
     $this->pratico = $pratico;
     return $this;
   }
@@ -313,7 +313,7 @@ class PropostaVoto {
   /**
    * Restituisce la proposta di voto per la valutazione unica
    *
-   * @return integer Proposta di voto per la valutazione unica
+   * @return int Proposta di voto per la valutazione unica
    */
   public function getUnico() {
     return $this->unico;
@@ -322,11 +322,11 @@ class PropostaVoto {
   /**
    * Modifica la proposta di voto per la valutazione unica
    *
-   * @param integer $unico Proposta di voto per la valutazione unica
+   * @param int $unico Proposta di voto per la valutazione unica
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setUnico($unico) {
+  public function setUnico($unico): self {
     $this->unico = $unico;
     return $this;
   }
@@ -345,9 +345,9 @@ class PropostaVoto {
    *
    * @param string $debito Argomenti per il recupero del debito
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setDebito($debito) {
+  public function setDebito($debito): self {
     $this->debito = $debito;
     return $this;
   }
@@ -366,9 +366,9 @@ class PropostaVoto {
    *
    * @param string $recupero Modalità di recupero del debito
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setRecupero($recupero) {
+  public function setRecupero($recupero): self {
     $this->recupero = $recupero;
     return $this;
   }
@@ -376,7 +376,7 @@ class PropostaVoto {
   /**
    * Restituisce il numero di ore di assenza nel periodo
    *
-   * @return integer Numero di ore di assenza nel periodo
+   * @return int Numero di ore di assenza nel periodo
    */
   public function getAssenze() {
     return $this->assenze;
@@ -385,11 +385,11 @@ class PropostaVoto {
   /**
    * Modifica il numero di ore di assenza nel periodo
    *
-   * @param integer $assenze Numero di ore di assenza nel periodo
+   * @param int $assenze Numero di ore di assenza nel periodo
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setAssenze($assenze) {
+  public function setAssenze($assenze): self {
     $this->assenze = $assenze;
     return $this;
   }
@@ -408,9 +408,9 @@ class PropostaVoto {
    *
    * @param array $dati Lista dei dati aggiuntivi
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati($dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -439,7 +439,7 @@ class PropostaVoto {
    * @param string $nome Nome identificativo del dato
    * @param mixed $valore Valore del dato
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
   public function addDato($nome, $valore) {
     if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
@@ -455,7 +455,7 @@ class PropostaVoto {
    *
    * @param string $nome Nome identificativo del dato
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
   public function removeDato($nome) {
     unset($this->dati[$nome]);
@@ -476,9 +476,9 @@ class PropostaVoto {
    *
    * @param Alunno $alunno Alunno a cui si attribuisce la proposta di voto
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -497,9 +497,9 @@ class PropostaVoto {
    *
    * @param Classe $classe Classe dell'alunno a cui si attribuisce la proposta di voto
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe) {
+  public function setClasse(Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -518,9 +518,9 @@ class PropostaVoto {
    *
    * @param Materia $materia Materia della proposta di voto
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setMateria(Materia $materia) {
+  public function setMateria(Materia $materia): self {
     $this->materia = $materia;
     return $this;
   }
@@ -539,9 +539,9 @@ class PropostaVoto {
    *
    * @param Docente $docente Docente che inserisce la proposta di voto
    *
-   * @return PropostaVoto Oggetto PropostaVoto
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -562,7 +562,7 @@ class PropostaVoto {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->materia.' - '.$this->alunno.': '.$this->orale.' '.$this->scritto.' '.$this->pratico.' '.$this->unico;
   }
 

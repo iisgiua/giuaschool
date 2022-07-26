@@ -238,7 +238,7 @@ class StaffController extends AbstractController {
       $avviso = (new Avviso())
         ->setTipo('C');
       if ($this->getUser()->getSede()) {
-        $avviso->addSede($this->getUser()->getSede());
+        $avviso->addSedi($this->getUser()->getSede());
       }
       $em->persist($avviso);
     }
@@ -793,7 +793,7 @@ class StaffController extends AbstractController {
         ->setTesto($trans->trans($tipo == 'E' ? 'message.avviso_entrata_testo' :
           'message.avviso_uscita_testo'));
       if ($this->getUser()->getSede()) {
-        $avviso->addSede($this->getUser()->getSede());
+        $avviso->addSedi($this->getUser()->getSede());
       }
       $em->persist($avviso);
     }
@@ -1108,7 +1108,7 @@ class StaffController extends AbstractController {
         ->setOggetto($trans->trans('message.avviso_attivita_oggetto'))
         ->setTesto($trans->trans('message.avviso_attivita_testo'));
       if ($this->getUser()->getSede()) {
-        $avviso->addSede($this->getUser()->getSede());
+        $avviso->addSedi($this->getUser()->getSede());
       }
       $em->persist($avviso);
     }
@@ -1398,7 +1398,7 @@ class StaffController extends AbstractController {
         ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
         ->setData(new \DateTime('today'));
       if ($this->getUser()->getSede()) {
-        $avviso->addSede($this->getUser()->getSede());
+        $avviso->addSedi($this->getUser()->getSede());
       }
       $em->persist($avviso);
     }

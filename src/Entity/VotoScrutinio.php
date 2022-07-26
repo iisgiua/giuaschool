@@ -32,51 +32,51 @@ class VotoScrutinio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per il voto assegnato allo scrutinio
+   * @var int|null $id Identificativo univoco per il voto assegnato allo scrutinio
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var integer $orale Voto per la valutazione orale
+   * @var int $orale Voto per la valutazione orale
    *
    * @ORM\Column(type="integer", nullable=true)
    */
   private $orale;
 
   /**
-   * @var integer $scritto Voto per la valutazione scritta
+   * @var int $scritto Voto per la valutazione scritta
    *
    * @ORM\Column(type="integer", nullable=true)
    */
   private $scritto;
 
   /**
-   * @var integer $pratico Voto per la valutazione pratica
+   * @var int $pratico Voto per la valutazione pratica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
   private $pratico;
 
   /**
-   * @var integer $unico Voto per la valutazione unica
+   * @var int $unico Voto per la valutazione unica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
@@ -99,7 +99,7 @@ class VotoScrutinio {
   private $recupero;
 
   /**
-   * @var integer $assenze Numero di ore di assenza nel periodo
+   * @var int $assenze Numero di ore di assenza nel periodo
    *
    * @ORM\Column(type="integer", nullable=false)
    *
@@ -152,7 +152,7 @@ class VotoScrutinio {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -163,7 +163,7 @@ class VotoScrutinio {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -174,34 +174,34 @@ class VotoScrutinio {
   /**
    * Restituisce l'identificativo univoco per il voto
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce il voto per la valutazione orale
    *
-   * @return integer Voto per la valutazione orale
+   * @return int Voto per la valutazione orale
    */
   public function getOrale() {
     return $this->orale;
@@ -210,11 +210,11 @@ class VotoScrutinio {
   /**
    * Modifica il voto per la valutazione orale
    *
-   * @param integer $orale Voto per la valutazione orale
+   * @param int $orale Voto per la valutazione orale
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setOrale($orale) {
+  public function setOrale($orale): self {
     $this->orale = $orale;
     return $this;
   }
@@ -222,7 +222,7 @@ class VotoScrutinio {
   /**
    * Restituisce il voto per la valutazione scritta
    *
-   * @return integer Voto per la valutazione scritta
+   * @return int Voto per la valutazione scritta
    */
   public function getScritto() {
     return $this->scritto;
@@ -231,11 +231,11 @@ class VotoScrutinio {
   /**
    * Modifica il voto per la valutazione scritta
    *
-   * @param integer $scritto Voto per la valutazione scritta
+   * @param int $scritto Voto per la valutazione scritta
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setScritto($scritto) {
+  public function setScritto($scritto): self {
     $this->scritto = $scritto;
     return $this;
   }
@@ -243,7 +243,7 @@ class VotoScrutinio {
   /**
    * Restituisce il voto per la valutazione pratica
    *
-   * @return integer Voto per la valutazione pratica
+   * @return int Voto per la valutazione pratica
    */
   public function getPratico() {
     return $this->pratico;
@@ -252,11 +252,11 @@ class VotoScrutinio {
   /**
    * Modifica il voto per la valutazione pratica
    *
-   * @param integer $pratico Voto per la valutazione pratica
+   * @param int $pratico Voto per la valutazione pratica
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setPratico($pratico) {
+  public function setPratico($pratico): self {
     $this->pratico = $pratico;
     return $this;
   }
@@ -264,7 +264,7 @@ class VotoScrutinio {
   /**
    * Restituisce il voto per la valutazione unica
    *
-   * @return integer Voto per la valutazione unica
+   * @return int Voto per la valutazione unica
    */
   public function getUnico() {
     return $this->unico;
@@ -273,11 +273,11 @@ class VotoScrutinio {
   /**
    * Modifica il voto per la valutazione unica
    *
-   * @param integer $unico Voto per la valutazione unica
+   * @param int $unico Voto per la valutazione unica
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setUnico($unico) {
+  public function setUnico($unico): self {
     $this->unico = $unico;
     return $this;
   }
@@ -296,9 +296,9 @@ class VotoScrutinio {
    *
    * @param string $debito Argomenti per il recupero del debito
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setDebito($debito) {
+  public function setDebito($debito): self {
     $this->debito = $debito;
     return $this;
   }
@@ -317,9 +317,9 @@ class VotoScrutinio {
    *
    * @param string $recupero Modalità di recupero del debito
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setRecupero($recupero) {
+  public function setRecupero($recupero): self {
     $this->recupero = $recupero;
     return $this;
   }
@@ -327,7 +327,7 @@ class VotoScrutinio {
   /**
    * Restituisce il numero di ore di assenza nel periodo
    *
-   * @return integer Numero di ore di assenza nel periodo
+   * @return int Numero di ore di assenza nel periodo
    */
   public function getAssenze() {
     return $this->assenze;
@@ -336,11 +336,11 @@ class VotoScrutinio {
   /**
    * Modifica il numero di ore di assenza nel periodo
    *
-   * @param integer $assenze Numero di ore di assenza nel periodo
+   * @param int $assenze Numero di ore di assenza nel periodo
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setAssenze($assenze) {
+  public function setAssenze($assenze): self {
     $this->assenze = $assenze;
     return $this;
   }
@@ -359,9 +359,9 @@ class VotoScrutinio {
    *
    * @param array $dati Lista dei dati sul voto
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati($dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -390,7 +390,7 @@ class VotoScrutinio {
    * @param string $nome Nome identificativo del dato
    * @param mixed $valore Valore del dato
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
   public function addDato($nome, $valore) {
     if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
@@ -406,7 +406,7 @@ class VotoScrutinio {
    *
    * @param string $nome Nome identificativo del dato
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
   public function removeDato($nome) {
     unset($this->dati[$nome]);
@@ -427,9 +427,9 @@ class VotoScrutinio {
    *
    * @param Scrutinio $scrutinio Scrutinio a cui si riferisce il voto
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setScrutinio(Scrutinio $scrutinio) {
+  public function setScrutinio(Scrutinio $scrutinio): self {
     $this->scrutinio = $scrutinio;
     return $this;
   }
@@ -448,9 +448,9 @@ class VotoScrutinio {
    *
    * @param Alunno $alunno Alunno a cui si attribuisce il voto
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -469,9 +469,9 @@ class VotoScrutinio {
    *
    * @param Materia $materia Materia del voto
    *
-   * @return VotoScrutinio Oggetto VotoScrutinio
+   * @return self Oggetto modificato
    */
-  public function setMateria(Materia $materia) {
+  public function setMateria(Materia $materia): self {
     $this->materia = $materia;
     return $this;
   }
@@ -492,7 +492,7 @@ class VotoScrutinio {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->materia.' - '.$this->alunno.': '.$this->orale.' '.$this->scritto.' '.$this->pratico.' '.$this->unico;
   }
 

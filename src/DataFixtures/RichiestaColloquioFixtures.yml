@@ -1,0 +1,30 @@
+####################
+# RichiestaColloquioFixtures - dati di test
+#
+# Dati per la richiesta di un colloquio da parte del genitore:
+#   appuntamento: data e ora del colloquio
+#   durata: durata del colloquio (in minuti)
+#   colloquio: colloquio richiesto
+#   alunno: alunno al quale si riferisce il colloquio
+#   genitore: genitore che effettua la richiesta del colloquio
+#   genitoreAnnulla: genitore che effettua l'annullamento della richiesta
+#   stato: stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
+#   messaggio: messaggio da comunicare relativamente allo stato della richiesta
+####################
+
+
+include:
+  - ColloquioFixtures.yml
+  - GenitoreFixtures.yml
+
+
+App\Entity\RichiestaColloquio:
+  richiesta_colloquio_{1..30}:
+    appuntamento: '<dateTimeBetween("-1 month", "now")>'
+    durata: '<randomElement([5, 10, 15])>'
+    colloquio: '@colloquio_*'
+    genitore: '@genitore1_*'
+    alunno: '<($genitore->getAlunno())>'
+    stato: '<randomElement(["R", "A", "C", "N", "X"])>'
+    genitoreAnnulla: '<($stato == "A" ? $genitore : null)>'
+    messaggio: '80%? <text()>: <strval("")>'

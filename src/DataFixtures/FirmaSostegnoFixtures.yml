@@ -1,0 +1,23 @@
+####################
+# FirmaSostegnoFixtures - dati di test
+#
+# Dati della firma del docente per una lezione: gli stessi della Firma più i seguenti
+#   argomento: Argomento della lezione di sostegno
+#   attivita: Attività della lezione di sostegno
+#   alunno: Alunno della cattedra di sostegno (importante quando più alunni con stesso docente in stessa classe)
+####################
+
+
+include:
+  - LezioneFixtures.yml
+  - DocenteFixtures.yml
+  - AlunnoFixtures.yml
+
+
+App\Entity\FirmaSostegno:
+  firma_sostegno_{1..10}:
+    lezione: '@lezione_sostegno_<current()>'
+    docente: '@docente_*'
+    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    attivita: '50%? <paragraph(2, false)>: <strval("")>'
+    alunno: '@alunno_sostegno_*'

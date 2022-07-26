@@ -100,7 +100,7 @@ class CircolariController extends AbstractController {
         ->setAnno((int) substr($reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4))
         ->setNumero($numero);
       if ($this->getUser()->getSede()) {
-        $circolare->addSede($this->getUser()->getSede());
+        $circolare->addSedi($this->getUser()->getSede());
       }
       $em->persist($circolare);
     }

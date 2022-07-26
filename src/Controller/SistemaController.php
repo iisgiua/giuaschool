@@ -600,9 +600,6 @@ class SistemaController extends BaseController {
           $stmt->execute(['ruolo' => 'PRE', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
             $preside = (new Preside())
-              ->setChiave1($utente_old['chiave1'])
-              ->setChiave2($utente_old['chiave2'])
-              ->setChiave3($utente_old['chiave3'])
               ->setOtp($utente_old['otp'])
               ->setUsername($utente_old['username'])
               ->setPassword($utente_old['password'])
@@ -630,9 +627,6 @@ class SistemaController extends BaseController {
             $sede = $em->getRepository('App\Entity\Sede')->findOneByNome($utente_old['s_nome']);
             $staff = (new Staff())
               ->setSede($sede)
-              ->setChiave1($utente_old['chiave1'])
-              ->setChiave2($utente_old['chiave2'])
-              ->setChiave3($utente_old['chiave3'])
               ->setOtp($utente_old['otp'])
               ->setUsername($utente_old['username'])
               ->setPassword($utente_old['password'])
@@ -658,9 +652,6 @@ class SistemaController extends BaseController {
           $stmt->execute(['ruolo' => 'DOC', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
             $docente = (new Docente())
-              ->setChiave1($utente_old['chiave1'])
-              ->setChiave2($utente_old['chiave2'])
-              ->setChiave3($utente_old['chiave3'])
               ->setOtp($utente_old['otp'])
               ->setUsername($utente_old['username'])
               ->setPassword($utente_old['password'])

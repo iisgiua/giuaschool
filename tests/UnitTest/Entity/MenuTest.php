@@ -12,15 +12,13 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use App\DataFixtures\MenuFixtures;
 use App\Tests\DatabaseTestCase;
-use App\Entity\MenuOpzione;
 
 
 /**
- * Unit test della classe
- */
+* Unit test dell'entità Menu
+*
+*/
 class MenuTest extends DatabaseTestCase {
 
   /**
@@ -33,164 +31,163 @@ class MenuTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Menu';
     // campi da testare
-    $this->fields = ['selettore', 'nome', 'descrizione', 'mega', 'opzioni'];
+    $this->fields = ['selettore', 'nome', 'descrizione', 'mega'];
+    $this->noStoredFields = ['opzioni'];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = [MenuFixtures::class];
+    $this->fixtures = ['MenuFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_menu' => ['id', 'creato', 'modificato', 'selettore', 'nome', 'descrizione', 'mega'],
-      //-- 'gs_utente' => '*'
-    ];
+    $this->canRead = ['gs_menu' => ['id', 'creato', 'modificato', 'selettore', 'nome', 'descrizione', 'mega']];
     // SQL write
-    $this->canWrite = [
-      'gs_menu' => ['id', 'creato', 'modificato', 'selettore', 'nome', 'descrizione', 'mega']];
+    $this->canWrite = ['gs_menu' => ['id', 'creato', 'modificato', 'selettore', 'nome', 'descrizione', 'mega']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'selettore' ? $this->faker->unique()->words(1, true) :
-          ($field == 'nome' ? ucfirst($this->faker->words(1, true)) :
-          ($field == 'descrizione' ? $this->faker->optional(0.6, null)->paragraph(2, false) :
-          ($field == 'mega' ? $this->faker->randomElement([false, false, true]) :
-          new ArrayCollection())));
+          ($field == 'selettore' ? $this->faker->passthrough(substr($this->faker->text(), 0, 32)) :
+          ($field == 'nome' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'descrizione' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 255)) :
+          ($field == 'mega' ? $this->faker->boolean() :
+          null))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[0])}(!$data[$i][$this->fields[0]]);
+      $data[$i]['selettore'] = $this->faker->passthrough(substr($this->faker->text(), 0, 32));
+      $o[$i]->setSelettore($data[$i]['selettore']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[0])}($data[$i][$this->fields[0]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
-        if ($field == 'opzioni') {
-          $this->assertSame([], $created->getOpzioni()->toArray(),
-            $this->entity.'::getOpzioni');
-          $op1 = (new MenuOpzione())
-            ->setRuolo("ROLE_UTENTE")
-            ->setFunzione("NESSUNA")
-            ->setNome("Nome1")
-            ->setDescrizione("Descrizione1")
-            ->setOrdinamento(1)
-            ->setDisabilitato(false)
-            ->setMenu($created);
-          $op2 = (new MenuOpzione())
-            ->setRuolo("ROLE_UTENTE")
-            ->setFunzione("NESSUNA")
-            ->setNome("Nome2")
-            ->setDescrizione("Descrizione2")
-            ->setOrdinamento(2)
-            ->setDisabilitato(false)
-            ->setMenu($created);
-          $created->setOpzioni(new ArrayCollection([$op1]));
-          $this->assertSame(array_values([$op1]), array_values($created->getOpzioni()->toArray()),
-            $this->entity.'::getOpzioni');
-          $created->addOpzione($op2);
-          $this->assertSame(array_values([$op1, $op2]), array_values($created->getOpzioni()->toArray()),
-            $this->entity.'::addOpzione');
-          $created->addOpzione($op1);
-          $this->assertSame(array_values([$op1, $op2]), array_values($created->getOpzioni()->toArray()),
-            $this->entity.'::addOpzione');
-          $created->removeOpzione($op1);
-          $this->assertSame(array_values([$op2]), array_values($created->getOpzioni()->toArray()),
-            $this->entity.'::removeOpzione');
-          $created->removeOpzione($op1);
-          $this->assertSame(array_values([$op2]), array_values($created->getOpzioni()->toArray()),
-            $this->entity.'::removeOpzione');
-          $created->removeOpzione($op2);
-          $this->assertSame([], $created->getOpzioni()->toArray(),
-            $this->entity.'::removeOpzione');
-        } else {
-          $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-            $this->entity.'::get'.ucfirst($field));
-        }
+      foreach ($this->fields as $field) {
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
+          $this->entity.'::get'.ucfirst($field));
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+    }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getSelettore(), (string) $existent, $this->entity.'::toString');
+    // addOpzioni
+    $items = $existent->getOpzioni()->toArray();
+    $item = new \App\Entity\MenuOpzione();
+    $existent->addOpzioni($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getOpzioni()->toArray()), $this->entity.'::addOpzioni');
+    $existent->addOpzioni($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getOpzioni()->toArray()), $this->entity.'::addOpzioni');
+    // removeOpzioni
+    $items = $existent->getOpzioni()->toArray();
+    if (count($items) == 0) {
+      $item = new \App\Entity\MenuOpzione();
+    } else {
+      $item = $items[0];
+    }
+    $existent->removeOpzioni($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getOpzioni()->toArray()), $this->entity.'::removeOpzioni');
+    $existent->removeOpzioni($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getOpzioni()->toArray()), $this->entity.'::removeOpzioni');
   }
 
   /**
    * Test validazione dei dati
    */
-  public function testValidazione() {
+  public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // selettore
-    $existent->setSelettore(null);
+    $property = $this->getPrivateProperty('App\Entity\Menu', 'selettore');
+    $property->setValue($existent, '');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::selettore - NOT BLANK');
-    $existent->setSelettore(str_repeat('X', 32).'*');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Selettore - NOT BLANK');
+    $existent->setSelettore($this->faker->randomLetter());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Selettore - VALID NOT BLANK');
+    $existent->setSelettore(str_repeat('*', 33));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::selettore - MAX LENGTH');
-    $existent->setSelettore(str_repeat('X', 32));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::selettore - VALID MAX LENGTH');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Selettore - MAX LENGTH');
+    $existent->setSelettore(str_repeat('*', 32));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Selettore - VALID MAX LENGTH');
     // nome
-    $existent->setNome(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID');
-    $existent->setNome(str_repeat('X', 64).'*');
+    $existent->setNome(str_repeat('*', 65));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::nome - MAX LENGTH');
-    $existent->setNome(str_repeat('X', 64));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Nome - MAX LENGTH');
+    $existent->setNome(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // descrizione
-    $existent->setDescrizione(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::descrizione - VALID');
-    $existent->setDescrizione(str_repeat('X', 255).'*');
+    $existent->setDescrizione(str_repeat('*', 256));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::descrizione - MAX LENGTH');
-    $existent->setDescrizione(str_repeat('X', 255));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::descrizione - VALID MAX LENGTH');
-    // unique - selettore
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Descrizione - MAX LENGTH');
+    $existent->setDescrizione(str_repeat('*', 255));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Descrizione - VALID MAX LENGTH');
+    // legge dati esistenti
     $this->em->flush();
-    $o = $this->em->getRepository($this->entity)->find(2);
-    $this->assertCount(0, $this->val->validate($o), $this->entity.' - Oggetto valido');
-    $o->setSelettore($existent->getSelettore());
-    $err = $this->val->validate($o);
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    // unique selettore
+    $selettoreSaved = $objects[1]->getSelettore();
+    $objects[1]->setSelettore($objects[0]->getSelettore());
+    $err = $this->val->validate($objects[1]);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::selettore - UNIQUE');
+    $objects[1]->setSelettore($selettoreSaved);
+    // unique
+    $newObject = new \App\Entity\Menu();
+    foreach ($this->fields as $field) {
+      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+    }
+    $err = $this->val->validate($newObject);
+    $msgs = [];
+    foreach ($err as $e) {
+      $msgs[] = $e->getMessageTemplate();
+    }
+    $this->assertEquals(array_fill(0, 1, 'field.unique'), $msgs, $this->entity.' - UNIQUE');
   }
 
 }

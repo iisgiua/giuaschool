@@ -6,10 +6,10 @@
     <li role="none"><span class="divider"></span></li>
   {% else %}
     <li class="nav-item" role="none">
-    {% if opt.disabilitato %}
-      <span class="nav-link px-3 disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
-    {% else %}
+    {% if opt.abilitato %}
       <a class="nav-link px-3{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+    {% else %}
+      <span class="nav-link px-3 disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
     {% endif %}
     {% if opt.icona %}
         <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
@@ -17,10 +17,10 @@
         </svg>
     {% endif %}
         <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
-    {% if opt.disabilitato %}
-      </span>
-    {% else %}
+    {% if opt.abilitato %}
       </a>
+    {% else %}
+      </span>
     {% endif %}
     </li>
   {% endif %}
@@ -31,16 +31,16 @@
     <li role="none"><span class="divider"></span></li>
   {% else %}
     <li role="none">
-    {% if opt.disabilitato %}
-      <span class="list-item disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
-    {% else %}
+    {% if opt.abilitato %}
       <a class="list-item{{ route == opt.url ? ' active' }}" role="menuitem" href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+    {% else %}
+      <span class="list-item disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
     {% endif %}
         <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
-    {% if opt.disabilitato %}
-      </span>
-    {% else %}
+    {% if opt.abilitato %}
       </a>
+    {% else %}
+      </span>
     {% endif %}
     </li>
   {% endif %}
@@ -48,7 +48,7 @@
 
 {% macro menu(opt,route) %}
   <li class="nav-item dropdown" role="none">
-    <a class="nav-link dropdown-toggle px-3{{ opt.disabilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ opt.disabilitato ? ' aria-disabled="true"' }}>
+    <a class="nav-link dropdown-toggle px-3{{ not opt.abilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ not opt.abilitato ? ' aria-disabled="true"' }}>
   {% if opt.icona %}
       <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
@@ -77,7 +77,7 @@
 
 {% macro megamenu(opt,route) %}
   <li class="nav-item dropdown megamenu" role="none">
-    <a class="nav-link dropdown-toggle px-3{{ opt.disabilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ opt.disabilitato ? ' aria-disabled="true"' }}>
+    <a class="nav-link dropdown-toggle px-3{{ not opt.abilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ not opt.abilitato ? ' aria-disabled="true"' }}>
   {% if opt.icona %}
       <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>

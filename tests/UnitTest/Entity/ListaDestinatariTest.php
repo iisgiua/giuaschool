@@ -12,13 +12,13 @@
 
 namespace App\Tests\UnitTest\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use App\Tests\DatabaseTestCase;
 
 
 /**
- * Unit test della classe
- */
+* Unit test dell'entità ListaDestinatari
+*
+*/
 class ListaDestinatariTest extends DatabaseTestCase {
 
   /**
@@ -31,110 +31,98 @@ class ListaDestinatariTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\ListaDestinatari';
     // campi da testare
-    $this->fields = ['sedi', 'dsga', 'ata', 'docenti', 'filtroDocenti', 'coordinatori', 'filtroCoordinatori',
-      'staff', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni'];
+    $this->fields = ['sedi', 'dsga', 'ata', 'docenti', 'filtroDocenti', 'coordinatori', 'filtroCoordinatori', 'staff', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni'];
+    $this->noStoredFields = [];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['g:Test'];
+    $this->fixtures = ['ListaDestinatariFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_lista_destinatari' => ['id', 'creato', 'modificato', 'sedi', 'dsga', 'ata', 'docenti', 'filtro_docenti',
-        'coordinatori', 'filtro_coordinatori', 'staff', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni'],
-      'gs_sede' => '*'];
+    $this->canRead = ['gs_lista_destinatari' => ['id', 'creato', 'modificato', 'dsga', 'ata', 'docenti', 'filtro_docenti', 'coordinatori', 'filtro_coordinatori', 'staff', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni']];
     // SQL write
-    $this->canWrite = [
-      'gs_lista_destinatari' => ['id', 'creato', 'modificato', 'sedi', 'dsga', 'ata', 'docenti', 'filtro_docenti',
-        'coordinatori', 'filtro_coordinatori', 'staff', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni'],
-      'gs_lista_destinatari_sede' => '*'];
+    $this->canWrite = ['gs_lista_destinatari' => ['id', 'creato', 'modificato', 'dsga', 'ata', 'docenti', 'filtro_docenti', 'coordinatori', 'filtro_coordinatori', 'staff', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    $sede1 = [$this->em->getRepository('App\Entity\Sede')->find(1)];
-    $sede2 = [$this->em->getRepository('App\Entity\Sede')->find(2)];
-    $sede0 = array_merge($sede1, $sede2);
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'sedi' ? new ArrayCollection(${'sede'.$i}) :
-          ($field == 'dsga' ? $this->faker->randomElement([true, false]) :
-          ($field == 'ata' ? $this->faker->randomElement([true, false]) :
-          ($field == 'docenti' ? $this->faker->randomElement(['N', 'S', 'C', 'M', 'U']) :
-          ($field == 'filtroDocenti' ? [$this->faker->randomNumber(3, false)] :
-          ($field == 'coordinatori' ? $this->faker->randomElement(['N', 'S', 'C']) :
-          ($field == 'filtroCoordinatori' ? [$this->faker->randomNumber(3, false), $this->faker->randomNumber(3, false)] :
-          ($field == 'staff' ? $this->faker->randomElement([true, false]) :
-          ($field == 'genitori' ? $this->faker->randomElement(['N', 'S', 'C', 'U']) :
-          ($field == 'filtroGenitori' ? [$this->faker->randomNumber(3, true), $this->faker->randomNumber(2, true)] :
-          ($field == 'alunni' ? $this->faker->randomElement(['N', 'S', 'C', 'U']) :
-          [$this->faker->randomNumber(3, true), $this->faker->randomNumber(2, true), $this->faker->randomNumber(1, true)]))))))))));
+          ($field == 'sedi' ? new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1")]) :
+          ($field == 'dsga' ? $this->faker->boolean() :
+          ($field == 'ata' ? $this->faker->boolean() :
+          ($field == 'docenti' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroDocenti' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'coordinatori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroCoordinatori' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'staff' ? $this->faker->boolean() :
+          ($field == 'genitori' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroGenitori' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          ($field == 'alunni' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'filtroAlunni' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
+          null))))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[1])}(!$data[$i][$this->fields[1]]);
+      $data[$i]['filtroDocenti'] = [1, 2, 3, 4, 5];
+      $o[$i]->setFiltroDocenti($data[$i]['filtroDocenti']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[1])}($data[$i][$this->fields[1]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
-        if ($field=='sedi') {
-          $this->assertSame($data[$i][$field]->toArray(), $created->{'get'.ucfirst($field)}()->toArray(),
-            $this->entity.'::get'.ucfirst($field));
-        } else {
-          $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
-            $this->entity.'::get'.ucfirst($field));
-        }
-        if ($field == 'sedi') {
-          $created->setSedi(new ArrayCollection());
-          $created->addSede($sede1[0]);
-          $created->addSede($sede2[0]);
-          $created->addSede($sede1[0]);
-          $this->assertSame($sede0, $created->getSedi()->toArray(), $this->entity.'::addSede');
-          $created->removeSede($sede2[0]);
-          $created->removeSede($sede2[0]);
-          $this->assertSame($sede1, $created->getSedi()->toArray(), $this->entity.'::removeSede');
-        }
+      foreach ($this->fields as $field) {
+        $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
+          $this->entity.'::get'.ucfirst($field));
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+    }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame('Destinatari: '.($existent->getDsga() ? 'DSGA ' : '').($existent->getAta() ? 'ATA ' : '').
       ($existent->getDocenti() != 'N' ? 'Docenti ' : '').($existent->getCoordinatori() != 'N' ? 'Coordinatori ' : '').
@@ -159,74 +147,68 @@ class ListaDestinatariTest extends DatabaseTestCase {
     $dt['filtroGenitori'] = [1, 2];
     $existent->setGenitori('C')->setFiltroGenitori([1, 2]);
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
-    $sedi = $this->em->getRepository('App\Entity\Sede')->findBy([]);
-    $existent->setSedi(new ArrayCollection($sedi));
-    $dt['sedi'] = array_map(function($ogg) { return $ogg->getId(); }, $sedi);
+    $sedi = new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1"), $this->getReference("sede_2")]);
+    $existent->setSedi($sedi);
+    $dt['sedi'] = array_map(function($ogg) { return $ogg->getId(); }, $sedi->toArray());
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
+    // addSedi
+    $items = $existent->getSedi()->toArray();
+    $item = new \App\Entity\Sede();
+    $existent->addSedi($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::addSedi');
+    $existent->addSedi($item);
+    $this->assertSame(array_values(array_merge($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::addSedi');
+    // removeSedi
+    $items = $existent->getSedi()->toArray();
+    if (count($items) == 0) {
+      $item = new \App\Entity\Sede();
+    } else {
+      $item = $items[0];
+    }
+    $existent->removeSedi($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::removeSedi');
+    $existent->removeSedi($item);
+    $this->assertSame(array_values(array_diff($items, [$item])), array_values($existent->getSedi()->toArray()), $this->entity.'::removeSedi');
   }
 
   /**
    * Test validazione dei dati
    */
-  public function testValidazione() {
+  public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // sedi
-    $obj_sede = $this->getPrivateProperty($this->entity, 'sedi');
-    $obj_sede->setValue($existent, null);
+    $property = $this->getPrivateProperty('App\Entity\ListaDestinatari', 'sedi');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sedi - NOT BLANK');
-    $existent->setSedi(new ArrayCollection([$this->em->getRepository('App\Entity\Sede')->find(1)]));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sedi - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sedi - NOT BLANK');
+    $existent->setSedi(new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1")]));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sedi - VALID NOT BLANK');
     // docenti
-    $existent->setDocenti(null);
+    $existent->setDocenti('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::docenti - NOT BLANK');
-    $existent->setDocenti('A');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::docenti - CHOICE');
-    $existent->setDocenti('n');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::docenti - CHOICE');
-    $existent->setDocenti('U');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::docenti - VALID CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Docenti - CHOICE');
+    $existent->setDocenti('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docenti - VALID CHOICE');
     // coordinatori
-    $existent->setCoordinatori(null);
+    $existent->setCoordinatori('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::coordinatori - NOT BLANK');
-    $existent->setCoordinatori('A');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::coordinatori - CHOICE');
-    $existent->setCoordinatori('n');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::coordinatori - CHOICE');
-    $existent->setCoordinatori('C');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::coordinatori - VALID CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Coordinatori - CHOICE');
+    $existent->setCoordinatori('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Coordinatori - VALID CHOICE');
     // genitori
-    $existent->setGenitori(null);
+    $existent->setGenitori('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::genitori - NOT BLANK');
-    $existent->setGenitori('A');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::genitori - CHOICE');
-    $existent->setGenitori('n');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::genitori - CHOICE');
-    $existent->setGenitori('U');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::genitori - VALID CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Genitori - CHOICE');
+    $existent->setGenitori('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Genitori - VALID CHOICE');
     // alunni
-    $existent->setAlunni(null);
+    $existent->setAlunni('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::alunni - NOT BLANK');
-    $existent->setAlunni('A');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::alunni - CHOICE');
-    $existent->setAlunni('n');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::alunni - CHOICE');
-    $existent->setAlunni('U');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::alunni - VALID CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Alunni - CHOICE');
+    $existent->setAlunni('N');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunni - VALID CHOICE');
   }
 
 }

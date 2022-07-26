@@ -1,0 +1,56 @@
+####################
+# UtenteFixtures - dati di test
+#
+# Dati degli utenti:
+#   username: nome utente univoco
+#   password: password cifrata dell'utente
+#   passwordNonCifrata: password in chiaro dell'utente (dato non persistente)
+#   email: indirizzo email dell'utente
+#   token: token generato per la procedura di attivazione o di recupero password
+#   tokenCreato: data/ora di creazione del token
+#   prelogin: codice di pre-login
+#   preloginCreato: data/ora di creazione del codice di pre-login
+#   abilitato: indica se l'utente è abilitato al login o no
+#   spid: indica se l'utente è abilitato all'accesso SPID
+#   ultimoAccesso: data/ora dell'ultimo accesso
+#   otp: codice segreto per accesso con OTP (se vuoto non è attivato)
+#   ultimoOtp: codice OTP usato l'ultima volta (per evitare replay attack)
+#   nome: nome dell'utente
+#   cognome: cognome dell'utente
+#   sesso: sesso dell'utente
+#   dataNascita: data di nascita dell'utente
+#   comuneNascita: comune di nascita dell'utente
+#   codiceFiscale: codice fiscale dell'utente
+#   citta: città di residenza dell'utente
+#   indirizzo: indirizzo di residenza dell'utente
+#   numeriTelefono: lista di numeri di telefono dell'utente
+#   notifica: lista di parametri di notifica per i servizi esterni
+#   listaProfili: lista di profili per lo stesso utente (dato non persistente)
+#   infoLogin: lista di dati utili in fase di autenticazione (dato non persistente)
+####################
+
+
+App\Entity\Utente:
+  utente_{1..20}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, ".u")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: '90%? 1: 0'
+    spid: '70%? 1: 0'
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <city()>: <strval("")>'
+    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
+    citta: '50%? <city()>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(3)>'
+    notifica: '<(array())>'

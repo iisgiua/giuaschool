@@ -16,8 +16,9 @@ use App\Tests\DatabaseTestCase;
 
 
 /**
- * Unit test della classe
- */
+* Unit test dell'entità FirmaSostegno
+*
+*/
 class FirmaSostegnoTest extends DatabaseTestCase {
 
   /**
@@ -30,94 +31,103 @@ class FirmaSostegnoTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\FirmaSostegno';
     // campi da testare
-    $this->fields = ['lezione', 'docente', 'argomento', 'attivita', 'alunno'];
+    $this->fields = ['argomento', 'attivita', 'alunno', 'lezione', 'docente'];
+    $this->noStoredFields = [];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['g:Test'];
+    $this->fixtures = ['FirmaSostegnoFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_firma' => ['id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo', 'argomento', 'attivita', 'alunno_id'],
-      'gs_lezione' => '*',
-      'gs_utente' => '*',
-      'gs_classe' => '*',
-    ];
+    $this->canRead = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo']];
     // SQL write
-    $this->canWrite = [
-      'gs_firma' => ['id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo', 'argomento', 'attivita', 'alunno_id']];
+    $this->canWrite = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    $this->assertTrue($existent->getId() != null, 'Oggetto esistente');
-    // legge lezioni
-    $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(['anno' => '2', 'sezione' => 'A']);
-    $lezioni = $this->em->getRepository('App\Entity\Lezione')->findByClasse($classe);
-    $docenti = $this->em->getRepository('App\Entity\Docente')->findBy([]);
-    $alunni = $this->em->getRepository('App\Entity\Alunno')->findByClasse($classe);
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'lezione' ? $this->faker->randomElement($lezioni) :
-          ($field == 'docente' ? $this->faker->randomElement($docenti) :
-          ($field == 'argomento' ? $this->faker->paragraph(2, false) :
-          ($field == 'attivita' ? $this->faker->optional(0.3, null)->paragraph(2, false) :
-          $this->faker->randomElement($alunni))));
+          ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
+          ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
+          ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
+          ($field == 'docente' ? $this->getReference("docente_".($i + 1)) :
+          null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[2])}(!$data[$i][$this->fields[2]]);
+      $data[$i]['argomento'] = $this->faker->text();
+      $o[$i]->setArgomento($data[$i]['argomento']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[2])}($data[$i][$this->fields[2]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
+      foreach ($this->fields as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+    }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    // istanza di classe
-    $this->assertTrue($existent instanceOf \App\Entity\Firma, $this->entity.'instanceOf Firma');
-    $this->assertTrue($existent instanceOf \App\Entity\FirmaSostegno, $this->entity.'instanceOf FirmaSostegno');
-    $this->assertTrue(is_a($existent, 'App\Entity\Firma'), $this->entity.'is_a Firma');
-    $this->assertTrue(is_a($existent, 'App\Entity\FirmaSostegno'), $this->entity.'is_a FirmaSostegno');
+  }
+
+  /**
+   * Test validazione dei dati
+   */
+  public function testValidation() {
+    // carica oggetto esistente
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
+    // alunno
+    $existent->setAlunno(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NULL');
   }
 
 }

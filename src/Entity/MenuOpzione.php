@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * MenuOpzione - entità
+ * MenuOpzione - dati delle singole opzioni di un menu
  *
  * @ORM\Entity(repositoryClass="App\Repository\MenuOpzioneRepository")
  * @ORM\Table(name="gs_menu_opzione")
@@ -30,47 +30,46 @@ class MenuOpzione {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu
+   * @var string $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di uno) [N=nessuno (utente anonino), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore]
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"NESSUNO","ROLE_UTENTE","ROLE_ALUNNO","ROLE_GENITORE","ROLE_ATA","ROLE_DOCENTE","ROLE_STAFF","ROLE_PRESIDE","ROLE_AMMINISTRATORE"}, strict=true, message="field.choice")
+   * @Assert\Length(max=32, maxMessage="field.maxlength")
    */
-  private $ruolo;
+  private string $ruolo = '';
 
   /**
-   * @var string $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   * @var string $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di una) [S=segreteria, C=coordinatore, B=responsabile BES]
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Choice(choices={"NESSUNA","SEGRETERIA","COORDINATORE"}, strict=true, message="field.choice")
+   * @Assert\Length(max=32, maxMessage="field.maxlength")
    */
-  private $funzione;
+  private string $funzione = '';
 
   /**
    * @var string $nome Nome dell'opzione
@@ -80,7 +79,7 @@ class MenuOpzione {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64, maxMessage="field.maxlength")
    */
-  private $nome;
+  private string $nome = '';
 
   /**
    * @var string $descrizione Descrizione dell'opzione
@@ -90,59 +89,57 @@ class MenuOpzione {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-   private $descrizione;
+   private string $descrizione = '';
 
   /**
-   * @var string $url Indirizzo url (codificato internamente)
+   * @var string|null $url Indirizzo pagina (codificato come route)
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-   private $url;
+   private ?string $url = '';
 
   /**
-   * @var integer $ordinamento Numero d'ordine per la visualizzazione dell'opzione
+   * @var int $ordinamento Numero d'ordine per la visualizzazione dell'opzione
    *
    * @ORM\Column(type="smallint", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $ordinamento;
+  private int $ordinamento = 0;
 
   /**
-   * @var boolean $disabilitato Indica se l'opzione è disabilitata o meno
+   * @var bool $abilitato Indica se l'opzione è abilitata o meno
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-   private $disabilitato;
+   private bool $abilitato = true;
 
   /**
-   * @var string $icona Nome dell'eventuale icona dell'opzione
+   * @var string!null $icona Nome dell'eventuale icona dell'opzione
    *
    * @ORM\Column(type="string", length=64, nullable=true)
    *
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-   private $icona;
+   private ?string $icona = '';
 
   /**
-   * @var Menu $menu Menu a cui appartiene l'opzione
+   * @var Menu|null $menu Menu a cui appartiene l'opzione
    *
    * @ORM\ManyToOne(targetEntity="Menu", inversedBy="opzioni")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $menu;
+  private ?Menu $menu = null;
 
   /**
-   * @var Menu $sottoMenu Eventuale sottomenu collegato all'opzione
+   * @var Menu|null $sottoMenu Eventuale sottomenu collegato all'opzione
    *
    * @ORM\ManyToOne(targetEntity="Menu")
    * @ORM\JoinColumn(nullable=true, name="sotto_menu_id")
    */
-  private $sottoMenu;
+  private ?Menu $sottoMenu = null;
 
 
   //==================== EVENTI ORM ====================
@@ -152,7 +149,7 @@ class MenuOpzione {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -163,7 +160,7 @@ class MenuOpzione {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -174,18 +171,18 @@ class MenuOpzione {
   /**
    * Restituisce l'identificativo univoco
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
@@ -194,7 +191,7 @@ class MenuOpzione {
    *
    * @return DateTime Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -203,7 +200,7 @@ class MenuOpzione {
    *
    * @return string Ruolo dell'utente che può visualizzare l'opzione del menu
    */
-  public function getRuolo() {
+  public function getRuolo(): string {
     return $this->ruolo;
   }
 
@@ -212,9 +209,9 @@ class MenuOpzione {
    *
    * @param string $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setRuolo($ruolo) {
+  public function setRuolo(string $ruolo): self {
     $this->ruolo = $ruolo;
     return $this;
   }
@@ -224,7 +221,7 @@ class MenuOpzione {
    *
    * @return string Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
    */
-  public function getFunzione() {
+  public function getFunzione(): string {
     return $this->funzione;
   }
 
@@ -233,9 +230,9 @@ class MenuOpzione {
    *
    * @param string $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setFunzione($funzione) {
+  public function setFunzione(string $funzione): self {
     $this->funzione = $funzione;
     return $this;
   }
@@ -245,7 +242,7 @@ class MenuOpzione {
    *
    * @return string Nome dell'opzione
    */
-  public function getNome() {
+  public function getNome(): string {
     return $this->nome;
   }
 
@@ -254,9 +251,9 @@ class MenuOpzione {
    *
    * @param string $nome Nome dell'opzione
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setNome($nome) {
+  public function setNome(string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -266,7 +263,7 @@ class MenuOpzione {
    *
    * @return string Descrizione dell'opzione
    */
-  public function getDescrizione() {
+  public function getDescrizione(): string {
     return $this->descrizione;
   }
 
@@ -275,30 +272,30 @@ class MenuOpzione {
    *
    * @param string $descrizione Descrizione dell'opzione
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setDescrizione($descrizione) {
+  public function setDescrizione(string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }
 
   /**
-   * Restituisce l'indirizzo url (codificato internamente)
+   * Restituisce l'indirizzo della pagina (codificato come route)
    *
-   * @return string Indirizzo url
+   * @return string|null Indirizzo url
    */
-  public function getUrl() {
+  public function getUrl(): ?string {
     return $this->url;
   }
 
   /**
-   * Modifica l'indirizzo url (codificato internamente)
+   * Modifica l'indirizzo della pagina (codificato come route)
    *
    * @param string $url Indirizzo url
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setUrl($url) {
+  public function setUrl(string $url): self {
     $this->url = $url;
     return $this;
   }
@@ -306,51 +303,51 @@ class MenuOpzione {
   /**
    * Restituisce il numero d'ordine per la visualizzazione dell'opzione
    *
-   * @return integer Numero d'ordine per la visualizzazione dell'opzione
+   * @return int Numero d'ordine per la visualizzazione dell'opzione
    */
-  public function getOrdinamento() {
+  public function getOrdinamento(): int {
     return $this->ordinamento;
   }
 
   /**
    * Modifica il numero d'ordine per la visualizzazione dell'opzione
    *
-   * @param integer $ordinamento Numero d'ordine per la visualizzazione dell'opzione
+   * @param int $ordinamento Numero d'ordine per la visualizzazione dell'opzione
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setOrdinamento($ordinamento) {
+  public function setOrdinamento(int $ordinamento): self {
     $this->ordinamento = $ordinamento;
     return $this;
   }
 
   /**
-   * Restituisce se l'opzione è disabilitata o meno
+   * Restituisce se l'opzione è abilitata o meno
    *
-   * @return boolean Indica se l'opzione è disabilitata
+   * @return bool Indica se l'opzione è abilitata
    */
-  public function getDisabilitato() {
-    return $this->disabilitato;
+  public function getAbilitato(): bool {
+    return $this->abilitato;
   }
 
   /**
-   * Modifica se l'opzione è disabilitata o meno
+   * Modifica se l'opzione è abilitata o meno
    *
-   * @param boolean $disabilitato Indica se l'opzione è disabilitata
+   * @param bool $abilitato Indica se l'opzione è abilitata
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setDisabilitato($disabilitato) {
-    $this->disabilitato = ($disabilitato == true);
+  public function setAbilitato(bool $abilitato): self {
+    $this->abilitato = ($abilitato == true);
     return $this;
   }
 
   /**
    * Restituisce il nome dell'eventuale icona dell'opzione
    *
-   * @return string Nome dell'icona dell'opzione
+   * @return string|null Nome dell'icona dell'opzione
    */
-  public function getIcona() {
+  public function getIcona(): ?string {
     return $this->icona;
   }
 
@@ -359,9 +356,9 @@ class MenuOpzione {
    *
    * @param string $icona Nome dell'icona dell'opzione
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setIcona($icona) {
+  public function setIcona(string $icona): self {
     $this->icona = $icona;
     return $this;
   }
@@ -371,7 +368,7 @@ class MenuOpzione {
    *
    * @return Menu Menu a cui appartiene l'opzione
    */
-  public function getMenu() {
+  public function getMenu(): ?Menu {
     return $this->menu;
   }
 
@@ -380,9 +377,9 @@ class MenuOpzione {
    *
    * @param Menu $menu Menu a cui appartiene l'opzione
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setMenu(Menu $menu) {
+  public function setMenu(Menu $menu): self {
     $this->menu = $menu;
     return $this;
   }
@@ -390,9 +387,9 @@ class MenuOpzione {
   /**
    * Restituisce l'eventuale sottomenu collegato all'opzione
    *
-   * @return Menu Sottomenu collegato all'opzione
+   * @return Menu|null Sottomenu collegato all'opzione
    */
-  public function getSottoMenu() {
+  public function getSottoMenu(): ?Menu {
     return $this->sottoMenu;
   }
 
@@ -401,9 +398,9 @@ class MenuOpzione {
    *
    * @param Menu $sottoMenu Sottomenu collegato all'opzione
    *
-   * @return MenuOpzione Oggetto MenuOpzione
+   * @return self Oggetto modificato
    */
-  public function setSottoMenu(Menu $sottoMenu=null) {
+  public function setSottoMenu(?Menu $sottoMenu): self {
     $this->sottoMenu = $sottoMenu;
     return $this;
   }
@@ -412,21 +409,11 @@ class MenuOpzione {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->ruolo = 'NESSUNO';
-    $this->funzione = 'NESSUNA';
-    $this->disabilitato = false;
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->nome;
   }
 

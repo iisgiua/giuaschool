@@ -13,13 +13,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Assenza - entità
+ * Assenza - dati per le assenze degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\AssenzaRepository")
  * @ORM\Table(name="gs_assenza", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
@@ -33,105 +33,105 @@ class Assenza {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'assenza
+   * @var int|null $id Identificativo univoco per l'assenza
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data dell'assenza
+   * @var \DateTime|null $data Data dell'assenza
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var \DateTime $giustificato Data della giustificazione
+   * @var \DateTime|null $giustificato Data della giustificazione
    *
    * @ORM\Column(type="date", nullable=true)
    *
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private ?\DateTime $giustificato;
+  private ?\DateTime $giustificato = null;
 
   /**
-   * @var string $motivazione Motivazione dell'assenza
+   * @var string|null $motivazione Motivazione dell'assenza
    *
    * @ORM\Column(type="string", length=1024, nullable=true)
    *
    * @Assert\Length(max=1024, maxMessage="field.maxlength")
    */
-  private $motivazione;
+  private ?string $motivazione = '';
 
   /**
-   * @var array $dichiarazione Informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
+   * @var array|null $dichiarazione Informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dichiarazione;
+  private ?array $dichiarazione = array();
 
   /**
-   * @var array $certificato Lista di file allegati per i certificati medici
+   * @var array|null $certificati Lista di file allegati per i certificati medici
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $certificati;
+  private ?array $certificati = array();
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'assenza
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Docente $docente Docente che rileva l'assenza
+   * @var Docente|null $docente Docente che rileva l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
   /**
-   * @var Docente $docenteGiustifica Docente che giustifica l'assenza
+   * @var Docente|null $docenteGiustifica Docente che giustifica l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $docenteGiustifica;
+  private ?Docente $docenteGiustifica = null;
 
   /**
-   * @var Utente $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'assenza
+   * @var Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $utenteGiustifica;
+  private ?Utente $utenteGiustifica = null;
 
 
   //==================== EVENTI ORM ====================
@@ -141,7 +141,7 @@ class Assenza {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -152,7 +152,7 @@ class Assenza {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -163,36 +163,36 @@ class Assenza {
   /**
    * Restituisce l'identificativo univoco per l'assenza
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'assenza
    *
-   * @return \DateTime Data dell'assenza
+   * @return \DateTime|null Data dell'assenza
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -201,9 +201,9 @@ class Assenza {
    *
    * @param \DateTime $data Data dell'assenza
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -211,20 +211,20 @@ class Assenza {
   /**
    * Restituisce la data della giustificazione
    *
-   * @return \DateTime Data della giustificazione
+   * @return \DateTime|null Data della giustificazione
    */
-  public function getGiustificato() {
+  public function getGiustificato(): ?\DateTime {
     return $this->giustificato;
   }
 
   /**
    * Modifica la data della giustificazione
    *
-   * @param \DateTime $giustificato Data della giustificazione
+   * @param \DateTime|null $giustificato Data della giustificazione
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setGiustificato(\DateTime $giustificato=null) {
+  public function setGiustificato(?\DateTime $giustificato): self {
     $this->giustificato = $giustificato;
     return $this;
   }
@@ -232,9 +232,9 @@ class Assenza {
   /**
    * Restituisce la motivazione dell'assenza
    *
-   * @return string Motivazione dell'assenza
+   * @return string|null Motivazione dell'assenza
    */
-  public function getMotivazione() {
+  public function getMotivazione(): ?string {
     return $this->motivazione;
   }
 
@@ -243,9 +243,9 @@ class Assenza {
    *
    * @param string $motivazione Motivazione dell'assenza
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setMotivazione($motivazione) {
+  public function setMotivazione(string $motivazione): self {
     $this->motivazione = $motivazione;
     return $this;
   }
@@ -253,9 +253,9 @@ class Assenza {
   /**
    * Restituisce le informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
    *
-   * @return array Informazioni sulla sottoscrizione della dichiarazione
+   * @return array|null Informazioni sulla sottoscrizione della dichiarazione
    */
-  public function getDichiarazione() {
+  public function getDichiarazione(): ?array {
     return $this->dichiarazione;
   }
 
@@ -264,9 +264,9 @@ class Assenza {
    *
    * @param array $dichiarazione Informazioni sulla sottoscrizione della dichiarazione
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setDichiarazione($dichiarazione) {
+  public function setDichiarazione(array $dichiarazione): self {
     if ($dichiarazione === $this->dichiarazione) {
       // clona array per forzare update su doctrine
       $dichiarazione = unserialize(serialize($dichiarazione));
@@ -278,9 +278,9 @@ class Assenza {
   /**
    * Restituisce la lista di file allegati per i certificati medici
    *
-   * @return array Lista di file allegati per i certificati medici
+   * @return array|null Lista di file allegati per i certificati medici
    */
-  public function getCertificati() {
+  public function getCertificati(): ?array {
     return $this->certificati;
   }
 
@@ -289,9 +289,9 @@ class Assenza {
    *
    * @param array $certificati Lista di file allegati per i certificati medici
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setCertificati($certificati) {
+  public function setCertificati(array $certificati): self {
     if ($certificati === $this->certificati) {
       // clona array per forzare update su doctrine
       $certificati = unserialize(serialize($certificati));
@@ -301,39 +301,11 @@ class Assenza {
   }
 
   /**
-   * Aggiunge un file alla lista di allegati per i certificati medici
-   *
-   * @param File $certificato File allegato per i certificati medici
-   *
-   * @return Assenza Oggetto Assenza
-   */
-  public function addCertificato(File $certificato) {
-    if (!in_array($certificato->getBasename(), $this->certificati)) {
-      $this->certificati[] = $certificato->getBasename();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un file dalla lista di allegati per i certificati medici
-   *
-   * @param File $certificato File da rimuovere dalla lista di allegati per i certificati medici
-   *
-   * @return Assenza Oggetto Assenza
-   */
-  public function removeCertificato(File $certificato) {
-    if (in_array($certificato->getBasename(), $this->certificati)) {
-      unset($this->certificati[array_search($certificato->getBasename(), $this->certificati)]);
-    }
-    return $this;
-  }
-
-  /**
    * Restituisce l'alunno al quale si riferisce l'assenza
    *
-   * @return Alunno Alunno al quale si riferisce l'assenza
+   * @return Alunno|null Alunno al quale si riferisce l'assenza
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -342,9 +314,9 @@ class Assenza {
    *
    * @param Alunno $alunno Alunno al quale si riferisce l'assenza
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -352,9 +324,9 @@ class Assenza {
   /**
    * Restituisce il docente che rileva l'assenza
    *
-   * @return Docente Docente che rileva l'assenza
+   * @return Docente|null Docente che rileva l'assenza
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 
@@ -363,9 +335,9 @@ class Assenza {
    *
    * @param Docente $docente Docente che rileva l'assenza
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -373,20 +345,20 @@ class Assenza {
   /**
    * Restituisce il docente che giustifica l'assenza
    *
-   * @return Docente Docente che giustifica l'assenza
+   * @return Docente|null Docente che giustifica l'assenza
    */
-  public function getDocenteGiustifica() {
+  public function getDocenteGiustifica(): ?Docente {
     return $this->docenteGiustifica;
   }
 
   /**
    * Modifica il docente che giustifica l'assenza
    *
-   * @param Docente $docenteGiustifica Docente che giustifica l'assenza
+   * @param Docente|null $docenteGiustifica Docente che giustifica l'assenza
    *
-   * @return Assenza Oggetto Assenza
+   * @return self Oggetto modificato
    */
-  public function setDocenteGiustifica(Docente $docenteGiustifica = null) {
+  public function setDocenteGiustifica(?Docente $docenteGiustifica): self {
     $this->docenteGiustifica = $docenteGiustifica;
     return $this;
   }
@@ -394,20 +366,20 @@ class Assenza {
   /**
    * Restituisce l'utente (Genitore/Alunno) che giustifica l'assenza
    *
-   * @return Utente Utente (Genitore/Alunno) che giustifica l'assenza
+   * @return Utente|null Utente (Genitore/Alunno) che giustifica l'assenza
    */
-  public function getUtenteGiustifica() {
+  public function getUtenteGiustifica(): ?Utente {
     return $this->utenteGiustifica;
   }
 
   /**
    * Modifica l'utente (Genitore/Alunno) che giustifica l'assenza
    *
-   * @param Utente $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'assenza
+   * @param Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'assenza
    *
-   * @return Assenza Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setUtenteGiustifica(Utente $utenteGiustifica = null) {
+  public function setUtenteGiustifica(?Utente $utenteGiustifica): self {
     $this->utenteGiustifica = $utenteGiustifica;
     return $this;
   }
@@ -416,20 +388,11 @@ class Assenza {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->dichiarazione = array();
-    $this->certificati = array();
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').': '.$this->alunno;
   }
 

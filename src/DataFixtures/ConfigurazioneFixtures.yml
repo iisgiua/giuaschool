@@ -1,0 +1,243 @@
+####################
+# ConfigurazioneFixtures - dati iniziali dell'applicazione e di test
+#
+# Dati per i parametri della configurazione:
+#   categoria: nome della categoria del parametro
+#   parametro: nome del parametro
+#   descrizione: descrizione dell'uso del parametro
+#   valore: valore del parametro (default: nullo)
+#   gestito: se falso è modificabile dalla pagina della configurazione, altrimenti è gestito
+#            da una procedura apposita
+####################
+
+
+parameters:
+  # ----- voti finali religione -----
+  voti_finali_R:
+    min: 20
+    max: 27
+    suff: 23
+    med: 23
+    valori: '20,21,22,23,24,25,26,27'
+    etichette: '"NC","","","Suff.","","","","Ottimo"'
+    voti: '"Non Classificato","Insufficiente","Mediocre","Sufficiente","Discreto","Buono","Distinto","Ottimo"'
+    votiAbbr: '"NC","Insufficiente","Mediocre","Sufficiente","Discreto","Buono","Distinto","Ottimo"'
+  # ----- voti finali ed. civica -----
+  voti_finali_E:
+    min: 2
+    max: 10
+    suff: 6
+    med: 5
+    valori: '2,3,4,5,6,7,8,9,10'
+    etichette: '"NC",3,4,5,6,7,8,9,10'
+    voti: '"Non Classificato",3,4,5,6,7,8,9,10'
+    votiAbbr: '"NC",3,4,5,6,7,8,9,10'
+  # ----- voti condotta -----
+  voti_finali_C:
+    min: 4
+    max: 10
+    suff: 6
+    med: 6
+    valori: '4,5,6,7,8,9,10'
+    etichette: '"NC",5,6,7,8,9,10'
+    voti: '"Non Classificato",5,6,7,8,9,10'
+    votiAbbr: '"NC",5,6,7,8,9,10'
+  # ----- voti finali altre materie -----
+  voti_finali_N:
+    min: 0
+    max: 10
+    suff: 6
+    med: 5
+    valori: '0,1,2,3,4,5,6,7,8,9,10'
+    etichette: '"NC",1,2,3,4,5,6,7,8,9,10'
+    voti: '"Non Classificato",1,2,3,4,5,6,7,8,9,10'
+    votiAbbr: '"NC",1,2,3,4,5,6,7,8,9,10'
+
+
+App\Entity\Configurazione:
+
+  # ----- categoria SISTEMA -----
+  configurazione_SISTEMA1:
+    categoria: 'SISTEMA'
+    parametro: 'versione'
+    descrizione: 'Numero di versione dell''applicazione\<br>[testo]'
+    valore: '1.4.5'
+    gestito: true
+  configurazione_SISTEMA2:
+    categoria: 'SISTEMA'
+    parametro: 'manutenzione_inizio'
+    descrizione: 'Inizio della modalit&agrave; manutenzione durante la quale il registro &egrave; offline\<br>[formato: AAAA-MM-GG HH:MM]'
+    valore: ''
+    gestito: true
+  configurazione_SISTEMA3:
+    categoria: 'SISTEMA'
+    parametro: 'manutenzione_fine'
+    descrizione: 'Fine della modalit&agrave; manutenzione durante la quale il registro &egrave; offline\<br>[formato: AAAA-MM-GG HH:MM]'
+    valore: ''
+    gestito: true
+  configurazione_SISTEMA4:
+    categoria: 'SISTEMA'
+    parametro: 'banner_login'
+    descrizione: 'Messaggio da visualizzare nella pagina pubblica di login\<br>[testo HTML]'
+    valore: ''
+    gestito: true
+  configurazione_SISTEMA5:
+    categoria: 'SISTEMA'
+    parametro: 'banner_home'
+    descrizione: 'Messaggio da visualizzare nella pagina home degli utenti autenticati\<br>[testo HTML]'
+    valore: ''
+    gestito: true
+  configurazione_SISTEMA6:
+    categoria: 'SISTEMA'
+    parametro: 'dominio_default'
+    descrizione: 'Indica il dominio di posta predefinito per le email degli utenti (usato nell''importazione)\<br>[testo]'
+    valore: 'noemail.local'
+    gestito: false
+
+  # ----- categoria SCUOLA -----
+  configurazione_SCUOLA1:
+    categoria: 'SCUOLA'
+    parametro: 'anno_scolastico'
+    descrizione: 'Anno scolastico corrente\<br>[formato: AAAA/AAAA]'
+    valore: '2021/2022'
+    gestito: false
+  configurazione_SCUOLA2:
+    categoria: 'SCUOLA'
+    parametro: 'anno_inizio'
+    descrizione: 'Data dell''inizio dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
+    valore: '2021-09-22'
+    gestito: false
+  configurazione_SCUOLA3:
+    categoria: 'SCUOLA'
+    parametro: 'anno_fine'
+    descrizione: 'Data della fine dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
+    valore: '2022-06-12'
+    gestito: false
+  configurazione_SCUOLA4:
+    categoria: 'SCUOLA'
+    parametro: 'periodo1_nome'
+    descrizione: 'Nome del primo periodo dell''anno scolastico (primo trimestre/quadrimestre)\<br>[testo]'
+    valore: 'Primo Quadrimestre'
+    gestito: false
+  configurazione_SCUOLA5:
+    categoria: 'SCUOLA'
+    parametro: 'periodo1_fine'
+    descrizione: 'Data della fine del primo periodo, da \<em>anno_inizio</em> sino al giorno indicato incluso\<br>[formato: AAAA-MM-GG]'
+    valore: '2022-01-31'
+    gestito: false
+  configurazione_SCUOLA6:
+    categoria: 'SCUOLA'
+    parametro: 'periodo2_nome'
+    descrizione: 'Nome del secondo periodo dell''anno scolastico (secondo trimestre/quadrimestre/pentamestre)\<br>[testo]'
+    valore: 'Secondo Quadrimestre'
+    gestito: false
+  configurazione_SCUOLA7:
+    categoria: 'SCUOLA'
+    parametro: 'periodo2_fine'
+    descrizione: 'Data della fine del secondo periodo, da \<em>periodo1_fine</em>+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a \<em>anno_fine</em>\<br>[formato AAAA-MM-GG]'
+    valore: '2022-06-12'
+    gestito: false
+  configurazione_SCUOLA8:
+    categoria: 'SCUOLA'
+    parametro: 'periodo3_nome'
+    descrizione: 'Nome del terzo periodo dell''anno scolastico (terzo trimestre) o vuoto se non usato (se &egrave; usato un terzo periodo, inizia a \<em>periodo2_fine</em>+1 e finisce a \<em>anno_fine</em>\<br>[testo]'
+    valore: ''
+    gestito: false
+  configurazione_SCUOLA9:
+    categoria: 'SCUOLA'
+    parametro: 'ritardo_breve'
+    descrizione: 'Numero di minuti per la definizione di ritardo breve (non richiede giustificazione)\<br>[intero]'
+    valore: '10'
+    gestito: false
+  configurazione_SCUOLA10:
+    categoria: 'SCUOLA'
+    parametro: 'mesi_colloqui'
+    descrizione: 'Mesi con i colloqui generali, nei quali non si pu&ograve; prenotare il colloquio individuale\<br>[lista separata da virgola dei numeri dei mesi]'
+    valore: '12,3'
+    gestito: false
+  configurazione_SCUOLA11:
+    categoria: 'SCUOLA'
+    parametro: 'notifica_circolari'
+    descrizione: 'Ore di notifica giornaliera delle nuove circolari\<br>[lista separata da virgola delle ore in formato HH]'
+    valore: '15,18,20'
+    gestito: false
+  configurazione_SCUOLA12:
+    categoria: 'SCUOLA'
+    parametro: 'assenze_dichiarazione'
+    descrizione: 'Indica se le assenze online devono inglobare l''autodichiarazione NO-COVID\<br>[booleano, 0 o 1]'
+    valore: '0'
+    gestito: false
+  configurazione_SCUOLA13:
+    categoria: 'SCUOLA'
+    parametro: 'assenze_ore'
+    descrizione: 'Indica se le assenze devono essere gestite su base oraria e non giornaliera\<br>[booleano, 0 o 1]'
+    valore: '0'
+    gestito: false
+  configurazione_SCUOLA14:
+    categoria: 'SCUOLA'
+    parametro: 'voti_finali_R'
+    descrizione: 'Lista dei voti finali per Religione\<br>[lista serializzata]'
+    valore: '<serialize( <{voti_finali_R}> )>'
+    gestito: true
+  configurazione_SCUOLA15:
+    categoria: 'SCUOLA'
+    parametro: 'voti_finali_E'
+    descrizione: 'Lista dei voti finali per Educazione Civica\<br>[lista serializzata]'
+    valore: '<serialize( <{voti_finali_E}> )>'
+    gestito: true
+  configurazione_SCUOLA16:
+    categoria: 'SCUOLA'
+    parametro: 'voti_finali_C'
+    descrizione: 'Lista dei voti finali per Condotta\<br>[lista serializzata]'
+    valore: '<serialize( <{voti_finali_C}> )>'
+    gestito: true
+  configurazione_SCUOLA17:
+    categoria: 'SCUOLA'
+    parametro: 'voti_finali_N'
+    descrizione: 'Lista dei voti finali per le altre materie\<br>[lista serializzata]'
+    valore: '<serialize( <{voti_finali_N}> )>'
+    gestito: true
+  configurazione_SCUOLA18:
+    categoria: 'SCUOLA'
+    parametro: 'giorni_festivi_istituto'
+    descrizione: 'Indica i giorni festivi settimanali per l''intero istituto\<br>[lista separata da virgole nel formato: 0=domenica, 1=luned&igrave;, ... 6=sabato]'
+    valore: '0'
+    gestito: false
+  configurazione_SCUOLA19:
+    categoria: 'SCUOLA'
+    parametro: 'giorni_festivi_classi'
+    descrizione: 'Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)\<br>[lista separata da virgole nel formato GIORNO:CLASSE; giorno: 0=domenica, 1=luned&igrave;, ... 6=sabato; classe: 1A, 2A, ...]'
+    valore: ''
+    gestito: false
+
+  # ----- categoria ACCESSO -----
+  configurazione_ACCESSO1:
+    categoria: 'ACCESSO'
+    parametro: 'id_provider'
+    descrizione: 'Se presente, indica l''uso di un identity provider esterno (es. SSO su Google)\<br>[testo]'
+    valore: ''
+    gestito: false
+  configurazione_ACCESSO2:
+    categoria: 'ACCESSO'
+    parametro: 'id_provider_dominio'
+    descrizione: 'Nel caso si utilizzi un identity provider esterno, indica il dominio di posta predefinito per le email degli utenti (usato nell''importazione)\<br>[testo]'
+    valore: ''
+    gestito: false
+  configurazione_ACCESSO3:
+    categoria: 'ACCESSO'
+    parametro: 'id_provider_tipo'
+    descrizione: 'Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore)\<br>[testo]'
+    valore: ''
+    gestito: false
+  configurazione_ACCESSO4:
+    categoria: 'ACCESSO'
+    parametro: 'otp_tipo'
+    descrizione: 'Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all''uso dell''OTP (U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore)\<br>[testo]'
+    valore: 'DS'
+    gestito: false
+  configurazione_ACCESSO5:
+    categoria: 'ACCESSO'
+    parametro: 'spid'
+    descrizione: 'Indica la modalit&agrave; dell''accesso SPID: \<em>no</em> = non utilizzato, \<em>si</em> = utilizzato, \<em>validazione</em> = utilizzato in validazione.\<br>[si|no|validazione]'
+    valore: 'no'
+    gestito: true

@@ -1,0 +1,20 @@
+####################
+# DefinizioneScrutinioFixtures - dati di test
+#
+# Dati per lo svolgimento degli scrutini: i dati di DefinizioneConsiglio più i seguenti
+#   periodo: Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
+#   dataProposte: Inizio dell'inserimento delle proposte di voto
+#   struttura: Lista delle parti dello scrutinio [array($passo_numerico => array($nome_funzione,$da_validare,array(args)), ...)]
+#   classiVisibili: Lista di data e ora di pubblicazione esiti per le classi dei vari anni
+####################
+
+
+App\Entity\DefinizioneScrutinio:
+  definizione_consiglio_{1..10}:
+    data: '<dateTimeBetween("-1 month", "now")>'
+    argomenti: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    periodo: '<randomElement(["P", "S", "F", "G", "R", "X"])>'
+    dataProposte: '<dateTimeBetween("-1 month", "now")>'
+    struttura: '<array_combine([1, 2, 3], <sentences(3)>)>'
+    classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<date()>, <date()>, <date()>, <date()>, <date()>])>'

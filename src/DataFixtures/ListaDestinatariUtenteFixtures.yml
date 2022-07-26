@@ -1,0 +1,22 @@
+####################
+# ListaDestinatariUtenteFixtures - dati di test
+#
+# Dati per l'associazione tra documento e utenti:
+#   listaDestinatari: lista dei destinatari a cui ci si riferisce
+#   utente: utente destinatario dell'avviso/circolare/documento
+#   letto: data e ora di lettura dell'avviso/circolare/documento
+#   firmato: data e ora di firma per presa visione dell'avviso/circolare/documento
+####################
+
+
+include:
+  - ListaDestinatariFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\ListaDestinatariUtente:
+  lista_destinatari_utente_{1..10}:
+    listaDestinatari: '@lista_destinatari_DOCENTI_*'
+    utente: '@docente_*'
+    letto: '50%? <dateTimeBetween("-1 month", "now")>'
+    firmato: '50%? <dateTimeBetween("-1 month", "now")>'

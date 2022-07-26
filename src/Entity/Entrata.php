@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Entrata - entità
+ * Entrata - dati per le entrate in ritardo degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\EntrataRepository")
  * @ORM\Table(name="gs_entrata", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
@@ -32,122 +32,122 @@ class Entrata {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'entrata in ritardo
+   * @var int|null $id Identificativo univoco per l'entrata in ritardo
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data dell'entrata in ritardo
+   * @var \DateTime|null $data Data dell'entrata in ritardo
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var \DateTime $ora Ora di entrata in ritardo
+   * @var \DateTime|null $ora Ora di entrata in ritardo
    *
    * @ORM\Column(type="time", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Time(message="field.time")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $ora;
+  private ?\DateTime $ora = null;
 
   /**
-   * @var boolean $ritardoBreve Indica se l'entrata in ritardo è un ritardo breve oppure no
+   * @var bool $ritardoBreve Indica se l'entrata in ritardo è un ritardo breve oppure no
    *
    * @ORM\Column(name="ritardo_breve", type="boolean", nullable=false)
    */
-  private $ritardoBreve;
+  private bool $ritardoBreve = false;
 
   /**
-   * @var string $note Note informative sull'entrata in ritardo
+   * @var string|null $note Note informative sull'entrata in ritardo
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $note;
+  private ?string $note = '';
 
   /**
-   * @var boolean $valido Indica se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
+   * @var bool $valido Indica se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $valido;
+  private bool $valido = false;
 
   /**
-   * @var string $motivazione Motivazione dell'assenza
+   * @var string|null $motivazione Motivazione dell'assenza
    *
    * @ORM\Column(type="string", length=1024, nullable=true)
    *
    * @Assert\Length(max=1024, maxMessage="field.maxlength")
    */
-  private $motivazione;
+  private ?string $motivazione = '';
 
   /**
-   * @var \DateTime $giustificato Data della giustificazione
+   * @var \DateTime|null $giustificato Data della giustificazione
    *
    * @ORM\Column(type="date", nullable=true)
    *
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private ?\DateTime $giustificato;
+  private ?\DateTime $giustificato = null;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'entrata in ritardo
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'entrata in ritardo
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Docente $docente Docente che autorizza l'entrata in ritardo
+   * @var Docente|null $docente Docente che autorizza l'entrata in ritardo
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
   /**
-   * @var Docente $docenteGiustifica Docente che giustifica l'entrata in ritardo
+   * @var Docente|null $docenteGiustifica Docente che giustifica l'entrata in ritardo
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $docenteGiustifica;
+  private ?Docente $docenteGiustifica = null;
 
   /**
-   * @var Utente $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
+   * @var Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $utenteGiustifica;
+  private ?Utente $utenteGiustifica = null;
 
 
   //==================== EVENTI ORM ====================
@@ -157,7 +157,7 @@ class Entrata {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -168,7 +168,7 @@ class Entrata {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -179,36 +179,36 @@ class Entrata {
   /**
    * Restituisce l'identificativo univoco per l'entrata in ritardo
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'entrata in ritardo
    *
-   * @return \DateTime Data dell'entrata in ritardo
+   * @return \DateTime|null Data dell'entrata in ritardo
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -217,9 +217,9 @@ class Entrata {
    *
    * @param \DateTime $data Data dell'entrata in ritardo
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -227,9 +227,9 @@ class Entrata {
   /**
    * Restituisce l'ora di entrata in ritardo
    *
-   * @return \DateTime Ora di entrata in ritardo
+   * @return \DateTime|null Ora di entrata in ritardo
    */
-  public function getOra() {
+  public function getOra(): ?\DateTime {
     return $this->ora;
   }
 
@@ -238,9 +238,9 @@ class Entrata {
    *
    * @param \DateTime $ora Ora di entrata in ritardo
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setOra($ora) {
+  public function setOra(\DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -248,20 +248,20 @@ class Entrata {
   /**
    * Indica se l'entrata in ritardo è un ritardo breve oppure no
    *
-   * @return boolean Vero se è un ritardo breve, falso altrimenti
+   * @return bool Vero se è un ritardo breve, falso altrimenti
    */
-  public function getRitardoBreve() {
+  public function getRitardoBreve(): bool {
     return $this->ritardoBreve;
   }
 
   /**
    * Modifica se l'entrata in ritardo è un ritardo breve oppure no
    *
-   * @param boolean $ritardoBreve Vero se è un ritardo breve, falso altrimenti
+   * @param bool $ritardoBreve Vero se è un ritardo breve, falso altrimenti
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setRitardoBreve($ritardoBreve) {
+  public function setRitardoBreve(bool $ritardoBreve): self {
     $this->ritardoBreve = $ritardoBreve;
     return $this;
   }
@@ -269,9 +269,9 @@ class Entrata {
   /**
    * Restituisce le note informative sull'entrata in ritardo
    *
-   * @return string Note informative sull'entrata in ritardo
+   * @return string|null Note informative sull'entrata in ritardo
    */
-  public function getNote() {
+  public function getNote(): ?string {
     return $this->note;
   }
 
@@ -280,9 +280,9 @@ class Entrata {
    *
    * @param string $note Note informative sull'entrata in ritardo
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setNote($note) {
+  public function setNote(string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -290,20 +290,20 @@ class Entrata {
   /**
    * Restituisce se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
    *
-   * @return boolean Vero se è valida per il conteggio, falso altrimenti
+   * @return bool Vero se è valida per il conteggio, falso altrimenti
    */
-  public function getValido() {
+  public function getValido(): bool {
     return $this->valido;
   }
 
   /**
    * Modifica se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
    *
-   * @param boolean $valido Vero se è valida per il conteggio, falso altrimenti
+   * @param bool $valido Vero se è valida per il conteggio, falso altrimenti
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setValido($valido) {
+  public function setValido(bool $valido): self {
     $this->valido = $valido;
     return $this;
   }
@@ -311,9 +311,9 @@ class Entrata {
   /**
    * Restituisce la motivazione dell'assenza
    *
-   * @return string Motivazione dell'assenza
+   * @return string|null Motivazione dell'assenza
    */
-  public function getMotivazione() {
+  public function getMotivazione(): ?string {
     return $this->motivazione;
   }
 
@@ -322,9 +322,9 @@ class Entrata {
    *
    * @param string $motivazione Motivazione dell'assenza
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setMotivazione($motivazione) {
+  public function setMotivazione(string $motivazione): self {
     $this->motivazione = $motivazione;
     return $this;
   }
@@ -332,20 +332,20 @@ class Entrata {
   /**
    * Restituisce la data della giustificazione
    *
-   * @return \DateTime Data della giustificazione
+   * @return \DateTime|null Data della giustificazione
    */
-  public function getGiustificato() {
+  public function getGiustificato(): ?\DateTime {
     return $this->giustificato;
   }
 
   /**
    * Modifica la data della giustificazione
    *
-   * @param \DateTime $giustificato Data della giustificazione
+   * @param \DateTime|null $giustificato Data della giustificazione
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setGiustificato(\DateTime $giustificato=null) {
+  public function setGiustificato(?\DateTime $giustificato): self {
     $this->giustificato = $giustificato;
     return $this;
   }
@@ -353,9 +353,9 @@ class Entrata {
   /**
    * Restituisce l'alunno al quale si riferisce l'entrata in ritardo
    *
-   * @return Alunno Alunno al quale si riferisce l'entrata in ritardo
+   * @return Alunno|null Alunno al quale si riferisce l'entrata in ritardo
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -364,9 +364,9 @@ class Entrata {
    *
    * @param Alunno $alunno Alunno al quale si riferisce l'entrata in ritardo
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -374,9 +374,9 @@ class Entrata {
   /**
    * Restituisce il docente che autorizza l'entrata in ritardo
    *
-   * @return Docente Docente che autorizza l'entrata in ritardo
+   * @return Docente|null Docente che autorizza l'entrata in ritardo
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 
@@ -385,9 +385,9 @@ class Entrata {
    *
    * @param Docente $docente Docente che autorizza l'entrata in ritardo
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -395,20 +395,20 @@ class Entrata {
   /**
    * Restituisce il docente che giustifica l'entrata in ritardo
    *
-   * @return Docente Docente che giustifica l'entrata in ritardo
+   * @return Docente|null Docente che giustifica l'entrata in ritardo
    */
-  public function getDocenteGiustifica() {
+  public function getDocenteGiustifica(): ?Docente {
     return $this->docenteGiustifica;
   }
 
   /**
    * Modifica il docente che giustifica l'entrata in ritardo
    *
-   * @param Docente $docenteGiustifica Docente che giustifica l'entrata in ritardo
+   * @param Docente|null $docenteGiustifica Docente che giustifica l'entrata in ritardo
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setDocenteGiustifica(Docente $docenteGiustifica = null) {
+  public function setDocenteGiustifica(?Docente $docenteGiustifica): self {
     $this->docenteGiustifica = $docenteGiustifica;
     return $this;
   }
@@ -416,20 +416,20 @@ class Entrata {
   /**
    * Restituisce l'utente (Genitore/Alunno) che giustifica il ritardo
    *
-   * @return Utente Utente (Genitore/Alunno) che giustifica il ritardo
+   * @return Utente|null Utente (Genitore/Alunno) che giustifica il ritardo
    */
-  public function getUtenteGiustifica() {
+  public function getUtenteGiustifica(): ?Utente {
     return $this->utenteGiustifica;
   }
 
   /**
    * Modifica l'utente (Genitore/Alunno) che giustifica il ritardo
    *
-   * @param Utente $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
+   * @param Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica il ritardo
    *
-   * @return Entrata Oggetto Entrata
+   * @return self Oggetto modificato
    */
-  public function setUtenteGiustifica(Utente $utenteGiustifica = null) {
+  public function setUtenteGiustifica(?Utente $utenteGiustifica): self {
     $this->utenteGiustifica = $utenteGiustifica;
     return $this;
   }
@@ -438,20 +438,11 @@ class Entrata {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->ritardoBreve = false;
-    $this->valido = false;
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').' '.$this->ora->format('H:i').' - '.$this->alunno;
   }
 

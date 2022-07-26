@@ -1,0 +1,30 @@
+####################
+# FirmaFixtures - dati di test
+#
+# Dati della firma del docente per una lezione:
+#   lezione: Lezione firmata dal docente
+#   docente: Docente che firma la lezione
+####################
+
+
+include:
+  - LezioneFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Firma:
+
+  # ----- lezioni delle classi -----
+  firma_{1..100}:
+    lezione: '@lezione_<current()>'
+    docente: '@docente_*'
+
+  # ----- lezioni di religione -----
+  firma_religione_{1..30}:
+    lezione: '@lezione_religione_<current()>'
+    docente: '@docente_*'
+
+  # ----- lezioni di sostituzione -----
+  firma_supplenza_{1..10}:
+    lezione: '@lezione_supplenza_<current()>'
+    docente: '@docente_*'

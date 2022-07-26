@@ -1,0 +1,39 @@
+####################
+# DocenteFixtures - dati di test
+#
+# dati dei docenti: gli stessi degli utenti più i seguentI
+#   responsabileBes: indica se il docente ha accesso alle funzioni di responsabile BES
+#   responsabileBesSede: sede di riferimento per il responsabile BES (se definita)
+####################
+
+
+include:
+  - SedeFixtures.yml
+
+
+App\Entity\Docente:
+  docente_{1..50}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, "")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: '90%? 1: 0'
+    spid: '70%? 1: 0'
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <city()>: <strval("")>'
+    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
+    citta: '50%? <city()>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    responsabileBes: '<boolean(20)>'
+    responsabileBesSede: '<($responsabileBes ? @sede_2 : null)>'

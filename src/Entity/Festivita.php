@@ -29,37 +29,36 @@ class Festivita {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la festività
+   * @var int|null $id Identificativo univoco per la festività
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data della festività
+   * @var \DateTime|null $data Data della festività
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
    * @var string $descrizione Descrizione della festività
@@ -69,25 +68,24 @@ class Festivita {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
-  private $descrizione;
+  private string $descrizione = '';
 
   /**
    * @var string $tipo Tipo di festività [F=festivo, A=assemblea di Istituto]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"F","A"}, strict=true, message="field.choice")
    */
-  private $tipo;
+  private string $tipo = 'F';
 
   /**
-   * @var Sede $sede Sede interessata dalla festività (se non presente riguarda tutte le sedi)
+   * @var Sede|null $sede Sede interessata dalla festività (se non presente riguarda tutte le sedi)
    *
    * @ORM\ManyToOne(targetEntity="Sede")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $sede;
+  private ?Sede $sede = null;
 
 
   //==================== EVENTI ORM ====================
@@ -97,7 +95,7 @@ class Festivita {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -108,7 +106,7 @@ class Festivita {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -119,36 +117,36 @@ class Festivita {
   /**
    * Restituisce l'identificativo univoco per la festività
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data della festività
    *
-   * @return \DateTime Data della festività
+   * @return \DateTime|null Data della festività
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -157,9 +155,9 @@ class Festivita {
    *
    * @param \DateTime $data Data della festività
    *
-   * @return Festivita Oggetto Festivita
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -169,7 +167,7 @@ class Festivita {
    *
    * @return string Descrizione della festività
    */
-  public function getDescrizione() {
+  public function getDescrizione(): string {
     return $this->descrizione;
   }
 
@@ -178,9 +176,9 @@ class Festivita {
    *
    * @param string $descrizione Descrizione della festività
    *
-   * @return Festivita Oggetto Festivita
+   * @return self Oggetto modificato
    */
-  public function setDescrizione($descrizione) {
+  public function setDescrizione(string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }
@@ -190,7 +188,7 @@ class Festivita {
    *
    * @return string Tipo di festività
    */
-  public function getTipo() {
+  public function getTipo(): string {
     return $this->tipo;
   }
 
@@ -199,9 +197,9 @@ class Festivita {
    *
    * @param string $tipo Tipo di festività
    *
-   * @return Festivita Oggetto Festivita
+   * @return self Oggetto modificato
    */
-  public function setTipo($tipo) {
+  public function setTipo(string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -209,20 +207,20 @@ class Festivita {
   /**
    * Restituisce la sede interessata dalla festività (se non presente riguarda tutte le sedi)
    *
-   * @return Sede Sede interessata dalla festività
+   * @return Sede|null Sede interessata dalla festività
    */
-  public function getSede() {
+  public function getSede(): ?Sede {
     return $this->sede;
   }
 
   /**
    * Modifica la sede interessata dalla festività (se non presente riguarda tutte le sedi)
    *
-   * @param Sede $sede Sede interessata dalla festività
+   * @param Sede|null $sede Sede interessata dalla festività
    *
-   * @return Festivita Oggetto Festivita
+   * @return self Oggetto modificato
    */
-  public function setSede(Sede $sede = null) {
+  public function setSede(?Sede $sede): self {
     $this->sede = $sede;
     return $this;
   }
@@ -231,19 +229,11 @@ class Festivita {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->tipo = 'F';
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').' ('.$this->descrizione.')';
   }
 

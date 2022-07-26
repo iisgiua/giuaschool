@@ -1,0 +1,15 @@
+####################
+# DefinizioneConsiglioFixtures - dati di test
+#
+# Dati per lo svolgimento dei consigli di classe:
+#   data: data per lo svolgimento della riunione
+#   argomenti: lista degli argomenti dell'ordine del giorno [array($id_numerico => $stringa_argomento, ...)]
+#   dati: lista di dati utili per la verbalizzazione
+####################
+
+
+App\Entity\DefinizioneConsiglio:
+  definizione_consiglio_{1..10}:
+    data: '<dateTimeBetween("-1 month", "now")>'
+    argomenti: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'

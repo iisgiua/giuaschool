@@ -1,0 +1,22 @@
+####################
+# ListaDestinatariClasseFixtures - dati di test
+#
+# Dati per la gestione dell'associazione tra documento e classe:
+#   listaDestinatari: lista dei destinatari a cui ci si riferisce
+#   classe: classe in cui deve essere letto l'avviso/circolare/documento
+#   letto: data e ora di lettura dell'avviso/circolare/documento
+#   firmato: data e ora di firma per presa visione dell'avviso/circolare/documento
+####################
+
+
+include:
+  - ListaDestinatariFixtures.yml
+  - ClasseFixtures.yml
+
+
+App\Entity\ListaDestinatariClasse:
+  lista_destinatari_classe_{1..10}:
+    listaDestinatari: '@lista_destinatari_GENITORI_*'
+    classe: '@classe_*'
+    letto: '50%? <dateTimeBetween("-1 month", "now")>'
+    firmato: '50%? <dateTimeBetween("-1 month", "now")>'

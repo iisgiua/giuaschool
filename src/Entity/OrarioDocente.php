@@ -29,27 +29,27 @@ class OrarioDocente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'orario del docente
+   * @var int|null $id Identificativo univoco per l'orario del docente
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var Orario $orario Orario a cui appartiene l'orario del docente
@@ -62,7 +62,7 @@ class OrarioDocente {
   private $orario;
 
   /**
-   * @var integer $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+   * @var int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
    * @ORM\Column(type="smallint", nullable=false)
    *
@@ -72,7 +72,7 @@ class OrarioDocente {
   private $giorno;
 
   /**
-   * @var integer $ora Numero dell'ora di lezione [1,2,...]
+   * @var int $ora Numero dell'ora di lezione [1,2,...]
    *
    * @ORM\Column(type="smallint", nullable=false)
    *
@@ -98,7 +98,7 @@ class OrarioDocente {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -109,7 +109,7 @@ class OrarioDocente {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -120,27 +120,27 @@ class OrarioDocente {
   /**
    * Restituisce l'identificativo univoco per l'orario del docente
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -158,9 +158,9 @@ class OrarioDocente {
    *
    * @param Orario $orario Orario a cui appartiene l'orario del docente
    *
-   * @return OrarioDocente Oggetto OrarioDocente
+   * @return self Oggetto modificato
    */
-  public function setOrario(Orario $orario) {
+  public function setOrario(Orario $orario): self {
     $this->orario = $orario;
     return $this;
   }
@@ -168,7 +168,7 @@ class OrarioDocente {
   /**
    * Restituisce il giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
-   * @return integer Giorno della settimana
+   * @return int Giorno della settimana
    */
   public function getGiorno() {
     return $this->giorno;
@@ -177,11 +177,11 @@ class OrarioDocente {
   /**
    * Modifica il giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
-   * @param integer $giorno Giorno della settimana
+   * @param int $giorno Giorno della settimana
    *
-   * @return OrarioDocente Oggetto OrarioDocente
+   * @return self Oggetto modificato
    */
-  public function setGiorno($giorno) {
+  public function setGiorno($giorno): self {
     $this->giorno = $giorno;
     return $this;
   }
@@ -189,7 +189,7 @@ class OrarioDocente {
   /**
    * Restituisce il numero dell'ora di lezione [1,2,...]
    *
-   * @return integer Numero dell'ora di lezione
+   * @return int Numero dell'ora di lezione
    */
   public function getOra() {
     return $this->ora;
@@ -198,11 +198,11 @@ class OrarioDocente {
   /**
    * Modifica il numero dell'ora di lezione [1,2,...]
    *
-   * @param integer $ora Numero dell'ora di lezione
+   * @param int $ora Numero dell'ora di lezione
    *
-   * @return OrarioDocente Oggetto OrarioDocente
+   * @return self Oggetto modificato
    */
-  public function setOra($ora) {
+  public function setOra($ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -221,9 +221,9 @@ class OrarioDocente {
    *
    * @param Cattedra $cattedra Cattedra relativa all'orario indicato
    *
-   * @return OrarioDocente Oggetto OrarioDocente
+   * @return self Oggetto modificato
    */
-  public function setCattedra(Cattedra $cattedra) {
+  public function setCattedra(Cattedra $cattedra): self {
     $this->cattedra = $cattedra;
     return $this;
   }
@@ -236,7 +236,7 @@ class OrarioDocente {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->giorno.': '.$this->ora.' > '.$this->cattedra;
   }
 

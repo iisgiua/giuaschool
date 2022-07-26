@@ -12,14 +12,15 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Menu - entità
+ * Menu - dati per i menu dell'applicazione
  *
  * @ORM\Entity(repositoryClass="App\Repository\MenuRepository")
  * @ORM\Table(name="gs_menu", uniqueConstraints={@ORM\UniqueConstraint(columns={"selettore"})})
@@ -33,27 +34,27 @@ class Menu {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var string $selettore Nome identificativo usato per selezionare il menu
@@ -63,39 +64,39 @@ class Menu {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private $selettore;
+  private string $selettore = '';
 
   /**
-   * @var string $nome Nome del menu (nullo se sottomenu)
+   * @var string|null $nome Nome del menu (vuoto se sottomenu)
    *
    * @ORM\Column(type="string", length=64, nullable=true)
    *
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $nome;
+  private ?string $nome = '';
 
   /**
-   * @var string $descrizione Descrizione del menu (nulla se sottomenu)
+   * @var string|null $descrizione Descrizione del menu (vuota se sottomenu)
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-   private $descrizione;
+   private ?string $descrizione = '';
 
   /**
-   * @var boolean $mega Indica se utilizza la modalità mega menu
+   * @var bool $mega Indica se utilizza la modalità mega menu
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-   private $mega;
+   private bool $mega = false;
 
   /**
-   * @var ArrayCollection $opzioni Lista delle opzioni del menu
+   * @var Collection|null $opzioni Lista delle opzioni del menu
    *
    * @ORM\OneToMany(targetEntity="MenuOpzione", mappedBy="menu")
    */
-   private $opzioni;
+   private ?Collection $opzioni = null;
 
 
   //==================== EVENTI ORM ====================
@@ -105,7 +106,7 @@ class Menu {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -116,7 +117,7 @@ class Menu {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -127,18 +128,18 @@ class Menu {
   /**
    * Restituisce l'identificativo univoco
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
    return $this->creato;
   }
 
@@ -147,7 +148,7 @@ class Menu {
    *
    * @return DateTime Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -156,7 +157,7 @@ class Menu {
    *
    * @return string Nome identificativo usato per selezionare il menu
    */
-  public function getSelettore() {
+  public function getSelettore(): string {
     return $this->selettore;
   }
 
@@ -165,9 +166,9 @@ class Menu {
    *
    * @param string $selettore Nome identificativo usato per selezionare il menu
    *
-   * @return Menu Oggetto Menu
+   * @return self Oggetto modificato
    */
-  public function setSelettore($selettore) {
+  public function setSelettore(string $selettore): self {
     $this->selettore = $selettore;
     return $this;
   }
@@ -175,9 +176,9 @@ class Menu {
   /**
    * Restituisce il nome del menu (nullo se sottomenu)
    *
-   * @return string Nome del menu
+   * @return string|null Nome del menu
    */
-  public function getNome() {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
@@ -186,9 +187,9 @@ class Menu {
    *
    * @param string $nome Nome del menu
    *
-   * @return Menu Oggetto Menu
+   * @return self Oggetto modificato
    */
-  public function setNome($nome) {
+  public function setNome(string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -196,9 +197,9 @@ class Menu {
   /**
    * Restituisce la descrizione del menu (nulla se sottomenu)
    *
-   * @return string Descrizione del menu
+   * @return string|null Descrizione del menu
    */
-  public function getDescrizione() {
+  public function getDescrizione(): ?string {
     return $this->descrizione;
   }
 
@@ -207,9 +208,9 @@ class Menu {
    *
    * @param string $descrizione Descrizione del menu
    *
-   * @return Menu Oggetto Menu
+   * @return self Oggetto modificato
    */
-  public function setDescrizione($descrizione) {
+  public function setDescrizione(string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }
@@ -217,20 +218,20 @@ class Menu {
   /**
    * Restituisce se utilizza la modalità mega menu o no
    *
-   * @return boolean Indica se utilizza la modalità mega menu
+   * @return bool Indica se utilizza la modalità mega menu
    */
-  public function getMega() {
+  public function getMega(): bool {
     return $this->mega;
   }
 
   /**
    * Modifica se utilizza la modalità mega menu o no
    *
-   * @param boolean $mega Indica se utilizza la modalità mega menu
+   * @param bool $mega Indica se utilizza la modalità mega menu
    *
-   * @return Menu Oggetto Menu
+   * @return self Oggetto modificato
    */
-  public function setMega($mega) {
+  public function setMega(bool $mega): self {
     $this->mega = ($mega == true);
     return $this;
   }
@@ -238,20 +239,20 @@ class Menu {
   /**
    * Restituisce la lista delle opzioni del menu
    *
-   * @return ArrayCollection Lista delle opzioni del menu
+   * @return Collection|null Lista delle opzioni del menu
    */
-  public function getOpzioni() {
+  public function getOpzioni(): ?Collection {
     return $this->opzioni;
   }
 
   /**
    * Modifica la lista delle opzioni del menu
    *
-   * @param ArrayCollection $opzioni Lista delle opzioni del menu
+   * @param Collection $opzioni Lista delle opzioni del menu
    *
-   * @return Menu Oggetto Menu
+   * @return self Oggetto modificato
    */
-  public function setOpzioni(ArrayCollection $opzioni) {
+  public function setOpzioni(Collection $opzioni): self {
     $this->opzioni = $opzioni;
     return $this;
   }
@@ -261,9 +262,9 @@ class Menu {
    *
    * @param MenuOpzione $opzione L'opzione da aggiungere
    *
-   * @return Menu Oggetto Menu
+   * @return self Oggetto modificato
    */
-  public function addOpzione(MenuOpzione $opzione) {
+  public function addOpzioni(MenuOpzione $opzione): self {
     if (!$this->opzioni->contains($opzione)) {
       $this->opzioni->add($opzione);
     }
@@ -275,9 +276,9 @@ class Menu {
    *
    * @param MenuOpzione $opzione L'opzione da rimuovere
    *
-   * @return Menu Oggetto Menu
+   * @return self Oggetto modificato
    */
-  public function removeOpzione(MenuOpzione $opzione) {
+  public function removeOpzioni(MenuOpzione $opzione): self {
     if ($this->opzioni->contains($opzione)) {
       $this->opzioni->removeElement($opzione);
     }
@@ -292,7 +293,6 @@ class Menu {
    */
   public function __construct() {
     // valori predefiniti
-    $this->mega = false;
     $this->opzioni = new ArrayCollection();
   }
 
@@ -301,7 +301,7 @@ class Menu {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->selettore;
   }
 

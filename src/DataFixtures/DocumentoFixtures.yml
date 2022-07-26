@@ -1,0 +1,36 @@
+####################
+# DocumentoFixtures - dati di test
+#
+# Dati per la gestione di un documento generico:
+#   tipo: tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni BES, G=materiali generici]
+#   docente: docente che carica il documento
+#   listaDestinatari: lista dei destinatari del documento
+#   materia: materia a cui è riferito il documento (solo per alcuni tipi di documento)
+#   classe: classe a cui è riferito il documento (solo per alcuni tipi di documento)
+#   alunno: alunno a cui è riferito il documento (solo per alcuni tipi di documento)
+#   cifrato: conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+#   firma: indica se è richiesta la firma di presa visione
+#   allegati: lista dei file allegati al documento
+####################
+
+
+include:
+  - DocenteFixtures.yml
+  - ListaDestinatariFixtures.yml
+  - MateriaFixtures.yml
+  - ClasseFixtures.yml
+  - AlunnoFixtures.yml
+  - FileFixtures.yml
+
+
+App\Entity\Documento:
+  documento_{1..5}:
+    tipo: '<randomElement(["L", "P", "R", "M", "H", "D", "C", "G"])>'
+    docente: '@docente_*'
+    listaDestinatari: '@lista_destinatari_ALUNNI_<current()>'
+    materia: '50%? @materia_*'
+    classe: '50%? @classe_*'
+    alunno: '50%? @alunno_*'
+    cifrato: '50%? <substr(<text()>, 0, 255)>: <strval("")>'
+    firma: '<boolean()>'
+    allegati: '<collection(@file_word_<current()>)>'

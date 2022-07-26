@@ -30,27 +30,27 @@ class Notifica {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per le istanze della classe
+   * @var int|null $id Identificativo univoco per le istanze della classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var string $oggetto_nome Nome della classe dell'oggetto da notificare
@@ -62,7 +62,7 @@ class Notifica {
   private $oggettoNome;
 
   /**
-   * @var integer $oggettoId Id dell'oggetto da notificare
+   * @var int $oggettoId Id dell'oggetto da notificare
    *
    * @ORM\Column(type="integer", nullable=false)
    *
@@ -87,7 +87,7 @@ class Notifica {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -98,7 +98,7 @@ class Notifica {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -109,27 +109,27 @@ class Notifica {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
 *
-* @return \DateTime Data/ora della creazione
+* @return \DateTime|null Data/ora della creazione
 */
-public function getCreato() {
+public function getCreato(): ?\DateTime {
  return $this->creato;
 }
 
 /**
 * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
@@ -147,9 +147,9 @@ public function getCreato() {
    *
    * @param string $oggettoNome Nome della classe dell'oggetto da notificare
    *
-   * @return Notifica Oggetto Notifica
+   * @return self Oggetto modificato
    */
-  public function setOggettoNome($oggettoNome) {
+  public function setOggettoNome($oggettoNome): self {
     $this->oggettoNome = $oggettoNome;
     return $this;
   }
@@ -157,7 +157,7 @@ public function getCreato() {
   /**
    * Restituisce l'id dell'oggetto da notificare
    *
-   * @return integer Id dell'oggetto da notificare
+   * @return int Id dell'oggetto da notificare
    */
   public function getOggettoId() {
     return $this->oggettoId;
@@ -166,11 +166,11 @@ public function getCreato() {
   /**
    * Modifica l'id dell'oggetto da notificare
    *
-   * @param integer $oggettoId Id dell'oggetto da notificare
+   * @param int $oggettoId Id dell'oggetto da notificare
    *
-   * @return Notifica Oggetto Notifica
+   * @return self Oggetto modificato
    */
-  public function setOggettoId($oggettoId) {
+  public function setOggettoId($oggettoId): self {
     $this->oggettoId = $oggettoId;
     return $this;
   }
@@ -189,9 +189,9 @@ public function getCreato() {
    *
    * @param string $azione Tipo di azione da notificare sull'oggetto
    *
-   * @return Notifica Oggetto Notifica
+   * @return self Oggetto modificato
    */
-  public function setAzione($azione) {
+  public function setAzione($azione): self {
     $this->azione = $azione;
     return $this;
   }
@@ -211,7 +211,7 @@ public function getCreato() {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->oggettoNome.':'.$this->oggettoId;
   }
 

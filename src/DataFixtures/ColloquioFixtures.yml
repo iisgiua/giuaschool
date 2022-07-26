@@ -1,0 +1,30 @@
+####################
+# ColloquioFixtures - dati di test
+#
+# Dati per la programmazione dei colloqui dei docenti:
+#   frequenza: frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
+#   note: note informative sul colloquio
+#   docente: docente che deve fare il colloquio
+#   orario: orario a cui appartiene il colloquio
+#   giorno: giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+#   ora: numero dell'ora di lezione [1,2,...]
+#   extra: liste di ora extra per i colloqui
+#   dati: lista di dati aggiuntivi
+####################
+
+
+include:
+  - DocenteFixtures.yml
+  - OrarioFixtures.yml
+
+
+App\Entity\Colloquio:
+  colloquio_{1..20}:
+    frequenza: '<randomElement(["S", "1", "2", "3", "4"])>'
+    note: '50%? <substr(<text()>, 0, 2048)>: <strval("")>'
+    docente: '@docente_*'
+    orario: '@orario_*'
+    giorno: '<randomElement([1, 2, 3, 4, 5, 6])>'
+    ora: '<numberBetween(1, 4)>'
+    extra: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'

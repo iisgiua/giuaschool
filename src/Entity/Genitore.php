@@ -26,19 +26,19 @@ class Genitore extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var boolean $giustificaOnline Indica se il genitore può effettuare la giustificazione online oppure no
+   * @var bool $giustificaOnline Indica se il genitore può effettuare la giustificazione online oppure no
    *
    * @ORM\Column(name="giustifica_online", type="boolean", nullable=false)
    */
-  private $giustificaOnline;
+  private bool $giustificaOnline = true;
 
   /**
-   * @var Alunno L'alunno figlio
+   * @var Alunno|null $alunno Alunno figlio o di cui si è tutori
    *
    * @ORM\ManyToOne(targetEntity="Alunno", inversedBy="genitori")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -46,20 +46,20 @@ class Genitore extends Utente {
   /**
    * Indica se il genitore può effettuare la giustificazione online oppure no
    *
-   * @return boolean Vero se il genitore può effettuare la giustificazione online, falso altrimenti
+   * @return bool Vero se il genitore può effettuare la giustificazione online, falso altrimenti
    */
-  public function getGiustificaOnline() {
+  public function getGiustificaOnline(): bool {
     return $this->giustificaOnline;
   }
 
   /**
    * Modifica se il genitore può effettuare la giustificazione online oppure no
    *
-   * @param boolean $giustificaOnline Vero se il genitore può effettuare la giustificazione online, falso altrimenti
+   * @param bool $giustificaOnline Vero se il genitore può effettuare la giustificazione online, falso altrimenti
    *
-   * @return Genitore Oggetto Genitore
+   * @return self Oggetto modificato
    */
-  public function setGiustificaOnline($giustificaOnline) {
+  public function setGiustificaOnline(bool $giustificaOnline): self {
     $this->giustificaOnline = ($giustificaOnline == true);
     return $this;
   }
@@ -67,20 +67,20 @@ class Genitore extends Utente {
   /**
    * Restituisce l'alunno figlio
    *
-   * @return Alunno L'alunno figlio
+   * @return Alunno|null L'alunno figlio
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
   /**
    * Modifica l'alunno figlio
    *
-   * @param Alunno $alunno L'alunno figlio
+   * @param Alunno|null $alunno L'alunno figlio
    *
-   * @return Genitore Oggetto Genitore
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno = null) {
+  public function setAlunno(?Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -89,32 +89,32 @@ class Genitore extends Utente {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    parent::__construct();
-    $this->giustificaOnline = true;
-  }
-
-  /**
    * Restituisce la lista di ruoli attribuiti al genitore
    *
    * @return array Lista di ruoli
    */
-  public function getRoles() {
+  public function getRoles(): array {
     return ['ROLE_GENITORE', 'ROLE_UTENTE'];
   }
 
   /**
    * Restituisce il codice corrispondente al ruolo dell'utente
    * I codici utilizzati sono:
-   *    U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'G';
+    return 'GU';
+  }
+
+  /**
+   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   *
+   * @return string Codifica della funzione
+   */
+  public function getCodiceFunzione(): string {
+    return 'N';
   }
 
 }

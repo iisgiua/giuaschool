@@ -32,7 +32,7 @@ class App {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per le istanze della classe
+   * @var int|null $id Identificativo univoco per le istanze della classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
@@ -41,18 +41,18 @@ class App {
   private int $id;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private ?\DateTime $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private ?\DateTime $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var string $nome Nome dell'app
@@ -62,7 +62,7 @@ class App {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(min=3,max=255,minMessage="field.minlength",maxMessage="field.maxlength")
    */
-  private string $nome;
+  private string $nome = '';
 
   /**
    * @var string $token Token univoco per l'app
@@ -72,17 +72,17 @@ class App {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(min=16,max=128,minMessage="field.minlength",maxMessage="field.maxlength")
    */
-  private string $token;
+  private string $token = '';
 
   /**
-   * @var boolean $attiva Indica se l'app è attiva o no
+   * @var bool $attiva Indica se l'app è attiva o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
   private bool $attiva;
 
   /**
-   * @var boolean $css Indica se l'app deve caricare un proprio CSS o no
+   * @var bool $css Indica se l'app deve caricare un proprio CSS o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
@@ -95,14 +95,14 @@ class App {
    *
    * @Assert\Choice(choices={"N","E","G","T"}, strict=true, message="field.choice")
    */
-  private string $notifica;
+  private string $notifica = '';
 
   /**
    * @var string|null $download Estensione del file da scaricare, o null se nessun file è previsto
    *
    * @ORM\Column(type="string", length=64, nullable=true)
    */
-  private ?string $download;
+  private ?string $download = '';
 
   /**
    * @var string $abilitati Indica gli utenti abilitati all'uso dell'app [A=alunni,G=genitori,D=docenti,T=ata,N=nessuno]
@@ -111,7 +111,7 @@ class App {
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private string $abilitati;
+  private string $abilitati = '';
 
   /**
    * @var array $dati Lista di dati aggiuntivi necessari per le funzionalità dell'app
@@ -150,7 +150,7 @@ class App {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
   public function getId(): int {
     return $this->id;
@@ -159,7 +159,7 @@ class App {
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
   public function getCreato(): ?\DateTime {
     return $this->creato;
@@ -168,7 +168,7 @@ class App {
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
   public function getModificato(): ?\DateTime {
     return $this->modificato;
@@ -188,7 +188,7 @@ class App {
    *
    * @param string $nome Nome dell'app
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setNome(string $nome): self {
     $this->nome = $nome;
@@ -209,7 +209,7 @@ class App {
    *
    * @param string $token Token univoco per l'app
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setToken(string $token): self {
     $this->token = $token;
@@ -219,7 +219,7 @@ class App {
   /**
    * Indica se l'app è attiva o no
    *
-   * @return boolean Vero se l'app è attiva, falso altrimenti
+   * @return bool Vero se l'app è attiva, falso altrimenti
    */
   public function getAttiva(): bool {
     return $this->attiva;
@@ -228,9 +228,9 @@ class App {
   /**
    * Modifica se l'app è attiva o no
    *
-   * @param boolean $attiva Vero se l'app è attiva, falso altrimenti
+   * @param bool $attiva Vero se l'app è attiva, falso altrimenti
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setAttiva(bool $attiva): self {
     $this->attiva = ($attiva == true);
@@ -240,7 +240,7 @@ class App {
   /**
    * Indica se l'app deve caricare un proprio CSS o no
    *
-   * @return boolean Vero se l'app deve caricare un proprio CSS, falso altrimenti
+   * @return bool Vero se l'app deve caricare un proprio CSS, falso altrimenti
    */
   public function getCss(): bool {
     return $this->css;
@@ -249,9 +249,9 @@ class App {
   /**
    * Modifica se l'app deve caricare un proprio CSS o no
    *
-   * @param boolean $css Vero se l'app deve caricare un proprio CSS, falso altrimenti
+   * @param bool $css Vero se l'app deve caricare un proprio CSS, falso altrimenti
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setCss(bool $css): self {
     $this->css = ($css == true);
@@ -272,7 +272,7 @@ class App {
    *
    * @param string $notifica Tipo di notifica utilizzata dall'app
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setNotifica(string $notifica): self {
     $this->notifica = $notifica;
@@ -293,7 +293,7 @@ class App {
    *
    * @param string|null $download Estensione del file da scaricare
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setDownload(?string $download=null): self {
     $this->download = $download;
@@ -314,7 +314,7 @@ class App {
    *
    * @param string $abilitati Utenti abilitati all'uso dell'app
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setAbilitati(string $abilitati): self {
     $this->abilitati = $abilitati;
@@ -335,7 +335,7 @@ class App {
    *
    * @param array $dati Lista di dati aggiuntivi necessari per le funzionalità dell'app
    *
-   * @return App Oggetto App
+   * @return self Oggetto modificato
    */
   public function setDati(array $dati): self {
     if ($dati === $this->dati) {

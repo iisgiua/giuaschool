@@ -54,9 +54,9 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @param Alunno $alunno Alunno a cui si riferisce l'osservazione
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -69,7 +69,7 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->getData()->format('d/m/Y').' - '.$this->getCattedra().' - '.$this->alunno.': '.$this->getTesto();
   }
 

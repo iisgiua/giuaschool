@@ -17,6 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\File;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 
 /**
@@ -34,30 +35,30 @@ class Circolare {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la circolare
+   * @var int|null $id Identificativo univoco per la circolare
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var ArrayCollection $sedi Sedi a cui è destinata la circolare
+   * @var Collection $sedi Sedi a cui è destinata la circolare
    *
    * @ORM\ManyToMany(targetEntity="Sede")
    * @ORM\JoinTable(name="gs_circolare_sede",
@@ -69,7 +70,7 @@ class Circolare {
   private $sedi;
 
   /**
-   * @var integer $anno Anno iniziale dell'A.S. a cui si riferisce la circolare
+   * @var int $anno Anno iniziale dell'A.S. a cui si riferisce la circolare
    *
    * @ORM\Column(type="integer", nullable=false)
    *
@@ -78,7 +79,7 @@ class Circolare {
   private $anno;
 
   /**
-   * @var integer $numero Numero della circolare
+   * @var int $numero Numero della circolare
    *
    * @ORM\Column(type="integer", nullable=false)
    *
@@ -121,14 +122,14 @@ class Circolare {
   private $allegati;
 
   /**
-   * @var boolean $ata Indica se il personale ATA è destinatario della circolare o no
+   * @var bool $ata Indica se il personale ATA è destinatario della circolare o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
   private $ata;
 
   /**
-   * @var boolean $dsga Indica se il DSGA è destinatario della circolare o no
+   * @var bool $dsga Indica se il DSGA è destinatario della circolare o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
@@ -210,21 +211,21 @@ class Circolare {
   private $altri;
 
   /**
-   * @var boolean $firma Indica se è richiesta la conferma esplicita di lettura della circolare o no
+   * @var bool $firma Indica se è richiesta la conferma esplicita di lettura della circolare o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
   private $firma;
 
   /**
-   * @var boolean $notifica Indica se è richiesta la notifica della circolare ai destinatari o no
+   * @var bool $notifica Indica se è richiesta la notifica della circolare ai destinatari o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
   private $notifica;
 
   /**
-   * @var boolean $pubblicata Indica se la circolare è pubblicata o no
+   * @var bool $pubblicata Indica se la circolare è pubblicata o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
@@ -238,7 +239,7 @@ class Circolare {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -249,7 +250,7 @@ class Circolare {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -260,34 +261,34 @@ class Circolare {
   /**
    * Restituisce l'identificativo univoco per la circolare
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce le sedi a cui è destinata la circolare
    *
-   * @return ArrayCollection Sedi a cui è destinata la circolare
+   * @return Collection Sedi a cui è destinata la circolare
    */
   public function getSedi() {
     return $this->sedi;
@@ -296,11 +297,11 @@ class Circolare {
   /**
    * Modifica le sedi a cui è destinata la circolare
    *
-   * @param ArrayCollection $sedi Sedi a cui è destinata la circolare
+   * @param Collection $sedi Sedi a cui è destinata la circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setSedi(ArrayCollection $sedi) {
+  public function setSedi(Collection $sedi): self {
     $this->sedi = $sedi;
     return $this;
   }
@@ -310,9 +311,9 @@ class Circolare {
    *
    * @param Sede $sede Sede a cui è destinata la circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function addSede(Sede $sede) {
+  public function addSedi(Sede $sede) {
     if (!$this->sedi->contains($sede)) {
       $this->sedi[] = $sede;
     }
@@ -324,7 +325,7 @@ class Circolare {
    *
    * @param Sede $sede Sedi da rimuovere da quelle a cui è destinata la circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function removeSede(Sede $sede) {
     $this->sedi->removeElement($sede);
@@ -334,7 +335,7 @@ class Circolare {
   /**
    * Restituisce l'anno iniziale dell'A.S. a cui si riferisce la circolare
    *
-   * @return integer Anno iniziale dell'A.S. a cui si riferisce la circolare
+   * @return int Anno iniziale dell'A.S. a cui si riferisce la circolare
    */
   public function getAnno() {
     return $this->anno;
@@ -343,11 +344,11 @@ class Circolare {
   /**
    * Modifica l'anno iniziale dell'A.S. a cui si riferisce la circolare
    *
-   * @param integer $anno Anno iniziale dell'A.S. a cui si riferisce la circolare
+   * @param int $anno Anno iniziale dell'A.S. a cui si riferisce la circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setAnno($anno) {
+  public function setAnno($anno): self {
     $this->anno = $anno;
     return $this;
   }
@@ -355,7 +356,7 @@ class Circolare {
   /**
    * Restituisce il numero della circolare (univoco solo assieme alla sede)
    *
-   * @return integer Numero della circolare
+   * @return int Numero della circolare
    */
   public function getNumero() {
     return $this->numero;
@@ -364,11 +365,11 @@ class Circolare {
   /**
    * Modifica il numero della circolare (univoco solo assieme alla sede)
    *
-   * @param integer $numero Numero della circolare
+   * @param int $numero Numero della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setNumero($numero) {
+  public function setNumero($numero): self {
     $this->numero = $numero;
     return $this;
   }
@@ -387,9 +388,9 @@ class Circolare {
    *
    * @param \DateTime $data Data della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setData(\DateTime $data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -408,9 +409,9 @@ class Circolare {
    *
    * @param string $oggetto Oggetto della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setOggetto($oggetto) {
+  public function setOggetto($oggetto): self {
     $this->oggetto = $oggetto;
     return $this;
   }
@@ -429,9 +430,9 @@ class Circolare {
    *
    * @param File $documento Documento della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setDocumento(File $documento) {
+  public function setDocumento(File $documento): self {
     $this->documento = $documento->getBasename();
     return $this;
   }
@@ -450,9 +451,9 @@ class Circolare {
    *
    * @param array $allegati Lista di file allegati alla circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setAllegati($allegati) {
+  public function setAllegati($allegati): self {
     if ($allegati === $this->allegati) {
       // clona array per forzare update su doctrine
       $allegati = unserialize(serialize($allegati));
@@ -466,7 +467,7 @@ class Circolare {
    *
    * @param File $allegato File allegato alla circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function addAllegato(File $allegato) {
     if (!in_array($allegato->getBasename(), $this->allegati)) {
@@ -480,7 +481,7 @@ class Circolare {
    *
    * @param File $allegato File da rimuovere dalla lista di allegati alla circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function removeAllegato(File $allegato) {
     if (in_array($allegato->getBasename(), $this->allegati)) {
@@ -492,7 +493,7 @@ class Circolare {
   /**
    * Indica se il personale ATA è destinatario della circolare o no
    *
-   * @return boolean Vero se il personale ATA è destinatario della circolare, falso altrimenti
+   * @return bool Vero se il personale ATA è destinatario della circolare, falso altrimenti
    */
   public function getAta() {
     return $this->ata;
@@ -501,11 +502,11 @@ class Circolare {
   /**
    * Modifica se il personale ATA è destinatario della circolare o no
    *
-   * @param boolean $ata Vero se il personale ATA è destinatario della circolare, falso altrimenti
+   * @param bool $ata Vero se il personale ATA è destinatario della circolare, falso altrimenti
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setAta($ata) {
+  public function setAta($ata): self {
     $this->ata = ($ata == true);
     return $this;
   }
@@ -513,7 +514,7 @@ class Circolare {
   /**
    * Indica se il DSGA è destinatario della circolare o no
    *
-   * @return boolean Vero se il DSGA è destinatario della circolare, falso altrimenti
+   * @return bool Vero se il DSGA è destinatario della circolare, falso altrimenti
    */
   public function getDsga() {
     return $this->dsga;
@@ -522,11 +523,11 @@ class Circolare {
   /**
    * Modifica se il DSGA è destinatario della circolare o no
    *
-   * @param boolean $dsga Vero se il DSGA è destinatario della circolare, falso altrimenti
+   * @param bool $dsga Vero se il DSGA è destinatario della circolare, falso altrimenti
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setDsga($dsga) {
+  public function setDsga($dsga): self {
     $this->dsga = ($dsga == true);
     return $this;
   }
@@ -545,9 +546,9 @@ class Circolare {
    *
    * @param string $genitori Indica quali genitori sono destinatari della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setGenitori($genitori) {
+  public function setGenitori($genitori): self {
     $this->genitori = $genitori;
     return $this;
   }
@@ -566,9 +567,9 @@ class Circolare {
    *
    * @param array $filtroGenitori Lista dei filtri per i genitori
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setFiltroGenitori($filtroGenitori) {
+  public function setFiltroGenitori($filtroGenitori): self {
     $this->filtroGenitori = $filtroGenitori;
     return $this;
   }
@@ -578,7 +579,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da aggiungere alla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function addFiltroGenitori($filtro) {
     if (!in_array($filtro->getId(), $this->filtroGenitori)) {
@@ -592,7 +593,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da rimuovere dalla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function removeFiltroGenitori($filtro) {
     if (in_array($filtro->getId(), $this->filtroGenitori)) {
@@ -615,9 +616,9 @@ class Circolare {
    *
    * @param string $alunni Indica quali alunni sono destinatari della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setAlunni($alunni) {
+  public function setAlunni($alunni): self {
     $this->alunni = $alunni;
     return $this;
   }
@@ -636,9 +637,9 @@ class Circolare {
    *
    * @param array $filtroAlunni Lista dei filtri per gli alunni
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setFiltroAlunni($filtroAlunni) {
+  public function setFiltroAlunni($filtroAlunni): self {
     $this->filtroAlunni = $filtroAlunni;
     return $this;
   }
@@ -648,7 +649,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da aggiungere alla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function addFiltroAlunni($filtro) {
     if (!in_array($filtro->getId(), $this->filtroAlunni)) {
@@ -662,7 +663,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da rimuovere dalla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function removeFiltroAlunni($filtro) {
     if (in_array($filtro->getId(), $this->filtroAlunni)) {
@@ -685,9 +686,9 @@ class Circolare {
    *
    * @param string $coordinatori Indica quali coordinatori sono destinatari della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setCoordinatori($coordinatori) {
+  public function setCoordinatori($coordinatori): self {
     $this->coordinatori = $coordinatori;
     return $this;
   }
@@ -706,9 +707,9 @@ class Circolare {
    *
    * @param array $filtroCoordinatori Lista dei filtri per i coordinatori
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setFiltroCoordinatori($filtroCoordinatori) {
+  public function setFiltroCoordinatori($filtroCoordinatori): self {
     $this->filtroCoordinatori = $filtroCoordinatori;
     return $this;
   }
@@ -718,7 +719,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da aggiungere alla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function addFiltroCoordinatori($filtro) {
     if (!in_array($filtro->getId(), $this->filtroCoordinatori)) {
@@ -732,7 +733,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da rimuovere dalla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function removeFiltroCoordinatori($filtro) {
     if (in_array($filtro->getId(), $this->filtroCoordinatori)) {
@@ -755,9 +756,9 @@ class Circolare {
    *
    * @param string $docenti Indica quali docenti sono destinatari della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setDocenti($docenti) {
+  public function setDocenti($docenti): self {
     $this->docenti = $docenti;
     return $this;
   }
@@ -776,9 +777,9 @@ class Circolare {
    *
    * @param array $filtroDocenti Lista dei filtri per i docenti
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setFiltroDocenti($filtroDocenti) {
+  public function setFiltroDocenti($filtroDocenti): self {
     $this->filtroDocenti = $filtroDocenti;
     return $this;
   }
@@ -788,7 +789,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da aggiungere alla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function addFiltroDocenti($filtro) {
     if (!in_array($filtro->getId(), $this->filtroDocenti)) {
@@ -802,7 +803,7 @@ class Circolare {
    *
    * @param object $filtro Filtro da rimuovere dalla lista dei filtri
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function removeFiltroDocenti($filtro) {
     if (in_array($filtro->getId(), $this->filtroDocenti)) {
@@ -825,9 +826,9 @@ class Circolare {
    *
    * @param array $altri Altri destinatari della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setAltri($altri) {
+  public function setAltri($altri): self {
     $this->altri = $altri;
     return $this;
   }
@@ -837,7 +838,7 @@ class Circolare {
    *
    * @param string $altro Altro destinatario da aggiungere alla lista
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function addAltro($altro) {
     if (!in_array($altro, $this->altri)) {
@@ -851,7 +852,7 @@ class Circolare {
    *
    * @param string $altro Altro destinatario da rimuovere dalla lista
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
   public function removeAltro($altro) {
     if (in_array($altro, $this->altri)) {
@@ -863,7 +864,7 @@ class Circolare {
   /**
    * Indica se è richiesta la conferma esplicita di lettura della circolare o no
    *
-   * @return boolean Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
+   * @return bool Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
    */
   public function getFirma() {
     return $this->firma;
@@ -872,11 +873,11 @@ class Circolare {
   /**
    * Modifica se è richiesta la conferma esplicita di lettura della circolare o no
    *
-   * @param boolean $firma Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
+   * @param bool $firma Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setFirma($firma) {
+  public function setFirma($firma): self {
     $this->firma = ($firma == true);
     return $this;
   }
@@ -884,7 +885,7 @@ class Circolare {
   /**
    * Indica se è richiesta la notifica della circolare ai destinatari o no
    *
-   * @return boolean Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
+   * @return bool Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
    */
   public function getNotifica() {
     return $this->notifica;
@@ -893,11 +894,11 @@ class Circolare {
   /**
    * Modifica se è richiesta la notifica della circolare ai destinatari o no
    *
-   * @param boolean $notifica Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
+   * @param bool $notifica Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setNotifica($notifica) {
+  public function setNotifica($notifica): self {
     $this->notifica = ($notifica == true);
     return $this;
   }
@@ -916,9 +917,9 @@ class Circolare {
    *
    * @param bool $pubblicata Vero se la circolare è pubblicata, falso altrimenti
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setPubblicata($pubblicata) {
+  public function setPubblicata($pubblicata): self {
     $this->pubblicata = ($pubblicata == true);
     return $this;
   }
@@ -950,7 +951,7 @@ class Circolare {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return 'Circolare del '.$this->data->format('d/m/Y').' n. '.$this->numero;
   }
 
