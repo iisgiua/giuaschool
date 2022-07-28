@@ -52,13 +52,13 @@ class Valutazione {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $tipo Tipo di valutazione [S=scritto, O=orale, p=pratico]
+   * @var string|null $tipo Tipo di valutazione [S=scritto, O=orale, p=pratico]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"S","O","P"}, strict=true, message="field.choice")
    */
-  private string $tipo = 'O';
+  private ?string $tipo = 'O';
 
   /**
    * @var bool $visibile Indica se la valutazione è visibile ai genitori o no
@@ -192,20 +192,20 @@ class Valutazione {
   /**
    * Restituisce il tipo di valutazione [S=scritto, O=orale, p=pratico]
    *
-   * @return string Tipo di valutazione
+   * @return string|null Tipo di valutazione
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo di valutazione [S=scritto, O=orale, p=pratico]
    *
-   * @param string $tipo Tipo di valutazione
+   * @param string|null $tipo Tipo di valutazione
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -268,7 +268,7 @@ class Valutazione {
    *
    * @return self Oggetto modificato
    */
-  public function setVoto(float $voto): self {
+  public function setVoto(?float $voto): self {
     $this->voto = $voto;
     return $this;
   }
@@ -285,11 +285,11 @@ class Valutazione {
   /**
    * Modifica il giudizio della valutazione
    *
-   * @param string $giudizio Giudizio della valutazione
+   * @param string|null $giudizio Giudizio della valutazione
    *
    * @return self Oggetto modificato
    */
-  public function setGiudizio(string $giudizio): self {
+  public function setGiudizio(?string $giudizio): self {
     $this->giudizio = $giudizio;
     return $this;
   }
@@ -306,11 +306,11 @@ class Valutazione {
   /**
    * Modifica l'argomento relativo alla valutazione
    *
-   * @param string $argomento Argomento relativo alla valutazione
+   * @param string|null $argomento Argomento relativo alla valutazione
    *
    * @return self Oggetto modificato
    */
-  public function setArgomento(string $argomento): self {
+  public function setArgomento(?string $argomento): self {
     $this->argomento = $argomento;
     return $this;
   }

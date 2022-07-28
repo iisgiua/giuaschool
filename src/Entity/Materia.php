@@ -55,42 +55,42 @@ class Materia {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $nome Nome della materia
+   * @var string|null $nome Nome della materia
    *
    * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
-   * @var string $nomeBreve Nome breve della materia (non univoco)
+   * @var string|null $nomeBreve Nome breve della materia (non univoco)
    *
    * @ORM\Column(name="nome_breve", type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $nomeBreve = '';
+  private ?string $nomeBreve = '';
 
   /**
-   * @var string $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=ed.civica, U=supplenza]
+   * @var string|null $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=ed.civica, U=supplenza]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","R","S","C","E","U"}, strict=true, message="field.choice")
    */
-  private string $tipo = 'N';
+  private ?string $tipo = 'N';
 
   /**
-   * @var string $valutazione Tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
+   * @var string|null $valutazione Tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","G","A"}, strict=true, message="field.choice")
    */
-  private string $valutazione = 'N';
+  private ?string $valutazione = 'N';
 
   /**
    * @var bool $media Indica se la materia entra nel calcolo della media dei voti o no
@@ -163,20 +163,20 @@ class Materia {
   /**
    * Restituisce il nome della materia
    *
-   * @return string Nome della materia
+   * @return string|null Nome della materia
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome della materia
    *
-   * @param string $nome Nome della materia
+   * @param string|null $nome Nome della materia
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -184,20 +184,20 @@ class Materia {
   /**
    * Restituisce il nome breve della materia (non univoco)
    *
-   * @return string Nome breve della materia
+   * @return string|null Nome breve della materia
    */
-  public function getNomeBreve(): string {
+  public function getNomeBreve(): ?string {
     return $this->nomeBreve;
   }
 
   /**
    * Modifica il nome breve della materia (non univoco)
    *
-   * @param string $nomeBreve Nome breve della materia
+   * @param string|null $nomeBreve Nome breve della materia
    *
    * @return self Oggetto modificato
    */
-  public function setNomeBreve(string $nomeBreve): self {
+  public function setNomeBreve(?string $nomeBreve): self {
     $this->nomeBreve = $nomeBreve;
     return $this;
   }
@@ -205,20 +205,20 @@ class Materia {
   /**
    * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
    *
-   * @return string Tipo della materia
+   * @return string|null Tipo della materia
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
    *
-   * @param string $tipo Tipo della materia
+   * @param string|null $tipo Tipo della materia
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -226,20 +226,20 @@ class Materia {
   /**
    * Restituisce il tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
    *
-   * @return string Tipo di valutazione della materia
+   * @return string|null Tipo di valutazione della materia
    */
-  public function getValutazione(): string {
+  public function getValutazione(): ?string {
     return $this->valutazione;
   }
 
   /**
    * Modifica il tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
    *
-   * @param string $valutazione Tipo di valutazione della materia
+   * @param string|null $valutazione Tipo di valutazione della materia
    *
    * @return self Oggetto modificato
    */
-  public function setValutazione(string $valutazione): self {
+  public function setValutazione(?string $valutazione): self {
     $this->valutazione = $valutazione;
     return $this;
   }

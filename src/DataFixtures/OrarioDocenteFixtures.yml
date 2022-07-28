@@ -1,0 +1,22 @@
+####################
+# OrarioDocenteFixtures - dati di test
+#
+# Dati per l'orario personale dei docenti:
+#   orario: orario a cui appartiene l'orario del docente
+#   giorno: giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+#   ora: numero dell'ora di lezione [1,2,...]
+#   cattedra: cattedra relativa all'orario indicato
+####################
+
+
+include:
+  - OrarioFixtures.yml
+  - CattedraFixtures.yml
+
+
+App\Entity\OrarioDocente:
+  orario_docente_{1..10}:
+    orario: '@orario_provvisorio<(1 + $current % 2)>'
+    giorno: '<randomElement([1, 2, 3, 4, 5, 6])>'
+    ora: '<numberBetween(1, 4)>'
+    cattedra: '@cattedra_*'

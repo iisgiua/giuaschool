@@ -14,11 +14,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Notifica - entità
+ * Notifica - dati per la gestione delle notifiche da inviare successivamente
  *
  * @ORM\Entity(repositoryClass="App\Repository\NotificaRepository")
  * @ORM\Table(name="gs_notifica")
@@ -53,31 +52,29 @@ class Notifica {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $oggetto_nome Nome della classe dell'oggetto da notificare
+   * @var string|null $oggetto_nome Nome della classe dell'oggetto da notificare
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-  private $oggettoNome;
+  private ?string $oggettoNome = '';
 
   /**
    * @var int $oggettoId Id dell'oggetto da notificare
    *
    * @ORM\Column(type="integer", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $oggettoId;
+  private int $oggettoId = 0;
 
   /**
-   * @var string $azione Tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
+   * @var string|null $azione Tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"A","E","D"}, strict=true, message="field.choice")
    */
-  private $azione;
+  private ?string $azione = 'A';
 
 
   //==================== EVENTI ORM ====================
@@ -136,20 +133,20 @@ public function getCreato(): ?\DateTime {
   /**
    * Restituisce il nome della classe dell'oggetto da notificare
    *
-   * @return string Nome della classe dell'oggetto da notificare
+   * @return string|null Nome della classe dell'oggetto da notificare
    */
-  public function getOggettoNome() {
+  public function getOggettoNome(): ?string {
     return $this->oggettoNome;
   }
 
   /**
    * Modifica il nome della classe dell'oggetto da notificare
    *
-   * @param string $oggettoNome Nome della classe dell'oggetto da notificare
+   * @param string|null $oggettoNome Nome della classe dell'oggetto da notificare
    *
    * @return self Oggetto modificato
    */
-  public function setOggettoNome($oggettoNome): self {
+  public function setOggettoNome(?string $oggettoNome): self {
     $this->oggettoNome = $oggettoNome;
     return $this;
   }
@@ -159,7 +156,7 @@ public function getCreato(): ?\DateTime {
    *
    * @return int Id dell'oggetto da notificare
    */
-  public function getOggettoId() {
+  public function getOggettoId(): int {
     return $this->oggettoId;
   }
 
@@ -170,7 +167,7 @@ public function getCreato(): ?\DateTime {
    *
    * @return self Oggetto modificato
    */
-  public function setOggettoId($oggettoId): self {
+  public function setOggettoId(int $oggettoId): self {
     $this->oggettoId = $oggettoId;
     return $this;
   }
@@ -178,33 +175,26 @@ public function getCreato(): ?\DateTime {
   /**
    * Restituisce il tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
    *
-   * @return string Tipo di azione da notificare sull'oggetto
+   * @return string|null Tipo di azione da notificare sull'oggetto
    */
-  public function getAzione() {
+  public function getAzione(): ?string {
     return $this->azione;
   }
 
   /**
    * Modifica il tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
    *
-   * @param string $azione Tipo di azione da notificare sull'oggetto
+   * @param string|null $azione Tipo di azione da notificare sull'oggetto
    *
    * @return self Oggetto modificato
    */
-  public function setAzione($azione): self {
+  public function setAzione(?string $azione): self {
     $this->azione = $azione;
     return $this;
   }
 
 
   //==================== METODI DELLA CLASSE ====================
-
-  /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo

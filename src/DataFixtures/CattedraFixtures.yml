@@ -21,23 +21,23 @@ include:
 
 App\Entity\Cattedra:
 
-  # ----- cattedre delle classi -----
-  cattedra_{1..100}:
+  # ----- cattedre curricolari delle classi -----
+  cattedra_curricolare_{1..50}:
     attiva: '<boolean(90)>'
     supplenza: '<boolean(50)>'
     tipo: '<randomElement(["N", "N", "N", "P"])>'
     materia: '@materia_curricolare_*'
-    docente: '@docente_*'
+    docente: '@docente_curricolare_*'
     classe: '@classe_*'
     alunno:
 
   # ----- cattedre ITP -----
-  cattedra_itp_{1..30}:
+  cattedra_curricolare_itp_{1..30}:
     attiva: '<boolean(90)>'
     supplenza: '<boolean(50)>'
     tipo: 'I'
     materia: '@materia_curricolare_itp_*'
-    docente: '@docente_*'
+    docente: '@docente_curricolare_itp_*'
     classe: '@classe_*'
     alunno:
 
@@ -47,7 +47,7 @@ App\Entity\Cattedra:
     supplenza: '<boolean(50)>'
     tipo: 'N'
     materia: '@materia_RELIGIONE'
-    docente: '@docente_*'
+    docente: '@docente_religione_*'
     classe: '@classe_*'
     alunno:
 
@@ -57,7 +57,7 @@ App\Entity\Cattedra:
     supplenza: '<boolean(50)>'
     tipo: 'N'
     materia: '@materia_SOSTEGNO'
-    docente: '@docente_*'
+    docente: '@docente_curricolare_*'
     alunno: '@alunno_sostegno_*'
     classe: '<($alunno->getClasse())>'
 
@@ -67,6 +67,6 @@ App\Entity\Cattedra:
     supplenza: '<boolean(50)>'
     tipo: 'A'
     materia: '@materia_RELIGIONE'
-    docente: '@docente_*'
+    docente: '@docente_curricolare_*'
     classe: '@alunno_alternativa_*->classe'
     alunno:

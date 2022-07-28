@@ -24,36 +24,36 @@ App\Entity\Assenza:
 
   # ----- assenze non giustificate -----
   assenza_non_giustificata_{1..10}:
-    data: '<dateTimeBetween("-2 month", "-1 day")>'
+    data (unique): '<dateTimeBetween("-2 month", "-1 day")>'
     giustificato:
     motivazione: ''
     dichiarazione: '<(array())>'
     certificati: '<(array())>'
-    alunno: '@alunno_*'
+    alunno: '@alunno_prima_<current()>'
     docente: '@docente_*'
     docenteGiustifica:
     utenteGiustifica:
 
   # ----- assenze non validate -----
   assenza_non_validata_{1..10}:
-    data: '<dateTimeBetween("-2 month", "-1 day")>'
+    data (unique): '<dateTimeBetween("-2 month", "-1 day")>'
     giustificato: '<dateTimeBetween(<($data)>, "now")>'
     motivazione: '<sentence(3)>'
     dichiarazione: '<(array())>'
     certificati: '<(array())>'
-    alunno: '@alunno_*'
+    alunno: '@alunno_seconda_<current()>'
     docente: '@docente_*'
     docenteGiustifica:
     utenteGiustifica: <($alunno->getGenitori()[0])>
 
   # ----- assenze validate -----
   assenza_validata_{1..30}:
-    data: '<dateTimeBetween("-2 month", "-1 day")>'
+    data (unique): '<dateTimeBetween("-2 month", "-1 day")>'
     giustificato: '<dateTimeBetween(<($data)>, "now")>'
     motivazione: '<sentence(3)>'
     dichiarazione: '<(array())>'
     certificati: '<(array())>'
-    alunno: '@alunno_*'
+    alunno: '@alunno_terza_<current()>'
     docente: '@docente_*'
     docenteGiustifica: '@docente_*'
     utenteGiustifica: <($alunno->getGenitori()[0])>

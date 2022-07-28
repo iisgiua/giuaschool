@@ -30,13 +30,13 @@ class Ata extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $tipo Mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, U=autista, D=DSGA]
+   * @var string|null $tipo Mansioni del dipendente ATA [A=amministrativo, T=tecnico, C=collaboratore scolastico, U=autista, D=DSGA]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"A","T","C","U","D"}, strict=true, message="field.choice")
    */
-  private string $tipo = 'A';
+  private ?string $tipo = 'A';
 
   /**
    * @var bool $segreteria Indica se il dipendente ATA ha accesso alle funzioni della segreteria
@@ -59,20 +59,20 @@ class Ata extends Utente {
   /**
    * Restituisce le mansioni del dipendente ATA [A=amministrativo, T=tecnico, B=bidello, D=DSGA]
    *
-   * @return string Mansioni del dipendente ATA
+   * @return string|null Mansioni del dipendente ATA
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica le mansioni del dipendente ATA [A=amministrativo, T=tecnico, B=bidello, D=DSGA]
    *
-   * @param string $tipo Mansioni del personale ATA
+   * @param string|null $tipo Mansioni del personale ATA
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }

@@ -55,13 +55,13 @@ class Scrutinio {
   private ?\DateTime $modificato = null;
 
   /**
-  * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
+  * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
-  private string $periodo = 'P';
+  private ?string $periodo = 'P';
 
   /**
    * @var \DateTime|null $data Data dello scrutinio
@@ -91,13 +91,13 @@ class Scrutinio {
   private ?\DateTime $fine = null;
 
   /**
-   * @var string $stato Stato dello scrutinio [N=non aperto, C=chiuso, 1..9=avanzamento]
+   * @var string|null $stato Stato dello scrutinio [N=non aperto, C=chiuso, 1..9=avanzamento]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","C","1","2","3","4","5","6","7","8","9"}, strict=true, message="field.choice")
    */
-  private string $stato = 'N';
+  private ?string $stato = 'N';
 
   /**
    * @var Classe|null $classe Classe dello scrutinio
@@ -191,20 +191,20 @@ class Scrutinio {
   /**
    * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
    *
-   * @return string Periodo dello scrutinio
+   * @return string|null Periodo dello scrutinio
    */
-  public function getPeriodo(): string {
+  public function getPeriodo(): ?string {
     return $this->periodo;
   }
 
   /**
    * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
    *
-   * @param string $periodo Periodo dello scrutinio
+   * @param string|null $periodo Periodo dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setPeriodo(string $periodo): self {
+  public function setPeriodo(?string $periodo): self {
     $this->periodo = $periodo;
     return $this;
   }
@@ -275,20 +275,20 @@ class Scrutinio {
   /**
    * Restituisce lo stato dello scrutinio [N=non aperto, C=chiuso, 1..9=avanzamento]
    *
-   * @return string Stato dello scrutinio
+   * @return string|null Stato dello scrutinio
    */
-  public function getStato(): string {
+  public function getStato(): ?string {
     return $this->stato;
   }
 
   /**
    * Modifica lo stato dello scrutinio [N=non aperto, C=chiuso, 1..9=avanzamento]
    *
-   * @param string $stato Stato dello scrutinio
+   * @param string|null $stato Stato dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setStato(string $stato): self {
+  public function setStato(?string $stato): self {
     $this->stato = $stato;
     return $this;
   }

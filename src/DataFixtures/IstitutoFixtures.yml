@@ -17,7 +17,7 @@
 
 
 App\Entity\Istituto:
-  istituto_1:
+  istituto:
     tipo: 'Istituto di Istruzione Superiore'
     tipoSigla: 'I.I.S.'
     nome: 'Ada Lovelace'

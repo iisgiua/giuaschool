@@ -13,16 +13,27 @@
 namespace App\Tests;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Faker\Generator;
+use Faker\Provider\Base;
+use Symfony\Component\HttpFoundation\File\File;
 
 
 /**
  * CustomProvider - creazione dati personalizzati
  */
-class CustomProvider {
+class CustomProvider extends Base {
 
 
   //==================== METODI DELLA CLASSE ====================
 
+  /**
+   * Costruttore
+   *
+   * @var Generator $generator Generatore automatico di dati fittizi
+   */
+  public function __construct(Generator $generator) {
+    parent::__construct($generator);
+  }
 
   /**
    * Genera una collezione di oggetti (usata per le relazioni)
@@ -61,6 +72,22 @@ class CustomProvider {
    */
   public function ifand($test1, $test2, $ifTrue, $ifFalse) {
     return ($test1 && $test2) ? $ifTrue : $ifFalse;
+  }
+
+  /**
+   * Crea e restituisce un oggetto File per un file esistente
+   *
+   * @param string $path Percorso del file o NULL per restituire un file casuale
+   *
+   * @return File L'oggetto file da restituire
+   */
+  public function fileObj(?string $path=null): File {
+    if (empty($path)) {
+      $files = ['image0.png', 'image1.png', 'image2.png', 'image3.png',
+        'documento-docx.docx', 'documento-pdf.pdf', 'documento-xlsx.xlsx'];
+      $path = __DIR__.'/data/'.static::randomElement($files);
+    }
+    return new File($path);
   }
 
 }

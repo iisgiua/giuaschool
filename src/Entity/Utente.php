@@ -62,23 +62,23 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $username Nome utente univoco
+   * @var string|null $username Nome utente univoco
    *
    * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
    * @Assert\Length(min=3,max=128,minMessage="field.minlength",maxMessage="field.maxlength")
    * @Assert\Regex(pattern="/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/",message="field.regex")
    */
-  private string $username = '';
+  private ?string $username = '';
 
   /**
-   * @var string $password Password cifrata dell'utente
+   * @var string|null $password Password cifrata dell'utente
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private string $password = '';
+  private ?string $password = '';
 
   /**
    * @var string|null $passwordNonCifrata Password in chiaro dell'utente (dato non persistente)
@@ -88,7 +88,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?string $passwordNonCifrata = '###NOPASSWORD###';
 
   /**
-   * @var string $email Indirizzo email dell'utente
+   * @var string|null $email Indirizzo email dell'utente
    *
    * @ORM\Column(type="string", length=255, unique=true, nullable=false)
    *
@@ -96,7 +96,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
-  private string $email = '';
+  private ?string $email = '';
 
   /**
    * @var string|null $token Token generato per la procedura di attivazione o di recupero password
@@ -162,33 +162,33 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   private ?string $ultimoOtp = '';
 
   /**
-   * @var string $nome Nome dell'utente
+   * @var string|null $nome Nome dell'utente
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
-   * @var string $cognome Cognome dell'utente
+   * @var string|null $cognome Cognome dell'utente
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $cognome = '';
+  private ?string $cognome = '';
 
   /**
-   * @var string $sesso Sesso dell'utente [M,F]
+   * @var string|null $sesso Sesso dell'utente [M,F]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"M","F"}, strict=true, message="field.choice")
    */
-  private string $sesso = 'M';
+  private ?string $sesso = 'M';
 
   /**
    * @var \DateTime|null $dataNascita Data di nascita dell'utente
@@ -291,9 +291,9 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce l'identificativo dell'utente
    *
-   * @return string Identificativo dell'utente
+   * @return string|null Identificativo dell'utente
    */
-  public function getUserIdentifier(): string {
+  public function getUserIdentifier(): ?string {
     return $this->username;
   }
 
@@ -353,7 +353,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Deserializza l'oggetto Utente
    *
-   * @param string $oggetto Oggetto Utente serializzato
+   * @param mixed $oggetto Oggetto Utente serializzato
    */
   public function unserialize($oggetto): void {
     list (
@@ -398,20 +398,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce la username dell'utente
    *
-   * @return string Username dell'utente
+   * @return string|null Username dell'utente
    */
-  public function getUsername(): string {
+  public function getUsername(): ?string {
     return $this->username;
   }
 
   /**
    * Modifica la username dell'utente
    *
-   * @param string $username Username dell'utente
+   * @param string|null $username Username dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setUsername(string $username): self {
+  public function setUsername(?string $username): self {
     $this->username = $username;
     return $this;
   }
@@ -419,11 +419,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica la password cifrata dell'utente
    *
-   * @param string $password Password cifrata dell'utente
+   * @param string|null $password Password cifrata dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setPassword(string $password): self {
+  public function setPassword(?string $password): self {
     $this->password = $password;
     return $this;
   }
@@ -440,11 +440,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica la password in chiaro dell'utente (dato non persistente)
    *
-   * @param string $passwordNonCifrata Password in chiaro dell'utente
+   * @param string|null $passwordNonCifrata Password in chiaro dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setPasswordNonCifrata(string $passwordNonCifrata): self {
+  public function setPasswordNonCifrata(?string $passwordNonCifrata): self {
     $this->passwordNonCifrata = $passwordNonCifrata;
     return $this;
   }
@@ -452,20 +452,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce l'indirizzo email dell'utente (fittizio se dominio è "noemail.local")
    *
-   * @return string Indirizzo email dell'utente
+   * @return string|null Indirizzo email dell'utente
    */
-  public function getEmail(): string {
+  public function getEmail(): ?string {
     return $this->email;
   }
 
   /**
    * Modifica l'indirizzo email dell'utente (fittizio se dominio è "noemail.local")
    *
-   * @param string $email Indirizzo email dell'utente
+   * @param string|null $email Indirizzo email dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setEmail(string $email): self {
+  public function setEmail(?string $email): self {
     $this->email = $email;
     return $this;
   }
@@ -482,11 +482,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica il token generato per la procedura di attivazione o di recupero password
    *
-   * @param string Token generato
+   * @param string|null Token generato
    *
    * @return self Oggetto modificato
    */
-  public function setToken(string $token): self {
+  public function setToken(?string $token): self {
     $this->token = $token;
     return $this;
   }
@@ -524,11 +524,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica il codice di pre-login
    *
-   * @param string $prelogin Codice di pre-login
+   * @param string|null $prelogin Codice di pre-login
    *
    * @return self Oggetto modificato
    */
-  public function setPrelogin(string $prelogin): self {
+  public function setPrelogin(?string $prelogin): self {
     $this->prelogin = $prelogin;
     return $this;
   }
@@ -629,11 +629,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica il token segreto per l'accesso con OTP (se NULL non è attivato)
    *
-   * @param string $otp Token segreto per l'accesso con OTP
+   * @param string|null $otp Token segreto per l'accesso con OTP
    *
    * @return self Oggetto modificato
    */
-  public function setOtp(string $otp): self {
+  public function setOtp(?string $otp): self {
     $this->otp = $otp;
     return $this;
   }
@@ -650,11 +650,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica il codice OTP usato l'ultima volta (per evitare replay attack)
    *
-   * @param string $ultimoOtp Codice OTP usato l'ultima volta
+   * @param string|null $ultimoOtp Codice OTP usato l'ultima volta
    *
    * @return self Oggetto modificato
    */
-  public function setUltimoOtp(string $ultimoOtp): self {
+  public function setUltimoOtp(?string $ultimoOtp): self {
     $this->ultimoOtp = $ultimoOtp;
     return $this;
   }
@@ -662,20 +662,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce il nome dell'utente
    *
-   * @return string Nome dell'utente
+   * @return string|null Nome dell'utente
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome dell'utente
    *
-   * @param string $nome Nome dell'utente
+   * @param string|null $nome Nome dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -683,20 +683,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce il cognome dell'utente
    *
-   * @return string Cognome dell'utente
+   * @return string|null Cognome dell'utente
    */
-  public function getCognome(): string {
+  public function getCognome(): ?string {
     return $this->cognome;
   }
 
   /**
    * Modifica il cognome dell'utente
    *
-   * @param string $cognome Cognome dell'utente
+   * @param string|null $cognome Cognome dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setCognome(string $cognome): self {
+  public function setCognome(?string $cognome): self {
     $this->cognome = $cognome;
     return $this;
   }
@@ -704,20 +704,20 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Restituisce il sesso dell'utente [M,F]
    *
-   * @return string Sesso dell'utente
+   * @return string|null Sesso dell'utente
    */
-  public function getSesso(): string {
+  public function getSesso(): ?string {
     return $this->sesso;
   }
 
   /**
    * Modifica il sesso dell'utente [M,F]
    *
-   * @param string $sesso Sesso dell'utente
+   * @param string|null $sesso Sesso dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setSesso(string $sesso): self {
+  public function setSesso(?string $sesso): self {
     $this->sesso = $sesso;
     return $this;
   }
@@ -755,11 +755,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica il comune di nascita dell'utente
    *
-   * @param string $comuneNascita Comune di nascita dell'utente
+   * @param string|null $comuneNascita Comune di nascita dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setComuneNascita(string $comuneNascita): self {
+  public function setComuneNascita(?string $comuneNascita): self {
     $this->comuneNascita = $comuneNascita;
     return $this;
   }
@@ -776,11 +776,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica il codice fiscale dell'utente (univoco)
    *
-   * @param string $codiceFiscale Codice fiscale dell'utente
+   * @param string|null $codiceFiscale Codice fiscale dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setCodiceFiscale(string $codiceFiscale): self {
+  public function setCodiceFiscale(?string $codiceFiscale): self {
     $this->codiceFiscale = $codiceFiscale;
     return $this;
   }
@@ -797,11 +797,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica la città dell'utente
    *
-   * @param string $citta Città dell'utente
+   * @param string|null $citta Città dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setCitta(string $citta): self {
+  public function setCitta(?string $citta): self {
     $this->citta = $citta;
     return $this;
   }
@@ -818,11 +818,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica l'indirizzo dell'utente
    *
-   * @param string $indirizzo Indirizzo dell'utente
+   * @param string|null $indirizzo Indirizzo dell'utente
    *
    * @return self Oggetto modificato
    */
-  public function setIndirizzo(string $indirizzo): self {
+  public function setIndirizzo(?string $indirizzo): self {
     $this->indirizzo = $indirizzo;
     return $this;
   }

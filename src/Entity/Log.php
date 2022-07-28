@@ -62,24 +62,24 @@ class Log {
   private ?Utente $utente = null;
 
   /**
-   * @var string $username Username dell'utente connesso
+   * @var string|null $username Username dell'utente connesso
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private string $username = '';
+  private ?string $username = '';
 
   /**
-   * @var string $ruolo Ruolo dell'utente connesso
+   * @var string|null $ruolo Ruolo dell'utente connesso
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $ruolo = '';
+  private ?string $ruolo = '';
 
   /**
    * @var string|null $alias Username dell'utente reale se l'utente è un alias, altrimenti null
@@ -91,53 +91,53 @@ class Log {
   private ?string $alias = '';
 
   /**
-   * @var string $ip Indirizzo IP dell'utente connesso
+   * @var string|null $ip Indirizzo IP dell'utente connesso
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $ip = '';
+  private ?string $ip = '';
 
   /**
-   * @var string $origine Controller che ha generato il log
+   * @var string|null $origine Controller che ha generato il log
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private string $origine = '';
+  private ?string $origine = '';
 
   /**
-   * @var string $tipo Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
+   * @var string|null $tipo Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"A","C","U","D"}, strict=true, message="field.choice")
    */
-  private string $tipo = 'A';
+  private ?string $tipo = 'A';
 
   /**
-   * @var string $categoria Categoria dell'azione registrata nel log
+   * @var string|null $categoria Categoria dell'azione registrata nel log
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $categoria = '';
+  private ?string $categoria = '';
 
   /**
-   * @var string $azione Azione registrata nel log
+   * @var string|null $azione Azione registrata nel log
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $azione = '';
+  private ?string $azione = '';
 
   /**
    * @var array|null $dati Lista di dati da memorizzare nel log
@@ -224,20 +224,20 @@ class Log {
   /**
    * Restituisce la username dell'utente connesso
    *
-   * @return string Username dell'utente connesso
+   * @return string|null Username dell'utente connesso
    */
-  public function getUsername(): string {
+  public function getUsername(): ?string {
     return $this->username;
   }
 
   /**
    * Modifica la username dell'utente connesso
    *
-   * @param string $username Username dell'utente connesso
+   * @param string|null $username Username dell'utente connesso
    *
    * @return self Oggetto modificato
    */
-  public function setUsername(string $username): self {
+  public function setUsername(?string $username): self {
     $this->username = $username;
     return $this;
   }
@@ -245,20 +245,20 @@ class Log {
   /**
    * Restituisce il ruolo dell'utente connesso
    *
-   * @return string Ruolo dell'utente connesso
+   * @return string|null Ruolo dell'utente connesso
    */
-  public function getRuolo(): string {
+  public function getRuolo(): ?string {
     return $this->ruolo;
   }
 
   /**
    * Modifica il ruolo dell'utente connesso
    *
-   * @param string $ruolo Ruolo dell'utente connesso
+   * @param string|null $ruolo Ruolo dell'utente connesso
    *
    * @return self Oggetto modificato
    */
-  public function setRuolo(string $ruolo): self {
+  public function setRuolo(?string $ruolo): self {
     $this->ruolo = $ruolo;
     return $this;
   }
@@ -287,20 +287,20 @@ class Log {
   /**
    * Restituisce l'indirizzo IP dell'utente connesso
    *
-   * @return string Indirizzo IP dell'utente connesso
+   * @return string|null Indirizzo IP dell'utente connesso
    */
-  public function getIp(): string {
+  public function getIp(): ?string {
     return $this->ip;
   }
 
   /**
    * Modifica l'indirizzo IP dell'utente connesso
    *
-   * @param string $ip Indirizzo IP dell'utente connesso
+   * @param string|null $ip Indirizzo IP dell'utente connesso
    *
    * @return self Oggetto modificato
    */
-  public function setIp(string $ip): self {
+  public function setIp(?string $ip): self {
     $this->ip = $ip;
     return $this;
   }
@@ -308,20 +308,20 @@ class Log {
   /**
    * Restituisce il controller che ha generato il log
    *
-   * @return string Controller che ha generato il log
+   * @return string|null Controller che ha generato il log
    */
-  public function getOrigine(): string {
+  public function getOrigine(): ?string {
     return $this->origine;
   }
 
   /**
    * Modifica il controller che ha generato il log
    *
-   * @param string $origine Controller che ha generato il log
+   * @param string|null $origine Controller che ha generato il log
    *
    * @return self Oggetto modificato
    */
-  public function setOrigine(string $origine): self {
+  public function setOrigine(?string $origine): self {
     $this->origine = $origine;
     return $this;
   }
@@ -329,20 +329,20 @@ class Log {
   /**
    * Restituisce il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
-   * @return string Tipo di dati memorizzati
+   * @return string|null Tipo di dati memorizzati
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
-   * @param string $tipo Tipo di dati memorizzati
+   * @param string|null $tipo Tipo di dati memorizzati
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -350,20 +350,20 @@ class Log {
   /**
    * Restituisce la categoria dell'azione registrata nel log
    *
-   * @return string Categoria dell'azione registrata nel log
+   * @return string|null Categoria dell'azione registrata nel log
    */
-  public function getCategoria(): string {
+  public function getCategoria(): ?string {
     return $this->categoria;
   }
 
   /**
    * Modifica la categoria dell'azione registrata nel log
    *
-   * @param string $categoria Categoria dell'azione registrata nel log
+   * @param string|null $categoria Categoria dell'azione registrata nel log
    *
    * @return self Oggetto modificato
    */
-  public function setCategoria(string $categoria): self {
+  public function setCategoria(?string $categoria): self {
     $this->categoria = $categoria;
     return $this;
   }
@@ -371,20 +371,20 @@ class Log {
   /**
    * Restituisce l'azione registrata nel log
    *
-   * @return string Azione registrata nel log
+   * @return string|null Azione registrata nel log
    */
-  public function getAzione(): string {
+  public function getAzione(): ?string {
     return $this->azione;
   }
 
   /**
    * Modifica l'azione registrata nel log
    *
-   * @param string $azione Azione registrata nel log
+   * @param string|null $azione Azione registrata nel log
    *
    * @return self Oggetto modificato
    */
-  public function setAzione(string $azione): self {
+  public function setAzione(?string $azione): self {
     $this->azione = $azione;
     return $this;
   }

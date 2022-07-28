@@ -13,8 +13,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
@@ -56,38 +56,38 @@ class CircolareUtente {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var Circolare $circolare Circolare a cui ci si riferisce
+   * @var Circolare|null $circolare Circolare a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Circolare")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $circolare;
+  private ?Circolare $circolare = null;
 
   /**
-   * @var Utente $utente Utente destinatario della circolare
+   * @var Utente|null $utente Utente destinatario della circolare
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $utente;
+  private ?Utente $utente = null;
 
   /**
-   * @var \DateTime $letta Data e ora di lettura implicita della circolare da parte dell'utente
+   * @var \DateTime|null $letta Data e ora di lettura implicita della circolare da parte dell'utente
    *
    * @ORM\Column(type="datetime", nullable=true)
    */
-  private $letta;
+  private ?\DateTime $letta = null;
 
   /**
-   * @var \DateTime $confermata Data e ora di conferma esplicita della lettura della circolare da parte dell'utente
+   * @var \DateTime|null $confermata Data e ora di conferma esplicita della lettura della circolare da parte dell'utente
    *
    * @ORM\Column(type="datetime", nullable=true)
    */
-  private $confermata;
+  private ?\DateTime $confermata = null;
 
 
   //==================== EVENTI ORM ====================
@@ -146,9 +146,9 @@ class CircolareUtente {
   /**
    * Restituisce la circolare a cui ci si riferisce
    *
-   * @return Circolare Circolare a cui ci si riferisce
+   * @return Circolare|null Circolare a cui ci si riferisce
    */
-  public function getCircolare() {
+  public function getCircolare(): ?Circolare {
     return $this->circolare;
   }
 
@@ -167,9 +167,9 @@ class CircolareUtente {
   /**
    * Restituisce l'utente destinatario della circolare
    *
-   * @return Utente Utente destinatario della circolare
+   * @return Utente|null Utente destinatario della circolare
    */
-  public function getUtente() {
+  public function getUtente(): ?Utente {
     return $this->utente;
   }
 
@@ -188,20 +188,20 @@ class CircolareUtente {
   /**
    * Restituisce la data e ora di lettura implicita della circolare da parte dell'utente
    *
-   * @return \DateTime Data e ora di lettura implicita della circolare
+   * @return \DateTime|null Data e ora di lettura implicita della circolare
    */
-  public function getLetta() {
+  public function getLetta(): ?\DateTime {
     return $this->letta;
   }
 
   /**
    * Modifica la data e ora di lettura implicita della circolare da parte dell'utente
    *
-   * @param \DateTime $letta Data e ora di lettura implicita della circolare
+   * @param \DateTime|null $letta Data e ora di lettura implicita della circolare
    *
    * @return self Oggetto modificato
    */
-  public function setLetta($letta): self {
+  public function setLetta(?\DateTime $letta): self {
     $this->letta = $letta;
     return $this;
   }
@@ -209,20 +209,20 @@ class CircolareUtente {
   /**
    * Restituisce la data e ora di conferma esplicita della lettura della circolare da parte dell'utente
    *
-   * @return \DateTime Data e ora di conferma esplicita della lettura della circolare
+   * @return \DateTime|null Data e ora di conferma esplicita della lettura della circolare
    */
-  public function getConfermata() {
+  public function getConfermata(): ?\DateTime {
     return $this->confermata;
   }
 
   /**
    * Modifica la data e ora di conferma esplicita della lettura della circolare da parte dell'utente
    *
-   * @param \DateTime $confermata Data e ora di conferma esplicita della lettura della circolare
+   * @param \DateTime|null $confermata Data e ora di conferma esplicita della lettura della circolare
    *
    * @return self Oggetto modificato
    */
-  public function setConfermata($confermata): self {
+  public function setConfermata(?\DateTime $confermata): self {
     $this->confermata = $confermata;
     return $this;
   }

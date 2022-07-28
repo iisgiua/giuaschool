@@ -52,34 +52,34 @@ class File {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $titolo Nome da visualizzare per il file
+   * @var string|null $titolo Nome da visualizzare per il file
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private string $titolo = '';
+  private ?string $titolo = '';
 
   /**
-   * @var string $nome Nome per il salvataggio del file sul client
+   * @var string|null $nome Nome per il salvataggio del file sul client
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
-   * @var string $estensione Estensione del file per il salvataggio sul client (indica anche il tipo)
+   * @var string|null $estensione Estensione del file per il salvataggio sul client (indica anche il tipo)
    *
    * @ORM\Column(type="string", length=16, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=16,maxMessage="field.maxlength")
    */
-  private string $estensione = '';
+  private ?string $estensione = '';
 
   /**
    * @var int $dimensione Dimensione del file
@@ -91,14 +91,14 @@ class File {
   private int $dimensione = 0;
 
   /**
-   * @var string $file File memorizzato sul server
+   * @var string|null $file File memorizzato sul server
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private string $file = '';
+  private ?string $file = '';
 
 
   //==================== EVENTI ORM ====================
@@ -157,20 +157,20 @@ class File {
   /**
    * Restituisce il nome da visualizzare per il file
    *
-   * @return string Nome da visualizzare per il file
+   * @return string|null Nome da visualizzare per il file
    */
-  public function getTitolo(): string {
+  public function getTitolo(): ?string {
     return $this->titolo;
   }
 
   /**
    * Modifica il nome da visualizzare per il file
    *
-   * @param string $titolo Nome da visualizzare per il file
+   * @param string|null $titolo Nome da visualizzare per il file
    *
    * @return self Oggetto modificato
    */
-  public function setTitolo(string $titolo): self {
+  public function setTitolo(?string $titolo): self {
     $this->titolo = $titolo;
     return $this;
   }
@@ -178,20 +178,20 @@ class File {
   /**
    * Restituisce il nome per il salvataggio del file sul client
    *
-   * @return string Nome per il salvataggio del file sul client
+   * @return string|null Nome per il salvataggio del file sul client
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome per il salvataggio del file sul client
    *
-   * @param string $nome Nome per il salvataggio del file sul client
+   * @param string|null $nome Nome per il salvataggio del file sul client
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -199,20 +199,20 @@ class File {
   /**
    * Restituisce l'estensione del file per il salvataggio sul client (indica anche il tipo)
    *
-   * @return string Estensione del file per il salvataggio sul client (indica anche il tipo)
+   * @return string|null Estensione del file per il salvataggio sul client (indica anche il tipo)
    */
-  public function getEstensione(): string {
+  public function getEstensione(): ?string {
     return $this->estensione;
   }
 
   /**
    * Modifica l'estensione del file per il salvataggio sul client (indica anche il tipo)
    *
-   * @param string $estensione Estensione del file per il salvataggio sul client (indica anche il tipo)
+   * @param string|null $estensione Estensione del file per il salvataggio sul client (indica anche il tipo)
    *
    * @return self Oggetto modificato
    */
-  public function setEstensione(string $estensione): self {
+  public function setEstensione(?string $estensione): self {
     $this->estensione = $estensione;
     return $this;
   }
@@ -241,20 +241,20 @@ class File {
   /**
    * Restituisce il file memorizzato sul server
    *
-   * @return string File memorizzato sul server
+   * @return string|null File memorizzato sul server
    */
-  public function getFile(): string {
+  public function getFile(): ?string {
     return $this->file;
   }
 
   /**
    * Modifica il file memorizzato sul server
    *
-   * @param string $file File memorizzato sul server
+   * @param string|null $file File memorizzato sul server
    *
    * @return self Oggetto modificato
    */
-  public function setFile(string $file): self {
+  public function setFile(?string $file): self {
     $this->file = $file;
     return $this;
   }

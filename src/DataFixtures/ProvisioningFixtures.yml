@@ -1,0 +1,21 @@
+####################
+# ProvisioningFixtures - dati di test
+#
+# Dati per la gestione degli utenti su sistemi esterni:
+#   utente: utente del quale deve essere eseguito il provisioning
+#   dati: lista dei dati necessari per il provisioning
+#   funzione: funzione da eseguire
+#   stato: stato del provisioning [A=attesa,P=processato,C=da cancellare,E=errore]
+####################
+
+
+include:
+  - UtenteFixtures.yml
+
+
+App\Entity\Provisioning:
+  provisioning_{1..10}:
+    utente: '@utente_*'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    funzione: '<substr(<text()>, 0, 255)>'
+    stato: '<randomElement(["A", "P", "C", "E"])>'

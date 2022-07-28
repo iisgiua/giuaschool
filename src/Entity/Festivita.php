@@ -61,23 +61,23 @@ class Festivita {
   private ?\DateTime $data = null;
 
   /**
-   * @var string $descrizione Descrizione della festività
+   * @var string|null $descrizione Descrizione della festività
    *
    * @ORM\Column(type="string", length=128, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
-  private string $descrizione = '';
+  private ?string $descrizione = '';
 
   /**
-   * @var string $tipo Tipo di festività [F=festivo, A=assemblea di Istituto]
+   * @var string|null $tipo Tipo di festività [F=festivo, A=assemblea di Istituto]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"F","A"}, strict=true, message="field.choice")
    */
-  private string $tipo = 'F';
+  private ?string $tipo = 'F';
 
   /**
    * @var Sede|null $sede Sede interessata dalla festività (se non presente riguarda tutte le sedi)
@@ -165,20 +165,20 @@ class Festivita {
   /**
    * Restituisce la descrizione della festività
    *
-   * @return string Descrizione della festività
+   * @return string|null Descrizione della festività
    */
-  public function getDescrizione(): string {
+  public function getDescrizione(): ?string {
     return $this->descrizione;
   }
 
   /**
    * Modifica la descrizione della festività
    *
-   * @param string $descrizione Descrizione della festività
+   * @param string|null $descrizione Descrizione della festività
    *
    * @return self Oggetto modificato
    */
-  public function setDescrizione(string $descrizione): self {
+  public function setDescrizione(?string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }
@@ -186,20 +186,20 @@ class Festivita {
   /**
    * Restituisce il tipo di festività [F=festivo, A=assemblea di Istituto]
    *
-   * @return string Tipo di festività
+   * @return string|null Tipo di festività
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo di festività [F=festivo, A=assemblea di Istituto]
    *
-   * @param string $tipo Tipo di festività
+   * @param string|null $tipo Tipo di festività
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }

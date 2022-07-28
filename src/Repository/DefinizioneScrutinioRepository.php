@@ -39,7 +39,7 @@ class DefinizioneScrutinioRepository extends EntityRepository {
       (in_array('S', $periodi) ? 'S' :
       (in_array('P', $periodi) ? 'P' :
       (in_array('X', $periodi) ? 'X' :
-      '')))));
+      'P')))));
     // restituisce dato
     return $ultimo;
   }

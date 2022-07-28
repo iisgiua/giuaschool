@@ -50,14 +50,14 @@ class Orario {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $nome Nome descrittivo dell'orario
+   * @var string|null $nome Nome descrittivo dell'orario
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
    * @var \DateTime|null $inizio Data iniziale dell'entrata in vigore dell'orario
@@ -144,20 +144,20 @@ class Orario {
   /**
    * Restituisce il nome descrittivo dell'orario
    *
-   * @return string Nome descrittivo dell'orario
+   * @return string|null Nome descrittivo dell'orario
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome descrittivo dell'orario
    *
-   * @param string $nome Nome descrittivo dell'orario
+   * @param string|null $nome Nome descrittivo dell'orario
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }

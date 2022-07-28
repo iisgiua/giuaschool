@@ -60,8 +60,8 @@ class SegreteriaController extends AbstractController {
     $search = array();
     $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/nome', '');
     $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/segreteria_assenze/pagina', 1);
@@ -245,8 +245,8 @@ class SegreteriaController extends AbstractController {
     $search = array();
     $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/nome', '');
     $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/segreteria_scrutini/pagina', 1);
@@ -409,8 +409,8 @@ class SegreteriaController extends AbstractController {
     $search = array();
     $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/nome', '');
     $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/segreteria_genitori/pagina', 1);

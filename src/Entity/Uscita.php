@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Uscita - entità
+ * Uscita - dati per la gestione delle uscite anticipate degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\UscitaRepository")
  * @ORM\Table(name="gs_uscita", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
@@ -55,58 +55,58 @@ class Uscita {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data dell'uscita anticipata
+   * @var \DateTime|null $data Data dell'uscita anticipata
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var \DateTime $ora Ora dell'uscita anticipata
+   * @var \DateTime|null $ora Ora dell'uscita anticipata
    *
    * @ORM\Column(type="time", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $ora;
+  private ?\DateTime $ora = null;
 
   /**
-   * @var string $note Note informative sull'uscita anticipata
+   * @var string|null $note Note informative sull'uscita anticipata
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $note;
+  private ?string $note = '';
 
   /**
    * @var bool $valido Indica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
    *
    * @ORM\Column(name="valido", type="boolean", nullable=false)
    */
-  private $valido;
+  private bool $valido = false;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'uscita anticipata
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'uscita anticipata
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Docente $docente Docente che autorizza l'uscita anticipata
+   * @var Docente|null $docente Docente che autorizza l'uscita anticipata
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
 
   //==================== EVENTI ORM ====================
@@ -165,9 +165,9 @@ class Uscita {
   /**
    * Restituisce la data dell'uscita anticipata
    *
-   * @return \DateTime Data dell'uscita anticipata
+   * @return \DateTime|null Data dell'uscita anticipata
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -186,9 +186,9 @@ class Uscita {
   /**
    * Restituisce l'ora dell'uscita anticipata
    *
-   * @return \DateTime Ora dell'uscita anticipata
+   * @return \DateTime|null Ora dell'uscita anticipata
    */
-  public function getOra() {
+  public function getOra(): ?\DateTime {
     return $this->ora;
   }
 
@@ -207,20 +207,20 @@ class Uscita {
   /**
    * Restituisce le note informative sull'uscita anticipata
    *
-   * @return string Note informative sull'uscita anticipata
+   * @return string|null Note informative sull'uscita anticipata
    */
-  public function getNote() {
+  public function getNote(): ?string {
     return $this->note;
   }
 
   /**
    * Modifica le note informative sull'uscita anticipata
    *
-   * @param string $note Note informative sull'uscita anticipata
+   * @param string|null $note Note informative sull'uscita anticipata
    *
    * @return self Oggetto modificato
    */
-  public function setNote($note): self {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -230,7 +230,7 @@ class Uscita {
    *
    * @return bool Vero se è valida per il conteggio, falso altrimenti
    */
-  public function getValido() {
+  public function getValido(): bool {
     return $this->valido;
   }
 
@@ -241,7 +241,7 @@ class Uscita {
    *
    * @return self Oggetto modificato
    */
-  public function setValido($valido): self {
+  public function setValido(bool $valido): self {
     $this->valido = $valido;
     return $this;
   }
@@ -249,9 +249,9 @@ class Uscita {
   /**
    * Restituisce l'alunno al quale si riferisce l'uscita anticipata
    *
-   * @return Alunno Alunno al quale si riferisce l'uscita anticipata
+   * @return Alunno|null Alunno al quale si riferisce l'uscita anticipata
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -270,9 +270,9 @@ class Uscita {
   /**
    * Restituisce il docente che autorizza l'uscita anticipata
    *
-   * @return Docente Docente che autorizza l'uscita anticipata
+   * @return Docente|null Docente che autorizza l'uscita anticipata
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 

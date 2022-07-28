@@ -252,11 +252,11 @@ class Lezione {
   /**
    * Modifica l'argomento della lezione
    *
-   * @param string $argomento Argomento della lezione
+   * @param string|null $argomento Argomento della lezione
    *
    * @return self Oggetto modificato
    */
-  public function setArgomento(string $argomento): self {
+  public function setArgomento(?string $argomento): self {
     $this->argomento = $argomento;
     return $this;
   }
@@ -273,11 +273,11 @@ class Lezione {
   /**
    * Modifica le attività della lezione
    *
-   * @param string $attivita Attività della lezione
+   * @param string|null $attivita Attività della lezione
    *
    * @return self Oggetto modificato
    */
-  public function setAttivita(string $attivita): self {
+  public function setAttivita(?string $attivita): self {
     $this->attivita = $attivita;
     return $this;
   }

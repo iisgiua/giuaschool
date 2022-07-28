@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * StoricoVoto
+ * StoricoVoto - dati per la memorizzazione dei voti finali del precedente anno scolastico
  *
  * @ORM\Entity(repositoryClass="App\Repository\StoricoVotoRepository")
  * @ORM\Table(name="gs_storico_voto", uniqueConstraints={@ORM\UniqueConstraint(columns={"storico_esito_id","materia_id"})})
@@ -59,41 +59,41 @@ class StoricoVoto {
    *
    * @ORM\Column(type="integer", nullable=false)
    */
-  private $voto;
+  private int $voto = 0;
 
   /**
-   * @var string $carenze Carenze segnalate allo scrutinio finale
+   * @var string|null $carenze Carenze segnalate allo scrutinio finale
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $carenze;
+  private ?string $carenze = '';
 
   /**
-   * @var array $dati Dati aggiuntivi sulla valutazione
-   *
+   * @var array|null $dati Dati aggiuntivi sulla valutazione
+   *|null
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
   /**
-   * @var StoricoEsito $storicoEsito Esito dello storico a cui si riferisce il voto
+   * @var StoricoEsito|null $storicoEsito Esito dello storico a cui si riferisce il voto
    *
    * @ORM\ManyToOne(targetEntity="StoricoEsito")
    * @ORM\JoinColumn(name="storico_esito_id", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $storicoEsito;
+  private ?StoricoEsito $storicoEsito = null;
 
   /**
-   * @var Materia $materia Materia della valutazione
+   * @var Materia|null $materia Materia della valutazione
    *
    * @ORM\ManyToOne(targetEntity="Materia")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $materia;
+  private ?Materia $materia = null;
 
 
   //==================== EVENTI ORM ====================
@@ -154,7 +154,7 @@ class StoricoVoto {
    *
    * @return int Valutazione della materia
    */
-  public function getVoto() {
+  public function getVoto(): int {
     return $this->voto;
   }
 
@@ -165,7 +165,7 @@ class StoricoVoto {
    *
    * @return self Oggetto modificato
    */
-  public function setVoto($voto): self {
+  public function setVoto(int $voto): self {
     $this->voto = $voto;
     return $this;
   }
@@ -173,20 +173,20 @@ class StoricoVoto {
   /**
    * Restituisce le carenze segnalate allo scrutinio finale
    *
-   * @return string Carenze segnalate allo scrutinio finale
+   * @return string|null Carenze segnalate allo scrutinio finale
    */
-  public function getCarenze() {
+  public function getCarenze(): ?string {
     return $this->carenze;
   }
 
   /**
    * Modifica le carenze segnalate allo scrutinio finale
    *
-   * @param string $carenze Carenze segnalate allo scrutinio finale
+   * @param string|null $carenze Carenze segnalate allo scrutinio finale
    *
    * @return self Oggetto modificato
    */
-  public function setCarenze($carenze): self {
+  public function setCarenze(?string $carenze): self {
     $this->carenze = $carenze;
     return $this;
   }
@@ -194,9 +194,9 @@ class StoricoVoto {
   /**
    * Restituisce i dati aggiuntivi sulla valutazione
    *
-   * @return array Dati aggiuntivi sulla valutazione
+   * @return array|null Dati aggiuntivi sulla valutazione
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -207,7 +207,7 @@ class StoricoVoto {
    *
    * @return self Oggetto modificato
    */
-  public function setDati($dati): self {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -219,9 +219,9 @@ class StoricoVoto {
   /**
    * Restituisce l'esito dello storico a cui si riferisce il voto
    *
-   * @return StoricoEsito Esito dello storico a cui si riferisce il voto
+   * @return StoricoEsito|null Esito dello storico a cui si riferisce il voto
    */
-  public function getStoricoEsito() {
+  public function getStoricoEsito(): ?StoricoEsito {
     return $this->storicoEsito;
   }
 
@@ -240,9 +240,9 @@ class StoricoVoto {
   /**
    * Restituisce la materia della valutazione
    *
-   * @return Materia Materia della valutazione
+   * @return Materia|null Materia della valutazione
    */
-  public function getMateria() {
+  public function getMateria(): ?Materia {
     return $this->materia;
   }
 
@@ -260,14 +260,6 @@ class StoricoVoto {
 
 
   //==================== METODI DELLA CLASSE ====================
-
-  /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->dati = array();
-  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo

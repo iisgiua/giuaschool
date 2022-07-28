@@ -57,57 +57,57 @@ class Sede {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $nome Nome per la sede scolastica
+   * @var string|null $nome Nome per la sede scolastica
    *
    * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
-   * @var string $nomeBreve Nome breve per la sede scolastica
+   * @var string|null $nomeBreve Nome breve per la sede scolastica
    *
    * @ORM\Column(name="nome_breve", type="string", length=32, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $nomeBreve = '';
+  private ?string $nomeBreve = '';
 
   /**
-   * @var string $citta Città della sede scolastica
+   * @var string|null $citta Città della sede scolastica
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $citta = '';
+  private ?string $citta = '';
 
   /**
-   * @var string $indirizzo1 Prima riga per l'indirizzo della sede scolastica (via/num.civico)
+   * @var string|null $indirizzo1 Prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $indirizzo1 = '';
+  private ?string $indirizzo1 = '';
 
   /**
-   * @var string $indirizzo2 Seconda riga per l'indirizzo della sede scolastica (cap/città)
+   * @var string|null $indirizzo2 Seconda riga per l'indirizzo della sede scolastica (cap/città)
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $indirizzo2 = '';
+  private ?string $indirizzo2 = '';
 
   /**
-   * @var string $telefono Numero di telefono della sede scolastica
+   * @var string|null $telefono Numero di telefono della sede scolastica
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
@@ -115,7 +115,7 @@ class Sede {
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    * @Assert\Regex(pattern="/^\+?[0-9\(][0-9\.\-\(\) ]*[0-9]$/",message="field.phone")
    */
-  private string $telefono = '';
+  private ?string $telefono = '';
 
   /**
    * @var int $ordinamento Numero d'ordine per la visualizzazione delle sedi
@@ -183,20 +183,20 @@ class Sede {
   /**
    * Restituisce il nome della sede scolastica
    *
-   * @return string Nome della sede scolastica
+   * @return string|null Nome della sede scolastica
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome della sede scolastica
    *
-   * @param string $nome Nome della sede scolastica
+   * @param string|null $nome Nome della sede scolastica
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -204,20 +204,20 @@ class Sede {
   /**
    * Restituisce il nome breve della sede scolastica
    *
-   * @return string Nome breve della sede scolastica
+   * @return string|null Nome breve della sede scolastica
    */
-  public function getNomeBreve(): string {
+  public function getNomeBreve(): ?string {
     return $this->nomeBreve;
   }
 
   /**
    * Modifica il nome breve della sede scolastica
    *
-   * @param string $nomeBreve Nome breve della sede scolastica
+   * @param string|null $nomeBreve Nome breve della sede scolastica
    *
    * @return self Oggetto modificato
    */
-  public function setNomeBreve(string $nomeBreve): self {
+  public function setNomeBreve(?string $nomeBreve): self {
     $this->nomeBreve = $nomeBreve;
     return $this;
   }
@@ -225,20 +225,20 @@ class Sede {
   /**
    * Restituisce la città della sede scolastica
    *
-   * @return string Città della sede scolastica
+   * @return string|null Città della sede scolastica
    */
-  public function getCitta(): string {
+  public function getCitta(): ?string {
     return $this->citta;
   }
 
   /**
    * Modifica la città della sede scolastica
    *
-   * @param string $citta Città della sede scolastica
+   * @param string|null $citta Città della sede scolastica
    *
    * @return self Oggetto modificato
    */
-  public function setCitta(string $citta): self {
+  public function setCitta(?string $citta): self {
     $this->citta = $citta;
     return $this;
   }
@@ -246,20 +246,20 @@ class Sede {
   /**
    * Restituisce la prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
-   * @return string Prima riga per l'indirizzo della sede scolastica (via/num.civico)
+   * @return string|null Prima riga per l'indirizzo della sede scolastica (via/num.civico)
    */
-  public function getIndirizzo1(): string {
+  public function getIndirizzo1(): ?string {
     return $this->indirizzo1;
   }
 
   /**
    * Modifica la prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
-   * @param string $indirizzo1 Prima riga per l'indirizzo della sede scolastica (via/num.civico)
+   * @param string|null $indirizzo1 Prima riga per l'indirizzo della sede scolastica (via/num.civico)
    *
    * @return self Oggetto modificato
    */
-  public function setIndirizzo1(string $indirizzo1): self {
+  public function setIndirizzo1(?string $indirizzo1): self {
     $this->indirizzo1 = $indirizzo1;
     return $this;
   }
@@ -267,20 +267,20 @@ class Sede {
   /**
    * Restituisce la seconda riga per l'indirizzo della sede scolastica (cap/città)
    *
-   * @return string Seconda riga per l'indirizzo della sede scolastica (cap/città)
+   * @return string|null Seconda riga per l'indirizzo della sede scolastica (cap/città)
    */
-  public function getIndirizzo2(): string {
+  public function getIndirizzo2(): ?string {
     return $this->indirizzo2;
   }
 
   /**
    * Modifica la seconda riga per l'indirizzo della sede scolastica (cap/città)
    *
-   * @param string $indirizzo2 Seconda riga per l'indirizzo della sede scolastica (cap/città)
+   * @param string|null $indirizzo2 Seconda riga per l'indirizzo della sede scolastica (cap/città)
    *
    * @return self Oggetto modificato
    */
-  public function setIndirizzo2(string $indirizzo2): self {
+  public function setIndirizzo2(?string $indirizzo2): self {
     $this->indirizzo2 = $indirizzo2;
     return $this;
   }
@@ -288,20 +288,20 @@ class Sede {
   /**
    * Restituisce il numero di telefono della sede scolastica
    *
-   * @return string Numero di telefono della sede scolastica
+   * @return string|null Numero di telefono della sede scolastica
    */
-  public function getTelefono(): string {
+  public function getTelefono(): ?string {
     return $this->telefono;
   }
 
   /**
    * Modifica il numero di telefono della sede scolastica
    *
-   * @param string $telefono Numero di telefono della sede scolastica
+   * @param string|null $telefono Numero di telefono della sede scolastica
    *
    * @return self Oggetto modificato
    */
-  public function setTelefono(string $telefono): self {
+  public function setTelefono(?string $telefono): self {
     $this->telefono = $telefono;
     return $this;
   }

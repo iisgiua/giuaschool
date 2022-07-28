@@ -148,8 +148,8 @@ class DocentiController extends BaseController {
     $criteri = array();
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/nome', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_modifica/pagina', 1);
@@ -589,8 +589,8 @@ class DocentiController extends BaseController {
     $criteri = array();
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/nome', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/classe');
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_coordinatori/pagina', 1);
@@ -754,8 +754,8 @@ class DocentiController extends BaseController {
     $criteri = array();
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/nome', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/classe');
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_segretari/pagina', 1);
@@ -916,12 +916,12 @@ class DocentiController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/classe', 0);
-    $criteri['materia'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/materia', 0);
-    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/docente', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
-    $materia = ($criteri['materia'] > 0 ? $em->getRepository('App\Entity\Materia')->find($criteri['materia']) : 0);
-    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/classe');
+    $criteri['materia'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/materia');
+    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/docente');
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $materia = ($criteri['materia'] > 0 ? $em->getRepository('App\Entity\Materia')->find($criteri['materia']) : null);
+    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_cattedre/pagina', 1);
@@ -935,9 +935,9 @@ class DocentiController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
-      $criteri['classe'] = ($form->get('classe')->getData() ? $form->get('classe')->getData()->getId() : 0);
-      $criteri['materia'] = ($form->get('materia')->getData() ? $form->get('materia')->getData()->getId() : 0);
-      $criteri['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : 0);
+      $criteri['classe'] = ($form->get('classe')->getData() ? $form->get('classe')->getData()->getId() : null);
+      $criteri['materia'] = ($form->get('materia')->getData() ? $form->get('materia')->getData()->getId() : null);
+      $criteri['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : null);
       $pagina = 1;
       $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/classe', $criteri['classe']);
       $reqstack->getSession()->set('/APP/ROUTE/docenti_cattedre/materia', $criteri['materia']);
@@ -1115,12 +1115,12 @@ class DocentiController extends BaseController {
     $info = [];
     // recupera criteri dalla sessione
     $criteri = array();
-    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/sede', 0);
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/classe', 0);
-    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/docente', 0);
-    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
-    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : 0);
+    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/sede');
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/classe');
+    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/docente');
+    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
+    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/pagina', 1);

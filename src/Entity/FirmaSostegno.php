@@ -62,11 +62,11 @@ class FirmaSostegno extends Firma {
   /**
    * Modifica l'argomento della lezione di sostegno
    *
-   * @param string $argomento Argomento della lezione di sostegno
+   * @param string|null $argomento Argomento della lezione di sostegno
    *
    * @return self Oggetto modificato
    */
-  public function setArgomento(string $argomento): self {
+  public function setArgomento(?string $argomento): self {
     $this->argomento = $argomento;
     return $this;
   }
@@ -83,11 +83,11 @@ class FirmaSostegno extends Firma {
   /**
    * Modifica le attività della lezione di sostegno
    *
-   * @param string $attivita Attività della lezione di sostegno
+   * @param string|null $attivita Attività della lezione di sostegno
    *
    * @return self Oggetto modificato
    */
-  public function setAttivita(string $attivita): self {
+  public function setAttivita(?string $attivita): self {
     $this->attivita = $attivita;
     return $this;
   }

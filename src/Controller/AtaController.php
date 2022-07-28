@@ -120,8 +120,8 @@ class AtaController extends BaseController {
     $criteri = array();
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/nome', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/cognome', '');
-    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede', 0);
-    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : 0);
+    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/sede');
+    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/ata_modifica/pagina', 1);

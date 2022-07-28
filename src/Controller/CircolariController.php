@@ -186,7 +186,7 @@ class CircolariController extends AbstractController {
           $sedi[] = $s->getId();
         } else {
           // elimina sede
-          $circolare->removeSede($s);
+          $circolare->removeSedi($s);
         }
       }
       // controllo errori

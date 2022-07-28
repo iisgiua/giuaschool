@@ -278,11 +278,11 @@ class Entrata {
   /**
    * Modifica le note informative sull'entrata in ritardo
    *
-   * @param string $note Note informative sull'entrata in ritardo
+   * @param string|null $note Note informative sull'entrata in ritardo
    *
    * @return self Oggetto modificato
    */
-  public function setNote(string $note): self {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -320,11 +320,11 @@ class Entrata {
   /**
    * Modifica la motivazione dell'assenza
    *
-   * @param string $motivazione Motivazione dell'assenza
+   * @param string|null $motivazione Motivazione dell'assenza
    *
    * @return self Oggetto modificato
    */
-  public function setMotivazione(string $motivazione): self {
+  public function setMotivazione(?string $motivazione): self {
     $this->motivazione = $motivazione;
     return $this;
   }

@@ -1,0 +1,25 @@
+####################
+# AppFixtures - dati di test
+#
+# Dati per gestire l'uso di app o altri servizi esterni:
+#   nome: nome dell'app
+#   token: token univoco per l'app
+#   attiva: indica se l'app è attiva o no
+#   css: indica se l'app deve caricare un proprio CSS o no
+#   notifica: tipo di notifica utilizzata dall'app [N=nessuna, E=email, G=Google, T=Telegram]
+#   download: estensione del file da scaricare, o null se nessun file è previsto
+#   abilitati: indica gli utenti abilitati all'uso dell'app [A=alunni,G=genitori,D=docenti,T=ata,N=nessuno]
+#   dati: lista di dati aggiuntivi necessari per le funzionalità dell'app
+####################
+
+
+App\Entity\App:
+  app_{1..10}:
+    nome: '<substr(<text()>, 0, 255)>'
+    token (unique): '<substr(<text()>, 0, 128)>'
+    attiva: '<boolean()>'
+    css: '<boolean()>'
+    notifica: '<randomElement(["N", "E", "G", "T"])>'
+    download: '50%? <substr(<text()>, 0, 64)>: <strval("")>'
+    abilitati: '<substr(<text()>, 0, 4)>'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'

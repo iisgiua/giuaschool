@@ -57,14 +57,14 @@ class Menu {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $selettore Nome identificativo usato per selezionare il menu
+   * @var string|null $selettore Nome identificativo usato per selezionare il menu
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $selettore = '';
+  private ?string $selettore = '';
 
   /**
    * @var string|null $nome Nome del menu (vuoto se sottomenu)
@@ -155,20 +155,20 @@ class Menu {
   /**
    * Restituisce il nome identificativo usato per selezionare il menu
    *
-   * @return string Nome identificativo usato per selezionare il menu
+   * @return string|null Nome identificativo usato per selezionare il menu
    */
-  public function getSelettore(): string {
+  public function getSelettore(): ?string {
     return $this->selettore;
   }
 
   /**
    * Modifica il nome identificativo usato per selezionare il menu
    *
-   * @param string $selettore Nome identificativo usato per selezionare il menu
+   * @param string|null $selettore Nome identificativo usato per selezionare il menu
    *
    * @return self Oggetto modificato
    */
-  public function setSelettore(string $selettore): self {
+  public function setSelettore(?string $selettore): self {
     $this->selettore = $selettore;
     return $this;
   }
@@ -185,11 +185,11 @@ class Menu {
   /**
    * Modifica il nome del menu
    *
-   * @param string $nome Nome del menu
+   * @param string|null $nome Nome del menu
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -206,11 +206,11 @@ class Menu {
   /**
    * Modifica la descrizione del menu
    *
-   * @param string $descrizione Descrizione del menu
+   * @param string|null $descrizione Descrizione del menu
    *
    * @return self Oggetto modificato
    */
-  public function setDescrizione(string $descrizione): self {
+  public function setDescrizione(?string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }

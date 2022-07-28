@@ -167,7 +167,7 @@ class DatabaseTestCase extends KernelTestCase {
     $this->val = $kernel->getContainer()->get('validator');
     $this->faker = $kernel->getContainer()->get('Faker\Generator');
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
-    $this->faker->addProvider(new CustomProvider());
+    $this->faker->addProvider(new CustomProvider($this->faker));
     $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
     // svuota database e carica dati fissi
     $this->addFixtures();

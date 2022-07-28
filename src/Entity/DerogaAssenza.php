@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * DerogaAssenza - entità
+ * DerogaAssenza - dati per le deroghe per il conteggio finale delle assenze
  *
  * @ORM\Entity(repositoryClass="App\Repository\DerogaAssenzaRepository")
  * @ORM\Table(name="gs_deroga_assenza")
@@ -52,31 +52,31 @@ class DerogaAssenza {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data dell'assenza per cui vale la deroga
+   * @var \DateTime|null $data Data dell'assenza per cui vale la deroga
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'assenza
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var string $motivazione Motivazione della deroga
+   * @var string|null $motivazione Motivazione della deroga
    *
    * @ORM\Column(type="text", nullable=false)
    */
-  private $motivazione;
+  private ?string $motivazione = '';
 
 
   //==================== EVENTI ORM ====================
@@ -135,9 +135,9 @@ class DerogaAssenza {
   /**
    * Restituisce la data dell'assenza per cui vale la deroga
    *
-   * @return \DateTime Data dell'assenza per cui vale la deroga
+   * @return \DateTime|null Data dell'assenza per cui vale la deroga
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -156,9 +156,9 @@ class DerogaAssenza {
   /**
    * Restituisce l'alunno al quale si riferisce l'assenza
    *
-   * @return Alunno Alunno al quale si riferisce l'assenza
+   * @return Alunno|null Alunno al quale si riferisce l'assenza
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -177,20 +177,20 @@ class DerogaAssenza {
   /**
    * Restituisce la motivazione della deroga
    *
-   * @return string Motivazione della deroga
+   * @return string|null Motivazione della deroga
    */
-  public function getMotivazione() {
+  public function getMotivazione(): ?string {
     return $this->motivazione;
   }
 
   /**
    * Modifica la motivazione della deroga
    *
-   * @param string $motivazione Motivazione della deroga
+   * @param string|null $motivazione Motivazione della deroga
    *
    * @return self Oggetto modificato
    */
-  public function setMotivazione($motivazione): self {
+  public function setMotivazione(?string $motivazione): self {
     $this->motivazione = $motivazione;
     return $this;
   }

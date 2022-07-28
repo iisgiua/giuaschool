@@ -52,13 +52,13 @@ class Colloquio {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $frequenza Frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
+   * @var string|null $frequenza Frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"S","1","2","3","4"}, strict=true, message="field.choice")
    */
-  private string $frequenza = 'S';
+  private ?string $frequenza = 'S';
 
   /**
    * @var string|null $note Note informative sul colloquio
@@ -174,20 +174,20 @@ class Colloquio {
   /**
    * Restituisce la frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
    *
-   * @return string Frequenza del colloquio
+   * @return string|null Frequenza del colloquio
    */
-  public function getFrequenza(): string {
+  public function getFrequenza(): ?string {
     return $this->frequenza;
   }
 
   /**
    * Modifica la frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
    *
-   * @param string $frequenza Frequenza del colloquio
+   * @param string|null $frequenza Frequenza del colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setFrequenza(string $frequenza): self {
+  public function setFrequenza(?string $frequenza): self {
     $this->frequenza = $frequenza;
     return $this;
   }
@@ -204,11 +204,11 @@ class Colloquio {
   /**
    * Modifica le note informative sul colloquio
    *
-   * @param string $note Note informative sul colloquio
+   * @param string|null $note Note informative sul colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setNote(string $note): self {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -355,7 +355,7 @@ class Colloquio {
    *
    * @param string $nome Nome identificativo del dato
    *
-   * @return mixed Valore del dato o null se non esiste
+   * @return mixed|null Valore del dato o null se non esiste
    */
   public function getDato(string $nome) {
     if (isset($this->dati[$nome])) {

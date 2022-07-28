@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * AssenzaLezione - entità
+ * AssenzaLezione - dati per gestire le ore di assenza degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\AssenzaLezioneRepository")
  * @ORM\Table(name="gs_assenza_lezione", uniqueConstraints={@ORM\UniqueConstraint(columns={"alunno_id","lezione_id"})})
@@ -55,33 +55,31 @@ class AssenzaLezione {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'assenza
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Lezione $lezione Lezione a cui si riferisce l'assenza
+   * @var Lezione|null $lezione Lezione a cui si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $lezione;
+  private ?Lezione $lezione = null;
 
   /**
    * @var float $ore Ore di assenza dell'alunno alla lezione
    *
    * @ORM\Column(type="float", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $ore;
+  private float $ore = 0;
 
 
   //==================== EVENTI ORM ====================
@@ -140,9 +138,9 @@ class AssenzaLezione {
   /**
    * Restituisce l'alunno al quale si riferisce l'assenza
    *
-   * @return Alunno Alunno al quale si riferisce l'assenza
+   * @return Alunno|null Alunno al quale si riferisce l'assenza
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -161,9 +159,9 @@ class AssenzaLezione {
   /**
    * Restituisce la lezione a cui si riferisce l'assenza
    *
-   * @return Lezione Lezione a cui si riferisce l'assenza
+   * @return Lezione|null Lezione a cui si riferisce l'assenza
    */
-  public function getLezione() {
+  public function getLezione(): ?Lezione {
     return $this->lezione;
   }
 
@@ -184,7 +182,7 @@ class AssenzaLezione {
    *
    * @return float Ore di assenza dell'alunno alla lezione
    */
-  public function getOre() {
+  public function getOre(): float {
     return $this->ore;
   }
 
@@ -195,7 +193,7 @@ class AssenzaLezione {
    *
    * @return self Oggetto modificato
    */
-  public function setOre($ore): self {
+  public function setOre(float $ore): self {
     $this->ore = $ore;
     return $this;
   }

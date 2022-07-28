@@ -103,13 +103,13 @@ class RichiestaColloquio {
   private ?Genitore $genitoreAnnulla = null;
 
   /**
-   * @var string $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
+   * @var string|null $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"R","A","C","N","X"}, strict=true, message="field.choice")
    */
-  private string $stato = 'R';
+  private ?string $stato = 'R';
 
   /**
    * @var string|null $messaggio Messaggio da comunicare relativamente allo stato della richiesta
@@ -301,20 +301,20 @@ class RichiestaColloquio {
   /**
    * Restituisce lo stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
    *
-   * @return string Stato della richiesta del colloquio
+   * @return string|null Stato della richiesta del colloquio
    */
-  public function getStato(): string {
+  public function getStato(): ?string {
     return $this->stato;
   }
 
   /**
    * Modifica lo stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
    *
-   * @param string $stato Stato della richiesta del colloquio
+   * @param string|null $stato Stato della richiesta del colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setStato(string $stato): self {
+  public function setStato(?string $stato): self {
     $this->stato = $stato;
     return $this;
   }
@@ -331,11 +331,11 @@ class RichiestaColloquio {
   /**
    * Modifica il messaggio da comunicare relativamente allo stato della richiesta
    *
-   * @param string $messaggio Messaggio da comunicare relativamente allo stato della richiesta
+   * @param string|null $messaggio Messaggio da comunicare relativamente allo stato della richiesta
    *
    * @return self Oggetto modificato
    */
-  public function setMessaggio(string $messaggio): self {
+  public function setMessaggio(?string $messaggio): self {
     $this->messaggio = $messaggio;
     return $this;
   }

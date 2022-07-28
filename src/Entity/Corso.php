@@ -55,24 +55,24 @@ class Corso {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $nome Nome per il corso
+   * @var string|null $nome Nome per il corso
    *
    * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
-   * @var string $nomeBreve Nome breve per il corso
+   * @var string|null $nomeBreve Nome breve per il corso
    *
    * @ORM\Column(name="nome_breve", type="string", length=32, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $nomeBreve = '';
+  private ?string $nomeBreve = '';
 
 
   //==================== EVENTI ORM ====================
@@ -131,20 +131,20 @@ class Corso {
   /**
    * Restituisce il nome del corso
    *
-   * @return string Nome del corso
+   * @return string|null Nome del corso
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome del corso
    *
-   * @param string $nome Nome del corso
+   * @param string|null $nome Nome del corso
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -152,20 +152,20 @@ class Corso {
   /**
    * Restituisce il nome breve del corso
    *
-   * @return string Nome breve del corso
+   * @return string|null Nome breve del corso
    */
-  public function getNomeBreve(): string {
+  public function getNomeBreve(): ?string {
     return $this->nomeBreve;
   }
 
   /**
    * Modifica il nome breve del corso
    *
-   * @param string $nomeBreve Nome breve del corso
+   * @param string|null $nomeBreve Nome breve del corso
    *
    * @return self Oggetto modificato
    */
-  public function setNomeBreve(string $nomeBreve): self {
+  public function setNomeBreve(?string $nomeBreve): self {
     $this->nomeBreve = $nomeBreve;
     return $this;
   }

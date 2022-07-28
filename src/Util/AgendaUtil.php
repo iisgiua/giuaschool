@@ -450,7 +450,7 @@ class AgendaUtil {
       ->setClasse($avviso->getCattedra()->getClasse())
       ->setDocente($avviso->getDocente());
     $this->em->persist($a);
-    $avviso->addAnnotazione($a);
+    $avviso->addAnnotazioni($a);
   }
 
   /**

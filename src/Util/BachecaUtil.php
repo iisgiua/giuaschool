@@ -205,7 +205,7 @@ class BachecaUtil {
         ->setClasse($this->em->getReference('App\Entity\Classe', $c))
         ->setDocente($avviso->getDocente());
       $this->em->persist($a);
-      $avviso->addAnnotazione($a);
+      $avviso->addAnnotazioni($a);
     }
   }
 

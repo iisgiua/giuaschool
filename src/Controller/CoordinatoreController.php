@@ -843,7 +843,7 @@ class CoordinatoreController extends AbstractController {
             ->setClasse($classe)
             ->setDocente($avviso->getDocente());
           $em->persist($a);
-          $avviso->addAnnotazione($a);
+          $avviso->addAnnotazioni($a);
         }
         // ok: memorizza dati
         $em->flush();

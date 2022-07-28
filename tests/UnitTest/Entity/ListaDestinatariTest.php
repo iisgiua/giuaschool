@@ -31,8 +31,8 @@ class ListaDestinatariTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\ListaDestinatari';
     // campi da testare
-    $this->fields = ['sedi', 'dsga', 'ata', 'docenti', 'filtroDocenti', 'coordinatori', 'filtroCoordinatori', 'staff', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni'];
-    $this->noStoredFields = [];
+    $this->fields = ['dsga', 'ata', 'docenti', 'filtroDocenti', 'coordinatori', 'filtroCoordinatori', 'staff', 'genitori', 'filtroGenitori', 'alunni', 'filtroAlunni'];
+    $this->noStoredFields = ['sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = ['ListaDestinatariFixtures'];
@@ -70,7 +70,6 @@ class ListaDestinatariTest extends DatabaseTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'sedi' ? new \Doctrine\Common\Collections\ArrayCollection([$this->getReference("sede_1")]) :
           ($field == 'dsga' ? $this->faker->boolean() :
           ($field == 'ata' ? $this->faker->boolean() :
           ($field == 'docenti' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
@@ -82,7 +81,7 @@ class ListaDestinatariTest extends DatabaseTestCase {
           ($field == 'filtroGenitori' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
           ($field == 'alunni' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'filtroAlunni' ? $this->faker->optional($weight = 50, $default = array())->passthrough($this->faker->sentences($i)) :
-          null))))))))))));
+          null)))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -97,7 +96,7 @@ class ListaDestinatariTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['filtroDocenti'] = [1, 2, 3, 4, 5];
+      $data[$i]['filtroDocenti'] = [$this->faker->text()];
       $o[$i]->setFiltroDocenti($data[$i]['filtroDocenti']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');

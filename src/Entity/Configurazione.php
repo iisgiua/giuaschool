@@ -55,40 +55,40 @@ class Configurazione {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $categoria Categoria a cui appartiene la configurazione
+   * @var string|null $categoria Categoria a cui appartiene la configurazione
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $categoria = '';
+  private ?string $categoria = '';
 
   /**
-   * @var string $parametro Parametro della configurazione
+   * @var string|null $parametro Parametro della configurazione
    *
    * @ORM\Column(type="string", length=64, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $parametro = '';
+  private ?string $parametro = '';
 
   /**
-  * @var string $descrizione Descrizione dell'utilizzo del parametro
+  * @var string|null $descrizione Descrizione dell'utilizzo del parametro
    *
    * @ORM\Column(type="string", length=1024, nullable=false)
    *
    * @Assert\Length(max=1024,maxMessage="field.maxlength")
    */
-  private string $descrizione = '';
+  private ?string $descrizione = '';
 
   /**
-   * @var string $valore Valore della configurazione
+   * @var string|null $valore Valore della configurazione
    *
    * @ORM\Column(type="text", nullable=false)
    */
-  private string $valore = '';
+  private ?string $valore = '';
 
   /**
   * @var bool $gestito Indica se il parametro viene gestito da una procedura apposita
@@ -154,20 +154,20 @@ class Configurazione {
   /**
    * Restituisce la categoria a cui appartiene la configurazione
    *
-   * @return string Categoria a cui appartiene la configurazione
+   * @return string|null Categoria a cui appartiene la configurazione
    */
-  public function getCategoria(): string {
+  public function getCategoria(): ?string {
     return $this->categoria;
   }
 
   /**
    * Modifica la categoria a cui appartiene la configurazione
    *
-   * @param string $categoria Categoria a cui appartiene la configurazione
+   * @param string|null $categoria Categoria a cui appartiene la configurazione
    *
    * @return self Oggetto modificato
    */
-  public function setCategoria(string $categoria): self {
+  public function setCategoria(?string $categoria): self {
     $this->categoria = $categoria;
     return $this;
   }
@@ -175,20 +175,20 @@ class Configurazione {
   /**
    * Restituisce il parametro della configurazione
    *
-   * @return string Parametro della configurazione
+   * @return string|null Parametro della configurazione
    */
-  public function getParametro(): string {
+  public function getParametro(): ?string {
     return $this->parametro;
   }
 
   /**
    * Modifica il parametro della configurazione
    *
-   * @param string $parametro Parametro della configurazione
+   * @param string|null $parametro Parametro della configurazione
    *
    * @return self Oggetto modificato
    */
-  public function setParametro(string $parametro): self {
+  public function setParametro(?string $parametro): self {
     $this->parametro = $parametro;
     return $this;
   }
@@ -196,20 +196,20 @@ class Configurazione {
   /**
    * Restituisce la descrizione dell'utilizzo del parametro
    *
-   * @return string Descrizione dell'utilizzo del parametro
+   * @return string|null Descrizione dell'utilizzo del parametro
    */
-  public function getDescrizione(): string {
+  public function getDescrizione(): ?string {
     return $this->descrizione;
   }
 
   /**
    * Modifica la descrizione dell'utilizzo del parametro
    *
-   * @param string $descrizione Descrizione dell'utilizzo del parametro
+   * @param string|null $descrizione Descrizione dell'utilizzo del parametro
    *
    * @return self Oggetto modificato
    */
-  public function setDescrizione(string $descrizione): self {
+  public function setDescrizione(?string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }
@@ -217,20 +217,20 @@ class Configurazione {
   /**
    * Restituisce il valore della configurazione
    *
-   * @return string Valore della configurazione
+   * @return string|null Valore della configurazione
    */
-  public function getValore(): string {
+  public function getValore(): ?string {
     return $this->valore;
   }
 
   /**
    * Modifica il valore della configurazione
    *
-   * @param string $valore Valore della configurazione
+   * @param string|null $valore Valore della configurazione
    *
    * @return self Oggetto modificato
    */
-  public function setValore(string $valore): self {
+  public function setValore(?string $valore): self {
     $this->valore = $valore;
     return $this;
   }

@@ -1051,7 +1051,7 @@ class RegistroController extends AbstractController {
             ->setOggetto($trans->trans('message.avviso_individuale_oggetto', ['docente' => $docente]))
             ->setTesto($annotazione->getTesto())
             ->setDocente($this->getUser())
-            ->addAnnotazione($annotazione);
+            ->addAnnotazioni($annotazione);
           $em->persist($avviso);
           $annotazione->setAvviso($avviso);
           // destinatari

@@ -13,13 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * CircolareClasse - entità
- * Classe in cui si deve leggere la circolare
+ * CircolareClasse - associazione tra la circolare e le classi di destinazione
  *
  * @ORM\Entity(repositoryClass="App\Repository\CircolareClasseRepository")
  * @ORM\Table(name="gs_circolare_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"circolare_id","classe_id"})})
@@ -56,31 +55,31 @@ class CircolareClasse {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var Circolare $circolare Circolare a cui ci si riferisce
+   * @var Circolare|null $circolare Circolare a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Circolare")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $circolare;
+  private ?Circolare $circolare = null;
 
   /**
-   * @var Classe $classe Classe in cui deve essere letta la circolare
+   * @var Classe|null $classe Classe in cui deve essere letta la circolare
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var \DateTime $letta Data e ora di lettura della circolare nella classe
+   * @var \DateTime|null $letta Data e ora di lettura della circolare nella classe
    *
    * @ORM\Column(type="datetime", nullable=true)
    */
-  private $letta;
+  private ?\DateTime $letta = null;
 
 
   //==================== EVENTI ORM ====================
@@ -139,9 +138,9 @@ class CircolareClasse {
   /**
    * Restituisce la circolare a cui ci si riferisce
    *
-   * @return Circolare Circolare a cui ci si riferisce
+   * @return Circolare|null Circolare a cui ci si riferisce
    */
-  public function getCircolare() {
+  public function getCircolare(): ?Circolare {
     return $this->circolare;
   }
 
@@ -160,9 +159,9 @@ class CircolareClasse {
   /**
    * Restituisce la classe in cui deve essere letta la circolare
    *
-   * @return Classe Classe in cui deve essere letta la circolare
+   * @return Classe|null Classe in cui deve essere letta la circolare
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
@@ -181,20 +180,20 @@ class CircolareClasse {
   /**
    * Restituisce la data e ora di lettura della circolare nella classe
    *
-   * @return \DateTime Data e ora di lettura della circolare nella classe
+   * @return \DateTime|null Data e ora di lettura della circolare nella classe
    */
-  public function getLetta() {
+  public function getLetta(): ?\DateTime {
     return $this->letta;
   }
 
   /**
    * Modifica la data e ora di lettura della circolare nella classe
    *
-   * @param \DateTime $letta Data e ora di lettura della circolare nella classe
+   * @param \DateTime|null $letta Data e ora di lettura della circolare nella classe
    *
    * @return self Oggetto modificato
    */
-  public function setLetta($letta): self {
+  public function setLetta(?\DateTime $letta): self {
     $this->letta = $letta;
     return $this;
   }

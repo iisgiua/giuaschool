@@ -64,14 +64,14 @@ class Classe {
   private int $anno = 1;
 
   /**
-   * @var string $sezione Sezione della classe
+   * @var string|null $sezione Sezione della classe
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $sezione = 'A';
+  private ?string $sezione = 'A';
 
   /**
    * @var int $oreSettimanali Numero di ore settimanali della classe
@@ -196,20 +196,20 @@ class Classe {
   /**
    * Restituisce la sezione della classe
    *
-   * @return string Sezione della classe
+   * @return string|null Sezione della classe
    */
-  public function getSezione(): string {
+  public function getSezione(): ?string {
     return $this->sezione;
   }
 
   /**
    * Modifica la sezione della classe
    *
-   * @param string $sezione Sezione della classe
+   * @param string|null $sezione Sezione della classe
    *
    * @return self Oggetto modificato
    */
-  public function setSezione(string $sezione): self {
+  public function setSezione(?string $sezione): self {
     $this->sezione = $sezione;
     return $this;
   }

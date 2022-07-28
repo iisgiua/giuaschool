@@ -13,13 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * AvvisoClasse - entità
- * Classe a cui è indirizzato l'avviso: usata per la lettura in classe con destinatari alunni
+ * AvvisoClasse - dati per l'associazione tra avviso e classe
  *
  * @ORM\Entity(repositoryClass="App\Repository\AvvisoClasseRepository")
  * @ORM\Table(name="gs_avviso_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"avviso_id","classe_id"})})
@@ -56,31 +55,31 @@ class AvvisoClasse {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var Avviso $avviso Avviso a cui ci si riferisce
+   * @var Avviso|null $avviso Avviso a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Avviso")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $avviso;
+  private ?Avviso $avviso = null;
 
   /**
-   * @var Classe $classe Classe a cui è indirizzato l'avviso
+   * @var Classe|null $classe Classe a cui è indirizzato l'avviso
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var \DateTime $letto Data e ora di lettura dell'avviso in classe
+   * @var \DateTime|null $letto Data e ora di lettura dell'avviso in classe
    *
    * @ORM\Column(type="datetime", nullable=true)
    */
-  private $letto;
+  private ?\DateTime $letto = null;
 
 
   //==================== EVENTI ORM ====================
@@ -139,9 +138,9 @@ class AvvisoClasse {
   /**
    * Restituisce l'avviso a cui ci si riferisce
    *
-   * @return Avviso Avviso a cui ci si riferisce
+   * @return Avviso|null Avviso a cui ci si riferisce
    */
-  public function getAvviso() {
+  public function getAvviso(): ?Avviso {
     return $this->avviso;
   }
 
@@ -160,9 +159,9 @@ class AvvisoClasse {
   /**
    * Restituisce la classe a cui è indirizzato l'avviso
    *
-   * @return Classe Classe a cui è indirizzato l'avviso
+   * @return Classe|null Classe a cui è indirizzato l'avviso
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
@@ -181,20 +180,20 @@ class AvvisoClasse {
   /**
    * Restituisce la data e ora di lettura dell'avviso in classe
    *
-   * @return \DateTime Data e ora di lettura dell'avviso in classe
+   * @return \DateTime|null Data e ora di lettura dell'avviso in classe
    */
-  public function getLetto() {
+  public function getLetto(): ?\DateTime {
     return $this->letto;
   }
 
   /**
    * Modifica la data e ora di lettura dell'avviso in classe
    *
-   * @param \DateTime $letto Data e ora di lettura dell'avviso in classe
+   * @param \DateTime|null $letto Data e ora di lettura dell'avviso in classe
    *
    * @return self Oggetto modificato
    */
-  public function setLetto($letto): self {
+  public function setLetto(?\DateTime $letto): self {
     $this->letto = $letto;
     return $this;
   }

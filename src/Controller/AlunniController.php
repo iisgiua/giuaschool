@@ -129,8 +129,8 @@ class AlunniController extends BaseController {
     $criteri = array();
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
@@ -478,8 +478,8 @@ class AlunniController extends BaseController {
     $criteri = array();
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/nome', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/classe');
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/alunni_classe/pagina', 1);
@@ -778,8 +778,8 @@ class AlunniController extends BaseController {
     $criteri = array();
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/nome', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/cognome', '');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe', 0);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : 0);
+    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
+    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
     $pagina = $reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/pagina', 1);
     // recupera dati
     $dati = $em->getRepository('App\Entity\Alunno')->cerca($criteri, $pagina);

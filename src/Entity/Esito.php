@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Esito - entità
+ * Esito - dati per l'esito degli scrutini di un alunno
  *
  * @ORM\Entity(repositoryClass="App\Repository\EsitoRepository")
  * @ORM\Table(name="gs_esito", uniqueConstraints={@ORM\UniqueConstraint(columns={"scrutinio_id","alunno_id"})})
@@ -55,62 +55,61 @@ class Esito {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $esito Esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
+   * @var string|null $esito Esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"A","N","S","R","L","E","X"}, strict=true, message="field.choice")
    */
-  private $esito;
+  private ?string $esito = 'A';
 
   /**
-   * @var float $media Media dei voti
+   * @var float|null $media Media dei voti
    *
    * @ORM\Column(type="float", nullable=true)
    */
-  private $media;
+  private ?float $media = 0;
 
   /**
-   * @var int $credito Punteggio di credito
+   * @var int|null $credito Punteggio di credito
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private $credito;
+  private ?int $credito = 0;
 
   /**
-   * @var int $creditoPrecedente Punteggio di credito degli anni precedenti
+   * @var int|null $creditoPrecedente Punteggio di credito degli anni precedenti
    *
    * @ORM\Column(name="credito_precedente", type="integer", nullable=true)
    */
-  private $creditoPrecedente;
+  private ?int $creditoPrecedente = 0;
 
   /**
-   * @var array $dati Lista dei dati sull'esito (giudizio ammissione e delibera)
+   * @var array|null $dati Lista dei dati sull'esito (giudizio ammissione e delibera)
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
   /**
-   * @var Scrutinio $scrutinio Scrutinio a cui si riferisce l'esito
+   * @var Scrutinio|null $scrutinio Scrutinio a cui si riferisce l'esito
    *
    * @ORM\ManyToOne(targetEntity="Scrutinio")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $scrutinio;
+  private ?Scrutinio $scrutinio = null;
 
   /**
-   * @var Alunno $alunno Alunno a cui si attribuisce l'esito
+   * @var Alunno|null $alunno Alunno a cui si attribuisce l'esito
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
 
   //==================== EVENTI ORM ====================
@@ -169,20 +168,20 @@ class Esito {
   /**
    * Restituisce l'esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
-   * @return string Esito dello scrutinio
+   * @return string|null Esito dello scrutinio
    */
-  public function getEsito() {
+  public function getEsito(): ?string {
     return $this->esito;
   }
 
   /**
    * Modifica l'esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
    *
-   * @param string $esito Esito dello scrutinio
+   * @param string|null $esito Esito dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setEsito($esito): self {
+  public function setEsito(?string $esito): self {
     $this->esito = $esito;
     return $this;
   }
@@ -190,20 +189,20 @@ class Esito {
   /**
    * Restituisce la media dei voti
    *
-   * @return float Media dei voti
+   * @return float|null Media dei voti
    */
-  public function getMedia() {
+  public function getMedia(): ?float {
     return $this->media;
   }
 
   /**
    * Modifica la media dei voti
    *
-   * @param float $media Media dei voti
+   * @param float|null $media Media dei voti
    *
    * @return self Oggetto modificato
    */
-  public function setMedia($media): self {
+  public function setMedia(?float $media): self {
     $this->media = $media;
     return $this;
   }
@@ -211,20 +210,20 @@ class Esito {
   /**
    * Restituisce il punteggio di credito
    *
-   * @return int Punteggio di credito
+   * @return int|null Punteggio di credito
    */
-  public function getCredito() {
+  public function getCredito(): ?int {
     return $this->credito;
   }
 
   /**
    * Modifica il punteggio di credito
    *
-   * @param int $credito Punteggio di credito
+   * @param int|null $credito Punteggio di credito
    *
    * @return self Oggetto modificato
    */
-  public function setCredito($credito): self {
+  public function setCredito(?int $credito): self {
     $this->credito = $credito;
     return $this;
   }
@@ -232,20 +231,20 @@ class Esito {
   /**
    * Restituisce il punteggio di credito degli anni precedenti
    *
-   * @return int Punteggio di credito degli anni precedenti
+   * @return int|null Punteggio di credito degli anni precedenti
    */
-  public function getCreditoPrecedente() {
+  public function getCreditoPrecedente(): ?int {
     return $this->creditoPrecedente;
   }
 
   /**
    * Modifica il punteggio di credito degli anni precedenti
    *
-   * @param int $creditoPrecedente Punteggio di credito degli anni precedenti
+   * @param int|null $creditoPrecedente Punteggio di credito degli anni precedenti
    *
    * @return self Oggetto modificato
    */
-  public function setCreditoPrecedente($creditoPrecedente): self {
+  public function setCreditoPrecedente(?int $creditoPrecedente): self {
     $this->creditoPrecedente = $creditoPrecedente;
     return $this;
   }
@@ -253,9 +252,9 @@ class Esito {
   /**
    * Restituisce la lista dei dati sull'esito (giudizio ammissione e delibera)
    *
-   * @return array Lista dei dati sull'esito
+   * @return array|null Lista dei dati sull'esito
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -266,7 +265,7 @@ class Esito {
    *
    * @return self Oggetto modificato
    */
-  public function setDati($dati): self {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -278,9 +277,9 @@ class Esito {
   /**
    * Restituisce lo scrutinio a cui si riferisce l'esito
    *
-   * @return Scrutinio Scrutinio a cui si riferisce l'esito
+   * @return Scrutinio|null Scrutinio a cui si riferisce l'esito
    */
-  public function getScrutinio() {
+  public function getScrutinio(): ?Scrutinio {
     return $this->scrutinio;
   }
 
@@ -299,9 +298,9 @@ class Esito {
   /**
    * Restituisce l'alunno a cui si attribuisce l'esito
    *
-   * @return Alunno Alunno a cui si attribuisce l'esito
+   * @return Alunno|null Alunno a cui si attribuisce l'esito
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 

@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * VotoScrutinio
+ * VotoScrutinio - dati per i voti assegnati in uno scrutinio
  *
  * @ORM\Entity(repositoryClass="App\Repository\VotoScrutinioRepository")
  * @ORM\Table(name="gs_voto_scrutinio", uniqueConstraints={@ORM\UniqueConstraint(columns={"scrutinio_id","alunno_id","materia_id"})})
@@ -55,94 +55,92 @@ class VotoScrutinio {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var int $orale Voto per la valutazione orale
+   * @var int|null $orale Voto per la valutazione orale
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private $orale;
+  private ?int $orale = 0;
 
   /**
-   * @var int $scritto Voto per la valutazione scritta
+   * @var int|null $scritto Voto per la valutazione scritta
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private $scritto;
+  private ?int $scritto = 0;
 
   /**
-   * @var int $pratico Voto per la valutazione pratica
+   * @var int|null $pratico Voto per la valutazione pratica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private $pratico;
+  private ?int $pratico = 0;
 
   /**
-   * @var int $unico Voto per la valutazione unica
+   * @var int|null $unico Voto per la valutazione unica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private $unico;
+  private ?int $unico = 0;
 
   /**
-   * @var string $debito Argomenti per il recupero del debito
+   * @var string|null $debito Argomenti per il recupero del debito
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $debito;
+  private ?string $debito = '';
 
   /**
-   * @var string $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
+   * @var string|null $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
    *
    * @ORM\Column(type="string", length=1, nullable=true)
    *
    * @Assert\Choice(choices={"A","C","S","P","I","R","N"}, strict=true, message="field.choice")
    */
-  private $recupero;
+  private ?string $recupero = 'A';
 
   /**
    * @var int $assenze Numero di ore di assenza nel periodo
    *
    * @ORM\Column(type="integer", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $assenze;
+  private int $assenze = 0;
 
   /**
-   * @var array $dati Lista dei dati sul voto (usati per la condotta)
+   * @var array|null $dati Lista dei dati sul voto (usati per la condotta)
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
   /**
-   * @var Scrutinio $scrutinio Scrutinio a cui si riferisce il voto
+   * @var Scrutinio|null $scrutinio Scrutinio a cui si riferisce il voto
    *
    * @ORM\ManyToOne(targetEntity="Scrutinio")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $scrutinio;
+  private ?Scrutinio $scrutinio = null;
 
   /**
-   * @var Alunno $alunno Alunno a cui si attribuisce il voto
+   * @var Alunno|null $alunno Alunno a cui si attribuisce il voto
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Materia $materia Materia del voto
+   * @var Materia|null $materia Materia del voto
    *
    * @ORM\ManyToOne(targetEntity="Materia")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $materia;
+  private ?Materia $materia = null;
 
 
   //==================== EVENTI ORM ====================
@@ -201,20 +199,20 @@ class VotoScrutinio {
   /**
    * Restituisce il voto per la valutazione orale
    *
-   * @return int Voto per la valutazione orale
+   * @return int|null Voto per la valutazione orale
    */
-  public function getOrale() {
+  public function getOrale(): ?int {
     return $this->orale;
   }
 
   /**
    * Modifica il voto per la valutazione orale
    *
-   * @param int $orale Voto per la valutazione orale
+   * @param int|null $orale Voto per la valutazione orale
    *
    * @return self Oggetto modificato
    */
-  public function setOrale($orale): self {
+  public function setOrale(?int $orale): self {
     $this->orale = $orale;
     return $this;
   }
@@ -222,20 +220,20 @@ class VotoScrutinio {
   /**
    * Restituisce il voto per la valutazione scritta
    *
-   * @return int Voto per la valutazione scritta
+   * @return int|null Voto per la valutazione scritta
    */
-  public function getScritto() {
+  public function getScritto(): ?int {
     return $this->scritto;
   }
 
   /**
    * Modifica il voto per la valutazione scritta
    *
-   * @param int $scritto Voto per la valutazione scritta
+   * @param int|null $scritto Voto per la valutazione scritta
    *
    * @return self Oggetto modificato
    */
-  public function setScritto($scritto): self {
+  public function setScritto(?int $scritto): self {
     $this->scritto = $scritto;
     return $this;
   }
@@ -243,20 +241,20 @@ class VotoScrutinio {
   /**
    * Restituisce il voto per la valutazione pratica
    *
-   * @return int Voto per la valutazione pratica
+   * @return int|null Voto per la valutazione pratica
    */
-  public function getPratico() {
+  public function getPratico(): ?int {
     return $this->pratico;
   }
 
   /**
    * Modifica il voto per la valutazione pratica
    *
-   * @param int $pratico Voto per la valutazione pratica
+   * @param int|null $pratico Voto per la valutazione pratica
    *
    * @return self Oggetto modificato
    */
-  public function setPratico($pratico): self {
+  public function setPratico(?int $pratico): self {
     $this->pratico = $pratico;
     return $this;
   }
@@ -264,20 +262,20 @@ class VotoScrutinio {
   /**
    * Restituisce il voto per la valutazione unica
    *
-   * @return int Voto per la valutazione unica
+   * @return int|null Voto per la valutazione unica
    */
-  public function getUnico() {
+  public function getUnico(): ?int {
     return $this->unico;
   }
 
   /**
    * Modifica il voto per la valutazione unica
    *
-   * @param int $unico Voto per la valutazione unica
+   * @param int|null $unico Voto per la valutazione unica
    *
    * @return self Oggetto modificato
    */
-  public function setUnico($unico): self {
+  public function setUnico(?int $unico): self {
     $this->unico = $unico;
     return $this;
   }
@@ -285,20 +283,20 @@ class VotoScrutinio {
   /**
    * Restituisce gli argomenti per il recupero del debito
    *
-   * @return string Argomenti per il recupero del debito
+   * @return string|null Argomenti per il recupero del debito
    */
-  public function getDebito() {
+  public function getDebito(): ?string {
     return $this->debito;
   }
 
   /**
    * Modifica gli argomenti per il recupero del debito
    *
-   * @param string $debito Argomenti per il recupero del debito
+   * @param string|null $debito Argomenti per il recupero del debito
    *
    * @return self Oggetto modificato
    */
-  public function setDebito($debito): self {
+  public function setDebito(?string $debito): self {
     $this->debito = $debito;
     return $this;
   }
@@ -306,20 +304,20 @@ class VotoScrutinio {
   /**
    * Restituisce la modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
    *
-   * @return string Modalità di recupero del debito
+   * @return string|null Modalità di recupero del debito
    */
-  public function getRecupero() {
+  public function getRecupero(): ?string {
     return $this->recupero;
   }
 
   /**
    * Modifica la modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
    *
-   * @param string $recupero Modalità di recupero del debito
+   * @param string|null $recupero Modalità di recupero del debito
    *
    * @return self Oggetto modificato
    */
-  public function setRecupero($recupero): self {
+  public function setRecupero(?string $recupero): self {
     $this->recupero = $recupero;
     return $this;
   }
@@ -329,7 +327,7 @@ class VotoScrutinio {
    *
    * @return int Numero di ore di assenza nel periodo
    */
-  public function getAssenze() {
+  public function getAssenze(): int {
     return $this->assenze;
   }
 
@@ -340,7 +338,7 @@ class VotoScrutinio {
    *
    * @return self Oggetto modificato
    */
-  public function setAssenze($assenze): self {
+  public function setAssenze(int $assenze): self {
     $this->assenze = $assenze;
     return $this;
   }
@@ -348,9 +346,9 @@ class VotoScrutinio {
   /**
    * Restituisce la lista dei dati sul voto (usati per la condotta)
    *
-   * @return array Lista dei dati sul voto
+   * @return array|null Lista dei dati sul voto
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -361,7 +359,7 @@ class VotoScrutinio {
    *
    * @return self Oggetto modificato
    */
-  public function setDati($dati): self {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -371,54 +369,11 @@ class VotoScrutinio {
   }
 
   /**
-   * Restituisce il valore del dato indicato all'interno della lista dei dati del voto
-   *
-   * @param string $nome Nome identificativo del dato
-   *
-   * @return mixed Valore del dato o null se non esiste
-   */
-  public function getDato($nome) {
-    if (isset($this->dati[$nome])) {
-      return $this->dati[$nome];
-    }
-    return null;
-  }
-
-  /**
-   * Aggiunge/modifica un dato alla lista dei dati del voto
-   *
-   * @param string $nome Nome identificativo del dato
-   * @param mixed $valore Valore del dato
-   *
-   * @return self Oggetto modificato
-   */
-  public function addDato($nome, $valore) {
-    if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
-      // clona array per forzare update su doctrine
-      $valore = unserialize(serialize($valore));
-    }
-    $this->dati[$nome] = $valore;
-    return $this;
-  }
-
-  /**
-   * Elimina un dato dalla lista dei dati del voto
-   *
-   * @param string $nome Nome identificativo del dato
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeDato($nome) {
-    unset($this->dati[$nome]);
-    return $this;
-  }
-
-  /**
    * Restituisce lo scrutinio a cui si riferisce il voto
    *
-   * @return Scrutinio Scrutinio a cui si riferisce il voto
+   * @return Scrutinio|null Scrutinio a cui si riferisce il voto
    */
-  public function getScrutinio() {
+  public function getScrutinio(): ?Scrutinio {
     return $this->scrutinio;
   }
 
@@ -437,9 +392,9 @@ class VotoScrutinio {
   /**
    * Restituisce l'alunno a cui si attribuisce il voto
    *
-   * @return Alunno Alunno a cui si attribuisce il voto
+   * @return Alunno|null Alunno a cui si attribuisce il voto
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -458,9 +413,9 @@ class VotoScrutinio {
   /**
    * Restituisce la materia del voto
    *
-   * @return Materia Materia del voto
+   * @return Materia|null Materia del voto
    */
-  public function getMateria() {
+  public function getMateria(): ?Materia {
     return $this->materia;
   }
 
@@ -480,11 +435,46 @@ class VotoScrutinio {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
+   * Restituisce il valore del dato indicato all'interno della lista dei dati del voto
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return mixed|null Valore del dato o null se non esiste
    */
-  public function __construct() {
-    // valori predefiniti
-    $this->dati = array();
+  public function getDato(string $nome) {
+    if (isset($this->dati[$nome])) {
+      return $this->dati[$nome];
+    }
+    return null;
+  }
+
+  /**
+   * Aggiunge/modifica un dato alla lista dei dati del voto
+   *
+   * @param string $nome Nome identificativo del dato
+   * @param mixed $valore Valore del dato
+   *
+   * @return self Oggetto modificato
+   */
+  public function addDato(string $nome, $valore): self {
+    if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
+      // clona array per forzare update su doctrine
+      $valore = unserialize(serialize($valore));
+    }
+    $this->dati[$nome] = $valore;
+    return $this;
+  }
+
+  /**
+   * Elimina un dato dalla lista dei dati del voto
+   *
+   * @param string $nome Nome identificativo del dato
+   *
+   * @return self Oggetto modificato
+   */
+  public function removeDato(string $nome): self {
+    unset($this->dati[$nome]);
+    return $this;
   }
 
   /**

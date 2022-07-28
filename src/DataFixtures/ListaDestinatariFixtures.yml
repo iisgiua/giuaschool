@@ -55,7 +55,7 @@ App\Entity\ListaDestinatari:
     sedi: '<collection(@sede_<current()>)>'
 
   # ----- destinatari docenti -----
-  lista_destinatari_DOCENTI_{1..5}:
+  lista_destinatari_DOCENTI_{1..10}:
     dsga: false
     ata: false
     docenti: '<randomElement(["M", "C", "U"])>'

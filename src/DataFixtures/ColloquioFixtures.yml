@@ -23,7 +23,7 @@ App\Entity\Colloquio:
     frequenza: '<randomElement(["S", "1", "2", "3", "4"])>'
     note: '50%? <substr(<text()>, 0, 2048)>: <strval("")>'
     docente: '@docente_*'
-    orario: '@orario_*'
+    orario: '@orario_definitivo*'
     giorno: '<randomElement([1, 2, 3, 4, 5, 6])>'
     ora: '<numberBetween(1, 4)>'
     extra: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'

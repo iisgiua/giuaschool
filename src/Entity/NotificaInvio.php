@@ -14,11 +14,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Notifica - entità
+ * NotificaInvio - dati per l'invio delle notifiche agli utenti
  *
  * @ORM\Entity(repositoryClass="App\Repository\NotificaInvioRepository")
  * @ORM\Table(name="gs_notifica_invio")
@@ -53,39 +52,39 @@ class NotificaInvio {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $stato Stato dell'invio della notifica [P=precedenza,A=attesa,S=spedito,E=errore]
+   * @var string|null $stato Stato dell'invio della notifica [P=precedenza,A=attesa,S=spedito,E=errore]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"A","P","S","E"}, strict=true, message="field.choice")
    */
-  private $stato;
+  private ?string $stato = 'A';
 
   /**
-   * @var string $messaggio Messaggio da notificare all'utente
+   * @var string|null $messaggio Messaggio da notificare all'utente
    *
    * @ORM\Column(type="text", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $messaggio;
+  private ?string $messaggio = '';
 
   /**
-   * @var App $app App che deve inviare il messaggio
+   * @var App|null $app App che deve inviare il messaggio
    *
    * @ORM\ManyToOne(targetEntity="App")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $app;
+  private ?App $app = null;
 
   /**
-   * @var array $dati Parametri per l'invio del messaggio all'utente
+   * @var array|null $dati Parametri per l'invio del messaggio all'utente
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
 
   //==================== EVENTI ORM ====================
@@ -144,20 +143,20 @@ class NotificaInvio {
   /**
    * Restituisce lo stato dell'invio della notifica [A=attesa,S=spedito,E=errore]
    *
-   * @return string Stato dell'invio della notifica
+   * @return string|null Stato dell'invio della notifica
    */
-  public function getStato() {
+  public function getStato(): ?string {
     return $this->stato;
   }
 
   /**
    * Modifica lo stato dell'invio della notifica [A=attesa,S=spedito,E=errore]
    *
-   * @param string $stato Stato dell'invio della notifica
+   * @param string|null $stato Stato dell'invio della notifica
    *
    * @return self Oggetto modificato
    */
-  public function setStato($stato): self {
+  public function setStato(?string $stato): self {
     $this->stato = $stato;
     return $this;
   }
@@ -165,20 +164,20 @@ class NotificaInvio {
   /**
    * Restituisce il messaggio da notificare all'utente
    *
-   * @return string Messaggio da notificare all'utente
+   * @return string|null Messaggio da notificare all'utente
    */
-  public function getMessaggio() {
+  public function getMessaggio(): ?string {
     return $this->messaggio;
   }
 
   /**
    * Modifica il messaggio da notificare all'utente
    *
-   * @param string $messaggio Messaggio da notificare all'utente
+   * @param string|null $messaggio Messaggio da notificare all'utente
    *
    * @return self Oggetto modificato
    */
-  public function setMessaggio($messaggio): self {
+  public function setMessaggio(?string $messaggio): self {
     $this->messaggio = $messaggio;
     return $this;
   }
@@ -186,9 +185,9 @@ class NotificaInvio {
   /**
    * Restituisce l'app che deve inviare il messaggio
    *
-   * @return App App che deve inviare il messaggio
+   * @return App|null App che deve inviare il messaggio
    */
-  public function getApp() {
+  public function getApp(): ?App {
     return $this->app;
   }
 
@@ -207,9 +206,9 @@ class NotificaInvio {
   /**
    * Restituisce i parametri per l'invio del messaggio all'utente
    *
-   * @return array Parametri per l'invio del messaggio all'utente
+   * @return array!null Parametri per l'invio del messaggio all'utente
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -220,7 +219,7 @@ class NotificaInvio {
    *
    * @return self Oggetto modificato
    */
-  public function setDati($dati): self {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -231,13 +230,6 @@ class NotificaInvio {
 
 
   //==================== METODI DELLA CLASSE ====================
-
-  /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo

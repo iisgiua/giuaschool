@@ -13,7 +13,6 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -54,47 +53,47 @@ class Istituto {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $tipo Tipo di istituto (es. Istituto di Istruzione Superiore)
+   * @var string|null $tipo Tipo di istituto (es. Istituto di Istruzione Superiore)
    *
    * @ORM\Column(type="string", length=128, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128, maxMessage="field.maxlength")
    */
-  private string $tipo = '';
+  private ?string $tipo = '';
 
   /**
-   * @var string $tipoSigla Tipo di istituto come sigla (es. I.I.S.)
+   * @var string|null $tipoSigla Tipo di istituto come sigla (es. I.I.S.)
    *
    * @ORM\Column(name="tipo_sigla", type="string", length=16, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=16, maxMessage="field.maxlength")
    */
-  private string $tipoSigla = '';
+  private ?string $tipoSigla = '';
 
   /**
-  * @var string $nome Nome dell'istituto scolastico
+  * @var string|null $nome Nome dell'istituto scolastico
    *
    * @ORM\Column(type="string", length=128, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128, maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
-   * @var string $nomeBreve Nome breve dell'istituto scolastico
+   * @var string|null $nomeBreve Nome breve dell'istituto scolastico
    *
    * @ORM\Column(name="nome_breve", type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private string $nomeBreve = '';
+  private ?string $nomeBreve = '';
 
   /**
-   * @var string $email Indirizzo email dell'istituto scolastico
+   * @var string|null $email Indirizzo email dell'istituto scolastico
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
@@ -102,10 +101,10 @@ class Istituto {
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
-  private string $email = '';
+  private ?string $email = '';
 
   /**
-   * @var string $pec Indirizzo PEC dell'istituto scolastico
+   * @var string|null $pec Indirizzo PEC dell'istituto scolastico
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
@@ -113,10 +112,10 @@ class Istituto {
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
-  private string $pec = '';
+  private ?string $pec = '';
 
   /**
-   * @var string $urlSito Indirizzo web del sito istituzionale dell'istituto
+   * @var string|null $urlSito Indirizzo web del sito istituzionale dell'istituto
    *
    * @ORM\Column(name="url_sito", type="string", length=255, nullable=false)
    *
@@ -124,10 +123,10 @@ class Istituto {
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Url(message="field.url")
    */
-  private string $urlSito = '';
+  private ?string $urlSito = '';
 
   /**
-   * @var string $urlRegistro Indirizzo web del registro elettronico
+   * @var string|null $urlRegistro Indirizzo web del registro elettronico
    *
    * @ORM\Column(name="url_registro", type="string", length=255, nullable=false)
    *
@@ -135,20 +134,20 @@ class Istituto {
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Url(message="field.url")
    */
-  private string $urlRegistro = '';
+  private ?string $urlRegistro = '';
 
   /**
-   * @var string $firmaPreside Testo per la firma sui documenti
+   * @var string|null $firmaPreside Testo per la firma sui documenti
    *
    * @ORM\Column(name="firma_preside", type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-  private string $firmaPreside = '';
+  private ?string $firmaPreside = '';
 
   /**
-   * @var string $emailAmministratore Indirizzo email dell'amministratore di sistema
+   * @var string|null $emailAmministratore Indirizzo email dell'amministratore di sistema
    *
    * @ORM\Column(name="email_amministratore", type="string", length=255, nullable=false)
    *
@@ -156,10 +155,10 @@ class Istituto {
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
-  private string $emailAmministratore = '';
+  private ?string $emailAmministratore = '';
 
   /**
-   * @var string $emailNotifiche Indirizzo email del mittente delle notifiche inviate dal sistema
+   * @var string|null $emailNotifiche Indirizzo email del mittente delle notifiche inviate dal sistema
    *
    * @ORM\Column(name="email_notifiche", type="string", length=255, nullable=false)
    *
@@ -167,7 +166,7 @@ class Istituto {
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
-  private string $emailNotifiche = '';
+  private ?string $emailNotifiche = '';
 
 
   //==================== EVENTI ORM ====================
@@ -226,20 +225,20 @@ class Istituto {
   /**
    * Restituisce il tipo di istituto (es. Istituto di Istruzione Superiore)
    *
-   * @return string Tipo di istituto
+   * @return string|null Tipo di istituto
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo di istituto (es. Istituto di Istruzione Superiore)
    *
-   * @param string $tipo Tipo di istituto
+   * @param string|null $tipo Tipo di istituto
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -247,20 +246,20 @@ class Istituto {
   /**
    * Restituisce il tipo di istituto come sigla (es. I.I.S.)
    *
-   * @return string Tipo di istituto come sigla
+   * @return string|null Tipo di istituto come sigla
    */
-  public function getTipoSigla(): string {
+  public function getTipoSigla(): ?string {
     return $this->tipoSigla;
   }
 
   /**
    * Modifica il tipo di istituto come sigla (es. I.I.S.)
    *
-   * @param string $tipoSigla Tipo di istituto come sigla
+   * @param string|null $tipoSigla Tipo di istituto come sigla
    *
    * @return self Oggetto modificato
    */
-  public function setTipoSigla(string $tipoSigla): self {
+  public function setTipoSigla(?string $tipoSigla): self {
     $this->tipoSigla = $tipoSigla;
     return $this;
   }
@@ -268,20 +267,20 @@ class Istituto {
   /**
    * Restituisce il nome dell'istituto scolastico
    *
-   * @return string Nome dell'istituto scolastico
+   * @return string|null Nome dell'istituto scolastico
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome dell'istituto scolastico
    *
-   * @param string $nome Nome dell'istituto scolastico
+   * @param string|null $nome Nome dell'istituto scolastico
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -289,20 +288,20 @@ class Istituto {
   /**
    * Restituisce il nome breve dell'istituto scolastico
    *
-   * @return string Nome breve dell'istituto scolastico
+   * @return string|null Nome breve dell'istituto scolastico
    */
-  public function getNomeBreve(): string {
+  public function getNomeBreve(): ?string {
     return $this->nomeBreve;
   }
 
   /**
    * Modifica il nome breve dell'istituto scolastico
    *
-   * @param string $nomeBreve Nome breve dell'istituto scolastico
+   * @param string|null $nomeBreve Nome breve dell'istituto scolastico
    *
    * @return self Oggetto modificato
    */
-  public function setNomeBreve(string $nomeBreve): self {
+  public function setNomeBreve(?string $nomeBreve): self {
     $this->nomeBreve = $nomeBreve;
     return $this;
   }
@@ -310,20 +309,20 @@ class Istituto {
   /**
    * Restituisce l'indirizzo email dell'istituto scolastico
    *
-   * @return string Indirizzo email dell'istituto scolastico
+   * @return string|null Indirizzo email dell'istituto scolastico
    */
-  public function getEmail(): string {
+  public function getEmail(): ?string {
     return $this->email;
   }
 
   /**
    * Modifica l'indirizzo email dell'istituto scolastico
    *
-   * @param string $email Indirizzo email dell'istituto scolastico
+   * @param string|null $email Indirizzo email dell'istituto scolastico
    *
    * @return self Oggetto modificato
    */
-  public function setEmail(string $email): self {
+  public function setEmail(?string $email): self {
     $this->email = $email;
     return $this;
   }
@@ -331,20 +330,20 @@ class Istituto {
   /**
    * Restituisce l'indirizzo PEC dell'istituto scolastico
    *
-   * @return string Indirizzo PEC dell'istituto scolastico
+   * @return string|null Indirizzo PEC dell'istituto scolastico
    */
-  public function getPec(): string {
+  public function getPec(): ?string {
     return $this->pec;
   }
 
   /**
    * Modifica l'indirizzo PEC dell'istituto scolastico
    *
-   * @param string $pec Indirizzo PEC dell'istituto scolastico
+   * @param string|null $pec Indirizzo PEC dell'istituto scolastico
    *
    * @return self Oggetto modificato
    */
-  public function setPec(string $pec): self {
+  public function setPec(?string $pec): self {
     $this->pec = $pec;
     return $this;
   }
@@ -352,20 +351,20 @@ class Istituto {
   /**
    * Restituisce l'indirizzo web del sito istituzionale dell'istituto
    *
-   * @return string Indirizzo web del sito istituzionale dell'istituto
+   * @return string|null Indirizzo web del sito istituzionale dell'istituto
    */
-  public function getUrlSito(): string {
+  public function getUrlSito(): ?string {
     return $this->urlSito;
   }
 
   /**
    * Modifica l'indirizzo web del sito istituzionale dell'istituto
    *
-   * @param string $urlSito Indirizzo web del sito istituzionale dell'istituto
+   * @param string|null $urlSito Indirizzo web del sito istituzionale dell'istituto
    *
    * @return self Oggetto modificato
    */
-  public function setUrlSito(string $urlSito): self {
+  public function setUrlSito(?string $urlSito): self {
     $this->urlSito = $urlSito;
     return $this;
   }
@@ -373,20 +372,20 @@ class Istituto {
   /**
    * Restituisce l'indirizzo web del registro elettronico
    *
-   * @return string Indirizzo web del registro elettronico
+   * @return string|null Indirizzo web del registro elettronico
    */
-  public function getUrlRegistro(): string {
+  public function getUrlRegistro(): ?string {
     return $this->urlRegistro;
   }
 
   /**
    * Modifica l'indirizzo web del registro elettronico
    *
-   * @param string $urlRegistro Indirizzo web del registro elettronico
+   * @param string|null $urlRegistro Indirizzo web del registro elettronico
    *
    * @return self Oggetto modificato
    */
-  public function setUrlRegistro(string $urlRegistro): self {
+  public function setUrlRegistro(?string $urlRegistro): self {
     $this->urlRegistro = $urlRegistro;
     return $this;
   }
@@ -394,20 +393,20 @@ class Istituto {
   /**
    * Restituisce il testo per la firma sui documenti
    *
-   * @return string Testo per la firma sui documenti
+   * @return string|null Testo per la firma sui documenti
    */
-  public function getFirmaPreside(): string {
+  public function getFirmaPreside(): ?string {
     return $this->firmaPreside;
   }
 
   /**
    * Modifica il testo per la firma sui documenti
    *
-   * @param string $firmaPreside Testo per la firma sui documenti
+   * @param string|null $firmaPreside Testo per la firma sui documenti
    *
    * @return self Oggetto modificato
    */
-  public function setFirmaPreside(string $firmaPreside): self {
+  public function setFirmaPreside(?string $firmaPreside): self {
     $this->firmaPreside = $firmaPreside;
     return $this;
   }
@@ -415,20 +414,20 @@ class Istituto {
   /**
    * Restituisce l'indirizzo email dell'amministratore di sistema
    *
-   * @return string Indirizzo email dell'amministratore di sistema
+   * @return string|null Indirizzo email dell'amministratore di sistema
    */
-  public function getEmailAmministratore(): string {
+  public function getEmailAmministratore(): ?string {
     return $this->emailAmministratore;
   }
 
   /**
    * Modifica l'indirizzo email dell'amministratore di sistema
    *
-   * @param string $emailAmministratore Indirizzo email dell'amministratore di sistema
+   * @param string|null $emailAmministratore Indirizzo email dell'amministratore di sistema
    *
    * @return self Oggetto modificato
    */
-  public function setEmailAmministratore(string $emailAmministratore): self {
+  public function setEmailAmministratore(?string $emailAmministratore): self {
     $this->emailAmministratore = $emailAmministratore;
     return $this;
   }
@@ -436,20 +435,20 @@ class Istituto {
   /**
    * Restituisce l'indirizzo email del mittente delle notifiche inviate dal sistema
    *
-   * @return string Indirizzo email del mittente delle notifiche inviate dal sistema
+   * @return string|null Indirizzo email del mittente delle notifiche inviate dal sistema
    */
-  public function getEmailNotifiche(): string {
+  public function getEmailNotifiche(): ?string {
     return $this->emailNotifiche;
   }
 
   /**
    * Modifica l'indirizzo email del mittente delle notifiche inviate dal sistema
    *
-   * @param string $emailNotifiche Indirizzo email del mittente delle notifiche inviate dal sistema
+   * @param string|null $emailNotifiche Indirizzo email del mittente delle notifiche inviate dal sistema
    *
    * @return self Oggetto modificato
    */
-  public function setEmailNotifiche(string $emailNotifiche): self {
+  public function setEmailNotifiche(?string $emailNotifiche): self {
     $this->emailNotifiche = $emailNotifiche;
     return $this;
   }

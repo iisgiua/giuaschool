@@ -15,8 +15,13 @@ include:
 
 
 App\Entity\ListaDestinatariClasse:
-  lista_destinatari_classe_{1..10}:
-    listaDestinatari: '@lista_destinatari_GENITORI_*'
-    classe: '@classe_*'
+  lista_destinatari_classe_genitori_{1..5}:
+    listaDestinatari: '@lista_destinatari_GENITORI_<current()>'
+    classe: '@classe_<($current."C")>'
+    letto: '50%? <dateTimeBetween("-1 month", "now")>'
+    firmato: '50%? <dateTimeBetween("-1 month", "now")>'
+  lista_destinatari_classe_alunni_{1..5}:
+    listaDestinatari: '@lista_destinatari_ALUNNI_<current()>'
+    classe: '@classe_<($current."D")>'
     letto: '50%? <dateTimeBetween("-1 month", "now")>'
     firmato: '50%? <dateTimeBetween("-1 month", "now")>'

@@ -1,0 +1,47 @@
+####################
+# AvvisoFixtures - dati di test
+#
+# Dati per la gestione di un avviso:
+#   tipo: indica il tipo dell'avviso [U=uscite classi, E=entrate classi, V=verifiche, P=compiti, A=attività, I=individuale, C=comunicazione generica, O=avvisi coordinatori, D=avvisi docenti]
+#   sedi: sedi a cui è destinato l'avviso
+#   data: data dell'evento associato all'avviso
+#   ora: ora associata all'evento dell'avviso
+#   oraFine: ora finale associata all'evento dell'avviso
+#   cattedra: cattedra associata ad una verifica (o per altri usi)
+#   materia: materia associata ad una verifica per una cattedra di sostegno (o per altri usi)
+#   oggetto: oggetto dell'avviso
+#   testo: testo dell'avviso
+#   allegati: lista di file allegati all'avviso
+#   destinatariAta: indica il personale ATA destinatario dell'avviso [D=DSGA, A=personale ATA]
+#   destinatari: indica i destinatari dell'avviso [C=coordinatori, D=docenti, G=genitori, A=alunni]
+#   filtroTipo: indica il tipo di filtro da applicare [N=nessuno, T=tutti, C=classe, M=materia (solo docenti), U=utente (solo genitori e alunni)]
+#   filtro: lista degli ID per il tipo di filtro specificato
+#   docente: docente che ha scritto l'avviso
+#   annotazioni: annotazioni associate all'avviso
+####################
+
+
+include:
+  - SedeFixtures.yml
+  - CattedraFixtures.yml
+  - MateriaFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Avviso:
+  avviso_{1..10}:
+    tipo: '<randomElement(["U", "E", "V", "P", "A", "I", "C", "D", "O"])>'
+    sedi: '<collection(@sede_*)>'
+    data: '<dateTimeBetween("-1 month", "now")>'
+    ora: '50%? <dateTimeBetween("-1 month", "now")>'
+    oraFine: '50%? <dateTimeBetween("-1 month", "now")>'
+    cattedra: '@cattedra_*'
+    materia: '@materia_*'
+    oggetto: '<substr(<text()>, 0, 255)>'
+    testo: '<text()>'
+    allegati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    destinatariAta: '50%? <sentences(3)>: <(array())>'
+    destinatari: '50%? <sentences(3)>: <(array())>'
+    filtroTipo: '<randomElement(["N", "T", "C", "M", "U"])>'
+    filtro: '50%? <sentences(3)>: <(array())>'
+    docente: '@docente_*'

@@ -53,43 +53,43 @@ class MenuOpzione {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di uno) [N=nessuno (utente anonino), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore]
+   * @var string|null $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di uno) [N=nessuno (utente anonino), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore]
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32, maxMessage="field.maxlength")
    */
-  private string $ruolo = '';
+  private ?string $ruolo = '';
 
   /**
-   * @var string $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di una) [S=segreteria, C=coordinatore, B=responsabile BES]
+   * @var string|null $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu (può essere più di una) [S=segreteria, C=coordinatore, B=responsabile BES]
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\Length(max=32, maxMessage="field.maxlength")
    */
-  private string $funzione = '';
+  private ?string $funzione = '';
 
   /**
-   * @var string $nome Nome dell'opzione
+   * @var string|null $nome Nome dell'opzione
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64, maxMessage="field.maxlength")
    */
-  private string $nome = '';
+  private ?string $nome = '';
 
   /**
-   * @var string $descrizione Descrizione dell'opzione
+   * @var string|null $descrizione Descrizione dell'opzione
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-   private string $descrizione = '';
+   private ?string $descrizione = '';
 
   /**
    * @var string|null $url Indirizzo pagina (codificato come route)
@@ -198,20 +198,20 @@ class MenuOpzione {
   /**
    * Restituisce il ruolo dell'utente che può visualizzare l'opzione del menu
    *
-   * @return string Ruolo dell'utente che può visualizzare l'opzione del menu
+   * @return string|null Ruolo dell'utente che può visualizzare l'opzione del menu
    */
-  public function getRuolo(): string {
+  public function getRuolo(): ?string {
     return $this->ruolo;
   }
 
   /**
    * Modifica il ruolo dell'utente che può visualizzare l'opzione del menu
    *
-   * @param string $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu
+   * @param string|null $ruolo Ruolo dell'utente che può visualizzare l'opzione del menu
    *
    * @return self Oggetto modificato
    */
-  public function setRuolo(string $ruolo): self {
+  public function setRuolo(?string $ruolo): self {
     $this->ruolo = $ruolo;
     return $this;
   }
@@ -219,20 +219,20 @@ class MenuOpzione {
   /**
    * Restituisce la funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
    *
-   * @return string Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   * @return string|null Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
    */
-  public function getFunzione(): string {
+  public function getFunzione(): ?string {
     return $this->funzione;
   }
 
   /**
    * Modifica la funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
    *
-   * @param string $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
+   * @param string|null $funzione Funzione svolta relativa al ruolo dell'utente che può visualizzare l'opzione del menu
    *
    * @return self Oggetto modificato
    */
-  public function setFunzione(string $funzione): self {
+  public function setFunzione(?string $funzione): self {
     $this->funzione = $funzione;
     return $this;
   }
@@ -240,20 +240,20 @@ class MenuOpzione {
   /**
    * Restituisce il nome dell'opzione
    *
-   * @return string Nome dell'opzione
+   * @return string|null Nome dell'opzione
    */
-  public function getNome(): string {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome dell'opzione
    *
-   * @param string $nome Nome dell'opzione
+   * @param string|null $nome Nome dell'opzione
    *
    * @return self Oggetto modificato
    */
-  public function setNome(string $nome): self {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -261,20 +261,20 @@ class MenuOpzione {
   /**
    * Restituisce la descrizione dell'opzione
    *
-   * @return string Descrizione dell'opzione
+   * @return string|null Descrizione dell'opzione
    */
-  public function getDescrizione(): string {
+  public function getDescrizione(): ?string {
     return $this->descrizione;
   }
 
   /**
    * Modifica la descrizione dell'opzione
    *
-   * @param string $descrizione Descrizione dell'opzione
+   * @param string|null $descrizione Descrizione dell'opzione
    *
    * @return self Oggetto modificato
    */
-  public function setDescrizione(string $descrizione): self {
+  public function setDescrizione(?string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }
@@ -291,11 +291,11 @@ class MenuOpzione {
   /**
    * Modifica l'indirizzo della pagina (codificato come route)
    *
-   * @param string $url Indirizzo url
+   * @param string|null $url Indirizzo url
    *
    * @return self Oggetto modificato
    */
-  public function setUrl(string $url): self {
+  public function setUrl(?string $url): self {
     $this->url = $url;
     return $this;
   }
@@ -354,11 +354,11 @@ class MenuOpzione {
   /**
   * Modifica il nome dell'eventuale icona dell'opzione
    *
-   * @param string $icona Nome dell'icona dell'opzione
+   * @param string|null $icona Nome dell'icona dell'opzione
    *
    * @return self Oggetto modificato
    */
-  public function setIcona(string $icona): self {
+  public function setIcona(?string $icona): self {
     $this->icona = $icona;
     return $this;
   }

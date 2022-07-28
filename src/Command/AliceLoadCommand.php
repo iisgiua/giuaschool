@@ -26,6 +26,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
+
 
 /**
  * Comando per caricare le fixtures create tramite alice
@@ -34,6 +37,13 @@ class AliceLoadCommand extends Command {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
+
+  /**
+   * Servizio per l'utilizzo delle entità su database
+   *
+   * @var EntityManagerInterface $em Gestore delle entità
+   */
+  protected $em;
 
   /**
    * Servizio per la codifica delle password
@@ -67,19 +77,21 @@ class AliceLoadCommand extends Command {
   /**
    * Costruttore
    *
+   * @param EntityManagerInterface $em Gestore delle entità
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param Generator $faker Generatore automatico di dati fittizi
    * @param PurgerLoader $alice Generatore di fixtures con memmorizzazione su database
    * @param string $dirProgetto Percorso del progetto
    */
-  public function __construct(UserPasswordHasherInterface $hasher, Generator $faker, PurgerLoader $alice,
-                              string $dirProgetto) {
+  public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $hasher, Generator $faker,
+                              PurgerLoader $alice, string $dirProgetto) {
     parent::__construct();
+    $this->em = $em;
     $this->hasher = $hasher;
     $this->faker = $faker;
     $this->alice = $alice;
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
-    $this->faker->addProvider(new CustomProvider());
+    $this->faker->addProvider(new CustomProvider($this->faker));
     $this->projectPath = $dirProgetto;
   }
 
@@ -100,6 +112,7 @@ class AliceLoadCommand extends Command {
     $this->addOption('append', '', InputOption::VALUE_NONE, 'Aggiunge i dati senza eliminare quelli esistenti');
     $this->addOption('delete', '', InputOption::VALUE_NONE, 'Cancella i dati con il comando DELETE');
     $this->addOption('truncate', '', InputOption::VALUE_NONE, 'Cancella i dati con il comando TRUNCATE');
+    $this->addOption('dump', '', InputOption::VALUE_REQUIRED, 'Esporta i dati nel file SQL indicato');
   }
 
   /**
@@ -125,7 +138,6 @@ class AliceLoadCommand extends Command {
       // errore
       throw new InvalidArgumentException('La fixture non è stata trovata ('.$path.$fixture.'Fixtures.yml'.').');
     }
-
   }
 
   /**
@@ -142,6 +154,7 @@ class AliceLoadCommand extends Command {
     $append = $input->getOption('append');
     $delete = $input->getOption('delete');
     $truncate = $input->getOption('truncate');
+    $dump = $input->getOption('dump');
     // determina modalità di cancellazione dei dati
     if ($append) {
       $purgeMode = PurgeMode::createNoPurgeMode();
@@ -161,6 +174,22 @@ class AliceLoadCommand extends Command {
     }
     // carica dati
     $this->alice->load($fixtures, [], [], $purgeMode);
+    print("---> dati caricati correttamente\n");
+    // dump dei dati
+    if ($dump) {
+      // legge configurazione db
+      $dbParams = $this->em->getConnection()->getParams();
+      // esegue dump
+      $path = $this->projectPath.'/'.$dump;
+      $process = new Process(['mysqldump', '-u'.$dbParams['user'], '-p'.$dbParams['password'], $dbParams['dbname'],
+        '-t', '-n', '--compact', '--result-file='.$path]);
+      $process->setTimeout(0);
+      $process->run();
+      if (!$process->isSuccessful()) {
+        throw new ProcessFailedException($process);
+      }
+      print("---> dump dei dati scritto su: $path\n");
+    }
     // ok, fine
     return 0;
   }

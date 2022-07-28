@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * CambioClasse - entità
+ * CambioClasse - dati per la gestione dei trasferimenti degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\CambioClasseRepository")
  * @ORM\Table(name="gs_cambio_classe")
@@ -52,51 +52,51 @@ class CambioClasse {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var Alunno $alunno Alunno che ha effettuato il cambio classe
+   * @var Alunno|null $alunno Alunno che ha effettuato il cambio classe
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var \DateTime $inizio Data iniziale della permanenza nella classe indicata
+   * @var \DateTime|null $inizio Data iniziale della permanenza nella classe indicata
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $inizio;
+  private ?\DateTime $inizio = null;
 
   /**
-   * @var \DateTime $fine Data finale della permanenza nella classe indicata
+   * @var \DateTime|null $fine Data finale della permanenza nella classe indicata
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $fine;
+  private ?\DateTime $fine = null;
 
   /**
-   * @var Classe $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
+   * @var Classe|null $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var string $note Note descrittive sul cambio classe
+   * @var string|null $note Note descrittive sul cambio classe
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $note;
+  private ?string $note = '';
 
 
   //==================== EVENTI ORM ====================
@@ -155,9 +155,9 @@ class CambioClasse {
   /**
    * Restituisce l'alunno che ha effettuato il cambio classe
    *
-   * @return Alunno Alunno che ha effettuato il cambio classe
+   * @return Alunno|null Alunno che ha effettuato il cambio classe
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -176,9 +176,9 @@ class CambioClasse {
   /**
    * Restituisce la data iniziale della permanenza nella classe indicata
    *
-   * @return \DateTime Data iniziale della permanenza nella classe indicata
+   * @return \DateTime|null Data iniziale della permanenza nella classe indicata
    */
-  public function getInizio() {
+  public function getInizio(): ?\DateTime {
     return $this->inizio;
   }
 
@@ -197,9 +197,9 @@ class CambioClasse {
   /**
    * Restituisce la data finale della permanenza nella classe indicata
    *
-   * @return \DateTime Data finale della permanenza nella classe indicata
+   * @return \DateTime|null Data finale della permanenza nella classe indicata
    */
-  public function getFine() {
+  public function getFine(): ?\DateTime {
     return $this->fine;
   }
 
@@ -218,20 +218,20 @@ class CambioClasse {
   /**
    * Restituisce la classe dell'alunno nel periodo indicato (null=altra scuola)
    *
-   * @return Classe Classe dell'alunno nel periodo indicato
+   * @return Classe|null Classe dell'alunno nel periodo indicato
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
   /**
    * Modifica la classe dell'alunno nel periodo indicato (null=altra scuola)
    *
-   * @param Classe $classe Classe dell'alunno nel periodo indicato
+   * @param Classe|null $classe Classe dell'alunno nel periodo indicato
    *
    * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe = null): self {
+  public function setClasse(?Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -239,20 +239,20 @@ class CambioClasse {
   /**
    * Restituisce le note descrittive sul cambio classe
    *
-   * @return string Note descrittive sul cambio classe
+   * @return string|null Note descrittive sul cambio classe
    */
-  public function getNote() {
+  public function getNote(): ?string {
     return $this->note;
   }
 
   /**
    * Modifica le note descrittive sul cambio classe
    *
-   * @param string $note Note descrittive sul cambio classe
+   * @param string|null $note Note descrittive sul cambio classe
    *
    * @return self Oggetto modificato
    */
-  public function setNote($note): self {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }

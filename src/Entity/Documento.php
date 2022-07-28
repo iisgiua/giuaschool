@@ -54,13 +54,13 @@ class Documento {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni BES, G=materiali generici]
+   * @var string|null $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni BES, G=materiali generici]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"L","P","R","M","H","D","C","G"}, strict=true, message="field.choice")
    */
-  private string $tipo = 'G';
+  private ?string $tipo = 'G';
 
   /**
    * @var Docente|null $docente Docente che carica il documento
@@ -119,7 +119,7 @@ class Documento {
   private ?Alunno $alunno = null;
 
   /**
-   * @var string $cifrato Conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+   * @var string|null $cifrato Conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
@@ -191,20 +191,20 @@ class Documento {
   /**
    * Restituisce il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
    *
-   * @return string Tipo di documento
+   * @return string|null Tipo di documento
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo  di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
    *
-   * @param string $tipo Tipo di documento
+   * @param string|null $tipo Tipo di documento
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }

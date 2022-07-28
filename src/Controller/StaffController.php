@@ -102,11 +102,11 @@ class StaffController extends AbstractController {
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/docente', 0);
+    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/docente');
     $search['destinatari'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/destinatari', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/classe', 0);
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/classe');
+    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi/pagina', 1);
@@ -297,7 +297,7 @@ class StaffController extends AbstractController {
           $sedi[] = $s->getId();
         } else {
           // elimina sede
-          $avviso->removeSede($s);
+          $avviso->removeSedi($s);
         }
       }
       // controllo errori
@@ -813,7 +813,7 @@ class StaffController extends AbstractController {
           $sedi[] = $s->getId();
         } else {
           // elimina sede
-          $avviso->removeSede($s);
+          $avviso->removeSedi($s);
         }
       }
       // controllo errori
@@ -985,10 +985,10 @@ class StaffController extends AbstractController {
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/docente', 0);
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/classe', 0);
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/docente');
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/classe');
+    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_attivita/pagina', 1);
@@ -1128,7 +1128,7 @@ class StaffController extends AbstractController {
           $sedi[] = $s->getId();
         } else {
           // elimina sede
-          $avviso->removeSede($s);
+          $avviso->removeSedi($s);
         }
       }
       // controllo errori
@@ -1300,8 +1300,8 @@ class StaffController extends AbstractController {
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/docente', 0);
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : 0);
+    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/docente');
+    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_individuali/pagina', 1);
@@ -1419,7 +1419,7 @@ class StaffController extends AbstractController {
           $sedi[] = $s->getId();
         } else {
           // elimina sede
-          $avviso->removeSede($s);
+          $avviso->removeSedi($s);
         }
       }
       if (count($sedi) == 0) {
@@ -1588,8 +1588,8 @@ class StaffController extends AbstractController {
     $search = array();
     $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/nome', '');
     $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_autorizza/pagina', 1);
@@ -2054,8 +2054,8 @@ class StaffController extends AbstractController {
     $search = array();
     $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/nome', '');
     $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_deroghe/pagina', 1);
@@ -2230,8 +2230,8 @@ class StaffController extends AbstractController {
     $search = array();
     $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/nome', '');
     $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_situazione/pagina', 1);
@@ -2330,8 +2330,8 @@ class StaffController extends AbstractController {
     $giorni_settimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_colloqui/docente', 0);
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : 0);
+    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_colloqui/docente');
+    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_colloqui/pagina', 1);
@@ -2539,8 +2539,8 @@ class StaffController extends AbstractController {
     $search = array();
     $search['nome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_password/nome', '');
     $search['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/staff_password/cognome', '');
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_password/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_password/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_password/pagina', 1);
@@ -3013,10 +3013,10 @@ class StaffController extends AbstractController {
     $errore = $reg->controlloData($data_obj, null);
     // recupera criteri dalla sessione
     $search = array();
-    $search['sede'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/sede', 0);
-    $sede = ($search['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($search['sede']) : 0);
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/classe', 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['sede'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/sede');
+    $sede = ($search['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($search['sede']) : null);
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_studenti_statistiche/classe');
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     // legge sede
     $sede_staff = $this->getUser()->getSede();
     // form di ricerca

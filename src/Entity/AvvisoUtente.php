@@ -13,13 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * AvvisoUtente - entità
- * Utente a cui è indirizzato l'avviso: usata da destinatari genitori
+ * AvvisoUtente - dati per l'associazione tra avviso e utente
  *
  * @ORM\Entity(repositoryClass="App\Repository\AvvisoUtenteRepository")
  * @ORM\Table(name="gs_avviso_utente", uniqueConstraints={@ORM\UniqueConstraint(columns={"avviso_id","utente_id"})})
@@ -56,31 +55,31 @@ class AvvisoUtente {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var Avviso $avviso Avviso a cui ci si riferisce
+   * @var Avviso|null $avviso Avviso a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Avviso")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $avviso;
+  private ?Avviso $avviso = null;
 
   /**
-   * @var Utente $utente Utente destinatario della circolare
+   * @var Utente|null $utente Utente destinatario della circolare
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $utente;
+  private ?Utente $utente = null;
 
   /**
-   * @var \DateTime $letto Data e ora di lettura dell'avviso da parte dell'utente
+   * @var \DateTime|null $letto Data e ora di lettura dell'avviso da parte dell'utente
    *
    * @ORM\Column(type="datetime", nullable=true)
    */
-  private $letto;
+  private ?\DateTime $letto = null;
 
 
   //==================== EVENTI ORM ====================
@@ -139,9 +138,9 @@ class AvvisoUtente {
   /**
    * Restituisce l'avviso a cui ci si riferisce
    *
-   * @return Avviso Avviso a cui ci si riferisce
+   * @return Avviso|null Avviso a cui ci si riferisce
    */
-  public function getAvviso() {
+  public function getAvviso(): ?Avviso {
     return $this->avviso;
   }
 
@@ -160,9 +159,9 @@ class AvvisoUtente {
   /**
    * Restituisce l'utente destinatario dell'avviso
    *
-   * @return Utente Utente destinatario dell'avviso
+   * @return Utente|null Utente destinatario dell'avviso
    */
-  public function getUtente() {
+  public function getUtente(): ?Utente {
     return $this->utente;
   }
 
@@ -181,20 +180,20 @@ class AvvisoUtente {
   /**
    * Restituisce la data e ora di lettura dell'avviso
    *
-   * @return \DateTime Data e ora di lettura dell'avviso
+   * @return \DateTime|null Data e ora di lettura dell'avviso
    */
-  public function getLetto() {
+  public function getLetto(): ?\DateTime {
     return $this->letto;
   }
 
   /**
    * Modifica la data e ora di lettura dell'avviso
    *
-   * @param \DateTime $letto Data e ora di lettura dell'avviso
+   * @param \DateTime|null $letto Data e ora di lettura dell'avviso
    *
    * @return self Oggetto modificato
    */
-  public function setLetto($letto): self {
+  public function setLetto(?\DateTime $letto): self {
     $this->letto = $letto;
     return $this;
   }

@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * OsservazioneClasse - entità
+ * OsservazioneClasse - dati per le osservazioni sulla classe riportate sul registro
  *
  * @ORM\Entity(repositoryClass="App\Repository\OsservazioneClasseRepository")
  * @ORM\Table(name="gs_osservazione")
@@ -62,16 +62,14 @@ class OsservazioneClasse {
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var string $testo Testo dell'osservazione
+   * @var string|null $testo Testo dell'osservazione
    *
    * @ORM\Column(type="text", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $testo;
+  private ?string $testo = '';
 
   /**
    * @var Cattedra $cattedra Cattedra del docente che inserisce l'osservazione
@@ -81,7 +79,7 @@ class OsservazioneClasse {
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $cattedra;
+  private ?Cattedra $cattedra = null;
 
 
   //==================== EVENTI ORM ====================
@@ -140,9 +138,9 @@ class OsservazioneClasse {
   /**
    * Restituisce la data dell'osservazione
    *
-   * @return \DateTime Data dell'osservazione
+   * @return \DateTime|null Data dell'osservazione
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -161,20 +159,20 @@ class OsservazioneClasse {
   /**
    * Restituisce il testo dell'osservazione
    *
-   * @return string Testo dell'osservazione
+   * @return string|null Testo dell'osservazione
    */
-  public function getTesto() {
+  public function getTesto(): ?string {
     return $this->testo;
   }
 
   /**
    * Modifica il testo dell'osservazione
    *
-   * @param string $testo Testo dell'osservazione
+   * @param string|null $testo Testo dell'osservazione
    *
    * @return self Oggetto modificato
    */
-  public function setTesto($testo): self {
+  public function setTesto(?string $testo): self {
     $this->testo = $testo;
     return $this;
   }
@@ -182,9 +180,9 @@ class OsservazioneClasse {
   /**
    * Restituisce la cattedra del docente che inserisce l'osservazione
    *
-   * @return Cattedra Cattedra del docente che inserisce l'osservazione
+   * @return Cattedra|null Cattedra del docente che inserisce l'osservazione
    */
-  public function getCattedra() {
+  public function getCattedra(): ?Cattedra {
     return $this->cattedra;
   }
 

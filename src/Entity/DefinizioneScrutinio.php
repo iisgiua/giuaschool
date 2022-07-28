@@ -13,7 +13,6 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -28,13 +27,13 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
+   * @var string|null $periodo Periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, G=esame giudizio sospeso, R=rinviato, X=rinviato in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"P","S","F","G","R","X"}, strict=true, message="field.choice")
    */
-  private string $periodo = 'P';
+  private ?string $periodo = 'P';
 
   /**
    * @var \DateTime|null $dataProposte Inizio dell'inserimento delle proposte di voto
@@ -66,20 +65,20 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   /**
    * Restituisce il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, U=sessione supplettiva, X=sessione supplettiva in precedente A.S.]
    *
-   * @return string Periodo dello scrutinio
+   * @return string|null Periodo dello scrutinio
    */
-  public function getPeriodo(): string {
+  public function getPeriodo(): ?string {
     return $this->periodo;
   }
 
   /**
    * Modifica il periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, E=esame sospesi, U=sessione supplettiva, X=sessione supplettiva in precedente A.S.]
    *
-   * @param string $periodo Periodo dello scrutinio
+   * @param string|null $periodo Periodo dello scrutinio
    *
    * @return self Oggetto modificato
    */
-  public function setPeriodo(string $periodo): self {
+  public function setPeriodo(?string $periodo): self {
     $this->periodo = $periodo;
     return $this;
   }

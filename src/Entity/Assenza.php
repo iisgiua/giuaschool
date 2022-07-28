@@ -241,11 +241,11 @@ class Assenza {
   /**
    * Modifica la motivazione dell'assenza
    *
-   * @param string $motivazione Motivazione dell'assenza
+   * @param string|null $motivazione Motivazione dell'assenza
    *
    * @return self Oggetto modificato
    */
-  public function setMotivazione(string $motivazione): self {
+  public function setMotivazione(?string $motivazione): self {
     $this->motivazione = $motivazione;
     return $this;
   }

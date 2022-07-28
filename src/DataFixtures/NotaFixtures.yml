@@ -1,0 +1,31 @@
+####################
+# NotaFixtures - dati di test
+#
+# Dati per la gestione delle note disciplinari sul registro:
+#   tipo: tipo della nota [C=di classe, I=individuale]
+#   data: data della nota
+#   testo: testo della nota
+#   provvedimento: provvedimento disciplinare preso per la nota
+#   classe: classe della nota
+#   docente: docente che ha messo la nota
+#   docenteProvvedimento: docente che ha preso il provvedimento disciplinare
+#   alunni: alunni ai quali viene data la nota
+####################
+
+
+include:
+  - ClasseFixtures.yml
+  - DocenteFixtures.yml
+  - AlunnoFixtures.yml
+
+
+App\Entity\Nota:
+  nota_{1..10}:
+    tipo: '<randomElement(["C", "I"])>'
+    data: '<dateTimeBetween("-1 month", "now")>'
+    testo: '<text()>'
+    provvedimento: '50%? <text()>: <strval("")>'
+    classe: '@classe_*'
+    docente: '@docente_*'
+    docenteProvvedimento: '50%? @docente_*'
+    alunni: '<collection(@alunno_prima_*)>'

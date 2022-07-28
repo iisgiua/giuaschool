@@ -66,13 +66,13 @@ class Cattedra {
   private bool $supplenza = false;
 
   /**
-   * @var string $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
+   * @var string|null $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","I","P","A"}, strict=true, message="field.choice")
    */
-  private string $tipo = 'N';
+  private ?string $tipo = 'N';
 
   /**
    * @var Materia|null $materia Materia della cattedra
@@ -211,20 +211,20 @@ class Cattedra {
   /**
    * Restituisce il tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
-   * @return string Tipo della cattedra
+   * @return string|null Tipo della cattedra
    */
-  public function getTipo(): string {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
-   * @param string $tipo Tipo della cattedra
+   * @param string|null $tipo Tipo della cattedra
    *
    * @return self Oggetto modificato
    */
-  public function setTipo(string $tipo): self {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }

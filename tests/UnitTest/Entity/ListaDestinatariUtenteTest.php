@@ -132,7 +132,7 @@ class ListaDestinatariUtenteTest extends DatabaseTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
-    $existent->setListaDestinatari($this->getReference("lista_destinatari_10"));
+    $existent->setListaDestinatari($this->getReference("lista_destinatari_3"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // utente
     $property = $this->getPrivateProperty('App\Entity\ListaDestinatariUtente', 'utente');

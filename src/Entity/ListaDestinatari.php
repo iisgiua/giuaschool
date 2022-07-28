@@ -80,13 +80,13 @@ class ListaDestinatari {
   private bool $ata = false;
 
   /**
-   * @var string $docenti Indica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
+   * @var string|null $docenti Indica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
-  private string $docenti = 'N';
+  private ?string $docenti = 'N';
 
   /**
    * @var array|null $filtroDocenti Lista dei filtri per i docenti
@@ -96,13 +96,13 @@ class ListaDestinatari {
   private ?array $filtroDocenti = array();
 
   /**
-   * @var string $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
+   * @var string|null $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
    */
-  private string $coordinatori = 'N';
+  private ?string $coordinatori = 'N';
 
   /**
    * @var array|null $filtroCoordinatori Lista dei filtri per i coordinatori
@@ -119,13 +119,13 @@ class ListaDestinatari {
   private bool $staff = false;
 
   /**
-   * @var string $genitori Indica quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+   * @var string|null $genitori Indica quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
-  private string $genitori = 'N';
+  private ?string $genitori = 'N';
 
   /**
    * @var array $filtroGenitori Lista dei filtri per i genitori
@@ -135,13 +135,13 @@ class ListaDestinatari {
   private ?array $filtroGenitori = array();
 
   /**
-   * @var string $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+   * @var string|null $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
-  private string $alunni = 'N';
+  private ?string $alunni = 'N';
 
   /**
    * @var array $filtroAlunni Lista dei filtri per gli alunni
@@ -298,20 +298,20 @@ class ListaDestinatari {
   /**
    * Restituisce quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
-   * @return string Indica Indica quali docenti sono tra i destinatari
+   * @return string|null Indica Indica quali docenti sono tra i destinatari
    */
-  public function getDocenti(): string {
+  public function getDocenti(): ?string {
     return $this->docenti;
   }
 
   /**
    * Modifica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
-   * @param string $docenti Indica Indica quali docenti sono tra i destinatari
+   * @param string|null $docenti Indica Indica quali docenti sono tra i destinatari
    *
    * @return self Oggetto modificato
    */
-  public function setDocenti(string $docenti): self {
+  public function setDocenti(?string $docenti): self {
     $this->docenti = $docenti;
     return $this;
   }
@@ -340,20 +340,20 @@ class ListaDestinatari {
   /**
    * Restituisce quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @return string Indica quali coordinatori sono tra i destinatari
+   * @return string|null Indica quali coordinatori sono tra i destinatari
    */
-  public function getCoordinatori(): string {
+  public function getCoordinatori(): ?string {
     return $this->coordinatori;
   }
 
   /**
    * Modifica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @param string $coordinatori Indica quali coordinatori sono tra i destinatari
+   * @param string|null $coordinatori Indica quali coordinatori sono tra i destinatari
    *
    * @return self Oggetto modificato
    */
-  public function setCoordinatori(string $coordinatori): self {
+  public function setCoordinatori(?string $coordinatori): self {
     $this->coordinatori = $coordinatori;
     return $this;
   }
@@ -403,20 +403,20 @@ class ListaDestinatari {
   /**
    * Restituisce quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @return string Indica quali genitori sono tra i destinatari
+   * @return string|null Indica quali genitori sono tra i destinatari
    */
-  public function getGenitori(): string {
+  public function getGenitori(): ?string {
     return $this->genitori;
   }
 
   /**
    * Modifica quali genitori siano tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @param string $genitori Indica quali genitori sono tra i destinatari
+   * @param string|null $genitori Indica quali genitori sono tra i destinatari
    *
    * @return self Oggetto modificato
    */
-  public function setGenitori(string $genitori): self {
+  public function setGenitori(?string $genitori): self {
     $this->genitori = $genitori;
     return $this;
   }
@@ -445,20 +445,20 @@ class ListaDestinatari {
   /**
    * Restituisce quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @return string Indica quali alunni sono tra i destinatari
+   * @return string|null Indica quali alunni sono tra i destinatari
    */
-  public function getAlunni(): string {
+  public function getAlunni(): ?string {
     return $this->alunni;
   }
 
   /**
    * Modifica quali alunni siano tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @param string $alunni Indica quali alunni sono fra i destinatari
+   * @param string|null $alunni Indica quali alunni sono fra i destinatari
    *
    * @return self Oggetto modificato
    */
-  public function setAlunni(string $alunni): self {
+  public function setAlunni(?string $alunni): self {
     $this->alunni = $alunni;
     return $this;
   }

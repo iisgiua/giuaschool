@@ -41,13 +41,13 @@ class Alunno extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"N","H","D","B"}, strict=true, message="field.choice")
    */
-  private string $bes = 'N';
+  private ?string $bes = 'N';
 
   /**
    * @var string|null $noteBes Note sull'alunno BES
@@ -89,13 +89,13 @@ class Alunno extends Utente {
   private bool $frequenzaEstero = false;
 
   /**
-   * @var string $religione Indica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
+   * @var string|null $religione Indica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"S","U","I","D","A"}, strict=true, message="field.choice")
    */
-  private string $religione = 'S';
+  private ?string $religione = 'S';
 
   /**
    * @var int $credito3 Punteggio di credito per la classe terza (se presente)
@@ -159,20 +159,20 @@ class Alunno extends Utente {
   /**
    * Restituisce i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
-   * @return string Bisogni educativi speciali dell'alunno
+   * @return string|null Bisogni educativi speciali dell'alunno
    */
-  public function getBes(): string {
+  public function getBes(): ?string {
     return $this->bes;
   }
 
   /**
    * Modifica i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
-   * @param string $bes Bisogni educativi speciali dell'alunno
+   * @param string|null $bes Bisogni educativi speciali dell'alunno
    *
    * @return self Oggetto modificato
    */
-  public function setBes(string $bes): self {
+  public function setBes(?string $bes): self {
     $this->bes = $bes;
     return $this;
   }
@@ -189,11 +189,11 @@ class Alunno extends Utente {
   /**
    * Modifica le note sull'alunno BES
    *
-   * @param string $noteBes Note sull'alunno BES
+   * @param string|null $noteBes Note sull'alunno BES
    *
    * @return self Oggetto modificato
    */
-  public function setNoteBes(string $noteBes): self {
+  public function setNoteBes(?string $noteBes): self {
     $this->noteBes = $noteBes;
     return $this;
   }
@@ -210,11 +210,11 @@ class Alunno extends Utente {
   /**
    * Modifica l'autorizzazione all'entrata in ritardo
    *
-   * @param string $autorizzaEntrata Autorizzazione all'entrata in ritardo
+   * @param string|null $autorizzaEntrata Autorizzazione all'entrata in ritardo
    *
    * @return self Oggetto modificato
    */
-  public function setAutorizzaEntrata(string $autorizzaEntrata): self {
+  public function setAutorizzaEntrata(?string $autorizzaEntrata): self {
     $this->autorizzaEntrata = $autorizzaEntrata;
     return $this;
   }
@@ -231,11 +231,11 @@ class Alunno extends Utente {
   /**
    * Modifica l'autorizzazione all'uscita in anticipo
    *
-   * @param string $autorizzaUscita Autorizzazione all'uscita in anticipo
+   * @param string|null $autorizzaUscita Autorizzazione all'uscita in anticipo
    *
    * @return self Oggetto modificato
    */
-  public function setAutorizzaUscita(string $autorizzaUscita): self {
+  public function setAutorizzaUscita(?string $autorizzaUscita): self {
     $this->autorizzaUscita = $autorizzaUscita;
     return $this;
   }
@@ -252,11 +252,11 @@ class Alunno extends Utente {
   /**
    * Modifica le note sull'alunno
    *
-   * @param string $note Note sull'alunno
+   * @param string|null $note Note sull'alunno
    *
    * @return self Oggetto modificato
    */
-  public function setNote(string $note): self {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -285,20 +285,20 @@ class Alunno extends Utente {
   /**
    * Restituisce se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
-   * @return string Indica se l'alunno si avvale della religione
+   * @return string|null Indica se l'alunno si avvale della religione
    */
-  public function getReligione(): string {
+  public function getReligione(): ?string {
     return $this->religione;
   }
 
   /**
    * Modifica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
-   * @param string $religione Indica se l'alunno si avvale della religione
+   * @param string|null $religione Indica se l'alunno si avvale della religione
    *
    * @return self Oggetto modificato
    */
-  public function setReligione(string $religione): self {
+  public function setReligione(?string $religione): self {
     $this->religione = $religione;
     return $this;
   }
@@ -315,11 +315,11 @@ class Alunno extends Utente {
   /**
    * Modifica il punteggio di credito per la classe terza (se presente)
    *
-   * @param int $credito3 Punteggio di credito per la classe terza
+   * @param int|null $credito3 Punteggio di credito per la classe terza
    *
    * @return self Oggetto modificato
    */
-  public function setCredito3(int $credito3): self {
+  public function setCredito3(?int $credito3): self {
     $this->credito3 = $credito3;
     return $this;
   }
@@ -336,11 +336,11 @@ class Alunno extends Utente {
   /**
    * Modifica il punteggio di credito per la classe quarta (se presente)
    *
-   * @param int $credito4 Punteggio di credito per la classe quarta
+   * @param int|null $credito4 Punteggio di credito per la classe quarta
    *
    * @return self Oggetto modificato
    */
-  public function setCredito4(int $credito4): self {
+  public function setCredito4(?int $credito4): self {
     $this->credito4 = $credito4;
     return $this;
   }
@@ -403,7 +403,7 @@ class Alunno extends Utente {
    *
    * @return self Oggetto modificato
    */
-  public function setFoto(string $foto): self {
+  public function setFoto(?string $foto): self {
     $this->foto = $foto;
     return $this;
   }

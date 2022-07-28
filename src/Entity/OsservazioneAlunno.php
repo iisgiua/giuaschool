@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * OsservazioneAlunno - entità
+ * OsservazioneAlunno - dati per le osservazioni sugli alunni riportate sul registro
  *
  * @ORM\Entity(repositoryClass="App\Repository\OsservazioneAlunnoRepository")
  */
@@ -34,7 +34,7 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -45,7 +45,7 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @return Alunno Alunno a cui si riferisce l'osservazione
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -74,4 +74,3 @@ class OsservazioneAlunno extends OsservazioneClasse {
   }
 
 }
-

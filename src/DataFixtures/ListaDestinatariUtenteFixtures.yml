@@ -16,7 +16,7 @@ include:
 
 App\Entity\ListaDestinatariUtente:
   lista_destinatari_utente_{1..10}:
-    listaDestinatari: '@lista_destinatari_DOCENTI_*'
+    listaDestinatari: '@lista_destinatari_DOCENTI_<current()>'
     utente: '@docente_*'
     letto: '50%? <dateTimeBetween("-1 month", "now")>'
     firmato: '50%? <dateTimeBetween("-1 month", "now")>'

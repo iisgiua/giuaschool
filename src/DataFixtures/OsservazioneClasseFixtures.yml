@@ -1,0 +1,19 @@
+####################
+# OsservazioneClasseFixtures - dati di test
+#
+# Dati per le osservazioni sulla classe riportate sul registro:
+#   data: data dell'osservazione
+#   testo: testo dell'osservazione
+#   cattedra: cattedra del docente che inserisce l'osservazione
+####################
+
+
+include:
+  - CattedraFixtures.yml
+
+
+App\Entity\OsservazioneClasse:
+  osservazione_classe_{1..10}:
+    data: '<dateTimeBetween("-1 month", "now")>'
+    testo: '<text()>'
+    cattedra: '@cattedra_*'

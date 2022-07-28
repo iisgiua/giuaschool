@@ -13,12 +13,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * FirmaCircolare - entità
+ * FirmaCircolare - dati per la firma delle circolari
  *
  * @ORM\Entity(repositoryClass="App\Repository\FirmaCircolareRepository")
  * @ORM\Table(name="gs_firma_circolare", uniqueConstraints={@ORM\UniqueConstraint(columns={"circolare_id","utente_id"})})
@@ -55,42 +55,42 @@ class FirmaCircolare {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var Circolare $circolare Circolare a cui si riferisce la firma
+   * @var Circolare|null $circolare Circolare a cui si riferisce la firma
    *
    * @ORM\ManyToOne(targetEntity="Circolare")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $circolare;
+  private ?Circolare $circolare = null;
 
   /**
-   * @var Utente $utente Utente che firma la circolare
+   * @var Utente|null $utente Utente che firma la circolare
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $utente;
+  private ?Utente $utente = null;
 
   /**
-   * @var \DateTime $letto Data e ora della visualizzazione della circolare [conferma di lettura presunta]
+   * @var \DateTime|null $letto Data e ora della visualizzazione della circolare [conferma di lettura presunta]
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private ?\DateTime $letto;
+  private ?\DateTime $letto = null;
 
   /**
-   * @var \DateTime $firmato Data e ora della firma della circolare [conferma di lettura esplicita]
+   * @var \DateTime|null $firmato Data e ora della firma della circolare [conferma di lettura esplicita]
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
    * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private ?\DateTime $firmato;
+  private ?\DateTime $firmato = null;
 
 
   //==================== EVENTI ORM ====================
@@ -149,9 +149,9 @@ class FirmaCircolare {
   /**
    * Restituisce la circolare a cui si riferisce la firma
    *
-   * @return Circolare Circolare a cui si riferisce la firma
+   * @return Circolare|null Circolare a cui si riferisce la firma
    */
-  public function getCircolare() {
+  public function getCircolare(): ?Circolare {
     return $this->circolare;
   }
 
@@ -170,9 +170,9 @@ class FirmaCircolare {
   /**
    * Restituisce l'utente che firma la circolare
    *
-   * @return Utente Utente che firma la circolare
+   * @return Utente|null Utente che firma la circolare
    */
-  public function getUtente() {
+  public function getUtente(): ?Utente {
     return $this->utente;
   }
 
@@ -191,20 +191,20 @@ class FirmaCircolare {
   /**
    * Restituisce la data e ora della visualizzazione della circolare [conferma di lettura presunta]
    *
-   * @return \DateTime Data e ora della visualizzazione della circolare
+   * @return \DateTime|null Data e ora della visualizzazione della circolare
    */
-  public function getLetto() {
+  public function getLetto(): ?\DateTime {
     return $this->letto;
   }
 
   /**
    * Modifica la data e ora della visualizzazione della circolare [conferma di lettura presunta]
    *
-   * @param \DateTime $letto Data e ora della visualizzazione della circolare
+   * @param \DateTime|null $letto Data e ora della visualizzazione della circolare
    *
    * @return self Oggetto modificato
    */
-  public function setLetto(\DateTime $letto=null): self {
+  public function setLetto(?\DateTime $letto): self {
     $this->letto = $letto;
     return $this;
   }
@@ -212,20 +212,20 @@ class FirmaCircolare {
   /**
    * Restituisce la data e ora della firma della circolare [conferma di lettura esplicita]
    *
-   * @return \DateTime Data e ora della firma della circolare
+   * @return \DateTime|null Data e ora della firma della circolare
    */
-  public function getFirmato() {
+  public function getFirmato(): ?\DateTime {
     return $this->firmato;
   }
 
   /**
    * Modifica la data e ora della firma della circolare [conferma di lettura esplicita]
    *
-   * @param \DateTime $firmato Data e ora della firma della circolare
+   * @param \DateTime|null $firmato Data e ora della firma della circolare
    *
    * @return self Oggetto modificato
    */
-  public function setFirmato(\DateTime $firmato=null): self {
+  public function setFirmato(?\DateTime $firmato): self {
     $this->firmato = $firmato;
     return $this;
   }
