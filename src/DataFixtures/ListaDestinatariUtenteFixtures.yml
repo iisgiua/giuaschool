@@ -12,11 +12,17 @@
 include:
   - ListaDestinatariFixtures.yml
   - DocenteFixtures.yml
+  - StaffFixtures.yml
 
 
 App\Entity\ListaDestinatariUtente:
-  lista_destinatari_utente_{1..10}:
-    listaDestinatari: '@lista_destinatari_DOCENTI_<current()>'
+  lista_destinatari_utente_{1..5}:
+    listaDestinatari: '@lista_destinatari_COORDINATORI_<current()>'
     utente: '@docente_*'
+    letto: '50%? <dateTimeBetween("-1 month", "now")>'
+    firmato: '50%? <dateTimeBetween("-1 month", "now")>'
+  lista_destinatari_utente_{6..10}:
+    listaDestinatari: '@lista_destinatari_STAFF_<($current - 5)>'
+    utente: '@staff_*'
     letto: '50%? <dateTimeBetween("-1 month", "now")>'
     firmato: '50%? <dateTimeBetween("-1 month", "now")>'

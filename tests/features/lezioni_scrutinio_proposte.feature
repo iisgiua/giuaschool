@@ -39,9 +39,9 @@ Schema dello scenario: Inserisce e memorizza i voti senza recupero per la catted
     | classe | #abilitato |
     | $cl1   | no         |
   E istanze di tipo "Alunno":
-    | id   | classe | nome     | cognome | abilitato |
-    | $a1  | $cl1   | Mario    | Rossi   | si        |
-    | $a2  | $cl1   | Giuseppe | Verdi   | si        |
+    | id   | classe | nome     | cognome | abilitato | religione |
+    | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
+    | $a2  | $cl1   | Giuseppe | Verdi   | si        | S         |
   E pagina attiva "lezioni_scrutinio_proposte" con parametri:
     | cattedra | classe  | periodo   |
     | $c1:id   | $cl1:id | <periodo> |
@@ -167,9 +167,9 @@ Schema dello scenario: Modifica voti esistenti per la cattedra del docente
     | classe | #abilitato |
     | $cl1   | no         |
   E istanze di tipo "Alunno":
-    | id   | classe | nome     | cognome | abilitato |
-    | $a1  | $cl1   | Mario    | Rossi   | si        |
-    | $a2  | $cl1   | Giuseppe | Verdi   | si        |
+    | id   | classe | nome     | cognome | abilitato | religione |
+    | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
+    | $a2  | $cl1   | Giuseppe | Verdi   | si        | S         |
   E creazione istanze di tipo "PropostaVoto":
     | id   | alunno | classe | materia | docente | periodo   | unico  |
     | $pv1 | $a2    | $cl1   | $m1     | #logged | <periodo> | <voto> |
@@ -316,9 +316,9 @@ Schema dello scenario: Visualizza messaggio di errore per voti incompleti
     | classe | #abilitato |
     | $cl1   | no         |
   E istanze di tipo "Alunno":
-    | id   | classe | nome     | cognome | abilitato |
-    | $a1  | $cl1   | Mario    | Rossi   | si        |
-    | $a2  | $cl1   | Giuseppe | Verdi   | si        |
+    | id   | classe | nome     | cognome | abilitato | religione |
+    | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
+    | $a2  | $cl1   | Giuseppe | Verdi   | si        | S         |
   E pagina attiva "lezioni_scrutinio_proposte" con parametri:
     | cattedra | classe  | periodo   |
     | $c1:id   | $cl1:id | <periodo> |
@@ -399,9 +399,9 @@ Schema dello scenario: Visualizza messaggio di conferma per voti completi
     | classe | #abilitato |
     | $cl1   | no         |
   E istanze di tipo "Alunno":
-    | id   | classe | nome     | cognome | abilitato |
-    | $a1  | $cl1   | Mario    | Rossi   | si        |
-    | $a2  | $cl1   | Giuseppe | Verdi   | si        |
+    | id   | classe | nome     | cognome | abilitato | religione |
+    | $a1  | $cl1   | Mario    | Rossi   | si        | S         |
+    | $a2  | $cl1   | Giuseppe | Verdi   | si        | S         |
   E pagina attiva "lezioni_scrutinio_proposte" con parametri:
     | cattedra | classe  | periodo   |
     | $c1:id   | $cl1:id | <periodo> |
@@ -420,7 +420,7 @@ Schema dello scenario: Visualizza messaggio di conferma per voti completi
     | F       | 4    | E            | 1         |
     | F       | 5    | N            | -1        |
     | F       | 5    | E            | -1        |
-@debug
+
 Schema dello scenario: Visualizza messaggio di conferma per dati completi
   Data creazione istanze di tipo "DefinizioneScrutinio":
     | id   | periodo   | data   | dataProposte |

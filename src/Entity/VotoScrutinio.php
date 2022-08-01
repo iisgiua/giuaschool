@@ -59,35 +59,35 @@ class VotoScrutinio {
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private ?int $orale = 0;
+  private ?int $orale = null;
 
   /**
    * @var int|null $scritto Voto per la valutazione scritta
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private ?int $scritto = 0;
+  private ?int $scritto = null;
 
   /**
    * @var int|null $pratico Voto per la valutazione pratica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private ?int $pratico = 0;
+  private ?int $pratico = null;
 
   /**
    * @var int|null $unico Voto per la valutazione unica
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private ?int $unico = 0;
+  private ?int $unico = null;
 
   /**
    * @var string|null $debito Argomenti per il recupero del debito
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private ?string $debito = '';
+  private ?string $debito = null;
 
   /**
    * @var string|null $recupero Modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
@@ -96,7 +96,7 @@ class VotoScrutinio {
    *
    * @Assert\Choice(choices={"A","C","S","P","I","R","N"}, strict=true, message="field.choice")
    */
-  private ?string $recupero = 'A';
+  private ?string $recupero = null;
 
   /**
    * @var int $assenze Numero di ore di assenza nel periodo

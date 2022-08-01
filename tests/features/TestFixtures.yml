@@ -1,0 +1,24 @@
+####################
+# TestFixtures - dati di test iniziali
+####################
+
+
+include:
+  - ../../src/DataFixtures/ConfigurazioneFixtures.yml
+  - ../../src/DataFixtures/MenuFixtures.yml
+  - ../../src/DataFixtures/IstitutoFixtures.yml
+  - ../../src/DataFixtures/SedeFixtures.yml
+  - ../../src/DataFixtures/CorsoFixtures.yml
+  - ../../src/DataFixtures/MateriaFixtures.yml
+  - ../../src/DataFixtures/ClasseFixtures.yml
+  - ../../src/DataFixtures/ScansioneOrariaFixtures.yml
+  - ../../src/DataFixtures/FestivitaFixtures.yml
+  - ../../src/DataFixtures/AmministratoreFixtures.yml
+  - ../../src/DataFixtures/PresideFixtures.yml
+  - ../../src/DataFixtures/StaffFixtures.yml
+  - ../../src/DataFixtures/AtaFixtures.yml
+  - ../../src/DataFixtures/DocenteFixtures.yml
+  - ../../src/DataFixtures/AlunnoFixtures.yml
+  - ../../src/DataFixtures/GenitoreFixtures.yml
+  - ../../src/DataFixtures/UtenteFixtures.yml
+  - ../../src/DataFixtures/CattedraFixtures.yml

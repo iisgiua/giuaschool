@@ -16,5 +16,5 @@ include:
 App\Entity\AvvisoUtente:
   avviso_utente_{1..10}:
     avviso: '@avviso_<current()>'
-    utente: '@docente_curricolare_itp_*'
+    utente: '@docente_curricolare_<current()>'
     letto: '50%? <dateTimeBetween("-1 month", "now")>'

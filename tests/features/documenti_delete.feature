@@ -450,9 +450,9 @@ Schema dello scenario: inserisce e poi cancella documento BES
   E non vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
     | tipo     | nome     | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
 
 
 ################################################################################

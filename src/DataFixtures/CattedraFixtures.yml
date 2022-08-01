@@ -37,7 +37,7 @@ App\Entity\Cattedra:
     supplenza: '<boolean(50)>'
     tipo: 'I'
     materia: '@materia_curricolare_itp_*'
-    docente: '@docente_curricolare_itp_*'
+    docente: '@docente_itp_*'
     classe: '@classe_*'
     alunno:
 
@@ -57,7 +57,7 @@ App\Entity\Cattedra:
     supplenza: '<boolean(50)>'
     tipo: 'N'
     materia: '@materia_SOSTEGNO'
-    docente: '@docente_curricolare_*'
+    docente: '@docente_sostegno_*'
     alunno: '@alunno_sostegno_*'
     classe: '<($alunno->getClasse())>'
 

@@ -79,21 +79,21 @@ class Valutazione {
    *
    * @ORM\Column(type="float", nullable=true)
    */
-  private ?float $voto = 0;
+  private ?float $voto = null;
 
   /**
    * @var string|null $giudizio Giudizio della valutazione
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private ?string $giudizio = '';
+  private ?string $giudizio = null;
 
   /**
    * @var string|null $argomento Argomento relativo alla valutazione
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private ?string $argomento = '';
+  private ?string $argomento = null;
 
   /**
    * @var Docente|null $docente Docente che inserisce la valutazione

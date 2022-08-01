@@ -12,46 +12,49 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use App\Util\NotificheUtil;
-use App\Util\LogHandler;
-use App\Util\ConfigLoader;
-use App\Util\OtpUtil;
-use App\Util\StaffUtil;
-use App\Entity\Amministratore;
 use App\Entity\Alunno;
-use App\Entity\Genitore;
-use App\Entity\Docente;
+use App\Entity\Amministratore;
 use App\Entity\Ata;
 use App\Entity\Avviso;
 use App\Entity\AvvisoIndividuale;
+use App\Entity\Docente;
+use App\Entity\Genitore;
 use App\Entity\Utente;
+use App\Util\ConfigLoader;
+use App\Util\LogHandler;
+use App\Util\NotificheUtil;
+use App\Util\OtpUtil;
+use App\Util\StaffUtil;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Component\Security\Http\SecurityEvents;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -460,7 +463,8 @@ class LoginController extends BaseController {
    * @IsGranted("ROLE_UTENTE")
    */
   public function profiloAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                EventDispatcherInterface $disp, LogHandler $dblogger) {
+                                EventDispatcherInterface $disp, AuthenticationManagerInterface $authenticationManager,
+                                TokenStorageInterface $tokenStorage, LogHandler $dblogger) {
     // imposta profili
     $lista = [];
     foreach ($reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
@@ -508,11 +512,12 @@ class LoginController extends BaseController {
           'Username' => $utente->getUsername(),
           'Ruolo' => $utente->getRoles()[0]));
         // crea token di autenticazione
-        $token = new UsernamePasswordToken($utente, '', 'main', $utente->getRoles());
+        $token = new UsernamePasswordToken($utente, 'main', $utente->getRoles());
         // autentica con nuovo token
-        $this->get('security.token_storage')->setToken($token);
-        $event = new InteractiveLoginEvent($request, $token);
-        $disp->dispatch('security.interactive_login', $event);
+        $authenticatedToken = $authenticationManager->authenticate($token);
+        $tokenStorage->setToken($authenticatedToken);
+        $event = new InteractiveLoginEvent($request, $authenticatedToken);
+        $disp->dispatch($event, SecurityEvents::INTERACTIVE_LOGIN);
         // memorizza profilo in uso
         $reqstack->getSession()->set('/APP/UTENTE/profilo_usato', $profiloId);
       }

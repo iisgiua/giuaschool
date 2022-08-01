@@ -14,7 +14,7 @@ include:
 App\Entity\Docente:
 
   # ----- docenti curricolari -----
-  docente_curricolare_{1..30}:
+  docente_curricolare_{1..10}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, "")>'
     nome: '<datoUtente("nome")>'
@@ -37,11 +37,11 @@ App\Entity\Docente:
     indirizzo: '50%? <streetAddress()>: <strval("")>'
     numeriTelefono: '<telefono(2)>'
     notifica: '<(array())>'
-    responsabileBes: '<boolean(20)>'
-    responsabileBesSede: '<($responsabileBes ? @sede_2 : null)>'
+    responsabileBes: false
+    responsabileBesSede:
 
   # ----- docenti curricolari ITP -----
-  docente_curricolare_itp_{1..20}:
+  docente_itp_{1..10}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, "")>'
     nome: '<datoUtente("nome")>'
@@ -68,7 +68,7 @@ App\Entity\Docente:
     responsabileBesSede:
 
   # ----- docenti religione -----
-  docente_religione_{1..10}:
+  docente_religione_{1..5}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, "")>'
     nome: '<datoUtente("nome")>'
@@ -80,6 +80,60 @@ App\Entity\Docente:
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
     abilitato: '90%? 1: 0'
+    spid: '70%? 1: 0'
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
+    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
+    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    responsabileBes: false
+    responsabileBesSede:
+
+  # ----- docenti sostegno -----
+  docente_sostegno_{1..5}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, "")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: '90%? 1: 0'
+    spid: '70%? 1: 0'
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
+    codiceFiscale (unique): '50%? <taxId()>: <strval("")>'
+    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(2)>'
+    notifica: '<(array())>'
+    responsabileBes: '<boolean()>'
+    responsabileBesSede: '<($responsabileBes ? @sede_2 : null)>'
+
+  # ----- docenti senza cattedra -----
+  docente_nocattedra_{1..5}:
+    sesso: '<randomElement(["M", "F"])>'
+    username (unique): '<generaUtente($sesso, "")>'
+    nome: '<datoUtente("nome")>'
+    cognome: '<datoUtente("cognome")>'
+    password: '<datoUtente("password")>'
+    email: '$username@lovelace.edu.it'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: '50%? <md5()>: <strval("")>'

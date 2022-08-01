@@ -185,10 +185,10 @@ class UtenteTest extends DatabaseTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Username - MAX LENGTH');
     $existent->setUsername(str_repeat('a', 128));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID MAX LENGTH');
-    $existent->setUsername($this->faker->regexify('(?!/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/)'));
+    $existent->setUsername($this->faker->regexify('^(?![a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9])$'));
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.regex', $this->entity.'::Username - REGEX');
-    $existent->setUsername($this->faker->regexify('/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/'));
+    $existent->setUsername($this->faker->unique()->regexify('^[a-zA-Z][a-zA-Z0-9\._\-]+[a-zA-Z0-9]$'));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Username - VALID REGEX');
     // password
     $property = $this->getPrivateProperty('App\Entity\Utente', 'password');

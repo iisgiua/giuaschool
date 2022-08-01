@@ -24,15 +24,26 @@ use Symfony\Component\HttpFoundation\File\File;
 class CustomProvider extends Base {
 
 
+  //==================== ATTRIBUTI DELLA CLASSE  ====================
+
+  /**
+   * Lista dei dati che devono essere aggiornati dopo la memorizzazione su db
+   *
+   * @var array $postPersist Lista delle informazioni per la modifica post memorizzazione
+   */
+  protected static array $postPersist = [];
+
+
   //==================== METODI DELLA CLASSE ====================
 
   /**
    * Costruttore
    *
-   * @var Generator $generator Generatore automatico di dati fittizi
+   * @param Generator $generator Generatore automatico di dati fittizi
    */
   public function __construct(Generator $generator) {
     parent::__construct($generator);
+    $postPersist = [];
   }
 
   /**
@@ -88,6 +99,37 @@ class CustomProvider extends Base {
       $path = __DIR__.'/data/'.static::randomElement($files);
     }
     return new File($path);
+  }
+
+  /**
+   * Crea e restituisce una lista di id relativi agli oggetti indicati.
+   * Viene creata una lista vuota e memorizzati i dati per l'aggiornamento dopo la memorizzazione su db.
+   * Questo è necessario perché gli id vengono inseriti solo al momento della memorizzazione su db.
+   *
+   * @param string $name Nome del riferimento all'oggetto su cui devono essere memorizzati gli id
+   * @param string $property Nome dell'attributo dell'oggetto sul quale devono essere memorizzati gli id
+   * @param mixed $obj Oggetto su cui devono essere memorizzati gli id
+   * @param mixed $args Lista di oggetti da cui leggere gli id, passati come parametri variabili
+   *
+   * @return array Restituisce una lista vuota
+   */
+  public function arrayId($name, $property, $obj, $args): array {
+    // memorizza informazioni
+    static::$postPersist[$name][$property] = [$obj, array_slice(func_get_args(), 3)];
+    // restituisce lista vuota
+    return array();
+  }
+
+  /**
+   * Modifica gli id dopo l'inserimento nel db
+   *
+   */
+  public function postPersistArrayId(): void {
+    foreach (static::$postPersist as $name => $attrs) {
+      foreach ($attrs as $property => $list) {
+        $list[0]->{'set'.ucfirst($property)}(array_map(function($o) { return $o->getId(); }, $list[1]));
+      }
+    }
   }
 
 }

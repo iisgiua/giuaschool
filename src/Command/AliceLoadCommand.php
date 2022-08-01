@@ -173,22 +173,37 @@ class AliceLoadCommand extends Command {
       print("...fixture: $file\n");
     }
     // carica dati
-    $this->alice->load($fixtures, [], [], $purgeMode);
+    $objects = $this->alice->load($fixtures, [], [], $purgeMode);
+    // esegue modifiche dopo l'inserimento nel db e le rende permanenti
+    CustomProvider::postPersistArrayId();
+    $this->em->flush();
     print("---> dati caricati correttamente\n");
     // dump dei dati
     if ($dump) {
       // legge configurazione db
       $dbParams = $this->em->getConnection()->getParams();
       // esegue dump
-      $path = $this->projectPath.'/'.$dump;
-      $process = new Process(['mysqldump', '-u'.$dbParams['user'], '-p'.$dbParams['password'], $dbParams['dbname'],
-        '-t', '-n', '--compact', '--result-file='.$path]);
+      $path = $this->projectPath.'/'.$dump.'.sql';
+      file_put_contents($path, "SET FOREIGN_KEY_CHECKS = 0;\n");
+      $process = Process::fromShellCommandline('mysqldump -u'.$dbParams['user'].' -p'.$dbParams['password'].
+        ' '.$dbParams['dbname'].' -t -n --compact >> '.$path);
       $process->setTimeout(0);
       $process->run();
       if (!$process->isSuccessful()) {
         throw new ProcessFailedException($process);
       }
+      file_put_contents($path, "SET FOREIGN_KEY_CHECKS = 1;\n", FILE_APPEND);
+      // crea mappa dei riferimenti agli oggetti
+      $mapPath = $this->projectPath.'/'.$dump.'.map';
+      $objectMap = [];
+      foreach ($objects as $name => $object) {
+        // determina classe e numero di istanza
+        $objectMap[$name] = [get_class($object), $object->getId()];
+      }
+      // memorizza mappa dei riferimenti agli oggetti
+      file_put_contents($mapPath, serialize($objectMap));
       print("---> dump dei dati scritto su: $path\n");
+      print("                             : $mapPath\n\n");
     }
     // ok, fine
     return 0;

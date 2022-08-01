@@ -75,8 +75,8 @@ class ClasseTest extends DatabaseTestCase {
           ($field == 'oreSettimanali' ? $this->faker->randomNumber(4, false) :
           ($field == 'sede' ? $this->getReference("sede_1") :
           ($field == 'corso' ? $this->getReference("corso_1") :
-          ($field == 'coordinatore' ? $this->getReference("docente_1") :
-          ($field == 'segretario' ? $this->getReference("docente_1") :
+          ($field == 'coordinatore' ? $this->getReference("docente_curricolare_1") :
+          ($field == 'segretario' ? $this->getReference("docente_curricolare_1") :
           null)))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }

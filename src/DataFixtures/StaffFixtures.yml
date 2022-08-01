@@ -11,7 +11,7 @@ include:
 
 
 App\Entity\Staff:
-  docente_{1..10}:
+  staff_{1..10}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, "")>'
     nome: '<datoUtente("nome")>'

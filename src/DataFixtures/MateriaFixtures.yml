@@ -80,135 +80,116 @@ App\Entity\Materia:
     Media: true
     Ordinamento: 40
   materia_curricolare_5:
-    Nome: 'Lingua e cultura straniera: Inglese'
-    NomeBreve: 'Inglese'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 50
-  materia_curricolare_6:
     Nome: 'Lingua straniera: Inglese'
     NomeBreve: 'Inglese'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 50
-  materia_curricolare_7:
-    Nome: 'Matematica e complementi di matematica'
-    NomeBreve: 'Matem. compl.'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 60
-  materia_curricolare_8:
+  materia_curricolare_6:
     Nome: 'Matematica'
     NomeBreve: 'Matematica'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 60
-  materia_curricolare_itp_9:
-    Nome: 'Informatica'
-    NomeBreve: 'Informatica'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 70
-  materia_curricolare_10:
+  materia_curricolare_7:
     Nome: 'Scienze integrate: Scienze della Terra e Biologia'
     NomeBreve: 'Sc. Terra Biologia'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 90
-  materia_curricolare_11:
-    Nome: 'Geografia generale ed economica'
-    NomeBreve: 'Geografia'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 100
-  materia_curricolare_12:
+  materia_curricolare_8:
     Nome: 'Fisica'
     NomeBreve: 'Fisica'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 110
-  materia_curricolare_13:
-    Nome: 'Scienze naturali: Biologia, Chimica, Scienze della Terra'
-    NomeBreve: 'Sc. naturali'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 120
-  materia_curricolare_itp_14:
-    Nome: 'Scienze integrate: Chimica'
-    NomeBreve: 'Chimica'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 130
-  materia_curricolare_15:
+  materia_curricolare_9:
     Nome: 'Disegno e storia dell''arte'
     NomeBreve: 'Disegno'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 140
-  materia_curricolare_itp_16:
-    Nome: 'Tecnologie chimiche industriali'
-    NomeBreve: 'Tecn. chim.'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 170
-  materia_curricolare_17:
-    Nome: 'Biologia, microbiologia e tecnologie di controllo ambientale'
-    NomeBreve: 'Biologia'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 180
-  materia_curricolare_itp_18:
-    Nome: 'Fisica ambientale'
-    NomeBreve: 'Fisica amb.'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 190
-  materia_curricolare_itp_19:
-    Nome: 'Sistemi e reti'
-    NomeBreve: 'Sistemi'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 200
-  materia_curricolare_itp_20:
-    Nome: 'Tecnologie e progettazione di sistemi informatici e di telecomunicazioni'
-    NomeBreve: 'Tecn. prog. sis.'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 210
-  materia_curricolare_itp_21:
-    Nome: 'Gestione progetto, organizzazione d''impresa'
-    NomeBreve: 'Gestione prog.'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 220
-  materia_curricolare_itp_22:
-    Nome: 'Telecomunicazioni'
-    NomeBreve: 'Telecom.'
-    Tipo: 'N'
-    Valutazione: 'N'
-    Media: true
-    Ordinamento: 220
-  materia_curricolare_23:
+  materia_curricolare_10:
     Nome: 'Scienze motorie e sportive'
     NomeBreve: 'Sc. motorie'
     Tipo: 'N'
     Valutazione: 'N'
     Media: true
     Ordinamento: 500
+
+  # ----- materie curricolari con ITP -----
+  materia_curricolare_itp_1:
+    Nome: 'Informatica'
+    NomeBreve: 'Informatica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 70
+  materia_curricolare_itp_2:
+    Nome: 'Scienze integrate: Fisica'
+    NomeBreve: 'Fisica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 110
+  materia_curricolare_itp_3:
+    Nome: 'Scienze integrate: Chimica'
+    NomeBreve: 'Chimica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 130
+  materia_curricolare_itp_4:
+    Nome: 'Tecnologie e tecniche di rappresentazione grafica'
+    NomeBreve: 'Tecn. graf.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 140
+  materia_curricolare_itp_5:
+    Nome: 'Tecnologie chimiche industriali'
+    NomeBreve: 'Tecn. chim.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 170
+  materia_curricolare_itp_6:
+    Nome: 'Fisica ambientale'
+    NomeBreve: 'Fisica amb.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 190
+  materia_curricolare_itp_7:
+    Nome: 'Sistemi e reti'
+    NomeBreve: 'Sistemi'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 200
+  materia_curricolare_itp_8:
+    Nome: 'Tecnologie e progettazione di sistemi informatici e di telecomunicazioni'
+    NomeBreve: 'Tecn. prog. sis.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 210
+  materia_curricolare_itp_9:
+    Nome: 'Gestione progetto, organizzazione d''impresa'
+    NomeBreve: 'Gestione prog.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 220
+  materia_curricolare_itp_10:
+    Nome: 'Telecomunicazioni'
+    NomeBreve: 'Telecom.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 220

@@ -12,28 +12,33 @@
 
 namespace App\Tests\Behat;
 
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Finder\Finder;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Tests\CustomProvider;
+use App\Tests\PersonaProvider;
 use Behat\Behat\Context\Context;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Behat\Behat\Hook\Scope\BeforeStepScope;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\AfterStepScope;
-use Behat\MinkExtension\Context\RawMinkContext;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
+use Behat\Behat\Hook\Scope\BeforeStepScope;
+use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Exception\ExpectationException;
 use Behat\Mink\Session;
-use Behat\Gherkin\Node\TableNode;
+use Behat\MinkExtension\Context\RawMinkContext;
 use DMore\ChromeDriver\ChromeDriver;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\ORM\EntityManagerInterface;
 use Faker\Factory;
-use App\Tests\FakerPerson;
+use Fidry\AliceDataFixtures\Loader\PurgerLoader;
+use Fidry\AliceDataFixtures\Persistence\PurgeMode;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 
 /**
@@ -72,6 +77,20 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected $router;
 
   /**
+   * Servizio per la codifica delle password
+   *
+   * @var UserPasswordHasherInterface|null $hasher Gestore della codifica delle password
+   */
+  protected ?UserPasswordHasherInterface $hasher = null;
+
+  /**
+   * Generatore di fixtures con memmorizzazione su database
+   *
+   * @var PurgerLoader|null $alice Generatore di fixtures con memmorizzazione su database
+   */
+  protected ?PurgerLoader $alice = null;
+
+  /**
    * Servizio per la gestione della sessione di navigazione HTTP
    *
    * @var Session $session Gestore della sessione di navigazione HTTP
@@ -79,7 +98,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected $session;
 
   /**
-   * Lista di variabili definite nell'esecuzione o impostate da sistema
+   * Servizio per la gestione della modifica delle stringhe in slug
+   *
+   * @var SluggerInterface|null $slugger Gestore della modifica delle stringhe in slug
+   */
+  protected ?SluggerInterface $slugger = null;
+
+  /**
+   * Lista di variabili definite nell'esecuzione, impostate da sistema o da fixtures
    *
    * @var array $vars Lista di variabili
    */
@@ -94,13 +120,6 @@ abstract class BaseContext extends RawMinkContext implements Context {
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
-
-  /**
-   * Nome del gruppo per le fixtures relativi ai dati di test
-   *
-   * @var string $gruppo Gruppo dati fixtures
-   */
-  private $gruppo;
 
   /**
    * Testo visualizzato nell'output dell'ultimo comando eseguito
@@ -153,22 +172,28 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RouterInterface $router Gestore delle URL
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
+   * @param SluggerInterface $slugger Gestore della modifica delle stringhe in slug
    */
-  public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router) {
-    $this->faker = Factory::create('it_IT');
-    $this->faker->addProvider(new FakerPerson($this->faker));
+  public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router,
+                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger) {
     $this->kernel = $kernel;
     $this->em = $em;
     $this->router = $router;
+    $this->hasher = $hasher;
+    $this->slugger = $slugger;
+    $this->faker = $kernel->getContainer()->get('Faker\Generator');
+    $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
+    $this->faker->addProvider(new CustomProvider($this->faker));
+    $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
     $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
       ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
-    // gruppo fixtures per i test
-    $this->gruppo = 'Test';
     // inizializza variabili
     $this->cmdOutput = [];
     $this->cmdStatus = 0;
     $this->vars['exec'] = [];
     $this->vars['sys'] = [];
+    $this->vars['obj'] = [];
     $this->files = [];
     $this->log = [];
     $this->debug = false;
@@ -197,7 +222,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       $this->stepper = true;
     }
     // database iniziale
-    $this->initDatabase();
+    $this->initDatabase($scope->getFeature()->getFile());
     // cancella vecchi screenshots
     $fs = new Filesystem();
     $finder = new Finder();
@@ -276,7 +301,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Trasforma testo in valore corrispondente
    *  I possibili valori contenuti nel testo sono:
-   *    $nome o #nome -> valore della variabile di esecuzione o di sistema (vedi funzione getVar)
+   *    $nome, #nome o @nome -> valore della variabile di esecuzione, di sistema o riferimento oggetto fixture (vedi getVar)
    *    si|no|null -> valori booleani true|false o valore null
    *    [+-]?\d+(\.\d+)? -> valori numerici interi o float
    *    altro -> stringa di testo
@@ -290,7 +315,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Trasforma testo da ricercare in espressione regolare.
    *  I possibili valori contenuti nel testo sono:
-   *    $nome o #nome -> valore della variabile di esecuzione (vedi funzione getVar)
+   *    $nome, #nome o @nome -> valore della variabile di esecuzione, di sistema o riferimento oggetto fixture (vedi getVar)
    *    /regex/ -> espressione regolare
    *    altro -> stringa di testo
    *
@@ -320,7 +345,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
 
   /**
    * Trasforma testo sostituendo le variabili con i loro valori
-   *  Ogni variabile di sostituzione va indicata con la sintassi: {{$nome}} o {{#nome}}
+   *  Ogni variabile di sostituzione va indicata con la sintassi: {{$nome}} o {{#nome}} o {{@nome}}
    *  Vedi funzione getVar per sintassi completa
    *
    * @Transform  :testoParam
@@ -482,49 +507,72 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Svuota il database e carica i dati di test
    *
+   * @param string $file Percorso completo del file della feature corrente
    */
-  protected function initDatabase(): void {
-    // svuota il database
+  protected function initDatabase(string $file): void {
     $connection = $this->em->getConnection();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
-    $purger = new ORMPurger($this->em);
-    $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
-    $purger->purge();
-    $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
-    // carica i dati
-    $fs = new Filesystem();
-    if ($fs->exists(dirname(__DIR__).'/temp/'.$this->gruppo.'.fixtures')) {
-      // carica da file
-      $file = file(dirname(__DIR__).'/temp/'.$this->gruppo.'.fixtures', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $dbParams = $connection->getParams();
+    $fixture = substr(basename($file), 0, -8);
+    $fixturePath = $this->kernel->getProjectDir().'/tests/features/'.$fixture.'.yml';
+    if (!file_exists($fixturePath)) {
+      // carica dati generici di test
+      $fixture = 'TestFixtures';
+      $fixturePath = $this->kernel->getProjectDir().'/tests/features/'.$fixture.'.yml';
+    }
+    $sqlPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.sql';
+    $mapPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixture.'.map';
+    if (file_exists($sqlPath)) {
+      // svuota il database
       $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
-      foreach ($file as $sql) {
-        $connection->exec($sql);
-      }
+      $purger = new ORMPurger($this->em);
+      $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
+      $purger->purge();
       $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
+      // carica file SQL
+      $process = Process::fromShellCommandline('mysql -u'.$dbParams['user'].' -p'.$dbParams['password'].
+        ' '.$dbParams['dbname'].' < '.$sqlPath);
+      $process->setTimeout(0);
+      $process->run();
+      if (!$process->isSuccessful()) {
+        throw new ProcessFailedException($process);
+      }
+      // carica riferimenti agli oggetti
+      $objectMap = unserialize(file_get_contents($mapPath));
+      $this->vars['obj'] = [];
+      foreach ($objectMap as $name => $attrs) {
+        $this->vars['obj'][$name] = $this->em->getReference($attrs[0], $attrs[1]);
+      }
+    } elseif (file_exists($fixturePath)) {
+      // carica fixtures per l'ambiente di test
+      $this->vars['obj'] = $this->alice->load([$fixturePath], [], [], PurgeMode::createTruncateMode());
+      // esegue modifiche dopo l'inserimento nel db e le rende permanenti
+      CustomProvider::postPersistArrayId();
       $this->em->flush();
+      // memorizza fixtures in un file SQL
+      file_put_contents($sqlPath, "SET FOREIGN_KEY_CHECKS = 0;\n");
+      $process = Process::fromShellCommandline('mysqldump -u'.$dbParams['user'].' -p'.$dbParams['password'].
+        ' '.$dbParams['dbname'].' -t -n --compact >> '.$sqlPath);
+      $process->setTimeout(0);
+      $process->run();
+      if (!$process->isSuccessful()) {
+        throw new ProcessFailedException($process);
+      }
+      file_put_contents($sqlPath, "SET FOREIGN_KEY_CHECKS = 1;\n", FILE_APPEND);
+      // crea mappa dei riferimenti agli oggetti
+      $objectMap = [];
+      foreach ($this->vars['obj'] as $name => $object) {
+        // determina classe e numero di istanza
+        $objectMap[$name] = [get_class($object), $object->getId()];
+      }
+      // memorizza mappa dei riferimenti agli oggetti
+      file_put_contents($mapPath, serialize($objectMap));
     } else {
-      // carica dati di gruppo definito
-      $process = new Process(['php', 'bin/console', 'doctrine:fixtures:load',
-        '--append', '--env=test', '--group='.$this->gruppo]);
-      $process->setTimeout(0);
-      $process->run();
-      if (!$process->isSuccessful()) {
-        throw new ProcessFailedException($process);
-      }
-      // memorizza su file i dati
-      $container = $this->kernel->getContainer();
-      // carica i dati
-      $params = $this->em->getConnection()->getParams();
-      $db_name = $params['dbname'];
-      $db_user = $params['user'];
-      $db_pass = $params['password'];
-      $process = new Process(['mysqldump', '-u'.$db_user, '-p'.$db_pass, $db_name,
-        '-t', '-n', '--compact', '--result-file='.dirname(__DIR__).'/temp/'.$this->gruppo.'.fixtures']);
-      $process->setTimeout(0);
-      $process->run();
-      if (!$process->isSuccessful()) {
-        throw new ProcessFailedException($process);
-      }
+      // svuota il database
+      $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
+      $purger = new ORMPurger($this->em);
+      $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
+      $purger->purge();
+      $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
     }
   }
 
@@ -874,10 +922,12 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * separatore nel caso di più varibili (Es. "$c1 $c2"). Ogni variabile ha la sintassi:
    *  "$": come primo carattere, indica variabile di esecuzione
    *  "#": come primo carattere, indica variabile di sistema
+   *  "@": come primo carattere, indica riferimento a oggetto fixture
    *  "#dtm(G,M,A,h,m,s)": indica variabile DateTime con i valori indicati
    *  "#dtm()": indica variabile DateTime con il valore della data e ora corrente
    *  "#arc($v1,$v2,...)": indica variabile ArrayCollection con i valori indicati
    *  "#upr($v1)": trasforma in maiuscolo il valore indicato
+   *  "#slg($v1)": trasforma in maiuscolo con - per caratteri non alfanumerici (slug) il valore indicato
    *  "nome": restituisce l'intera istanza o variabile <nome>
    *  "nome:attr": restituisce solo l'attributo <attr> dell'istanza <nome>
    *  "nome:attr.sub": restituisce solo il sottoattributo <campo> dell'istanza <nome->getAttr()>
@@ -893,7 +943,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    */
   protected function getVar($var) {
     // controlla funzioni
-    if (preg_match('/^#(dtm|arc|upr)\([^\)]*\)$/', $var, $fn)) {
+    if (preg_match('/^#(dtm|arc|upr|slg)\([^\)]*\)$/', $var, $fn)) {
       // controlla funzione DateTime
       if (preg_match('/^#dtm\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)$/', $var, $dt)) {
         // crea variabile DateTime
@@ -921,9 +971,14 @@ abstract class BaseContext extends RawMinkContext implements Context {
         $var = substr(substr($var, 5), 0 , -1);
         return strtoupper($this->getVar($var));
       }
+      // controlla funzione upper slug
+      if ($fn[1] == 'slg') {
+        $var = substr(substr($var, 5), 0 , -1);
+        return strtoupper($this->slugger->slug($this->getVar($var)));
+      }
     }
     // tipo di variabile
-    $type =  $var[0] == '#' ? 'sys' : 'exec';
+    $type =  $var[0] == '#' ? 'sys' : ($var[0] == '$' ? 'exec' : 'obj');
     // gestione variabili
     $var = substr($var, 1);
     $var_parts = explode(':', $var);
@@ -980,7 +1035,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $var_list = explode('+', $vars);
     if (count($var_list) > 1) {
       foreach ($var_list as $var) {
-        $value = ($var[0] == '$' || $var[0] == '#') ? $this->getVar($var) : $var;
+        $value = in_array($var[0], ['$', '#', '@'], true) ? $this->getVar($var) : $var;
         if (is_array($value)) {
           $values = array_merge($values, $value);
         } else {
@@ -1005,7 +1060,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Converte il testo di un parametro nel valore corrispondente.
    *  I possibili valori contenuti nel testo sono:
-   *    $nome o #nome -> valore della variabile (vedi funzione getVar)
+   *    $nome, #nome o @nome -> valore della variabile di esecuzione, di sistema o riferimento oggetto fixture (vedi getVar)
    *    si|no|null -> valori booleani true|false o valore null
    *    [+-]?\d+(\.\d+)? -> valori numerici interi o float
    *    altro -> stringa di testo
@@ -1015,7 +1070,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del parametro
    */
   protected function convertText($text) {
-    if ($text && ($text[0] == '$' || $text[0] == '#')) {
+    if ($text && in_array($text[0], ['$', '#', '@'], true))  {
       // valore della variabile di esecuzione
       return $this->getVars($text);
     } elseif (preg_match('/^(si|no|null)$/i', $text)) {
@@ -1033,7 +1088,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Converte il testo di un parametro di ricerca in una espressione regolare.
    *  I possibili valori contenuti nel testo sono:
-   *    $nome o #nome -> valore della variabile (vedi funzione getVar)
+   *    $nome, #nome o @nome -> valore della variabile di esecuzione, di sistema o riferimento oggetto fixture (vedi getVar)
    *    /regex/ -> espressione regolare
    *    altro -> stringa di testo
    *
@@ -1042,7 +1097,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
    * @return mixed Valore convertito del parametro
    */
   protected function convertSearch($search) {
-    if ($search[0] == '$' || $search[0] == '#') {
+    if ($search && in_array($search[0], ['$', '#', '@'], true))  {
       // valore della variabile di esecuzione
       $value = $this->getVars($search);
       $value = is_array($value) ? $value : [$value];
@@ -1066,7 +1121,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
 
   /**
   * Trasforma testo sostituendo le variabili con i loro valori
-  *  Ogni variabile di sostituzione va indicata con la sintassi: {{$nome}} o {{#nome}}
+  *  Ogni variabile di sostituzione va indicata con la sintassi: {{$nome}} o {{#nome}} o {{@nome}}
   *  Vedi funzione getVar per sintassi completa
    *
    * @param string $text Testo con parametri da convertire
@@ -1128,8 +1183,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
   /**
    * Memorizza messaggio di debug nel log
    *
-   * @param string $type Tipo di azione eseguita
-   * @param string $action Descrizione dell'azione
+   * @param string $message Descrizione dell'azione
    */
   protected function logDebug($message) {
     if ($this->debug) {

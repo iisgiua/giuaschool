@@ -70,8 +70,8 @@ class AvvisoUtenteTest extends DatabaseTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'avviso' ? $this->getReference("avviso_".($i + 1)) :
-          ($field == 'utente' ? $this->getReference("docente_".($i + 1)) :
+          ($field == 'avviso' ? $this->getReference("avviso_1") :
+          ($field == 'utente' ? $this->getReference("docente_".($i + 2)) :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -88,7 +88,7 @@ class AvvisoUtenteTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['avviso'] = $this->getReference("avviso_6");
+      $data[$i]['avviso'] = $this->getReference("avviso_10");
       $o[$i]->setAvviso($data[$i]['avviso']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
@@ -128,7 +128,7 @@ class AvvisoUtenteTest extends DatabaseTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Avviso - NOT BLANK');
-    $existent->setAvviso($this->getReference("avviso_10"));
+    $existent->setAvviso($this->getReference("avviso_9"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Avviso - VALID NOT BLANK');
     // utente
     $property = $this->getPrivateProperty('App\Entity\AvvisoUtente', 'utente');
