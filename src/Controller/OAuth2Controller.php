@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -21,6 +17,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * OAuth2Controller - gestione dell'autenticazione su provider esterno (GSuite)
+ *
+ * @author Antonello Dessì
  */
 class OAuth2Controller extends AbstractController {
 

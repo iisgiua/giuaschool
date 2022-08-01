@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -32,6 +28,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @UniqueEntity(fields="username", message="field.unique", entityClass="App\Entity\Utente")
  * @UniqueEntity(fields="email", message="field.unique", entityClass="App\Entity\Utente")
+ *
+ * @author Antonello Dessì
  */
 class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable {
 

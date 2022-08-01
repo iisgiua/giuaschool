@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -44,6 +40,8 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
  * Con identity provider esterno (id_provider):
  *    - utente di tipo previsto (id_provider_tipo): autentificazione tramite Google
  *    - altro tipo di utente: autenticazione tramite form
+ *
+ * @author Antonello Dessì
  */
 class FormAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface {
 
