@@ -70,7 +70,7 @@
               </button>
               <div class="visible-xs-block text-center">
                 <strong>{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</strong>
-                  {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SISTEMA/anno_scolastico') }}{% endif %}
+                  {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}{% endif %}
               </div>
             </div>
             <div class="collapse navbar-collapse" id="gs-navbar-collapse-1">

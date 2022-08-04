@@ -49,7 +49,7 @@ class ConfigLoader {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali

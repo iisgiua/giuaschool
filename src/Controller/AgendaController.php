@@ -45,8 +45,6 @@ use App\Form\AvvisoType;
  * AgendaController - gestione dell'agenda
  *
  * @author Antonello Dessì
- *
- * @author Antonello Dessì
  */
 class AgendaController extends AbstractController {
 

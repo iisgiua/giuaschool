@@ -1,0 +1,8 @@
+# config/services_dev.yaml
+
+services:
+
+  # necessario per il comando app:alice:load
+  Fidry\AliceDataFixtures\Loader\PurgerLoader:
+    alias: fidry_alice_data_fixtures.doctrine.purger_loader
+    public: true

@@ -135,6 +135,12 @@ class PresideTest extends DatabaseTestCase {
     $this->assertSame(['ROLE_PRESIDE', 'ROLE_STAFF', 'ROLE_DOCENTE', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
     $this->assertSame('PSDU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // controllaRuolo
+    $this->assertFalse($existent->controllaRuolo('NAGTM'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('P'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('S'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('D'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
     // getCodiceFunzione
     $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
   }

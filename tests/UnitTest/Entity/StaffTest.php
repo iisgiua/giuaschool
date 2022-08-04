@@ -136,6 +136,11 @@ class StaffTest extends DatabaseTestCase {
     $this->assertSame(['ROLE_STAFF', 'ROLE_DOCENTE', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
     $this->assertSame('SDU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // controllaRuolo
+    $this->assertFalse($existent->controllaRuolo('NAGPTM'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('S'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('D'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
     // getCodiceFunzione
     $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
   }

@@ -125,7 +125,9 @@
 
 {% block pagina_css %}
 {{ parent() }}
+{% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
 <link href="{{ asset('spid/spid-sp-access-button/css/spid-sp-access-button.min.css') }}" rel="stylesheet">
+{% endif %}
 <style>
 .spid-idp-button .spid-idp-button-menu li > a img { padding: 0px 10px 0px 10px; }
 .spid-idp-button .spid-idp-button-menu li > a, .spid-idp-button .spid-idp-button-menu label { padding-bottom: 5px; }
@@ -134,7 +136,9 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
+{% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
 <script type="text/javascript" src="{{ asset('spid/spid-sp-access-button/js/spid-sp-access-button.min.js') }}"></script>
+{% endif %}
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();

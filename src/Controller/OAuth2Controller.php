@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 /**
- * OAuth2Controller - gestione dell'autenticazione su provider esterno (GSuite)
+ * OAuth2Controller - gestione dell'autenticazione su provider esterno (Google Workspace)
  *
  * @author Antonello Dessì
  */
@@ -39,7 +39,7 @@ class OAuth2Controller extends AbstractController {
 	}
 
   /**
-   * Avvia l'autenticazione su provider esterno GSuite per le app.
+   * Avvia l'autenticazione su provider esterno Google Workspace per le app.
    *
    * @param ClientRegistry $clientRegistry Client che richiede il servizio
    * @param string $email Email dell'utente di cui effettuare il login
@@ -58,7 +58,7 @@ class OAuth2Controller extends AbstractController {
 	}
 
   /**
-   * Esegue autenticazione su Gsuite tramite GsuiteAuthenticator
+   * Esegue autenticazione su Google Workspace tramite GsuiteAuthenticator
    *
    * @param Request $request Pagina richiesta
    * @param ClientRegistry $clientRegistry Client che richiede il servizio

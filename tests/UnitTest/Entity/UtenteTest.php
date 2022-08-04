@@ -149,6 +149,9 @@ class UtenteTest extends DatabaseTestCase {
     $this->assertSame(serialize(array($o->getId(), $o->getUsername(), $o->getPassword(), $o->getEmail(), $o->getAbilitato())), $o->serialize(), $this->entity.'::serialize');
     // getCodiceRuolo
     $this->assertSame('U', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // controllaRuolo
+    $this->assertFalse($existent->controllaRuolo('NAGDSPTM'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
     // getCodiceFunzione
     $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
     // toString

@@ -8,10 +8,11 @@
 
 namespace App\Controller;
 
+use App\Entity\MenuOpzione;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use App\Entity\MenuOpzione;
 
 
 /**
@@ -29,16 +30,23 @@ class BaseController extends AbstractController {
    */
   private $em;
 
+  /**
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
+   */
+  private $reqstack;
+
 
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  public function __construct(EntityManagerInterface $em) {
+  public function __construct(EntityManagerInterface $em, RequestStack $reqstack) {
     $this->em = $em;
+    $this->reqstack = $reqstack;
   }
 
   /**
@@ -54,13 +62,12 @@ class BaseController extends AbstractController {
    */
   protected function renderHtml(string $categoria, string $azione, array $dati=[],
                                 array $info=[], array $form=[]): Response {
-    $reqstack = $this->get('request_stack');
     list($azione_principale) = explode('_', $azione);
     // legge breadcrumb
     $breadcrumb = $this->em->getRepository('App\Entity\MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
-      $this->getUser(), $reqstack);
+      $this->getUser(), $this->reqstack);
     // restituisce vista
-    $tema = $reqstack->getSession()->get('/APP/APP/tema', '');
+    $tema = $this->reqstack->getSession()->get('/APP/APP/tema', '');
     return $this->render($tema.'/'.$categoria.'/'.$azione.'.html.twig', array(
       'pagina_titolo' => 'page.'.$categoria.'.'.$azione_principale,
       'titolo' => 'title.'.$categoria.'.'.$azione,

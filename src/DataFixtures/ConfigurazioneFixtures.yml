@@ -122,7 +122,7 @@ App\Entity\Configurazione:
   configurazione_SCUOLA5:
     categoria: 'SCUOLA'
     parametro: 'periodo1_fine'
-    descrizione: 'Data della fine del primo periodo, da \<em>anno_inizio</em> sino al giorno indicato incluso\<br>[formato: AAAA-MM-GG]'
+    descrizione: 'Data della fine del primo periodo, da \<em>anno_inizio</em> sino al giorno indicato incluso<br>[formato: AAAA-MM-GG]'
     valore: '2022-01-31'
     gestito: false
   configurazione_SCUOLA6:
@@ -134,13 +134,13 @@ App\Entity\Configurazione:
   configurazione_SCUOLA7:
     categoria: 'SCUOLA'
     parametro: 'periodo2_fine'
-    descrizione: 'Data della fine del secondo periodo, da \<em>periodo1_fine</em>+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a \<em>anno_fine</em>\<br>[formato AAAA-MM-GG]'
+    descrizione: 'Data della fine del secondo periodo, da \<em>periodo1_fine</em>+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a <em>anno_fine</em><br>[formato AAAA-MM-GG]'
     valore: '2022-06-12'
     gestito: false
   configurazione_SCUOLA8:
     categoria: 'SCUOLA'
     parametro: 'periodo3_nome'
-    descrizione: 'Nome del terzo periodo dell''anno scolastico (terzo trimestre) o vuoto se non usato (se &egrave; usato un terzo periodo, inizia a \<em>periodo2_fine</em>+1 e finisce a \<em>anno_fine</em>\<br>[testo]'
+    descrizione: 'Nome del terzo periodo dell''anno scolastico (terzo trimestre) o vuoto se non usato (se &egrave; usato un terzo periodo, inizia a \<em>periodo2_fine</em>+1 e finisce a <em>anno_fine</em><br>[testo]'
     valore: ''
     gestito: false
   configurazione_SCUOLA9:
@@ -226,7 +226,7 @@ App\Entity\Configurazione:
   configurazione_ACCESSO3:
     categoria: 'ACCESSO'
     parametro: 'id_provider_tipo'
-    descrizione: 'Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore)\<br>[testo]'
+    descrizione: 'Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (U=utente qualsiasi, A=alunno, G=genitore. D=docente/staff/preside, S=staff/preside, P=preside, T=ata, M=amministratore)\<br>[testo]'
     valore: ''
     gestito: false
   configurazione_ACCESSO4:
@@ -238,6 +238,6 @@ App\Entity\Configurazione:
   configurazione_ACCESSO5:
     categoria: 'ACCESSO'
     parametro: 'spid'
-    descrizione: 'Indica la modalit&agrave; dell''accesso SPID: \<em>no</em> = non utilizzato, \<em>si</em> = utilizzato, \<em>validazione</em> = utilizzato in validazione.\<br>[si|no|validazione]'
+    descrizione: 'Indica la modalit&agrave; dell''accesso SPID: \<em>no</em> = non utilizzato, <em>si</em> = utilizzato, <em>validazione</em> = utilizzato in validazione.<br>[si|no|validazione]'
     valore: 'no'
     gestito: true

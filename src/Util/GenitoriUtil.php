@@ -85,7 +85,7 @@ class GenitoriUtil {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità

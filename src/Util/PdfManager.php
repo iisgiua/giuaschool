@@ -37,7 +37,7 @@ class PdfManager {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param TCPDFController $pdfcontroller Controlla la creazione dell'oggetto TCPDF
    */

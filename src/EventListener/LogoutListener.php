@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 
 /**
@@ -76,13 +77,13 @@ class LogoutListener {
     $user = $this->security->getUser();
     if ($user) {
       // legge eventuale url per il logut SPID
-      $spidLogout = $reqstack->getSession()->get('/APP/UTENTE/spid_logout');
+      $spidLogout = $this->reqstack->getSession()->get('/APP/UTENTE/spid_logout');
       if ($spidLogout) {
         // esegue logout SPID su Identity provider
         $response = new RedirectResponse($spidLogout);
       }
       // ditrugge la sessione
-      $reqstack->getSession()->invalidate();
+      $this->reqstack->getSession()->invalidate();
       // log azione
       $this->dblogger->logAzione('ACCESSO', 'Logout', array(
         'Username' => $user->getUsername(),

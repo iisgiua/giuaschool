@@ -41,7 +41,7 @@ class OtpUtil {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param string $qrcode_file File di libreria per la generazione del codice QR
    */

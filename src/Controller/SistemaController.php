@@ -138,10 +138,10 @@ class SistemaController extends BaseController {
       // form inviato
       if ($form->get('manutenzione')->getData()) {
         // imposta manutenzione
-        $param_inizio = $form->get('data_inizio')->getData()->format('Y-m-d').' '.
-          $form->get('ora_inizio')->getData()->format('H:i');
-        $param_fine = $form->get('data_fine')->getData()->format('Y-m-d').' '.
-          $form->get('ora_fine')->getData()->format('H:i');
+        $param_inizio = $form->get('data_inizio')->getData().' '.
+          $form->get('ora_inizio')->getData();
+        $param_fine = $form->get('data_fine')->getData().' '.
+          $form->get('ora_fine')->getData();
         if ($param_inizio > $param_fine) {
           // inverte l'ordine
           $temp = $param_inizio;
@@ -337,6 +337,8 @@ class SistemaController extends BaseController {
     // ricarica dati in sessione
     $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', $reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso_reale'));
     $reqstack->getSession()->set('/APP/UTENTE/tipo_accesso', $reqstack->getSession()->get('/APP/UTENTE/tipo_accesso_reale'));
+    $reqstack->getSession()->remove('/APP/UTENTE/lista_profili');
+    $reqstack->getSession()->remove('/APP/UTENTE/profilo_usato');
     $reqstack->getSession()->remove('/APP/UTENTE/tipo_accesso_reale');
     $reqstack->getSession()->remove('/APP/UTENTE/ultimo_accesso_reale');
     $reqstack->getSession()->remove('/APP/UTENTE/username_reale');

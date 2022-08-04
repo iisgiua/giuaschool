@@ -147,6 +147,10 @@ class AlunnoTest extends DatabaseTestCase {
     $this->assertSame(['ROLE_ALUNNO', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
     $this->assertSame('AU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // controllaRuolo
+    $this->assertFalse($existent->controllaRuolo('NGDSPTM'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('A'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
     // getCodiceFunzione
     $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
     // toString

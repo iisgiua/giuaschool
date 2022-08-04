@@ -52,7 +52,7 @@ class ProvisioningCommand extends Command {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param ConfigLoader $config Gestore della configurazione su database

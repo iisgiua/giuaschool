@@ -8,6 +8,7 @@
 
 namespace App\Security;
 
+use App\Entity\Genitore;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
@@ -44,6 +45,8 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
  * @author Antonello Dessì
  */
 class FormAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface {
+
+  use AuthenticatorTrait;
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -117,7 +120,8 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
    * @return bool|null Se vero o nullo è supportata, altrimenti no.
    */
   public function supports(Request $request): ?bool {
-    return ($request->getPathInfo() == '/login/form/' && $request->isMethod('POST'));
+    // solo se vero continua con l'autenticazione
+    return ($request->attributes->get('_route') === 'login_form' && $request->isMethod('POST'));
   }
 
   /**
@@ -165,47 +169,8 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
         'username' => $username));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    if (empty($user->getCodiceFiscale())) {
-      // ok restituisce profilo
-      return $user;
-    }
-    // trova profili attivi
-    $profilo = $this->em->getRepository('App\Entity\Utente')->profiliAttivi($user->getNome(),
-      $user->getCognome(), $user->getCodiceFiscale());
-    if ($profilo) {
-      if ($user instanceOf Genitore) {
-        // elimina profili non genitore (evita login docente con credenziali poco affidabili)
-        $nuoviProfili = [];
-        $contaProfili = 0;
-        foreach ($profilo->getListaProfili() as $ruolo=>$profili) {
-          if ($ruolo == 'GENITORE') {
-            $nuoviProfili[$ruolo] = $profili;
-            $contaProfili = count($profili);
-          }
-        }
-        $profilo->setListaProfili($contaProfili > 1 ? $nuoviProfili : []);
-      }
-      // controlla che il profilo sia lo stesso richiesto con username
-      if ($profilo->getId() == $user->getId()) {
-        // ok restituisce profilo
-        return $user;
-      }
-      // altrimenti cerca tra i profili attivi
-      foreach ($profilo->getListaProfili() as $profili) {
-        foreach ($profili as $id) {
-          if ($id == $user->getId()) {
-            // memorizza lista profili
-            $user->setListaProfili($profilo->getListaProfili());
-            // ok restituisce profilo
-            return $user;
-          }
-        }
-      }
-    }
-    // errore: utente disabilitato
-    $this->logger->error('Utente disabilitato nella richiesta di login.', array(
-      'username' => $username));
-    throw new CustomUserMessageAuthenticationException('exception.invalid_user');
+    // restituisce profilo attivo
+    return $this->controllaProfili($user);
   }
 
   /**
@@ -222,35 +187,24 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
    */
   public function checkCredentials($credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine');
-    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine &&
-        !($user instanceOf Amministratore)) {
-      // errore: modalità manutenzione
-      $this->logger->error('Tentativo di accesso da form durante la modalità manutenzione.', array(
-        'username' => $user->getUsername(),
-        'ruolo' => $user->getCodiceRuolo(),
-        'ip' => $credentials['ip']));
-      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
-    }
+    $this->controllaManutenzione($user);
     // legge configurazione: id_provider
     $idProvider = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider');
     $idProviderTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider_tipo');
     // se id_provider controlla ruolo utente
-    if ($idProvider && strpos($user->getCodiceRuolo(), $idProviderTipo) !== false) {
+    if ($idProvider && $user->controllaRuolo($idProviderTipo)) {
       // errore: utente deve usare accesso con id provider
-      $this->logger->error('Tipo di utente non valido nella richiesta di login.', array(
+      $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite form.', array(
         'username' => $user->getUsername(),
         'ruolo' => $user->getCodiceRuolo(),
         'ip' => $credentials['ip']));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
     }
     // controlla password
     if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
       // password ok
       $otpTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('otp_tipo');
-      if ($user->getOtp() && strpos($user->getCodiceRuolo(), $otpTipo) !== false) {
+      if ($user->getOtp() && $user->controllaRuolo($otpTipo)) {
         // controlla otp
         if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
           // otp corretto
@@ -303,7 +257,7 @@ class FormAuthenticator extends AbstractAuthenticator implements AuthenticationE
     $url = $this->router->generate('login_home');
     // tipo di login
     $otpTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('otp_tipo');
-    $tipo_accesso = ($token->getUser()->getOtp() && strpos($token->getUser()->getCodiceRuolo(), $otpTipo) !== false) ?
+    $tipo_accesso = ($token->getUser()->getOtp() && $token->getUser()->controllaRuolo($otpTipo)) ?
       'form/OTP' : 'form';
     $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipo_accesso);
     if ($tipo_accesso != 'form') {

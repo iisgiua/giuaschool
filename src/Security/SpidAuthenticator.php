@@ -8,23 +8,24 @@
 
 namespace App\Security;
 
+use App\Util\ConfigLoader;
+use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use App\Entity\Configurazione;
-use App\Entity\Spid;
-use App\Entity\Utente;
-use App\Util\LogHandler;
-use App\Util\ConfigLoader;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 
 /**
@@ -32,7 +33,9 @@ use App\Util\ConfigLoader;
  *
  * @author Antonello Dessì
  */
-class SpidAuthenticator extends AbstractGuardAuthenticator {
+class SpidAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface {
+
+  use AuthenticatorTrait;
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -88,91 +91,68 @@ class SpidAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param Request $request Pagina richiesta
    *
-   * @return bool Vero se supportato, falso altrimenti
+   * @return bool|null Se vero o nullo è supportata, altrimenti no.
    */
-  public function supports(Request $request) {
+  public function supports(Request $request): ?bool {
     // solo se vero continua con l'autenticazione
-    return $request->attributes->get('_route') === 'spid_acs' && $request->isMethod('GET');
+    return ($request->attributes->get('_route') === 'spid_acs' && $request->isMethod('GET'));
   }
 
   /**
-   * Recupera le credenziali di autenticazione dalla pagina richiesta e le restituisce.
-   * Se si restituisce null, l'autenticazione viene interrotta.
+   * Esegue l'autenticazione e crea un passaporto che contiene il solo utente.
    *
    * @param Request $request Pagina richiesta
    *
-   * @return mixed|null Le credenziali dell'autenticazione o null
+   * @return Passport Passaporto creato per la richiesta corrente
+   *
+   * @throws AuthenticationException Eccezione lanciata per ogni tipo di errore di autenticazione
    */
-  public function getCredentials(Request $request) {
-    // restituisce l'ID della risposta dell'idp
-    return $request->attributes->get('responseId');
+  public function authenticate(Request $request): Passport {
+    // crea e restituisce il passaporto
+    return new SelfValidatingPassport(
+      new UserBadge($request->attributes->get('responseId'), [$this, 'getUser']));
   }
 
   /**
-   * Restituisce l'utente corrispondente alle credenziali fornite
+   * Restituisce l'utente corrispondente all'identificatore fornito
    *
-   * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserProviderInterface $userProvider Gestore degli utenti
+   * @param string $responseId Codice univoco della risposta dell'autenticazione SPID
    *
-   * @return UserInterface|null L'utente trovato o null
+   * @return UserInterface|null L'utente trovato o null se errore
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function getUser($credentials, UserProviderInterface $userProvider) {
-    // init
+  public function getUser(string $responseId): ?UserInterface {
     $user = null;
     // trova utente SPID
-    $spid = $this->em->getRepository('App\Entity\Spid')->findOneBy(['responseId' => $credentials, 'state' => 'A']);
-    if ($spid) {
-      // autenticato su SPID: controlla se esiste nel registro
-      $nome = $spid->getAttrName();
-      $cognome = $spid->getAttrFamilyName();
-      $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
-      $user = $this->em->getRepository('App\Entity\Utente')->profiliAttivi($nome, $cognome, $codiceFiscale, true);
-      if (empty($user)) {
-        // utente non esiste nel registro
-        $spid->setState('E');
-        $this->em->flush();
-        $this->logger->error('Utente non valido nell\'autenticazione SPID.', array(
-          'codiceFiscale' => $codiceFiscale,
-          'responseId' => $credentials));
-        throw new CustomUserMessageAuthenticationException('exception.spid_invalid_user');
-      }
-      // memorizza url logout
-      $user->setInfoLogin(['logoutUrl' => $spid->getLogoutUrl()]);
+    $spid = $this->em->getRepository('App\Entity\Spid')->findOneBy(['responseId' => $responseId, 'state' => 'A']);
+    if (!$spid) {
+      // errore nei dati identificativi della risposta
+      $this->logger->error('Autenticazione Spid non valida per mancanza di dati.', ['responseId' => $responseId]);
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    // restituisce utente
-    return $user;
-  }
-
-  /**
-   * Restituisce vero se le credenziali sono valide.
-   * Qualsiasi altro valore restituito farà fallire l'autenticazione.
-   * Si può anche generare un'eccezione per far fallire l'autenticazione.
-   *
-   * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserInterface $user Utente corripondente alle credenziali
-   *
-   * @return bool Vero se le credenziali sono valide, falso altrimenti
-   */
-  public function checkCredentials($credentials, UserInterface $user): bool {
-    // controlla modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine');
-    $spid = $this->em->getRepository('App\Entity\Spid')->findOneBy(['responseId' => $credentials, 'state' => 'A']);
-    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
-      // errore: modalità manutenzione
+    // autenticato su SPID: controlla se esiste nel registro ed abilitato all'accesso SPID
+    $nome = $spid->getAttrName();
+    $cognome = $spid->getAttrFamilyName();
+    $codiceFiscale = substr($spid->getAttrFiscalNumber(), 6);
+    $user = $this->em->getRepository('App\Entity\Utente')->profiliAttivi($nome, $cognome, $codiceFiscale, true);
+    if (empty($user)) {
+      // utente non esiste nel registro
       $spid->setState('E');
       $this->em->flush();
-      $this->logger->error('Tentativo di accesso da SPID durante la modalità manutenzione.', array(
-        'codiceFiscale' => $user->getCodiceFiscale(),
-        'responseId' => $credentials));
-      throw new CustomUserMessageAuthenticationException('exception.spid_blocked_login');
+      $this->logger->error('Utente non valido nell\'autenticazione SPID.',
+        ['responseId' => $responseId, 'codiceFiscale' => $codiceFiscale]);
+      throw new CustomUserMessageAuthenticationException('exception.spid_invalid_user');
     }
     // cambia stato del record SPID
     $spid->setState('L');
     $this->em->flush();
-    // nessun altro controllo necessario
-    return true;
+    // controlla modalità manutenzione
+    $this->controllaManutenzione($user);
+    // memorizza url logout
+    $user->setInfoLogin(['logoutUrl' => $spid->getLogoutUrl()]);
+    // restituisce utente
+    return $user;
   }
 
   /**
@@ -180,11 +160,11 @@ class SpidAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param Request $request Pagina richiesta
    * @param TokenInterface $token Token di autenticazione (contiene l'utente)
-   * @param string $providerKey Chiave usata dal gestore della sicurezza (definita nel firewall)
+   * @param string $firewallName Nome del firewall usato per la richiesta
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta come utente autenticato
    */
-  public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
+   public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
@@ -218,9 +198,9 @@ class SpidAuthenticator extends AbstractGuardAuthenticator {
    * @param Request $request Pagina richiesta
    * @param AuthenticationException $exception Eccezione di autenticazione
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
-  public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
+   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
     // messaggio di errore
     $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
@@ -237,19 +217,12 @@ class SpidAuthenticator extends AbstractGuardAuthenticator {
    *
    * @return Response Pagina di risposta
    */
-  public function start(Request $request, AuthenticationException $authException = null) {
+  public function start(Request $request, AuthenticationException $authException = null): Response {
+    // eccezione che ha richiesto l'autenticazione
+    $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
+    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
-  }
-
-  /**
-   * Indica se l'autenticatore supporta o meno la gestione del cookie RICORDAMI.
-   *
-   * @return bool Vero se supportato il cookie RICORDAMI, falso altrimenti
-   */
-  public function supportsRememberMe(): bool {
-    // nessun supporto per il cookie RICORDAMI
-    return false;
   }
 
 }

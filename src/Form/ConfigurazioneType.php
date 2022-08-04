@@ -21,6 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use App\Form\MessageType;
 use App\Entity\Configurazione;
+use Symfony\Component\Form\CallbackTransformer;
 
 
 /**
@@ -80,6 +81,23 @@ class ConfigurazioneType extends AbstractType {
           'html5' => false,
           'attr' => ['widget' => 'gs-row-end'],
           'required' => true));
+      // data transformer necessari per evitare errori
+      $builder->get('data_inizio')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('Y-m-d'); }));
+      $builder->get('ora_inizio')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('H:i'); }));
+      $builder->get('data_fine')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('Y-m-d'); }));
+      $builder->get('ora_fine')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('H:i'); }));
     } elseif ($options['formMode'] == 'parametri') {
       // form parametri
       $builder

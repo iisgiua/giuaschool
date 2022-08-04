@@ -932,6 +932,31 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   }
 
   /**
+   * Controlla e restituisce il valore vero se l'utente ha un ruolo tra quelli specificati
+   * I codici utilizzati sono:
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente/staff/preside, S=staff/preside, P=preside, T=ata, M=amministratore
+   *
+   * @param string lista Lista codificata dei ruoli ammessi
+   *
+   * @return bool Vero se il ruolo dell'utente è tra quelli ammessi
+   */
+  public function controllaRuolo(string $lista): bool {
+    if (empty($lista)) {
+      // nessun ruolo specificato
+      return false;
+    }
+    // controlla tutti i ruoli specificati
+    for ($i = 0; $i < strlen($lista); $i++) {
+      if (strpos($this->getCodiceRuolo(), $lista[$i]) !== false) {
+        // ruolo ammesso trovato
+        return true;
+      }
+    }
+    // nessun ruolo ammesso
+    return false;
+  }
+
+  /**
    * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
    *
    * @return string Codifica della funzione

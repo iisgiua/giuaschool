@@ -136,6 +136,10 @@ class GenitoreTest extends DatabaseTestCase {
     $this->assertSame(['ROLE_GENITORE', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
     $this->assertSame('GU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // controllaRuolo
+    $this->assertFalse($existent->controllaRuolo('NADSPTM'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('G'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
     // getCodiceFunzione
     $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
   }

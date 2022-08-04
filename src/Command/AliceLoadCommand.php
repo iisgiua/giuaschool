@@ -131,10 +131,11 @@ class AliceLoadCommand extends Command {
   protected function interact(InputInterface $input, OutputInterface $output): void {
     // controlla anno
     $fixture = $input->getArgument('fixture');
-    $path = $this->projectPath.'/src/DataFixtures/';
-    if ($fixture && !file_exists($path.$fixture.'Fixtures.yml')) {
+    $file1 = $this->projectPath.'/src/DataFixtures/'.$fixture.'Fixtures.yml';
+    $file2 = $this->projectPath.'/'.$fixture;
+    if ($fixture && !file_exists($file1) && !file_exists($file2)) {
       // errore
-      throw new InvalidArgumentException('La fixture non è stata trovata ('.$path.$fixture.'Fixtures.yml'.').');
+      throw new InvalidArgumentException('La fixture indicata non è stata trovata.');
     }
   }
 
@@ -162,11 +163,25 @@ class AliceLoadCommand extends Command {
       $purgeMode = PurgeMode::createTruncateMode();
     }
     // esegue per ogni fixture
-    $path = $this->projectPath.'/src/DataFixtures';
-    $finder = new Finder();
-    $finder->files()->in($path)->depth('== 0')->name(($fixture ? $fixture : '*').'Fixtures.yml');
+    $path = $this->projectPath.'/src/DataFixtures/';
     $fixtures = [];
-    foreach ($finder as $file) {
+    if (empty($fixture)) {
+      // carica tutti i file della directory DataFixtures
+      $finder = new Finder();
+      $finder->files()->in($path)->depth('== 0')->name('*Fixtures.yml');
+      $fixtures = [];
+      foreach ($finder as $file) {
+        $fixtures[] = $file;
+        print("...fixture: $file\n");
+      }
+    } elseif (file_exists($path.$fixture.'Fixtures.yml')) {
+      // carica file indicato con il solo nome della classe
+      $file = $path.$fixture.'Fixtures.yml';
+      $fixtures[] = $file;
+      print("...fixture: $file\n");
+    } else {
+      // carica file specificato
+      $file = $this->projectPath.'/'.$fixture;
       $fixtures[] = $file;
       print("...fixture: $file\n");
     }

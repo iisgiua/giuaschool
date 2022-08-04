@@ -134,6 +134,10 @@ class AmministratoreTest extends DatabaseTestCase {
     $this->assertSame(['ROLE_AMMINISTRATORE', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
     $this->assertSame('MU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // controllaRuolo
+    $this->assertFalse($existent->controllaRuolo('NAGDSPT'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('M'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
     // getCodiceFunzione
     $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
   }

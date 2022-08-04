@@ -137,6 +137,10 @@ class AtaTest extends DatabaseTestCase {
     $this->assertSame(['ROLE_ATA', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
     $this->assertSame('TU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    // controllaRuolo
+    $this->assertFalse($existent->controllaRuolo('NAGDSPM'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('T'), $this->entity.'::controllaRuolo');
+    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
     // getCodiceFunzione
     $existent->setSegreteria(false);
     $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');

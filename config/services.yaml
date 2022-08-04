@@ -85,3 +85,11 @@ services:
   App\Util\OtpUtil:
     arguments:
       $qrcode_file: '%kernel.project_dir%/vendor/tecnickcom/tcpdf/tcpdf_barcodes_2d.php'
+
+  # usato per il logout
+  App\EventListener\LogoutListener:
+    tags:
+      - name: 'kernel.event_listener'
+        event: 'Symfony\Component\Security\Http\Event\LogoutEvent'
+        dispatcher: security.event_dispatcher.main
+        method: onLogoutEvent

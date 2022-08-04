@@ -99,9 +99,9 @@ class AppController extends AbstractController {
     $risposta['token'] = null;
     // legge dati
     $codice = $request->request->get('codice');
-    $lusr = intval($request->request->get('lusr'));
-    $lpsw = intval($request->request->get('lpsw'));
-    $lapp = intval($request->request->get('lapp'));
+    $lusr = (int) $request->request->get('lusr');
+    $lpsw = (int) $request->request->get('lpsw');
+    $lapp = (int) $request->request->get('lapp');
     // decodifica credenziali
     $testo = base64_decode(str_replace(array('-', '_'), array('+', '/'), $codice));
     $profilo = substr($testo, 0, 1);

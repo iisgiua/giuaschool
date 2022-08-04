@@ -22,19 +22,13 @@ use App\Util\NotificheUtil;
 use App\Util\OtpUtil;
 use App\Util\StaffUtil;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,14 +37,12 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -106,120 +98,6 @@ class LoginController extends BaseController {
    */
   public function logoutAction() {
     // niente da fare
-  }
-
-  /**
-   * Registra docente per l'uso dei token (tramite lettore di impronte)
-   *
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
-   * @param ConfigLoader $config Gestore della configurazione su database
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/login/registrazione/", name="login_registrazione",
-   *    methods={"GET", "POST"})
-   */
-  public function registrazioneAction(RequestStack $reqstack, AuthenticationUtils $auth, ConfigLoader $config) {
-    // carica configurazione di sistema
-    $config->carica();
-    // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
-    // conserva ultimo errore del login, se presente
-    $errore = $auth->getLastAuthenticationError();
-    // conserva ultimo username inserito
-    $username = $auth->getLastUsername();
-    // mostra la pagina di risposta
-    return $this->render('login/registrazione.html.twig', array(
-      'pagina_titolo' => 'page.enroll',
-      'username' => $username,
-      'errore' => $errore,
-      'manutenzione' => $manutenzione,
-      ));
-  }
-
-  /**
-   * Login dell'utente tramite token (inviato dal lettore di impronte).
-   *
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/login/token/", name="login_token",
-   *    methods={"GET", "POST"})
-   */
-  public function tokenAction(RequestStack $reqstack, AuthenticationUtils $auth) {
-    // legge sessione
-    $token1 = $reqstack->getSession()->get('/APP/UTENTE/token1');
-    $token2 = $reqstack->getSession()->get('/APP/UTENTE/token2');
-    $token3 = $reqstack->getSession()->get('/APP/UTENTE/token3');
-    if (!$token1 || !$token2 || !$token3) {
-      // esegue autenticazione
-      $errore = $auth->getLastAuthenticationError();
-      // mostra la pagina di risposta
-      return $this->render('login/token.html.twig', array(
-        'errore' => $errore,
-        'token1' => null,
-        'token2' => null,
-        'token3' => null,
-        ));
-    } else {
-      // secondo passo della registrazione: invio token
-      return $this->render('login/token.html.twig', array(
-        'errore' => null,
-        'token1' => $token1,
-        'token2' => $token2,
-        'token3' => $token3,
-        ));
-    }
-  }
-
-  /**
-   * Login dell'utente tramite smartcard: pagina iniziale di autenticazione
-   * Sono necessari due url per evitare errore del server "too many redirections".
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/login/card/", name="login_card",
-   *    methods={"GET"})
-   */
-  public function cardAction() {
-    // niente da fare
-  }
-
-  /**
-   * Login dell'utente tramite smartcard: pagina con messaggio di errore.
-   * Sono necessari due url per evitare errore del server "too many redirections".
-   *
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
-   * @param ConfigLoader $config Gestore della configurazione su database
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/login/card-errore/", name="login_cardErrore",
-   *    methods={"GET"})
-   */
-  public function cardErroreAction(RequestStack $reqstack, AuthenticationUtils $auth, ConfigLoader $config) {
-    // carica configurazione di sistema
-    $config->carica();
-    // modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
-    // legge ultimo errore del login
-    $errore = $auth->getLastAuthenticationError();
-    // mostra la pagina di risposta
-    return $this->render('login/card.html.twig', array(
-      'pagina_titolo' => 'page.login',
-      'errore' => $errore,
-      'manutenzione' => $manutenzione,
-      ));
   }
 
   /**
@@ -461,8 +339,8 @@ class LoginController extends BaseController {
    * @IsGranted("ROLE_UTENTE")
    */
   public function profiloAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                EventDispatcherInterface $disp, AuthenticationManagerInterface $authenticationManager,
-                                TokenStorageInterface $tokenStorage, LogHandler $dblogger) {
+                                EventDispatcherInterface $disp, TokenStorageInterface $tokenStorage,
+                                LogHandler $dblogger) {
     // imposta profili
     $lista = [];
     foreach ($reqstack->getSession()->get('/APP/UTENTE/lista_profili', []) as $ruolo=>$profili) {
@@ -480,7 +358,7 @@ class LoginController extends BaseController {
         $lista[] = [$nome => $utente->getId()];
       }
     }
-    // crea form inserimento email
+    // crea form scelta profilo
     $form = $this->container->get('form.factory')->createNamedBuilder('login_profilo', FormType::class)
       ->add('profilo', ChoiceType::class, array('label' => 'label.profilo',
         'data' => $request->getSession()->get('/APP/UTENTE/profilo_usato'),
@@ -512,9 +390,8 @@ class LoginController extends BaseController {
         // crea token di autenticazione
         $token = new UsernamePasswordToken($utente, 'main', $utente->getRoles());
         // autentica con nuovo token
-        $authenticatedToken = $authenticationManager->authenticate($token);
-        $tokenStorage->setToken($authenticatedToken);
-        $event = new InteractiveLoginEvent($request, $authenticatedToken);
+        $tokenStorage->setToken($token);
+        $event = new InteractiveLoginEvent($request, $token);
         $disp->dispatch($event, SecurityEvents::INTERACTIVE_LOGIN);
         // memorizza profilo in uso
         $reqstack->getSession()->set('/APP/UTENTE/profilo_usato', $profiloId);
