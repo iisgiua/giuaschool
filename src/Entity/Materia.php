@@ -254,11 +254,11 @@ class Materia {
   /**
    * Modifica se la materia entra nel calcolo della media dei voti o no
    *
-   * @param bool $media Vero se la materia entra nel calcolo della media dei voti, falso altrimenti
+   * @param bool|null $media Vero se la materia entra nel calcolo della media dei voti, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setMedia(bool $media): self {
+  public function setMedia(?bool $media): self {
     $this->media = ($media == true);
     return $this;
   }

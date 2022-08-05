@@ -366,11 +366,11 @@ class Documento {
   /**
    * Modifica l'indicazione se sia richiesta la firma di presa visione
    *
-   * @param bool $firma Vero se è richiesta la firma di presa visione, falso altrimenti
+   * @param bool|null $firma Vero se è richiesta la firma di presa visione, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setFirma(bool $firma): self {
+  public function setFirma(?bool $firma): self {
     $this->firma = ($firma == true);
     return $this;
   }

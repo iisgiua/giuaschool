@@ -331,11 +331,11 @@ class MenuOpzione {
   /**
    * Modifica se l'opzione è abilitata o meno
    *
-   * @param bool $abilitato Indica se l'opzione è abilitata
+   * @param bool|null $abilitato Indica se l'opzione è abilitata
    *
    * @return self Oggetto modificato
    */
-  public function setAbilitato(bool $abilitato): self {
+  public function setAbilitato(?bool $abilitato): self {
     $this->abilitato = ($abilitato == true);
     return $this;
   }

@@ -211,11 +211,11 @@ class Annotazione {
   /**
    * Modifica se l'annotazione è visibile ai genitori o no
    *
-   * @param bool $visibile Vero se l'annotazione è visibile ai genitori, falso altrimenti
+   * @param bool|null $visibile Vero se l'annotazione è visibile ai genitori, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setVisibile(bool $visibile): self {
+  public function setVisibile(?bool $visibile): self {
     $this->visibile = ($visibile == true);
     return $this;
   }

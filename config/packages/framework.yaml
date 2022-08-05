@@ -18,8 +18,8 @@ framework:
     save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
   property_access:
     enabled: true
-    throw_exception_on_invalid_index: '%kernel.debug%'
-    throw_exception_on_invalid_property_path: '%kernel.debug%'
+    throw_exception_on_invalid_index: false
+    throw_exception_on_invalid_property_path: false
   property_info:
     enabled: false
   annotations:

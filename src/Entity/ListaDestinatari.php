@@ -263,11 +263,11 @@ class ListaDestinatari {
   /**
    * Modifica l'indicazione se il DSGA sia fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @param bool $dsga Vero se il DSGA è tra i destinatari, falso altrimenti
+   * @param bool|null $dsga Vero se il DSGA è tra i destinatari, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setDsga(bool $dsga): self {
+  public function setDsga(?bool $dsga): self {
     $this->dsga = ($dsga == true);
     return $this;
   }
@@ -284,11 +284,11 @@ class ListaDestinatari {
   /**
    * Modifica l'indicazione se il personale ATA sia fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @param bool $ata Vero se il personale ATA è fra i destinatari, falso altrimenti
+   * @param bool|null $ata Vero se il personale ATA è fra i destinatari, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setAta(bool $ata): self {
+  public function setAta(?bool $ata): self {
     $this->ata = ($ata == true);
     return $this;
   }
@@ -389,11 +389,11 @@ class ListaDestinatari {
   /**
    * Modifica l'indicazione se lo staff sia fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @param bool $staff Vero se lo staff è fra i destinatari, falso altrimenti
+   * @param bool|null $staff Vero se lo staff è fra i destinatari, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setStaff(bool $staff): self {
+  public function setStaff(?bool $staff): self {
     $this->staff = ($staff == true);
     return $this;
   }

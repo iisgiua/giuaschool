@@ -255,11 +255,11 @@ class Entrata {
   /**
    * Modifica se l'entrata in ritardo è un ritardo breve oppure no
    *
-   * @param bool $ritardoBreve Vero se è un ritardo breve, falso altrimenti
+   * @param bool|null $ritardoBreve Vero se è un ritardo breve, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setRitardoBreve(bool $ritardoBreve): self {
+  public function setRitardoBreve(?bool $ritardoBreve): self {
     $this->ritardoBreve = $ritardoBreve;
     return $this;
   }
@@ -297,11 +297,11 @@ class Entrata {
   /**
    * Modifica se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
    *
-   * @param bool $valido Vero se è valida per il conteggio, falso altrimenti
+   * @param bool|null $valido Vero se è valida per il conteggio, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setValido(bool $valido): self {
+  public function setValido(?bool $valido): self {
     $this->valido = $valido;
     return $this;
   }

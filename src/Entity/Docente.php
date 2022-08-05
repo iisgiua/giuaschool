@@ -56,11 +56,11 @@ class Docente extends Utente {
   /**
    * Modifica se il docente abbia accesso o no alle funzioni di responsabile BES
    *
-   * @param bool $responsabileBes Vero se il docente ha accesso alle funzioni di responsabile BES, falso altrimenti
+   * @param bool|null $responsabileBes Vero se il docente ha accesso alle funzioni di responsabile BES, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setResponsabileBes(bool $responsabileBes): self {
+  public function setResponsabileBes(?bool $responsabileBes): self {
     $this->responsabileBes = $responsabileBes;
     return $this;
   }

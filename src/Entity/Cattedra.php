@@ -176,11 +176,11 @@ class Cattedra {
   /**
    * Modifica se la cattedra è attiva o no
    *
-   * @param bool $attiva Vero se la cattedra è attiva, falso altrimenti
+   * @param bool|null $attiva Vero se la cattedra è attiva, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setAttiva(bool $attiva): self {
+  public function setAttiva(?bool $attiva): self {
     $this->attiva = ($attiva == true);
     return $this;
   }
@@ -197,11 +197,11 @@ class Cattedra {
   /**
    * Modifica se la cattedra è una supplenza temporanea o no
    *
-   * @param bool $supplenza Vero se la cattedra è una supplenza temporanea, falso altrimenti
+   * @param bool|null $supplenza Vero se la cattedra è una supplenza temporanea, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setSupplenza(bool $supplenza): self {
+  public function setSupplenza(?bool $supplenza): self {
     $this->supplenza = ($supplenza == true);
     return $this;
   }

@@ -464,11 +464,11 @@ class Circolare {
   /**
    * Modifica se il personale ATA è destinatario della circolare o no
    *
-   * @param bool $ata Vero se il personale ATA è destinatario della circolare, falso altrimenti
+   * @param bool|null $ata Vero se il personale ATA è destinatario della circolare, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setAta(bool $ata): self {
+  public function setAta(?bool $ata): self {
     $this->ata = ($ata == true);
     return $this;
   }
@@ -485,11 +485,11 @@ class Circolare {
   /**
    * Modifica se il DSGA è destinatario della circolare o no
    *
-   * @param bool $dsga Vero se il DSGA è destinatario della circolare, falso altrimenti
+   * @param bool|null $dsga Vero se il DSGA è destinatario della circolare, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setDsga(bool $dsga): self {
+  public function setDsga(?bool $dsga): self {
     $this->dsga = ($dsga == true);
     return $this;
   }
@@ -695,11 +695,11 @@ class Circolare {
   /**
    * Modifica se è richiesta la conferma esplicita di lettura della circolare o no
    *
-   * @param bool $firma Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
+   * @param bool|null $firma Vero se è richiesta la conferma esplicita di lettura della circolare, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setFirma(bool $firma): self {
+  public function setFirma(?bool $firma): self {
     $this->firma = ($firma == true);
     return $this;
   }
@@ -716,11 +716,11 @@ class Circolare {
   /**
    * Modifica se è richiesta la notifica della circolare ai destinatari o no
    *
-   * @param bool $notifica Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
+   * @param bool|null $notifica Vero se è richiesta la notifica della circolare ai destinatari, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setNotifica(bool $notifica): self {
+  public function setNotifica(?bool $notifica): self {
     $this->notifica = ($notifica == true);
     return $this;
   }
@@ -737,11 +737,11 @@ class Circolare {
   /**
    * Modifica se la circolare è pubblicata o no
    *
-   * @param bool $pubblicata Vero se la circolare è pubblicata, falso altrimenti
+   * @param bool|null $pubblicata Vero se la circolare è pubblicata, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setPubblicata(bool $pubblicata): self {
+  public function setPubblicata(?bool $pubblicata): self {
     $this->pubblicata = ($pubblicata == true);
     return $this;
   }

@@ -220,11 +220,11 @@ class Valutazione {
   /**
    * Modifica se la valutazione è visibile ai genitori o no
    *
-   * @param bool $visibile Vero se la valutazione è visibile ai genitori, falso altrimenti
+   * @param bool|null $visibile Vero se la valutazione è visibile ai genitori, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setVisibile(bool $visibile): self {
+  public function setVisibile(?bool $visibile): self {
     $this->visibile = ($visibile == true);
     return $this;
   }
@@ -241,11 +241,11 @@ class Valutazione {
   /**
    * Modifica se la valutazione entra nella media di riepilogo o no
    *
-   * @param bool $media Vero se la valutazione entra nella media di riepilogo, falso altrimenti
+   * @param bool|null $media Vero se la valutazione entra nella media di riepilogo, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setMedia(bool $media): self {
+  public function setMedia(?bool $media): self {
     $this->media = ($media == true);
     return $this;
   }

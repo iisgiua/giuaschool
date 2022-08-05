@@ -564,11 +564,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica se l'utente è abilitato al login o no
    *
-   * @param bool $abilitato Vero se l'utente è abilitato al login, falso altrimenti
+   * @param bool|null $abilitato Vero se l'utente è abilitato al login, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setAbilitato(bool $abilitato): self {
+  public function setAbilitato(?bool $abilitato): self {
     $this->abilitato = ($abilitato == true);
     return $this;
   }
@@ -585,11 +585,11 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Modifica se l'utente è abilitato all'accesso SPID
    *
-   * @param bool $spid Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
+   * @param bool|null $spid Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setSpid(bool $spid): self {
+  public function setSpid(?bool $spid): self {
     $this->spid = ($spid == true);
     return $this;
   }

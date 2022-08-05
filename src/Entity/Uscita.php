@@ -235,11 +235,11 @@ class Uscita {
   /**
    * Modifica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
    *
-   * @param bool $valido Vero se è valida per il conteggio, falso altrimenti
+   * @param bool|null $valido Vero se è valida per il conteggio, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setValido(bool $valido): self {
+  public function setValido(?bool $valido): self {
     $this->valido = $valido;
     return $this;
   }

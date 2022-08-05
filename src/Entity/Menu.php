@@ -225,11 +225,11 @@ class Menu {
   /**
    * Modifica se utilizza la modalità mega menu o no
    *
-   * @param bool $mega Indica se utilizza la modalità mega menu
+   * @param bool|null $mega Indica se utilizza la modalità mega menu
    *
    * @return self Oggetto modificato
    */
-  public function setMega(bool $mega): self {
+  public function setMega(?bool $mega): self {
     $this->mega = ($mega == true);
     return $this;
   }

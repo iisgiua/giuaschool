@@ -87,11 +87,11 @@ class Ata extends Utente {
   /**
    * Modifica se il dipendente ATA ha accesso alle funzioni della segreteria
    *
-   * @param bool $segreteria Vero se il dipendente ATA ha accesso alle funzioni della segreteria, falso altrimenti
+   * @param bool|null $segreteria Vero se il dipendente ATA ha accesso alle funzioni della segreteria, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setSegreteria(bool $segreteria): self {
+  public function setSegreteria(?bool $segreteria): self {
     $this->segreteria = ($segreteria == true);
     return $this;
   }

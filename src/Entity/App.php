@@ -224,11 +224,11 @@ class App {
   /**
    * Modifica se l'app è attiva o no
    *
-   * @param bool $attiva Vero se l'app è attiva, falso altrimenti
+   * @param bool|null $attiva Vero se l'app è attiva, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setAttiva(bool $attiva): self {
+  public function setAttiva(?bool $attiva): self {
     $this->attiva = ($attiva == true);
     return $this;
   }
@@ -245,11 +245,11 @@ class App {
   /**
    * Modifica se l'app deve caricare un proprio CSS o no
    *
-   * @param bool $css Vero se l'app deve caricare un proprio CSS, falso altrimenti
+   * @param bool|null $css Vero se l'app deve caricare un proprio CSS, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setCss(bool $css): self {
+  public function setCss(?bool $css): self {
     $this->css = ($css == true);
     return $this;
   }

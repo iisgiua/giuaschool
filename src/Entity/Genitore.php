@@ -53,11 +53,11 @@ class Genitore extends Utente {
   /**
    * Modifica se il genitore può effettuare la giustificazione online oppure no
    *
-   * @param bool $giustificaOnline Vero se il genitore può effettuare la giustificazione online, falso altrimenti
+   * @param bool|null $giustificaOnline Vero se il genitore può effettuare la giustificazione online, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setGiustificaOnline(bool $giustificaOnline): self {
+  public function setGiustificaOnline(?bool $giustificaOnline): self {
     $this->giustificaOnline = ($giustificaOnline == true);
     return $this;
   }

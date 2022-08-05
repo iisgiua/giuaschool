@@ -61,12 +61,15 @@ FROM system_builder as symfony_builder
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data composer.* symfony.lock ./
 RUN \
-  composer -q install --no-dev --no-progress --no-scripts && \
+  composer -q install --no-progress --no-scripts && \
   composer -q clear-cache
 
 
-########## Third Step - Build Application for PROD environment
-FROM symfony_builder as application_prod
+########## Third Step - Build Application for DEV environment
+FROM symfony_builder as application_dev
+
+### Build environment
+ARG DEBIAN_FRONTEND=noninteractive
 
 ### Configure application
 WORKDIR /var/www/giuaschool
@@ -74,17 +77,12 @@ COPY --chown=www-data:www-data . .
 RUN \
 # adjust scripts permissions
   chmod 755 tests/docker/*.sh && \
-# set PROD environment
-  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
 # create database
   service mariadb start && mysqladmin -u root password 'root' && \
   php bin/console doctrine:database:create -n -q && \
   php bin/console doctrine:schema:update -f -q && \
 # init database
-  mysql -uroot -proot --default-character-set=utf8 giuaschool < src/Install/init-db.sql && \
-  php bin/console security:encode-password -n admin App\\Entity\\Amministratore 2> /dev/null | grep "Encoded password" | sed -r -e "s/^\s*Encoded password\s+(\S+)\s*$/UPDATE gs_utente SET password='\1' where username='admin';/" > admin-pswd && \
-  mysql -uroot -proot giuaschool < admin-pswd && \
-  rm -f admin-pswd && \
+  php bin/console app:alice:load Giuaschool --dump src/Install/init-db && \
 # install SPID library
   mkdir vendor/italia && \
   cd vendor/italia && \
@@ -107,20 +105,29 @@ EXPOSE 443
 CMD tests/docker/entrypoint.sh
 
 
-########## Fourth Step - Build Application for DEV environment
-FROM application_prod as application_dev
-
-### Build environment
-ARG DEBIAN_FRONTEND=noninteractive
+########## Fourth Step - Build Application for PROD environment
+FROM application_dev as application_prod
 
 ### Configure application
 WORKDIR /var/www/giuaschool
 RUN \
-# Set DEV environment
-  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=dev/" .env && \
-  composer -q install --no-progress --no-scripts && \
-  composer clear-cache && \
+# set PROD environment
+  sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
+# remove DEV dependencies
+  composer install -q --no-dev --no-scripts && \
+  composer -q clear-cache && \
+# remove unused files
+  rm -f -r src/Command/AliceLoadCommand.php src/DataFixtures/ src/Install/init-db.map && \
+  rm -f -r tests/*.php tests/Behat/ tests/data/ tests/features/ tests/temp/ tests/UnitTest/ && \
+  rm -f -r var/cache/* var/log/* var/sessions/* && \
+  rm -f .dockerignore .env.test .gitignore behat.yml phpunit.xml publiccode.yml && \
+  rm -f -r ./*/.gitkeep ./*/*/.gitkeep ./*/*/*/.gitkeep && \
+# adjust file permissions
   chown -R www-data:www-data .
+
+### Configure services
+EXPOSE 443
+CMD tests/docker/entrypoint.sh
 
 
 ########## Fifth Step - Build Application for TEST environment
@@ -147,9 +154,5 @@ RUN \
 # Set TEST environment
   sed -r -i -e "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
   service mariadb start && \
-  php bin/console doctrine:database:drop -f -q && \
-  php bin/console doctrine:database:create -n -q && \
-  php bin/console doctrine:schema:update -f -q && \
-  php bin/console doctrine:fixtures:load -n -q --group=Test && \
-  mysqldump -uroot -proot giuaschool -t -n --compact --result-file='tests/temp/Test.fixtures' && \
+  php bin/console app:alice:load tests/features/TestFixtures.yml --dump tests/temp/TestFixtures && \
   chown -R www-data:www-data .

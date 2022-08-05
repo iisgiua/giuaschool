@@ -271,11 +271,11 @@ class Alunno extends Utente {
   /**
    * Modifica se l'alunno sta frequentando l'anno scolastico all'estero oppure no
    *
-   * @param bool $frequenzaEstero Vero se l'alunno sta frequentando l'anno scolastico all'estero, falso altrimenti
+   * @param bool|null $frequenzaEstero Vero se l'alunno sta frequentando l'anno scolastico all'estero, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setFrequenzaEstero(bool $frequenzaEstero): self {
+  public function setFrequenzaEstero(?bool $frequenzaEstero): self {
     $this->frequenzaEstero = ($frequenzaEstero == true);
     return $this;
   }
@@ -355,11 +355,11 @@ class Alunno extends Utente {
   /**
    * Modifica se l'alunno può effettuare la giustificazione online oppure no
    *
-   * @param bool $giustificaOnline Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
+   * @param bool|null $giustificaOnline Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setGiustificaOnline(bool $giustificaOnline): self {
+  public function setGiustificaOnline(?bool $giustificaOnline): self {
     $this->giustificaOnline = ($giustificaOnline == true);
     return $this;
   }
@@ -376,11 +376,11 @@ class Alunno extends Utente {
   /**
    * Imposta se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
-   * @param bool $richiestaCertificato Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
+   * @param bool|null $richiestaCertificato Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
    *
    * @return self Oggetto modificato
    */
-  public function setRichiestaCertificato(bool $richiestaCertificato): self {
+  public function setRichiestaCertificato(?bool $richiestaCertificato): self {
     $this->richiestaCertificato = ($richiestaCertificato == true);
     return $this;
   }

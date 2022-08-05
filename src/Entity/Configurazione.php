@@ -245,11 +245,11 @@ class Configurazione {
   /**
    * Modifica se il parametro viene gestito da una procedura apposita o no
    *
-   * @param bool $gestito Indica se il parametro viene gestito da una procedura apposita
+   * @param bool|null $gestito Indica se il parametro viene gestito da una procedura apposita
    *
    * @return self Oggetto modificato
    */
-  public function setGestito(bool $gestito): self {
+  public function setGestito(?bool $gestito): self {
     $this->gestito = $gestito;
     return $this;
   }
