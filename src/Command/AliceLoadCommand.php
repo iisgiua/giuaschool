@@ -58,6 +58,13 @@ class AliceLoadCommand extends Command {
   protected ?Generator $faker;
 
   /**
+   * Generatore personalizzato di dati fittizi
+   *
+   * @var CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
+   */
+  protected ?CustomProvider $customProvider;
+
+  /**
    * Generatore di fixtures con memmorizzazione su database
    *
    * @var PurgerLoader|null $alice Generatore di fixtures con memmorizzazione su database
@@ -89,7 +96,8 @@ class AliceLoadCommand extends Command {
     $this->faker = $faker;
     $this->alice = $alice;
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
-    $this->faker->addProvider(new CustomProvider($this->faker));
+    $this->customProvider = new CustomProvider($this->faker);
+    $this->faker->addProvider($this->customProvider);
     $this->projectPath = $dirProgetto;
   }
 
@@ -188,7 +196,7 @@ class AliceLoadCommand extends Command {
     // carica dati
     $objects = $this->alice->load($fixtures, [], [], $purgeMode);
     // esegue modifiche dopo l'inserimento nel db e le rende permanenti
-    CustomProvider::postPersistArrayId();
+    $this->customProvider->postPersistArrayId();
     $this->em->flush();
     print("---> dati caricati correttamente\n");
     // dump dei dati

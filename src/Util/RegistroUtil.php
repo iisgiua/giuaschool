@@ -1027,6 +1027,7 @@ class RegistroUtil {
     $dati['assenze'] = array();
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->infoPeriodi();
+    $dati_periodo = [];
     // legge assenze
     $assenze = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')

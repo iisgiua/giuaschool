@@ -637,10 +637,10 @@ class StaffController extends AbstractController {
     $dati = null;
     // recupera criteri dalla sessione
     $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente', 0);
-    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe', 0);
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : 0);
-    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : 0);
+    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/docente');
+    $search['classe'] = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/classe');
+    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
+    $classe = ($search['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($search['classe']) : null);
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_avvisi_orario_'.$tipo.'/pagina', 1);

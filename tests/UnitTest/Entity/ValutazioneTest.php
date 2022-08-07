@@ -160,13 +160,6 @@ class ValutazioneTest extends DatabaseTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
     $existent->setAlunno($this->getReference("alunno_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
-    // lezione
-    $property = $this->getPrivateProperty('App\Entity\Valutazione', 'lezione');
-    $property->setValue($existent, null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');
-    $existent->setLezione($this->getReference("lezione_1"));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Lezione - VALID NOT BLANK');
     // materia
     $property = $this->getPrivateProperty('App\Entity\Valutazione', 'materia');
     $property->setValue($existent, null);

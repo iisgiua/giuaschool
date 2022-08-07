@@ -8,49 +8,49 @@
 
 namespace App\Controller;
 
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Classe;
+use App\Entity\Corso;
+use App\Entity\Docente;
+use App\Entity\Documento;
+use App\Entity\Genitore;
+use App\Entity\Istituto;
+use App\Entity\Materia;
+use App\Entity\Preside;
+use App\Entity\Provisioning;
+use App\Entity\Scrutinio;
+use App\Entity\Sede;
+use App\Entity\Staff;
+use App\Entity\StoricoEsito;
+use App\Entity\StoricoVoto;
+use App\Entity\Utente;
+use App\Form\ConfigurazioneType;
+use App\Form\ModuloType;
+use App\Form\UtenteType;
+use App\Kernel;
+use App\Util\ArchiviazioneUtil;
+use App\Util\LogHandler;
+use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Dotenv\Dotenv;
-use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
-use App\Kernel;
-use App\Form\ConfigurazioneType;
-use App\Form\UtenteType;
-use App\Form\ModuloType;
-use App\Util\LogHandler;
-use App\Util\ArchiviazioneUtil;
-use App\Entity\Istituto;
-use App\Entity\Sede;
-use App\Entity\Corso;
-use App\Entity\Materia;
-use App\Entity\Classe;
-use App\Entity\Preside;
-use App\Entity\Staff;
-use App\Entity\Docente;
-use App\Entity\Ata;
-use App\Entity\Alunno;
-use App\Entity\Genitore;
-use App\Entity\StoricoEsito;
-use App\Entity\StoricoVoto;
-use App\Entity\Documento;
-use App\Entity\Provisioning;
-use App\Entity\Scrutinio;
-use App\Entity\Configurazione;
-use App\Entity\Utente;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -1098,6 +1098,7 @@ class SistemaController extends BaseController {
    * Cancella la cache di sistema
    *
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
    *
    * @return Response Pagina di risposta
    *
@@ -1106,15 +1107,14 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneCacheAction(TranslatorInterface $trans): Response {
+  public function manutenzioneCacheAction(TranslatorInterface $trans, KernelInterface $kernel): Response {
     // comandi per la pulizia della cache del database
     $commands = [
-      new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => null, '-q' => null]),
-      new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => null, '-q' => null]),
-      //-- new ArrayInput(['command' => 'cache:clear', '-q' => null]),
+      new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]),
+      new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => true, '-n' => true, '-q' => true]),
+      new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => true, '-n' => true, '-q' => true]),
     ];
     // esegue comandi
-    $kernel = new Kernel('prod', false);
     $application = new Application($kernel);
     $application->setAutoExit(false);
     $output = new BufferedOutput();
@@ -1126,13 +1126,6 @@ class SistemaController extends BaseController {
         $this->addFlash('danger', $trans->trans('exception.svuota_cache', ['errore' => $content]));
         break;
       }
-    }
-    if ($status == 0) {
-      // cancella cache
-      $dir = $this->getParameter('kernel.cache_dir');
-      $this->fileDelete($dir);
-      // esecuzione senza errori
-      $this->addFlash('success', 'message.svuota_cache_ok');
     }
     // redirect
     return $this->redirectToRoute('sistema_manutenzione');
@@ -1194,8 +1187,8 @@ class SistemaController extends BaseController {
       // imposta data, ora inizio e ora fine
       $dt = $form->get('data')->getData()->format('Y-m-d');
       $tm = $form->get('ora')->getData()->format('H:i');
-      $inizio = '['.$dt.' '.$tm.':00]';
-      $fine = '['.$dt.' '.$form->get('ora')->getData()->modify('+1 hour')->format('H:i').':00]';
+      $inizio = '['.$dt.'T'.$tm.':00';
+      $fine = '['.$dt.'T'.$form->get('ora')->getData()->modify('+1 hour')->format('H:i').':00';
       // nome file
       $nomefile = $this->getParameter('kernel.project_dir').'/var/log/app_'.
         mb_strtolower($request->server->get('APP_ENV')).'-'.$dt.'.log';
@@ -1203,7 +1196,7 @@ class SistemaController extends BaseController {
         $fl = fopen($nomefile, "r");
         while (($riga = fgets($fl)) !== false) {
           // legge una riga
-          $tag = substr($riga, 0, 21);
+          $tag = substr($riga, 0, 20);
           if ($tag >= $inizio && $tag <= $fine) {
             // estrae messaggio;
             $msgs[] = $riga;
@@ -1231,6 +1224,10 @@ class SistemaController extends BaseController {
   /**
    * Imposta le informazioni di debug nel log di sistema
    *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
+   *
    * @return Response Pagina di risposta
    *
    * @Route("/sistema/manutenzione/debug/", name="sistema_manutenzione_debug",
@@ -1238,7 +1235,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneDebugAction(Request $request): Response {
+  public function manutenzioneDebugAction(Request $request, TranslatorInterface $trans, KernelInterface $kernel): Response {
     // imposta nuovo livello di log
     $logLevel = ($request->server->get('LOG_LEVEL') == 'warning') ? 'debug' : 'warning';
     // legge .env
@@ -1255,15 +1252,21 @@ class SistemaController extends BaseController {
     // scrive nuovo .env
     unlink($envPath);
     file_put_contents($envPath, $envData);
-    // cancella cache (solo file principali)
-    $dir = $this->getParameter('kernel.cache_dir');
-    $finder = new Finder();
-    $finder->files()->in($dir);
-    foreach ($finder as $file) {
-      unlink($file->getRealPath());
+    // cancella cache
+    $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
+    // esegue comando
+    $application = new Application($kernel);
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
+    $status = $application->run($command, $output);
+    if ($status != 0) {
+      // errore nell'esecuzione del comando
+      $content = $output->fetch();
+      $this->addFlash('danger', $trans->trans('exception.svuota_cache', ['errore' => $content]));
+    } else {
+      // messaggio ok
+      $this->addFlash('success', 'message.modifica_log_level_ok');
     }
-    // messaggio
-    $this->addFlash('success', 'message.modifica_log_level_ok');
     // redirect
     return $this->redirectToRoute('sistema_manutenzione');
   }
