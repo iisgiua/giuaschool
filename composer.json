@@ -1,9 +1,9 @@
 {
-    "name": "trinko/giuaschool",
+    "name": "iisgiua/giuaschool",
     "description": "giua@school - il Registro Elettronico open source dell' I.I.S. Michele Giua",
     "license": "AGPL-3.0-only",
     "type": "project",
-    "homepage": "https://github.com/trinko/giuaschool",
+    "homepage": "https://github.com/iisgiua/giuaschool",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {

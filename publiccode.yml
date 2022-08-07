@@ -8,7 +8,7 @@ categories:
   - data-analytics
 description:
   it:
-    documentation: 'https://trinko.github.io/giuaschool-docs/'
+    documentation: 'https://iisgiua.github.io/giuaschool-docs/'
     features:
       - |-
         Gestione di due sedi scolastiche, con docenti che possono lavorare anche
@@ -72,7 +72,7 @@ maintenance:
 name: giua@school
 platforms:
   - web
-releaseDate: '2022-06-01'
+releaseDate: '2022-07-07'
 softwareType: standalone/web
-softwareVersion: 1.4.4
-url: 'https://github.com/trinko/giuaschool'
+softwareVersion: 1.4.5
+url: 'https://github.com/iisgiua/giuaschool'

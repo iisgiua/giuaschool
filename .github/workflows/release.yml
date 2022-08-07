@@ -59,8 +59,8 @@ jobs:
           target: application_prod
           push: true
           tags: |
-            ghcr.io/trinko/giuaschool:latest
-            ghcr.io/trinko/giuaschool:${{ github.event.inputs.version }}
+            ghcr.io/iisgiua/giuaschool:latest
+            ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }}
 
       - name: Build and publish DEV image
         uses: docker/build-push-action@v3
@@ -70,8 +70,8 @@ jobs:
           target: application_dev
           push: true
           tags: |
-            ghcr.io/trinko/giuaschool-dev:latest
-            ghcr.io/trinko/giuaschool-dev:${{ github.event.inputs.version }}
+            ghcr.io/iisgiua/giuaschool-dev:latest
+            ghcr.io/iisgiua/giuaschool-dev:${{ github.event.inputs.version }}
 
       - name: Build and publish TEST image
         uses: docker/build-push-action@v3
@@ -80,12 +80,12 @@ jobs:
           file: tests/docker/Dockerfile
           push: true
           tags: |
-            ghcr.io/trinko/giuaschool-test:latest
-            ghcr.io/trinko/giuaschool-test:${{ github.event.inputs.version }}
+            ghcr.io/iisgiua/giuaschool-test:latest
+            ghcr.io/iisgiua/giuaschool-test:${{ github.event.inputs.version }}
 
       - name: Create archive for release code
         run: |
-          docker run --name "gs_release" ghcr.io/trinko/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
+          docker run --name "gs_release" ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
           docker cp gs_release:/var/www/giuaschool-release.zip giuaschool-release-v${{ github.event.inputs.version }}.zip
           docker cp gs_release:/var/www/giuaschool-release.md5.zip giuaschool-release-v${{ github.event.inputs.version }}.md5.zip
 
@@ -110,7 +110,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'docs/version.yml'
-          destination_repo: 'trinko/giuaschool-docs'
+          destination_repo: 'iisgiua/giuaschool-docs'
           destination_branch: 'master'
           destination_folder: '_data'
           user_name: ${{ github.actor }}
@@ -131,7 +131,7 @@ jobs:
           echo "# Ultima versione"  >> docs/latest-release.md
           echo "{: .text-center .fw-400 .pb-5}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
-          echo "[**Scarica la Versione {{ site.data.version.tag }}**](https://github.com/trinko/giuaschool/releases/download/v{{ site.data.version.tag }}/giuaschool-release-v{{ site.data.version.tag }}.zip)" >> docs/latest-release.md
+          echo "[**Scarica la Versione {{ site.data.version.tag }}**](https://github.com/iisgiua/giuaschool/releases/download/v{{ site.data.version.tag }}/giuaschool-release-v{{ site.data.version.tag }}.zip)" >> docs/latest-release.md
           echo "{: .text-center .pb-5}" >> docs/latest-release.md
           echo "" >> docs/latest-release.md
           echo "Data e ora di rilascio: `TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`" >> docs/latest-release.md
@@ -158,7 +158,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'docs/.'
-          destination_repo: 'trinko/giuaschool-docs'
+          destination_repo: 'iisgiua/giuaschool-docs'
           destination_branch: 'master'
           user_name: ${{ github.actor }}
           user_email: '${{ github.actor }}@users.noreply.github.com'
