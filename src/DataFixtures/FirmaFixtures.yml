@@ -17,12 +17,12 @@ App\Entity\Firma:
   # ----- lezioni delle classi -----
   firma_{1..100}:
     lezione: '@lezione_<current()>'
-    docente: '@docente_*'
+    docente: '@docente_curricolare_*'
 
   # ----- lezioni di religione -----
   firma_religione_{1..30}:
     lezione: '@lezione_religione_<current()>'
-    docente: '@docente_*'
+    docente: '@docente_religione_*'
 
   # ----- lezioni di sostituzione -----
   firma_supplenza_{1..10}:

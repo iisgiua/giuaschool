@@ -68,7 +68,7 @@ class FirmaTest extends DatabaseTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
-          ($field == 'docente' ? $this->getReference("docente_".($i + 1)) :
+          ($field == 'docente' ? $this->getReference("docente_".($i + 11)) :
           null));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
