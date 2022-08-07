@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,11 +13,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * ScansioneOraria - entità
+ * ScansioneOraria - dati della scansione oraria
  *
  * @ORM\Entity(repositoryClass="App\Repository\ScansioneOrariaRepository")
  * @ORM\Table(name="gs_scansione_oraria")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class ScansioneOraria {
 
@@ -29,85 +27,80 @@ class ScansioneOraria {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la scansione oraria
+   * @var int|null $id Identificativo univoco per la scansione oraria
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var integer $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+   * @var int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
    * @ORM\Column(type="smallint", nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={0,1,2,3,4,5,6}, strict=true, message="field.choice")
    */
-  private $giorno;
+  private int $giorno = 0;
 
   /**
-   * @var integer $ora Numero dell'ora di lezione [1,2,...]
+   * @var int $ora Numero dell'ora di lezione [1,2,...]
    *
    * @ORM\Column(type="smallint", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $ora;
+  private int $ora = 1;
 
   /**
-   * @var \DateTime $inizio Inizio dell'ora di lezione
+   * @var \DateTime|null $inizio Inizio dell'ora di lezione
    *
    * @ORM\Column(type="time", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Time(message="field.time")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $inizio;
+  private ?\DateTime $inizio = null;
 
   /**
-   * @var \DateTime $fine Fine dell'ora di lezione
+   * @var \DateTime|null $fine Fine dell'ora di lezione
    *
    * @ORM\Column(type="time", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Time(message="field.time")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $fine;
+  private ?\DateTime $fine = null;
 
   /**
-   * @var integer $durata Durata dell'ora di lezione (intesa come unità oraria)
+   * @var float $durata Durata dell'ora di lezione (intesa come unità oraria)
    *
    * @ORM\Column(type="float", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $durata;
+  private float $durata = 1.0;
 
   /**
-   * @var Orario $orario Orario a cui appartiene la scansione oraria
+   * @var Orario|null $orario Orario a cui appartiene la scansione oraria
    *
    * @ORM\ManyToOne(targetEntity="Orario")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $orario;
+  private ?Orario $orario = null;
 
 
   //==================== EVENTI ORM ====================
@@ -117,7 +110,7 @@ class ScansioneOraria {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -128,7 +121,7 @@ class ScansioneOraria {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -139,47 +132,47 @@ class ScansioneOraria {
   /**
    * Restituisce l'identificativo univoco per la scansione oraria
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce il giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
-   * @return integer Giorno della settimana
+   * @return int Giorno della settimana
    */
-  public function getGiorno() {
+  public function getGiorno(): int {
     return $this->giorno;
   }
 
   /**
    * Modifica il giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
    *
-   * @param integer $giorno Giorno della settimana
+   * @param int $giorno Giorno della settimana
    *
-   * @return ScansioneOraria Oggetto ScansioneOraria
+   * @return self Oggetto modificato
    */
-  public function setGiorno($giorno) {
+  public function setGiorno(int $giorno): self {
     $this->giorno = $giorno;
     return $this;
   }
@@ -187,20 +180,20 @@ class ScansioneOraria {
   /**
    * Restituisce il numero dell'ora di lezione [1,2,...]
    *
-   * @return integer Numero dell'ora di lezione
+   * @return int Numero dell'ora di lezione
    */
-  public function getOra() {
+  public function getOra(): int {
     return $this->ora;
   }
 
   /**
    * Modifica il numero dell'ora di lezione [1,2,...]
    *
-   * @param integer $ora Numero dell'ora di lezione
+   * @param int $ora Numero dell'ora di lezione
    *
-   * @return ScansioneOraria Oggetto ScansioneOraria
+   * @return self Oggetto modificato
    */
-  public function setOra($ora) {
+  public function setOra(int $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -208,9 +201,9 @@ class ScansioneOraria {
   /**
    * Restituisce l'inizio dell'ora di lezione
    *
-   * @return \DateTime Inizio dell'ora di lezione
+   * @return \DateTime|null Inizio dell'ora di lezione
    */
-  public function getInizio() {
+  public function getInizio(): ?\DateTime {
     return $this->inizio;
   }
 
@@ -219,9 +212,9 @@ class ScansioneOraria {
    *
    * @param \DateTime $inizio Inizio dell'ora di lezione
    *
-   * @return ScansioneOraria Oggetto ScansioneOraria
+   * @return self Oggetto modificato
    */
-  public function setInizio($inizio) {
+  public function setInizio(\DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -229,9 +222,9 @@ class ScansioneOraria {
   /**
    * Restituisce la fine dell'ora di lezione
    *
-   * @return \DateTime Fine dell'ora di lezione
+   * @return \DateTime|null Fine dell'ora di lezione
    */
-  public function getFine() {
+  public function getFine(): ?\DateTime {
     return $this->fine;
   }
 
@@ -240,9 +233,9 @@ class ScansioneOraria {
    *
    * @param \DateTime $fine Fine dell'ora di lezione
    *
-   * @return ScansioneOraria Oggetto ScansioneOraria
+   * @return self Oggetto modificato
    */
-  public function setFine($fine) {
+  public function setFine(\DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }
@@ -250,20 +243,20 @@ class ScansioneOraria {
   /**
    * Restituisce la durata dell'ora di lezione (intesa come unità oraria)
    *
-   * @return integer Durata dell'ora di lezione
+   * @return float Durata dell'ora di lezione
    */
-  public function getDurata() {
+  public function getDurata(): float {
     return $this->durata;
   }
 
   /**
    * Modifica la durata dell'ora di lezione (intesa come unità oraria)
    *
-   * @param integer $durata Durata dell'ora di lezione
+   * @param float $durata Durata dell'ora di lezione
    *
-   * @return ScansioneOraria Oggetto ScansioneOraria
+   * @return self Oggetto modificato
    */
-  public function setDurata($durata) {
+  public function setDurata(float $durata): self {
     $this->durata = $durata;
     return $this;
   }
@@ -271,9 +264,9 @@ class ScansioneOraria {
   /**
    * Restituisce l'orario a cui appartiene la scansione oraria
    *
-   * @return Orario Orario a cui appartiene la scansione oraria
+   * @return Orario|null Orario a cui appartiene la scansione oraria
    */
-  public function getOrario() {
+  public function getOrario(): ?Orario {
     return $this->orario;
   }
 
@@ -282,9 +275,9 @@ class ScansioneOraria {
    *
    * @param Orario $orario Orario a cui appartiene la scansione oraria
    *
-   * @return ScansioneOraria Oggetto ScansioneOraria
+   * @return self Oggetto modificato
    */
-  public function setOrario(Orario $orario) {
+  public function setOrario(Orario $orario): self {
     $this->orario = $orario;
     return $this;
   }
@@ -297,7 +290,7 @@ class ScansioneOraria {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->giorno.':'.$this->ora;
   }
 

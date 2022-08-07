@@ -1,0 +1,30 @@
+####################
+# SedeFixtures - dati di test
+#
+# Dati delle sedi scolastiche:
+#   nome: nome della sede scolastica
+#   nomeBreve: nome breve della sede scolastica
+#   citta: città della sede scolastica
+#   indirizzo1: prima riga dell'indirizzo della sede scolastica (via e numero civico)
+#   indirizzo2: seconda riga dell'indirizzo della sede scolastica (CAP e città)
+#   ordinamento: numero d'ordine per la visualizzazione delle sedi
+####################
+
+
+App\Entity\Sede:
+  sede_1:
+    nome: 'Sede centrale'
+    nomeBreve: 'Grossetto'
+    citta: 'Grossetto'
+    indirizzo1: 'Via Edipo, 338'
+    indirizzo2: '70222 - GROSSETTO'
+    telefono: '099 123 321'
+    ordinamento: 10
+  sede_2:
+    nome: 'Sede staccata'
+    nomeBreve: 'Bergamo'
+    citta: 'Bergamo'
+    indirizzo1: 'Incrocio Longo, 721'
+    indirizzo2: '60111 - BERGAMO'
+    telefono: '088 321 123'
+    ordinamento: 20

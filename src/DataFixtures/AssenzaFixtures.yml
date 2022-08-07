@@ -1,0 +1,59 @@
+####################
+# AssenzaFixtures - dati di test
+#
+# Dati per le assenze degli alunni:
+#   data: Data dell'assenza
+#   giustificato: Data della giustificazione
+#   motivazione: Motivazione dell'assenza
+#   dichiarazione: Informazioni sulla sottoscrizione della dichiarazione (quando necessaria)
+#   certificati: Lista di file allegati per i certificati medici
+#   alunno: Alunno al quale si riferisce l'assenza
+#   docente: Docente che rileva l'assenza
+#   docenteGiustifica: Docente che giustifica l'assenza
+#   utenteGiustifica: Utente (Genitore/Alunno) che giustifica l'assenza
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+  - GenitoreFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Assenza:
+
+  # ----- assenze non giustificate -----
+  assenza_non_giustificata_{1..10}:
+    data (unique): '<dateTimeBetween("-2 month", "-1 day")>'
+    giustificato:
+    motivazione: ''
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_prima_<current()>'
+    docente: '@docente_*'
+    docenteGiustifica:
+    utenteGiustifica:
+
+  # ----- assenze non validate -----
+  assenza_non_validata_{1..10}:
+    data (unique): '<dateTimeBetween("-2 month", "-1 day")>'
+    giustificato: '<dateTimeBetween(<($data)>, "now")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_seconda_<current()>'
+    docente: '@docente_*'
+    docenteGiustifica:
+    utenteGiustifica: <($alunno->getGenitori()[0])>
+
+  # ----- assenze validate -----
+  assenza_validata_{1..30}:
+    data (unique): '<dateTimeBetween("-2 month", "-1 day")>'
+    giustificato: '<dateTimeBetween(<($data)>, "now")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_terza_<current()>'
+    docente: '@docente_*'
+    docenteGiustifica: '@docente_*'
+    utenteGiustifica: <($alunno->getGenitori()[0])>

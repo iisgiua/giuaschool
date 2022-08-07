@@ -1,0 +1,42 @@
+####################
+# PropostaVotoFixtures - dati di test
+#
+# Dati per le proposte di voto dei docenti agli scrutini:
+#   periodo: periodo dello scrutinio [P=primo periodo, S=secondo periodo, F=scrutinio finale, I=scrutinio integrativo, 1=prima valutazione intermedia, 2=seconda valutazione intermedia]
+#   orale: proposta di voto per la valutazione orale
+#   scritto: proposta di voto per la valutazione scritta
+#   pratico: proposta di voto per la valutazione pratica
+#   unico: proposta di voto per la valutazione unica
+#   debito: argomenti per il recupero del debito
+#   recupero: modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
+#   assenze: numero di ore di assenza nel periodo
+#   dati: lista dei dati aggiuntivi
+#   alunno: alunno a cui si attribuisce la proposta di voto
+#   classe: classe dell'alunno a cui si attribuisce la proposta di voto
+#   materia: materia della proposta di voto
+#   docente: docente che inserisce la proposta di voto
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+  - ClasseFixtures.yml
+  - MateriaFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\PropostaVoto:
+  proposta_voto_{1..10}:
+    periodo: '<randomElement(["P", "S", "F"])>'
+    orale: '50%? <numberBetween(1, 10)>: 0'
+    scritto: '50%? <numberBetween(1, 10)>: 0'
+    pratico: '50%? <numberBetween(1, 10)>: 0'
+    unico: '50%? <numberBetween(1, 10)>: 0'
+    debito: '50%? <text()>: <strval("")>'
+    recupero: '<randomElement(["A", "C", "S", "P", "I", "R", "N"])>'
+    assenze: '50%? <numberBetween(1, 100)>: 0'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    alunno: '@alunno_*'
+    classe: '@classe_*'
+    materia: '@materia_*'
+    docente: '@docente_*'

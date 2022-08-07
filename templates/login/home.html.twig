@@ -11,7 +11,7 @@
     <div class="panel-heading gs-pt-1 gs-pb-1">
       <div class="panel-title">
         <span>Utente: <strong>{{ app.user.username }} ({{ ('label.'~app.user.roles[0])|trans }})</strong></span>
-        <span class="gs-ml-5">Ultimo accesso: <strong>{{ app.session.get('APP/UTENTE/ultimo_accesso') ? app.session.get('APP/UTENTE/ultimo_accesso') : 'NESSUNO' }}</strong></span>
+        <span class="gs-ml-5">Ultimo accesso: <strong>{{ app.session.get('/APP/UTENTE/ultimo_accesso') ? app.session.get('/APP/UTENTE/ultimo_accesso') : 'NESSUNO' }}</strong></span>
       </div>
     </div>
     <div class="panel-body">

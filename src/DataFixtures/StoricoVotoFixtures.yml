@@ -1,0 +1,24 @@
+####################
+# StoricoVotoFixtures - dati di test
+#
+# Dati per la memorizzazione dei voti finali del precedente anno scolastico:
+#   voto: valutazione della materia
+#   carenze: carenze segnalate allo scrutinio finale
+#   dati: dati aggiuntivi sulla valutazione
+#   storicoEsito: esito dello storico a cui si riferisce il voto
+#   materia: materia della valutazione
+####################
+
+
+include:
+  - StoricoEsitoFixtures.yml
+  - MateriaFixtures.yml
+
+
+App\Entity\StoricoVoto:
+  storico_voto_{1..10}:
+    voto: '<numberBetween(1, 10)>'
+    carenze: '50%? <text()>: <strval("")>'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    storicoEsito: '@storico_esito_<current()>'
+    materia: '@materia_*'

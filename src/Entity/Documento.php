@@ -1,28 +1,27 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Doctrine\Common\Collections\ArrayCollection;
 
 
 /**
- * Documento - entità
+ * Documento - dati per la gestione di un documento generico
  *
  * @ORM\Entity(repositoryClass="App\Repository\DocumentoRepository")
  * @ORM\Table(name="gs_documento")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class Documento {
 
@@ -30,58 +29,60 @@ class Documento {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
+   * @var string|null $tipo Tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni BES, G=materiali generici]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"L","P","R","M","H","D","C","G"}, strict=true, message="field.choice")
    */
-  private $tipo;
+  private ?string $tipo = 'G';
 
   /**
-   * @var Docente $docente Docente che carica il documento
+   * @var Docente|null $docente Docente che carica il documento
+   *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
   /**
-   * @var ListaDestinatari $listaDestinatari Lista dei destinatari del documento
+   * @var ListaDestinatari|null $listaDestinatari Lista dei destinatari del documento
+   *
    * @ORM\OneToOne(targetEntity="ListaDestinatari")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $listaDestinatari;
+  private ?ListaDestinatari $listaDestinatari = null;
 
   /**
-   * @var ArrayCollection $allegati Lista dei file allegati al documento
+   * @var Collection $allegati Lista dei file allegati al documento
+   *
    * @ORM\ManyToMany(targetEntity="File")
    * @ORM\JoinTable(name="gs_documento_file",
    *    joinColumns={@ORM\JoinColumn(name="documento_id", nullable=false)},
@@ -89,47 +90,47 @@ class Documento {
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $allegati;
+  private ?Collection $allegati = null;
 
   /**
-   * @var Materia $materia Materia a cui è riferito il documento (solo per alcuni tipi di documento)
+   * @var Materia|null $materia Materia a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @ORM\ManyToOne(targetEntity="Materia")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $materia;
+  private ?Materia $materia = null;
 
   /**
-   * @var Classe $classe Classe a cui è riferito il documento (solo per alcuni tipi di documento)
+   * @var Classe|null $classe Classe a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var Alunno $alunno Alunno a cui è riferito il documento (solo per alcuni tipi di documento)
+   * @var Alunno|null $alunno Alunno a cui è riferito il documento (solo per alcuni tipi di documento)
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var string $cifrato Conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+   * @var string|null $cifrato Conserva la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
-   * @Assert\Length(max=255,maxMessage="field.maxlength")   
+   * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $cifrato;
+  private ?string $cifrato = '';
 
   /**
-   * @var boolean $firma Indica se è richiesta la firma di presa visione
+   * @var bool $firma Indica se è richiesta la firma di presa visione
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $firma;
+  private bool $firma = false;
 
 
   //==================== EVENTI ORM ====================
@@ -139,7 +140,7 @@ class Documento {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -150,7 +151,7 @@ class Documento {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -161,47 +162,47 @@ class Documento {
   /**
    * Restituisce l'identificativo univoco per il documento
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce il tipo di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
    *
-   * @return string Tipo di documento
+   * @return string|null Tipo di documento
    */
-  public function getTipo() {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo  di documento [L=piani di lavoro, P=programma svolto, R=relazione finale, M=documento 15 maggio, H=PEI per alunni H, D=PDP per alunni DSA/BES, C=certificazioni mediche alunni, G=materiali generici]
    *
-   * @param string $tipo Tipo di documento
+   * @param string|null $tipo Tipo di documento
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setTipo($tipo) {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -209,9 +210,9 @@ class Documento {
   /**
    * Restituisce il docente che carica il documento
    *
-   * @return Docente Docente che carica il documento
+   * @return Docente|null Docente che carica il documento
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 
@@ -220,9 +221,9 @@ class Documento {
    *
    * @param Docente $docente Docente che carica il documento
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -230,9 +231,9 @@ class Documento {
   /**
    * Restituisce la lista dei destinatari del documento
    *
-   * @return ListaDestinatari Lista dei destinatari del documento
+   * @return ListaDestinatari|null Lista dei destinatari del documento
    */
-  public function getListaDestinatari() {
+  public function getListaDestinatari(): ?ListaDestinatari {
     return $this->listaDestinatari;
   }
 
@@ -241,9 +242,9 @@ class Documento {
    *
    * @param ListaDestinatari $listaDestinatari Lista dei destinatari del documento
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setListaDestinatari(ListaDestinatari $listaDestinatari) {
+  public function setListaDestinatari(ListaDestinatari $listaDestinatari): self {
     $this->listaDestinatari = $listaDestinatari;
     return $this;
   }
@@ -251,69 +252,41 @@ class Documento {
   /**
    * Restituisce la lista dei file allegati al documento
    *
-   * @return ArrayCollection Lista dei file allegati al documento
+   * @return Collection|null Lista dei file allegati al documento
    */
-  public function getAllegati() {
+  public function getAllegati(): ?Collection {
     return $this->allegati;
   }
 
   /**
    * Modifica la lista dei file allegati al documento
    *
-   * @param ArrayCollection $allegati Lista dei file allegati al documento
+   * @param Collection $allegati Lista dei file allegati al documento
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAllegati(ArrayCollection $allegati) {
+  public function setAllegati(Collection $allegati): self {
     $this->allegati = $allegati;
-    return $this;
-  }
-
-  /**
-   * Aggiunge un file allegato al documento
-   *
-   * @param File $file Nuovo file allegato al documento
-   *
-   * @return Documento Oggetto modificato
-   */
-  public function addAllegato(File $file) {
-    if (!$this->allegati->contains($file)) {
-      $this->allegati->add($file);
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un file allegato al documento
-   *
-   * @param File $file File allegato al documento da rimuovere
-   *
-   * @return Documento Oggetto modificato
-   */
-  public function removeAllegato(File $file) {
-    if ($this->allegati->contains($file)) {
-      $this->allegati->removeElement($file);
-    }
     return $this;
   }
 
   /**
    * Restituisce la materia a cui è riferito il documento (solo per alcuni tipi di documento)
    *
-   * @return Materia Materia a cui è riferito il documento
+   * @return Materia|null Materia a cui è riferito il documento
    */
-  public function getMateria() {
+  public function getMateria(): ?Materia {
     return $this->materia;
   }
 
   /**
    * Modifica la materia a cui è riferito il documento (solo per alcuni tipi di documento)
    *
-   * @param Materia $materia Materia a cui è riferito il documento
+   * @param Materia|null $materia Materia a cui è riferito il documento
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setMateria(Materia $materia=null) {
+  public function setMateria(?Materia $materia): self {
     $this->materia = $materia;
     return $this;
   }
@@ -321,20 +294,20 @@ class Documento {
   /**
    * Restituisce la classe a cui è riferito il documento (solo per alcuni tipi di documento)
    *
-   * @return Classe Classe a cui è riferito il documento
+   * @return Classe|null Classe a cui è riferito il documento
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
   /**
    * Modifica la classe a cui è riferito il documento (solo per alcuni tipi di documento)
    *
-   * @param Classe $classe Classe a cui è riferito il documento
+   * @param Classe|null $classe Classe a cui è riferito il documento
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe=null) {
+  public function setClasse(?Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -342,20 +315,20 @@ class Documento {
   /**
    * Restituisce l'alunno a cui è riferito il documento (solo per alcuni tipi di documento)
    *
-   * @return Alunno Alunno a cui è riferito il documento
+   * @return Alunno|null Alunno a cui è riferito il documento
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
   /**
    * Modifica l'alunno a cui è riferito il documento (solo per alcuni tipi di documento)
    *
-   * @param Alunno $alunno Alunno a cui è riferito il documento
+   * @param Alunno|null $alunno Alunno a cui è riferito il documento
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno=null) {
+  public function setAlunno(?Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -363,20 +336,20 @@ class Documento {
   /**
    * Restituisce la password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
-   * @return string La password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+   * @return string|null La password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    */
-  public function getCifrato() {
+  public function getCifrato(): ?string {
     return $this->cifrato;
   }
 
   /**
    * Modifica la password (in chiaro) se il documento è cifrato, altrimenti imposta il valore nullo
    *
-   * @param string La password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
+   * @param string|null La password (in chiaro) se il documento è cifrato, altrimenti il valore nullo
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setCifrato($cifrato) {
+  public function setCifrato(?string $cifrato): self {
     $this->cifrato = $cifrato;
     return $this;
   }
@@ -384,20 +357,20 @@ class Documento {
   /**
    * Indica se è richiesta la firma di presa visione
    *
-   * @return boolean Vero se è richiesta la firma di presa visione, falso altrimenti
+   * @return bool Vero se è richiesta la firma di presa visione, falso altrimenti
    */
-  public function getFirma() {
+  public function getFirma(): bool {
     return $this->firma;
   }
 
   /**
    * Modifica l'indicazione se sia richiesta la firma di presa visione
    *
-   * @param boolean $firma Vero se è richiesta la firma di presa visione, falso altrimenti
+   * @param bool|null $firma Vero se è richiesta la firma di presa visione, falso altrimenti
    *
-   * @return Documento Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setFirma($firma) {
+  public function setFirma(?bool $firma): self {
     $this->firma = ($firma == true);
     return $this;
   }
@@ -411,7 +384,34 @@ class Documento {
   public function __construct() {
     // valori predefiniti
     $this->allegati = new ArrayCollection();
-    $this->firma = false;
+  }
+
+  /**
+   * Aggiunge un file allegato al documento
+   *
+   * @param File $file Nuovo file allegato al documento
+   *
+   * @return self Oggetto modificato
+   */
+  public function addAllegato(File $file): self {
+    if (!$this->allegati->contains($file)) {
+      $this->allegati->add($file);
+    }
+    return $this;
+  }
+
+  /**
+   * Rimuove un file allegato al documento
+   *
+   * @param File $file File allegato al documento da rimuovere
+   *
+   * @return self Oggetto modificato
+   */
+  public function removeAllegato(File $file): self {
+    if ($this->allegati->contains($file)) {
+      $this->allegati->removeElement($file);
+    }
+    return $this;
   }
 
   /**
@@ -419,7 +419,7 @@ class Documento {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return 'Documento #'.$this->id;
   }
 

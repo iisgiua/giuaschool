@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -19,6 +15,8 @@ use App\Entity\Sede;
 
 /**
  * Annotazione - repository
+ *
+ * @author Antonello Dessì
  */
 class AnnotazioneRepository extends EntityRepository {
 
@@ -54,7 +52,7 @@ class AnnotazioneRepository extends EntityRepository {
     $query = $this->createQueryBuilder('a')
       ->join('a.classe', 'cl')
       ->join('a.docente', 'd')
-      ->where('a.data=:data AND d INSTANCE OF App:Staff')
+      ->where('a.data=:data AND d INSTANCE OF App\Entity\Staff')
       ->orderBy('cl.anno,cl.sezione', 'ASC')
       ->setParameters(['data' => $search['data']]);
     if ($sede) {

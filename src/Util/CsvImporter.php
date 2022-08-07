@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,9 +13,9 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Validator\ValidatorBuilder;
 use Symfony\Component\Validator\ValidatorInterface;
 use App\Entity\Cattedra;
@@ -33,10 +29,14 @@ use App\Entity\Colloquio;
 use App\Entity\Orario;
 use App\Entity\OrarioDocente;
 use App\Entity\Provisioning;
+use App\Entity\ScansioneOraria;
+use App\Entity\Sede;
 
 
 /**
  * CsvImporter - classe di utilità per il caricamento dei dati da file CSV
+ *
+ * @author Antonello Dessì
  */
 class CsvImporter {
 
@@ -54,14 +54,14 @@ class CsvImporter {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
-   * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
   /**
    * @var ValidatorInterface $validator Gestore della validazione dei dati
@@ -87,21 +87,21 @@ class CsvImporter {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param ValidatorBuilder $valbuilder Costruttore per il gestore della validazione dei dati
    * @param StaffUtil $staff Classe di utilità per le funzioni disponibili allo staff
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, SessionInterface $session,
-                              UserPasswordEncoderInterface $encoder, ValidatorBuilder $valbuilder, StaffUtil $staff) {
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, RequestStack $reqstack,
+                              UserPasswordHasherInterface $hasher, ValidatorBuilder $valbuilder, StaffUtil $staff) {
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
-    $this->encoder = $encoder;
+    $this->reqstack = $reqstack;
+    $this->hasher = $hasher;
     $this->validator = $valbuilder->getValidator();
     $this->staff = $staff;
     $this->fh = null;
@@ -194,11 +194,11 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
-          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') : $this->session->get('/CONFIG/SISTEMA/dominio_default'));
+        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider') ?
+          $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio') : $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       // controlla esistenza di docente
-      $docente = $this->em->getRepository('App:Docente')->findOneByUsername($fields['username']);
+      $docente = $this->em->getRepository('App\Entity\Docente')->findOneByUsername($fields['username']);
       if ($docente) {
         // docente esiste
         if ($filtro == 'T' || $filtro == 'E') {
@@ -310,7 +310,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di docente
-      $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['usernameDocente']);
+      $lista = $this->em->getRepository('App\Entity\Docente')->findByUsername($fields['usernameDocente']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -326,7 +326,7 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di classe
-      $lista = $this->em->getRepository('App:Classe')->findBy(array(
+      $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
         'anno' => $fields['classe'][0],
         'sezione' => $fields['classe'][1]));
       if (count($lista) != 1 || strlen($fields['classe']) != 2) {
@@ -338,7 +338,7 @@ class CsvImporter {
       }
       $classe = $lista[0];
       // controlla esistenza di materia
-      $lista = $this->em->getRepository('App:Materia')->findByNomeNormalizzato($fields['materia']);
+      $lista = $this->em->getRepository('App\Entity\Materia')->findByNomeNormalizzato($fields['materia']);
       if (count($lista) != 1) {
         // errore: materia
         fclose($this->fh);
@@ -349,7 +349,7 @@ class CsvImporter {
       $materia = $lista[0];
       // controlla esistenza di alunno
       if (!empty($fields['usernameAlunno']) && $fields['usernameAlunno'] != '---') {
-        $lista = $this->em->getRepository('App:Alunno')->findByUsername($fields['usernameAlunno']);
+        $lista = $this->em->getRepository('App\Entity\Alunno')->findByUsername($fields['usernameAlunno']);
       } elseif ($fields['usernameAlunno'] == '---') {
         // alunno da rimuovere
         $lista = null;
@@ -406,7 +406,7 @@ class CsvImporter {
         $empty_fields['usernameAlunno'] = true;
       }
       // controlla esistenza di cattedra
-      $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['docente' => $docente,
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['docente' => $docente,
         'classe' => $classe, 'materia' => $materia]);
       if ($cattedra) {
         // cattedra esiste
@@ -642,7 +642,7 @@ class CsvImporter {
           $fields['classe'] = null;
         } else {
           // classe esistente
-          $classe = $this->em->getRepository('App:Classe')->findOneBy(array(
+          $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(array(
             'anno' => $fields['classe'][0], 'sezione' => $fields['classe'][1]));
           if (!$classe) {
             // errore: classe
@@ -665,7 +665,7 @@ class CsvImporter {
         }
         $username = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $username));
         $username = preg_replace('/[^a-z\.]+/', '', $username);
-        $result = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+        $result = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
           ->where('a.username LIKE :username')
           ->setParameter(':username', $username.'.s%')
           ->orderBy('a.username', 'DESC')
@@ -683,9 +683,9 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.($this->session->get('/CONFIG/SISTEMA/id_provider') ?
-          $this->session->get('/CONFIG/SISTEMA/dominio_id_provider') :
-          $this->session->get('/CONFIG/SISTEMA/dominio_default'));
+        $fields['email'] = $fields['username'].'@'.($this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider') ?
+          $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_dominio') :
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default'));
       }
       if (empty($fields['genitore1Cognome'])) {
         // default genitore1Cognome
@@ -720,7 +720,7 @@ class CsvImporter {
         // default genitore1Email
         $empty_fields['genitore1Email'] = true;
         $fields['genitore1Email'] = $fields['genitore1Username'].'@'.
-          $this->session->get('/CONFIG/SISTEMA/dominio_default');
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default');
       }
       if (empty($fields['genitore2Cognome'])) {
         // default genitore2Cognome
@@ -755,7 +755,7 @@ class CsvImporter {
         // default genitore2Email
         $empty_fields['genitore2Email'] = true;
         $fields['genitore2Email'] = $fields['genitore2Username'].'@'.
-          $this->session->get('/CONFIG/SISTEMA/dominio_default');
+          $this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default');
       }
       // controlla modalità di modifica
       $alunno = null;
@@ -763,10 +763,10 @@ class CsvImporter {
       $genitore2 = null;
       if (!$empty_fields['username'] && !$empty_fields['genitore1Username'] && !$empty_fields['genitore2Username']) {
         // controlla esistenza di alunno
-        $alunno = $this->em->getRepository('App:Alunno')->findOneByUsername($fields['username']);
-        $genitore1 = $this->em->getRepository('App:Genitore')->findOneBy(['username' => $fields['genitore1Username'],
+        $alunno = $this->em->getRepository('App\Entity\Alunno')->findOneByUsername($fields['username']);
+        $genitore1 = $this->em->getRepository('App\Entity\Genitore')->findOneBy(['username' => $fields['genitore1Username'],
           'alunno' => $alunno]);
-        $genitore2 = $this->em->getRepository('App:Genitore')->findOneBy(['username' => $fields['genitore2Username'],
+        $genitore2 = $this->em->getRepository('App\Entity\Genitore')->findOneBy(['username' => $fields['genitore2Username'],
           'alunno' => $alunno]);
       }
       $modifica = $alunno && $genitore1 && $genitore2;
@@ -820,7 +820,7 @@ class CsvImporter {
       } else {
         // utente non esiste
         if ($filtro == 'T' || ($filtro == 'N' &&
-            !$this->em->getRepository('App:Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']))) {
+            !$this->em->getRepository('App\Entity\Alunno')->findOneByCodiceFiscale($fields['codiceFiscale']))) {
           // crea nuovo alunno
           $error = $this->nuovoAlunno($fields);
           if ($error) {
@@ -919,7 +919,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di docente
-      $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['username']);
+      $lista = $this->em->getRepository('App\Entity\Docente')->findByUsername($fields['username']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -935,7 +935,7 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di sede
-      $lista = $this->em->getRepository('App:Sede')->findByCitta($fields['sede']);
+      $lista = $this->em->getRepository('App\Entity\Sede')->findByCitta($fields['sede']);
       if (count($lista) != 1) {
         // errore: sede
         fclose($this->fh);
@@ -945,7 +945,7 @@ class CsvImporter {
       }
       $sede = $lista[0];
       // legge orario
-      $scansione_oraria = $this->em->getRepository('App:ScansioneOraria')->createQueryBuilder('so')
+      $scansione_oraria = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
         ->join('so.orario', 'o')
         ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
         ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $sede])
@@ -993,7 +993,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di colloquio
-      $colloquio = $this->em->getRepository('App:Colloquio')->findOneBy(['docente' => $docente,
+      $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['docente' => $docente,
         'orario' => $scansione_oraria[0]->getOrario()]);
       if ($colloquio) {
         // colloquio esiste
@@ -1127,7 +1127,7 @@ class CsvImporter {
       if (empty($fields['email'])) {
         // crea finta email
         $empty_fields['email'] = true;
-        $fields['email'] = $fields['username'].'@'.$this->session->get('/CONFIG/SISTEMA/dominio_default');
+        $fields['email'] = $fields['username'].'@'.$this->reqstack->getSession()->get('/CONFIG/SISTEMA/dominio_default');
       }
       if (empty($fields['tipo'])) {
         // default: amministrativo
@@ -1149,7 +1149,7 @@ class CsvImporter {
         $fields['sede'] = null;
       }
       // controlla esistenza
-      $ata = $this->em->getRepository('App:Ata')->findOneByUsername($fields['username']);
+      $ata = $this->em->getRepository('App\Entity\Ata')->findOneByUsername($fields['username']);
       if ($ata) {
         // utente esiste
         if ($filtro == 'T' || $filtro == 'E') {
@@ -1262,7 +1262,7 @@ class CsvImporter {
         return $imported;
       }
       // controlla esistenza di docente
-      $lista = $this->em->getRepository('App:Docente')->findByUsername($fields['username']);
+      $lista = $this->em->getRepository('App\Entity\Docente')->findByUsername($fields['username']);
       if (count($lista) == 0) {
         // errore: docente non esiste
         fclose($this->fh);
@@ -1278,7 +1278,7 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di sede
-      $lista = $this->em->getRepository('App:Sede')->findByCitta($fields['sede']);
+      $lista = $this->em->getRepository('App\Entity\Sede')->findByCitta($fields['sede']);
       if (count($lista) != 1) {
         // errore: sede
         fclose($this->fh);
@@ -1288,12 +1288,12 @@ class CsvImporter {
       }
       $sede = $lista[0];
       // legge orario
-      $definizione_orario = $this->em->getRepository('App:Orario')->createQueryBuilder('o')
+      $definizione_orario = $this->em->getRepository('App\Entity\Orario')->createQueryBuilder('o')
         ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
         ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $sede])
         ->getQuery()
         ->getResult();
-      $scansione_oraria = $this->em->getRepository('App:ScansioneOraria')->createQueryBuilder('so')
+      $scansione_oraria = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
         ->join('so.orario', 'o')
         ->where('o.id=:orario')
         ->setParameters(['orario' => ($definizione_orario ? $definizione_orario[0] : null)])
@@ -1333,7 +1333,7 @@ class CsvImporter {
       // controlla esistenza di classe
       $classe = null;
       if ($fields['classe'] != '---') {
-        $lista = $this->em->getRepository('App:Classe')->findBy(array(
+        $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
           'anno' => $fields['classe'][0],
           'sezione' => $fields['classe'][1]));
         if (count($lista) != 1 || strlen($fields['classe']) != 2) {
@@ -1348,7 +1348,7 @@ class CsvImporter {
       // controlla esistenza di materia
       $materia = null;
       if ($fields['materia'] != '---') {
-        $lista = $this->em->getRepository('App:Materia')->findByNomeNormalizzato($fields['materia']);
+        $lista = $this->em->getRepository('App\Entity\Materia')->findByNomeNormalizzato($fields['materia']);
         if (count($lista) != 1) {
           // errore: materia
           fclose($this->fh);
@@ -1360,7 +1360,7 @@ class CsvImporter {
       }
       // controlla esistenza cattedra
       if ($classe && $materia) {
-        $lista = $this->em->getRepository('App:Cattedra')->findBy(['docente' => $docente,
+        $lista = $this->em->getRepository('App\Entity\Cattedra')->findBy(['docente' => $docente,
           'classe' => $classe, 'materia' => $materia]);
         if (count($lista) != 1) {
           // errore: cattedra
@@ -1377,7 +1377,7 @@ class CsvImporter {
         $cattedra = null;
       }
       // controlla esistenza di orario
-      $orario = $this->em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+      $orario = $this->em->getRepository('App\Entity\OrarioDocente')->createQueryBuilder('od')
         ->join('od.orario', 'o')
         ->join('od.cattedra', 'c')
         ->where('o.id=:orario AND c.docente=:docente AND od.giorno=:giorno AND od.ora=:ora')
@@ -1492,7 +1492,7 @@ class CsvImporter {
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso'])
       ->setCodiceFiscale($fields['codiceFiscale']);
-    $password = $this->encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($docente, $docente->getPasswordNonCifrata());
     $docente->setPassword($password);
     // valida dati
     $errors = $this->validator->validate($docente);
@@ -1542,7 +1542,7 @@ class CsvImporter {
     }
     if (!isset($empty_fields['password'])) {
       $docente->setPasswordNonCifrata($fields['password']);
-      $password = $this->encoder->encodePassword($docente, $docente->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($docente, $docente->getPasswordNonCifrata());
       $docente->setPassword($password);
     } else {
       unset($fields['password']);
@@ -1642,7 +1642,7 @@ class CsvImporter {
       ->setCredito3($fields['credito3'])
       ->setCredito4($fields['credito4'])
       ->setClasse($fields['classe']);
-    $password = $this->encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($alunno, $alunno->getPasswordNonCifrata());
     $alunno->setPassword($password);
     // valida dati alunno
     $errors = $this->validator->validate($alunno);
@@ -1664,7 +1664,7 @@ class CsvImporter {
       ->setCodiceFiscale($fields['genitore1CodiceFiscale'])
       ->setNumeriTelefono($fields['genitore1Telefono'])
       ->setAlunno($alunno);
-    $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
     // valida dati genitore
     $errors = $this->validator->validate($genitore);
@@ -1686,7 +1686,7 @@ class CsvImporter {
       ->setCodiceFiscale($fields['genitore2CodiceFiscale'])
       ->setNumeriTelefono($fields['genitore2Telefono'])
       ->setAlunno($alunno);
-    $password = $this->encoder->encodePassword($genitore, $genitore->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
     // valida dati genitore
     $errors = $this->validator->validate($genitore);
@@ -1730,7 +1730,7 @@ class CsvImporter {
     // modifica dati di alunno
     if (!$empty_fields['password']) {
       $alunno->setPasswordNonCifrata($fields['password']);
-      $password = $this->encoder->encodePassword($alunno, $alunno->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($alunno, $alunno->getPasswordNonCifrata());
       $alunno->setPassword($password);
     }
     if (!$empty_fields['email']) {
@@ -1792,7 +1792,7 @@ class CsvImporter {
     // modifica dati di genitore1
     if (!$empty_fields['genitore1Password']) {
       $genitore1->setPasswordNonCifrata($fields['genitore1Password']);
-      $password = $this->encoder->encodePassword($genitore1, $genitore1->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($genitore1, $genitore1->getPasswordNonCifrata());
       $genitore1->setPassword($password);
     }
     if (!$empty_fields['genitore1Email']) {
@@ -1820,7 +1820,7 @@ class CsvImporter {
     // modifica dati di genitore2
     if (!$empty_fields['genitore2Password']) {
       $genitore2->setPasswordNonCifrata($fields['genitore2Password']);
-      $password = $this->encoder->encodePassword($genitore2, $genitore2->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($genitore2, $genitore2->getPasswordNonCifrata());
       $genitore2->setPassword($password);
     }
     if (!$empty_fields['genitore2Email']) {
@@ -1957,7 +1957,7 @@ class CsvImporter {
    */
   private function nuovoAta($fields) {
     // legge sede
-    $sede = $this->em->getRepository('App:Sede')->findOneByCitta($fields['sede']);
+    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByCitta($fields['sede']);
     if ($fields['sede'] && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');
@@ -1976,7 +1976,7 @@ class CsvImporter {
       ->setSede($sede)
       ->setTipo($fields['tipo'])
       ->setSegreteria($fields['segreteria']);
-    $password = $this->encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
+    $password = $this->hasher->hashPassword($ata, $ata->getPasswordNonCifrata());
     $ata->setPassword($password);
     // valida dati
     $errors = $this->validator->validate($ata);
@@ -2014,7 +2014,7 @@ class CsvImporter {
     }
     if (!isset($empty_fields['password'])) {
       $ata->setPasswordNonCifrata($fields['password']);
-      $password = $this->encoder->encodePassword($ata, $ata->getPasswordNonCifrata());
+      $password = $this->hasher->hashPassword($ata, $ata->getPasswordNonCifrata());
       $ata->setPassword($password);
     } else {
       unset($fields['password']);
@@ -2035,7 +2035,7 @@ class CsvImporter {
       unset($fields['segreteria']);
     }
     // legge sede
-    $sede = $this->em->getRepository('App:Sede')->findOneByCitta($fields['sede']);
+    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByCitta($fields['sede']);
     if (!isset($empty_fields['sede']) && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');

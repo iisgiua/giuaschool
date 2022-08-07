@@ -1,0 +1,34 @@
+####################
+# LogFixtures - dati di test
+#
+# Dati per il log degli eventi
+#   utente: Utente connesso
+#   username: Username dell'utente connesso
+#   ruolo: Ruolo dell'utente connesso
+#   alias: Username dell'utente reale se l'utente è un alias, altrimenti null
+#   ip: Indirizzo IP dell'utente connesso
+#   origine: Controller che ha generato il log
+#   tipo: Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
+#   categoria: Categoria dell'azione registrata nel log
+#   azione: Azione registrata nel log
+#   dati: Lista di dati da memorizzare nel log
+####################
+
+
+include:
+  - AmministratoreFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Log:
+  log_{1..20}:
+    utente: '@docente_*'
+    username: '<($utente->getUsername())>'
+    ruolo: '<($utente->getRoles()[0])>'
+    alias: '30%? admin'
+    ip: '50%? <ipv4()>: <ipv6()>'
+    origine: 'App\\Controller\\<ucfirst(<word()>)>Controller::<ucfirst(<word()>)>Action'
+    tipo: '<randomElement(["A", "C", "U", "D"])>'
+    categoria: '<strtoupper(<word()>)>'
+    azione: '<substr(<sentence(4)>, 0, -1)>'
+    dati: '<words(4,false)>'

@@ -2,4 +2,25 @@
 
 monolog:
   use_microseconds: false
-  handlers: ~
+  channels:
+    - command
+    - deprecation
+  handlers:
+    main:
+      type: rotating_file
+      max_files: 10
+      path: '%kernel.logs_dir%/app_%kernel.environment%.log'
+      level: error
+      channels: ['!command', '!deprecation', '!console']
+    command:
+      type: rotating_file
+      max_files: 10
+      path: '%kernel.logs_dir%/command_%kernel.environment%.log'
+      level: error
+      channels: ['command', 'console']
+    deprecation:
+      type: rotating_file
+      max_files: 10
+      path: '%kernel.logs_dir%/deprecation_%kernel.environment%.log'
+      level: debug
+      channels: ['deprecation']

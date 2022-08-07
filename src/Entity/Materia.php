@@ -1,30 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Materia - entità
+ * Materia - dati per le materie scolastiche
  *
  * @ORM\Entity(repositoryClass="App\Repository\MateriaRepository")
  * @ORM\Table(name="gs_materia")
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields="nome", message="field.unique")
+ *
+ * @author Antonello Dessì
  */
 class Materia {
 
@@ -32,81 +30,79 @@ class Materia {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la materia
+   * @var int|null $id Identificativo univoco per la materia
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $nome Nome della materia
+   * @var string|null $nome Nome della materia
    *
    * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=128,maxMessage="field.maxlength")
    */
-  private $nome;
+  private ?string $nome = '';
 
   /**
-   * @var string $nomeBreve Nome breve della materia (non univoco)
+   * @var string|null $nomeBreve Nome breve della materia (non univoco)
    *
    * @ORM\Column(name="nome_breve", type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private $nomeBreve;
+  private ?string $nomeBreve = '';
 
   /**
-   * @var string $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
+   * @var string|null $tipo Tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=ed.civica, U=supplenza]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","R","S","C","E","U"}, strict=true, message="field.choice")
    */
-  private $tipo;
+  private ?string $tipo = 'N';
 
   /**
-   * @var string $valutazione Tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
+   * @var string|null $valutazione Tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","G","A"}, strict=true, message="field.choice")
    */
-  private $valutazione;
+  private ?string $valutazione = 'N';
 
   /**
-   * @var boolean $media Indica se la materia entra nel calcolo della media dei voti o no
+   * @var bool $media Indica se la materia entra nel calcolo della media dei voti o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $media;
+  private bool $media = true;
 
   /**
-   * @var integer $ordinamento Numero d'ordine per la visualizzazione della materia
+   * @var int $ordinamento Numero d'ordine per la visualizzazione della materia
    *
    * @ORM\Column(type="smallint", nullable=false)
    */
-  private $ordinamento;
+  private int $ordinamento = 0;
 
 
   //==================== EVENTI ORM ====================
@@ -116,7 +112,7 @@ class Materia {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -127,7 +123,7 @@ class Materia {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -138,47 +134,47 @@ class Materia {
   /**
    * Restituisce l'identificativo univoco per la materia
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null  Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce il nome della materia
    *
-   * @return string Nome della materia
+   * @return string|null Nome della materia
    */
-  public function getNome() {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome della materia
    *
-   * @param string $nome Nome della materia
+   * @param string|null $nome Nome della materia
    *
-   * @return Materia Oggetto Materia
+   * @return self Oggetto modificato
    */
-  public function setNome($nome) {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -186,20 +182,20 @@ class Materia {
   /**
    * Restituisce il nome breve della materia (non univoco)
    *
-   * @return string Nome breve della materia
+   * @return string|null Nome breve della materia
    */
-  public function getNomeBreve() {
+  public function getNomeBreve(): ?string {
     return $this->nomeBreve;
   }
 
   /**
    * Modifica il nome breve della materia (non univoco)
    *
-   * @param string $nomeBreve Nome breve della materia
+   * @param string|null $nomeBreve Nome breve della materia
    *
-   * @return Materia Oggetto Materia
+   * @return self Oggetto modificato
    */
-  public function setNomeBreve($nomeBreve) {
+  public function setNomeBreve(?string $nomeBreve): self {
     $this->nomeBreve = $nomeBreve;
     return $this;
   }
@@ -207,20 +203,20 @@ class Materia {
   /**
    * Restituisce il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
    *
-   * @return string Tipo della materia
+   * @return string|null Tipo della materia
    */
-  public function getTipo() {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo della materia [N=normale, R=religione/alternativa, S=sostegno, C=condotta, E=Ed.civica, U=supplenza]
    *
-   * @param string $tipo Tipo della materia
+   * @param string|null $tipo Tipo della materia
    *
-   * @return Materia Oggetto Materia
+   * @return self Oggetto modificato
    */
-  public function setTipo($tipo) {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -228,20 +224,20 @@ class Materia {
   /**
    * Restituisce il tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
    *
-   * @return string Tipo di valutazione della materia
+   * @return string|null Tipo di valutazione della materia
    */
-  public function getValutazione() {
+  public function getValutazione(): ?string {
     return $this->valutazione;
   }
 
   /**
    * Modifica il tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
    *
-   * @param string $valutazione Tipo di valutazione della materia
+   * @param string|null $valutazione Tipo di valutazione della materia
    *
-   * @return Materia Oggetto Materia
+   * @return self Oggetto modificato
    */
-  public function setValutazione($valutazione) {
+  public function setValutazione(?string $valutazione): self {
     $this->valutazione = $valutazione;
     return $this;
   }
@@ -249,20 +245,20 @@ class Materia {
   /**
    * Indica se la materia entra nel calcolo della media dei voti o no
    *
-   * @return boolean Vero se la materia entra nel calcolo della media dei voti, falso altrimenti
+   * @return bool Vero se la materia entra nel calcolo della media dei voti, falso altrimenti
    */
-  public function getMedia() {
+  public function getMedia(): bool {
     return $this->media;
   }
 
   /**
    * Modifica se la materia entra nel calcolo della media dei voti o no
    *
-   * @param boolean $media Vero se la materia entra nel calcolo della media dei voti, falso altrimenti
+   * @param bool|null $media Vero se la materia entra nel calcolo della media dei voti, falso altrimenti
    *
-   * @return Materia Oggetto Materia
+   * @return self Oggetto modificato
    */
-  public function setMedia($media) {
+  public function setMedia(?bool $media): self {
     $this->media = ($media == true);
     return $this;
   }
@@ -270,20 +266,20 @@ class Materia {
   /**
    * Restituisce il numero d'ordine per la visualizzazione della materia
    *
-   * @return integer Numero d'ordine per la visualizzazione della materia
+   * @return int Numero d'ordine per la visualizzazione della materia
    */
-  public function getOrdinamento() {
+  public function getOrdinamento(): int {
     return $this->ordinamento;
   }
 
   /**
    * Modifica il numero d'ordine per la visualizzazione della materia
    *
-   * @param integer $ordinamento Numero d'ordine per la visualizzazione della materia
+   * @param int $ordinamento Numero d'ordine per la visualizzazione della materia
    *
-   * @return Materia Oggetto Materia
+   * @return self Oggetto modificato
    */
-  public function setOrdinamento($ordinamento) {
+  public function setOrdinamento(int $ordinamento): self {
     $this->ordinamento = $ordinamento;
     return $this;
   }
@@ -292,20 +288,11 @@ class Materia {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->media = true;
-    $this->ordinamento = 0;
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->nomeBreve;
   }
 

@@ -2,27 +2,33 @@
 
 framework:
   secret: '%env(APP_SECRET)%'
-  ide: atom
+  ide: 'atom'
   form:
     enabled: true
   csrf_protection:
     enabled: true
   session:
     enabled: true
-    cookie_samesite: lax
-    cookie_secure: auto
+    storage_factory_id: 'session.storage.factory.native'
+    cookie_samesite: 'lax'
+    cookie_secure: 'auto'
     cookie_httponly: true
     sid_length: 64
     sid_bits_per_character: 5
     save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
+  property_access:
+    enabled: true
+    throw_exception_on_invalid_index: false
+    throw_exception_on_invalid_property_path: false
   property_info:
     enabled: false
   annotations:
     enabled: true
-    cache: file
+    cache: 'file'
   serializer:
     enabled: true
     enable_annotations: true
   php_errors:
     log: true
-  web_link: true
+  web_link:
+    enabled: true

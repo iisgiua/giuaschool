@@ -1,29 +1,27 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Doctrine\Common\Collections\ArrayCollection;
 
 
 /**
- * ListaDestinatari - entità
- * Destinatari di avvisi/circolari/documenti
+ * ListaDestinatari - dati per la gestione dei destinatari di un qualsiasi documento
  *
  * @ORM\Entity(repositoryClass="App\Repository\ListaDestinatariRepository")
  * @ORM\Table(name="gs_lista_destinatari")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class ListaDestinatari {
 
@@ -31,30 +29,30 @@ class ListaDestinatari {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var ArrayCollection $sedi Sedi scolastiche di destinazione (usato come filtro principale)
+   * @var Collection|null $sedi Sedi scolastiche di destinazione (usato come filtro principale)
    *
    * @ORM\ManyToMany(targetEntity="Sede")
    * @ORM\JoinTable(name="gs_lista_destinatari_sede",
@@ -63,96 +61,92 @@ class ListaDestinatari {
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $sedi;
+  private ?Collection $sedi = null;
 
   /**
-   * @var boolean $dsga Indica se il DSGA è fra i destinatari [FALSE=no, TRUE=si]
+   * @var bool $dsga Indica se il DSGA è fra i destinatari [FALSE=no, TRUE=si]
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $dsga;
+  private bool $dsga = false;
 
   /**
-   * @var boolean $ata Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
+   * @var bool $ata Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $ata;
+  private bool $ata = false;
 
   /**
-   * @var string $docenti Indica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
+   * @var string|null $docenti Indica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","T","C","M","U"}, strict=true, message="field.choice")
    */
-  private $docenti;
+  private ?string $docenti = 'N';
 
   /**
-   * @var array $filtroDocenti Lista dei filtri per i docenti
+   * @var array|null $filtroDocenti Lista dei filtri per i docenti
    *
    * @ORM\Column(name="filtro_docenti", type="simple_array", nullable=true)
    */
-  private $filtroDocenti;
+  private ?array $filtroDocenti = array();
 
   /**
-   * @var string $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
+   * @var string|null $coordinatori Indica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","T","C"}, strict=true, message="field.choice")
    */
-  private $coordinatori;
+  private ?string $coordinatori = 'N';
 
   /**
-   * @var array $filtroCoordinatori Lista dei filtri per i coordinatori
+   * @var array|null $filtroCoordinatori Lista dei filtri per i coordinatori
    *
    * @ORM\Column(name="filtro_coordinatori", type="simple_array", nullable=true)
    */
-  private $filtroCoordinatori;
+  private ?array $filtroCoordinatori = array();
 
   /**
-   * @var boolean $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
+   * @var bool $staff Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $staff;
+  private bool $staff = false;
 
   /**
-   * @var string $genitori Indica quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+   * @var string|null $genitori Indica quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
-  private $genitori;
+  private ?string $genitori = 'N';
 
   /**
    * @var array $filtroGenitori Lista dei filtri per i genitori
    *
    * @ORM\Column(name="filtro_genitori", type="simple_array", nullable=true)
    */
-  private $filtroGenitori;
+  private ?array $filtroGenitori = array();
 
   /**
-   * @var string $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+   * @var string|null $alunni Indica quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","T","C","U"}, strict=true, message="field.choice")
    */
-  private $alunni;
+  private ?string $alunni = 'N';
 
   /**
    * @var array $filtroAlunni Lista dei filtri per gli alunni
    *
    * @ORM\Column(name="filtro_alunni", type="simple_array", nullable=true)
    */
-  private $filtroAlunni;
+  private ?array $filtroAlunni = array();
 
 
   //==================== EVENTI ORM ====================
@@ -162,7 +156,7 @@ class ListaDestinatari {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -173,7 +167,7 @@ class ListaDestinatari {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -184,47 +178,47 @@ class ListaDestinatari {
   /**
    * Restituisce l'identificativo univoco
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce le sedi scolastiche di destinazione (usato come filtro principale)
    *
-   * @return ArrayCollection Sedi scolastiche di destinazione
+   * @return Collection|null Sedi scolastiche di destinazione
    */
-  public function getSedi() {
+  public function getSedi(): ?Collection {
     return $this->sedi;
   }
 
   /**
    * Modifica le sedi scolastiche di destinazione (usato come filtro principale)
    *
-   * @param ArrayCollection $sedi Sedi scolastiche di destinazione
+   * @param Collection $sedi Sedi scolastiche di destinazione
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setSedi(ArrayCollection $sedi) {
+  public function setSedi(Collection $sedi): self {
     $this->sedi = $sedi;
     return $this;
   }
@@ -234,9 +228,9 @@ class ListaDestinatari {
    *
    * @param Sede $sede Sede scolastica di destinazione
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function addSede(Sede $sede) {
+  public function addSedi(Sede $sede): self {
     if (!$this->sedi->contains($sede)) {
       $this->sedi->add($sede);
     }
@@ -248,9 +242,9 @@ class ListaDestinatari {
    *
    * @param Sede $sede Sede scolastiche di destinazione da rimuovere
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function removeSede(Sede $sede) {
+  public function removeSedi(Sede $sede): self {
     if ($this->sedi->contains($sede)) {
       $this->sedi->removeElement($sede);
     }
@@ -260,20 +254,20 @@ class ListaDestinatari {
   /**
    * Indica se il DSGA è fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @return boolean Vero se il DSGA è tra i destinatario, falso altrimenti
+   * @return bool Vero se il DSGA è tra i destinatario, falso altrimenti
    */
-  public function getDsga() {
+  public function getDsga(): bool {
     return $this->dsga;
   }
 
   /**
    * Modifica l'indicazione se il DSGA sia fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @param boolean $dsga Vero se il DSGA è tra i destinatari, falso altrimenti
+   * @param bool|null $dsga Vero se il DSGA è tra i destinatari, falso altrimenti
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setDsga($dsga) {
+  public function setDsga(?bool $dsga): self {
     $this->dsga = ($dsga == true);
     return $this;
   }
@@ -281,20 +275,20 @@ class ListaDestinatari {
   /**
    * Indica se il personale ATA è fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @return boolean Vero se se il personale ATA è fra i destinatari, falso altrimenti
+   * @return bool Vero se se il personale ATA è fra i destinatari, falso altrimenti
    */
-  public function getAta() {
+  public function getAta(): bool {
     return $this->ata;
   }
 
   /**
    * Modifica l'indicazione se il personale ATA sia fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @param boolean $ata Vero se il personale ATA è fra i destinatari, falso altrimenti
+   * @param bool|null $ata Vero se il personale ATA è fra i destinatari, falso altrimenti
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAta($ata) {
+  public function setAta(?bool $ata): self {
     $this->ata = ($ata == true);
     return $this;
   }
@@ -302,20 +296,20 @@ class ListaDestinatari {
   /**
    * Restituisce quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
-   * @return string Indica Indica quali docenti sono tra i destinatari
+   * @return string|null Indica Indica quali docenti sono tra i destinatari
    */
-  public function getDocenti() {
+  public function getDocenti(): ?string {
     return $this->docenti;
   }
 
   /**
    * Modifica quali docenti sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
    *
-   * @param string $docenti Indica Indica quali docenti sono tra i destinatari
+   * @param string|null $docenti Indica Indica quali docenti sono tra i destinatari
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setDocenti($docenti) {
+  public function setDocenti(?string $docenti): self {
     $this->docenti = $docenti;
     return $this;
   }
@@ -323,9 +317,9 @@ class ListaDestinatari {
   /**
    * Restituisce la lista dei filtri per i docenti
    *
-   * @return array Lista dei filtri per i docenti
+   * @return array|null Lista dei filtri per i docenti
    */
-  public function getFiltroDocenti() {
+  public function getFiltroDocenti(): ?array {
     return $this->filtroDocenti;
   }
 
@@ -334,58 +328,30 @@ class ListaDestinatari {
    *
    * @param array $filtroDocenti Lista dei filtri per i docenti
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setFiltroDocenti($filtroDocenti) {
+  public function setFiltroDocenti(array $filtroDocenti): self {
     $this->filtroDocenti = $filtroDocenti;
-    return $this;
-  }
-
-  /**
-   * Aggiunge un filtro alla lista dei filtri per i docenti
-   *
-   * @param Object $filtro Filtro da aggiungere alla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function addFiltroDocenti($filtro) {
-    if (!in_array($filtro->getId(), $this->filtroDocenti)) {
-      $this->filtroDocenti[] = $filtro->getId();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un filtro dalla lista dei filtri per i docenti
-   *
-   * @param Object $filtro Filtro da rimuovere dalla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function removeFiltroDocenti($filtro) {
-    if (($key = array_search($filtro->getId(), $this->filtroDocenti)) !== false) {
-      unset($this->filtroDocenti[$key]);
-    }
     return $this;
   }
 
   /**
    * Restituisce quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @return string Indica quali coordinatori sono tra i destinatari
+   * @return string|null Indica quali coordinatori sono tra i destinatari
    */
-  public function getCoordinatori() {
+  public function getCoordinatori(): ?string {
     return $this->coordinatori;
   }
 
   /**
    * Modifica quali coordinatori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe]
    *
-   * @param string $coordinatori Indica quali coordinatori sono tra i destinatari
+   * @param string|null $coordinatori Indica quali coordinatori sono tra i destinatari
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setCoordinatori($coordinatori) {
+  public function setCoordinatori(?string $coordinatori): self {
     $this->coordinatori = $coordinatori;
     return $this;
   }
@@ -393,9 +359,9 @@ class ListaDestinatari {
   /**
    * Restituisce la lista dei filtri per i coordinatori
    *
-   * @return array Lista dei filtri per i coordinatori
+   * @return array|null Lista dei filtri per i coordinatori
    */
-  public function getFiltroCoordinatori() {
+  public function getFiltroCoordinatori(): ?array {
     return $this->filtroCoordinatori;
   }
 
@@ -404,58 +370,30 @@ class ListaDestinatari {
    *
    * @param array $filtroCoordinatori Lista dei filtri per i coordinatori
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setFiltroCoordinatori($filtroCoordinatori) {
+  public function setFiltroCoordinatori(array $filtroCoordinatori): self {
     $this->filtroCoordinatori = $filtroCoordinatori;
-    return $this;
-  }
-
-  /**
-   * Aggiunge un filtro alla lista dei filtri per i coordinatori
-   *
-   * @param Object $filtro Filtro da aggiungere alla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function addFiltroCoordinatori($filtro) {
-    if (!in_array($filtro->getId(), $this->filtroCoordinatori)) {
-      $this->filtroCoordinatori[] = $filtro->getId();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un filtro dalla lista dei filtri per i coordinatori
-   *
-   * @param Object $filtro Filtro da rimuovere dalla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function removeFiltroCoordinatori($filtro) {
-    if (($key = array_search($filtro->getId(), $this->filtroCoordinatori)) !== false) {
-      unset($this->filtroCoordinatori[$key]);
-    }
     return $this;
   }
 
   /**
    * Indica se lo staff è fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @return boolean Vero se se lo staff è fra i destinatari, falso altrimenti
+   * @return bool Vero se se lo staff è fra i destinatari, falso altrimenti
    */
-  public function getStaff() {
+  public function getStaff(): bool {
     return $this->staff;
   }
 
   /**
    * Modifica l'indicazione se lo staff sia fra i destinatari [FALSE=no, TRUE=si]
    *
-   * @param boolean $staff Vero se lo staff è fra i destinatari, falso altrimenti
+   * @param bool|null $staff Vero se lo staff è fra i destinatari, falso altrimenti
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setStaff($staff) {
+  public function setStaff(?bool $staff): self {
     $this->staff = ($staff == true);
     return $this;
   }
@@ -463,20 +401,20 @@ class ListaDestinatari {
   /**
    * Restituisce quali genitori sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @return string Indica quali genitori sono tra i destinatari
+   * @return string|null Indica quali genitori sono tra i destinatari
    */
-  public function getGenitori() {
+  public function getGenitori(): ?string {
     return $this->genitori;
   }
 
   /**
    * Modifica quali genitori siano tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @param string $genitori Indica quali genitori sono tra i destinatari
+   * @param string|null $genitori Indica quali genitori sono tra i destinatari
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setGenitori($genitori) {
+  public function setGenitori(?string $genitori): self {
     $this->genitori = $genitori;
     return $this;
   }
@@ -484,9 +422,9 @@ class ListaDestinatari {
   /**
    * Restituisce la lista dei filtri per i genitori
    *
-   * @return array Lista dei filtri per i genitori
+   * @return array|null Lista dei filtri per i genitori
    */
-  public function getFiltroGenitori() {
+  public function getFiltroGenitori(): ?array {
     return $this->filtroGenitori;
   }
 
@@ -495,58 +433,30 @@ class ListaDestinatari {
    *
    * @param array $filtroGenitori Lista dei filtri per i genitori
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setFiltroGenitori($filtroGenitori) {
+  public function setFiltroGenitori(array $filtroGenitori): self {
     $this->filtroGenitori = $filtroGenitori;
-    return $this;
-  }
-
-  /**
-   * Aggiunge un filtro alla lista dei filtri per i genitori
-   *
-   * @param Object $filtro Filtro da aggiungere alla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function addFiltroGenitori($filtro) {
-    if (!in_array($filtro->getId(), $this->filtroGenitori)) {
-      $this->filtroGenitori[] = $filtro->getId();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un filtro dalla lista dei filtri per i genitori
-   *
-   * @param Object $filtro Filtro da rimuovere dalla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function removeFiltroGenitori($filtro) {
-    if (($key = array_search($filtro->getId(), $this->filtroGenitori)) !== false) {
-      unset($this->filtroGenitori[$key]);
-    }
     return $this;
   }
 
   /**
    * Restituisce quali alunni sono tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @return string Indica quali alunni sono tra i destinatari
+   * @return string|null Indica quali alunni sono tra i destinatari
    */
-  public function getAlunni() {
+  public function getAlunni(): ?string {
     return $this->alunni;
   }
 
   /**
    * Modifica quali alunni siano tra i destinatari [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
    *
-   * @param string $alunni Indica quali alunni sono fra i destinatari
+   * @param string|null $alunni Indica quali alunni sono fra i destinatari
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAlunni($alunni) {
+  public function setAlunni(?string $alunni): self {
     $this->alunni = $alunni;
     return $this;
   }
@@ -554,9 +464,9 @@ class ListaDestinatari {
   /**
    * Restituisce la lista dei filtri per gli alunni
    *
-   * @return array Lista dei filtri per gli alunni
+   * @return array|null Lista dei filtri per gli alunni
    */
-  public function getFiltroAlunni() {
+  public function getFiltroAlunni(): ?array {
     return $this->filtroAlunni;
   }
 
@@ -565,38 +475,10 @@ class ListaDestinatari {
    *
    * @param array $filtroAlunni Lista dei filtri per gli alunni
    *
-   * @return ListaDestinatari Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setFiltroAlunni($filtroAlunni) {
+  public function setFiltroAlunni(array $filtroAlunni): self {
     $this->filtroAlunni = $filtroAlunni;
-    return $this;
-  }
-
-  /**
-   * Aggiunge un filtro alla lista dei filtri per gli alunni
-   *
-   * @param Object $filtro Filtro da aggiungere alla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function addFiltroAlunni($filtro) {
-    if (!in_array($filtro->getId(), $this->filtroAlunni)) {
-      $this->filtroAlunni[] = $filtro->getId();
-    }
-    return $this;
-  }
-
-  /**
-   * Rimuove un filtro dalla lista dei filtri per gli alunni
-   *
-   * @param Object $filtro Filtro da rimuovere dalla lista dei filtri
-   *
-   * @return ListaDestinatari Oggetto modificato
-   */
-  public function removeFiltroAlunni($filtro) {
-    if (($key = array_search($filtro->getId(), $this->filtroAlunni)) !== false) {
-      unset($this->filtroAlunni[$key]);
-    }
     return $this;
   }
 
@@ -609,17 +491,6 @@ class ListaDestinatari {
   public function __construct() {
     // valori predefiniti
     $this->sedi = new ArrayCollection();
-    $this->dsga = false;
-    $this->ata = false;
-    $this->docenti = 'N';
-    $this->filtroDocenti = array();
-    $this->coordinatori = 'N';
-    $this->filtroCoordinatori = array();
-    $this->staff = false;
-    $this->genitori = 'N';
-    $this->filtroGenitori = array();
-    $this->alunni = 'N';
-    $this->filtroAlunni = array();
   }
 
   /**
@@ -627,7 +498,7 @@ class ListaDestinatari {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return 'Destinatari: '.($this->dsga ? 'DSGA ' : '').($this->ata ? 'ATA ' : '').
       ($this->docenti != 'N' ? 'Docenti ' : '').($this->coordinatori != 'N' ? 'Coordinatori ' : '').
       ($this->staff ? 'Staff ' : '').($this->genitori != 'N' ? 'Genitori ' : '').

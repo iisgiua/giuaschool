@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -23,9 +19,12 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\OsservazioneAlunno;
 use App\Entity\OsservazioneClasse;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Festivita;
 use App\Util\LogHandler;
 use App\Util\RegistroUtil;
 use App\Form\MessageType;
@@ -33,6 +32,8 @@ use App\Form\MessageType;
 
 /**
  * OsservazioniController - gestione delle osservazioni sugli alunni
+ *
+ * @author Antonello Dessì
  */
 class OsservazioniController extends AbstractController {
 
@@ -41,7 +42,7 @@ class OsservazioniController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
@@ -56,7 +57,7 @@ class OsservazioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function osservazioniAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                       RegistroUtil $reg, $cattedra, $classe, $data) {
     // inizializza variabili
     $lista_festivi = null;
@@ -72,19 +73,19 @@ class OsservazioniController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($session->get('/APP/DOCENTE/data_lezione')) {
+      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -92,7 +93,7 @@ class OsservazioniController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $session->set('/APP/DOCENTE/data_lezione', $data);
+      $reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -101,7 +102,7 @@ class OsservazioniController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -113,7 +114,7 @@ class OsservazioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -132,9 +133,9 @@ class OsservazioniController extends AbstractController {
       }
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -145,7 +146,7 @@ class OsservazioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render($template, array(
       'pagina_titolo' => 'page.lezioni_osservazioni',
@@ -188,7 +189,7 @@ class OsservazioniController extends AbstractController {
     // inizializza
     $label = array();
     // controlla cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -203,7 +204,7 @@ class OsservazioniController extends AbstractController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $em->getRepository('App:OsservazioneAlunno')->findOneBy(['id' => $id,
+      $osservazione = $em->getRepository('App\Entity\OsservazioneAlunno')->findOneBy(['id' => $id,
         'data' => $data_obj]);
       if (!$osservazione) {
         // errore
@@ -243,7 +244,7 @@ class OsservazioniController extends AbstractController {
       ($cattedra->getMateria()->getTipo() == 'R' ? 'S' : '');
     $form = $this->container->get('form.factory')->createNamedBuilder('osservazione_edit', FormType::class, $osservazione)
       ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-        'class' => 'App:Alunno',
+        'class' => 'App\Entity\Alunno',
         'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')';
           },
@@ -323,7 +324,7 @@ class OsservazioniController extends AbstractController {
   public function osservazioneDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                             LogHandler $dblogger, $id) {
     // controlla osservazione
-    $osservazione = $em->getRepository('App:OsservazioneAlunno')->find($id);
+    $osservazione = $em->getRepository('App\Entity\OsservazioneAlunno')->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni');
@@ -356,7 +357,7 @@ class OsservazioniController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param int $cattedra Identificativo della cattedra
    * @param int $classe Identificativo della classe (supplenza)
@@ -371,7 +372,7 @@ class OsservazioniController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function osservazioniPersonaliAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function osservazioniPersonaliAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                                RegistroUtil $reg, $cattedra, $classe, $data) {
     // inizializza variabili
     $lista_festivi = null;
@@ -383,19 +384,19 @@ class OsservazioniController extends AbstractController {
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
-      $cattedra = $session->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $session->get('/APP/DOCENTE/classe_lezione');
+      $cattedra = $reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
+      $classe = $reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
     } else {
       // memorizza su sessione
-      $session->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $session->set('/APP/DOCENTE/classe_lezione', $classe);
+      $reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+      $reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
     }
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($session->get('/APP/DOCENTE/data_lezione')) {
+      if ($reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -403,7 +404,7 @@ class OsservazioniController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $session->set('/APP/DOCENTE/data_lezione', $data);
+      $reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
     }
     // data in formato stringa
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -412,7 +413,7 @@ class OsservazioniController extends AbstractController {
     // controllo cattedra/supplenza
     if ($cattedra > 0) {
       // lezione in propria cattedra: controlla esistenza
-      $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+      $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
         'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
@@ -424,7 +425,7 @@ class OsservazioniController extends AbstractController {
       $info['alunno'] = $cattedra->getAlunno();
     } elseif ($classe > 0) {
       // supplenza
-      $classe = $em->getRepository('App:Classe')->find($classe);
+      $classe = $em->getRepository('App\Entity\Classe')->find($classe);
       if (!$classe) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -435,9 +436,9 @@ class OsservazioniController extends AbstractController {
     if ($cattedra) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
       $data_prec = (clone $data_obj);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -449,7 +450,7 @@ class OsservazioniController extends AbstractController {
     }
     // salva pagina visitata
     $route = ['name' => $request->get('_route'), 'param' => $request->get('_route_params')];
-    $session->set('/APP/DOCENTE/menu_lezione', $route);
+    $reqstack->getSession()->set('/APP/DOCENTE/menu_lezione', $route);
     // visualizza pagina
     return $this->render('lezioni/osservazioni_personali.html.twig', array(
       'pagina_titolo' => 'page.lezioni_osservazioni_personali',
@@ -492,7 +493,7 @@ class OsservazioniController extends AbstractController {
     // inizializza
     $label = array();
     // controlla cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -507,7 +508,7 @@ class OsservazioniController extends AbstractController {
     }
     if ($id > 0) {
       // azione edit, controlla ossservazione
-      $osservazione = $em->getRepository('App:OsservazioneClasse')->findOneBy(['id' => $id,
+      $osservazione = $em->getRepository('App\Entity\OsservazioneClasse')->findOneBy(['id' => $id,
         'data' => $data_obj, 'cattedra' => $cattedra]);
       if (!$osservazione) {
         // errore
@@ -597,7 +598,7 @@ class OsservazioniController extends AbstractController {
   public function osservazionePersonaleDeleteAction(Request $request, EntityManagerInterface $em, RegistroUtil $reg,
                                             LogHandler $dblogger, $id) {
     // controlla osservazione
-    $osservazione = $em->getRepository('App:OsservazioneClasse')->find($id);
+    $osservazione = $em->getRepository('App\Entity\OsservazioneClasse')->find($id);
     if (!$osservazione) {
       // non esiste, niente da fare
       return $this->redirectToRoute('lezioni_osservazioni_personali');

@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -26,6 +22,8 @@ use App\Entity\Cattedra;
 
 /**
  * CattedraType - form per la classe Cattedra
+ *
+ * @author Antonello Dessì
  */
 class CattedraType extends AbstractType {
 
@@ -39,7 +37,7 @@ class CattedraType extends AbstractType {
     // aggiunge campi al form
     $builder
       ->add('classe', EntityType::class, array('label' => 'label.classe',
-        'class' => 'App:Classe',
+        'class' => 'App\Entity\Classe',
         'choice_label' => function ($obj) {
           return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
         'group_by' => 'sede.citta',
@@ -49,7 +47,7 @@ class CattedraType extends AbstractType {
         'attr' => ['widget' => 'search'],
         'required' => true))
       ->add('materia', EntityType::class, array('label' => 'label.materia',
-        'class' => 'App:Materia',
+        'class' => 'App\Entity\Materia',
         'choice_label' => 'nome',
         'query_builder' => function (EntityRepository $er) {
           return $er->createQueryBuilder('c')
@@ -59,7 +57,7 @@ class CattedraType extends AbstractType {
         'attr' => ['widget' => 'search'],
         'required' => true))
       ->add('alunno', EntityType::class, array('label' => 'label.alunno_H',
-        'class' => 'App:Alunno',
+        'class' => 'App\Entity\Alunno',
         'choice_label' => function ($obj) {
           return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')'; },
         'query_builder' => function (EntityRepository $er) {
@@ -70,12 +68,12 @@ class CattedraType extends AbstractType {
         'attr' => ['widget' => 'search'],
         'required' => false))
       ->add('docente', EntityType::class, array('label' => 'label.docente',
-        'class' => 'App:Docente',
+        'class' => 'App\Entity\Docente',
         'choice_label' => function ($obj) {
           return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
         'query_builder' => function (EntityRepository $er) {
           return $er->createQueryBuilder('d')
-            ->where('d.abilitato=1 AND d NOT INSTANCE OF App:Preside')
+            ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
             ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
         'placeholder' => 'label.choose_option',
         'attr' => ['widget' => 'search'],

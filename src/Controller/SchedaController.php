@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,11 +13,16 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
+use App\Entity\VotoScrutinio;
 use App\Util\RegistroUtil;
 
 
 /**
  * SchedaController - mostra le schede informative da visualizzare in una modal window
+ *
+ * @author Antonello Dessì
  */
 class SchedaController extends AbstractController {
 
@@ -46,7 +47,7 @@ class SchedaController extends AbstractController {
     $info = null;
     $dati = null;
     // controllo cattedra
-    $cattedra = $em->getRepository('App:Cattedra')->findOneBy(['id' => $cattedra,
+    $cattedra = $em->getRepository('App\Entity\Cattedra')->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
@@ -58,7 +59,7 @@ class SchedaController extends AbstractController {
     $info['religione'] = ($cattedra->getMateria()->getTipo() == 'R');
     $info['edcivica'] = ($cattedra->getMateria()->getTipo() == 'E');
     // controllo alunno
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
     if (!$alunno) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -80,7 +81,7 @@ class SchedaController extends AbstractController {
       // voto primo trimestre/quadrimestre
       $dati['scrutini'][0]['nome'] = 'Scrutinio del '.$periodi[1]['nome'];
       $dati['scrutini'][0]['voto'] = null;
-      $voto = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voto = $em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato')
         ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),
@@ -102,7 +103,7 @@ class SchedaController extends AbstractController {
       $dati['scrutini'][0]['voto'] = null;
       $dati['scrutini'][1]['nome'] = 'Scrutinio del '.$periodi[2]['nome'];
       $dati['scrutini'][1]['voto'] = null;
-      $voti = $em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->where('vs.alunno=:alunno AND vs.materia=:materia AND s.classe=:classe AND s.periodo IN (:periodi) AND s.stato=:stato')
         ->setParameters(['alunno' => $alunno, 'classe' => $cattedra->getClasse(), 'materia' => $cattedra->getMateria(),

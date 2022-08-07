@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -18,7 +14,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -27,9 +23,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Colloquio;
 use App\Entity\RichiestaColloquio;
+use App\Entity\ScansioneOraria;
 use App\Util\RegistroUtil;
 use App\Util\LogHandler;
 use App\Form\ColloquioType;
@@ -37,6 +34,8 @@ use App\Form\ColloquioType;
 
 /**
  * ColloquiController - gestione dei colloqui
+ *
+ * @author Antonello Dessì
  */
 class ColloquiController extends AbstractController {
 
@@ -44,7 +43,7 @@ class ColloquiController extends AbstractController {
    * Visualizza le richieste di colloquio
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    *
    * @return Response Pagina di risposta
    *
@@ -53,14 +52,14 @@ class ColloquiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function colloquiAction(EntityManagerInterface $em, SessionInterface $session) {
+  public function colloquiAction(EntityManagerInterface $em, RequestStack $reqstack) {
     // inizializza variabili
     $errore = null;
     $dati = null;
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // controllo fine colloqui
-    $fine = \DateTime::createFromFormat('Y-m-d H:i:s', $session->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
+    $fine = \DateTime::createFromFormat('Y-m-d H:i:s', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
     $fine->modify('-30 days');    // controllo fine
     $oggi = new \DateTime('today');
     if ($oggi > $fine) {
@@ -68,9 +67,9 @@ class ColloquiController extends AbstractController {
       $errore = 'exception.colloqui_sospesi';
     } else {
       // legge richieste
-      $dati['richieste'] = $em->getRepository('App:RichiestaColloquio')->colloquiDocente($this->getUser());
-      $dati['ore'] = $em->getRepository('App:Colloquio')->oreNoSede($this->getUser());
-      $dati['appuntamenti'] = $em->getRepository('App:RichiestaColloquio')->infoAppuntamenti($this->getUser());
+      $dati['richieste'] = $em->getRepository('App\Entity\RichiestaColloquio')->colloquiDocente($this->getUser());
+      $dati['ore'] = $em->getRepository('App\Entity\Colloquio')->oreNoSede($this->getUser());
+      $dati['appuntamenti'] = $em->getRepository('App\Entity\RichiestaColloquio')->infoAppuntamenti($this->getUser());
     }
     // visualizza pagina
     return $this->render('colloqui/colloqui.html.twig', array(
@@ -105,7 +104,7 @@ class ColloquiController extends AbstractController {
     // inizializza variabili
     $label = array();
     // controlla richiesta
-    $richiesta = $em->getRepository('App:RichiestaColloquio')->find($richiesta);
+    $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->find($richiesta);
     if (empty($richiesta)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -211,7 +210,7 @@ class ColloquiController extends AbstractController {
                                  RegistroUtil $reg, LogHandler $dblogger) {
     $docente = $this->getUser();
     // determina operazione da eseguire
-    $colloquio = $em->getRepository('App:Colloquio')->findOneByDocente($docente);
+    $colloquio = $em->getRepository('App\Entity\Colloquio')->findOneByDocente($docente);
     if ($colloquio) {
       // modalità modifica
       $edit = true;
@@ -231,7 +230,7 @@ class ColloquiController extends AbstractController {
       $em->persist($colloquio);
     }
     // determina lista orari
-    $ore = $em->getRepository('App:ScansioneOraria')->orarioGiorno($colloquio->getGiorno(), $colloquio->getOrario());
+    $ore = $em->getRepository('App\Entity\ScansioneOraria')->orarioGiorno($colloquio->getGiorno(), $colloquio->getOrario());
     $lista_ore = array();
     foreach ($ore as $o) {
       $opzione = $o['ora'].': '.$o['inizio']->format('H:i').' - '.$o['fine']->format('H:i');
@@ -340,7 +339,7 @@ class ColloquiController extends AbstractController {
                                Colloquio $colloquio, $appuntamento, $blocca) {
     // controlla richiesta
     $data = \DateTime::createFromFormat('Y-m-d-G-i', $appuntamento);
-    $richiesta = $em->getRepository('App:RichiestaColloquio')->findOneBy(['colloquio' => $colloquio,
+    $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->findOneBy(['colloquio' => $colloquio,
       'appuntamento' => $data, 'stato' => ($blocca ? 'C' : 'X')]);
     if (!$richiesta) {
       // errore

@@ -1,0 +1,195 @@
+####################
+# MateriaFixtures - dati di test
+#
+# Dati delle materie scolastiche:
+#   nome: nome della materia scolastica
+#   nomeBreve: nome breve della materia scolastica
+#   tipo: tipo della materia [N=normale, R=religione, S=sostegno, C=condotta, E=ed.civica, U=supplenza]
+#   valutazione: tipo di valutazione della materia [N=numerica, G=giudizio, A=assente]
+#   media: vero se la materia entra nel calcolo della media dei voti, falso altrimenti
+#   ordinamento: numero progressivo per la visualizzazione ordinata delle materie
+####################
+
+
+App\Entity\Materia:
+
+  # ----- materie con gestione particolare  -----
+  materia_SUPPLENZA:
+    Nome: 'Supplenza'
+    NomeBreve: 'Supplenza'
+    Tipo: 'U'
+    Valutazione: 'A'
+    Media: false
+    Ordinamento: 0
+  materia_RELIGIONE:
+    Nome: 'Religione Cattolica o attività alternative'
+    NomeBreve: 'Religione / Att. alt.'
+    Tipo: 'R'
+    Valutazione: 'G'
+    Media: false
+    Ordinamento: 10
+  materia_EDCIVICA:
+    Nome: 'Educazione civica'
+    NomeBreve: 'Ed. civica'
+    Tipo: 'E'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 800
+  materia_CONDOTTA:
+    Nome: 'Condotta'
+    NomeBreve: 'Condotta'
+    Tipo: 'C'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 900
+  materia_SOSTEGNO:
+    Nome: 'Sostegno'
+    NomeBreve: 'Sostegno'
+    Tipo: 'S'
+    Valutazione: 'A'
+    Media: false
+    Ordinamento: 999
+
+  # ----- materie curricolari  -----
+  materia_curricolare_1:
+    Nome: 'Lingua e letteratura italiana'
+    NomeBreve: 'Italiano'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 20
+  materia_curricolare_2:
+    Nome: 'Storia'
+    NomeBreve: 'Storia'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 30
+  materia_curricolare_3:
+    Nome: 'Diritto ed economia'
+    NomeBreve: 'Diritto'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 40
+  materia_curricolare_4:
+    Nome: 'Filosofia'
+    NomeBreve: 'Filosofia'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 40
+  materia_curricolare_5:
+    Nome: 'Lingua straniera: Inglese'
+    NomeBreve: 'Inglese'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 50
+  materia_curricolare_6:
+    Nome: 'Matematica'
+    NomeBreve: 'Matematica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 60
+  materia_curricolare_7:
+    Nome: 'Scienze integrate: Scienze della Terra e Biologia'
+    NomeBreve: 'Sc. Terra Biologia'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 90
+  materia_curricolare_8:
+    Nome: 'Fisica'
+    NomeBreve: 'Fisica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 110
+  materia_curricolare_9:
+    Nome: 'Disegno e storia dell''arte'
+    NomeBreve: 'Disegno'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 140
+  materia_curricolare_10:
+    Nome: 'Scienze motorie e sportive'
+    NomeBreve: 'Sc. motorie'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 500
+
+  # ----- materie curricolari con ITP -----
+  materia_curricolare_itp_1:
+    Nome: 'Informatica'
+    NomeBreve: 'Informatica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 70
+  materia_curricolare_itp_2:
+    Nome: 'Scienze integrate: Fisica'
+    NomeBreve: 'Fisica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 110
+  materia_curricolare_itp_3:
+    Nome: 'Scienze integrate: Chimica'
+    NomeBreve: 'Chimica'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 130
+  materia_curricolare_itp_4:
+    Nome: 'Tecnologie e tecniche di rappresentazione grafica'
+    NomeBreve: 'Tecn. graf.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 140
+  materia_curricolare_itp_5:
+    Nome: 'Tecnologie chimiche industriali'
+    NomeBreve: 'Tecn. chim.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 170
+  materia_curricolare_itp_6:
+    Nome: 'Fisica ambientale'
+    NomeBreve: 'Fisica amb.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 190
+  materia_curricolare_itp_7:
+    Nome: 'Sistemi e reti'
+    NomeBreve: 'Sistemi'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 200
+  materia_curricolare_itp_8:
+    Nome: 'Tecnologie e progettazione di sistemi informatici e di telecomunicazioni'
+    NomeBreve: 'Tecn. prog. sis.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 210
+  materia_curricolare_itp_9:
+    Nome: 'Gestione progetto, organizzazione d''impresa'
+    NomeBreve: 'Gestione prog.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 220
+  materia_curricolare_itp_10:
+    Nome: 'Telecomunicazioni'
+    NomeBreve: 'Telecom.'
+    Tipo: 'N'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 220

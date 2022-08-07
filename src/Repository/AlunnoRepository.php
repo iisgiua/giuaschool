@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -15,10 +11,13 @@ namespace App\Repository;
 use App\Entity\Sede;
 use App\Entity\Classe;
 use App\Entity\Alunno;
+use App\Entity\CambioClasse;
 
 
 /**
  * Alunno - repository
+ *
+ * @author Antonello Dessì
  */
 class AlunnoRepository extends BaseRepository {
 
@@ -253,7 +252,7 @@ class AlunnoRepository extends BaseRepository {
         ->getArrayResult();
     } else {
       // aggiunge alunni attuali che non hanno fatto cambiamenti di classe in quella data
-      $cambio = $this->_em->getRepository('App:CambioClasse')->createQueryBuilder('cc')
+      $cambio = $this->_em->getRepository('App\Entity\CambioClasse')->createQueryBuilder('cc')
         ->where('cc.alunno=a.id AND :data BETWEEN cc.inizio AND cc.fine')
         ->andWhere('cc.classe IS NULL OR cc.classe!=:classe');
       $alunni_id1 = $this->createQueryBuilder('a')
@@ -265,7 +264,7 @@ class AlunnoRepository extends BaseRepository {
       // aggiunge altri alunni con cambiamento nella classe in quella data
       $alunni_id2 = $this->createQueryBuilder('a')
         ->select('a.id')
-        ->join('App:CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
+        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'a.id=cc.alunno')
         ->where(':data BETWEEN cc.inizio AND cc.fine AND cc.classe=:classe')
         ->setParameters(['data' => $data->format('Y-m-d'), 'classe' => $classe])
         ->getQuery()

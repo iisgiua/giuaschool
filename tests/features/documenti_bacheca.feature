@@ -375,9 +375,9 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
   E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" decodificato con "$d1:cifrato"
   Esempi:
     | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
 
 
 ################################################################################

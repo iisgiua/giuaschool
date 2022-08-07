@@ -1,30 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * AssenzaLezione - entità
+ * AssenzaLezione - dati per gestire le ore di assenza degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\AssenzaLezioneRepository")
  * @ORM\Table(name="gs_assenza_lezione", uniqueConstraints={@ORM\UniqueConstraint(columns={"alunno_id","lezione_id"})})
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields={"alunno","lezione"}, message="field.unique")
+ *
+ * @author Antonello Dessì
  */
 class AssenzaLezione {
 
@@ -32,56 +30,54 @@ class AssenzaLezione {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'assenza della lezione
+   * @var int|null $id Identificativo univoco per l'assenza della lezione
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'assenza
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Lezione $lezione Lezione a cui si riferisce l'assenza
+   * @var Lezione|null $lezione Lezione a cui si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Lezione")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $lezione;
+  private ?Lezione $lezione = null;
 
   /**
    * @var float $ore Ore di assenza dell'alunno alla lezione
    *
    * @ORM\Column(type="float", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $ore;
+  private float $ore = 0;
 
 
   //==================== EVENTI ORM ====================
@@ -91,7 +87,7 @@ class AssenzaLezione {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -102,7 +98,7 @@ class AssenzaLezione {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -113,36 +109,36 @@ class AssenzaLezione {
   /**
    * Restituisce l'identificativo univoco per la firma
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'alunno al quale si riferisce l'assenza
    *
-   * @return Alunno Alunno al quale si riferisce l'assenza
+   * @return Alunno|null Alunno al quale si riferisce l'assenza
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -151,9 +147,9 @@ class AssenzaLezione {
    *
    * @param Alunno $alunno Alunno al quale si riferisce l'assenza
    *
-   * @return AssenzaLezione Oggetto AssenzaLezione
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -161,9 +157,9 @@ class AssenzaLezione {
   /**
    * Restituisce la lezione a cui si riferisce l'assenza
    *
-   * @return Lezione Lezione a cui si riferisce l'assenza
+   * @return Lezione|null Lezione a cui si riferisce l'assenza
    */
-  public function getLezione() {
+  public function getLezione(): ?Lezione {
     return $this->lezione;
   }
 
@@ -172,9 +168,9 @@ class AssenzaLezione {
    *
    * @param Lezione $lezione Lezione a cui si riferisce l'assenza
    *
-   * @return AssenzaLezione Oggetto AssenzaLezione
+   * @return self Oggetto modificato
    */
-  public function setLezione(Lezione $lezione) {
+  public function setLezione(Lezione $lezione): self {
     $this->lezione = $lezione;
     return $this;
   }
@@ -184,7 +180,7 @@ class AssenzaLezione {
    *
    * @return float Ore di assenza dell'alunno alla lezione
    */
-  public function getOre() {
+  public function getOre(): float {
     return $this->ore;
   }
 
@@ -193,9 +189,9 @@ class AssenzaLezione {
    *
    * @param float $ore Ore di assenza dell'alunno alla lezione
    *
-   * @return AssenzaLezione Oggetto AssenzaLezione
+   * @return self Oggetto modificato
    */
-  public function setOre($ore) {
+  public function setOre(float $ore): self {
     $this->ore = $ore;
     return $this;
   }
@@ -208,7 +204,7 @@ class AssenzaLezione {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->lezione.' - '.$this->alunno;
   }
 

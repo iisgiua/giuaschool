@@ -1,0 +1,15 @@
+####################
+# NotificaFixtures - dati di test
+#
+# Dati per la gestione delle notifiche da inviare successivamente:
+#   oggettoNome: nome della classe dell'oggetto da notificare
+#   oggettoId: id dell'oggetto da notificare
+#   azione: tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
+####################
+
+
+App\Entity\Notifica:
+  notifica_{1..10}:
+    oggettoNome: '<substr(<text()>, 0, 255)>'
+    oggettoId: '<numberBetween(1, 100)>'
+    azione: '<randomElement(["A", "E", "D"])>'

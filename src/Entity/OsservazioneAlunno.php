@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,9 +13,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * OsservazioneAlunno - entità
+ * OsservazioneAlunno - dati per le osservazioni sugli alunni riportate sul registro
  *
  * @ORM\Entity(repositoryClass="App\Repository\OsservazioneAlunnoRepository")
+ *
+ * @author Antonello Dessì
  */
 class OsservazioneAlunno extends OsservazioneClasse {
 
@@ -34,7 +32,7 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -45,7 +43,7 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @return Alunno Alunno a cui si riferisce l'osservazione
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -54,9 +52,9 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @param Alunno $alunno Alunno a cui si riferisce l'osservazione
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -69,9 +67,8 @@ class OsservazioneAlunno extends OsservazioneClasse {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->getData()->format('d/m/Y').' - '.$this->getCattedra().' - '.$this->alunno.': '.$this->getTesto();
   }
 
 }
-

@@ -1,30 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * FirmaCircolare - entità
+ * FirmaCircolare - dati per la firma delle circolari
  *
  * @ORM\Entity(repositoryClass="App\Repository\FirmaCircolareRepository")
  * @ORM\Table(name="gs_firma_circolare", uniqueConstraints={@ORM\UniqueConstraint(columns={"circolare_id","utente_id"})})
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields={"circolare","utente"}, message="field.unique")
+ *
+ * @author Antonello Dessì
  */
 class FirmaCircolare {
 
@@ -32,65 +30,65 @@ class FirmaCircolare {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la firma della circolare
+   * @var int|null $id Identificativo univoco per la firma della circolare
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var Circolare $circolare Circolare a cui si riferisce la firma
+   * @var Circolare|null $circolare Circolare a cui si riferisce la firma
    *
    * @ORM\ManyToOne(targetEntity="Circolare")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $circolare;
+  private ?Circolare $circolare = null;
 
   /**
-   * @var Utente $utente Utente che firma la circolare
+   * @var Utente|null $utente Utente che firma la circolare
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $utente;
+  private ?Utente $utente = null;
 
   /**
-   * @var \DateTime $letto Data e ora della visualizzazione della circolare [conferma di lettura presunta]
+   * @var \DateTime|null $letto Data e ora della visualizzazione della circolare [conferma di lettura presunta]
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
-   * @Assert\DateTime(message="field.datetime")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $letto;
+  private ?\DateTime $letto = null;
 
   /**
-   * @var \DateTime $firmato Data e ora della firma della circolare [conferma di lettura esplicita]
+   * @var \DateTime|null $firmato Data e ora della firma della circolare [conferma di lettura esplicita]
    *
    * @ORM\Column(type="datetime", nullable=true)
    *
-   * @Assert\DateTime(message="field.datetime")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $firmato;
+  private ?\DateTime $firmato = null;
 
 
   //==================== EVENTI ORM ====================
@@ -100,7 +98,7 @@ class FirmaCircolare {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -111,7 +109,7 @@ class FirmaCircolare {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -122,36 +120,36 @@ class FirmaCircolare {
   /**
    * Restituisce l'identificativo univoco per la firma della circolare
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la circolare a cui si riferisce la firma
    *
-   * @return Circolare Circolare a cui si riferisce la firma
+   * @return Circolare|null Circolare a cui si riferisce la firma
    */
-  public function getCircolare() {
+  public function getCircolare(): ?Circolare {
     return $this->circolare;
   }
 
@@ -160,9 +158,9 @@ class FirmaCircolare {
    *
    * @param Circolare $circolare Circolare a cui si riferisce la firma
    *
-   * @return FirmaCircolare Oggetto FirmaCircolare
+   * @return self Oggetto modificato
    */
-  public function setCircolare(Circolare $circolare) {
+  public function setCircolare(Circolare $circolare): self {
     $this->circolare = $circolare;
     return $this;
   }
@@ -170,9 +168,9 @@ class FirmaCircolare {
   /**
    * Restituisce l'utente che firma la circolare
    *
-   * @return Utente Utente che firma la circolare
+   * @return Utente|null Utente che firma la circolare
    */
-  public function getUtente() {
+  public function getUtente(): ?Utente {
     return $this->utente;
   }
 
@@ -181,9 +179,9 @@ class FirmaCircolare {
    *
    * @param Utente $utente Utente che firma la circolare
    *
-   * @return FirmaCircolare Oggetto FirmaCircolare
+   * @return self Oggetto modificato
    */
-  public function setUtente(Utente $utente) {
+  public function setUtente(Utente $utente): self {
     $this->utente = $utente;
     return $this;
   }
@@ -191,20 +189,20 @@ class FirmaCircolare {
   /**
    * Restituisce la data e ora della visualizzazione della circolare [conferma di lettura presunta]
    *
-   * @return \DateTime Data e ora della visualizzazione della circolare
+   * @return \DateTime|null Data e ora della visualizzazione della circolare
    */
-  public function getLetto() {
+  public function getLetto(): ?\DateTime {
     return $this->letto;
   }
 
   /**
    * Modifica la data e ora della visualizzazione della circolare [conferma di lettura presunta]
    *
-   * @param \DateTime $letto Data e ora della visualizzazione della circolare
+   * @param \DateTime|null $letto Data e ora della visualizzazione della circolare
    *
-   * @return Circolare Oggetto Circolare
+   * @return self Oggetto modificato
    */
-  public function setLetto($letto) {
+  public function setLetto(?\DateTime $letto): self {
     $this->letto = $letto;
     return $this;
   }
@@ -212,20 +210,20 @@ class FirmaCircolare {
   /**
    * Restituisce la data e ora della firma della circolare [conferma di lettura esplicita]
    *
-   * @return \DateTime Data e ora della firma della circolare
+   * @return \DateTime|null Data e ora della firma della circolare
    */
-  public function getFirmato() {
+  public function getFirmato(): ?\DateTime {
     return $this->firmato;
   }
 
   /**
    * Modifica la data e ora della firma della circolare [conferma di lettura esplicita]
    *
-   * @param \DateTime $firmato Data e ora della firma della circolare
+   * @param \DateTime|null $firmato Data e ora della firma della circolare
    *
-   * @return FirmaCircolare Oggetto FirmaCircolare
+   * @return self Oggetto modificato
    */
-  public function setFirmato($firmato) {
+  public function setFirmato(?\DateTime $firmato): self {
     $this->firmato = $firmato;
     return $this;
   }
@@ -238,7 +236,7 @@ class FirmaCircolare {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->getCircolare().($this->firmato ? (' (firmata il '.$this->firmato->format('d/m/Y').')') : ' (non firmata)');
   }
 

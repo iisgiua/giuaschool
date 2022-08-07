@@ -1,0 +1,72 @@
+####################
+# GiuaschoolFixtures - dati iniziali dell'applicazione
+####################
+
+
+include:
+  - ConfigurazioneFixtures.yml
+  - MenuFixtures.yml
+
+
+App\Entity\Materia:
+  materia_SUPPLENZA:
+    Nome: 'Supplenza'
+    NomeBreve: 'Supplenza'
+    Tipo: 'U'
+    Valutazione: 'A'
+    Media: false
+    Ordinamento: 0
+  materia_RELIGIONE:
+    Nome: 'Religione Cattolica o attività alternative'
+    NomeBreve: 'Religione / Att. alt.'
+    Tipo: 'R'
+    Valutazione: 'G'
+    Media: false
+    Ordinamento: 10
+  materia_EDCIVICA:
+    Nome: 'Educazione civica'
+    NomeBreve: 'Ed. civica'
+    Tipo: 'E'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 800
+  materia_CONDOTTA:
+    Nome: 'Condotta'
+    NomeBreve: 'Condotta'
+    Tipo: 'C'
+    Valutazione: 'N'
+    Media: true
+    Ordinamento: 900
+  materia_SOSTEGNO:
+    Nome: 'Sostegno'
+    NomeBreve: 'Sostegno'
+    Tipo: 'S'
+    Valutazione: 'A'
+    Media: false
+    Ordinamento: 999
+
+
+App\Entity\Amministratore:
+  amministratore:
+    sesso: 'M'
+    nome: 'Amministratore'
+    cognome: 'Registro'
+    username: 'admin'
+    email: 'admin@noemail.local'
+    password: '<passwordCodificata($username)>'
+    tokenCreato:
+    token: ''
+    preloginCreato:
+    prelogin: ''
+    abilitato: true
+    spid: false
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dataNascita:
+    comuneNascita: ''
+    codiceFiscale: ''
+    citta: ''
+    indirizzo: ''
+    numeriTelefono: '<(array())>'
+    notifica: '<(array())>'

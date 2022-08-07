@@ -1,0 +1,28 @@
+####################
+# EsitoFixtures - dati di test
+#
+# Dati per l'esito degli scrutini di un alunno:
+#   esito: esito dello scrutinio [A=ammesso, N=non ammesso, S=sospeso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero, X=scrutinio rimandato]
+#   media: media dei voti
+#   credito: punteggio di credito
+#   creditoPrecedente: punteggio di credito degli anni precedenti
+#   dati: lista dei dati sull'esito (giudizio ammissione e delibera)
+#   scrutinio: scrutinio a cui si riferisce l'esito
+#   alunno: alunno a cui si attribuisce l'esito
+####################
+
+
+include:
+  - ScrutinioFixtures.yml
+  - AlunnoFixtures.yml
+
+
+App\Entity\Esito:
+  esito_{1..10}:
+    esito: '<randomElement(["A", "N", "S", "R", "L", "E", "X"])>'
+    media: '50%? <randomFloat()>: 0'
+    credito: '50%? <numberBetween(6, 14)>: 0'
+    creditoPrecedente: '50%? <numberBetween(6, 20)>: 0'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    scrutinio: '@scrutinio_*'
+    alunno: '@alunno_seconda_<current()>'

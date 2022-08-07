@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -16,11 +12,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -34,6 +30,9 @@ use Symfony\Component\Form\FormError;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Entity\Notifica;
+use App\Entity\Alunno;
+use App\Entity\Cattedra;
+use App\Entity\Festivita;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
 use App\Util\AgendaUtil;
@@ -44,6 +43,8 @@ use App\Form\AvvisoType;
 
 /**
  * AgendaController - gestione dell'agenda
+ *
+ * @author Antonello Dessì
  */
 class AgendaController extends AbstractController {
 
@@ -51,7 +52,7 @@ class AgendaController extends AbstractController {
    * Visualizza gli eventi destinati ai docenti
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
    * @param string $mese Anno e mese della pagina da visualizzare dell'agenda
@@ -65,15 +66,15 @@ class AgendaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function eventiAction(EntityManagerInterface $em, SessionInterface $session, AgendaUtil $age, $mese) {
+  public function eventiAction(EntityManagerInterface $em, RequestStack $reqstack, AgendaUtil $age, $mese) {
     $dati = null;
     $info = null;
     // parametro data
     if ($mese == '0000-00') {
       // mese non specificato
-      if ($session->get('/APP/ROUTE/agenda_eventi/mese')) {
+      if ($reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese')) {
         // recupera data da sessione
-        $mese = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/agenda_eventi/mese').'-01');
+        $mese = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese').'-01');
       } else {
         // imposta data odierna
         $mese = (new \DateTime())->modify('first day of this month');
@@ -81,7 +82,7 @@ class AgendaController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $mese = \DateTime::createFromFormat('Y-m-d', $mese.'-01');
-      $session->set('/APP/ROUTE/agenda_eventi/mese', $mese->format('Y-m'));
+      $reqstack->getSession()->set('/APP/ROUTE/agenda_eventi/mese', $mese->format('Y-m'));
     }
     // nome/url mese
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -92,10 +93,10 @@ class AgendaController extends AbstractController {
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
     $data_succ = (clone $data_fine);
-    $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
     $info['url_succ'] = ($data_succ ? $data_succ->format('Y-m') : null);
     $data_prec = (clone $data_inizio);
-    $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
     $info['url_prec'] = ($data_prec ? $data_prec->format('Y-m') : null);
     // presentazione calendario
     $info['inizio'] = (intval($mese->format('w')) - 1);
@@ -147,7 +148,7 @@ class AgendaController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -164,7 +165,7 @@ class AgendaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function verificaEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function verificaEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                      TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
     $dati = array();
@@ -174,12 +175,12 @@ class AgendaController extends AbstractController {
     $materia_sostegno = null;
     if ($request->isMethod('GET')) {
       // inizializza sessione
-      $session->set('/APP/ROUTE/agenda_verifica_edit/conferma', 0);
+      $reqstack->getSession()->set('/APP/ROUTE/agenda_verifica_edit/conferma', 0);
     }
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
+      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -190,16 +191,16 @@ class AgendaController extends AbstractController {
       // azione add
       $oggi = new \DateTime();
       $mese = $oggi;
-      if ($session->get('/APP/ROUTE/agenda_eventi/mese')) {
+      if ($reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese')) {
         // recupera data da sessione
-        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/agenda_eventi/mese').'-01');
+        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese').'-01');
         if ($mese_sessione > $oggi) {
           // ultimo giorno di mese precedente
           $mese = $mese_sessione;
           $mese->modify('-1 day');
         }
       }
-      $mese = $em->getRepository('App:Festivita')->giornoSuccessivo($mese);
+      $mese = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($mese);
       $avviso = (new Avviso())
         ->setTipo('V')
         ->setDestinatari(['G', 'A'])
@@ -212,7 +213,7 @@ class AgendaController extends AbstractController {
     // recupera festivi per calendario
     $lista_festivi = $age->festivi();
     // form di inserimento
-    $dati = $em->getRepository('App:Cattedra')->cattedreDocente($docente);
+    $dati = $em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
     $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'verifica',
       'returnUrl' => $this->generateUrl('agenda_eventi'),
       'dati' => [$dati['choice'], $materia_sostegno]]);
@@ -220,7 +221,7 @@ class AgendaController extends AbstractController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
@@ -247,7 +248,7 @@ class AgendaController extends AbstractController {
       $materia = null;
       if ($avviso->getCattedra() && $avviso->getCattedra()->getMateria()->getTipo() == 'S') {
         // legge materia scelta
-        $materia = $em->getRepository('App:Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
+        $materia = $em->getRepository('App\Entity\Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
           'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
         if (!$materia ||
             ($avviso->getCattedra()->getAlunno() && $avviso->getCattedra()->getAlunno()->getId() != $avviso->getFiltro()[0])) {
@@ -258,7 +259,7 @@ class AgendaController extends AbstractController {
       $lista = array();
       $errore = false;
       if ($avviso->getFiltroTipo() == 'U') {
-        $lista = $em->getRepository('App:Alunno')
+        $lista = $em->getRepository('App\Entity\Alunno')
           ->controllaAlunni([$avviso->getCattedra()->getClasse()->getSede()], $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -287,9 +288,9 @@ class AgendaController extends AbstractController {
         // controllo verifiche esistenti
         $verifiche = $age->controlloVerifiche($avviso);
         $data_classe = $avviso->getData()->format('Y-m-d').'|'.$avviso->getCattedra()->getClasse()->getId();
-        if (count($verifiche) > 0 && $session->get('/APP/ROUTE/agenda_verifica_edit/conferma', 0) != $data_classe) {
+        if (count($verifiche) > 0 && $reqstack->getSession()->get('/APP/ROUTE/agenda_verifica_edit/conferma', 0) != $data_classe) {
           // richiede conferma
-          $session->set('/APP/ROUTE/agenda_verifica_edit/conferma', $data_classe);
+          $reqstack->getSession()->set('/APP/ROUTE/agenda_verifica_edit/conferma', $data_classe);
         } else {
           // imposta sede
           $avviso->setSedi(new ArrayCollection([$avviso->getCattedra()->getClasse()->getSede()]));
@@ -302,7 +303,7 @@ class AgendaController extends AbstractController {
           // gestione destinatari
           if ($id) {
             // cancella destinatari precedenti e dati lettura
-            $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
               ->delete()
               ->where('au.avviso=:avviso')
               ->setParameters(['avviso' => $avviso])
@@ -322,7 +323,7 @@ class AgendaController extends AbstractController {
           foreach ($dest['utenti'] as $u) {
             $obj = (new AvvisoUtente())
               ->setAvviso($avviso)
-              ->setUtente($em->getReference('App:Utente', $u));
+              ->setUtente($em->getReference('App\Entity\Utente', $u));
             $em->persist($obj);
           }
           // annotazione
@@ -404,9 +405,9 @@ class AgendaController extends AbstractController {
    * @IsGranted("ROLE_DOCENTE")
    */
   public function cattedraAjaxAction(EntityManagerInterface $em, $id) {
-    $alunni = $em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select("a.id,CONCAT(a.cognome,' ',a.nome) AS nome")
-      ->join('App:Cattedra', 'c', 'WITH', 'c.classe=a.classe')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.classe=a.classe')
       ->where('a.abilitato=:abilitato AND c.id=:cattedra AND c.attiva=:attiva')
       ->setParameters(['abilitato' => 1, 'cattedra' => $id, 'attiva' => 1])
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -433,7 +434,7 @@ class AgendaController extends AbstractController {
    */
   public function classeAjaxAction(EntityManagerInterface $em, $id) {
     // solo cattedre attive e normali, no supplenza, no sostegno
-    $cattedre = $em->getRepository('App:Cattedra')->createQueryBuilder('c')
+    $cattedre = $em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('m.id,m.nome')
       ->join('c.materia', 'm')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND m.tipo!=:sostegno')
@@ -467,7 +468,7 @@ class AgendaController extends AbstractController {
   public function verificaDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                        RegistroUtil $reg, BachecaUtil $bac, AgendaUtil $age, $id) {
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
+    $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'V']);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -491,7 +492,7 @@ class AgendaController extends AbstractController {
       $em->remove($a);
     }
     // cancella destinatari
-    $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+    $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])
@@ -528,7 +529,7 @@ class AgendaController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
@@ -545,7 +546,7 @@ class AgendaController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function compitoEditAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function compitoEditAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                     TranslatorInterface $trans, RegistroUtil $reg, BachecaUtil $bac,
                                     AgendaUtil $age, LogHandler $dblogger, $id) {
     // inizializza
@@ -556,12 +557,12 @@ class AgendaController extends AbstractController {
     $materia_sostegno = null;
     if ($request->isMethod('GET')) {
       // inizializza sessione
-      $session->set('/APP/ROUTE/agenda_compito_edit/conferma', 0);
+      $reqstack->getSession()->set('/APP/ROUTE/agenda_compito_edit/conferma', 0);
     }
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
+      $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
       if (!$avviso) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -572,16 +573,16 @@ class AgendaController extends AbstractController {
       // azione add
       $oggi = new \DateTime();
       $mese = $oggi;
-      if ($session->get('/APP/ROUTE/agenda_eventi/mese')) {
+      if ($reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese')) {
         // recupera data da sessione
-        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/agenda_eventi/mese').'-01');
+        $mese_sessione = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/agenda_eventi/mese').'-01');
         if ($mese_sessione > $oggi) {
           // ultimo giorno di mese precedente
           $mese = $mese_sessione;
           $mese->modify('-1 day');
         }
       }
-      $mese = $em->getRepository('App:Festivita')->giornoSuccessivo($mese);
+      $mese = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($mese);
       $avviso = (new Avviso())
         ->setTipo('P')
         ->setDestinatari(['G', 'A'])
@@ -594,7 +595,7 @@ class AgendaController extends AbstractController {
     // recupera festivi per calendario
     $lista_festivi = $age->festivi();
     // form di inserimento
-    $dati = $em->getRepository('App:Cattedra')->cattedreDocente($docente);
+    $dati = $em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente);
     $form = $this->createForm(AvvisoType::class, $avviso, ['formMode' => 'compito',
       'returnUrl' => $this->generateUrl('agenda_eventi'),
       'dati' => [$dati['choice'], $materia_sostegno]]);
@@ -602,7 +603,7 @@ class AgendaController extends AbstractController {
     // visualizzazione filtri
     $dati['lista'] = '';
     if ($form->get('filtroTipo')->getData() == 'U') {
-      $dati['lista'] = $em->getRepository('App:Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
+      $dati['lista'] = $em->getRepository('App\Entity\Alunno')->listaAlunni($form->get('filtro')->getData(), 'gs-filtro-');
     }
     if ($form->isSubmitted() && $form->isValid()) {
       // controllo errori
@@ -629,7 +630,7 @@ class AgendaController extends AbstractController {
       $materia = null;
       if ($avviso->getCattedra() && $avviso->getCattedra()->getMateria()->getTipo() == 'S') {
         // legge materia scelta
-        $materia = $em->getRepository('App:Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
+        $materia = $em->getRepository('App\Entity\Cattedra')->findOneBy(['materia' => $form->get('materia_sostegno')->getData(),
           'classe' => $avviso->getCattedra()->getClasse(), 'attiva' => 1]);
         if (!$materia ||
             ($avviso->getCattedra()->getAlunno() && $avviso->getCattedra()->getAlunno()->getId() != $avviso->getFiltro()[0])) {
@@ -640,7 +641,7 @@ class AgendaController extends AbstractController {
       $lista = array();
       $errore = false;
       if ($avviso->getFiltroTipo() == 'U') {
-        $lista = $em->getRepository('App:Alunno')
+        $lista = $em->getRepository('App\Entity\Alunno')
           ->controllaAlunni([$avviso->getCattedra()->getClasse()->getSede()], $form->get('filtro')->getData(), $errore);
         if ($errore) {
           // utente non valido
@@ -658,9 +659,9 @@ class AgendaController extends AbstractController {
         // controllo compiti esistenti
         $compiti = $age->controlloCompiti($avviso);
         $data_classe = $avviso->getData()->format('Y-m-d').'|'.$avviso->getCattedra()->getClasse()->getId();
-        if (count($compiti) > 0 && $session->get('/APP/ROUTE/agenda_compito_edit/conferma', 0) != $data_classe) {
+        if (count($compiti) > 0 && $reqstack->getSession()->get('/APP/ROUTE/agenda_compito_edit/conferma', 0) != $data_classe) {
           // richiede conferma
-          $session->set('/APP/ROUTE/agenda_compito_edit/conferma', $data_classe);
+          $reqstack->getSession()->set('/APP/ROUTE/agenda_compito_edit/conferma', $data_classe);
         } else {
           // imposta sede
           $avviso->setSedi(new ArrayCollection([$avviso->getCattedra()->getClasse()->getSede()]));
@@ -673,7 +674,7 @@ class AgendaController extends AbstractController {
           // gestione destinatari
           if ($id) {
             // cancella destinatari precedenti e dati lettura
-            $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+            $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
               ->delete()
               ->where('au.avviso=:avviso')
               ->setParameters(['avviso' => $avviso])
@@ -694,7 +695,7 @@ class AgendaController extends AbstractController {
           foreach ($dest['utenti'] as $u) {
             $obj = (new AvvisoUtente())
               ->setAvviso($avviso)
-              ->setUtente($em->getReference('App:Utente', $u));
+              ->setUtente($em->getReference('App\Entity\Utente', $u));
             $em->persist($obj);
           }
           // ok: memorizza dati
@@ -761,7 +762,7 @@ class AgendaController extends AbstractController {
   public function compitoDeleteAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
                                       AgendaUtil $age, $id) {
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
+    $avviso = $em->getRepository('App\Entity\Avviso')->findOneBy(['id' => $id, 'tipo' => 'P']);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -772,7 +773,7 @@ class AgendaController extends AbstractController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // cancella destinatari
-    $em->getRepository('App:AvvisoUtente')->createQueryBuilder('au')
+    $em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
       ->delete()
       ->where('au.avviso=:avviso')
       ->setParameters(['avviso' => $avviso])

@@ -1,0 +1,166 @@
+####################
+# OrarioFixtures - dati di test
+#
+# Dati della scansione oraria:
+#   giorno: giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+#   ora: numero dell'ora di lezione [1,2,...]
+#   inizio: inizio dell'ora di lezione
+#   fine: fine dell'ora di lezione
+#   durata: durata dell'ora di lezione (in unità oraria)
+#   orario: orario a cui si riferisce la scansione oraria
+####################
+
+
+include:
+  - OrarioFixtures.yml
+
+
+App\Entity\ScansioneOraria:
+
+  # ----- scansione orario provvisorio sede 1 -----
+  scansione_oraria_provvisorio1_{1..6}_1:
+    giorno: '<current()>'
+    ora: 1
+    inizio: '<date_create("08:30")>'
+    fine: '<date_create("09:30")>'
+    durata: 1
+    orario: '@orario_provvisorio1'
+  scansione_oraria_provvisorio1_{1..6}_2:
+    giorno: '<current()>'
+    ora: 2
+    inizio: '<date_create("09:30")>'
+    fine: '<date_create("10:30")>'
+    durata: 1
+    orario: '@orario_provvisorio1'
+  scansione_oraria_provvisorio1_{1..6}_3:
+    giorno: '<current()>'
+    ora: 3
+    inizio: '<date_create("10:30")>'
+    fine: '<date_create("11:30")>'
+    durata: 1
+    orario: '@orario_provvisorio1'
+  scansione_oraria_provvisorio1_{1..6}_4:
+    giorno: '<current()>'
+    ora: 4
+    inizio: '<date_create("11:30")>'
+    fine: '<date_create("12:30")>'
+    durata: 1
+    orario: '@orario_provvisorio1'
+
+  # ----- scansione orario provvisorio sede 2 -----
+  scansione_oraria_provvisorio2_{1..6}_1:
+    giorno: '<current()>'
+    ora: 1
+    inizio: '<date_create("08:30")>'
+    fine: '<date_create("09:30")>'
+    durata: 1
+    orario: '@orario_provvisorio2'
+  scansione_oraria_provvisorio2_{1..6}_2:
+    giorno: '<current()>'
+    ora: 2
+    inizio: '<date_create("09:30")>'
+    fine: '<date_create("10:30")>'
+    durata: 1
+    orario: '@orario_provvisorio2'
+  scansione_oraria_provvisorio2_{1..6}_3:
+    giorno: '<current()>'
+    ora: 3
+    inizio: '<date_create("10:30")>'
+    fine: '<date_create("11:30")>'
+    durata: 1
+    orario: '@orario_provvisorio2'
+  scansione_oraria_provvisorio2_{1..6}_4:
+    giorno: '<current()>'
+    ora: 4
+    inizio: '<date_create("11:30")>'
+    fine: '<date_create("12:30")>'
+    durata: 1
+    orario: '@orario_provvisorio2'
+
+  # ----- scansione orario definitivo sede 1 -----
+  scansione_oraria_definitivo1_{1..6}_1:
+    giorno: '<current()>'
+    ora: 1
+    inizio: '<date_create("08:20")>'
+    fine: '<date_create("09:20")>'
+    durata: 1
+    orario: '@orario_definitivo1'
+  scansione_oraria_definitivo1_{1..6}_2:
+    giorno: '<current()>'
+    ora: 2
+    inizio: '<date_create("09:20")>'
+    fine: '<date_create("10:10")>'
+    durata: 1
+    orario: '@orario_definitivo1'
+  scansione_oraria_definitivo1_{1..6}_3:
+    giorno: '<current()>'
+    ora: 3
+    inizio: '<date_create("10:10")>'
+    fine: '<date_create("11:00")>'
+    durata: 1
+    orario: '@orario_definitivo1'
+  scansione_oraria_definitivo1_{1..6}_4:
+    giorno: '<current()>'
+    ora: 4
+    inizio: '<date_create("11:00")>'
+    fine: '<date_create("12:00")>'
+    durata: 1
+    orario: '@orario_definitivo1'
+  scansione_oraria_definitivo1_{1..6}_5:
+    giorno: '<current()>'
+    ora: 5
+    inizio: '<date_create("12:00")>'
+    fine: '<date_create("12:50")>'
+    durata: 1
+    orario: '@orario_definitivo1'
+  scansione_oraria_definitivo1_{1..6}_6:
+    giorno: '<current()>'
+    ora: 6
+    inizio: '<date_create("12:50")>'
+    fine: '<date_create("13:50")>'
+    durata: 1
+    orario: '@orario_definitivo1'
+
+  # ----- scansione orario definitivo sede 2 -----
+  scansione_oraria_definitivo2_{1..6}_1:
+    giorno: '<current()>'
+    ora: 1
+    inizio: '<date_create("08:20")>'
+    fine: '<date_create("09:20")>'
+    durata: 1
+    orario: '@orario_definitivo2'
+  scansione_oraria_definitivo2_{1..6}_2:
+    giorno: '<current()>'
+    ora: 2
+    inizio: '<date_create("09:20")>'
+    fine: '<date_create("10:10")>'
+    durata: 1
+    orario: '@orario_definitivo2'
+  scansione_oraria_definitivo2_{1..6}_3:
+    giorno: '<current()>'
+    ora: 3
+    inizio: '<date_create("10:10")>'
+    fine: '<date_create("11:00")>'
+    durata: 1
+    orario: '@orario_definitivo2'
+  scansione_oraria_definitivo2_{1..6}_4:
+    giorno: '<current()>'
+    ora: 4
+    inizio: '<date_create("11:00")>'
+    fine: '<date_create("12:00")>'
+    durata: 1
+    orario: '@orario_definitivo2'
+  scansione_oraria_definitivo2_{1..6}_5:
+    giorno: '<current()>'
+    ora: 5
+    inizio: '<date_create("12:00")>'
+    fine: '<date_create("12:50")>'
+    durata: 1
+    orario: '@orario_definitivo2'
+  scansione_oraria_definitivo2_{1..6}_6:
+    giorno: '<current()>'
+    ora: 6
+    inizio: '<date_create("12:50")>'
+    fine: '<date_create("13:50")>'
+    durata: 1
+    orario: '@orario_definitivo2'

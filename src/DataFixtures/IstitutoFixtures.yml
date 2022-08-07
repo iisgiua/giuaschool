@@ -1,0 +1,31 @@
+####################
+# IstitutoFixtures - dati di test
+#
+# Dati dell'istituto scolastico:
+#   tipo: tipo di istituto (es. Istituto di Istruzione Superiore)
+#   tipoSigla: tipo di istituto come sigla (es. I.I.S.)
+#   nome: nome completo dell'istituto scolastico
+#   nomeBreve: nome breve dell'istituto scolastico
+#   email: indirizzo email dell'istituto scolastico
+#   pec: indirizzo PEC dell'istituto scolastico
+#   urlSito: indirizzo web del sito istituzionale dell'istituto
+#   urlRegistro: indirizzo web del registro elettronico
+#   firmaPreside: testo per la firma del dirigente sui documenti
+#   emailAmministratore: indirizzo email dell'amministratore di sistema
+#   emailNotifiche: indirizzo email del mittente delle notifiche inviate dal sistema
+####################
+
+
+App\Entity\Istituto:
+  istituto:
+    tipo: 'Istituto di Istruzione Superiore'
+    tipoSigla: 'I.I.S.'
+    nome: 'Ada Lovelace'
+    nomeBreve: 'Lovelace'
+    email: 'iis.lovelace@istruzione.it'
+    pec: 'iis.lovelace@pec.istruzione.it'
+    urlSito: 'https://www.lovelace.edu.it'
+    urlRegistro: 'https://registro.lovelace.edu.it'
+    firmaPreside: 'Ing. Alan Turing'
+    emailAmministratore: 'admin@lovelace.edu.it'
+    emailNotifiche: 'noreply@lovelace.edu.it'

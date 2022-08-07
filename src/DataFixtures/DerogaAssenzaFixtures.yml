@@ -1,0 +1,19 @@
+####################
+# DerogaAssenzaFixtures - dati di test
+#
+# Dati per le deroghe per il conteggio finale delle assenze:
+#   data: data dell'assenza per cui vale la deroga
+#   alunno: alunno al quale si riferisce l'assenza
+#   motivazione: Motivazione della deroga
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+
+
+App\Entity\DerogaAssenza:
+  deroga_assenza_{1..10}:
+    data: '<dateTimeBetween("-1 month", "now")>'
+    alunno: '@alunno_*'
+    motivazione: '<text()>'

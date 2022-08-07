@@ -1,42 +1,42 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Security;
 
+use App\Util\ConfigLoader;
+use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
-use KnpU\OAuth2ClientBundle\Security\Authenticator\SocialAuthenticator;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use App\Util\LogHandler;
-use App\Util\ConfigLoader;
-use App\Entity\Utente;
-use App\Entity\Alunno;
-use App\Entity\Docente;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 
 /**
- * GSuiteAuthenticator - servizio usato per l'autenticazione tramite OAuth2 su GSuite
+ * GSuiteAuthenticator - servizio usato per l'autenticazione tramite OAuth2 su Google Workspace
+ *
+ * @author Antonello Dessì
  */
-class GSuiteAuthenticator extends SocialAuthenticator {
+class GSuiteAuthenticator extends OAuth2Authenticator implements AuthenticationEntrypointInterface {
+
+  use AuthenticatorTrait;
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -99,114 +99,70 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    *
    * @param Request $request Pagina richiesta
    *
-   * @return bool Vero se supportato, falso altrimenti
+   * @return bool|null Se vero o nullo è supportata, altrimenti no.
    */
-  public function supports(Request $request) {
+  public function supports(Request $request): ?bool {
     // solo se vero continua con l'autenticazione
-    return $request->attributes->get('_route') === 'login_gsuite_check' && $request->isMethod('GET');
+    return ($request->attributes->get('_route') === 'login_gsuite_check' && $request->isMethod('GET'));
   }
 
   /**
-   * Recupera le credenziali di autenticazione dalla pagina richiesta e le restituisce.
-   * Se si restituisce null, l'autenticazione viene interrotta.
+   * Esegue l'autenticazione e crea un passaporto che contiene il solo utente.
    *
    * @param Request $request Pagina richiesta
    *
-   * @return mixed|null Le credenziali dell'autenticazione o null
+   * @return Passport Passaporto creato per la richiesta corrente
+   *
+   * @throws AuthenticationException Eccezione lanciata per ogni tipo di errore di autenticazione
    */
-  public function getCredentials(Request $request) {
-    // restituisce il token di accesso
-    return $this->fetchAccessToken($this->clientRegistry->getClient('gsuite'));
+  public function authenticate(Request $request): Passport {
+      // crea e restituisce il passaporto
+    return new SelfValidatingPassport(
+      new UserBadge($request->getClientIp(), [$this, 'getUser']));
   }
 
   /**
-   * Restituisce l'utente corrispondente alle credenziali fornite
+   * Restituisce l'utente corrispondente all'identificativo fornito
    *
-   * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserProviderInterface $userProvider Gestore degli utenti
+   * @param string $ip Indirizzo IP della richiesta di accesso
    *
-   * @return UserInterface|null L'utente trovato o null
+   * @return UserInterface|null L'utente trovato o null se errore
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function getUser($credentials, UserProviderInterface $userProvider) {
-    // init
+  public function getUser(string $ip): ?UserInterface {
     $user = null;
     // trova utente Google
-    $userGoogle = $this->clientRegistry->getClient('gsuite')->fetchUserFromToken($credentials);
+    $client = $this->clientRegistry->getClient('gsuite');
+    $accessToken = $this->fetchAccessToken($client);
+    $userGoogle = $client->fetchUserFromToken($accessToken);
     if (!$userGoogle) {
       // utente non autenticato su Google
-      $this->logger->error('Autenticazione Google non valida.', array(
-        'credenziali' => $credentials));
+      $this->logger->error('Autenticazione Google non valida.', ['ip' => $ip]);
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // autenticato su Google: controlla se esiste nel registro
-    $user = $this->em->getRepository('App:Utente')->findOneBy(['email' => $userGoogle->getEmail(),
+    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['email' => $userGoogle->getEmail(),
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste nel registro
-      $this->logger->error('Utente non valido nell\'autenticazione Google.', array(
-        'email' => $userGoogle->getEmail()));
+      $this->logger->error('Utente non valido nell\'autenticazione Google.',
+        ['email' => $userGoogle->getEmail(), 'ip' => $ip]);
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    if (!($user instanceOf Alunno) && !($user instanceOf Docente)) {
-      // utente non è alunno/docente
-      $this->logger->error('Tipo di utente non valido nell\'autenticazione Google.', array(
-        'email' => $userGoogle->getEmail()));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_user');
-    }
-    if (empty($user->getCodiceFiscale()) || ($user instanceOf Alunno)) {
-      // ok restituisce profilo
-      return $user;
-    }
-    // trova profili attivi per docente
-    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getNome(),
-      $user->getCognome(), $user->getCodiceFiscale());
-    if ($profilo) {
-      // controlla che il profilo sia lo stesso richiesto tramite autenticazione Google
-      if ($profilo->getId() == $user->getId()) {
-        // ok restituisce profilo
-        return $user;
-      }
-      // altrimenti cerca tra i profili attivi
-      foreach ($profilo->getListaProfili() as $profili) {
-        foreach ($profili as $id) {
-          if ($id == $user->getId()) {
-            // memorizza lista profili
-            $user->setListaProfili($profilo->getListaProfili());
-            // ok restituisce profilo
-            return $user;
-          }
-        }
-      }
-    }
-    // errore: utente disabilitato
-    $this->logger->error('Utente disabilitato nell\'autenticazione Google.', array(
-      'email' => $userGoogle->getEmail()));
-    throw new CustomUserMessageAuthenticationException('exception.invalid_user');
-  }
-
-  /**
-   * Restituisce vero se le credenziali sono valide.
-   * Qualsiasi altro valore restituito farà fallire l'autenticazione.
-   * Si può anche generare un'eccezione per far fallire l'autenticazione.
-   *
-   * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserInterface $user Utente corripondente alle credenziali
-   *
-   * @return bool Vero se le credenziali sono valide, falso altrimenti
-   */
-  public function checkCredentials($credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
-    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
-      // errore: modalità manutenzione
-      $this->logger->error('Tentativo di accesso da Google durante la modalità manutenzione.', array(
-        'email' => $user->getEmail()));
-      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
+    $this->controllaManutenzione($user);
+    // legge configurazione: id_provider
+    $idProvider = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider');
+    $idProviderTipo = $this->em->getRepository('App\Entity\Configurazione')->getParametro('id_provider_tipo');
+    if (!$idProvider || !$user->controllaRuolo($idProviderTipo)) {
+      // errore: utente non abilitato deve usare accesso con id provider
+      $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite Google.',
+        ['email' => $user->getEmail(), 'ruolo' => $user->getCodiceRuolo(), 'ip' => $ip]);
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
     }
-    // validazione corretta
-    return true;
+    // restituisce profilo attivo
+    return $this->controllaProfili($user);
   }
 
   /**
@@ -214,11 +170,11 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    *
    * @param Request $request Pagina richiesta
    * @param TokenInterface $token Token di autenticazione (contiene l'utente)
-   * @param string $providerKey Chiave usata dal gestore della sicurezza (definita nel firewall)
+   * @param string $firewallName Nome del firewall usato per la richiesta
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta come utente autenticato
    */
-  public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
+  public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
@@ -251,9 +207,9 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    * @param Request $request Pagina richiesta
    * @param AuthenticationException $exception Eccezione di autenticazione
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
-  public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
+   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
     // messaggio di errore
     $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
@@ -270,22 +226,12 @@ class GSuiteAuthenticator extends SocialAuthenticator {
    *
    * @return Response Pagina di risposta
    */
-  public function start(Request $request, AuthenticationException $authException = null) {
+  public function start(Request $request, AuthenticationException $authException = null): Response {
     // eccezione che ha richiesto l'autenticazione
     $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
     $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
     return new RedirectResponse($this->router->generate('login_form'));
-  }
-
-  /**
-   * Indica se l'autenticatore supporta o meno la gestione del cookie RICORDAMI.
-   *
-   * @return bool Vero se supportato il cookie RICORDAMI, falso altrimenti
-   */
-  public function supportsRememberMe(): bool {
-    // nessun supporto per il cookie RICORDAMI
-    return false;
   }
 
 }

@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,135 +13,136 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Log - entità
+ * Log - dati per il log degli eventi
  *
  * @ORM\Entity(repositoryClass="App\Repository\LogRepository")
  * @ORM\Table(name="gs_log")
  * @ORM\HasLifecycleCallbacks
-*/
+ *
+ * @author Antonello Dessì
+ */
 class Log {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per il log
+   * @var int|null $id Identificativo univoco per il log
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var Utente $utente Utente connesso
+   * @var Utente|null $utente Utente connesso
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $utente;
+  private ?Utente $utente = null;
 
   /**
-   * @var string $username Username dell'utente connesso
+   * @var string|null $username Username dell'utente connesso
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $username;
+  private ?string $username = '';
 
   /**
-   * @var string $ruolo Ruolo dell'utente connesso
+   * @var string|null $ruolo Ruolo dell'utente connesso
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private $ruolo;
+  private ?string $ruolo = '';
 
   /**
-   * @var string $alias Username dell'utente reale se l'utente è un alias, altrimenti null
+   * @var string|null $alias Username dell'utente reale se l'utente è un alias, altrimenti null
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $alias;
+  private ?string $alias = '';
 
   /**
-   * @var string $ip Indirizzo IP dell'utente connesso
+   * @var string|null $ip Indirizzo IP dell'utente connesso
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $ip;
+  private ?string $ip = '';
 
   /**
-   * @var string $origine Controller che ha generato il log
+   * @var string|null $origine Controller che ha generato il log
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $origine;
+  private ?string $origine = '';
 
   /**
-   * @var string $tipo Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
+   * @var string|null $tipo Tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"A","C","U","D"}, strict=true, message="field.choice")
    */
-  private $tipo;
+  private ?string $tipo = 'A';
 
   /**
-   * @var string $categoria Categoria dell'azione registrata nel log
+   * @var string|null $categoria Categoria dell'azione registrata nel log
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private $categoria;
+  private ?string $categoria = '';
 
   /**
-   * @var string $azione Azione registrata nel log
+   * @var string|null $azione Azione registrata nel log
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $azione;
+  private ?string $azione = '';
 
   /**
-   * @var array $dati Lista di dati da memorizzare nel log
+   * @var array|null $dati Lista di dati da memorizzare nel log
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
 
   //==================== EVENTI ORM ====================
@@ -155,7 +152,7 @@ class Log {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -166,7 +163,7 @@ class Log {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -177,36 +174,36 @@ class Log {
   /**
    * Restituisce l'identificativo univoco per il log
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'utente connesso
    *
-   * @return Utente Utente connesso
+   * @return Utente|null Utente connesso
    */
-  public function getUtente() {
+  public function getUtente(): ?Utente {
     return $this->utente;
   }
 
@@ -215,9 +212,9 @@ class Log {
    *
    * @param Utente $utente Utente connesso
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setUtente(Utente $utente) {
+  public function setUtente(Utente $utente): self {
     $this->utente = $utente;
     return $this;
   }
@@ -225,20 +222,20 @@ class Log {
   /**
    * Restituisce la username dell'utente connesso
    *
-   * @return string Username dell'utente connesso
+   * @return string|null Username dell'utente connesso
    */
-  public function getUsername() {
+  public function getUsername(): ?string {
     return $this->username;
   }
 
   /**
    * Modifica la username dell'utente connesso
    *
-   * @param string $username Username dell'utente connesso
+   * @param string|null $username Username dell'utente connesso
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setUsername($username) {
+  public function setUsername(?string $username): self {
     $this->username = $username;
     return $this;
   }
@@ -246,20 +243,20 @@ class Log {
   /**
    * Restituisce il ruolo dell'utente connesso
    *
-   * @return string Ruolo dell'utente connesso
+   * @return string|null Ruolo dell'utente connesso
    */
-  public function getRuolo() {
+  public function getRuolo(): ?string {
     return $this->ruolo;
   }
 
   /**
    * Modifica il ruolo dell'utente connesso
    *
-   * @param string $ruolo Ruolo dell'utente connesso
+   * @param string|null $ruolo Ruolo dell'utente connesso
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setRuolo($ruolo) {
+  public function setRuolo(?string $ruolo): self {
     $this->ruolo = $ruolo;
     return $this;
   }
@@ -269,7 +266,7 @@ class Log {
    *
    * @return string|null Username dell'utente reale, o null se l'utente non è un alias
    */
-  public function getAlias() {
+  public function getAlias(): ?string {
     return $this->alias;
   }
 
@@ -278,9 +275,9 @@ class Log {
    *
    * @param string|null $alias Username dell'utente reale, o null se l'utente non è un alias
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAlias($alias) {
+  public function setAlias(?string $alias): self {
     $this->alias = $alias;
     return $this;
   }
@@ -288,20 +285,20 @@ class Log {
   /**
    * Restituisce l'indirizzo IP dell'utente connesso
    *
-   * @return string Indirizzo IP dell'utente connesso
+   * @return string|null Indirizzo IP dell'utente connesso
    */
-  public function getIp() {
+  public function getIp(): ?string {
     return $this->ip;
   }
 
   /**
    * Modifica l'indirizzo IP dell'utente connesso
    *
-   * @param string $ip Indirizzo IP dell'utente connesso
+   * @param string|null $ip Indirizzo IP dell'utente connesso
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setIp($ip) {
+  public function setIp(?string $ip): self {
     $this->ip = $ip;
     return $this;
   }
@@ -309,20 +306,20 @@ class Log {
   /**
    * Restituisce il controller che ha generato il log
    *
-   * @return string Controller che ha generato il log
+   * @return string|null Controller che ha generato il log
    */
-  public function getOrigine() {
+  public function getOrigine(): ?string {
     return $this->origine;
   }
 
   /**
    * Modifica il controller che ha generato il log
    *
-   * @param string $origine Controller che ha generato il log
+   * @param string|null $origine Controller che ha generato il log
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setOrigine($origine) {
+  public function setOrigine(?string $origine): self {
     $this->origine = $origine;
     return $this;
   }
@@ -330,20 +327,20 @@ class Log {
   /**
    * Restituisce il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
-   * @return string Tipo di dati memorizzati
+   * @return string|null Tipo di dati memorizzati
    */
-  public function getTipo() {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo di dati memorizzati [A=azione utente, C=creazione istanza, U=modifica istanza, D=cancellazione istanza]
    *
-   * @param string $tipo Tipo di dati memorizzati
+   * @param string|null $tipo Tipo di dati memorizzati
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setTipo($tipo) {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -351,20 +348,20 @@ class Log {
   /**
    * Restituisce la categoria dell'azione registrata nel log
    *
-   * @return string Categoria dell'azione registrata nel log
+   * @return string|null Categoria dell'azione registrata nel log
    */
-  public function getCategoria() {
+  public function getCategoria(): ?string {
     return $this->categoria;
   }
 
   /**
    * Modifica la categoria dell'azione registrata nel log
    *
-   * @param string $categoria Categoria dell'azione registrata nel log
+   * @param string|null $categoria Categoria dell'azione registrata nel log
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setCategoria($categoria) {
+  public function setCategoria(?string $categoria): self {
     $this->categoria = $categoria;
     return $this;
   }
@@ -372,20 +369,20 @@ class Log {
   /**
    * Restituisce l'azione registrata nel log
    *
-   * @return string Azione registrata nel log
+   * @return string|null Azione registrata nel log
    */
-  public function getAzione() {
+  public function getAzione(): ?string {
     return $this->azione;
   }
 
   /**
    * Modifica l'azione registrata nel log
    *
-   * @param string $azione Azione registrata nel log
+   * @param string|null $azione Azione registrata nel log
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAzione($azione) {
+  public function setAzione(?string $azione): self {
     $this->azione = $azione;
     return $this;
   }
@@ -393,9 +390,9 @@ class Log {
   /**
    * Restituisce la lista di dati da memorizzare nel log
    *
-   * @return array Lista di dati da memorizzare nel log
+   * @return array|null Lista di dati da memorizzare nel log
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -404,9 +401,9 @@ class Log {
    *
    * @param array $dati Lista di dati da memorizzare nel log
    *
-   * @return Log Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -419,19 +416,11 @@ class Log {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->dati = [];
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->modificato->format('d/m/Y H:i').' - '.$this->azione;
   }
 

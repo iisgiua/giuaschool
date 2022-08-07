@@ -70,7 +70,7 @@
               </button>
               <div class="visible-xs-block text-center">
                 <strong>{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</strong>
-                  {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('CONFIG/SISTEMA/anno_scolastico') }}{% endif %}
+                  {% if is_granted('IS_AUTHENTICATED_FULLY') %}<br>{{ app.session.get('/CONFIG/SISTEMA/anno_scolastico') }}{% endif %}
               </div>
             </div>
             <div class="collapse navbar-collapse" id="gs-navbar-collapse-1">
@@ -116,7 +116,7 @@
               </div>
               <div class="col-sm-5 col-xs-10 text-center">
                 <p>
-                  <a href="https://trinko.github.io/giuaschool-docs/" target="_blank" title="Vai alla documentazione del progetto">
+                  <a href="https://iisgiua.github.io/giuaschool-docs/" target="_blank" title="Vai alla documentazione del progetto">
                     <img src="{{ asset('img/logo-giuaschool.png') }}" class="gs-mr-2"><em style="color:#337ab7"><strong>giua@school {{ app.session.get('/CONFIG/SISTEMA/versione') }}</strong></em>
                   </a>
                   <em class="hidden-xs gs-big"><br>il registro elettronico<br>dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</em>

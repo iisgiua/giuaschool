@@ -1,0 +1,64 @@
+####################
+# ValutazioneFixtures - dati di test
+#
+# Dati di una valutazione scolastica:
+#   tipo: tipo di valutazione [S=scritto, O=orale, p=pratico]
+#   visibile: indica se la valutazione è visibile ai genitori o no
+#   media: indica se la valutazione entra nella media di riepilogo o no
+#   voto: voto numerico della valutazione [0|null=non presente, 1, 1.25, 1.50, 1.75, 2, ...]
+#   giudizio: giudizio della valutazione
+#   argomento: argomento relativo alla valutazione
+#   docente: docente che inserisce la valutazione
+#   alunno: alunno a cui si attribuisce la valutazione
+#   lezione: lezione a cui si riferisce la valutazione
+#   materia: materia a cui si riferisce la valutazione (potrebbe non coincidere con quella della lezione)
+####################
+
+
+include:
+  - DocenteFixtures.yml
+  - AlunnoFixtures.yml
+  - LezioneFixtures.yml
+  - MateriaFixtures.yml
+
+
+App\Entity\Valutazione:
+
+  # ----- valutazione con voto -----
+  valutazione_voto_{0..36}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: '<boolean()>'
+    media: '<boolean()>'
+    voto: '<((int) ($current / 4) + 1 + ($current % 4) * 0.25)>'
+    giudizio: '50%? <text()>: <strval("")>'
+    argomento: '50%? <text()>: <strval("")>'
+    docente: '@docente_*'
+    alunno: '@alunno_*'
+    lezione: '@lezione_*'
+    materia: '<($lezione->getMateria())>'
+
+  # ----- valutazione con giudizio -----
+  valutazione_giudizio_{1..30}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: '<boolean()>'
+    media: '<boolean()>'
+    voto: 0
+    giudizio: '<text()>'
+    argomento: '50%? <text()>: <strval("")>'
+    docente: '@docente_*'
+    alunno: '@alunno_*'
+    lezione: '@lezione_*'
+    materia: '<($lezione->getMateria())>'
+
+  # ----- valutazione materia diversa da lezione -----
+  valutazione_materia_{1..10}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: '<boolean()>'
+    media: '<boolean()>'
+    voto: '<numberBetween(1, 10)>'
+    giudizio: '50%? <text()>: <strval("")>'
+    argomento: '50%? <text()>: <strval("")>'
+    docente: '@docente_*'
+    alunno: '@alunno_*'
+    lezione: '@lezione_*'
+    materia: '@materia_*'

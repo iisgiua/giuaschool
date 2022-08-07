@@ -1,29 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use App\Entity\Alunno;
 use App\Entity\Amministratore;
 use App\Entity\Ata;
 use App\Entity\Docente;
 use App\Entity\Genitore;
-use App\Entity\Alunno;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
 
 /**
  * Utente - repository
+ *
+ * @author Antonello Dessì
  */
 class UtenteRepository extends EntityRepository {
 
@@ -120,6 +119,19 @@ class UtenteRepository extends EntityRepository {
       $utente->setListaProfili($numDati > 1 ? $dati : []);
     }
     return $utente;
+  }
+
+  /**
+   * Implementazione dell'interfaccia PasswordUpgraderInterface per l'aggiornamento del codice hash della password
+   *
+   * @param UserInterface $user Utente che deve aggiornare il codice hash della password
+   * @param string $newHashedPassword Nuovo codice hash della password
+   */
+  public function upgradePassword(UserInterface $user, string $newHashedPassword): void {
+     // imposta il nuovo codice hash per la password
+     $user->setPassword($newHashedPassword);
+     // memorizza su db
+     $this->getEntityManager()->flush();
   }
 
 }

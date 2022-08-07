@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -14,10 +10,17 @@ namespace App\Repository;
 
 use App\Entity\Sede;
 use App\Entity\Classe;
+use App\Entity\Assenza;
+use App\Entity\Configurazione;
+use App\Entity\Entrata;
+use App\Entity\Lezione;
+use App\Entity\Uscita;
 
 
 /**
  * Festivita - repository
+ *
+ * @author Antonello Dessì
  */
 class FestivitaRepository extends BaseRepository {
 
@@ -46,9 +49,9 @@ class FestivitaRepository extends BaseRepository {
       return true;
     }
     // controlla se la data è al di fuori dell'anno scolastico
-    $inizio_conf = $this->_em->getRepository('App:Configurazione')->findOneByParametro('anno_inizio');
+    $inizio_conf = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_inizio');
     $inizio = ($inizio_conf === null ? '0000-00-00' : $inizio_conf->getValore());
-    $fine_conf = $this->_em->getRepository('App:Configurazione')->findOneByParametro('anno_fine');
+    $fine_conf = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_fine');
     $fine = ($fine_conf === null ? '0000-00-00' : $fine_conf->getValore());
     $data_str = $data->format('Y-m-d');
     if ($data_str < $inizio || $data_str > $fine) {
@@ -70,14 +73,14 @@ class FestivitaRepository extends BaseRepository {
    */
   public function giornoSuccessivo(\DateTime $data, Sede $sede=null, Classe $classe=null) {
     // fine anno
-    $fine = $this->_em->getRepository('App:Configurazione')->findOneByParametro('anno_fine');
+    $fine = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_fine');
     // controlla successivo
     $succ = clone $data;
     while ($fine && $succ->format('Y-m-d') < $fine->getValore()) {
       // giorno successivo
       $succ->modify('+1 day');
       // controllo riposo settimanale (domenica e altri)
-      $weekdays = $this->_em->getRepository('App:Configurazione')->findOneByParametro('giorni_festivi_istituto');
+      $weekdays = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('giorni_festivi_istituto');
       if ($weekdays && in_array($succ->format('w'), explode(',', $weekdays->getValore()))) {
         // festivo
         continue;
@@ -91,7 +94,7 @@ class FestivitaRepository extends BaseRepository {
       // controllo situazioni anomali
       if ($classe) {
         // controllo se giorno senza lezioni
-        $lezioni = $this->_em->getRepository('App:Lezione')->createQueryBuilder('l')
+        $lezioni = $this->_em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->select('COUNT(l.id)')
           ->where('l.data=:data AND l.classe=:classe')
           ->setParameters(['data' => $succ, 'classe' => $classe])
@@ -102,21 +105,21 @@ class FestivitaRepository extends BaseRepository {
           return $succ;
         }
         // verifica assenze/ritardi/uscite non registrati
-        $assenze = $this->_em->getRepository('App:Assenza')->createQueryBuilder('ass')
+        $assenze = $this->_em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
           ->join('ass.alunno', 'a')
           ->where('ass.data=:data AND a.classe=:classe')
           ->setParameters(['data' => $succ, 'classe' => $classe])
           ->getQuery()
           ->getSingleScalarResult();
-        $ritardi = $this->_em->getRepository('App:Entrata')->createQueryBuilder('e')
+        $ritardi = $this->_em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->join('e.alunno', 'a')
           ->where('e.data=:data AND a.classe=:classe')
           ->setParameters(['data' => $succ, 'classe' => $classe])
           ->getQuery()
           ->getSingleScalarResult();
-        $uscite = $this->_em->getRepository('App:Uscita')->createQueryBuilder('u')
+        $uscite = $this->_em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
           ->select('COUNT(u.id)')
           ->join('u.alunno', 'a')
           ->where('u.data=:data AND a.classe=:classe')
@@ -146,14 +149,14 @@ class FestivitaRepository extends BaseRepository {
    */
   public function giornoPrecedente(\DateTime $data, Sede $sede=null, Classe $classe=null) {
     // inizio anno
-    $inizio = $this->_em->getRepository('App:Configurazione')->findOneByParametro('anno_inizio');
+    $inizio = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_inizio');
     // controlla precedente
     $prec = clone $data;
     while ($inizio && $prec->format('Y-m-d') > $inizio->getValore()) {
       // giorno successivo
       $prec->modify('-1 day');
       // controllo riposo settimanale (domenica e altri)
-      $weekdays = $this->_em->getRepository('App:Configurazione')->findOneByParametro('giorni_festivi_istituto');
+      $weekdays = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('giorni_festivi_istituto');
       if ($weekdays && in_array($prec->format('w'), explode(',', $weekdays->getValore()))) {
         // festivo
         continue;
@@ -167,7 +170,7 @@ class FestivitaRepository extends BaseRepository {
       // controllo situazioni anomali
       if ($classe) {
         // controllo se giorno senza lezioni
-        $lezioni = $this->_em->getRepository('App:Lezione')->createQueryBuilder('l')
+        $lezioni = $this->_em->getRepository('App\Entity\Lezione')->createQueryBuilder('l')
           ->select('COUNT(l.id)')
           ->where('l.data=:data AND l.classe=:classe')
           ->setParameters(['data' => $prec, 'classe' => $classe])
@@ -178,21 +181,21 @@ class FestivitaRepository extends BaseRepository {
           return $prec;
         }
         // verifica assenze/ritardi/uscite non registrati
-        $assenze = $this->_em->getRepository('App:Assenza')->createQueryBuilder('ass')
+        $assenze = $this->_em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
           ->join('ass.alunno', 'a')
           ->where('ass.data=:data AND a.classe=:classe')
           ->setParameters(['data' => $prec, 'classe' => $classe])
           ->getQuery()
           ->getSingleScalarResult();
-        $ritardi = $this->_em->getRepository('App:Entrata')->createQueryBuilder('e')
+        $ritardi = $this->_em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
           ->join('e.alunno', 'a')
           ->where('e.data=:data AND a.classe=:classe')
           ->setParameters(['data' => $prec, 'classe' => $classe])
           ->getQuery()
           ->getSingleScalarResult();
-        $uscite = $this->_em->getRepository('App:Uscita')->createQueryBuilder('u')
+        $uscite = $this->_em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
           ->select('COUNT(u.id)')
           ->join('u.alunno', 'a')
           ->where('u.data=:data AND a.classe=:classe')

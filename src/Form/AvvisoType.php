@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -30,6 +26,8 @@ use App\Entity\Avviso;
 
 /**
  * AvvisoType - form per la classe Avviso
+ *
+ * @author Antonello Dessì
  */
 class AvvisoType extends AbstractType {
 
@@ -63,7 +61,7 @@ class AvvisoType extends AbstractType {
           'mapped' => false,
           'required' => true))
         ->add('sedi', EntityType::class, array('label' => 'label.sede',
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) use ($options) {
               if ($options['dati'][1]) {
@@ -108,7 +106,7 @@ class AvvisoType extends AbstractType {
         ->add('filtro', HiddenType::class, array('label' => false,
           'required' => false))
         ->add('classi', EntityType::class, array('label' => 'label.scegli_classi',
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
               return $obj->getAnno().'ª '.$obj->getSezione();
             },
@@ -131,7 +129,7 @@ class AvvisoType extends AbstractType {
           'required' => false,
           'mapped' => false))
         ->add('materie', EntityType::class, array('label' => 'label.scegli_materie',
-          'class' => 'App:Materia',
+          'class' => 'App\Entity\Materia',
           'choice_label' => function ($obj) {
               return $obj->getNome();
             },
@@ -146,7 +144,7 @@ class AvvisoType extends AbstractType {
           'required' => false,
           'mapped' => false))
         ->add('lista_classi', EntityType::class, array('label' => 'label.scegli_classi',
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
               return $obj->getAnno().'ª '.$obj->getSezione();
             },
@@ -192,7 +190,7 @@ class AvvisoType extends AbstractType {
           'attr' => array('rows' => '4'),
           'required' => true))
         ->add('sedi', EntityType::class, array('label' => 'label.sede',
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) use ($options) {
               if ($options['dati'][1]) {
@@ -212,7 +210,7 @@ class AvvisoType extends AbstractType {
         ->add('filtro', HiddenType::class, array('label' => false,
           'required' => false))
         ->add('classi', EntityType::class, array('label' => 'label.scegli_classi',
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
               return $obj->getAnno().'ª '.$obj->getSezione();
             },
@@ -258,7 +256,7 @@ class AvvisoType extends AbstractType {
           'attr' => array('rows' => '4'),
           'required' => true))
         ->add('sedi', EntityType::class, array('label' => 'label.sede',
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) use ($options) {
               if ($options['dati'][0]) {
@@ -278,7 +276,7 @@ class AvvisoType extends AbstractType {
         ->add('filtro', HiddenType::class, array('label' => false,
           'required' => false))
         ->add('classi', EntityType::class, array('label' => 'label.scegli_classi',
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
               return $obj->getAnno().'ª '.$obj->getSezione();
             },
@@ -308,7 +306,7 @@ class AvvisoType extends AbstractType {
           'attr' => array('rows' => '4'),
           'required' => true))
         ->add('sedi', EntityType::class, array('label' => 'label.sede',
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) use ($options) {
               if ($options['dati'][0]) {
@@ -328,7 +326,7 @@ class AvvisoType extends AbstractType {
         ->add('filtro', HiddenType::class, array('label' => false,
           'required' => false))
         ->add('lista_classi', EntityType::class, array('label' => 'label.scegli_classi',
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
               return $obj->getAnno().'ª '.$obj->getSezione();
             },

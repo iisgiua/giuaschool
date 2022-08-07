@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,9 +13,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -35,6 +31,10 @@ use App\Entity\Genitore;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
 use App\Entity\Scrutinio;
+use App\Entity\Avviso;
+use App\Entity\Colloquio;
+use App\Entity\Festivita;
+use App\Entity\Materia;
 use App\Util\GenitoriUtil;
 use App\Util\RegistroUtil;
 use App\Util\BachecaUtil;
@@ -46,6 +46,8 @@ use App\Form\MessageType;
 
 /**
  * GenitoriController - funzioni per i genitori
+ *
+ * @author Antonello Dessì
  */
 class GenitoriController extends AbstractController {
 
@@ -53,7 +55,7 @@ class GenitoriController extends AbstractController {
    * Mostra lezioni svolte
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param RegistroUtil $reg Funzioni di utilità per il registro
@@ -68,7 +70,7 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function lezioniAction(EntityManagerInterface $em, SessionInterface $session, TranslatorInterface $trans,
+  public function lezioniAction(EntityManagerInterface $em, RequestStack $reqstack, TranslatorInterface $trans,
                                  GenitoriUtil $gen, RegistroUtil $reg, $data) {
     // inizializza variabili
     $lista_festivi = null;
@@ -82,9 +84,9 @@ class GenitoriController extends AbstractController {
     // parametro data
     if ($data == '0000-00-00') {
       // data non specificata
-      if ($session->get('/APP/GENITORE/data_lezione')) {
+      if ($reqstack->getSession()->get('/APP/GENITORE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/GENITORE/data_lezione'));
+        $data_obj = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/GENITORE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new \DateTime();
@@ -92,7 +94,7 @@ class GenitoriController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
-      $session->set('/APP/GENITORE/data_lezione', $data);
+      $reqstack->getSession()->set('/APP/GENITORE/data_lezione', $data);
     }
     // legge l'alunno
     if ($this->getUser() instanceOf Alunno) {
@@ -115,12 +117,12 @@ class GenitoriController extends AbstractController {
     if ($classe) {
       // data prec/succ
       $data_succ = (clone $data_obj);
-      $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+      $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
       if ($data_succ && $data_succ->format('Y-m-d') > (new \DateTime())->format('Y-m-d')) {
         $data_succ = null;
       }
       $data_prec = (clone $data_obj);
-      $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+      $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
       // recupera festivi per calendario
       $lista_festivi = $reg->listaFestivi($classe->getSede());
       // controllo data
@@ -179,7 +181,7 @@ class GenitoriController extends AbstractController {
     $dati = null;
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $em->getRepository('App:Materia')->find($idmateria);
+      $materia = $em->getRepository('App\Entity\Materia')->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -265,7 +267,7 @@ class GenitoriController extends AbstractController {
     $template = 'ruolo_genitore/voti.html.twig';
     // parametro materia
     if ($idmateria > 0) {
-      $materia = $em->getRepository('App:Materia')->find($idmateria);
+      $materia = $em->getRepository('App\Entity\Materia')->find($idmateria);
       if (!$materia) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -538,7 +540,7 @@ class GenitoriController extends AbstractController {
         $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
         if (!in_array($periodo, ['P', 'S', 'A'])) {
           // legge dati valutazioni
-          $dati['valutazioni'] = $em->getRepository('App:Scrutinio')
+          $dati['valutazioni'] = $em->getRepository('App\Entity\Scrutinio')
             ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
             ->getDato('valutazioni');
         }
@@ -628,7 +630,7 @@ class GenitoriController extends AbstractController {
     $dati['lista'] = array();
     $label = array();
     // controlla colloquio
-    $colloquio = $em->getRepository('App:Colloquio')->find($colloquio);
+    $colloquio = $em->getRepository('App\Entity\Colloquio')->find($colloquio);
     if (!$colloquio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -667,7 +669,7 @@ class GenitoriController extends AbstractController {
     $form->handleRequest($request);
     if (!$dati['errore'] && $form->isSubmitted() && $form->isValid()) {
       $data = explode('|', $form->get('data')->getData());
-      $richiesta = $em->getRepository('App:RichiestaColloquio')->createQueryBuilder('rc')
+      $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
         ->where('rc.colloquio=:colloquio AND rc.alunno=:alunno AND rc.appuntamento=:appuntamento AND rc.stato!=:stato')
         ->setParameters(['colloquio' => $colloquio, 'alunno' => $alunno,
           'appuntamento' => $data[0], 'stato' => 'A'])
@@ -737,7 +739,7 @@ class GenitoriController extends AbstractController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controlla richiesta
-    $richiesta = $em->getRepository('App:RichiestaColloquio')->findOneBy(['id' => $richiesta, 'alunno' => $alunno]);
+    $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->findOneBy(['id' => $richiesta, 'alunno' => $alunno]);
     if (!$richiesta) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -763,7 +765,7 @@ class GenitoriController extends AbstractController {
    * Visualizza gli avvisi destinati ai genitori
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param BachecaUtil $bac Funzioni di utilità per la gestione della bacheca
    * @param int $pagina Numero di pagina per l'elenco da visualizzare
    *
@@ -776,20 +778,20 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function avvisiAction(Request $request, SessionInterface $session, BachecaUtil $bac, $pagina) {
+  public function avvisiAction(Request $request, RequestStack $reqstack, BachecaUtil $bac, $pagina) {
     // inizializza variabili
     $dati = null;
     $limite = 20;
     // recupera criteri dalla sessione
     $cerca = array();
-    $cerca['visualizza'] = $session->get('/APP/ROUTE/genitori_avvisi/visualizza', 'T');
-    $cerca['oggetto'] = $session->get('/APP/ROUTE/genitori_avvisi/oggetto', '');
+    $cerca['visualizza'] = $reqstack->getSession()->get('/APP/ROUTE/genitori_avvisi/visualizza', 'T');
+    $cerca['oggetto'] = $reqstack->getSession()->get('/APP/ROUTE/genitori_avvisi/oggetto', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
-      $pagina = $session->get('/APP/ROUTE/genitori_avvisi/pagina', 1);
+      $pagina = $reqstack->getSession()->get('/APP/ROUTE/genitori_avvisi/pagina', 1);
     } else {
       // pagina specificata: la conserva in sessione
-      $session->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
     }
     // form di ricerca
     $form = $this->container->get('form.factory')->createNamedBuilder('bacheca_avvisi_genitori', FormType::class)
@@ -815,9 +817,9 @@ class GenitoriController extends AbstractController {
       $cerca['visualizza'] = $form->get('visualizza')->getData();
       $cerca['oggetto'] = $form->get('oggetto')->getData();
       $pagina = 1;
-      $session->set('/APP/ROUTE/genitori_avvisi/visualizza', $cerca['visualizza']);
-      $session->set('/APP/ROUTE/genitori_avvisi/oggetto', $cerca['oggetto']);
-      $session->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
+      $reqstack->getSession()->set('/APP/ROUTE/genitori_avvisi/visualizza', $cerca['visualizza']);
+      $reqstack->getSession()->set('/APP/ROUTE/genitori_avvisi/oggetto', $cerca['oggetto']);
+      $reqstack->getSession()->set('/APP/ROUTE/genitori_avvisi/pagina', $pagina);
     }
     // recupera dati
     $dati = $bac->bachecaAvvisi($cerca, $pagina, $limite, $this->getUser());
@@ -853,7 +855,7 @@ class GenitoriController extends AbstractController {
     $dati = null;
     $letto = null;
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($id);
+    $avviso = $em->getRepository('App\Entity\Avviso')->find($id);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -877,7 +879,7 @@ class GenitoriController extends AbstractController {
    * Visualizza gli eventi destinati ai genitori o agli alunni
    *
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
    * @param AgendaUtil $age Funzioni di utilità per la gestione dell'agenda
    * @param string $mese Anno e mese della pagina da visualizzare dell'agenda
@@ -891,16 +893,16 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function eventiAction(EntityManagerInterface $em, SessionInterface $session, GenitoriUtil $gen,
+  public function eventiAction(EntityManagerInterface $em, RequestStack $reqstack, GenitoriUtil $gen,
                                 AgendaUtil $age, $mese) {
     $dati = null;
     $info = null;
     // parametro data
     if ($mese == '0000-00') {
       // mese non specificato
-      if ($session->get('/APP/ROUTE/genitori_eventi/mese')) {
+      if ($reqstack->getSession()->get('/APP/ROUTE/genitori_eventi/mese')) {
         // recupera data da sessione
-        $mese = \DateTime::createFromFormat('Y-m-d', $session->get('/APP/ROUTE/genitori_eventi/mese').'-01');
+        $mese = \DateTime::createFromFormat('Y-m-d', $reqstack->getSession()->get('/APP/ROUTE/genitori_eventi/mese').'-01');
       } else {
         // imposta data odierna
         $mese = (new \DateTime())->modify('first day of this month');
@@ -908,7 +910,7 @@ class GenitoriController extends AbstractController {
     } else {
       // imposta data indicata e la memorizza in sessione
       $mese = \DateTime::createFromFormat('Y-m-d', $mese.'-01');
-      $session->set('/APP/ROUTE/genitori_eventi/mese', $mese->format('Y-m'));
+      $reqstack->getSession()->set('/APP/ROUTE/genitori_eventi/mese', $mese->format('Y-m'));
     }
     // nome/url mese
     $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
@@ -919,10 +921,10 @@ class GenitoriController extends AbstractController {
     $data_fine = clone $data_inizio;
     $data_fine->modify('last day of this month');
     $data_succ = (clone $data_fine);
-    $data_succ = $em->getRepository('App:Festivita')->giornoSuccessivo($data_succ);
+    $data_succ = $em->getRepository('App\Entity\Festivita')->giornoSuccessivo($data_succ);
     $info['url_succ'] = ($data_succ ? $data_succ->format('Y-m') : null);
     $data_prec = (clone $data_inizio);
-    $data_prec = $em->getRepository('App:Festivita')->giornoPrecedente($data_prec);
+    $data_prec = $em->getRepository('App\Entity\Festivita')->giornoPrecedente($data_prec);
     $info['url_prec'] = ($data_prec ? $data_prec->format('Y-m') : null);
     // presentazione calendario
     $info['inizio'] = (intval($mese->format('w')) - 1);
@@ -991,7 +993,7 @@ class GenitoriController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param GenitoriUtil $gen Funzioni di utilità per i genitori
@@ -1008,7 +1010,7 @@ class GenitoriController extends AbstractController {
    *
    * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
    */
-  public function giustificaAssenzaAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function giustificaAssenzaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                                           TranslatorInterface $trans, PdfManager $pdf, GenitoriUtil $gen,
                                           LogHandler $dblogger, Assenza $assenza, $posizione) {
     // inizializza
@@ -1040,7 +1042,7 @@ class GenitoriController extends AbstractController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // dati assenze
-    if ($session->get('/CONFIG/SCUOLA/assenze_ore')) {
+    if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_ore')) {
       // modalità assenze orarie
       $dati_assenze = $gen->raggruppaAssenzeOre($alunno);
     } else {
@@ -1082,7 +1084,7 @@ class GenitoriController extends AbstractController {
         'trim' => true,
         'attr' => array('rows' => '3'),
         'required' => true));
-    if ($session->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
+    if ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
       // dichiarazione NO-COVID
       $form = $form
         ->add('genitoreSesso', ChoiceType::class, array('label' => false,
@@ -1148,7 +1150,7 @@ class GenitoriController extends AbstractController {
         $motivazione = null;
         $dichiarazione = array();
         $certificati = array();
-      } elseif ($session->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
+      } elseif ($reqstack->getSession()->get('/CONFIG/SCUOLA/assenze_dichiarazione')) {
         // controlla campi
         $genitoreSesso = $form->get('genitoreSesso')->getData();
         $genitoreNome = strtoupper($form->get('genitoreNome')->getData());
@@ -1195,7 +1197,7 @@ class GenitoriController extends AbstractController {
             $fs->mkdir($percorso, 0775);
           }
           // crea pdf
-          $pdf->configure($session->get('/CONFIG/ISTITUTO/intestazione'),
+          $pdf->configure($reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
             'Autodichiarazione assenze no COVID');
           // contenuto in formato HTML
           $html = $this->renderView('pdf/autodichiarazione_nocovid.html.twig', array(
@@ -1215,7 +1217,7 @@ class GenitoriController extends AbstractController {
         $certificati = array();
       }
       // aggiorna dati
-      $risultato = $em->getRepository('App:Assenza')->createQueryBuilder('ass')
+      $risultato = $em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
         ->update()
         ->set('ass.modificato', ':modificato')
         ->set('ass.giustificato', ':giustificato')

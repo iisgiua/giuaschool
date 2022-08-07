@@ -1,0 +1,89 @@
+####################
+# MenuFixtures - dati iniziali dell'applicazione e di test
+#
+# Dati per i menu dell'applicazione:
+#   selettore: nome identificativo usato per selezionare il menu
+#   nome: nome del menu (vuoto se sottomenu)
+#   descrizione: descrizione del menu (vuota se sottomenu)
+#   mega: indica se utilizza la modalità mega menu
+#   opzioni: lista delle opzioni del menu (relazione 1-N)
+####################
+
+
+include:
+  - MenuOpzioneFixtures.yml
+
+
+App\Entity\Menu:
+
+  # ----- menu AIUTO -----
+  menu_HELP:
+    selettore: 'help'
+    nome: 'Aiuto'
+    descrizione: 'Guida e supporto per l''utente'
+    mega: false
+    opzioni: '<collection(@menu_opzione_HELP2)>'
+
+  # ----- menu UTENTE -----
+  menu_UTENTE:
+    selettore: 'user'
+    nome: 'Utente'
+    descrizione: 'Gestione del profilo dell''utente'
+    mega: false
+    opzioni: '<collection(@menu_opzione_UTENTE1)>'
+
+  # ----- menu INFO -----
+  menu_INFO:
+    selettore: 'info'
+    nome: 'Informazioni'
+    descrizione: 'Informazioni sull''applicazione'
+    mega: false
+    opzioni: '<collection(@menu_opzione_INFO1, @menu_opzione_INFO2, @menu_opzione_INFO3, @menu_opzione_INFO4, @menu_opzione_INFO10, @menu_opzione_INFO11, @menu_opzione_INFO12, @menu_opzione_INFO13)>'
+
+  # ----- menu PRINCIPALE -----
+  menu_PRINCIPALE:
+    selettore: 'main'
+    nome: 'Menu Principale'
+    descrizione: 'Apri il menu principale'
+    mega: false
+    opzioni: '<collection(@menu_opzione_PRINCIPALE1, @menu_opzione_PRINCIPALE2, @menu_opzione_PRINCIPALE3, @menu_opzione_PRINCIPALE10, @menu_opzione_PRINCIPALE20, @menu_opzione_PRINCIPALE21, @menu_opzione_PRINCIPALE22, @menu_opzione_PRINCIPALE23, @menu_opzione_PRINCIPALE24)>'
+
+  # ----- sottomenu SISTEMA -----
+  menu_SISTEMA:
+    selettore: 'sistema'
+    nome: ''
+    descrizione: ''
+    mega: false
+    opzioni: '<collection(@menu_opzione_SISTEMA1, @menu_opzione_SISTEMA2, @menu_opzione_SISTEMA3, @menu_opzione_SISTEMA4, @menu_opzione_SISTEMA5, @menu_opzione_SISTEMA6, @menu_opzione_SISTEMA7, @menu_opzione_SISTEMA8)>'
+
+  # ----- sottomenu SCUOLA -----
+  menu_SCUOLA:
+    selettore: 'scuola'
+    nome: ''
+    descrizione: ''
+    mega: false
+    opzioni: '<collection(@menu_opzione_SCUOLA1, @menu_opzione_SCUOLA2, @menu_opzione_SCUOLA3, @menu_opzione_SCUOLA4, @menu_opzione_SCUOLA5, @menu_opzione_SCUOLA6, @menu_opzione_SCUOLA7, @menu_opzione_SCUOLA8, @menu_opzione_SCUOLA9, @menu_opzione_SCUOLA10)>'
+
+  # ----- sottomenu ATA -----
+  menu_ATA:
+    selettore: 'ata'
+    nome: ''
+    descrizione: ''
+    mega: false
+    opzioni: '<collection(@menu_opzione_ATA1, @menu_opzione_ATA2)>'
+
+  # ----- sottomenu DOCENTI -----
+  menu_DOCENTI:
+    selettore: 'docenti'
+    nome: ''
+    descrizione: ''
+    mega: false
+    opzioni: '<collection(@menu_opzione_DOCENTI1, @menu_opzione_DOCENTI2, @menu_opzione_DOCENTI3, @menu_opzione_DOCENTI4, @menu_opzione_DOCENTI5, @menu_opzione_DOCENTI6, @menu_opzione_DOCENTI7)>'
+
+  # ----- sottomenu ALUNNI -----
+  menu_ALUNNI:
+    selettore: 'alunni'
+    nome: ''
+    descrizione: ''
+    mega: false
+    opzioni: '<collection(@menu_opzione_ALUNNI1, @menu_opzione_ALUNNI2, @menu_opzione_ALUNNI3)>'

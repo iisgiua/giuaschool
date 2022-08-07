@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,11 +13,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * DerogaAssenza - entità
+ * DerogaAssenza - dati per le deroghe per il conteggio finale delle assenze
  *
  * @ORM\Entity(repositoryClass="App\Repository\DerogaAssenzaRepository")
  * @ORM\Table(name="gs_deroga_assenza")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class DerogaAssenza {
 
@@ -29,54 +27,54 @@ class DerogaAssenza {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la deroga per le assenze
+   * @var int|null $id Identificativo univoco per la deroga per le assenze
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data dell'assenza per cui vale la deroga
+   * @var \DateTime|null $data Data dell'assenza per cui vale la deroga
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'assenza
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'assenza
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var string $motivazione Motivazione della deroga
+   * @var string|null $motivazione Motivazione della deroga
    *
    * @ORM\Column(type="text", nullable=false)
    */
-  private $motivazione;
+  private ?string $motivazione = '';
 
 
   //==================== EVENTI ORM ====================
@@ -86,7 +84,7 @@ class DerogaAssenza {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -97,7 +95,7 @@ class DerogaAssenza {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -108,36 +106,36 @@ class DerogaAssenza {
   /**
    * Restituisce l'identificativo univoco per la deroga
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'assenza per cui vale la deroga
    *
-   * @return \DateTime Data dell'assenza per cui vale la deroga
+   * @return \DateTime|null Data dell'assenza per cui vale la deroga
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -146,9 +144,9 @@ class DerogaAssenza {
    *
    * @param \DateTime $data Data dell'assenza per cui vale la deroga
    *
-   * @return DerogaAssenza Oggetto DerogaAssenza
+   * @return self Oggetto modificato
    */
-  public function setData($data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -156,9 +154,9 @@ class DerogaAssenza {
   /**
    * Restituisce l'alunno al quale si riferisce l'assenza
    *
-   * @return Alunno Alunno al quale si riferisce l'assenza
+   * @return Alunno|null Alunno al quale si riferisce l'assenza
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -167,9 +165,9 @@ class DerogaAssenza {
    *
    * @param Alunno $alunno Alunno al quale si riferisce l'assenza
    *
-   * @return DerogaAssenza Oggetto DerogaAssenza
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -177,20 +175,20 @@ class DerogaAssenza {
   /**
    * Restituisce la motivazione della deroga
    *
-   * @return string Motivazione della deroga
+   * @return string|null Motivazione della deroga
    */
-  public function getMotivazione() {
+  public function getMotivazione(): ?string {
     return $this->motivazione;
   }
 
   /**
    * Modifica la motivazione della deroga
    *
-   * @param string $motivazione Motivazione della deroga
+   * @param string|null $motivazione Motivazione della deroga
    *
-   * @return DerogaAssenza Oggetto DerogaAssenza
+   * @return self Oggetto modificato
    */
-  public function setMotivazione($motivazione) {
+  public function setMotivazione(?string $motivazione): self {
     $this->motivazione = $motivazione;
     return $this;
   }
@@ -203,7 +201,7 @@ class DerogaAssenza {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').': '.$this->alunno;
   }
 

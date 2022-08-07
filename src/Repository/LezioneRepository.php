@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -22,6 +18,8 @@ use App\Entity\Alunno;
 
 /**
  * Lezione - repository
+ *
+ * @author Antonello Dessì
  */
 class LezioneRepository extends EntityRepository {
 
@@ -38,7 +36,7 @@ class LezioneRepository extends EntityRepository {
   public function lezioneVoto(\DateTime $data, Docente $docente, Classe $classe, Materia $materia) {
     // query base
     $lezione = $this->createQueryBuilder('l')
-      ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
+      ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
       ->where('l.data=:data AND l.classe=:classe AND f.docente=:docente AND l.materia=:materia')
       ->setParameters(['data' => $data->format('Y-m-d'), 'docente' => $docente, 'classe' => $classe,
         'materia' => $materia])
@@ -50,7 +48,7 @@ class LezioneRepository extends EntityRepository {
     if (!$lezione && $materia->getTipo() == 'E') {
       // legge lezione firmata con altra materia
       $lezione = $this->createQueryBuilder('l')
-        ->join('App:Firma', 'f', 'WITH', 'l.id=f.lezione')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'l.id=f.lezione')
         ->where('l.data=:data AND l.classe=:classe AND f.docente=:docente')
         ->setParameters(['data' => $data->format('Y-m-d'), 'docente' => $docente, 'classe' => $classe])
         ->orderBy('l.ora', 'ASC')
@@ -74,7 +72,7 @@ class LezioneRepository extends EntityRepository {
     // legge assenza di alunno
     $assenza = $this->createQueryBuilder('l')
       ->select('al.ore')
-      ->join('App:AssenzaLezione', 'al', 'WITH', 'al.lezione=l.id AND al.alunno=:alunno')
+      ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.lezione=l.id AND al.alunno=:alunno')
       ->where('l.id=:lezione AND al.ore=:ora')
       ->setParameters(['alunno' => $alunno, 'lezione' => $lezione, 'ora' => 1])
       ->setMaxResults(1)
@@ -96,7 +94,7 @@ class LezioneRepository extends EntityRepository {
     // legge assenza di alunno
     $assenti = $this->createQueryBuilder('l')
       ->select('a.nome,a.cognome,a.dataNascita')
-      ->join('App:AssenzaLezione', 'al', 'WITH', 'al.lezione=l.id AND al.alunno IN (:alunni)')
+      ->join('App\Entity\AssenzaLezione', 'al', 'WITH', 'al.lezione=l.id AND al.alunno IN (:alunni)')
       ->join('al.alunno', 'a')
       ->where('l.id=:lezione AND al.ore=:ora')
       ->setParameters(['alunni' => $alunni, 'lezione' => $lezione, 'ora' => 1])

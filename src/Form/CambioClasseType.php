@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -27,6 +23,8 @@ use App\Entity\CambioClasse;
 
 /**
  * CambioClasseType - form per la classe CambioClasse
+ *
+ * @author Antonello Dessì
  */
 class CambioClasseType extends AbstractType {
 
@@ -41,7 +39,7 @@ class CambioClasseType extends AbstractType {
       // form cambio generico
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-          'class' => 'App:Alunno',
+          'class' => 'App\Entity\Alunno',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')'; },
           'query_builder' => function (EntityRepository $er) {
@@ -51,7 +49,7 @@ class CambioClasseType extends AbstractType {
           'attr' => ['widget' => 'search'],
           'required' => true))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
           'group_by' => 'sede.citta',
@@ -78,7 +76,7 @@ class CambioClasseType extends AbstractType {
       // form inserimento alunno
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-          'class' => 'App:Alunno',
+          'class' => 'App\Entity\Alunno',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')'; },
           'query_builder' => function (EntityRepository $er) {
@@ -100,7 +98,7 @@ class CambioClasseType extends AbstractType {
       // form trasferimento alunno
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-          'class' => 'App:Alunno',
+          'class' => 'App\Entity\Alunno',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')'; },
           'query_builder' => function (EntityRepository $er) {
@@ -122,7 +120,7 @@ class CambioClasseType extends AbstractType {
       // form cambio sezione
       $builder
         ->add('alunno', EntityType::class, array('label' => 'label.alunno',
-          'class' => 'App:Alunno',
+          'class' => 'App\Entity\Alunno',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')'; },
           'query_builder' => function (EntityRepository $er) {
@@ -133,7 +131,7 @@ class CambioClasseType extends AbstractType {
           'attr' => ['widget' => 'search'],
           'required' => true))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function ($obj) {
             return (is_object($obj) ? $obj->getAnno().'ª '.$obj->getSezione() : $obj); },
           'group_by' => 'sede.citta',

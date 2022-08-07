@@ -1,22 +1,24 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Repository;
 
 use \Doctrine\ORM\EntityRepository;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
+use App\Entity\Materia;
 
 
 /**
  * Provisioning - repository
+ *
+ * @author Antonello Dessì
  */
 class ProvisioningRepository extends EntityRepository {
 
@@ -64,20 +66,20 @@ class ProvisioningRepository extends EntityRepository {
       foreach ($dati['provisioning']->getDati() as $nm=>$dt) {
         switch ($nm) {
           case 'cattedra':
-            $dati[$nm] = $this->_em->getRepository('App:Cattedra')->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Cattedra')->find($dt);
             break;
           case 'docente':
           case 'docente_prec':
-            $dati[$nm] = $this->_em->getRepository('App:Docente')->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Docente')->find($dt);
             break;
           case 'classe':
           case 'classe_prec':
           case 'classe_origine':
           case 'classe_destinazione':
-            $dati[$nm] = $this->_em->getRepository('App:Classe')->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Classe')->find($dt);
             break;
           case 'materia':
-            $dati[$nm] = $this->_em->getRepository('App:Materia')->find($dt);
+            $dati[$nm] = $this->_em->getRepository('App\Entity\Materia')->find($dt);
             break;
         }
       }

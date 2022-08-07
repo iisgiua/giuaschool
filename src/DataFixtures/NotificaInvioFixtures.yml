@@ -1,0 +1,21 @@
+####################
+# NotificaInvioFixtures - dati di test
+#
+# Dati per l'invio delle notifiche agli utenti:
+#   stato: stato dell'invio della notifica [P=precedenza,A=attesa,S=spedito,E=errore]
+#   messaggio: messaggio da notificare all'utente
+#   app: app che deve inviare il messaggio
+#   dati: parametri per l'invio del messaggio all'utente
+####################
+
+
+include:
+  - AppFixtures.yml
+
+
+App\Entity\NotificaInvio:
+  notifica_invio_{1..10}:
+    stato: '<randomElement(["A", "P", "S", "E"])>'
+    messaggio: '<text()>'
+    app: '@app_*'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'

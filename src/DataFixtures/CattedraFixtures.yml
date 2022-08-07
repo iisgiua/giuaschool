@@ -1,0 +1,72 @@
+####################
+# CattedraFixtures - dati di test
+#
+# Dati delle cattedre dei docenti:
+#   attiva: Indica se la cattedra è attiva o no
+#   supplenza: Indica se la cattedra è una supplenza temporanea o no
+#   tipo: Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
+#   materia: Materia della cattedra
+#   docente: Docente della cattedra
+#   classe: Classe della cattedra
+#   alunno: Alunno di una cattedra di sostegno
+####################
+
+
+include:
+  - MateriaFixtures.yml
+  - ClasseFixtures.yml
+  - DocenteFixtures.yml
+  - AlunnoFixtures.yml
+
+
+App\Entity\Cattedra:
+
+  # ----- cattedre curricolari delle classi -----
+  cattedra_curricolare_{1..50}:
+    attiva: '<boolean(90)>'
+    supplenza: '<boolean(50)>'
+    tipo: '<randomElement(["N", "N", "N", "P"])>'
+    materia: '@materia_curricolare_*'
+    docente: '@docente_curricolare_*'
+    classe: '@classe_*'
+    alunno:
+
+  # ----- cattedre ITP -----
+  cattedra_curricolare_itp_{1..30}:
+    attiva: '<boolean(90)>'
+    supplenza: '<boolean(50)>'
+    tipo: 'I'
+    materia: '@materia_curricolare_itp_*'
+    docente: '@docente_itp_*'
+    classe: '@classe_*'
+    alunno:
+
+  # ----- cattedre di religione -----
+  cattedra_religione_{1..10}:
+    attiva: '<boolean(90)>'
+    supplenza: '<boolean(50)>'
+    tipo: 'N'
+    materia: '@materia_RELIGIONE'
+    docente: '@docente_religione_*'
+    classe: '@classe_*'
+    alunno:
+
+  # ----- cattedre di sostegno -----
+  cattedra_sostegno_{1..10}:
+    attiva: '<boolean(90)>'
+    supplenza: '<boolean(50)>'
+    tipo: 'N'
+    materia: '@materia_SOSTEGNO'
+    docente: '@docente_sostegno_*'
+    alunno: '@alunno_sostegno_*'
+    classe: '<($alunno->getClasse())>'
+
+  # ----- cattedre di materia alternativa -----
+  cattedra_alternativa_{1..5}:
+    attiva: '<boolean(90)>'
+    supplenza: '<boolean(50)>'
+    tipo: 'A'
+    materia: '@materia_RELIGIONE'
+    docente: '@docente_curricolare_*'
+    classe: '@alunno_alternativa_*->classe'
+    alunno:

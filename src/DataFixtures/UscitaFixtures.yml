@@ -1,0 +1,26 @@
+####################
+# UscitaFixtures - dati di test
+#
+# Dati per la gestione delle uscite anticipate degli alunni:
+#   data: data dell'uscita anticipata
+#   ora: ora dell'uscita anticipata
+#   note: note informative sull'uscita anticipata
+#   valido: indica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
+#   alunno: alunno al quale si riferisce l'uscita anticipata
+#   docente: docente che autorizza l'uscita anticipata
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Uscita:
+  uscita_{1..10}:
+    data (unique): '<dateTimeBetween("-3 month", "now")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: '50%? <text()>: <strval("")>'
+    valido: '<boolean()>'
+    alunno: '@alunno_*'
+    docente: '@docente_*'

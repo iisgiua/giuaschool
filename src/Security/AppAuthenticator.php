@@ -1,47 +1,48 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Security;
 
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Docente;
+use App\Entity\Genitore;
+use App\Util\ConfigLoader;
+use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
-use App\Entity\Alunno;
-use App\Entity\Genitore;
-use App\Entity\Docente;
-use App\Entity\Ata;
-use App\Util\ConfigLoader;
-use App\Util\LogHandler;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 
 /**
  * AppAuthenticator - servizio usato per l'autenticazione di un utente tramite app
- *
- * Se è attivato un identity provider esterno il servizio viene disattiva mostrando un errore,
+ * Se è attivato un identity provider esterno il servizio viene disattivato mostrando un errore,
  * in quanto non è attualmente compatibile con il SSO.
+ *
+ * @author Antonello Dessì
  */
-class AppAuthenticator extends AbstractGuardAuthenticator {
+class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface {
+
+  use AuthenticatorTrait;
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
@@ -57,9 +58,9 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
   private $em;
 
   /**
-   * @var UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @var UserPasswordHasherInterface $hasher Gestore della codifica delle password
    */
-  private $encoder;
+  private $hasher;
 
   /**
    * @var LoggerInterface $logger Gestore dei log su file
@@ -84,144 +85,82 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param LoggerInterface $logger Gestore dei log su file
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ConfigLoader $config Gestore della configurazione su database
    */
-  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
+  public function __construct(RouterInterface $router, EntityManagerInterface $em, UserPasswordHasherInterface $hasher,
                                LoggerInterface $logger, LogHandler $dblogger, ConfigLoader $config) {
     $this->router = $router;
     $this->em = $em;
-    $this->encoder = $encoder;
+    $this->hasher = $hasher;
     $this->logger = $logger;
     $this->dblogger = $dblogger;
     $this->config = $config;
   }
 
   /**
-   * Restituisce una pagina che invita l'utente ad autenticarsi.
-   * Il metodo è eseguito quando un utente anonimo accede a risorse che richiedono l'autenticazione.
-   * Lo scopo del metodo è restituire una pagina che permetta all'utente di iniziare il processo di autenticazione.
+   * Indica se l'autenticatore supporta o meno la richiesta attuale.
    *
    * @param Request $request Pagina richiesta
-   * @param AuthenticationException $authException Eccezione che inizia il processo di autenticazione
    *
-   * @return Response Pagina di risposta
+   * @return bool|null Se vero o nullo è supportata, altrimenti no.
    */
-  public function start(Request $request, AuthenticationException $authException = null) {
-    // eccezione che ha richiesto l'autenticazione
-    $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
-    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
-    // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('app_login'));
+  public function supports(Request $request): ?bool {
+    return ($request->attributes->get('_route') === 'app_login' && $request->isMethod('GET'));
   }
 
   /**
-   * Recupera le credenziali di autenticazione dalla pagina richiesta e le restituisce come un array associativo.
-   * Se si restituisce null, l'autenticazione viene annullata.
+   * Esegue l'autenticazione e crea un passaporto che contiene: l'utente e le credenziali.
    *
    * @param Request $request Pagina richiesta
    *
-   * @return mixed|null Le credenziali dell'autenticazione o null
+   * @return Passport Passaporto creato per la richiesta corrente
+   *
+   * @throws AuthenticationException Eccezione lanciata per ogni tipo di errore di autenticazione
    */
-  public function getCredentials(Request $request) {
-    // decodifica le credenziali
+  public function authenticate(Request $request): Passport {
+    // legge e decodifica le credenziali
     $codice = $request->get('codice');
-    $lusr = intval($request->get('lusr'));
-    $lpsw = intval($request->get('lpsw'));
-    $lapp = intval($request->get('lapp'));
+    $lusr = (int) $request->get('lusr');
+    $lpsw = (int) $request->get('lpsw');
+    $lapp = (int) $request->get('lapp');
     $testo = base64_decode(str_replace(array('-', '_'), array('+', '/'), $codice));
-    $profilo = substr($testo, 0, 1);
-    $username = substr($testo, 1, $lusr - 1);
-    $password = substr($testo, $lusr, $lpsw);
-    $appId = substr($testo, $lusr + $lpsw, $lapp);
-    $prelogin = $codice;
-    return array(
-      'profilo' => $profilo,
-      'username' => $username,
-      'password' => $password,
-      'appId' => $appId,
-      'prelogin' => $prelogin,
-      'ip' => $request->getClientIp());
+    $credentials = [
+      'profilo' => substr($testo, 0, 1),
+      'username' => substr($testo, 1, $lusr - 1),
+      'password' => substr($testo, $lusr, $lpsw),
+      'appId' => substr($testo, $lusr + $lpsw, $lapp),
+      'prelogin' => $codice,
+      'ip' => $request->getClientIp()];
+    // crea e restituisce il passaporto
+    return new Passport(
+      new UserBadge($credentials['username'], [$this, 'getUser']),
+      new CustomCredentials([$this, 'checkCredentials'], $credentials));
   }
 
   /**
-   * Restituisce l'utente corrispondente alle credenziali fornite
+   * Restituisce l'utente corrispondente all'identificatore fornito
    *
-   * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserProviderInterface $userProvider Gestore degli utenti
+   * @param string $username Identificatore dell'utente
    *
-   * @return UserInterface|null L'utente trovato o null
+   * @return UserInterface|null L'utente trovato o null se errore
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function getUser($credentials, UserProviderInterface $userProvider) {
-    // controlla appId
-    $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
-    if (!$app) {
-      // app non esiste o non attiva
-      $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', array(
-        'profilo' => $credentials['profilo'],
-        'username' => $credentials['username'],
-        'appId' =>  $credentials['appId'],
-        'ip' => $credentials['ip']));
-      throw new CustomUserMessageAuthenticationException('exception.invalid_app');
-    }
+  public function getUser(string $username): ?UserInterface {
     // restituisce l'utente o null
-    $user = $this->em->getRepository('App:Utente')->findOneBy(['username' => $credentials['username'],
+    $user = $this->em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username,
       'abilitato' => 1]);
     if (!$user) {
       // utente non esiste
       $this->logger->error('Utente non valido nella richiesta di login da app.', array(
-        'profilo' => $credentials['profilo'],
-        'username' => $credentials['username'],
-        'appId' =>  $credentials['appId'],
-        'ip' => $credentials['ip']));
+        'username' => $username));
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
-    if (empty($user->getCodiceFiscale())) {
-      // ok restituisce profilo
-      return $user;
-    }
-    // trova profili attivi
-    $profilo = $this->em->getRepository('App:Utente')->profiliAttivi($user->getNome(),
-      $user->getCognome(), $user->getCodiceFiscale());
-    if ($profilo) {
-      if ($user instanceOf Genitore) {
-        // elimina profili non genitore (evita login docente con credenziali poco affidabili)
-        $nuoviProfili = [];
-        $contaProfili = 0;
-        foreach ($profilo->getListaProfili() as $ruolo=>$profili) {
-          if ($ruolo == 'GENITORE') {
-            $nuoviProfili[$ruolo] = $profili;
-            $contaProfili = count($profili);
-          }
-        }
-        $profilo->setListaProfili($contaProfili > 1 ? $nuoviProfili : []);
-      }
-      // controlla che il profilo sia lo stesso richiesto con username
-      if ($profilo->getId() == $user->getId()) {
-        // ok restituisce profilo
-        return $user;
-      }
-      // altrimenti cerca tra i profili attivi
-      foreach ($profilo->getListaProfili() as $profili) {
-        foreach ($profili as $id) {
-          if ($id == $user->getId()) {
-            // memorizza lista profili
-            $user->setListaProfili($profilo->getListaProfili());
-            // ok restituisce profilo
-            return $user;
-          }
-        }
-      }
-    }
-    // errore: utente disabilitato
-    $this->logger->error('Utente disabilitato nella richiesta di login da app.', array(
-      'profilo' => $credentials['profilo'],
-      'username' => $credentials['username'],
-      'appId' =>  $credentials['appId'],
-      'ip' => $credentials['ip']));
-    throw new CustomUserMessageAuthenticationException('exception.invalid_user');
+    // restituisce profilo attivo
+    return $this->controllaProfili($user);
   }
 
   /**
@@ -230,24 +169,17 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    * Si può anche generare un'eccezione per far fallire l'autenticazione.
    *
    * @param mixed $credentials Credenziali dell'autenticazione
-   * @param UserInterface $user Utente corripondente alle credenziali
+   * @param UserInterface $user Utente corripondente all'identificatore fornito
    *
    * @return bool Vero se le credenziali sono valide, falso altrimenti
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function checkCredentials($credentials, UserInterface $user) {
+  public function checkCredentials($credentials, UserInterface $user): bool {
     // controlla modalità manutenzione
-    $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzioneInizio = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio');
-    $manutenzioneFine = $this->em->getRepository('App:Configurazione')->getParametro('manutenzione_fine');
-    if ($manutenzioneInizio && $manutenzioneFine && $ora >= $manutenzioneInizio && $ora <= $manutenzioneFine) {
-      // errore: modalità manutenzione
-      $this->logger->error('Tentativo di accesso da app durante la modalità manutenzione.', array(
-        'username' => $credentials['username'],
-        'ip' => $credentials['ip']));
-      throw new CustomUserMessageAuthenticationException('exception.blocked_login');
-    }
+    $this->controllaManutenzione($user);
     // controlla appId
-    $app = $this->em->getRepository('App:App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
+    $app = $this->em->getRepository('App\Entity\App')->findOneBy(['token' => $credentials['appId'], 'attiva' => 1]);
     if (!$app) {
       // app non esiste o non attiva
       $this->logger->error('App inesistente o non attiva nella richiesta di login da app.', array(
@@ -258,8 +190,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.invalid_app');
     }
     // controllo username/password
-    $plainPassword = $credentials['password'];
-    if ($this->encoder->isPasswordValid($user, $plainPassword)) {
+    if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
       // password ok, controlla codice prelogin
       if ($user->getPrelogin() != $credentials['prelogin']) {
         // codice prelogin errato
@@ -269,7 +200,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
           'appId' =>  $credentials['appId'],
           'prelogin' =>  $credentials['prelogin'],
           'ip' => $credentials['ip'],
-          ));
+        ));
         throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
       }
       if (!$user->getPreloginCreato() || (time() - $user->getPreloginCreato()->format('U')) > 60) {
@@ -307,7 +238,7 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
       'username' => $credentials['username'],
       'appId' =>  $credentials['appId'],
       'ip' => $credentials['ip'],
-      ));
+    ));
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
   }
 
@@ -316,11 +247,11 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    *
    * @param Request $request Pagina richiesta
    * @param TokenInterface $token Token di autenticazione (contiene l'utente)
-   * @param string $providerKey Chiave usata dal gestore della sicurezza (definita nel firewall)
+   * @param string $firewallName Nome del firewall usato per la richiesta
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta come utente autenticato
    */
-  public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
+  public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
@@ -354,34 +285,30 @@ class AppAuthenticator extends AbstractGuardAuthenticator {
    * @param Request $request Pagina richiesta
    * @param AuthenticationException $exception Eccezione di autenticazione
    *
-   * @return Response Pagina di risposta
+   * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
-  public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
-    // messaggio di errore
+  public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
     $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('app_login'));
+    return new RedirectResponse($this->router->generate('login_form'));
   }
 
   /**
-   * Indica se l'autenticatore supporta o meno la gestione del cookie RICORDAMI.
-   *
-   * @return bool Vero se supportato il cookie RICORDAMI, falso altrimenti
-   */
-  public function supportsRememberMe() {
-    // nessun supporto per il cookie RICORDAMI
-    return false;
-  }
-
-  /**
-   * Indica se l'autenticatore supporta o meno la richiesta attuale.
+   * Restituisce una pagina che invita l'utente ad autenticarsi.
+   * Il metodo è eseguito quando un utente anonimo accede a risorse che richiedono l'autenticazione.
+   * Lo scopo del metodo è restituire una pagina che permetta all'utente di iniziare il processo di autenticazione.
    *
    * @param Request $request Pagina richiesta
+   * @param AuthenticationException $authException Eccezione che inizia il processo di autenticazione
    *
-   * @return bool Vero se supportato, falso altrimenti
+   * @return Response Pagina di risposta
    */
-  public function supports(Request $request) {
-    return (substr($request->getPathInfo(), 0, 11) == '/app/login/' && $request->isMethod('GET'));
+  public function start(Request $request, AuthenticationException $authException = null): Response {
+    // eccezione che ha richiesto l'autenticazione
+    $exception = new CustomUserMessageAuthenticationException('exception.auth_required');
+    $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+    // redirect alla pagina di login
+    return new RedirectResponse($this->router->generate('login_form'));
   }
 
 }

@@ -1,24 +1,24 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Controller;
 
+use App\Entity\MenuOpzione;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
 
 /**
  * BaseController - funzioni di utilità per i controller
+ *
+ * @author Antonello Dessì
  */
 class BaseController extends AbstractController {
 
@@ -30,16 +30,23 @@ class BaseController extends AbstractController {
    */
   private $em;
 
+  /**
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
+   */
+  private $reqstack;
+
 
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  public function __construct(EntityManagerInterface $em) {
+  public function __construct(EntityManagerInterface $em, RequestStack $reqstack) {
     $this->em = $em;
+    $this->reqstack = $reqstack;
   }
 
   /**
@@ -55,13 +62,12 @@ class BaseController extends AbstractController {
    */
   protected function renderHtml(string $categoria, string $azione, array $dati=[],
                                 array $info=[], array $form=[]): Response {
-    $session = $this->get('session');
     list($azione_principale) = explode('_', $azione);
     // legge breadcrumb
-    $breadcrumb = $this->em->getRepository('App:MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
-      $this->getUser(), $session);
+    $breadcrumb = $this->em->getRepository('App\Entity\MenuOpzione')->breadcrumb($categoria.'_'.$azione_principale,
+      $this->getUser(), $this->reqstack);
     // restituisce vista
-    $tema = $session->get('/APP/APP/tema', '');
+    $tema = $this->reqstack->getSession()->get('/APP/APP/tema', '');
     return $this->render($tema.'/'.$categoria.'/'.$azione.'.html.twig', array(
       'pagina_titolo' => 'page.'.$categoria.'.'.$azione_principale,
       'titolo' => 'title.'.$categoria.'.'.$azione,

@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -18,13 +14,15 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Spid - entità
+ * Spid - dati per la gestione dello SPID
  *
  * @ORM\Entity(repositoryClass="App\Repository\SpidRepository")
  * @ORM\Table(name="gs_spid")
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields="responseId", message="field.unique", entityClass="App\Entity\Spid")
+ *
+ * @author Antonello Dessì
  */
 class Spid {
 
@@ -32,97 +30,96 @@ class Spid {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per le istanze della classe
+   * @var int|null $id Identificativo univoco per le istanze della classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $idp Identity provider che ha inviato la risposta
+   * @var string|null $idp Identity provider che ha inviato la risposta
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $idp;
+  private ?string $idp = '';
 
   /**
-   * @var string $responseId Identificativo univoco della risposta
+   * @var string|null $responseId Identificativo univoco della risposta
    *
-   * @ORM\Column(type="string", length=255, unique=true, nullable=false)
+   * @ORM\Column(name="response_id", type="string", length=255, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $responseId;
+  private ?string $responseId = '';
 
   /**
-   * @var string $attrName Nome dell'utente autenticato
+   * @var string|null $attrName Nome dell'utente autenticato
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
+   * @ORM\Column(name="attr_name", type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $attrName;
+  private ?string $attrName = '';
 
   /**
-   * @var string $attrFamilyName Cognome dell'utente autenticato
+   * @var string|null $attrFamilyName Cognome dell'utente autenticato
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
+   * @ORM\Column(name="attr_family_name", type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $attrFamilyName;
+  private ?string $attrFamilyName = '';
 
   /**
-   * @var string $attrFiscalNumber Codice fiscale dell'utente autenticato
+   * @var string|null $attrFiscalNumber Codice fiscale dell'utente autenticato
    *
-   * @ORM\Column(type="string", length=32, nullable=false)
+   * @ORM\Column(name="attr_fiscal_number", type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private $attrFiscalNumber;
+  private ?string $attrFiscalNumber = '';
 
   /**
-   * @var string $logoutUrl Url per effettuare il logout sull'identity provider
+   * @var string|null $logoutUrl Url per effettuare il logout sull'identity provider
    *
-   * @ORM\Column(type="string", length=255, nullable=false)
+   * @ORM\Column(name="logout_url", type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $logoutUrl;
+  private ?string $logoutUrl = '';
 
   /**
-   * @var string $state Stato del processo di autenticazione [A=autenticato su SPID, L=login su applicazione, E=utente apllicazione non valido]
+   * @var string|null $state Stato del processo di autenticazione [A=autenticato su SPID, L=login su applicazione, E=utente applicazione non valido]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"A","L","E"}, strict=true, message="field.choice")
    */
-  private $state;
+  private ?string $state = 'A';
 
 
   //==================== EVENTI ORM ====================
@@ -132,7 +129,7 @@ class Spid {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
    // inserisce data/ora di creazione
    $this->creato = new \DateTime();
    $this->modificato = $this->creato;
@@ -143,7 +140,7 @@ class Spid {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -154,47 +151,47 @@ class Spid {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'identity provider che ha inviato la risposta
    *
-   * @return string Identity provider che ha inviato la risposta
+   * @return string|null Identity provider che ha inviato la risposta
    */
-  public function getIdp() {
+  public function getIdp(): ?string {
     return $this->idp;
   }
 
   /**
    * Modifica l'identity provider che ha inviato la risposta
    *
-   * @param string $idp Identity provider che ha inviato la risposta
+   * @param string|null $idp Identity provider che ha inviato la risposta
    *
-   * @return Spid Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setIdp($idp) {
+  public function setIdp(?string $idp): self {
     $this->idp = $idp;
     return $this;
   }
@@ -202,20 +199,20 @@ class Spid {
   /**
    * Restituisce l'identificativo univoco della risposta
    *
-   * @return string Identificativo univoco della risposta
+   * @return string|null Identificativo univoco della risposta
    */
-  public function getResponseId() {
+  public function getResponseId(): ?string {
     return $this->responseId;
   }
 
   /**
    * Modifica l'identificativo univoco della risposta
    *
-   * @param string $responseId Identificativo univoco della risposta
+   * @param string|null $responseId Identificativo univoco della risposta
    *
-   * @return Spid Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setResponseId($responseId) {
+  public function setResponseId(?string $responseId): self {
     $this->responseId = $responseId;
     return $this;
   }
@@ -223,20 +220,20 @@ class Spid {
   /**
    * Restituisce il nome dell'utente autenticato
    *
-   * @return string Nome dell'utente autenticato
+   * @return string|null Nome dell'utente autenticato
    */
-  public function getAttrName() {
+  public function getAttrName(): ?string {
     return $this->attrName;
   }
 
   /**
    * Modifica il nome dell'utente autenticato
    *
-   * @param string $attrName Nome dell'utente autenticato
+   * @param string|null $attrName Nome dell'utente autenticato
    *
-   * @return Spid Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAttrName($attrName) {
+  public function setAttrName(?string $attrName): self {
     $this->attrName = $attrName;
     return $this;
   }
@@ -244,20 +241,20 @@ class Spid {
   /**
    * Restituisce il cognome dell'utente autenticato
    *
-   * @return string Cognome dell'utente autenticato
+   * @return string|null Cognome dell'utente autenticato
    */
-  public function getAttrFamilyName() {
+  public function getAttrFamilyName(): ?string {
     return $this->attrFamilyName;
   }
 
   /**
    * Modifica il cognome dell'utente autenticato
    *
-   * @param string $attrFamilyName Cognome dell'utente autenticato
+   * @param string|null $attrFamilyName Cognome dell'utente autenticato
    *
-   * @return Spid Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAttrFamilyName($attrFamilyName) {
+  public function setAttrFamilyName(?string $attrFamilyName): self {
     $this->attrFamilyName = $attrFamilyName;
     return $this;
   }
@@ -265,20 +262,20 @@ class Spid {
   /**
    * Restituisce il codice fiscale dell'utente autenticato
    *
-   * @return string Codice fiscale dell'utente autenticato
+   * @return string|null Codice fiscale dell'utente autenticato
    */
-  public function getAttrFiscalNumber() {
+  public function getAttrFiscalNumber(): ?string {
     return $this->attrFiscalNumber;
   }
 
   /**
    * Modifica il codice fiscale dell'utente autenticato
    *
-   * @param string $attrFiscalNumber Codice fiscale dell'utente autenticato
+   * @param string|null $attrFiscalNumber Codice fiscale dell'utente autenticato
    *
-   * @return Spid Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAttrFiscalNumber($attrFiscalNumber) {
+  public function setAttrFiscalNumber(?string $attrFiscalNumber): self {
     $this->attrFiscalNumber = $attrFiscalNumber;
     return $this;
   }
@@ -286,20 +283,20 @@ class Spid {
   /**
    * Restituisce la url per effettuare il logout sull'identity provider
    *
-   * @return string Url per effettuare il logout sull'identity provider
+   * @return string|null Url per effettuare il logout sull'identity provider
    */
-  public function getLogoutUrl() {
+  public function getLogoutUrl(): ?string {
     return $this->logoutUrl;
   }
 
   /**
    * Modifica la url per effettuare il logout sull'identity provider
    *
-   * @param string $logoutUrl Url per effettuare il logout sull'identity provider
+   * @param string|null $logoutUrl Url per effettuare il logout sull'identity provider
    *
-   * @return Spid Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setLogoutUrl($logoutUrl) {
+  public function setLogoutUrl(?string $logoutUrl): self {
     $this->logoutUrl = $logoutUrl;
     return $this;
   }
@@ -307,20 +304,20 @@ class Spid {
   /**
    * Restituisce lo stato del processo di autenticazione [A=autenticato su SPID, L=login su applicazione, E=utente apllicazione non valido]
    *
-   * @return string Stato del processo di autenticazione
+   * @return string|null Stato del processo di autenticazione
    */
-  public function getState() {
+  public function getState(): ?string {
     return $this->state;
   }
 
   /**
    * Modifica lo stato del processo di autenticazione [A=autenticato su SPID, L=login su applicazione, E=utente apllicazione non valido]
    *
-   * @param string $state Stato del processo di autenticazione
+   * @param string|null $state Stato del processo di autenticazione
    *
-   * @return Spid Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setState($state) {
+  public function setState(?string $state): self {
     $this->state = $state;
     return $this;
   }
@@ -329,19 +326,11 @@ class Spid {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->state = 'A';
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->responseId;
   }
 

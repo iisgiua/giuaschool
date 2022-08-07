@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,6 +13,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Classe - repository
+ *
+ * @author Antonello Dessì
  */
 class ClasseRepository extends BaseRepository {
 
@@ -159,8 +157,8 @@ class ClasseRepository extends BaseRepository {
     if ($filtro) {
       // filtro genitori
       $classi
-        ->join('App:Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
-        ->join('App:Genitore', 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
+        ->join('App\Entity\Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
+        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.alunno=a.id AND g.abilitato=:abilitato')
         ->andWhere('g.id IN (:lista)')
         ->setParameter('lista', $filtro)
         ->setParameter('abilitato', 1);
@@ -188,7 +186,7 @@ class ClasseRepository extends BaseRepository {
     if ($filtro) {
       // filtro alunni
       $classi
-        ->join('App:Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
+        ->join('App\Entity\Alunno', 'a', 'WITH', 'a.classe=c.id AND a.abilitato=:abilitato')
         ->andWhere('a.id IN (:lista)')
         ->setParameter('lista', $filtro)
         ->setParameter('abilitato', 1);

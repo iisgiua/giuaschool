@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,6 +13,8 @@ use App\Entity\Avviso;
 
 /**
  * Avviso - repository
+ *
+ * @author Antonello Dessì
  */
 class AvvisoRepository extends BaseRepository {
 
@@ -41,8 +39,8 @@ class AvvisoRepository extends BaseRepository {
       // dsga/ata
       $utenti = $this->createQueryBuilder('a')
         ->select('ata.tipo,COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App:Ata', 'ata', 'WITH', 'ata.id=au.utente')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Ata', 'ata', 'WITH', 'ata.id=au.utente')
         ->where('a.id=:avviso')
         ->setParameters(['avviso' => $avviso])
         ->groupBy('ata.tipo')
@@ -65,9 +63,9 @@ class AvvisoRepository extends BaseRepository {
       // coordinatori
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App:Docente', 'd', 'WITH', 'd.id=au.utente')
-        ->join('App:Classe', 'c', 'WITH', 'c.coordinatore=d.id')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
+        ->join('App\Entity\Classe', 'c', 'WITH', 'c.coordinatore=d.id')
         ->where('a.id=:avviso')
         ->setParameters(['avviso' => $avviso])
         ->getQuery()
@@ -78,8 +76,8 @@ class AvvisoRepository extends BaseRepository {
       // docenti
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App:Docente', 'd', 'WITH', 'd.id=au.utente')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
         ->where('a.id=:avviso')
         ->setParameters(['avviso' => $avviso])
         ->getQuery()
@@ -90,8 +88,8 @@ class AvvisoRepository extends BaseRepository {
       // genitori
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App:Genitore', 'g', 'WITH', 'g.id=au.utente')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.id=au.utente')
         ->where('a.id=:avviso')
         ->setParameters(['avviso' => $avviso])
         ->getQuery()
@@ -102,8 +100,8 @@ class AvvisoRepository extends BaseRepository {
       // alunni
       $utenti = $this->createQueryBuilder('a')
         ->select('COUNT(au.id) AS tot,COUNT(au.letto) AS letti')
-        ->join('App:AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
-        ->join('App:Alunno', 'al', 'WITH', 'al.id=au.utente')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Alunno', 'al', 'WITH', 'al.id=au.utente')
         ->where('a.id=:avviso')
         ->setParameters(['avviso' => $avviso])
         ->getQuery()
@@ -112,7 +110,7 @@ class AvvisoRepository extends BaseRepository {
       // classi
       $classi = $this->createQueryBuilder('a')
         ->select('COUNT(ac.id) AS tot,COUNT(ac.letto) AS letti')
-        ->join('App:AvvisoClasse', 'ac', 'WITH', 'ac.avviso=a.id')
+        ->join('App\Entity\AvvisoClasse', 'ac', 'WITH', 'ac.avviso=a.id')
         ->join('ac.classe', 'cl')
         ->where('a.id=:avviso')
         ->setParameters(['avviso' => $avviso])
@@ -124,7 +122,7 @@ class AvvisoRepository extends BaseRepository {
           // lista classi in cui va letta
           $classi = $this->createQueryBuilder('a')
             ->select("CONCAT(cl.anno,'ª ',cl.sezione) AS nome")
-            ->join('App:AvvisoClasse', 'ac', 'WITH', 'ac.avviso=a.id')
+            ->join('App\Entity\AvvisoClasse', 'ac', 'WITH', 'ac.avviso=a.id')
             ->join('ac.classe', 'cl')
             ->where('a.id=:avviso AND ac.letto IS NULL')
             ->setParameters(['avviso' => $avviso])

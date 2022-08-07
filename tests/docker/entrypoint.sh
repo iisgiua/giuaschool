@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Start MySql service in background
 service mariadb start

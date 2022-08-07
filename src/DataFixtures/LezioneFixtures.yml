@@ -1,0 +1,55 @@
+####################
+# LezioneFixtures - dati di test
+#
+# Dati delle ore di lezione:
+#   data: Data della lezione
+#   ora: Numero dell'ora di lezione [1,2,...]
+#   classe: Classe della lezione
+#   materia: Materia della lezione
+#   argomento: Argomento della lezione
+#   attivita: Attività della lezione
+####################
+
+
+include:
+  - ClasseFixtures.yml
+  - MateriaFixtures.yml
+
+
+App\Entity\Lezione:
+
+  # ----- lezioni delle classi -----
+  lezione_{1..100}:
+    data: '<dateTimeBetween("-2 month", "now")>'
+    ora: '<numberBetween(1, 4)>'
+    classe: '@classe_*'
+    materia: '@materia_curricolare_*'
+    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    attivita: '50%? <paragraph(2, false)>: <strval("")>'
+
+  # ----- lezioni di religione -----
+  lezione_religione_{1..30}:
+    data: '<dateTimeBetween("-2 month", "now")>'
+    ora: '<numberBetween(1, 4)>'
+    classe: '@classe_*'
+    materia: '@materia_RELIGIONE'
+    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    attivita: '50%? <paragraph(2, false)>: <strval("")>'
+
+  # ----- lezioni di sostegno -----
+  lezione_sostegno_{1..10}:
+    data: '<dateTimeBetween("-2 month", "now")>'
+    ora: '<numberBetween(1, 4)>'
+    classe: '@classe_*'
+    materia: '@materia_SOSTEGNO'
+    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    attivita: '50%? <paragraph(2, false)>: <strval("")>'
+
+  # ----- lezioni di sostituzione -----
+  lezione_supplenza_{1..10}:
+    data: '<dateTimeBetween("-2 month", "now")>'
+    ora: '<numberBetween(1, 4)>'
+    classe: '@classe_*'
+    materia: '@materia_SUPPLENZA'
+    argomento: '80%? <paragraph(2, false)>: <strval("")>'
+    attivita: '50%? <paragraph(2, false)>: <strval("")>'

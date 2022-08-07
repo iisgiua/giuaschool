@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -27,6 +23,8 @@ use App\Entity\Documento;
 
 /**
  * DocumentoType - form per i documenti
+ *
+ * @author Antonello Dessì
  */
 class DocumentoType extends AbstractType {
 
@@ -71,7 +69,7 @@ class DocumentoType extends AbstractType {
           'required' => true))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['values'][3],
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
           'placeholder' => 'label.tutte_classi',
           'query_builder' => $fnSede,
@@ -98,7 +96,7 @@ class DocumentoType extends AbstractType {
           'required' => false))
         ->add('classe', EntityType::class, array('label' => 'label.classe',
           'data' => $options['values'][2],
-          'class' => 'App:Classe',
+          'class' => 'App\Entity\Classe',
           'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
           'placeholder' => 'label.tutte_classi',
           'query_builder' => $fnSede,
@@ -141,7 +139,7 @@ class DocumentoType extends AbstractType {
         // scelta alunno
         $builder
           ->add('classe', EntityType::class, array('label' => 'label.classe',
-            'class' => 'App:Classe',
+            'class' => 'App\Entity\Classe',
             'choice_label' => function($obj) { return $obj->getAnno().'ª '.$obj->getSezione(); },
             'placeholder' => 'label.scegli_classe',
             'query_builder' => $fnSede,

@@ -1,31 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * AvvisoUtente - entità
- * Utente a cui è indirizzato l'avviso: usata da destinatari genitori
+ * AvvisoUtente - dati per l'associazione tra avviso e utente
  *
  * @ORM\Entity(repositoryClass="App\Repository\AvvisoUtenteRepository")
  * @ORM\Table(name="gs_avviso_utente", uniqueConstraints={@ORM\UniqueConstraint(columns={"avviso_id","utente_id"})})
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields={"avviso","utente"}, message="field.unique")
+ *
+ * @author Antonello Dessì
  */
 class AvvisoUtente {
 
@@ -33,54 +30,54 @@ class AvvisoUtente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco
+   * @var int|null $id Identificativo univoco
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var Avviso $avviso Avviso a cui ci si riferisce
+   * @var Avviso|null $avviso Avviso a cui ci si riferisce
    *
    * @ORM\ManyToOne(targetEntity="Avviso")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $avviso;
+  private ?Avviso $avviso = null;
 
   /**
-   * @var Utente $utente Utente destinatario della circolare
+   * @var Utente|null $utente Utente destinatario della circolare
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $utente;
+  private ?Utente $utente = null;
 
   /**
-   * @var \DateTime $letto Data e ora di lettura dell'avviso da parte dell'utente
+   * @var \DateTime|null $letto Data e ora di lettura dell'avviso da parte dell'utente
    *
    * @ORM\Column(type="datetime", nullable=true)
    */
-  private $letto;
+  private ?\DateTime $letto = null;
 
 
   //==================== EVENTI ORM ====================
@@ -90,7 +87,7 @@ class AvvisoUtente {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -101,7 +98,7 @@ class AvvisoUtente {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -112,36 +109,36 @@ class AvvisoUtente {
   /**
    * Restituisce l'identificativo univoco per l'avviso
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'avviso a cui ci si riferisce
    *
-   * @return Avviso Avviso a cui ci si riferisce
+   * @return Avviso|null Avviso a cui ci si riferisce
    */
-  public function getAvviso() {
+  public function getAvviso(): ?Avviso {
     return $this->avviso;
   }
 
@@ -150,9 +147,9 @@ class AvvisoUtente {
    *
    * @param Avviso $avviso Avviso a cui ci si riferisce
    *
-   * @return AvvisoUtente Oggetto AvvisoUtente
+   * @return self Oggetto modificato
    */
-  public function setAvviso(Avviso $avviso) {
+  public function setAvviso(Avviso $avviso): self {
     $this->avviso = $avviso;
     return $this;
   }
@@ -160,9 +157,9 @@ class AvvisoUtente {
   /**
    * Restituisce l'utente destinatario dell'avviso
    *
-   * @return Utente Utente destinatario dell'avviso
+   * @return Utente|null Utente destinatario dell'avviso
    */
-  public function getUtente() {
+  public function getUtente(): ?Utente {
     return $this->utente;
   }
 
@@ -171,9 +168,9 @@ class AvvisoUtente {
    *
    * @param Utente $utente Utente destinatario dell'avviso
    *
-   * @return AvvisoUtente Oggetto AvvisoUtente
+   * @return self Oggetto modificato
    */
-  public function setUtente(Utente $utente) {
+  public function setUtente(Utente $utente): self {
     $this->utente = $utente;
     return $this;
   }
@@ -181,20 +178,20 @@ class AvvisoUtente {
   /**
    * Restituisce la data e ora di lettura dell'avviso
    *
-   * @return \DateTime Data e ora di lettura dell'avviso
+   * @return \DateTime|null Data e ora di lettura dell'avviso
    */
-  public function getLetto() {
+  public function getLetto(): ?\DateTime {
     return $this->letto;
   }
 
   /**
    * Modifica la data e ora di lettura dell'avviso
    *
-   * @param \DateTime $letto Data e ora di lettura dell'avviso
+   * @param \DateTime|null $letto Data e ora di lettura dell'avviso
    *
-   * @return AvvisoUtente Oggetto AvvisoUtente
+   * @return self Oggetto modificato
    */
-  public function setLetto($letto) {
+  public function setLetto(?\DateTime $letto): self {
     $this->letto = $letto;
     return $this;
   }

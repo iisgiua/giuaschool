@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -16,10 +12,13 @@ use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\Cattedra;
 use App\Entity\FirmaSostegno;
+use App\Entity\OrarioDocente;
 
 
 /**
  * Cattedra - repository
+ *
+ * @author Antonello Dessì
  */
 class CattedraRepository extends BaseRepository {
 
@@ -179,10 +178,10 @@ class CattedraRepository extends BaseRepository {
       $dati['lista'][$cat->getId()]['orario'] = array();
       if ($cat->getMateria()->getTipo() != 'S') {
         // cattedra curricolare
-        $orario = $this->_em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+        $orario = $this->_em->getRepository('App\Entity\OrarioDocente')->createQueryBuilder('od')
           ->select('od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
-          ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->where('od.cattedra=:cattedra AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('od.giorno,od.ora', 'ASC')
           ->setParameters(['cattedra' => $cat, 'sede' => $cat->getClasse()->getSede(),
@@ -194,10 +193,10 @@ class CattedraRepository extends BaseRepository {
         }
       } else {
         // cattedra di sostegno: imposta orari di tutte le materie della classe
-        $orari = $this->_em->getRepository('App:OrarioDocente')->createQueryBuilder('od')
+        $orari = $this->_em->getRepository('App\Entity\OrarioDocente')->createQueryBuilder('od')
           ->select('(c.id) AS materia,od.giorno,od.ora,so.inizio')
           ->join('od.orario', 'o')
-          ->join('App:ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
+          ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'so.orario=o.id AND so.giorno=od.giorno AND so.ora=od.ora')
           ->join('od.cattedra', 'c')
           ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND c.supplenza=:supplenza AND o.sede=:sede AND :data BETWEEN o.inizio AND o.fine')
           ->orderBy('c.id,od.giorno,od.ora', 'ASC')

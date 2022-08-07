@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -24,9 +20,11 @@ use App\Kernel;
 
 
 /**
-* Installer - Gestione procedura di installazione
-*
-*/
+ * Installer - Gestione procedura di installazione
+ *
+ *
+ * @author Antonello Dessì
+ */
 class Installer {
 
 
@@ -173,7 +171,29 @@ class Installer {
       "INSERT INTO `gs_configurazione` VALUES (NULL,NOW(),NOW(),'SCUOLA','voti_finali_N','Lista dei voti finali per le altre materie<br>[lista serializzata]','a:8:{s:3:\"min\";i:0;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:5;s:6:\"valori\";s:22:\"0,1,2,3,4,5,6,7,8,9,10\";s:9:\"etichette\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";s:4:\"voti\";s:39:\"\"Non Classificato\",1,2,3,4,5,6,7,8,9,10\";s:8:\"votiAbbr\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";}',1);",
     ],
     '1.4.5' => [],
-    'build' => []
+    'build' => [
+      "DELETE FROM gs_configurazione WHERE parametro IN ('blocco_inizio', 'blocco_fine', 'ip_scuola');",
+      "UPDATE gs_configurazione SET categoria='SCUOLA' WHERE parametro IN ('giorni_festivi_istituto', 'giorni_festivi_classi');",
+      "UPDATE gs_configurazione SET categoria='ACCESSO' WHERE parametro IN ('id_provider', 'dominio_id_provider', 'spid');",
+      "UPDATE gs_configurazione SET parametro='id_provider_dominio' WHERE parametro='dominio_id_provider';",
+      "INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES
+        (NULL, NOW(), NOW(), 'ACCESSO', 'id_provider_tipo', 'Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (U=utente qualsiasi, A=alunno, G=genitore. D=docente/staff/preside, S=staff/preside, P=preside, T=ata, M=amministratore)<br>[testo]', 'AD', '0');",
+      "INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES
+        (NULL, NOW(), NOW(), 'ACCESSO', 'otp_tipo', 'Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all\'uso dell\'OTP (U=utente qualsiasi, A=alunno, G=genitore. D=docente/staff/preside, S=staff/preside, P=preside, T=ata, M=amministratore)<br>[testo]', 'DS', '0');",
+      "UPDATE gs_configurazione SET descrizione='' WHERE descrizione IS NULL;",
+      "UPDATE gs_configurazione SET valore='' WHERE valore IS NULL;",
+      "ALTER TABLE gs_configurazione CHANGE descrizione descrizione VARCHAR(1024) NOT NULL, CHANGE valore valore LONGTEXT NOT NULL;",
+      "ALTER TABLE gs_utente CHANGE ultimo_otp ultimo_otp VARCHAR(128) DEFAULT NULL;",
+      "ALTER TABLE gs_menu_opzione CHANGE disabilitato abilitato TINYINT(1) NOT NULL;",
+      "ALTER TABLE gs_utente DROP chiave1, DROP chiave2, DROP chiave3;",
+      "DROP INDEX UNIQ_170CE9DBC6E493B068B49425 ON gs_classe;",
+      "ALTER TABLE gs_classe CHANGE sezione sezione VARCHAR(64) NOT NULL;",
+      "CREATE UNIQUE INDEX UNIQ_170CE9DBC6E493B068B494254465899F ON gs_classe (anno, sezione, corso_id);",
+      "DELETE FROM gs_menu_opzione;",
+      "DELETE FROM gs_menu;",
+      "INSERT INTO gs_menu VALUES (1,'2022-08-07 15:53:40','2022-08-07 15:53:40','help','Aiuto','Guida e supporto per l\'utente',0),(2,'2022-08-07 15:53:40','2022-08-07 15:53:40','user','Utente','Gestione del profilo dell\'utente',0),(3,'2022-08-07 15:53:40','2022-08-07 15:53:40','info','Informazioni','Informazioni sull\'applicazione',0),(4,'2022-08-07 15:53:40','2022-08-07 15:53:40','main','Menu Principale','Apri il menu principale',0),(5,'2022-08-07 15:53:40','2022-08-07 15:53:40','sistema','','',0),(6,'2022-08-07 15:53:40','2022-08-07 15:53:40','scuola','','',0),(7,'2022-08-07 15:53:40','2022-08-07 15:53:40','ata','','',0),(8,'2022-08-07 15:53:40','2022-08-07 15:53:40','docenti','','',0),(9,'2022-08-07 15:53:40','2022-08-07 15:53:40','alunni','','',0);",
+      "INSERT INTO gs_menu_opzione VALUES (1,1,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','U','N','Manuale','Scarica il manuale d\'uso dell\'applicazione','',2,0,''),(2,2,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','U','N','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,1,''),(3,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','N','N','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,1,''),(4,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','N','N','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,1,''),(5,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','N','N','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,1,''),(6,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','N','N','Credits','Mostra i credits','info_credits',4,1,''),(7,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','U','N','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,1,''),(8,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','U','N','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,1,''),(9,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','U','N','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,1,''),(10,3,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','U','N','Credits','Mostra i credits','info_credits',4,1,''),(11,4,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','N','N','Accesso','Accedi al registro','login_form',1,1,''),(12,4,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','N','N','Recupero&nbsp;Password','Recupera la password di accesso tramite la posta elettronica','login_recovery',2,1,''),(13,4,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','N','N','App&nbsp;e&nbsp;Servizi','Informazioni su app e servizi disponibili','app_info',3,1,''),(14,4,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','U','N','Home','Pagina principale','login_home',10,1,''),(15,4,5,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Sistema','Gestione generale del sistema','',20,1,'cog'),(16,4,6,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Scuola','Configurazione dei dati della scuola','',21,1,'school'),(17,4,7,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','ATA','Gestione del personale ATA','',22,1,'user-tie'),(18,4,8,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Docenti','Gestione dei docenti','',23,1,'user-graduate'),(19,4,9,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Alunni','Gestione degli alunni','',24,1,'child'),(20,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Parametri','Configura i parametri dell\'applicazione','sistema_parametri',1,1,''),(21,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Banner','Visualizza un banner sulle pagine principali','sistema_banner',2,1,''),(22,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Manutenzione','Imposta la modalit&agrave; di manutenzione','sistema_manutenzione',3,1,''),(23,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Importazione&nbsp;iniziale','Importa i dati dall\'A.S. precedente','sistema_importa',4,1,''),(24,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Archiviazione','Archivia i registri e i documenti delle classi','sistema_archivia',5,1,''),(25,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','__SEPARATORE__','__SEPARATORE__','',6,1,''),(26,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Alias','Assumi l\'identit&agrave; di un altro utente','sistema_alias',7,1,''),(27,5,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Password','Cambia la password di un utente','sistema_password',8,1,''),(28,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Amministratore','Configura i dati dell\'amministratore','scuola_amministratore',1,1,''),(29,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Dirigente&nbsp;scolastico','Configura i dati del dirigente scolastico','scuola_dirigente',2,1,''),(30,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Istituto','Configura i dati dell\'Istituto','scuola_istituto',3,1,''),(31,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Sedi','Configura i dati delle sedi scolastiche','scuola_sedi',4,1,''),(32,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Corsi','Configura i corsi di studio','scuola_corsi',5,1,''),(33,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Materie','Configura le materie scolastiche','scuola_materie',6,1,''),(34,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Classi','Configura le classi','scuola_classi',7,1,''),(35,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Festivit&agrave;','Configura il calendario delle festivit&agrave;','scuola_festivita',8,1,''),(36,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Orario','Configura la scansione oraria delle lezioni','scuola_orario',9,1,''),(37,6,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Scrutini','Configura gli scrutini','scuola_scrutini',10,1,''),(38,7,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Importa','Importa da file i dati del personale ATA','ata_importa',1,1,''),(39,7,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Modifica','Modifica i dati del personale ATA','ata_modifica',2,1,''),(40,8,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Importa','Importa da file i dati dei docenti','docenti_importa',1,1,''),(41,8,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Modifica','Modifica i dati dei docenti','docenti_modifica',2,1,''),(42,8,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Staff','Configura i componenti dello staff della dirigenza','docenti_staff',3,1,''),(43,8,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Coordinatori','Configura i coordinatori del Consiglio di Classe','docenti_coordinatori',4,1,''),(44,8,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Segretari','Configura i segretari del Consiglio di Classe','docenti_segretari',5,1,''),(45,8,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Cattedre','Configura le cattedre dei docenti','docenti_cattedre',6,1,''),(46,8,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Colloqui','Configura i colloqui dei docenti','docenti_colloqui',7,1,''),(47,9,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Importa','Importa da file i dati degli alunni','alunni_importa',1,1,''),(48,9,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Modifica','Modifica i dati degli alunni','alunni_modifica',2,1,''),(49,9,NULL,'2022-08-07 15:53:40','2022-08-07 15:53:40','M','N','Cambio&nbsp;classe','Configura il cambio di classe degli alunnii','alunni_classe',3,1,'');"
+    ]
   ];
 
   /**
@@ -185,16 +205,34 @@ class Installer {
    */
   private $checkUpdate = [
     '1.4.3' => [
-      "SELECT id FROM `gs_configurazione` WHERE parametro='spid';",
+      "SELECT id FROM gs_configurazione WHERE parametro='spid';",
     ],
     '1.4.4' => [
-      "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_R';",
-      "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_E';",
-      "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_C';",
-      "SELECT id FROM `gs_configurazione` WHERE parametro='voti_finali_N';"
+      "SELECT id FROM gs_configurazione WHERE parametro='voti_finali_R';",
+      "SELECT id FROM gs_configurazione WHERE parametro='voti_finali_E';",
+      "SELECT id FROM gs_configurazione WHERE parametro='voti_finali_C';",
+      "SELECT id FROM gs_configurazione WHERE parametro='voti_finali_N';"
     ],
-    '1.4.5' => [],
     'build' => [
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='id_provider_tipo';",
+      "SELECT id FROM gs_configurazione WHERE parametro='otp_tipo';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT * FROM information_schema.COLUMNS WHERE TABLE_NAME='gs_menu_opzione' AND COLUMN_NAME='abilitato'",
+      "SELECT 1 FROM DUAL WHERE NOT EXISTS (SELECT * FROM information_schema.COLUMNS WHERE TABLE_NAME='gs_utente' AND COLUMN_NAME='chiave1')",
+      "SELECT 1 FROM DUAL WHERE NOT EXISTS (SELECT * FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_NAME='gs_classe' AND CONSTRAINT_NAME='UNIQ_170CE9DBC6E493B068B49425')",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT * FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_NAME='gs_classe' AND CONSTRAINT_NAME='UNIQ_170CE9DBC6E493B068B494254465899F'",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';",
+      "SELECT id FROM gs_configurazione WHERE parametro='###NON-ESISTE###';"
     ]
   ];
 
@@ -1011,6 +1049,8 @@ class Installer {
       "DATABASE_URL='".$this->env['DATABASE_URL']."'\n\n".
       "### parametri di connessione al server email\n".
       "MAILER_DSN='".$this->env['MAILER_DSN']."'\n\n".
+      "### parametri di configurazione per l'invio dei messaggi\n".
+      "MESSENGER_TRANSPORT_DSN='".$this->env['MESSENGER_TRANSPORT_DSN']."'\n\n".
       "### autenticazione tramite Google Workspace\n".
       "GOOGLE_API_KEY='".$this->env['GOOGLE_API_KEY']."'\n".
       "GOOGLE_CLIENT_ID='".$this->env['GOOGLE_CLIENT_ID']."'\n".
@@ -1038,7 +1078,8 @@ class Installer {
     $env['APP_ENV'] = (empty($this->env['APP_ENV']) ? 'prod' : $this->env['APP_ENV']);
     $env['APP_SECRET'] = (empty($this->env['APP_SECRET']) ? bin2hex(random_bytes(20)) : $this->env['APP_SECRET']);
     $env['DATABASE_URL'] = (empty($this->env['DATABASE_URL']) ? 'mysql://root:root@localhost:3306/giuaschool' : $this->env['DATABASE_URL']);
-    $env['MAILER_DSN'] = (empty($this->env['MAILER_DSN']) ? 'gmail://utente:password@default' : $this->env['MAILER_DSN']);
+    $env['MAILER_DSN'] = (empty($this->env['MAILER_DSN']) ? 'null://null' : $this->env['MAILER_DSN']);
+    $env['MESSENGER_TRANSPORT_DSN'] = (empty($this->env['MESSENGER_TRANSPORT_DSN']) ? 'doctrine://default' : $this->env['MESSENGER_TRANSPORT_DSN']);
     $env['GOOGLE_API_KEY'] = (empty($this->env['GOOGLE_API_KEY']) ? '' : $this->env['GOOGLE_API_KEY']);
     $env['GOOGLE_CLIENT_ID'] = (empty($this->env['GOOGLE_CLIENT_ID']) ? '' : $this->env['GOOGLE_CLIENT_ID']);
     $env['GOOGLE_CLIENT_SECRET'] = (empty($this->env['GOOGLE_CLIENT_SECRET']) ? '' : $this->env['GOOGLE_CLIENT_SECRET']);

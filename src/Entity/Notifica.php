@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -14,15 +10,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Notifica - entità
+ * Notifica - dati per la gestione delle notifiche da inviare successivamente
  *
  * @ORM\Entity(repositoryClass="App\Repository\NotificaRepository")
  * @ORM\Table(name="gs_notifica")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class Notifica {
 
@@ -30,54 +27,52 @@ class Notifica {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per le istanze della classe
+   * @var int|null $id Identificativo univoco per le istanze della classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $oggetto_nome Nome della classe dell'oggetto da notificare
+   * @var string|null $oggetto_nome Nome della classe dell'oggetto da notificare
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-  private $oggettoNome;
+  private ?string $oggettoNome = '';
 
   /**
-   * @var integer $oggettoId Id dell'oggetto da notificare
+   * @var int $oggettoId Id dell'oggetto da notificare
    *
    * @ORM\Column(type="integer", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $oggettoId;
+  private int $oggettoId = 0;
 
   /**
-   * @var string $azione Tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
+   * @var string|null $azione Tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"A","E","D"}, strict=true, message="field.choice")
    */
-  private $azione;
+  private ?string $azione = 'A';
 
 
   //==================== EVENTI ORM ====================
@@ -87,7 +82,7 @@ class Notifica {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -98,7 +93,7 @@ class Notifica {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -109,47 +104,47 @@ class Notifica {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
-*
-* @return \DateTime Data/ora della creazione
-*/
-public function getCreato() {
- return $this->creato;
-}
-
-/**
-* Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getModificato() {
+  public function getCreato(): ?\DateTime {
+   return $this->creato;
+  }
+
+  /**
+   * Restituisce la data e ora dell'ultima modifica dei dati
+   *
+   * @return \DateTime|null Data/ora dell'ultima modifica
+   */
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce il nome della classe dell'oggetto da notificare
    *
-   * @return string Nome della classe dell'oggetto da notificare
+   * @return string|null Nome della classe dell'oggetto da notificare
    */
-  public function getOggettoNome() {
+  public function getOggettoNome(): ?string {
     return $this->oggettoNome;
   }
 
   /**
    * Modifica il nome della classe dell'oggetto da notificare
    *
-   * @param string $oggettoNome Nome della classe dell'oggetto da notificare
+   * @param string|null $oggettoNome Nome della classe dell'oggetto da notificare
    *
-   * @return Notifica Oggetto Notifica
+   * @return self Oggetto modificato
    */
-  public function setOggettoNome($oggettoNome) {
+  public function setOggettoNome(?string $oggettoNome): self {
     $this->oggettoNome = $oggettoNome;
     return $this;
   }
@@ -157,20 +152,20 @@ public function getCreato() {
   /**
    * Restituisce l'id dell'oggetto da notificare
    *
-   * @return integer Id dell'oggetto da notificare
+   * @return int Id dell'oggetto da notificare
    */
-  public function getOggettoId() {
+  public function getOggettoId(): int {
     return $this->oggettoId;
   }
 
   /**
    * Modifica l'id dell'oggetto da notificare
    *
-   * @param integer $oggettoId Id dell'oggetto da notificare
+   * @param int $oggettoId Id dell'oggetto da notificare
    *
-   * @return Notifica Oggetto Notifica
+   * @return self Oggetto modificato
    */
-  public function setOggettoId($oggettoId) {
+  public function setOggettoId(int $oggettoId): self {
     $this->oggettoId = $oggettoId;
     return $this;
   }
@@ -178,20 +173,20 @@ public function getCreato() {
   /**
    * Restituisce il tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
    *
-   * @return string Tipo di azione da notificare sull'oggetto
+   * @return string|null Tipo di azione da notificare sull'oggetto
    */
-  public function getAzione() {
+  public function getAzione(): ?string {
     return $this->azione;
   }
 
   /**
    * Modifica il tipo di azione da notificare sull'oggetto [A=added,E=edited,D=deleted]
    *
-   * @param string $azione Tipo di azione da notificare sull'oggetto
+   * @param string|null $azione Tipo di azione da notificare sull'oggetto
    *
-   * @return Notifica Oggetto Notifica
+   * @return self Oggetto modificato
    */
-  public function setAzione($azione) {
+  public function setAzione(?string $azione): self {
     $this->azione = $azione;
     return $this;
   }
@@ -200,18 +195,11 @@ public function getCreato() {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->oggettoNome.':'.$this->oggettoId;
   }
 

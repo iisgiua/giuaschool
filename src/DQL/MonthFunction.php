@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -20,6 +16,8 @@ use Doctrine\ORM\Query\SqlWalker;
 
 /**
  * MonthFunction - funzione SQL MONTH: MONTH(date)
+ *
+ * @author Antonello Dessì
  */
 class MonthFunction extends FunctionNode {
 
@@ -39,7 +37,7 @@ class MonthFunction extends FunctionNode {
    *
    * @param Parser $parser Oggetto Parser
    */
-  public function parse(Parser $parser) {
+  public function parse(Parser $parser): void {
     $parser->match(Lexer::T_IDENTIFIER);
     $parser->match(Lexer::T_OPEN_PARENTHESIS);
     $this->date = $parser->ArithmeticPrimary();
@@ -58,4 +56,3 @@ class MonthFunction extends FunctionNode {
   }
 
 }
-

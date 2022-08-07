@@ -133,9 +133,9 @@ Schema dello scenario: inserisce documento BES e lo visualizza su pagina inserim
   E vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
     | tipo     | nome     | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
 
 Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza modifiche
   Data ricerca istanze di tipo "Classe":
@@ -157,9 +157,9 @@ Schema dello scenario: annulla inserimento e torna a pagina inserimenti senza mo
   E non vedi file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf"
   Esempi:
     | tipo     | nome     | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | Diagnosi | DIAGNOSI | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.E.I.   | PEI      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.D.P.   | PDP      | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
 
 Scenario: errore inserimento documento BES senza selezione classe
   Quando pagina attiva "documenti_bes_add"
@@ -246,9 +246,9 @@ Schema dello scenario: inserisce documento BES e controlla la sua codifica
   E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in file "archivio/classi/3A/riservato/<nome>-<alunno_file>.pdf" decodificato con "$d1:cifrato"
   Esempi:
     | tipo     | nome     | tipodoc | alunno                 | alunno_file                              |
-    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
-    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#upr($a1:cognome)}}-{{#upr($a1:nome)}} |
+    | Diagnosi | DIAGNOSI | B       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.E.I.   | PEI      | H       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
+    | P.D.P.   | PDP      | D       | $a1:cognome+ +$a1:nome | {{#slg($a1:cognome)}}-{{#slg($a1:nome)}} |
 
 
 ################################################################################

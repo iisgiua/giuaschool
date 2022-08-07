@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -25,10 +21,13 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use App\Form\MessageType;
 use App\Entity\Configurazione;
+use Symfony\Component\Form\CallbackTransformer;
 
 
 /**
  * ConfigurazioneType - form per i paramtri di configurazione
+ *
+ * @author Antonello Dessì
  */
 class ConfigurazioneType extends AbstractType {
 
@@ -82,6 +81,23 @@ class ConfigurazioneType extends AbstractType {
           'html5' => false,
           'attr' => ['widget' => 'gs-row-end'],
           'required' => true));
+      // data transformer necessari per evitare errori
+      $builder->get('data_inizio')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('Y-m-d'); }));
+      $builder->get('ora_inizio')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('H:i'); }));
+      $builder->get('data_fine')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('Y-m-d'); }));
+      $builder->get('ora_fine')
+        ->addModelTransformer(new CallbackTransformer(
+          function ($d) { return $d; },
+          function ($d) { return $d->format('H:i'); }));
     } elseif ($options['formMode'] == 'parametri') {
       // form parametri
       $builder
@@ -124,6 +140,8 @@ class ConfigurazioneType extends AbstractType {
 
 /**
  * ParametroType - form per un parametro di configurazione
+ *
+ * @author Antonello Dessì
  */
 class ParametroType extends AbstractType {
 

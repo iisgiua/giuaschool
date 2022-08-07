@@ -1,0 +1,58 @@
+####################
+# CircolareFixtures - dati di test
+#
+# Dati per le circolari scolastiche:
+#   sedi: sedi a cui è destinata la circolare
+#   anno: anno iniziale dell'A.S. a cui si riferisce la circolare
+#   numero: numero della circolare
+#   data: data della circolare
+#   oggetto: oggetto della circolare
+#   documento: documento della circolare
+#   allegati: lista di file allegati alla circolare
+#   ata: indica se il personale ATA è destinatario della circolare o no
+#   dsga: indica se il DSGA è destinatario della circolare o no
+#   genitori: indica quali genitori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroGenitori: lista dei filtri per i genitori
+#   alunni: indica quali alunni sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, U=filtro utente]
+#   filtroAlunni: lista dei filtri per gli alunni
+#   coordinatori: indica quali coordinatori sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe]
+#   filtroCoordinatori: lista dei filtri per i coordinatori
+#   docenti: indica quali docenti sono destinatari della circolare [N=nessuno, T=tutti, C=filtro classe, M=filtro materia, U=filtro utente]
+#   filtroDocenti: lista dei filtri per i docenti
+#   altri: altri destinatari della circolare non riferiti ad utenti sul registro
+#   firma: indica se è richiesta la conferma esplicita di lettura della circolare o no
+#   notifica: indica se è richiesta la notifica della circolare ai destinatari o no
+#   pubblicata: indica se la circolare è pubblicata o no
+####################
+
+
+include:
+  - SedeFixtures.yml
+  - GenitoreFixtures.yml
+  - AlunnoFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Circolare:
+  circolare_{1..10}:
+    sedi: '<collection(@sede_*)>'
+    anno: '<numberBetween(2020, 2022)>'
+    numero (unique): '<numberBetween(1, 300)>'
+    data: '<dateTimeBetween("-1 month", "now")>'
+    oggetto: '<substr(<text()>, 0, 255)>'
+    documento: '<fileObj()>'
+    allegati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    ata: '<boolean()>'
+    dsga: '<boolean()>'
+    genitori: '<randomElement(["N", "T", "C", "U"])>'
+    filtroGenitori: '50%? [@genitore1_*->id]: <(array())>'
+    alunni: '<randomElement(["N", "T", "C", "U"])>'
+    filtroAlunni: '50%? [@alunno_*->id]: <(array())>'
+    coordinatori: '<randomElement(["N", "T", "C"])>'
+    filtroCoordinatori: '50%? [@docente_*->id]: <(array())>'
+    docenti: '<randomElement(["N", "T", "C", "M", "U"])>'
+    filtroDocenti: '50%? [@docente_*->id]: <(array())>'
+    altri: '50%? <words(3)>: <(array())>'
+    firma: '<boolean()>'
+    notifica: '<boolean()>'
+    pubblicata: '<boolean()>'

@@ -1,0 +1,36 @@
+####################
+# OrarioFixtures - dati di test
+#
+# Dati dell'orario:
+#   nome: nome descrittivo dell'orario
+#   inizio: data iniziale dell'entrata in vigore dell'orario
+#   fine: data finale della validità dell'orario
+#   sede: sede a cui si riferisce l'orario
+####################
+
+
+include:
+  - SedeFixtures.yml
+
+
+App\Entity\Orario:
+  orario_provvisorio1:
+    nome: 'Orario Provvisorio - @sede_1->nomeBreve'
+    inizio: '<date_create("2021-09-14")>'
+    fine: '<date_create("2021-10-04")>'
+    sede: '@sede_1'
+  orario_provvisorio2:
+    nome: 'Orario Provvisorio - @sede_2->nomeBreve'
+    inizio: '<date_create("2021-09-14")>'
+    fine: '<date_create("2021-10-04")>'
+    sede: '@sede_2'
+  orario_definitivo1:
+    nome: 'Orario Definitivo - @sede_1->nomeBreve'
+    inizio: '<date_create("2021-10-05")>'
+    fine: '<date_create("2022-06-12")>'
+    sede: '@sede_1'
+  orario_definitivo2:
+    nome: 'Orario Definitivo - @sede_2->nomeBreve'
+    inizio: '<date_create("2021-10-05")>'
+    fine: '<date_create("2022-06-12")>'
+    sede: '@sede_2'

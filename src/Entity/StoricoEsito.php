@@ -1,30 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * StoricoEsito - entità
+ * StoricoEsito - dati per la memorizzazione degli esiti del precedente anno scolastico
  *
  * @ORM\Entity(repositoryClass="App\Repository\StoricoEsitoRepository")
  * @ORM\Table(name="gs_storico_esito")
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields="alunno", message="field.unique")
+ *
+ * @author Antonello Dessì
  */
 class StoricoEsito {
 
@@ -32,94 +30,92 @@ class StoricoEsito {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'esito
+   * @var int|null $id Identificativo univoco per l'esito
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $classe Classe dell'alunno
+   * @var string|null $classe Classe dell'alunno
    *
    * @ORM\Column(type="string", length=16, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private ?string $classe = '';
 
   /**
-   * @var string $esito Esito dello scrutinio [A=ammesso, N=non ammesso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero]
+   * @var string|null $esito Esito dello scrutinio [A=ammesso, N=non ammesso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"A","N","R","L","E"}, strict=true, message="field.choice")
    */
-  private $esito;
+  private ?string $esito = 'A';
 
   /**
-   * @var string $periodo Periodo dello scrutinio [F=scrutinio finale, G=esame giudizio sospeso, X=rinviato in precedente A.S.]
+   * @var string|null $periodo Periodo dello scrutinio [F=scrutinio finale, G=esame giudizio sospeso, X=rinviato in precedente A.S.]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"F","G","X"}, strict=true, message="field.choice")
    */
-  private $periodo;
+  private ?string $periodo = 'F';
 
   /**
-   * @var float $media Media dei voti
+   * @var float|null $media Media dei voti
    *
-   * @ORM\Column(type="float", precision=4, scale=2, nullable=true)
+   * @ORM\Column(type="float", nullable=true)
    */
-  private $media;
+  private ?float $media = 0;
 
   /**
-   * @var integer $credito Punteggio di credito
+   * @var int|null $credito Punteggio di credito
    *
    * @ORM\Column(type="integer", nullable=true)
    */
-  private $credito;
+  private ?int $credito = 0;
 
   /**
-   * @var integer $creditoPrecedente Punteggio di credito degli anni precedenti
+   * @var int|null $creditoPrecedente Punteggio di credito degli anni precedenti
    *
    * @ORM\Column(name="credito_precedente", type="integer", nullable=true)
    */
-  private $creditoPrecedente;
+  private ?int $creditoPrecedente = 0;
 
   /**
-   * @var Alunno $alunno Alunno a cui si attribuisce l'esito
+   * @var Alunno|null $alunno Alunno a cui si attribuisce l'esito
    *
    * @ORM\OneToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var array $dati Lista dei dati dello scrutinio
+   * @var array|null $dati Lista dei dati dello scrutinio
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
 
   //==================== EVENTI ORM ====================
@@ -129,7 +125,7 @@ class StoricoEsito {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -140,7 +136,7 @@ class StoricoEsito {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -151,47 +147,47 @@ class StoricoEsito {
   /**
    * Restituisce l'identificativo univoco per l'esito
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la classe dell'alunno
    *
-   * @return string Classe dell'alunno
+   * @return string|null Classe dell'alunno
    */
-  public function getClasse() {
+  public function getClasse(): ?string {
     return $this->classe;
   }
 
   /**
    * Modifica la classe dell'alunno
    *
-   * @param string $classe Classe dell'alunno
+   * @param string|null $classe Classe dell'alunno
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setClasse($classe) {
+  public function setClasse(?string $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -199,20 +195,20 @@ class StoricoEsito {
   /**
    * Restituisce l'esito dello scrutinio [A=ammesso, N=non ammesso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero]
    *
-   * @return string Esito dello scrutinio
+   * @return string|null Esito dello scrutinio
    */
-  public function getEsito() {
+  public function getEsito(): ?string {
     return $this->esito;
   }
 
   /**
    * Modifica l'esito dello scrutinio [A=ammesso, N=non ammesso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero]
    *
-   * @param string $esito Esito dello scrutinio
+   * @param string|null $esito Esito dello scrutinio
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setEsito($esito) {
+  public function setEsito(?string $esito): self {
     $this->esito = $esito;
     return $this;
   }
@@ -220,20 +216,20 @@ class StoricoEsito {
   /**
    * Restituisce il periodo dello scrutinio [F=scrutinio finale, E=esame sospesi, X=scrutinio rimandato]
    *
-   * @return string Periodo dello scrutinio
+   * @return string|null Periodo dello scrutinio
    */
-  public function getPeriodo() {
+  public function getPeriodo(): ?string {
     return $this->periodo;
   }
 
   /**
    * Modifica il periodo dello scrutinio [F=scrutinio finale, E=esame sospesi, X=scrutinio rimandato]
    *
-   * @param string $periodo Periodo dello scrutinio
+   * @param string|null $periodo Periodo dello scrutinio
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setPeriodo($periodo) {
+  public function setPeriodo(?string $periodo): self {
     $this->periodo = $periodo;
     return $this;
   }
@@ -241,20 +237,20 @@ class StoricoEsito {
   /**
    * Restituisce la media dei voti
    *
-   * @return float Media dei voti
+   * @return float|null Media dei voti
    */
-  public function getMedia() {
+  public function getMedia(): ?float {
     return $this->media;
   }
 
   /**
    * Modifica la media dei voti
    *
-   * @param float $media Media dei voti
+   * @param float|null $media Media dei voti
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setMedia($media) {
+  public function setMedia(?float $media): self {
     $this->media = $media;
     return $this;
   }
@@ -262,20 +258,20 @@ class StoricoEsito {
   /**
    * Restituisce il punteggio di credito
    *
-   * @return integer Punteggio di credito
+   * @return int|null Punteggio di credito
    */
-  public function getCredito() {
+  public function getCredito(): ?int {
     return $this->credito;
   }
 
   /**
    * Modifica il punteggio di credito
    *
-   * @param integer $credito Punteggio di credito
+   * @param int|null $credito Punteggio di credito
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setCredito($credito) {
+  public function setCredito(?int $credito): self {
     $this->credito = $credito;
     return $this;
   }
@@ -283,20 +279,20 @@ class StoricoEsito {
   /**
    * Restituisce il punteggio di credito degli anni precedenti
    *
-   * @return integer Punteggio di credito degli anni precedenti
+   * @return int|null Punteggio di credito degli anni precedenti
    */
-  public function getCreditoPrecedente() {
+  public function getCreditoPrecedente(): ?int {
     return $this->creditoPrecedente;
   }
 
   /**
    * Modifica il punteggio di credito degli anni precedenti
    *
-   * @param integer $creditoPrecedente Punteggio di credito degli anni precedenti
+   * @param int|null $creditoPrecedente Punteggio di credito degli anni precedenti
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setCreditoPrecedente($creditoPrecedente) {
+  public function setCreditoPrecedente(?int $creditoPrecedente): self {
     $this->creditoPrecedente = $creditoPrecedente;
     return $this;
   }
@@ -304,9 +300,9 @@ class StoricoEsito {
   /**
    * Restituisce l'alunno a cui si attribuisce l'esito
    *
-   * @return Alunno Alunno a cui si attribuisce l'esito
+   * @return Alunno|null Alunno a cui si attribuisce l'esito
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -315,9 +311,9 @@ class StoricoEsito {
    *
    * @param Alunno $alunno Alunno a cui si attribuisce l'esito
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -325,9 +321,9 @@ class StoricoEsito {
   /**
    * Restituisce la lista dei dati dello scrutinio
    *
-   * @return array Lista dei dati dello scrutinio
+   * @return array|null Lista dei dati dello scrutinio
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -336,9 +332,9 @@ class StoricoEsito {
    *
    * @param array $dati Lista dei dati dello scrutinio
    *
-   * @return StoricoEsito Oggetto modificato
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -351,19 +347,11 @@ class StoricoEsito {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->dati = array();
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->classe.': '.$this->esito;
   }
 

@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -19,6 +15,8 @@ use Doctrine\ORM\Mapping as ORM;
  * Staff - entità
  *
  * @ORM\Entity(repositoryClass="App\Repository\StaffRepository")
+ *
+ * @author Antonello Dessì
  */
 class Staff extends Docente {
 
@@ -26,12 +24,12 @@ class Staff extends Docente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var Sede $sede La sede di riferimento per il ruolo di staff (se definita)
+   * @var Sede|null $sede La sede di riferimento per il ruolo di staff (se definita)
    *
    * @ORM\ManyToOne(targetEntity="Sede")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $sede;
+  private ?Sede $sede = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -39,20 +37,20 @@ class Staff extends Docente {
   /**
    * Restituisce la sede di svolgimento del ruolo di staff
    *
-   * @return Sede Sede di svolgimento del ruolo di staff
+   * @return Sede|null Sede di svolgimento del ruolo di staff
    */
-  public function getSede() {
+  public function getSede(): ?Sede {
     return $this->sede;
   }
 
   /**
    * Modifica la sede di svolgimento del ruolo di staff
    *
-   * @param Sede $sede Sede di svolgimento del ruolo di staff
+   * @param Sede|null $sede Sede di svolgimento del ruolo di staff
    *
-   * @return Staff Oggetto Staff
+   * @return self Oggetto modificato
    */
-  public function setSede(Sede $sede = null) {
+  public function setSede(?Sede $sede): self {
     $this->sede = $sede;
     return $this;
   }
@@ -65,8 +63,29 @@ class Staff extends Docente {
    *
    * @return array Lista di ruoli
    */
-  public function getRoles() {
+  public function getRoles(): array {
     return ['ROLE_STAFF', 'ROLE_DOCENTE', 'ROLE_UTENTE'];
+  }
+
+  /**
+   * Restituisce il codice corrispondente al ruolo dell'utente
+   * I codici utilizzati sono:
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *
+   * @return string Codifica del ruolo dell'utente
+   */
+  public function getCodiceRuolo(): string {
+    return 'SDU';
+  }
+
+  /**
+   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente
+   * Utilizza le stesse funzioni dei docenti
+   *
+   * @return string Codifica della funzione
+   */
+  public function getCodiceFunzione(): string {
+    return parent::getCodiceFunzione();
   }
 
 }

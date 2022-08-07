@@ -1,19 +1,15 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -27,11 +23,16 @@ use Symfony\Component\Filesystem\Filesystem;
 use App\Entity\Staff;
 use App\Entity\Alunno;
 use App\Entity\Preside;
+use App\Entity\Assenza;
+use App\Entity\Avviso;
+use App\Entity\StoricoEsito;
 use App\Util\BachecaUtil;
 
 
 /**
  * FileController - gestione file upload
+ *
+ * @author Antonello Dessì
  */
 class FileController extends AbstractController {
 
@@ -39,7 +40,7 @@ class FileController extends AbstractController {
    * Esegue l'upload di un file tramite chiamata AJAX.
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param string $pagina Nome della pagina di invio del form
    * @param string $param Nome del parametro usato nel form
    *
@@ -51,7 +52,7 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function uploadAction(Request $request, SessionInterface $session, $pagina, $param) {
+  public function uploadAction(Request $request, RequestStack $reqstack, $pagina, $param) {
     $risposta = array();
     // legge file
     $files = $request->files->get($param);
@@ -76,7 +77,7 @@ class FileController extends AbstractController {
     }
     // memorizza in sessione
     $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
-    $session->set($var_sessione, array_merge($risposta, $session->get($var_sessione, [])));
+    $reqstack->getSession()->set($var_sessione, array_merge($risposta, $reqstack->getSession()->get($var_sessione, [])));
     // restituisce risposta
     return new JsonResponse($risposta);
   }
@@ -85,7 +86,7 @@ class FileController extends AbstractController {
    * Rimuove il file caricato tramite chiamata AJAX.
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param string $pagina Nome della pagina di invio del form
    * @param string $param Nome del parametro usato nel form
    *
@@ -97,7 +98,7 @@ class FileController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function removeAction(Request $request, SessionInterface $session, $pagina, $param) {
+  public function removeAction(Request $request, RequestStack $reqstack, $pagina, $param) {
     // legge file
     $file = $request->request->get($param);
     // imposta directory temporanea
@@ -106,7 +107,7 @@ class FileController extends AbstractController {
     if ($file) {
       $fs = new Filesystem();
       $var_sessione = '/APP/FILE/'.$pagina.'/'.$param;
-      $vs = $session->get($var_sessione, []);
+      $vs = $reqstack->getSession()->get($var_sessione, []);
       foreach ($vs as $k=>$f) {
         if ($f['type'] == 'uploaded' && $f['temp'] == $file['temp']) {
           // trovato: cancella
@@ -121,7 +122,7 @@ class FileController extends AbstractController {
         }
       }
       // memorizza sessione
-      $session->set($var_sessione, $vs);
+      $reqstack->getSession()->set($var_sessione, $vs);
     }
     // restituisce risposta vuota
     return new JsonResponse([]);
@@ -146,7 +147,7 @@ class FileController extends AbstractController {
   public function avvisoAction(EntityManagerInterface $em, BachecaUtil $bac,
                                 $avviso, $allegato) {
     // controllo avviso
-    $avviso = $em->getRepository('App:Avviso')->find($avviso);
+    $avviso = $em->getRepository('App\Entity\Avviso')->find($avviso);
     if (!$avviso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -187,7 +188,7 @@ class FileController extends AbstractController {
    */
   public function downloadSegreteriaAction(EntityManagerInterface $em, $tipo, $id) {
     // controllo
-    $storico = $em->getRepository('App:StoricoEsito')->findOneByAlunno($id);
+    $storico = $em->getRepository('App\Entity\StoricoEsito')->findOneByAlunno($id);
     if (!$storico) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -261,7 +262,7 @@ class FileController extends AbstractController {
     // init
     $fs = new Filesystem();
     if ($tipo == 'D') {
-      $assenza = $em->getRepository('App:Assenza')->find($id);
+      $assenza = $em->getRepository('App\Entity\Assenza')->find($id);
       if (!$assenza) {
         // errore assenza non definita
         throw $this->createNotFoundException('exception.id_notfound');

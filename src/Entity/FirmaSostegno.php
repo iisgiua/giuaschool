@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -16,9 +12,11 @@ use Doctrine\ORM\Mapping as ORM;
 
 
 /**
- * FirmaSostegno - entità
+ * FirmaSostegno - dati per la firma di una lezione di sostegno
  *
  * @ORM\Entity(repositoryClass="App\Repository\FirmaSostegnoRepository")
+ *
+ * @author Antonello Dessì
  */
 class FirmaSostegno extends Firma {
 
@@ -26,26 +24,26 @@ class FirmaSostegno extends Firma {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $argomento Argomento della lezione di sostegno
+   * @var string|null $argomento Argomento della lezione di sostegno
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $argomento;
+  private ?string $argomento = '';
 
   /**
-   * @var string $attivita Attività della lezione di sostegno
+   * @var string|null $attivita Attività della lezione di sostegno
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $attivita;
+  private ?string $attivita = '';
 
   /**
-   * @var Alunno $alunno Alunno della cattedra di sostegno (importante quando più alunni a stesso docente in stessa classe)
+   * @var Alunno|null $alunno Alunno della cattedra di sostegno (importante quando più alunni con stesso docente in stessa classe)
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -53,20 +51,20 @@ class FirmaSostegno extends Firma {
   /**
    * Restituisce l'argomento della lezione di sostegno
    *
-   * @return string Argomento della lezione di sostegno
+   * @return string|null Argomento della lezione di sostegno
    */
-  public function getArgomento() {
+  public function getArgomento(): ?string {
     return $this->argomento;
   }
 
   /**
    * Modifica l'argomento della lezione di sostegno
    *
-   * @param string $argomento Argomento della lezione di sostegno
+   * @param string|null $argomento Argomento della lezione di sostegno
    *
-   * @return FirmaSostegno Oggetto FirmaSostegno
+   * @return self Oggetto modificato
    */
-  public function setArgomento($argomento) {
+  public function setArgomento(?string $argomento): self {
     $this->argomento = $argomento;
     return $this;
   }
@@ -74,20 +72,20 @@ class FirmaSostegno extends Firma {
   /**
    * Restituisce le attività della lezione di sostegno
    *
-   * @return string Attività della lezione di sostegno
+   * @return string|null Attività della lezione di sostegno
    */
-  public function getAttivita() {
+  public function getAttivita(): ?string {
     return $this->attivita;
   }
 
   /**
    * Modifica le attività della lezione di sostegno
    *
-   * @param string $attivita Attività della lezione di sostegno
+   * @param string|null $attivita Attività della lezione di sostegno
    *
-   * @return FirmaSostegno Oggetto FirmaSostegno
+   * @return self Oggetto modificato
    */
-  public function setAttivita($attivita) {
+  public function setAttivita(?string $attivita): self {
     $this->attivita = $attivita;
     return $this;
   }
@@ -95,23 +93,22 @@ class FirmaSostegno extends Firma {
   /**
    * Restituisce l'alunno della cattedra di sostegno (importante quando più alunni a stesso docente in stessa classe)
    *
-   * @return Alunno Alunno della cattedra di sostegno
+   * @return Alunno|null Alunno della cattedra di sostegno
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
   /**
-   * Modifica l'alunno della cattedra di sostegno (importante quando più alunni a stesso docente in stessa classe)
+   * Modifica l'alunno della cattedra di sostegno (importante quando più alunni con stesso docente in stessa classe)
    *
-   * @param Alunno $alunno Alunno della cattedra di sostegno
+   * @param Alunno|null $alunno Alunno della cattedra di sostegno
    *
-   * @return FirmaSostegno Oggetto FirmaSostegno
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno=null) {
+  public function setAlunno(?Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
 
 }
-

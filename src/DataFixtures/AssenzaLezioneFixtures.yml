@@ -1,0 +1,20 @@
+####################
+# AssenzaLezioneFixtures - dati di test
+#
+# Dati per gestire le ore di assenza degli alunni:
+#   alunno: alunno al quale si riferisce l'assenza
+#   lezione: lezione a cui si riferisce l'assenza
+#   ore: ore di assenza dell'alunno alla lezione
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+  - LezioneFixtures.yml
+
+
+App\Entity\AssenzaLezione:
+  assenza_lezione_{1..10}:
+    alunno: '@alunno_*'
+    lezione: '@lezione_<current()>'
+    ore: '<randomElement([1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])>'

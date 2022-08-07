@@ -1,0 +1,31 @@
+####################
+# UtenteFixtures - dati di test
+#
+# Dati dell'amministratore: gli stessi degli utenti
+####################
+
+
+App\Entity\Amministratore:
+  amministratore:
+    sesso: 'M'
+    nome: 'Charles'
+    cognome: 'Babbage'
+    username: 'admin'
+    email: 'admin@lovelace.edu.it'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: false
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
+    codiceFiscale: 'BBBCRL91T26Z114G'
+    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(3)>'
+    notifica: '<(array())>'

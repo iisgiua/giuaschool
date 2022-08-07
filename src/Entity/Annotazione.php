@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,11 +13,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Annotazione - entità
+ * Annotazione - dati per le annotazioni sul registro
  *
  * @ORM\Entity(repositoryClass="App\Repository\AnnotazioneRepository")
  * @ORM\Table(name="gs_annotazione")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class Annotazione {
 
@@ -29,27 +27,27 @@ class Annotazione {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'annotazione
+   * @var int|null $id Identificativo univoco per l'annotazione
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private int $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private \DateTime $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private \DateTime $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
    * @var \DateTime $data Data della annotazione
@@ -57,25 +55,25 @@ class Annotazione {
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private \DateTime $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var string $testo Testo della annotazione
+   * @var string|null $testo Testo della annotazione
    *
    * @ORM\Column(type="text", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private string $testo;
+  private ?string $testo = '';
 
   /**
-   * @var boolean $visibile Indica se l'annotazione è visibile ai genitori o no
+   * @var bool $visibile Indica se l'annotazione è visibile ai genitori o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private bool $visibile;
+  private bool $visibile = false;
 
   /**
    * @var Avviso|null $avviso Avviso a cui è associata l'annotazione
@@ -83,27 +81,27 @@ class Annotazione {
    * @ORM\ManyToOne(targetEntity="Avviso", inversedBy="annotazioni")
    * @ORM\JoinColumn(nullable=true)
    */
-  private ?Avviso $avviso;
+  private ?Avviso $avviso = null;
 
   /**
-   * @var Classe $classe Classe a cui è riferita l'annotazione
+   * @var Classe|null $classe Classe a cui è riferita l'annotazione
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private Classe $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var Docente $docente Docente che ha scritto l'annotazione
+   * @var Docente|null $docente Docente che ha scritto l'annotazione
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private Docente $docente;
+  private ?Docente $docente = null;
 
 
   //==================== EVENTI ORM ====================
@@ -135,36 +133,36 @@ class Annotazione {
   /**
    * Restituisce l'identificativo univoco per la lezione
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId(): int {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato(): \DateTime {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato(): \DateTime {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data della annotazione
    *
-   * @return \DateTime Data della annotazione
+   * @return \DateTime|null Data della annotazione
    */
-  public function getData(): \DateTime {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -173,7 +171,7 @@ class Annotazione {
    *
    * @param \DateTime $data Data della annotazione
    *
-   * @return Annotazione Oggetto Annotazione
+   * @return self Oggetto modificato
    */
   public function setData(\DateTime $data): self {
     $this->data = $data;
@@ -183,20 +181,20 @@ class Annotazione {
   /**
    * Restituisce il testo della annotazione
    *
-   * @return string Testo della annotazione
+   * @return string|null Testo della annotazione
    */
-  public function getTesto(): string {
+  public function getTesto(): ?string {
     return $this->testo;
   }
 
   /**
    * Modifica il testo della annotazione
    *
-   * @param string $testo Testo della annotazione
+   * @param string|null $testo Testo della annotazione
    *
-   * @return Annotazione Oggetto Annotazione
+   * @return self Oggetto modificato
    */
-  public function setTesto(string $testo): self {
+  public function setTesto(?string $testo): self {
     $this->testo = $testo;
     return $this;
   }
@@ -204,7 +202,7 @@ class Annotazione {
   /**
    * Indica se l'annotazione è visibile ai genitori o no
    *
-   * @return boolean Vero se l'annotazione è visibile ai genitori, falso altrimenti
+   * @return bool Vero se l'annotazione è visibile ai genitori, falso altrimenti
    */
   public function getVisibile(): bool {
     return $this->visibile;
@@ -213,11 +211,11 @@ class Annotazione {
   /**
    * Modifica se l'annotazione è visibile ai genitori o no
    *
-   * @param boolean $visibile Vero se l'annotazione è visibile ai genitori, falso altrimenti
+   * @param bool|null $visibile Vero se l'annotazione è visibile ai genitori, falso altrimenti
    *
-   * @return Annotazione Oggetto Annotazione
+   * @return self Oggetto modificato
    */
-  public function setVisibile(bool $visibile): self {
+  public function setVisibile(?bool $visibile): self {
     $this->visibile = ($visibile == true);
     return $this;
   }
@@ -236,9 +234,9 @@ class Annotazione {
    *
    * @param Avviso|null $avviso Avviso a cui è associata l'annotazione
    *
-   * @return Annotazione Oggetto Annotazione
+   * @return self Oggetto modificato
    */
-  public function setAvviso(Avviso $avviso=null): self {
+  public function setAvviso(?Avviso $avviso): self {
     $this->avviso = $avviso;
     return $this;
   }
@@ -246,9 +244,9 @@ class Annotazione {
   /**
    * Restituisce la classe a cui è riferita l'annotazione
    *
-   * @return Classe Classe a cui è riferita l'annotazione
+   * @return Classe|null Classe a cui è riferita l'annotazione
    */
-  public function getClasse(): Classe
+  public function getClasse(): ?Classe
   {
     return $this->classe;
   }
@@ -258,7 +256,7 @@ class Annotazione {
    *
    * @param Classe $classe Classe a cui è riferita l'annotazione
    *
-   * @return Annotazione Oggetto Annotazione
+   * @return self Oggetto modificato
    */
   public function setClasse(Classe $classe): self {
     $this->classe = $classe;
@@ -268,9 +266,9 @@ class Annotazione {
   /**
    * Restituisce il docente che ha scritto l'annotazione
    *
-   * @return Docente Docente che ha scritto l'annotazione
+   * @return Docente|null Docente che ha scritto l'annotazione
    */
-  public function getDocente(): Docente
+  public function getDocente(): ?Docente
   {
     return $this->docente;
   }
@@ -280,7 +278,7 @@ class Annotazione {
    *
    * @param Docente $docente Docente che ha scritto l'annotazione
    *
-   * @return Annotazione Oggetto Annotazione
+   * @return self Oggetto modificato
    */
   public function setDocente(Docente $docente): self {
     $this->docente = $docente;
@@ -289,15 +287,6 @@ class Annotazione {
 
 
   //==================== METODI DELLA CLASSE ====================
-
-  /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->avviso = null;
-    $this->visibile = false;
-  }
 
   /**
    * Restituisce l'oggetto rappresentato come testo

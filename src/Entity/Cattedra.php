@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,11 +13,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Cattedra
+ * Cattedra - dati delle cattedre dei docenti
  *
  * @ORM\Entity(repositoryClass="App\Repository\CattedraRepository")
  * @ORM\Table(name="gs_cattedra")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class Cattedra {
 
@@ -29,89 +27,88 @@ class Cattedra {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la cattedra
+   * @var int|null $id Identificativo univoco per la cattedra
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var boolean $attiva Indica se la cattedra è attiva o no
+   * @var bool $attiva Indica se la cattedra è attiva o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $attiva;
+  private bool $attiva = true;
 
   /**
-   * @var boolean $supplenza Indica se la cattedra è una supplenza temporanea o no
+   * @var bool $supplenza Indica se la cattedra è una supplenza temporanea o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $supplenza;
+  private bool $supplenza = false;
 
   /**
-   * @var string $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
+   * @var string|null $tipo Tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","I","P","A"}, strict=true, message="field.choice")
    */
-  private $tipo;
+  private ?string $tipo = 'N';
 
   /**
-   * @var Materia $materia Materia della cattedra
+   * @var Materia|null $materia Materia della cattedra
    *
    * @ORM\ManyToOne(targetEntity="Materia")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $materia;
+  private ?Materia $materia = null;
 
   /**
-   * @var Docente $docente Docente della cattedra
+   * @var Docente|null $docente Docente della cattedra
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
   /**
-   * @var Classe $classe Classe della cattedra
+   * @var Classe|null $classe Classe della cattedra
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var Alunno $alunno Alunno di una cattedra di sostegno
+   * @var Alunno|null $alunno Alunno di una cattedra di sostegno
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
 
   //==================== EVENTI ORM ====================
@@ -121,7 +118,7 @@ class Cattedra {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -132,7 +129,7 @@ class Cattedra {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -143,47 +140,47 @@ class Cattedra {
   /**
    * Restituisce l'identificativo univoco per la cattedra
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Indica se la cattedra è attiva o no
    *
-   * @return boolean Vero se la cattedra è attiva, falso altrimenti
+   * @return bool Vero se la cattedra è attiva, falso altrimenti
    */
-  public function getAttiva() {
+  public function getAttiva(): bool {
     return $this->attiva;
   }
 
   /**
    * Modifica se la cattedra è attiva o no
    *
-   * @param boolean $attiva Vero se la cattedra è attiva, falso altrimenti
+   * @param bool|null $attiva Vero se la cattedra è attiva, falso altrimenti
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setAttiva($attiva) {
+  public function setAttiva(?bool $attiva): self {
     $this->attiva = ($attiva == true);
     return $this;
   }
@@ -191,20 +188,20 @@ class Cattedra {
   /**
    * Indica se la cattedra è una supplenza temporanea o no
    *
-   * @return boolean Vero se la cattedra è una supplenza temporanea, falso altrimenti
+   * @return bool Vero se la cattedra è una supplenza temporanea, falso altrimenti
    */
-  public function getSupplenza() {
+  public function getSupplenza(): bool {
     return $this->supplenza;
   }
 
   /**
    * Modifica se la cattedra è una supplenza temporanea o no
    *
-   * @param boolean $supplenza Vero se la cattedra è una supplenza temporanea, falso altrimenti
+   * @param bool|null $supplenza Vero se la cattedra è una supplenza temporanea, falso altrimenti
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setSupplenza($supplenza) {
+  public function setSupplenza(?bool $supplenza): self {
     $this->supplenza = ($supplenza == true);
     return $this;
   }
@@ -212,20 +209,20 @@ class Cattedra {
   /**
    * Restituisce il tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
-   * @return string Tipo della cattedra
+   * @return string|null Tipo della cattedra
    */
-  public function getTipo() {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo della cattedra [N=normale, I=ITP, P=potenziamento, A=attività alternativa]
    *
-   * @param string $tipo Tipo della cattedra
+   * @param string|null $tipo Tipo della cattedra
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setTipo($tipo) {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -233,9 +230,9 @@ class Cattedra {
   /**
    * Restituisce la materia della cattedra
    *
-   * @return Materia Materia della cattedra
+   * @return Materia|null Materia della cattedra
    */
-  public function getMateria() {
+  public function getMateria(): ?Materia {
     return $this->materia;
   }
 
@@ -244,9 +241,9 @@ class Cattedra {
    *
    * @param Materia $materia Materia della cattedra
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setMateria(Materia $materia) {
+  public function setMateria(Materia $materia): self {
     $this->materia = $materia;
     return $this;
   }
@@ -254,9 +251,9 @@ class Cattedra {
   /**
    * Restituisce il docente della cattedra
    *
-   * @return Docente Docente della cattedra
+   * @return Docente|null Docente della cattedra
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 
@@ -265,9 +262,9 @@ class Cattedra {
    *
    * @param Docente $docente Docente della cattedra
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -275,9 +272,9 @@ class Cattedra {
   /**
    * Restituisce la classe della cattedra
    *
-   * @return Classe Classe della cattedra
+   * @return Classe|null Classe della cattedra
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
@@ -286,9 +283,9 @@ class Cattedra {
    *
    * @param Classe $classe Classe della cattedra
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe) {
+  public function setClasse(Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -296,20 +293,20 @@ class Cattedra {
   /**
    * Restituisce l'alunno di una cattedra di sostegno
    *
-   * @return Alunno Alunno di una cattedra di sostegno
+   * @return Alunno|null Alunno di una cattedra di sostegno
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
   /**
    * Modifica l'alunno di una cattedra di sostegno
    *
-   * @param Alunno $alunno Alunno di una cattedra di sostegno
+   * @param Alunno|null $alunno Alunno di una cattedra di sostegno
    *
-   * @return Cattedra Oggetto Cattedra
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno = null) {
+  public function setAlunno(?Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -318,20 +315,11 @@ class Cattedra {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->attiva = true;
-    $this->supplenza = false;
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->docente.' - '.$this->materia.' - '.$this->classe;
   }
 

@@ -1,7 +1,20 @@
-services:
-    _defaults:
-        autowire: true
-        autoconfigure: true
+# config/services_test.yaml
 
-    App\Tests\Behat\:
-        resource: '../tests/Behat/*'
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\Tests\Behat\:
+    resource: '../tests/Behat/*'
+
+  security.user_password_hasher:
+    class: Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher
+    public: true
+    arguments:
+      [ '@security.password_hasher_factory' ]
+
+  Fidry\AliceDataFixtures\Loader\PurgerLoader:
+    alias: fidry_alice_data_fixtures.doctrine.purger_loader
+    public: true

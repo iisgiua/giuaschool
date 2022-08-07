@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,11 +13,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * RichiestaColloquio - entità
+ * RichiestaColloquio - dati per la richiesta di un colloquio da parte del genitore
  *
  * @ORM\Entity(repositoryClass="App\Repository\RichiestaColloquioRepository")
  * @ORM\Table(name="gs_richiesta_colloquio")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class RichiestaColloquio {
 
@@ -29,97 +27,94 @@ class RichiestaColloquio {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la richiesta del colloquio
+   * @var int|null $id Identificativo univoco per la richiesta del colloquio
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $appuntamento Data e ora del colloquio
+   * @var \DateTime|null $appuntamento Data e ora del colloquio
    *
    * @ORM\Column(type="datetime", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.datetime")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $appuntamento;
+  private ?\DateTime $appuntamento = null;
 
   /**
    * @var int $durata Durata del colloquio (in minuti)
    *
    * @ORM\Column(type="integer", nullable=false)
-   *
-   * @Assert\NotBlank(message="field.notblank")
    */
-  private $durata;
+  private int $durata = 0;
 
   /**
-   * @var Colloquio $colloquio Colloquio richiesto
+   * @var Colloquio|null $colloquio Colloquio richiesto
    *
    * @ORM\ManyToOne(targetEntity="Colloquio")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $colloquio;
+  private ?Colloquio $colloquio = null;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce il colloquio
+   * @var Alunno|null $alunno Alunno al quale si riferisce il colloquio
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Genitore $genitore Genitore che effettua la richiesta del colloquio
+   * @var Genitore|null $genitore Genitore che effettua la richiesta del colloquio
    *
    * @ORM\ManyToOne(targetEntity="Genitore")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $genitore;
+  private ?Genitore $genitore = null;
 
   /**
-   * @var Genitore $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
+   * @var Genitore!null $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
    *
    * @ORM\ManyToOne(targetEntity="Genitore")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $genitoreAnnulla;
+  private ?Genitore $genitoreAnnulla = null;
 
   /**
-   * @var string $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
+   * @var string|null $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"R","A","C","N","X"}, strict=true, message="field.choice")
    */
-  private $stato;
+  private ?string $stato = 'R';
 
   /**
-   * @var string $messaggio Messaggio da comunicare relativamente allo stato della richiesta
+   * @var string|null $messaggio Messaggio da comunicare relativamente allo stato della richiesta
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $messaggio;
+  private ?string $messaggio = '';
 
 
   //==================== EVENTI ORM ====================
@@ -151,36 +146,36 @@ class RichiestaColloquio {
   /**
    * Restituisce l'identificativo univoco per la richiesta di colloquio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data e l'ora del colloquio
    *
-   * @return \DateTime Data e ora del colloquio
+   * @return \DateTime|null Data e ora del colloquio
    */
-  public function getAppuntamento() {
+  public function getAppuntamento(): ?\DateTime {
     return $this->appuntamento;
   }
 
@@ -189,9 +184,9 @@ class RichiestaColloquio {
    *
    * @param \DateTime $appuntamento Data e ora del colloquio
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setAppuntamento($appuntamento) {
+  public function setAppuntamento(\DateTime $appuntamento): self {
     $this->appuntamento = $appuntamento;
     return $this;
   }
@@ -199,9 +194,9 @@ class RichiestaColloquio {
   /**
    * Restituisce la durata del colloquio (in minuti)
    *
-   * @return \DateTime Durata del colloquio (in minuti)
+   * @return int Durata del colloquio (in minuti)
    */
-  public function getDurata() {
+  public function getDurata(): int {
     return $this->durata;
   }
 
@@ -210,9 +205,9 @@ class RichiestaColloquio {
    *
    * @param int $durata Durata del colloquio (in minuti)
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setDurata($durata) {
+  public function setDurata(int $durata): self {
     $this->durata = $durata;
     return $this;
   }
@@ -220,9 +215,9 @@ class RichiestaColloquio {
   /**
    * Restituisce il colloquio richiesto
    *
-   * @return Colloquio Colloquio richiesto
+   * @return Colloquio|null Colloquio richiesto
    */
-  public function getColloquio() {
+  public function getColloquio(): ?Colloquio {
     return $this->colloquio;
   }
 
@@ -231,9 +226,9 @@ class RichiestaColloquio {
    *
    * @param Colloquio $colloquio Colloquio richiesto
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setColloquio(Colloquio $colloquio) {
+  public function setColloquio(Colloquio $colloquio): self {
     $this->colloquio = $colloquio;
     return $this;
   }
@@ -241,20 +236,20 @@ class RichiestaColloquio {
   /**
    * Restituisce l'alunno al quale si riferisce il colloquio
    *
-   * @return Alunno Alunno al quale si riferisce il colloquio
+   * @return Alunno|null Alunno al quale si riferisce il colloquio
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
   /**
    * Modifica l'alunno al quale si riferisce il colloquio
    *
-   * @param Alunno $alunno Alunno al quale si riferisce il colloquio
+   * @param Alunno|null $alunno Alunno al quale si riferisce il colloquio
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(?Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -262,20 +257,20 @@ class RichiestaColloquio {
   /**
    * Restituisce il genitore che effettua la richiesta del colloquio
    *
-   * @return Genitore Genitore che effettua la richiesta del colloquio
+   * @return Genitore|null Genitore che effettua la richiesta del colloquio
    */
-  public function getGenitore() {
+  public function getGenitore(): ?Genitore {
     return $this->genitore;
   }
 
   /**
    * Modifica il genitore che effettua la richiesta del colloquio
    *
-   * @param Genitore $genitore Genitore che effettua la richiesta del colloquio
+   * @param Genitore|null $genitore Genitore che effettua la richiesta del colloquio
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setGenitore(Genitore $genitore) {
+  public function setGenitore(?Genitore $genitore): self {
     $this->genitore = $genitore;
     return $this;
   }
@@ -294,9 +289,9 @@ class RichiestaColloquio {
    *
    * @param Genitore|null $genitoreAnnulla Genitore che effettua l'annullamento della richiesta
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setGenitoreAnnulla(Genitore $genitoreAnnulla=null) {
+  public function setGenitoreAnnulla(?Genitore $genitoreAnnulla): self {
     $this->genitoreAnnulla = $genitoreAnnulla;
     return $this;
   }
@@ -304,20 +299,20 @@ class RichiestaColloquio {
   /**
    * Restituisce lo stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
    *
-   * @return string Stato della richiesta del colloquio
+   * @return string|null Stato della richiesta del colloquio
    */
-  public function getStato() {
+  public function getStato(): ?string {
     return $this->stato;
   }
 
   /**
    * Modifica lo stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
    *
-   * @param string $stato Stato della richiesta del colloquio
+   * @param string|null $stato Stato della richiesta del colloquio
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setStato($stato) {
+  public function setStato(?string $stato): self {
     $this->stato = $stato;
     return $this;
   }
@@ -325,20 +320,20 @@ class RichiestaColloquio {
   /**
    * Restituisce il messaggio da comunicare relativamente allo stato della richiesta
    *
-   * @return string Messaggio da comunicare relativamente allo stato della richiesta
+   * @return string|null Messaggio da comunicare relativamente allo stato della richiesta
    */
-  public function getMessaggio() {
+  public function getMessaggio(): ?string {
     return $this->messaggio;
   }
 
   /**
    * Modifica il messaggio da comunicare relativamente allo stato della richiesta
    *
-   * @param string $messaggio Messaggio da comunicare relativamente allo stato della richiesta
+   * @param string|null $messaggio Messaggio da comunicare relativamente allo stato della richiesta
    *
-   * @return RichiestaColloquio Oggetto RichiestaColloquio
+   * @return self Oggetto modificato
    */
-  public function setMessaggio($messaggio) {
+  public function setMessaggio(?string $messaggio): self {
     $this->messaggio = $messaggio;
     return $this;
   }
@@ -351,7 +346,7 @@ class RichiestaColloquio {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->appuntamento->format('d/m/Y H:i').', '.$this->colloquio;
   }
 

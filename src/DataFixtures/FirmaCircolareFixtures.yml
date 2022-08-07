@@ -1,0 +1,22 @@
+####################
+# FirmaCircolareFixtures - dati di test
+#
+# Dati per la firma delle circolari:
+#   circolare: circolare a cui si riferisce la firma
+#   utente: utente che firma la circolare
+#   letto: data e ora della visualizzazione della circolare [conferma di lettura presunta]
+#   firmato: data e ora della firma della circolare [conferma di lettura esplicita]
+####################
+
+
+include:
+  - CircolareFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\FirmaCircolare:
+  firma_circolare_{1..10}:
+    circolare: '@circolare_<current()>'
+    utente: '@docente_curricolare_<current()>'
+    letto: '50%? <dateTimeBetween("-1 month", "now")>'
+    firmato: '50%? <dateTimeBetween("-1 month", "now")>'

@@ -1,0 +1,29 @@
+####################
+# StoricoEsitoFixtures - dati di test
+#
+# Dati per la memorizzazione degli esiti del precedente anno scolastico:
+#   classe: classe dell'alunno
+#   esito: esito dello scrutinio [A=ammesso, N=non ammesso, R=non scrutinato (ritirato d'ufficio), L=superamento limite assenze, E=anno all'estero]
+#   periodo: periodo dello scrutinio [F=scrutinio finale, G=esame giudizio sospeso, X=rinviato in precedente A.S.]
+#   media: media dei voti
+#   credito: punteggio di credito
+#   creditoPrecedente: punteggio di credito degli anni precedenti
+#   alunno: alunno a cui si attribuisce l'esito
+#   dati: lista dei dati dello scrutinio
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+
+
+App\Entity\StoricoEsito:
+  storico_esito_{1..10}:
+    classe: '<substr(<text()>, 0, 16)>'
+    esito: '<randomElement(["A", "N", "R", "L", "E"])>'
+    periodo: '<randomElement(["F", "G", "X"])>'
+    media: '<randomFloat()>'
+    credito: '<numberBetween(0, 14)>'
+    creditoPrecedente: '<numberBetween(0, 25)>'
+    alunno: '@alunno_prima_<current()>'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'

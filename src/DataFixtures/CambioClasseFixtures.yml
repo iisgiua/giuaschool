@@ -1,0 +1,24 @@
+####################
+# CambioClasseFixtures - dati di test
+#
+# Dati per la gestione dei trasferimenti degli alunni:
+#   alunno: alunno che ha effettuato il cambio classe
+#   inizio: data iniziale della permanenza nella classe indicata
+#   fine: data finale della permanenza nella classe indicata
+#   classe: classe dell'alunno nel periodo indicato (null=altra scuola)
+#   note: note descrittive sul cambio classe
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+  - ClasseFixtures.yml
+
+
+App\Entity\CambioClasse:
+  cambio_classe_{1..10}:
+    alunno: '@alunno_*'
+    inizio: '<dateTimeBetween("-3 month", "-1 month")>'
+    fine: '<dateTimeBetween($inizio, "now")>'
+    classe: '50%? @classe_*'
+    note: '50%? <substr(<text()>, 0, 255)>: <strval("")>'

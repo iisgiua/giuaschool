@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -14,15 +10,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * Provisioning - entità
+ * Provisioning - dati per la gestione degli utenti su sistemi esterni
  *
  * @ORM\Entity(repositoryClass="App\Repository\ProvisioningRepository")
  * @ORM\Table(name="gs_provisioning")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class Provisioning {
 
@@ -30,63 +27,62 @@ class Provisioning {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per le istanze della classe
+   * @var int|null $id Identificativo univoco per le istanze della classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var Utente $utente Utente del quale deve essere eseguito il provisioning
+   * @var Utente|null $utente Utente del quale deve essere eseguito il provisioning
    *
    * @ORM\ManyToOne(targetEntity="Utente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $utente;
+  private ?Utente $utente = null;
 
   /**
-   * @var array $dati Lista dei dati necessari per il provisioning
+   * @var array|null $dati Lista dei dati necessari per il provisioning
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $dati;
+  private ?array $dati = array();
 
   /**
-   * @var string $funzione Funzione da eseguire
+   * @var string|null $funzione Funzione da eseguire
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=255, maxMessage="field.maxlength")
    */
-  private $funzione;
+  private ?string $funzione = '';
 
   /**
-   * @var string $stato Stato del provisioning [A=attesa,P=processato,C=da cancellare,E=errore]
+   * @var string|null $stato Stato del provisioning [A=attesa,P=processato,C=da cancellare,E=errore]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
    * @Assert\Choice(choices={"A","P","C","E"}, strict=true, message="field.choice")
    */
-  private $stato;
+  private ?string $stato = 'A';
 
 
   //==================== EVENTI ORM ====================
@@ -96,7 +92,7 @@ class Provisioning {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -107,7 +103,7 @@ class Provisioning {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -118,36 +114,36 @@ class Provisioning {
   /**
    * Restituisce l'identificativo univoco per lo scrutinio
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'utente del quale deve essere eseguito il provisioning
    *
-   * @return Utente Utente del quale deve essere eseguito il provisioning
+   * @return Utente|null Utente del quale deve essere eseguito il provisioning
    */
-  public function getUtente() {
+  public function getUtente(): ?Utente {
     return $this->utente;
   }
 
@@ -156,9 +152,9 @@ class Provisioning {
    *
    * @param Utente $utente Utente del quale deve essere eseguito il provisioning
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setUtente(Utente $utente) {
+  public function setUtente(Utente $utente): self {
     $this->utente = $utente;
     return $this;
   }
@@ -166,9 +162,9 @@ class Provisioning {
   /**
    * Restituisce la lista dei dati necessari per il provisioning
    *
-   * @return array Lista dei dati necessari per il provisioning
+   * @return array|null Lista dei dati necessari per il provisioning
    */
-  public function getDati() {
+  public function getDati(): ?array {
     return $this->dati;
   }
 
@@ -177,9 +173,9 @@ class Provisioning {
    *
    * @param array $dati Lista dei dati necessari per il provisioning
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setDati($dati) {
+  public function setDati(array $dati): self {
     if ($dati === $this->dati) {
       // clona array per forzare update su doctrine
       $dati = unserialize(serialize($dati));
@@ -191,20 +187,20 @@ class Provisioning {
   /**
    * Restituisce la funzione da eseguire
    *
-   * @return string Funzione da eseguire
+   * @return string|null Funzione da eseguire
    */
-  public function getFunzione() {
+  public function getFunzione(): ?string {
     return $this->funzione;
   }
 
   /**
    * Modifica la funzione da eseguire
    *
-   * @param string $funzione Funzione da eseguire
+   * @param string|null $funzione Funzione da eseguire
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setFunzione($funzione) {
+  public function setFunzione(?string $funzione): self {
     $this->funzione = $funzione;
     return $this;
   }
@@ -212,20 +208,20 @@ class Provisioning {
   /**
    * Restituisce lo stato del provisioning [A=attesa,P=processato,E=errore]
    *
-   * @return string Stato del provisioning
+   * @return string|null Stato del provisioning
    */
-  public function getStato() {
+  public function getStato(): ?string {
     return $this->stato;
   }
 
   /**
    * Modifica lo stato del provisioning [A=attesa,P=processato,E=errore]
    *
-   * @param string $stato Stato del provisioning [A=attesa,P=processato,E=errore]
+   * @param string|null $stato Stato del provisioning [A=attesa,P=processato,E=errore]
    *
-   * @return Provisioning Oggetto Provisioning
+   * @return self Oggetto modificato
    */
-  public function setStato($stato) {
+  public function setStato(?string $stato): self {
     $this->stato = $stato;
     return $this;
   }
@@ -234,20 +230,11 @@ class Provisioning {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->dati = array();
-    $this->stato = 'A';
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->funzione.':'.$this->stato;
   }
 

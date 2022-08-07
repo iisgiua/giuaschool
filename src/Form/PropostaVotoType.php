@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -20,11 +16,14 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\CallbackTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\PropostaVoto;
+use App\Entity\Alunno;
 use App\Form\MessageType;
 
 
 /**
  * PropostaVotoType - form per la classe PropostaVoto
+ *
+ * @author Antonello Dessì
  */
 class PropostaVotoType extends AbstractType {
 
@@ -80,7 +79,7 @@ class PropostaVotoType extends AbstractType {
         return $alunno->getId();
       },
       function ($id) {
-        return $this->em->getRepository('App:Alunno')->find($id);
+        return $this->em->getRepository('App\Entity\Alunno')->find($id);
       }));
   }
 

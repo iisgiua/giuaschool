@@ -1,30 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Configurazione - entità
+ * Configurazione - dati per la configurazione dei parametri dell'applicazione
  *
  * @ORM\Entity(repositoryClass="App\Repository\ConfigurazioneRepository")
  * @ORM\Table(name="gs_configurazione")
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields="parametro", message="field.unique")
+ *
+ * @author Antonello Dessì
  */
 class Configurazione {
 
@@ -32,70 +30,70 @@ class Configurazione {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la configurazione
+   * @var int|null $id Identificativo univoco per la configurazione
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $categoria Categoria a cui appartiene la configurazione
+   * @var string|null $categoria Categoria a cui appartiene la configurazione
    *
    * @ORM\Column(type="string", length=32, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private $categoria;
+  private ?string $categoria = '';
 
   /**
-   * @var string $parametro Parametro della configurazione
+   * @var string|null $parametro Parametro della configurazione
    *
    * @ORM\Column(type="string", length=64, unique=true, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $parametro;
+  private ?string $parametro = '';
 
   /**
-  * @var string $descrizione Descrizione dell'utilizzo del parametro
+  * @var string|null $descrizione Descrizione dell'utilizzo del parametro
    *
-   * @ORM\Column(type="string", length=1024, nullable=true)
+   * @ORM\Column(type="string", length=1024, nullable=false)
    *
    * @Assert\Length(max=1024,maxMessage="field.maxlength")
    */
-  private $descrizione;
+  private ?string $descrizione = '';
 
   /**
-   * @var string $valore Valore della configurazione
+   * @var string|null $valore Valore della configurazione
    *
-   * @ORM\Column(type="text", nullable=true)
+   * @ORM\Column(type="text", nullable=false)
    */
-  private $valore;
+  private ?string $valore = '';
 
   /**
-  * @var boolean $gestito Indica se il parametro viene gestito da una procedura apposita
+  * @var bool $gestito Indica se il parametro viene gestito da una procedura apposita
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $gestito;
+  private bool $gestito = false;
 
 
   //==================== EVENTI ORM ====================
@@ -105,7 +103,7 @@ class Configurazione {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -116,7 +114,7 @@ class Configurazione {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -127,47 +125,47 @@ class Configurazione {
   /**
    * Restituisce l'identificativo univoco per la materia
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la categoria a cui appartiene la configurazione
    *
-   * @return string Categoria a cui appartiene la configurazione
+   * @return string|null Categoria a cui appartiene la configurazione
    */
-  public function getCategoria() {
+  public function getCategoria(): ?string {
     return $this->categoria;
   }
 
   /**
    * Modifica la categoria a cui appartiene la configurazione
    *
-   * @param string $categoria Categoria a cui appartiene la configurazione
+   * @param string|null $categoria Categoria a cui appartiene la configurazione
    *
-   * @return Configurazione Oggetto Configurazione
+   * @return self Oggetto modificato
    */
-  public function setCategoria($categoria) {
+  public function setCategoria(?string $categoria): self {
     $this->categoria = $categoria;
     return $this;
   }
@@ -175,20 +173,20 @@ class Configurazione {
   /**
    * Restituisce il parametro della configurazione
    *
-   * @return string Parametro della configurazione
+   * @return string|null Parametro della configurazione
    */
-  public function getParametro() {
+  public function getParametro(): ?string {
     return $this->parametro;
   }
 
   /**
    * Modifica il parametro della configurazione
    *
-   * @param string $parametro Parametro della configurazione
+   * @param string|null $parametro Parametro della configurazione
    *
-   * @return Configurazione Oggetto Configurazione
+   * @return self Oggetto modificato
    */
-  public function setParametro($parametro) {
+  public function setParametro(?string $parametro): self {
     $this->parametro = $parametro;
     return $this;
   }
@@ -196,20 +194,20 @@ class Configurazione {
   /**
    * Restituisce la descrizione dell'utilizzo del parametro
    *
-   * @return string Descrizione dell'utilizzo del parametro
+   * @return string|null Descrizione dell'utilizzo del parametro
    */
-  public function getDescrizione() {
+  public function getDescrizione(): ?string {
     return $this->descrizione;
   }
 
   /**
    * Modifica la descrizione dell'utilizzo del parametro
    *
-   * @param string $descrizione Descrizione dell'utilizzo del parametro
+   * @param string|null $descrizione Descrizione dell'utilizzo del parametro
    *
-   * @return Configurazione Oggetto Configurazione
+   * @return self Oggetto modificato
    */
-  public function setDescrizione($descrizione) {
+  public function setDescrizione(?string $descrizione): self {
     $this->descrizione = $descrizione;
     return $this;
   }
@@ -217,20 +215,20 @@ class Configurazione {
   /**
    * Restituisce il valore della configurazione
    *
-   * @return string Valore della configurazione
+   * @return string|null Valore della configurazione
    */
-  public function getValore() {
+  public function getValore(): ?string {
     return $this->valore;
   }
 
   /**
    * Modifica il valore della configurazione
    *
-   * @param string $valore Valore della configurazione
+   * @param string|null $valore Valore della configurazione
    *
-   * @return Configurazione Oggetto Configurazione
+   * @return self Oggetto modificato
    */
-  public function setValore($valore) {
+  public function setValore(?string $valore): self {
     $this->valore = $valore;
     return $this;
   }
@@ -238,20 +236,20 @@ class Configurazione {
   /**
    * Restituisce se il parametro viene gestito da una procedura apposita o no
    *
-   * @return boolean Indica se il parametro viene gestito da una procedura apposita
+   * @return bool Indica se il parametro viene gestito da una procedura apposita
    */
-  public function getGestito() {
+  public function getGestito(): bool {
     return $this->gestito;
   }
 
   /**
    * Modifica se il parametro viene gestito da una procedura apposita o no
    *
-   * @param boolean $gestito Indica se il parametro viene gestito da una procedura apposita
+   * @param bool|null $gestito Indica se il parametro viene gestito da una procedura apposita
    *
-   * @return Configurazione Oggetto Configurazione
+   * @return self Oggetto modificato
    */
-  public function setGestito($gestito) {
+  public function setGestito(?bool $gestito): self {
     $this->gestito = $gestito;
     return $this;
   }
@@ -259,20 +257,11 @@ class Configurazione {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
-   */
-  public function __construct() {
-    // valori predefiniti
-    $this->valore = '';
-    $this->gestito = false;
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->parametro.' = '.$this->valore;
   }
 

@@ -1,28 +1,32 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Entity\Classe;
 use App\Entity\Alunno;
+use App\Entity\DefinizioneScrutinio;
+use App\Entity\Docente;
+use App\Entity\Esito;
+use App\Entity\Materia;
+use App\Entity\Scrutinio;
+use App\Entity\VotoScrutinio;
 
 
 /**
  * PagelleUtil - classe di utilità per le funzioni per le pagelle e altre comunicazioni
+ *
+ * @author Antonello Dessì
  */
 class PagelleUtil {
 
@@ -40,9 +44,9 @@ class PagelleUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var \Twig\Environment $tpl Gestione template
@@ -68,20 +72,20 @@ class PagelleUtil {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param \Twig\Environment $tpl Gestione template
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param string $root Directory principale dell'applicazione
    */
   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session, \Twig\Environment $tpl, PdfManager $pdf, $root) {
+                               RequestStack $reqstack, \Twig\Environment $tpl, PdfManager $pdf, $root) {
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->tpl = $tpl;
     $this->pdf = $pdf;
     $this->root = $root;
@@ -107,10 +111,10 @@ class PagelleUtil {
     $dati = array();
     if ($periodo == 'P' || $periodo == 'S') {
       // legge scrutinio
-      $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       // legge alunni
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -121,9 +125,9 @@ class PagelleUtil {
         $dati['alunni'][$alu['id']] = $alu;
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -132,14 +136,14 @@ class PagelleUtil {
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
       }
-      $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+      $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
       $dati['materie'][$condotta->getId()] = array(
         'id' => $condotta->getId(),
         'nome' => $condotta->getNome(),
         'nomeBreve' => $condotta->getNomeBreve(),
         'tipo' => $condotta->getTipo());
       // legge i voti
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista) AND vs.unico IS NOT NULL')
         ->setParameters(['scrutinio' => $scrutinio, 'lista' => $scrutinio->getDato('alunni')])
         ->getQuery()
@@ -174,7 +178,7 @@ class PagelleUtil {
       // docenti
       $docenti = $scrutinio->getDato('docenti');
       $docenti_presenti = $scrutinio->getDato('presenze');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -195,7 +199,7 @@ class PagelleUtil {
       }
       // presidente
       if ($scrutinio->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $scrutinio->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -208,7 +212,7 @@ class PagelleUtil {
       }
     } elseif ($periodo == 'F') {
       // scrutinio finale
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // alunni scrutinati
@@ -226,7 +230,7 @@ class PagelleUtil {
       // alunni all'estero
       $dati['estero'] = $dati['scrutinio']->getDato('estero');
       // dati degli alunni (scrutinati/cessata frequenza/non scrutinabili/all'estero, sono esclusi i ritirati)
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.frequenzaEstero,a.codiceFiscale')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -238,9 +242,9 @@ class PagelleUtil {
         $dati['alunni'][$alu['id']] = $alu;
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -249,14 +253,14 @@ class PagelleUtil {
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
       }
-      $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+      $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
       $dati['materie'][$condotta->getId()] = array(
         'id' => $condotta->getId(),
         'nome' => $condotta->getNome(),
         'nomeBreve' => $condotta->getNomeBreve(),
         'tipo' => $condotta->getTipo());
       // legge i voti (alunni scrutinati e non scrutinabili per assenze)
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista)')
         ->setParameters(['scrutinio' => $dati['scrutinio'],
           'lista' => array_merge($dati['scrutinati'], $dati['no_scrutinabili'])])
@@ -272,7 +276,7 @@ class PagelleUtil {
           'debito' => $v->getDebito());
       }
       // legge esiti (scrutinati)
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
         ->setParameters(['lista' => $dati['scrutinati'], 'scrutinio' => $dati['scrutinio']])
         ->getQuery()
@@ -283,7 +287,7 @@ class PagelleUtil {
       // docenti
       $docenti = $dati['scrutinio']->getDato('docenti');
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -304,7 +308,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -317,12 +321,12 @@ class PagelleUtil {
       }
     } elseif ($periodo == 'G' || $periodo == 'R') {
       // esame sospesi
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
       $sospesi = $dati['scrutinio']->getDato('sospesi');
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -333,9 +337,9 @@ class PagelleUtil {
         $dati['alunni'][$alu['id']] = $alu;
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -344,14 +348,14 @@ class PagelleUtil {
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
       }
-      $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+      $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
       $dati['materie'][$condotta->getId()] = array(
         'id' => $condotta->getId(),
         'nome' => $condotta->getNome(),
         'nomeBreve' => $condotta->getNomeBreve(),
         'tipo' => $condotta->getTipo());
       // legge i voti
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista)')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'lista' => $sospesi])
         ->getQuery()
@@ -366,7 +370,7 @@ class PagelleUtil {
           'debito' => $v->getDebito());
       }
       // legge esiti
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
         ->setParameters(['lista' => $sospesi, 'scrutinio' => $dati['scrutinio']])
         ->getQuery()
@@ -377,7 +381,7 @@ class PagelleUtil {
       // docenti
       $docenti = $dati['scrutinio']->getDato('docenti');
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -398,7 +402,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -410,14 +414,14 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviati
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -429,7 +433,7 @@ class PagelleUtil {
         $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']->getDato('religione')[$alu['id']];
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameters(['tipi' => ['S'], 'lista' => $dati['scrutinio']->getDato('materie')])
@@ -440,7 +444,7 @@ class PagelleUtil {
         $dati['materie'][$mat['id']] = $mat;
       }
       // legge i voti
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista)')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'lista' => $dati['scrutinio']->getDato('alunni')])
         ->getQuery()
@@ -455,7 +459,7 @@ class PagelleUtil {
           'debito' => $v->getDebito());
       }
       // legge esiti
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
         ->setParameters(['lista' => $dati['scrutinio']->getDato('alunni'), 'scrutinio' => $dati['scrutinio']])
         ->getQuery()
@@ -480,7 +484,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
         $d = $dati['docenti'][$id_presidente];
@@ -516,13 +520,13 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-riepilogo-voti-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $dati = $this->riepilogoVotiDati($classe, $periodo);
         // crea il documento
@@ -543,7 +547,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(10, 20, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
@@ -551,7 +555,7 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetFooterMargin(10);
         $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 6));
         $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
-        $this->pdf->getHandler()->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintHeader(true);
         $this->pdf->getHandler()->setPrintFooter(true);
@@ -595,7 +599,7 @@ class PagelleUtil {
         '-riepilogo-voti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea pdf
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Riepilogo voti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(10, 20, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 15);
@@ -603,7 +607,7 @@ class PagelleUtil {
         $this->pdf->getHandler()->SetFooterMargin(10);
         $this->pdf->getHandler()->setHeaderFont(Array('helvetica', 'B', 6));
         $this->pdf->getHandler()->setFooterFont(Array('helvetica', '', 8));
-        $this->pdf->getHandler()->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
+        $this->pdf->getHandler()->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."     ***     RIEPILOGO VOTI ".$classe->getAnno().'ª '.$classe->getSezione(), '', array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setFooterData(array(0,0,0), array(255,255,255));
         $this->pdf->getHandler()->setPrintHeader(true);
         $this->pdf->getHandler()->setPrintFooter(true);
@@ -664,7 +668,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -677,7 +681,7 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 0, 5, 0, 0, 'PRIMO QUADRIMESTRE', 0, 'R', 'B');
@@ -884,25 +888,25 @@ class PagelleUtil {
     $dati = array();
     if ($periodo == 'P' || $periodo == 'S') {
       // dati scrutinio
-      $dati['periodo'] = $this->session->get('/CONFIG/SCUOLA/'.
+      $dati['periodo'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
-      $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['scrutinio'] = $scrutinio;
       $dati['classe'] = $classe;
       // legge materie
-      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.tipo')
         ->where('m.tipo NOT IN (:tipi)')
         ->setParameter('tipi', ['U', 'C', 'E'])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
-      $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+      $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -935,22 +939,22 @@ class PagelleUtil {
     } elseif ($periodo == 'F') {
       // scrutinio finale
       $dati['periodo'] = 'SCRUTINIO FINALE';
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge materie
-      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.tipo')
         ->where('m.tipo NOT IN (:tipi)')
         ->setParameter('tipi', ['U', 'C', 'E'])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
-      $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+      $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -977,22 +981,22 @@ class PagelleUtil {
     } elseif ($periodo == 'G' || $periodo == 'R') {
       // esame sospesi
       $dati['periodo'] = 'SCRUTINIO ESAMI GIUDIZIO SOSPESO'.($periodo != 'G' ? ' SESSIONE SUPPLETTIVA' : '');
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge materie
-      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.tipo')
         ->where('m.tipo NOT IN (:tipi)')
         ->setParameter('tipi', ['U', 'C', 'E'])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
-      $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+      $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -1017,22 +1021,22 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviati
       $dati['periodo'] = 'SCRUTINIO ESAMI GIUDIZIO SOSPESO SESSIONE SUPPLETTIVA';
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameters(['tipi' => ['U','C','E'], 'lista' => $dati['scrutinio']->getDato('materie')])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
-      $edcivica = $this->em->getRepository('App:Materia')->findOneByTipo('E');
+      $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
@@ -1080,14 +1084,14 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-firme-registro-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Foglio firme Registro '.$nome_classe);
         $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
@@ -1121,7 +1125,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Foglio firme Registro '.$nome_classe);
         $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
@@ -1156,7 +1160,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Foglio firme Registro '.$nome_classe);
         $this->pdf->getHandler()->SetMargins(10, 10, 10, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 10);
@@ -1202,16 +1206,16 @@ class PagelleUtil {
     // nomi mesi
     $dati['nomi_mesi'] = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // scrutinio finale
-    $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     // definizione scrutinio
-    $dati['definizione'] = $this->em->getRepository('App:DefinizioneScrutinio')->findOneByPeriodo($periodo);
+    $dati['definizione'] = $this->em->getRepository('App\Entity\DefinizioneScrutinio')->findOneByPeriodo($periodo);
     // legge classe
     $dati['classe'] = $classe;
     // legge dati di periodo
     if ($periodo == 'P' || $periodo == 'S') {
       // legge materie
-      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome')
         ->where('m.tipo NOT IN (:tipi)')
         ->setParameter('tipi', ['U', 'C'])
@@ -1220,7 +1224,7 @@ class PagelleUtil {
         ->getArrayResult();
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -1241,7 +1245,7 @@ class PagelleUtil {
         }
       }
       // legge alunni
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.credito3,a.credito4')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1256,7 +1260,7 @@ class PagelleUtil {
         }
       }
       // legge condotta
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.materia','m')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista) AND m.tipo=:tipo')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'lista' => $dati['scrutinio']->getDato('alunni'), 'tipo' => 'C'])
@@ -1268,7 +1272,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1297,7 +1301,7 @@ class PagelleUtil {
       }
     } elseif ($periodo == 'F') {
       // legge materie
-      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome')
         ->where('m.tipo NOT IN (:tipi)')
         ->setParameter('tipi', ['U', 'C'])
@@ -1306,7 +1310,7 @@ class PagelleUtil {
         ->getArrayResult();
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -1328,7 +1332,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1374,7 +1378,7 @@ class PagelleUtil {
       $dati['estero'] = ($dati['scrutinio']->getDato('estero') == null ? [] :
         $dati['scrutinio']->getDato('estero'));
       // dati degli alunni (scrutinati/cessata frequenza/non scrutinabili/all'estero)
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.frequenzaEstero,a.credito3,a.credito4,a.codiceFiscale')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1391,7 +1395,7 @@ class PagelleUtil {
         }
       }
       // legge condotta
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.materia','m')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista) AND m.tipo=:tipo')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'lista' => $dati['scrutinio']->getDato('alunni'),
@@ -1403,7 +1407,7 @@ class PagelleUtil {
         $dati['voti'][$v->getAlunno()->getId()] = $v;
       }
       // legge esiti (solo scrutinati)
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
         ->setParameters(['lista' => $dati['scrutinati'], 'scrutinio' => $dati['scrutinio']])
         ->getQuery()
@@ -1420,9 +1424,9 @@ class PagelleUtil {
       }
       // legge debiti
       $dati['debiti'] = array();
-      $debiti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $debiti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->select('(vs.alunno) AS alunno,vs.unico,vs.debito,vs.recupero,m.nome AS materia,m.tipo')
-        ->join('App:Esito', 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
+        ->join('App\Entity\Esito', 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
         ->join('vs.materia', 'm')
         ->where('vs.alunno IN (:lista) AND vs.scrutinio=:scrutinio AND vs.unico<:suff AND e.esito=:esito AND m.tipo IN (:tipo)')
         ->orderBy('m.ordinamento', 'ASC')
@@ -1436,10 +1440,10 @@ class PagelleUtil {
       // controlla ammessi con insuff in quinta
       $dati['insuff5'] = array();
       if ($dati['classe']->getAnno() == 5) {
-        $insuff = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+        $insuff = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
           ->select('COUNT(vs.id) AS cont,(vs.alunno) AS alunno')
           ->join('vs.materia','m')
-          ->join('App:Esito', 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
+          ->join('App\Entity\Esito', 'e', 'WITH', 'e.scrutinio=vs.scrutinio AND e.alunno=vs.alunno')
           ->where('vs.scrutinio=:scrutinio AND ((m.tipo IN (:normale) AND vs.unico<:suff) OR (m.tipo=:religione AND vs.unico<:suffrel)) AND e.esito=:ammesso')
           ->groupBy('vs.alunno')
           ->setParameters(['scrutinio' => $dati['scrutinio'], 'normale' => ['N', 'E'],
@@ -1454,7 +1458,7 @@ class PagelleUtil {
       }
     } elseif ($periodo == 'G' || $periodo == 'R') {
       // legge materie
-      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome')
         ->where('m.tipo NOT IN (:tipi)')
         ->setParameter('tipi', ['U', 'C'])
@@ -1463,7 +1467,7 @@ class PagelleUtil {
         ->getArrayResult();
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
-      $dati_docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $dati_docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -1485,7 +1489,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1514,7 +1518,7 @@ class PagelleUtil {
       }
       // legge dati di alunni
       $sospesi = $dati['scrutinio']->getDato('sospesi');
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.credito3,a.credito4')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1529,7 +1533,7 @@ class PagelleUtil {
         }
       }
       // legge esiti
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
         ->setParameters(['lista' => $sospesi, 'scrutinio' => $dati['scrutinio']])
         ->getQuery()
@@ -1552,7 +1556,7 @@ class PagelleUtil {
         if ($dati['esiti'][$kalu]->getEsito() == 'A') {
           $dati['creditoSospeso'][$kalu] = false;
           // legge i voti di recupero maggiori al 6
-          $maggioriSuff = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+          $maggioriSuff = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
             ->select('COUNT(vs.unico)')
             ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.recupero IS NOT NULL AND vs.unico>:suff')
             ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $kalu, 'suff' => 6])
@@ -1562,10 +1566,10 @@ class PagelleUtil {
         }
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // legge materie
-      $dati_materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $dati_materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameters(['tipi' => ['C'], 'lista' => $dati['scrutinio']->getDato('materie')])
@@ -1589,7 +1593,7 @@ class PagelleUtil {
       }
       // presidente
       if ($dati['scrutinio']->getDato('presiede_ds')) {
-        $dati['presidente_nome'] = $this->session->get('/CONFIG/ISTITUTO/firma_preside');
+        $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, '.$dati['presidente_nome'];
       } else {
         $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
@@ -1617,7 +1621,7 @@ class PagelleUtil {
         $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la').' '.$dati['segretario_nome'];
       }
       // legge dati di alunni
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1635,7 +1639,7 @@ class PagelleUtil {
         }
       }
       // legge esiti
-      $esiti = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $esiti = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
         ->setParameters(['lista' => $dati['scrutinio']->getDato('alunni'), 'scrutinio' => $dati['scrutinio']])
         ->getQuery()
@@ -1655,7 +1659,7 @@ class PagelleUtil {
         if ($dati['esiti'][$kalu]->getEsito() == 'A') {
           $dati['creditoSospeso'][$kalu] = false;
           // legge i voti di recupero maggiori al 6
-          $maggioriSuff = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+          $maggioriSuff = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
             ->select('COUNT(vs.unico)')
             ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.debito IS NOT NULL AND vs.unico>:suff')
             ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $kalu, 'suff' => 6])
@@ -1690,12 +1694,12 @@ class PagelleUtil {
     $dati['classe'] = $classe;
     $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
     // dati scrutinio
-    $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+    $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     // legge materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.tipo')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -1704,14 +1708,14 @@ class PagelleUtil {
     foreach ($materie as $mat) {
       $dati['materie'][$mat['id']] = $mat;
     }
-    $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+    $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
     $dati['materie'][$condotta->getId()] = array(
       'id' => $condotta->getId(),
       'nome' => $condotta->getNome(),
       'nomeBreve' => $condotta->getNomeBreve(),
       'tipo' => $condotta->getTipo());
     // legge i voti
-    $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+    $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
       ->join('vs.scrutinio', 's')
       ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno AND vs.unico IS NOT NULL')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'alunno' => $alunno])
@@ -1730,7 +1734,7 @@ class PagelleUtil {
       // legge valutazioni
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
@@ -1748,7 +1752,7 @@ class PagelleUtil {
       // legge valutazioni
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
@@ -1761,14 +1765,14 @@ class PagelleUtil {
         $dati['errore'] = true;
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviato
       $dati['religione'] = $dati['scrutinio']->getDato('religione')[$alunno->getId()];
       // legge valutazioni
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
@@ -1781,7 +1785,7 @@ class PagelleUtil {
         $dati['errore'] = true;
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameters(['tipi' => ['S'], 'lista' => $dati['scrutinio']->getDato('materie')])
@@ -1817,13 +1821,13 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-pagella-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Pagella - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -1856,7 +1860,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione dei voti - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -1896,7 +1900,7 @@ class PagelleUtil {
         '-voti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Comunicazione dei voti - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -1955,12 +1959,12 @@ class PagelleUtil {
       // dati alunno
       $dati['alunno'] = $alunno;
       // dati scrutinio
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo IN (:tipo) AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => ['N', 'A'], 'sostegno' => 'S'])
@@ -1970,7 +1974,7 @@ class PagelleUtil {
         $dati['materie'][$mat['id']] = $mat;
       }
       // legge i debiti
-      $debiti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $debiti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->join('vs.scrutinio', 's')
         ->join('vs.materia', 'm')
         ->where('s.classe=:classe AND s.periodo=:periodo AND vs.alunno=:alunno '.
@@ -1988,23 +1992,23 @@ class PagelleUtil {
       }
     } elseif ($periodo == 'F') {
       // scrutinio finale
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -2014,7 +2018,7 @@ class PagelleUtil {
         $dati['materie'][$mat['id']] = $mat;
       }
       // legge i debiti
-      $debiti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $debiti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno AND vs.unico<:suff')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $alunno, 'suff' => 6])
         ->getQuery()
@@ -2058,13 +2062,13 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-debiti-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Comunicazione debiti formativi - Alunno '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2097,7 +2101,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-debiti-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione debiti formativi - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2148,12 +2152,12 @@ class PagelleUtil {
   public function alunnoInScrutinio(Classe $classe, $alunno, $periodo) {
     $trovato = null;
     // legge scrutinio
-    $scrutinio = $this->em->getRepository('App:Scrutinio')->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
+    $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
     if ($periodo == 'P' || $periodo == 'S') {
       // solo gli alunni al momento dello scrutinio
       if (in_array($alunno, $scrutinio->getDato('alunni'))) {
         // alunno trovato
-        $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
+        $trovato = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       }
     } elseif ($periodo == 'F') {
       // controlla se alunno scrutinato
@@ -2161,11 +2165,11 @@ class PagelleUtil {
         array_keys($scrutinio->getDato('scrutinabili')));
       if (in_array($alunno, $scrut)) {
         // alunno scrutinato
-        return $this->em->getRepository('App:Alunno')->find($alunno);
+        return $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       }
       // controlla se alunno all'estero
-      $estero = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
-        ->join('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
+      $estero = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+        ->join('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=a.id')
         ->where('a.id IN (:lista) AND a.id=:alunno AND cc.classe=:classe AND a.frequenzaEstero=:estero')
         ->setParameters(['lista' => ($scrutinio->getDato('ritirati') == null ? [] : $scrutinio->getDato('ritirati')),
           'alunno' => $alunno, 'classe' => $classe, 'estero' => 1])
@@ -2180,7 +2184,7 @@ class PagelleUtil {
       $no_scrut = ($scrutinio->getDato('no_scrutinabili') == null ? [] : $scrutinio->getDato('no_scrutinabili'));
       if (isset($no_scrut[$alunno]) && !isset($no_scrut[$alunno]['deroga'])) {
         // alunno non scrutinabile per assenze
-        return $this->em->getRepository('App:Alunno')->find($alunno);
+        return $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       }
       // alunno non trovato: errore
       return null;
@@ -2188,13 +2192,13 @@ class PagelleUtil {
       // esame sospesi
       if (in_array($alunno, $scrutinio->getDato('sospesi'))) {
         // alunno trovato
-        $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
+        $trovato = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       }
     } elseif ($periodo == 'X') {
       // esame sospesi
       if (in_array($alunno, $scrutinio->getDato('alunni'))) {
         // alunno trovato
-        $trovato = $this->em->getRepository('App:Alunno')->find($alunno);
+        $trovato = $this->em->getRepository('App\Entity\Alunno')->find($alunno);
       }
     }
     // restituisce alunno
@@ -2268,7 +2272,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-tabellone-esiti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2302,7 +2306,7 @@ class PagelleUtil {
         '-tabellone-esiti.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Tabellone esiti - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2356,7 +2360,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
@@ -2402,7 +2406,7 @@ class PagelleUtil {
         '-certificazioni.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Certificazioni delle competenze - Classe '.$classe->getAnno().'ª '.$classe->getSezione());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
         $this->pdf->getHandler()->SetAutoPageBreak(false, 15);
@@ -2459,13 +2463,13 @@ class PagelleUtil {
     $dati = array();
     if ($periodo == 'F') {
       // scrutinio finale
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // alunni ammessi
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,e.dati')
-        ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id')
+        ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id')
         ->where('a.id IN (:lista) AND e.scrutinio=:scrutinio AND e.esito=:esito')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['lista' => array_keys($dati['scrutinio']->getDato('scrutinabili')),
@@ -2476,18 +2480,18 @@ class PagelleUtil {
         $dati['ammessi'][$alu['id']] = $alu;
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'G' || $periodo == 'R' || $periodo == 'X') {
       // scrutinio
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
       $sospesi = (($periodo == 'G' || $periodo == 'R') ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('alunni'));
       // alunni ammessi
-      $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+      $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,e.dati')
-        ->join('App:Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=:scrutinio')
+        ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id AND e.scrutinio=:scrutinio')
         ->where('a.id IN (:lista) AND e.esito=:esito')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'lista' => $sospesi, 'esito' => 'A'])
@@ -2497,7 +2501,7 @@ class PagelleUtil {
         $dati['ammessi'][$alu['id']] = $alu;
       }
       // anno scolastico
-      $dati['annoScolastico'] = ($periodo == 'X' ? '2021/2022' : $this->session->get('/CONFIG/SCUOLA/anno_scolastico'));
+      $dati['annoScolastico'] = ($periodo == 'X' ? '2021/2022' : $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'));
     }
     // restituisce dati
     return $dati;
@@ -2525,7 +2529,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione di non ammissione - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2566,7 +2570,7 @@ class PagelleUtil {
         '-non-ammesso-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Comunicazione di non ammissione - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2619,14 +2623,14 @@ class PagelleUtil {
     $dati = array();
     if ($periodo == 'F') {
       // scrutinio finale
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
@@ -2646,9 +2650,9 @@ class PagelleUtil {
         $dati['tipo'] = 'A';
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -2657,14 +2661,14 @@ class PagelleUtil {
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
       }
-      $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+      $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
       $dati['materie'][$condotta->getId()] = array(
         'id' => $condotta->getId(),
         'nome' => $condotta->getNome(),
         'nomeBreve' => $condotta->getNomeBreve(),
         'tipo' => $condotta->getTipo());
       // legge i voti
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $alunno])
         ->getQuery()
@@ -2678,14 +2682,14 @@ class PagelleUtil {
       }
     } elseif ($periodo == 'G' || $periodo == 'R') {
       // esame sospesi
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
@@ -2699,9 +2703,9 @@ class PagelleUtil {
         $dati['tipo'] = 'N';
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -2710,14 +2714,14 @@ class PagelleUtil {
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
       }
-      $condotta = $this->em->getRepository('App:Materia')->findOneByTipo('C');
+      $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
       $dati['materie'][$condotta->getId()] = array(
         'id' => $condotta->getId(),
         'nome' => $condotta->getNome(),
         'nomeBreve' => $condotta->getNomeBreve(),
         'tipo' => $condotta->getTipo());
       // legge i voti
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $alunno])
         ->getQuery()
@@ -2730,17 +2734,17 @@ class PagelleUtil {
           'assenze' => $v->getAssenze());
       }
       // anno scolastico
-      $dati['annoScolastico'] = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+      $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ($periodo == 'X') {
       // esame rinviato
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       $dati['religione'] = $dati['scrutinio']->getDato('religione')[$alunno->getId()];
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
@@ -2754,7 +2758,7 @@ class PagelleUtil {
         $dati['tipo'] = 'N';
       }
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameters(['tipi' => ['S'], 'lista' => $dati['scrutinio']->getDato('materie')])
@@ -2765,7 +2769,7 @@ class PagelleUtil {
         $dati['materie'][$mat['id']] = $mat;
       }
       // legge i voti
-      $voti = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
+      $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
         ->setParameters(['scrutinio' => $dati['scrutinio'], 'alunno' => $alunno])
         ->getQuery()
@@ -2805,7 +2809,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-carenze-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Comunicazione per il recupero autonomo - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
@@ -2857,22 +2861,22 @@ class PagelleUtil {
     $dati = array();
     if ($periodo == 'F') {
       // scrutinio finale
-      $dati['scrutinio'] = $this->em->getRepository('App:Scrutinio')->findOneBy(['classe' => $classe,
+      $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       // legge esito
-      $dati['esito'] = $this->em->getRepository('App:Esito')->createQueryBuilder('e')
+      $dati['esito'] = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio']])
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
       // legge materie
-      $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+      $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.nomeBreve,m.tipo')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
         ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo AND m.tipo!=:sostegno')
         ->orderBy('m.ordinamento', 'ASC')
         ->setParameters(['classe' => $classe, 'attiva' => 1, 'tipo' => 'N', 'sostegno' => 'S'])
@@ -2882,9 +2886,9 @@ class PagelleUtil {
         $dati['materie'][$mat['id']] = $mat;
       }
       // legge carenze
-      $carenze = $this->em->getRepository('App:VotoScrutinio')->createQueryBuilder('vs')
-        ->join('App:Esito', 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=vs.scrutinio')
-        ->join('App:PropostaVoto', 'pv', 'WITH', 'pv.alunno=vs.alunno AND pv.materia=vs.materia')
+      $carenze = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+        ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=vs.alunno AND e.scrutinio=vs.scrutinio')
+        ->join('App\Entity\PropostaVoto', 'pv', 'WITH', 'pv.alunno=vs.alunno AND pv.materia=vs.materia')
         ->where('vs.alunno=:alunno AND vs.scrutinio=:scrutinio AND e.esito IN (:esiti) AND pv.classe=:classe AND pv.periodo=:periodo AND pv.unico<:suff AND vs.unico>=:suff')
         ->setParameters(['alunno' => $alunno, 'scrutinio' => $dati['scrutinio'], 'esiti' => ['A','S'],
           'classe' => $classe, 'periodo' => $periodo, 'suff' => 6])
@@ -2929,14 +2933,14 @@ class PagelleUtil {
     }
     if ($periodo == 'P' || $periodo == 'S') {
       // primo/secondo trimestre/quadrimestre
-      $periodoNome = $this->session->get('/CONFIG/SCUOLA/'.
+      $periodoNome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.
         ($periodo == 'P' ? 'periodo1_nome' : 'periodo2_nome'));
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-'.
         strtolower(preg_replace('/\W+/', '-', $periodoNome)).'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio '.$periodoNome.' - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -2970,7 +2974,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -3005,7 +3009,7 @@ class PagelleUtil {
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento
         $nome_classe = $classe->getAnno().'ª '.$classe->getSezione();
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Verbale classe '.$nome_classe);
         $this->pdf->getHandler()->SetAutoPageBreak(true, 20);
         $this->pdf->getHandler()->SetFooterMargin(10);
@@ -3060,7 +3064,7 @@ class PagelleUtil {
       $nomefile = $classe->getAnno().$classe->getSezione().'-scrutinio-finale-certificazione-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio Finale - Certificazione delle competenze - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
@@ -3112,7 +3116,7 @@ class PagelleUtil {
         '-certificazione-'.$alunno->getId().'.pdf';
       if (!$fs->exists($percorso.'/'.$nomefile)) {
         // crea documento PDF
-        $this->pdf->configure($this->session->get('/CONFIG/ISTITUTO/intestazione'),
+        $this->pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
           'Scrutinio per gli esami '.($periodo != 'G' ? 'supplettivi ' : '').'degli studenti con sospensione del giudizio - Certificazione delle competenze - Alunn'.
           ($alunno->getSesso() == 'M' ? 'o' : 'a').' '.$alunno->getCognome().' '.$alunno->getNome());
         $this->pdf->getHandler()->SetMargins(15, 15, 15, true);
@@ -3183,7 +3187,7 @@ class PagelleUtil {
     $pdf->SetFooterMargin(12);
     $pdf->setHeaderFont(Array('helvetica', 'B', 6));
     $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->session->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
+    $pdf->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
     $pdf->setFooterData(array(0,0,0), array(255,255,255));
     $pdf->setPrintHeader(true);
     $pdf->setPrintFooter(true);
@@ -3196,10 +3200,10 @@ class PagelleUtil {
     $pdf->SetFont('helvetica', 'B', 10);
     $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
     $pdf->SetFont('helvetica', '', 10);
-    $as = $this->session->get('/CONFIG/SCUOLA/anno_scolastico');
+    $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
     $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 0, 5, 0, 0, $this->session->get('/CONFIG/SCUOLA/periodo2_nome'), 0, 'R', 'B');
+    $this->cella($pdf, 0, 5, 0, 0, $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome'), 0, 'R', 'B');
     $this->acapo($pdf, 5);
     // intestazione tabella
     $pdf->SetFont('helvetica', 'B', 8);

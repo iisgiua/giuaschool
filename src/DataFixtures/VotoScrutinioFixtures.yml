@@ -1,0 +1,37 @@
+####################
+# VotoScrutinioFixtures - dati di test
+#
+# Dati per i voti assegnati in uno scrutinio:
+#   orale: voto per la valutazione orale
+#   scritto: voto per la valutazione scritta
+#   pratico: voto per la valutazione pratica
+#   unico: voto per la valutazione unica
+#   debito: argomenti per il recupero del debito
+#   recupero: modalità di recupero del debito [A=autonomo, C=corso, S=sportello, P=pausa didattica, I=iscola, R=recuperato, N=non recuperato]
+#   assenze: numero di ore di assenza nel periodo
+#   dati: lista dei dati sul voto (usati per la condotta)
+#   scrutinio: scrutinio a cui si riferisce il voto
+#   alunno: alunno a cui si attribuisce il voto
+#   materia: materia del voto
+####################
+
+
+include:
+  - ScrutinioFixtures.yml
+  - AlunnoFixtures.yml
+  - MateriaFixtures.yml
+
+
+App\Entity\VotoScrutinio:
+  voto_scrutinio_{1..10}:
+    orale: '50%? <numberBetween(1, 10)>: 0'
+    scritto: '50%? <numberBetween(1, 10)>: 0'
+    pratico: '50%? <numberBetween(1, 10)>: 0'
+    unico: '50%? <numberBetween(1, 10)>: 0'
+    debito: '50%? <text()>: <strval("")>'
+    recupero: '<randomElement(["A", "C", "S", "P", "I", "R", "N"])>'
+    assenze: '<numberBetween(1, 100)>'
+    dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
+    scrutinio: '@scrutinio_*'
+    alunno: '@alunno_prima_<current()>'
+    materia: '@materia_*'

@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -29,6 +25,8 @@ use App\Entity\Colloquio;
 
 /**
  * ColloquioType - form per la classe Colloquio
+ *
+ * @author Antonello Dessì
  */
 class ColloquioType extends AbstractType {
 
@@ -45,7 +43,7 @@ class ColloquioType extends AbstractType {
       $builder
         ->add('sede', EntityType::class, array('label' => 'label.sede',
           'data' => $options['dati'][0],
-          'class' => 'App:Sede',
+          'class' => 'App\Entity\Sede',
           'choice_label' => 'citta',
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('s')->orderBy('s.ordinamento', 'ASC'); },
@@ -54,12 +52,12 @@ class ColloquioType extends AbstractType {
           'disabled' => ($options['dati'][0] !== null),
           'required' => true))
         ->add('docente', EntityType::class, array('label' => 'label.docente',
-          'class' => 'App:Docente',
+          'class' => 'App\Entity\Docente',
           'choice_label' => function ($obj) {
             return $obj->getCognome().' '.$obj->getNome().' ('.$obj->getUsername().')'; },
           'query_builder' => function (EntityRepository $er) {
             return $er->createQueryBuilder('d')
-              ->where('d.abilitato=1 AND d NOT INSTANCE OF App:Preside')
+              ->where('d.abilitato=1 AND d NOT INSTANCE OF App\Entity\Preside')
               ->orderBy('d.cognome,d.nome,d.username', 'ASC'); },
           'placeholder' => 'label.choose_option',
           'disabled' => ($options['dati'][1] !== null),

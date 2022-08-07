@@ -48,17 +48,6 @@ services:
       - { name: console.command }
       - { name: monolog.logger, channel: command }
 
-  # ridefinisce sessione per poter usare NamespacedAttributeBag
-  session:
-    class: 'Symfony\Component\HttpFoundation\Session\Session'
-    public: true
-    arguments:
-      - '@session.storage'
-      - '@session.attribute_namespacedbag'
-      - '@session.flash_bag'
-  session.attribute_namespacedbag:
-    class: 'Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag'
-
   # necessario per evitare warning di servizio deprecato
   App\Util\CsvImporter:
     arguments:
@@ -96,3 +85,11 @@ services:
   App\Util\OtpUtil:
     arguments:
       $qrcode_file: '%kernel.project_dir%/vendor/tecnickcom/tcpdf/tcpdf_barcodes_2d.php'
+
+  # usato per il logout
+  App\EventListener\LogoutListener:
+    tags:
+      - name: 'kernel.event_listener'
+        event: 'Symfony\Component\Security\Http\Event\LogoutEvent'
+        dispatcher: security.event_dispatcher.main
+        method: onLogoutEvent

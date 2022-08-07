@@ -1,25 +1,22 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Utente - entità
+ * Utente - dati degli utenti
  *
  * @ORM\Entity(repositoryClass="App\Repository\UtenteRepository")
  * @ORM\Table(name="gs_utente")
@@ -31,64 +28,65 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @UniqueEntity(fields="username", message="field.unique", entityClass="App\Entity\Utente")
  * @UniqueEntity(fields="email", message="field.unique", entityClass="App\Entity\Utente")
+ *
+ * @author Antonello Dessì
  */
-class Utente implements UserInterface, \Serializable {
+class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable {
 
 
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per il generico utente
+   * @var int|null $id Identificativo univoco per il generico utente
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $username Nome utente univoco
+   * @var string|null $username Nome utente univoco
    *
    * @ORM\Column(type="string", length=128, unique=true, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(min=3,max=128,minMessage="field.minlength",maxMessage="field.maxlength")
    * @Assert\Regex(pattern="/^[a-zA-Z][a-zA-Z0-9\._\-]*[a-zA-Z0-9]$/",message="field.regex")
    */
-  private $username;
+  private ?string $username = '';
 
   /**
-   * @var string $password Password cifrata dell'utente
+   * @var string|null $password Password cifrata dell'utente
    *
    * @ORM\Column(type="string", length=255, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $password;
+  private ?string $password = '';
 
   /**
-   * @var string $passwordNonCifrata Password in chiaro dell'utente (dato non persistente, la lunghezza massima è un limite di BCrypt)
+   * @var string|null $passwordNonCifrata Password in chiaro dell'utente (dato non persistente)
    *
    * @Assert\Length(min=8,max=72,minMessage="field.minlength",maxMessage="field.maxlength")
    */
-  private $passwordNonCifrata;
+  private ?string $passwordNonCifrata = '###NOPASSWORD###';
 
   /**
-   * @var string $email Indirizzo email dell'utente (fittizio se dominio è "noemail.local")
+   * @var string|null $email Indirizzo email dell'utente
    *
    * @ORM\Column(type="string", length=255, unique=true, nullable=false)
    *
@@ -96,157 +94,170 @@ class Utente implements UserInterface, \Serializable {
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    * @Assert\Email(message="field.email")
    */
-  private $email;
+  private ?string $email = '';
 
   /**
-   * @var string $token Token generato per la procedura di attivazione o di recupero password
+   * @var string|null $token Token generato per la procedura di attivazione o di recupero password
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    */
-  private $token;
+  private ?string $token = '';
 
   /**
-   * @var \DateTime $tokenCreato Data/ora di creazione del token
+   * @var \DateTime|null $tokenCreato Data/ora di creazione del token
    *
    * @ORM\Column(name="token_creato", type="datetime", nullable=true)
    */
-  private $tokenCreato;
+  private ?\DateTime $tokenCreato = null;
 
   /**
-   * @var string $prelogin Codice di pre-login
+   * @var string|null $prelogin Codice di pre-login
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    */
-  private $prelogin;
+  private ?string $prelogin = '';
 
   /**
-   * @var \DateTime $preloginCreato Data/ora di creazione del codice di pre-login
+   * @var \DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
    *
    * @ORM\Column(name="prelogin_creato", type="datetime", nullable=true)
    */
-  private $preloginCreato;
+  private ?\DateTime $preloginCreato = null;
 
   /**
-   * @var boolean $abilitato Indica se l'utente è abilitato al login o no
+   * @var bool $abilitato Indica se l'utente è abilitato al login o no
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $abilitato;
+  private bool $abilitato = false;
 
   /**
-   * @var boolean $spid Indica se l'utente è abilitato all'accesso SPID
+   * @var bool $spid Indica se l'utente è abilitato all'accesso SPID
    *
    * @ORM\Column(type="boolean", nullable=false)
    */
-  private $spid;
+  private bool $spid = false;
 
   /**
-   * @var \DateTime $ultimoAccesso Data/ora dell'ultimo accesso
+   * @var \DateTime|null $ultimoAccesso Data/ora dell'ultimo accesso
    *
    * @ORM\Column(name="ultimo_accesso", type="datetime", nullable=true)
    */
-  private $ultimoAccesso;
+  private ?\DateTime $ultimoAccesso = null;
 
   /**
-   * @var string $nome Nome dell'utente
+   * @var string|null $otp Codice segreto per accesso con OTP (se vuoto non è attivato)
+   *
+   * @ORM\Column(type="string", length=128, nullable=true)
+   */
+  private ?string $otp = '';
+
+  /**
+   * @var string|null $ultimoOtp Codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @ORM\Column(name="ultimo_otp", type="string", length=128, nullable=true)
+   */
+  private ?string $ultimoOtp = '';
+
+  /**
+   * @var string|null $nome Nome dell'utente
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $nome;
+  private ?string $nome = '';
 
   /**
-   * @var string $cognome Cognome dell'utente
+   * @var string|null $cognome Cognome dell'utente
    *
    * @ORM\Column(type="string", length=64, nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $cognome;
+  private ?string $cognome = '';
 
   /**
-   * @var string $sesso Sesso dell'utente [M,F]
+   * @var string|null $sesso Sesso dell'utente [M,F]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"M","F"}, strict=true, message="field.choice")
    */
-  private $sesso;
+  private ?string $sesso = 'M';
 
   /**
-   * @var \DateTime $dataNascita Data di nascita dell'utente
+   * @var \DateTime|null $dataNascita Data di nascita dell'utente
    *
    * @ORM\Column(name="data_nascita", type="date", nullable=true)
    *
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $dataNascita;
+  private ?\DateTime $dataNascita = null;
 
   /**
-   * @var string $comuneNascita Comune di nascita dell'utente
+   * @var string|null $comuneNascita Comune di nascita dell'utente
    *
    * @ORM\Column(name="comune_nascita", type="string", length=64, nullable=true)
    *
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $comuneNascita;
+  private ?string $comuneNascita = '';
 
   /**
-   * @var string $codiceFiscale Codice fiscale dell'utente (univoco)
+   * @var string|null $codiceFiscale Codice fiscale dell'utente
    *
    * @ORM\Column(name="codice_fiscale", type="string", length=16, nullable=true)
    *
    * @Assert\Length(max=16,maxMessage="field.maxlength")
    */
-  private $codiceFiscale;
+  private ?string $codiceFiscale = '';
 
   /**
-   * @var string $citta La città dell'utente
+   * @var string|null $citta Città di residenza dell'utente
    *
    * @ORM\Column(type="string", length=32, nullable=true)
    *
    * @Assert\Length(max=32,maxMessage="field.maxlength")
    */
-  private $citta;
+  private ?string $citta = '';
 
   /**
-   * @var string $indirizzo Indirizzo dell'utente
+   * @var string|null $indirizzo Indirizzo di residenza dell'utente
    *
    * @ORM\Column(type="string", length=64, nullable=true)
    *
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private $indirizzo;
+  private ?string $indirizzo = '';
 
   /**
-   * @var array $numeriTelefono Lista di numeri di telefono dell'utente
+   * @var array|null $numeriTelefono Lista di numeri di telefono dell'utente
    *
    * @ORM\Column(name="numeri_telefono", type="array", nullable=true)
    */
-  private $numeriTelefono;
+  private ?array $numeriTelefono = array();
 
   /**
-   * @var array $notifica Parametri di notifica per i servizi esterni
+   * @var array|null $notifica Lista di parametri di notifica per i servizi esterni
    *
    * @ORM\Column(type="array", nullable=true)
    */
-  private $notifica;
+  private ?array $notifica = array();
 
   /**
-   * @var array $listaProfili Lista di profili per lo stesso utente (dato non persistente)
+   * @var array|null $listaProfili Lista di profili per lo stesso utente (dato non persistente)
    *
    */
-  private $listaProfili;
+  private ?array $listaProfili = array();
 
   /**
-   * @var array $infoLogin Lista di dati utili in fase di autenticazione (dato non persistente)
+   * @var array|null $infoLogin Lista di dati utili in fase di autenticazione (dato non persistente)
    *
    */
-  private $infoLogin;
+  private ?array $infoLogin = array();
 
 
   //==================== EVENTI ORM ====================
@@ -256,7 +267,7 @@ class Utente implements UserInterface, \Serializable {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -267,7 +278,7 @@ class Utente implements UserInterface, \Serializable {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -276,20 +287,20 @@ class Utente implements UserInterface, \Serializable {
   //==================== IMPLEMENTAZIONE DI USERINTERFACE ====================
 
   /**
-   * Restituisce la username dell'utente
+   * Restituisce l'identificativo dell'utente
    *
-   * @return string Username dell'utente
+   * @return string|null Identificativo dell'utente
    */
-  public function getUsername() {
+  public function getUserIdentifier(): ?string {
     return $this->username;
   }
 
   /**
    * Restituisce la password cifrata dell'utente
    *
-   * @return string Password dell'utente
+   * @return string|null Password dell'utente
    */
-  public function getPassword() {
+  public function getPassword(): ?string {
     return $this->password;
   }
 
@@ -298,7 +309,7 @@ class Utente implements UserInterface, \Serializable {
    *
    * @return string|null Valore di salt
    */
-  public function getSalt() {
+  public function getSalt(): ?string {
     return null;
   }
 
@@ -307,15 +318,16 @@ class Utente implements UserInterface, \Serializable {
    *
    * @return array Lista di ruoli
    */
-  public function getRoles() {
+  public function getRoles(): array {
     return ['ROLE_UTENTE'];
   }
 
   /**
    * Rimuove informazioni sensibili dai dati dell'utente
+   *
    */
-  public function eraseCredentials() {
-    $this->passwordNonCifrata = null;
+  public function eraseCredentials(): void {
+    $this->passwordNonCifrata = '';
   }
 
 
@@ -326,7 +338,7 @@ class Utente implements UserInterface, \Serializable {
    *
    * @return string Oggetto Utente serializzato
    */
-  public function serialize() {
+  public function serialize(): string {
     return serialize(array(
       $this->id,
       $this->username,
@@ -339,9 +351,9 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Deserializza l'oggetto Utente
    *
-   * @param string $oggetto Oggetto Utente serializzato
+   * @param mixed $oggetto Oggetto Utente serializzato
    */
-  public function unserialize($oggetto) {
+  public function unserialize($oggetto): void {
     list (
       $this->id,
       $this->username,
@@ -357,38 +369,47 @@ class Utente implements UserInterface, \Serializable {
    /**
    * Restituisce l'identificativo univoco per l'utente
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
+  }
+
+  /**
+   * Restituisce la username dell'utente
+   *
+   * @return string|null Username dell'utente
+   */
+  public function getUsername(): ?string {
+    return $this->username;
   }
 
   /**
    * Modifica la username dell'utente
    *
-   * @param string $username Username dell'utente
+   * @param string|null $username Username dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setUsername($username) {
+  public function setUsername(?string $username): self {
     $this->username = $username;
     return $this;
   }
@@ -396,11 +417,11 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Modifica la password cifrata dell'utente
    *
-   * @param string $password Password cifrata dell'utente
+   * @param string|null $password Password cifrata dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setPassword($password) {
+  public function setPassword(?string $password): self {
     $this->password = $password;
     return $this;
   }
@@ -408,20 +429,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la password in chiaro dell'utente (dato non persistente)
    *
-   * @return string Password in chiaro dell'utente
+   * @return string|null Password in chiaro dell'utente
    */
-  public function getPasswordNonCifrata() {
+  public function getPasswordNonCifrata(): ?string {
     return $this->passwordNonCifrata;
   }
 
   /**
    * Modifica la password in chiaro dell'utente (dato non persistente)
    *
-   * @param string $passwordNonCifrata Password in chiaro dell'utente
+   * @param string|null $passwordNonCifrata Password in chiaro dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setPasswordNonCifrata($passwordNonCifrata) {
+  public function setPasswordNonCifrata(?string $passwordNonCifrata): self {
     $this->passwordNonCifrata = $passwordNonCifrata;
     return $this;
   }
@@ -429,20 +450,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce l'indirizzo email dell'utente (fittizio se dominio è "noemail.local")
    *
-   * @return string Indirizzo email dell'utente
+   * @return string|null Indirizzo email dell'utente
    */
-  public function getEmail() {
+  public function getEmail(): ?string {
     return $this->email;
   }
 
   /**
    * Modifica l'indirizzo email dell'utente (fittizio se dominio è "noemail.local")
    *
-   * @param string $email Indirizzo email dell'utente
+   * @param string|null $email Indirizzo email dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setEmail($email) {
+  public function setEmail(?string $email): self {
     $this->email = $email;
     return $this;
   }
@@ -450,20 +471,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce il token generato per la procedura di attivazione o di recupero password
    *
-   * @return string Token generato
+   * @return string|null Token generato
    */
-  public function getToken() {
+  public function getToken(): ?string {
     return $this->token;
   }
 
   /**
    * Modifica il token generato per la procedura di attivazione o di recupero password
    *
-   * @param string Token generato
+   * @param string|null Token generato
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setToken($token) {
+  public function setToken(?string $token): self {
     $this->token = $token;
     return $this;
   }
@@ -471,20 +492,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la data/ora di creazione del token, usato per la procedura di attivazione o di recupero password
    *
-   * @return DateTime Data/ora di creazione del token
+   * @return DateTime|null Data/ora di creazione del token
    */
-  public function getTokenCreato() {
+  public function getTokenCreato(): ?\DateTime {
     return $this->tokenCreato;
   }
 
   /**
    * Modifica la data/ora di creazione del token
    *
-   * @param DateTime $tokenCreato Data/ora di creazione del token
+   * @param DateTime|null $tokenCreato Data/ora di creazione del token
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setTokenCreato(\DateTime $tokenCreato=null) {
+  public function setTokenCreato(?\DateTime $tokenCreato): self {
     $this->tokenCreato = $tokenCreato;
     return $this;
   }
@@ -492,20 +513,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce il codice di pre-login
    *
-   * @return string Codice di pre-login
+   * @return string|null Codice di pre-login
    */
-  public function getPrelogin() {
+  public function getPrelogin(): ?string {
     return $this->prelogin;
   }
 
   /**
    * Modifica il codice di pre-login
    *
-   * @param string $prelogin Codice di pre-login
+   * @param string|null $prelogin Codice di pre-login
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setPrelogin($prelogin) {
+  public function setPrelogin(?string $prelogin): self {
     $this->prelogin = $prelogin;
     return $this;
   }
@@ -513,20 +534,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la data/ora di creazione del codice di pre-login
    *
-   * @return string Data/ora di creazione del codice di pre-login
+   * @return \DateTime|null Data/ora di creazione del codice di pre-login
    */
-  public function getPreloginCreato() {
+  public function getPreloginCreato(): ?\DateTime {
     return $this->preloginCreato;
   }
 
   /**
    * Modifica la data/ora di creazione del codice di pre-login
    *
-   * @param DateTime $preloginCreato Data/ora di creazione del codice di pre-login
+   * @param DateTime|null $preloginCreato Data/ora di creazione del codice di pre-login
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setPreloginCreato(\DateTime $preloginCreato=null) {
+  public function setPreloginCreato(?\DateTime $preloginCreato): self {
     $this->preloginCreato = $preloginCreato;
     return $this;
   }
@@ -534,20 +555,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Indica se l'utente è abilitato al login o no
    *
-   * @return boolean Vero se l'utente è abilitato al login, falso altrimenti
+   * @return bool Vero se l'utente è abilitato al login, falso altrimenti
    */
-  public function getAbilitato() {
+  public function getAbilitato(): bool {
     return $this->abilitato;
   }
 
   /**
    * Modifica se l'utente è abilitato al login o no
    *
-   * @param boolean $abilitato Vero se l'utente è abilitato al login, falso altrimenti
+   * @param bool|null $abilitato Vero se l'utente è abilitato al login, falso altrimenti
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setAbilitato($abilitato) {
+  public function setAbilitato(?bool $abilitato): self {
     $this->abilitato = ($abilitato == true);
     return $this;
   }
@@ -555,20 +576,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Indica se l'utente è abilitato all'accesso SPID
    *
-   * @return boolean Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
+   * @return bool Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
    */
-  public function getSpid() {
+  public function getSpid(): bool {
     return $this->spid;
   }
 
   /**
    * Modifica se l'utente è abilitato all'accesso SPID
    *
-   * @param boolean $spid Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
+   * @param bool|null $spid Vero se l'utente è abilitato all'accesso SPID, falso altrimenti
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setSpid($spid) {
+  public function setSpid(?bool $spid): self {
     $this->spid = ($spid == true);
     return $this;
   }
@@ -576,41 +597,83 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la data/ora dell'ultimo accesso
    *
-   * @return \DateTime Data/ora dell'ultimo accesso
+   * @return \DateTime|null Data/ora dell'ultimo accesso
    */
-  public function getUltimoAccesso() {
+  public function getUltimoAccesso(): ?\DateTime {
     return $this->ultimoAccesso;
   }
 
   /**
    * Modifica la data/ora dell'ultimo accesso
    *
-   * @param \DateTime Data/ora dell'ultimo accesso
+   * @param \DateTime|null Data/ora dell'ultimo accesso
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setUltimoAccesso($ultimoAccesso) {
+  public function setUltimoAccesso(?\DateTime $ultimoAccesso): self {
     $this->ultimoAccesso = $ultimoAccesso;
+    return $this;
+  }
+
+  /**
+   * Restituisce il token segreto per l'accesso con OTP (se NULL non è attivato)
+   *
+   * @return string|null Token segreto per l'accesso con OTP
+   */
+  public function getOtp(): ?string {
+    return $this->otp;
+  }
+
+  /**
+   * Modifica il token segreto per l'accesso con OTP (se NULL non è attivato)
+   *
+   * @param string|null $otp Token segreto per l'accesso con OTP
+   *
+   * @return self Oggetto modificato
+   */
+  public function setOtp(?string $otp): self {
+    $this->otp = $otp;
+    return $this;
+  }
+
+  /**
+   * Restituisce il codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @return string|null Codice OTP usato l'ultima volta
+   */
+  public function getUltimoOtp(): ?string {
+    return $this->ultimoOtp;
+  }
+
+  /**
+   * Modifica il codice OTP usato l'ultima volta (per evitare replay attack)
+   *
+   * @param string|null $ultimoOtp Codice OTP usato l'ultima volta
+   *
+   * @return self Oggetto modificato
+   */
+  public function setUltimoOtp(?string $ultimoOtp): self {
+    $this->ultimoOtp = $ultimoOtp;
     return $this;
   }
 
   /**
    * Restituisce il nome dell'utente
    *
-   * @return string Nome dell'utente
+   * @return string|null Nome dell'utente
    */
-  public function getNome() {
+  public function getNome(): ?string {
     return $this->nome;
   }
 
   /**
    * Modifica il nome dell'utente
    *
-   * @param string $nome Nome dell'utente
+   * @param string|null $nome Nome dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setNome($nome) {
+  public function setNome(?string $nome): self {
     $this->nome = $nome;
     return $this;
   }
@@ -618,20 +681,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce il cognome dell'utente
    *
-   * @return string Cognome dell'utente
+   * @return string|null Cognome dell'utente
    */
-  public function getCognome() {
+  public function getCognome(): ?string {
     return $this->cognome;
   }
 
   /**
    * Modifica il cognome dell'utente
    *
-   * @param string $cognome Cognome dell'utente
+   * @param string|null $cognome Cognome dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setCognome($cognome) {
+  public function setCognome(?string $cognome): self {
     $this->cognome = $cognome;
     return $this;
   }
@@ -639,20 +702,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce il sesso dell'utente [M,F]
    *
-   * @return string Sesso dell'utente
+   * @return string|null Sesso dell'utente
    */
-  public function getSesso() {
+  public function getSesso(): ?string {
     return $this->sesso;
   }
 
   /**
    * Modifica il sesso dell'utente [M,F]
    *
-   * @param string $sesso Sesso dell'utente
+   * @param string|null $sesso Sesso dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setSesso($sesso) {
+  public function setSesso(?string $sesso): self {
     $this->sesso = $sesso;
     return $this;
   }
@@ -660,20 +723,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la data di nascita dell'utente
    *
-   * @return \DateTime Data di nascita dell'utente
+   * @return \DateTime|null Data di nascita dell'utente
    */
-  public function getDataNascita() {
+  public function getDataNascita(): ?\DateTime {
     return $this->dataNascita;
   }
 
   /**
    * Modifica la data di nascita dell'utente
    *
-   * @param \DateTime $dataNascita Data di nascita dell'utente
+   * @param \DateTime|null $dataNascita Data di nascita dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setDataNascita($dataNascita) {
+  public function setDataNascita(?\DateTime $dataNascita): self {
     $this->dataNascita = $dataNascita;
     return $this;
   }
@@ -681,20 +744,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce il comune di nascita dell'utente
    *
-   * @return string Comune di nascita dell'utente
+   * @return string|null Comune di nascita dell'utente
    */
-  public function getComuneNascita() {
+  public function getComuneNascita(): ?string {
     return $this->comuneNascita;
   }
 
   /**
    * Modifica il comune di nascita dell'utente
    *
-   * @param string $comuneNascita Comune di nascita dell'utente
+   * @param string|null $comuneNascita Comune di nascita dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setComuneNascita($comuneNascita) {
+  public function setComuneNascita(?string $comuneNascita): self {
     $this->comuneNascita = $comuneNascita;
     return $this;
   }
@@ -702,20 +765,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce il codice fiscale dell'utente (univoco)
    *
-   * @return string Codice fiscale dell'utente
+   * @return string|null Codice fiscale dell'utente
    */
-  public function getCodiceFiscale() {
+  public function getCodiceFiscale(): ?string {
     return $this->codiceFiscale;
   }
 
   /**
    * Modifica il codice fiscale dell'utente (univoco)
    *
-   * @param string $codiceFiscale Codice fiscale dell'utente
+   * @param string|null $codiceFiscale Codice fiscale dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setCodiceFiscale($codiceFiscale) {
+  public function setCodiceFiscale(?string $codiceFiscale): self {
     $this->codiceFiscale = $codiceFiscale;
     return $this;
   }
@@ -723,20 +786,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la città dell'utente
    *
-   * @return string Città dell'utente
+   * @return string|null Città dell'utente
    */
-  public function getCitta() {
+  public function getCitta(): ?string {
     return $this->citta;
   }
 
   /**
    * Modifica la città dell'utente
    *
-   * @param string $citta Città dell'utente
+   * @param string|null $citta Città dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setCitta($citta) {
+  public function setCitta(?string $citta): self {
     $this->citta = $citta;
     return $this;
   }
@@ -744,20 +807,20 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce l'indirizzo dell'utente
    *
-   * @return string Indirizzo dell'utente
+   * @return string|null Indirizzo dell'utente
    */
-  public function getIndirizzo() {
+  public function getIndirizzo(): ?string {
     return $this->indirizzo;
   }
 
   /**
    * Modifica l'indirizzo dell'utente
    *
-   * @param string $indirizzo Indirizzo dell'utente
+   * @param string|null $indirizzo Indirizzo dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setIndirizzo($indirizzo) {
+  public function setIndirizzo(?string $indirizzo): self {
     $this->indirizzo = $indirizzo;
     return $this;
   }
@@ -765,9 +828,9 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la lista di numeri di telefono dell'utente
    *
-   * @return array Lista di numeri di telefono dell'utente
+   * @return array|null Lista di numeri di telefono dell'utente
    */
-  public function getNumeriTelefono() {
+  public function getNumeriTelefono(): ?array {
     return $this->numeriTelefono;
   }
 
@@ -776,9 +839,9 @@ class Utente implements UserInterface, \Serializable {
    *
    * @param array $numeriTelefono Lista di numeri di telefono dell'utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setNumeriTelefono($numeriTelefono) {
+  public function setNumeriTelefono(array $numeriTelefono): self {
     if ($numeriTelefono === $this->numeriTelefono) {
       // clona array per forzare update su doctrine
       $numeriTelefono = unserialize(serialize($numeriTelefono));
@@ -790,9 +853,9 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce i parametri di notifica per i servizi esterni
    *
-   * @return array Parametri di notifica per i servizi esterni
+   * @return array|null Parametri di notifica per i servizi esterni
    */
-  public function getNotifica() {
+  public function getNotifica(): ?array {
     return $this->notifica;
   }
 
@@ -801,9 +864,9 @@ class Utente implements UserInterface, \Serializable {
    *
    * @param array $notifica Parametri di notifica per i servizi esterni
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setNotifica($notifica) {
+  public function setNotifica(array $notifica): self {
     if ($notifica === $this->notifica) {
       // clona array per forzare update su doctrine
       $notifica = unserialize(serialize($notifica));
@@ -815,9 +878,9 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la lista di profili per lo stesso utente (dato non persistente)
    *
-   * @return array Lista di profili per lo stesso utente
+   * @return array|null Lista di profili per lo stesso utente
    */
-  public function getListaProfili() {
+  public function getListaProfili(): ?array {
     return $this->listaProfili;
   }
 
@@ -826,9 +889,9 @@ class Utente implements UserInterface, \Serializable {
    *
    * @param array $listaProfili Lista di profili per lo stesso utente
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setListaProfili($listaProfili) {
+  public function setListaProfili(array $listaProfili): self {
     $this->listaProfili = $listaProfili;
     return $this;
   }
@@ -836,9 +899,9 @@ class Utente implements UserInterface, \Serializable {
   /**
    * Restituisce la lista di dati utili in fase di autenticazione (dato non persistente)
    *
-   * @return array Lista di dati utili in fase di autenticazione
+   * @return array|null Lista di dati utili in fase di autenticazione
    */
-  public function getInfoLogin() {
+  public function getInfoLogin(): ?array {
     return $this->infoLogin;
   }
 
@@ -847,9 +910,9 @@ class Utente implements UserInterface, \Serializable {
    *
    * @param array $infoLogin Lista di dati utili in fase di autenticazione
    *
-   * @return Utente Oggetto Utente
+   * @return self Oggetto modificato
    */
-  public function setInfoLogin($infoLogin) {
+  public function setInfoLogin(array $infoLogin): self {
     $this->infoLogin = $infoLogin;
     return $this;
   }
@@ -858,16 +921,48 @@ class Utente implements UserInterface, \Serializable {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Costruttore
+   * Restituisce il codice corrispondente al ruolo dell'utente
+   * I codici utilizzati sono:
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *
+   * @return string Codifica del ruolo dell'utente
    */
-  public function __construct() {
-    // valori predefiniti
-    $this->numeriTelefono = array();
-    $this->notifica = array();
-    $this->abilitato = false;
-    $this->spid = false;
-    $this->listaProfili = array();
-    $this->infoLogin = array();
+  public function getCodiceRuolo(): string {
+    return 'U';
+  }
+
+  /**
+   * Controlla e restituisce il valore vero se l'utente ha un ruolo tra quelli specificati
+   * I codici utilizzati sono:
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente/staff/preside, S=staff/preside, P=preside, T=ata, M=amministratore
+   *
+   * @param string lista Lista codificata dei ruoli ammessi
+   *
+   * @return bool Vero se il ruolo dell'utente è tra quelli ammessi
+   */
+  public function controllaRuolo(string $lista): bool {
+    if (empty($lista)) {
+      // nessun ruolo specificato
+      return false;
+    }
+    // controlla tutti i ruoli specificati
+    for ($i = 0; $i < strlen($lista); $i++) {
+      if (strpos($this->getCodiceRuolo(), $lista[$i]) !== false) {
+        // ruolo ammesso trovato
+        return true;
+      }
+    }
+    // nessun ruolo ammesso
+    return false;
+  }
+
+  /**
+   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   *
+   * @return string Codifica della funzione
+   */
+  public function getCodiceFunzione(): string {
+    return 'N';
   }
 
   /**
@@ -875,23 +970,25 @@ class Utente implements UserInterface, \Serializable {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->cognome.' '.$this->nome.' ('.$this->username.')';
   }
 
   /**
    * Genera un nuovo token univoco e casuale
+   *
    */
-  public function creaToken() {
+  public function creaToken(): void {
     $this->token = bin2hex(openssl_random_pseudo_bytes(16));
     $this->tokenCreato = new \DateTime();
   }
 
   /**
    * Cancella il token utilizzato
+   *
    */
-  public function cancellaToken() {
-    $this->token = null;
+  public function cancellaToken(): void {
+    $this->token = '';
     $this->tokenCreato = null;
   }
 

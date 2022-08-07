@@ -1,27 +1,27 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Tests\Behat;
 
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Process\Process;
-use Doctrine\ORM\EntityManagerInterface;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Exception\ExpectationException;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 
 /**
  * Contesto con interazione con il browser
+ *
+ * @author Antonello Dessì
  */
 class BrowserContext extends BaseContext {
 
@@ -33,9 +33,12 @@ class BrowserContext extends BaseContext {
    * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RouterInterface $router Gestore delle URL
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
+   * @param SluggerInterface $slugger Gestore della modifica delle stringhe in slug
    */
-  public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router) {
-    parent::__construct($kernel, $em, $router);
+  public function __construct(KernelInterface $kernel, EntityManagerInterface $em, RouterInterface $router,
+                              UserPasswordHasherInterface $hasher, SluggerInterface $slugger) {
+    parent::__construct($kernel, $em, $router, $hasher, $slugger);
     $this->vars['sys']['logged'] = null;
   }
 
@@ -87,20 +90,20 @@ class BrowserContext extends BaseContext {
   }
 
   /**
-   * Esegue il login dell'utente indicato
+   * Esegue il login dell'utente indicato (sceglie il primo profilo se più di uno)
    *  $username: nome utente
    *  $password: password dell'utente o null per password uguale alla username
    *
-   * @Given login utente :username
-   * @Given login utente :username con :password
+   * @Given login utente :valore
+   * @Given login utente :valore con :password
    */
-  public function loginUtente($username, $password=null): void {
+  public function loginUtente($valore, $password=null): void {
     $this->assertEmpty($this->vars['sys']['logged']);
-    $user = $this->em->getRepository('App:Utente')->findOneByUsername($username);
-    $this->assertTrue($user && $user->getUsername() == $username);
+    $user = $this->em->getRepository('App\Entity\Utente')->findOneByUsername($valore);
     $this->paginaAttiva('login_form');
-    $this->session->getPage()->fillField('username', $username);
-    $this->session->getPage()->fillField('password', $password ? $password : $username);
+    $this->assertTrue($user && $user->getUsername() == $valore);
+    $this->session->getPage()->fillField('username', $valore);
+    $this->session->getPage()->fillField('password', $password ? $password : $valore);
     $this->session->getPage()->pressButton('login');
     $this->waitForPage();
     $this->assertPageStatus(200);
@@ -111,7 +114,7 @@ class BrowserContext extends BaseContext {
     }
     $this->assertPageUrl($this->getMinkParameter('base_url').$this->router->generate('login_home'));
     $this->vars['sys']['logged'] = $user;
-    $others = $this->em->getRepository('App:Utente')->createQueryBuilder('u')
+    $others = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
       ->where('u.username!=:username AND u.codiceFiscale!=:codFiscale AND u INSTANCE OF '.get_class($user))
       ->setParameters(['username' => $user->getUsername(), 'codFiscale' => $user->getCodiceFiscale()])
       ->getQuery()
@@ -124,7 +127,7 @@ class BrowserContext extends BaseContext {
       }
     }
     $this->vars['sys']['other'] = $other;
-    $this->log('LOGIN', 'Username: '.$username.' - Ruolo: '.$user->getRoles()[0]);
+    $this->log('LOGIN', 'Username: '.$valore.' - Ruolo: '.$user->getRoles()[0]);
     $this->logDebug('Altro utente: '.($other ? $other->getUsername().' - Ruolo: '.$other->getRoles()[0] : null));
   }
 
@@ -136,7 +139,7 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtenteConRuolo($ruolo): void {
     $class_name = ucfirst($ruolo);
-    $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy(['abilitato' => 1]));
+    $user = $this->faker->randomElement($this->em->getRepository("App\\Entity\\".$class_name)->findBy(['abilitato' => 1]));
     $this->assertNotEmpty($user);
     $this->loginUtente($user->getUsername());
   }
@@ -149,10 +152,12 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtenteConRuoloEsatto($ruolo): void {
     $class_name = ucfirst($ruolo);
+    $users = $this->em->getRepository('App\Entity\\'.$class_name)->findBy(['abilitato' => 1]);
+    $this->assertNotEmpty($users);
     do {
-      $user = $this->faker->randomElement($this->em->getRepository('App:'.$class_name)->findBy(['abilitato' => 1]));
-      $this->assertNotEmpty($user);
-    } while (get_class($user) != 'App\\Entity\\'.$class_name);
+      $user = $this->faker->randomElement($users);
+    } while (get_class($user) != 'App\\Entity\\'.$class_name  &&
+             get_class($user) != 'Proxies\\__CG__\\App\\Entity\\'.$class_name);
     $this->loginUtente($user->getUsername());
   }
 
@@ -280,6 +285,7 @@ class BrowserContext extends BaseContext {
    */
   public function laSezioneContiene($selettore, $ricerca): void {
     $sezione = $this->session->getPage()->find('css', $selettore);
+    $this->logDebug('laSezioneContiene -> '.$ricerca.' | '. $sezione->getText());
     $this->assertTrue($sezione && $sezione->isVisible() && preg_match($ricerca, $sezione->getText()));
   }
 
@@ -480,7 +486,7 @@ class BrowserContext extends BaseContext {
 
   /**
    * Va alla URL indicata
-   *  $testoParam: url della pagina, può contenere variabili con sintassi {{$nome}} o {{#nome}}
+   *  $testoParam: url della pagina, può contenere variabili con sintassi {{$nome}} o {{#nome}} o {{@nome}}
    *
    * @When vai alla url :testoParam
    */
@@ -951,5 +957,11 @@ class BrowserContext extends BaseContext {
     }
     return $row;
   }
+
+public function test($p):self {
+  $this->logDebug($p);
+  $this->logDebug("SIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+  return $this;
+}
 
 }

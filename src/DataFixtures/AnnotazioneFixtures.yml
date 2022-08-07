@@ -1,0 +1,27 @@
+####################
+# AnnotazioneFixtures - dati di test
+#
+# Dati per le annotazioni sul registro:
+#   data: data della annotazione
+#   testo: testo della annotazione
+#   visibile: indica se l'annotazione è visibile ai genitori o no
+#   avviso: avviso a cui è associata l'annotazione
+#   classe: classe a cui è riferita l'annotazione
+#   docente: docente che ha scritto l'annotazione
+####################
+
+
+include:
+  - AvvisoFixtures.yml
+  - ClasseFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Annotazione:
+  annotazione_{1..10}:
+    data: '<dateTimeBetween("-1 month", "now")>'
+    testo: '<text()>'
+    visibile: '<boolean()>'
+    avviso: '@avviso_<current()>'
+    classe: '@classe_*'
+    docente: '@docente_*'

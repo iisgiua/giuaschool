@@ -1,0 +1,27 @@
+####################
+# CorsoFixtures - dati di test
+#
+# Dati dei corsi/indirizzi scolastici:
+#   nome: nome completo del corso scolastico
+#   nomeBreve: nome breve del corso scolastico
+####################
+
+App\Entity\Corso:
+  corso_BIN:
+    nome: Istituto Tecnico Informatica e Telecomunicazioni
+    nomeBreve: Ist. Tecn. Inf. Telecom.
+  corso_BCH:
+    nome: Istituto Tecnico Chimica Materiali e Biotecnologie
+    nomeBreve: Ist. Tecn. Chim. Mat. Biotecn.
+  corso_INF:
+    nome: Istituto Tecnico Articolazione Informatica
+    nomeBreve: Ist. Tecn. Art. Informatica
+  corso_CHI:
+    nome: Istituto Tecnico Articolazione Chimica e Materiali
+    nomeBreve: Ist. Tecn. Art. Chimica Mat.
+  corso_AMB:
+    nome: Istituto Tecnico Articolazione Biotecnologie Ambientali
+    nomeBreve: Ist. Tecn. Art. Biotecn. Amb.
+  corso_LSA:
+    nome: Liceo Scientifico Opzione Scienze Applicate
+    nomeBreve: Liceo Scienze Applicate

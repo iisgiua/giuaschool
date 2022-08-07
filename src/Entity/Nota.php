@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -15,14 +11,17 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 
 /**
- * Nota - entità
+ * Nota - dati per la gestione delle note disciplinari sul registro
  *
  * @ORM\Entity(repositoryClass="App\Repository\NotaRepository")
  * @ORM\Table(name="gs_nota")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class Nota {
 
@@ -30,101 +29,100 @@ class Nota {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per la nota
+   * @var int|null $id Identificativo univoco per la nota
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var string $tipo Tipo della nota [C=di classe, I=individuale]
+   * @var string|null $tipo Tipo della nota [C=di classe, I=individuale]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"C","I"}, strict=true, message="field.choice")
    */
-  private $tipo;
+  private ?string $tipo = 'C';
 
   /**
-   * @var \DateTime $data Data della nota
+   * @var \DateTime|null $data Data della nota
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var string $testo Testo della nota
+   * @var string|null $testo Testo della nota
    *
    * @ORM\Column(type="text", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $testo;
+  private ?string $testo = '';
 
   /**
-   * @var string $provvedimento Provvedimento disciplinare preso per la nota
+   * @var string|null $provvedimento Provvedimento disciplinare preso per la nota
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $provvedimento;
+  private ?string $provvedimento = '';
 
   /**
-   * @var Classe $classe Classe della nota
+   * @var Classe|null $classe Classe della nota
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var Docente $docente Docente che ha messo la nota
+   * @var Docente|null $docente Docente che ha messo la nota
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
   /**
-   * @var Docente $docenteProvvedimento Docente che ha preso il provvedimento disciplinare
+   * @var Docente|null $docenteProvvedimento Docente che ha preso il provvedimento disciplinare
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $docenteProvvedimento;
+  private ?Docente $docenteProvvedimento = null;
 
   /**
-   * @var ArrayCollection $alunni Alunni ai quali viene data la nota
+   * @var Collection|null $alunni Alunni ai quali viene data la nota
    *
    * @ORM\ManyToMany(targetEntity="Alunno")
    * @ORM\JoinTable(name="gs_nota_alunno",
    *    joinColumns={@ORM\JoinColumn(name="nota_id", nullable=false)},
    *    inverseJoinColumns={@ORM\JoinColumn(name="alunno_id", nullable=false)})
    */
-  private $alunni;
+  private ?Collection $alunni = null;
 
 
   //==================== EVENTI ORM ====================
@@ -134,7 +132,7 @@ class Nota {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -145,7 +143,7 @@ class Nota {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -156,47 +154,47 @@ class Nota {
   /**
    * Restituisce l'identificativo univoco per la nota
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce il tipo della nota [C=di classe, I=individuale]
    *
-   * @return string Tipo della nota
+   * @return string|null Tipo della nota
    */
-  public function getTipo() {
+  public function getTipo(): ?string {
     return $this->tipo;
   }
 
   /**
    * Modifica il tipo della nota [C=di classe, I=individuale]
    *
-   * @param string $tipo Tipo della nota
+   * @param string|null $tipo Tipo della nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setTipo($tipo) {
+  public function setTipo(?string $tipo): self {
     $this->tipo = $tipo;
     return $this;
   }
@@ -204,9 +202,9 @@ class Nota {
   /**
    * Restituisce la data della nota
    *
-   * @return \DateTime Data della nota
+   * @return \DateTime|null Data della nota
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -215,9 +213,9 @@ class Nota {
    *
    * @param \DateTime $data Data della nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setData($data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -225,20 +223,20 @@ class Nota {
   /**
    * Restituisce il testo della nota
    *
-   * @return string Testo della nota
+   * @return string|null Testo della nota
    */
-  public function getTesto() {
+  public function getTesto(): ?string {
     return $this->testo;
   }
 
   /**
    * Modifica il testo della nota
    *
-   * @param string $testo Testo della nota
+   * @param string|null $testo Testo della nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setTesto($testo) {
+  public function setTesto(?string $testo): self {
     $this->testo = $testo;
     return $this;
   }
@@ -246,20 +244,20 @@ class Nota {
   /**
    * Restituisce il provvedimento disciplinare preso per la nota
    *
-   * @return string Provvedimento disciplinare preso per la nota
+   * @return string|null Provvedimento disciplinare preso per la nota
    */
-  public function getProvvedimento() {
+  public function getProvvedimento(): ?string {
     return $this->provvedimento;
   }
 
   /**
    * Modifica il provvedimento disciplinare preso per la nota
    *
-   * @param string $provvedimento Provvedimento disciplinare preso per la nota
+   * @param string|null $provvedimento Provvedimento disciplinare preso per la nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setProvvedimento($provvedimento) {
+  public function setProvvedimento(?string $provvedimento): self {
     $this->provvedimento = $provvedimento;
     return $this;
   }
@@ -267,9 +265,9 @@ class Nota {
   /**
    * Restituisce la classe della nota
    *
-   * @return Classe Classe della nota
+   * @return Classe|null Classe della nota
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
@@ -278,9 +276,9 @@ class Nota {
    *
    * @param Classe $classe Classe della nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe) {
+  public function setClasse(Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -288,9 +286,9 @@ class Nota {
   /**
    * Restituisce il docente che ha messo la nota
    *
-   * @return Docente Docente che ha messo la nota
+   * @return Docente|null Docente che ha messo la nota
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 
@@ -299,9 +297,9 @@ class Nota {
    *
    * @param Docente $docente Docente che ha messo la nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -309,20 +307,20 @@ class Nota {
   /**
    * Restituisce il docente che ha preso provvedimenti disciplinari
    *
-   * @return Docente Docente che ha preso provvedimenti disciplinari
+   * @return Docente|null Docente che ha preso provvedimenti disciplinari
    */
-  public function getDocenteProvvedimento() {
+  public function getDocenteProvvedimento(): ?Docente {
     return $this->docenteProvvedimento;
   }
 
   /**
    * Modifica il docente che ha preso provvedimenti disciplinari
    *
-   * @param Docente $docenteProvvedimento Docente che ha preso provvedimenti disciplinari
+   * @param Docente|null $docenteProvvedimento Docente che ha preso provvedimenti disciplinari
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setDocenteProvvedimento(Docente $docenteProvvedimento = null) {
+  public function setDocenteProvvedimento(?Docente $docenteProvvedimento): self {
     $this->docenteProvvedimento = $docenteProvvedimento;
     return $this;
   }
@@ -330,20 +328,20 @@ class Nota {
   /**
    * Restituisce gli alunni ai quali viene data la nota
    *
-   * @return ArrayCollection Alunni ai quali viene data la nota
+   * @return Collection|null Alunni ai quali viene data la nota
    */
-  public function getAlunni() {
+  public function getAlunni(): ?Collection {
     return $this->alunni;
   }
 
   /**
    * Modifica gli alunni ai quali viene data la nota
    *
-   * @param ArrayCollection $alunni Alunni ai quali viene data la nota
+   * @param Collection $alunni Alunni ai quali viene data la nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function setAlunni(ArrayCollection $alunni) {
+  public function setAlunni(Collection $alunni): self {
     $this->alunni = $alunni;
     return $this;
   }
@@ -353,9 +351,9 @@ class Nota {
    *
    * @param Alunno $alunno Alunno al quale viene data la nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function addAlunno(Alunno $alunno) {
+  public function addAlunni(Alunno $alunno): self {
     if (!$this->alunni->contains($alunno)) {
       $this->alunni[] = $alunno;
     }
@@ -367,9 +365,9 @@ class Nota {
    *
    * @param Alunno $alunno Alunno da rimuovere da quelli a cui viene data la nota
    *
-   * @return Nota Oggetto Nota
+   * @return self Oggetto modificato
    */
-  public function removeAlunno(Alunno $alunno) {
+  public function removeAlunni(Alunno $alunno): self {
     $this->alunni->removeElement($alunno);
     return $this;
   }
@@ -390,7 +388,7 @@ class Nota {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').' '.$this->classe.': '.$this->testo;
   }
 

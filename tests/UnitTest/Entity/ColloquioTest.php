@@ -1,24 +1,20 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Tests\UnitTest\Entity;
 
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Filesystem\Filesystem;
 use App\Tests\DatabaseTestCase;
 
 
 /**
- * Unit test della classe
+ * Unit test dell'entità Colloquio
+ *
+ * @author Antonello Dessì
  */
 class ColloquioTest extends DatabaseTestCase {
 
@@ -33,126 +29,112 @@ class ColloquioTest extends DatabaseTestCase {
     $this->entity = '\App\Entity\Colloquio';
     // campi da testare
     $this->fields = ['frequenza', 'note', 'docente', 'orario', 'giorno', 'ora', 'extra', 'dati'];
+    $this->noStoredFields = [];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['g:Test'];
+    $this->fixtures = ['ColloquioFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_colloquio' => ['id', 'creato', 'modificato', 'frequenza', 'note', 'docente_id', 'orario_id',
-        'giorno', 'ora', 'extra', 'dati'],
-      'gs_utente' => '*',
-      'gs_orario' => '*'];
+    $this->canRead = ['gs_colloquio' => ['id', 'creato', 'modificato', 'frequenza', 'note', 'docente_id', 'orario_id', 'giorno', 'ora', 'extra', 'dati']];
     // SQL write
-    $this->canWrite = [
-      'gs_colloquio' => ['id', 'creato', 'modificato', 'frequenza', 'note', 'docente_id', 'orario_id',
-        'giorno', 'ora', 'extra', 'dati']];
+    $this->canWrite = ['gs_colloquio' => ['id', 'creato', 'modificato', 'frequenza', 'note', 'docente_id', 'orario_id', 'giorno', 'ora', 'extra', 'dati']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    $this->assertNotEmpty($existent, 'Oggetto esistente');
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    $dati[0] = [];
-    $dati[1] = ['float' => $this->faker->randomFloat(2)];
-    $dati[2] = ['int' => $this->faker->randomNumber(5, false), 'string' => $this->faker->sentence(5)];
-    $dati[3] = ['string' => $this->faker->sentence(15)];
-    $dati[4] = ['int' => $this->faker->randomNumber(5, false), 'float' => $this->faker->randomFloat(3)];
-    $extra[0] = [];
-    $extra[1] = [$this->faker->dateTimeBetween('now', '+1 month')];
-    $extra[2] = [$this->faker->dateTimeBetween('now', '+3 month')];
-    $docenti = $this->em->getRepository('App:Docente')->findBy([]);
-    $orari = $this->em->getRepository('App:Orario')->findBy([]);
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          $field == 'frequenza' ? $this->faker->randomElement(['S', '1', '2', '3', '4']) :
-          ($field == 'note' ? $this->faker->optional(0.5, null)->paragraph(3, false) :
-          ($field == 'docente' ? $this->faker->randomElement($docenti) :
-          ($field == 'orario' ? $this->faker->randomElement($orari) :
-          ($field == 'giorno' ? $this->faker->randomElement([1, 2, 3, 4, 5, 6]) :
-          ($field == 'ora' ? $this->faker->randomElement([1, 2, 3, 4]) :
-          ($field == 'extra' ? $this->faker->randomElement($dati) :
-          $extra[$i]))))));
+          ($field == 'frequenza' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
+          ($field == 'note' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 2048)) :
+          ($field == 'docente' ? $this->getReference("docente_1") :
+          ($field == 'orario' ? $this->getReference("orario_1") :
+          ($field == 'giorno' ? $this->faker->randomNumber(4, false) :
+          ($field == 'ora' ? $this->faker->randomNumber(4, false) :
+          ($field == 'extra' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
+          null))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[0])}('*');
+      $data[$i]['frequenza'] = $this->faker->passthrough(substr($this->faker->text(), 0, 1));
+      $o[$i]->setFrequenza($data[$i]['frequenza']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[0])}($data[$i][$this->fields[0]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    $fs = new Filesystem();
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
-        // funzione get
+      foreach ($this->fields as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
-        if ($field == 'extra') {
-          $created->setExtra([]);
-          $created->addExtra(new \DateTime('today'));
-          $created->addExtra(new \DateTime('tomorrow'));
-          $created->addExtra(new \DateTime('today'));
-          $this->assertEquals([new \DateTime('today'), new \DateTime('tomorrow')], array_values($created->getExtra()),
-            $this->entity.'::addExtra');
-          $created->removeExtra(new \DateTime('tomorrow'));
-          $created->removeExtra(new \DateTime('tomorrow'));
-          $this->assertEquals([new \DateTime('today')], array_values($created->getExtra()),
-            $this->entity.'::removeExtra');
-        }
-        if ($field == 'dati') {
-          $created->setDati([]);
-          $created->addDato('txt', 'stringa di testo');
-          $created->addDato('int', 1234);
-          $created->addDato('txt', 'altro');
-          $created->addDato('int', 1234);
-          $this->assertSame(['txt' => 'altro', 'int' => 1234], $created->getDati(),
-            $this->entity.'::addDato');
-          $this->assertSame('altro', $created->getDato('txt'), $this->entity.'::getDato');
-          $this->assertSame(1234, $created->getDato('int'), $this->entity.'::getDato');
-          $this->assertSame(null, $created->getDato('niente'), $this->entity.'::getDato');
-          $created->removeDato('txt');
-          $created->removeDato('txt');
-          $this->assertSame(['int' => 1234], $created->getDati(),
-            $this->entity.'::removeDato');
-        }
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+    }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    // getDato
+    $existent->setDati([]);
+    $existent->addDato('txt', 'stringa di testo');
+    $existent->addDato('int', 1234);
+    $this->assertSame('stringa di testo', $existent->getDato('txt'), $this->entity.'::getDato');
+    $this->assertSame(1234, $existent->getDato('int'), $this->entity.'::getDato');
+    $this->assertSame(null, $existent->getDato('non_esiste'), $this->entity.'::getDato');
+    // addDato
+    $existent->setDati([]);
+    $existent->addDato('txt', 'stringa di testo');
+    $existent->addDato('int', 1234);
+    $this->assertSame(['txt' => 'stringa di testo', 'int' => 1234], $existent->getDati(), $this->entity.'::addDato');
+    $existent->addDato('txt', 'altro');
+    $existent->addDato('int', 1234);
+    $this->assertSame(['txt' => 'altro', 'int' => 1234], $existent->getDati(), $this->entity.'::addDato');
+    // removeDato
+    $existent->removeDato('txt');
+    $existent->removeDato('txt');
+    $this->assertSame(['int' => 1234], $existent->getDati(), $this->entity.'::removeDato');
     // toString
     $this->assertSame($existent->getDocente().' > '.$existent->getGiorno().':'.$existent->getOra(), (string) $existent, $this->entity.'::toString');
   }
@@ -160,58 +142,38 @@ class ColloquioTest extends DatabaseTestCase {
   /**
    * Test validazione dei dati
    */
-  public function testValidazione() {
+  public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // frequenza
-    $existent->setFrequenza(null);
+    $existent->setFrequenza('*');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::frequenza - NOT BLANK');
-    $existent->setFrequenza('X');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::frequenza - CHOICE');
-    $existent->setFrequenza('s');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::frequenza - CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Frequenza - CHOICE');
     $existent->setFrequenza('S');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::frequenza - VALID CHOICE');
-    $existent->setFrequenza('1');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::frequenza - VALID CHOICE');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Frequenza - VALID CHOICE');
     // note
-    $existent->setNote(str_repeat('X', 2049));
+    $existent->setNote(str_repeat('*', 2049));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::note - MAX LENGTH');
-    $existent->setNote(str_repeat('X', 2048));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::note - VALID MAX LENGTH');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Note - MAX LENGTH');
+    $existent->setNote(str_repeat('*', 2048));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Note - VALID MAX LENGTH');
     // docente
-    $obj_docente = $this->getPrivateProperty($this->entity, 'docente');
-    $obj_docente->setValue($existent, null);
+    $property = $this->getPrivateProperty('App\Entity\Colloquio', 'docente');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::docente - NOT BLANK');
-    $existent->setDocente($this->em->getRepository('App:Docente')->findOneBy([]));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::docente - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
+    $existent->setDocente($this->getReference("docente_1"));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
+    // orario
+    $existent->setOrario(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Orario - VALID NULL');
     // giorno
-    $existent->setGiorno(null);
+    $existent->setGiorno(22);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::giorno - NOT BLANK');
-    $existent->setGiorno('X');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::giorno - CHOICE');
-    $existent->setGiorno(9);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::giorno - CHOICE');
-    $existent->setGiorno(4);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::giorno - VALID CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Giorno - CHOICE');
     $existent->setGiorno(1);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::giorno - VALID CHOICE');
-    // ora
-    $existent->setOra(null);
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ora - NOT BLANK');
-    $existent->setora(2);
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ora - VALID');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giorno - VALID CHOICE');
   }
 
 }

@@ -1,23 +1,20 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Tests\UnitTest\Entity;
 
-use App\DataFixtures\OrarioFixtures;
 use App\Tests\DatabaseTestCase;
 
 
 /**
- * Unit test della classe
+ * Unit test dell'entità Orario
+ *
+ * @author Antonello Dessì
  */
 class OrarioTest extends DatabaseTestCase {
 
@@ -32,80 +29,89 @@ class OrarioTest extends DatabaseTestCase {
     $this->entity = '\App\Entity\Orario';
     // campi da testare
     $this->fields = ['nome', 'inizio', 'fine', 'sede'];
+    $this->noStoredFields = [];
+    $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = [OrarioFixtures::class];
+    $this->fixtures = ['OrarioFixtures'];
     // SQL read
-    $this->canRead = [
-      'gs_orario' => ['id', 'creato', 'modificato', 'nome', 'inizio', 'fine', 'sede_id'],
-      'gs_sede' => '*'];
+    $this->canRead = ['gs_orario' => ['id', 'creato', 'modificato', 'nome', 'inizio', 'fine', 'sede_id']];
     // SQL write
-    $this->canWrite = [
-      'gs_orario' => ['id', 'creato', 'modificato', 'nome', 'inizio', 'fine', 'sede_id']];
+    $this->canWrite = ['gs_orario' => ['id', 'creato', 'modificato', 'nome', 'inizio', 'fine', 'sede_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
 
   /**
-   * Test getter/setter degli attributi, con memorizzazione su database.
-   * Sono esclusi gli attributi ereditati.
+   * Test sull'inizializzazione degli attributi.
+   * Controlla errore "Typed property must not be accessed before initialization"
+   *
    */
-  public function testAttributi() {
-    // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertEquals(1, $existent->getId(), 'Oggetto esistente');
+  public function testInitialized(): void {
+    // crea nuovo oggetto
+    $obj = new $this->entity();
+    // verifica inizializzazione
+    foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
+      $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
+        $this->entity.' - Initializated');
+    }
+  }
+
+  /**
+   * Test sui metodi getter/setter degli attributi, con memorizzazione su database.
+   * Sono esclusi gli attributi ereditati.
+   *
+   */
+  public function testProperties() {
     // crea nuovi oggetti
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
-        $sede = $this->em->getRepository('App:Sede')->find($this->faker->randomElement(['1', '2']));
         $data[$i][$field] =
-          $field == 'nome' ? implode(' ', array_map('ucfirst', $this->faker->words(3))) :
-          ($field == 'inizio' ? $this->faker->dateTimeBetween('-3 month', 'now') :
-          ($field == 'fine' ? $this->faker->dateTimeBetween('now', '+3 month') :
-          $sede));
+          ($field == 'nome' ? $this->faker->passthrough(substr($this->faker->text(), 0, 64)) :
+          ($field == 'inizio' ? $this->faker->dateTime() :
+          ($field == 'fine' ? $this->faker->dateTime() :
+          ($field == 'sede' ? $this->getReference("sede_1") :
+          null))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
-      $this->assertEmpty($o[$i]->getId(), $this->entity.'::getId Pre-inserimento');
-      $this->assertEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Pre-inserimento');
-      $this->assertEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Pre-inserimento');
-      // memorizza su db
+      foreach ($this->generatedFields as $field) {
+        $this->assertEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Pre-insert');
+      }
+      // memorizza su db: controlla dati dopo l'inserimento
       $this->em->persist($o[$i]);
       $this->em->flush();
-      $this->assertNotEmpty($o[$i]->getId(), $this->entity.'::getId Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getCreato(), $this->entity.'::getCreato Post-inserimento');
-      $this->assertNotEmpty($o[$i]->getModificato(), $this->entity.'::getModificato Post-inserimento');
-      $data[$i]['id'] = $o[$i]->getId();
-      $data[$i]['creato'] = $o[$i]->getCreato();
-      // controlla creato < modificato
+      foreach ($this->generatedFields as $field) {
+        $this->assertNotEmpty($o[$i]->{'get'.ucfirst($field)}(), $this->entity.'::get'.ucfirst($field).' - Post-insert');
+        $data[$i][$field] = $o[$i]->{'get'.ucfirst($field)}();
+      }
+      // controlla dati dopo l'aggiornamento
       sleep(1);
-      $o[$i]->{'set'.ucfirst($this->fields[0])}(!$data[$i][$this->fields[0]]);
+      $data[$i]['nome'] = $this->faker->passthrough(substr($this->faker->text(), 0, 64));
+      $o[$i]->setNome($data[$i]['nome']);
       $this->em->flush();
-      $o[$i]->{'set'.ucfirst($this->fields[0])}($data[$i][$this->fields[0]]);
-      $this->em->flush();
-      $this->assertTrue($o[$i]->getCreato() < $o[$i]->getModificato(), $this->entity.'::getCreato < getModificato');
-      $data[$i]['modificato'] = $o[$i]->getModificato();
+      $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
     // controlla gli attributi
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 5; $i++) {
       $created = $this->em->getRepository($this->entity)->find($data[$i]['id']);
-      foreach (array_merge(['id', 'creato', 'modificato'], $this->fields) as $field) {
+      foreach ($this->fields as $field) {
         $this->assertSame($data[$i][$field], $created->{'get'.ucfirst($field)}(),
           $this->entity.'::get'.ucfirst($field));
       }
     }
-    // controlla metodi setId, setCreato e setModificato
+    // controlla metodi setter per attributi generati
     $rc = new \ReflectionClass($this->entity);
-    $this->assertFalse($rc->hasMethod('setId'), 'Esiste metodo '.$this->entity.'::setId');
-    $this->assertFalse($rc->hasMethod('setCreato'), 'Esiste metodo '.$this->entity.'::setCreato');
-    $this->assertFalse($rc->hasMethod('setModificato'), 'Esiste metodo '.$this->entity.'::setModificato');
+    foreach ($this->generatedFields as $field) {
+      $this->assertFalse($rc->hasMethod('set'.ucfirst($field)), $this->entity.'::set'.ucfirst($field).' - Setter for generated property');
+    }
   }
 
   /**
    * Test altri metodi
    */
-  public function testMetodi() {
+  public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getNome(), (string) $existent, $this->entity.'::toString');
   }
@@ -113,46 +119,43 @@ class OrarioTest extends DatabaseTestCase {
   /**
    * Test validazione dei dati
    */
-  public function testValidazione() {
+  public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->find(1);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - Oggetto valido');
+    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // nome
-    $existent->setNome(null);
+    $property = $this->getPrivateProperty('App\Entity\Orario', 'nome');
+    $property->setValue($existent, '');
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::nome - NOT BLANK');
-    $existent->setNome('12345678901234567890123456789012345678901234567890123456789012345');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Nome - NOT BLANK');
+    $existent->setNome($this->faker->randomLetter());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID NOT BLANK');
+    $existent->setNome(str_repeat('*', 65));
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::nome - MAX LENGTH');
-    $existent->setNome('1234567890123456789012345678901234567890123456789012345678901234');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::nome - VALID MAX LENGTH');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Nome - MAX LENGTH');
+    $existent->setNome(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Nome - VALID MAX LENGTH');
     // inizio
-    $existent->setInizio(null);
+    $property = $this->getPrivateProperty('App\Entity\Orario', 'inizio');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::inizio - NOT BLANK');
-    $existent->setInizio('13/33/2012');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.date', $this->entity.'::inizio - DATE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
     $existent->setInizio(new \DateTime());
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::inizio - VALID');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NOT BLANK');
     // fine
-    $existent->setFine(null);
+    $property = $this->getPrivateProperty('App\Entity\Orario', 'fine');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::fine - NOT BLANK');
-    $existent->setFine('13/33/2012');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.date', $this->entity.'::fine - DATE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
     $existent->setFine(new \DateTime());
-    $err = $this->val->validate($existent);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::fine - VALID');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NOT BLANK');
     // sede
-    $obj_sede = $this->getPrivateProperty($this->entity, 'sede');
-    $obj_sede->setValue($existent, null);
+    $property = $this->getPrivateProperty('App\Entity\Orario', 'sede');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::sede - NOT BLANK');
-    $existent->setSede($this->em->getRepository('App:Sede')->find(1));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::sede - VALID');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Sede - NOT BLANK');
+    $existent->setSede($this->getReference("sede_1"));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Sede - VALID NOT BLANK');
   }
 
 }

@@ -1,0 +1,67 @@
+####################
+# EntrataFixtures - dati di test
+#
+# Dati per le entrate in ritardo degli alunni:
+#   data: Data dell'entrata in ritardo
+#   ora: Ora di entrata in ritardo
+#   ritardoBreve: Indica se l'entrata in ritardo è un ritardo breve oppure no
+#   note: Note informative sull'entrata in ritardo
+#   valido: Indica se l'entrata in ritardo è valida per il conteggio del numero massimo di entrate a disposizione
+#   motivazione: Motivazione dell'assenza
+#   giustificato: Data della giustificazione
+#   alunno: Alunno al quale si riferisce l'entrata in ritardo
+#   docente: Docente che autorizza l'entrata in ritardo
+#   docenteGiustifica: Docente che giustifica l'entrata in ritardo
+#   utenteGiustifica: Utente (Genitore/Alunno) che giustifica il ritardo
+####################
+
+
+include:
+  - AlunnoFixtures.yml
+  - GenitoreFixtures.yml
+  - DocenteFixtures.yml
+
+
+App\Entity\Entrata:
+
+  # ----- assenze non giustificate -----
+  entrata_non_giustificata_{1..10}:
+    data (unique): '<dateTimeBetween("-3 month", "-1 day")>'
+    ora: '<dateTimeBetween("08:30", "11:00")>'
+    ritardoBreve: '<boolean(20)>'
+    note: '50%? <paragraph(1, true)>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_prima_<current()>'
+    docente: '@docente_*'
+    docenteGiustifica:
+    utenteGiustifica:
+
+  # ----- assenze non validate -----
+  entrata_non_validata_{1..10}:
+    data (unique): '<dateTimeBetween("-3 month", "-1 day")>'
+    ora: '<dateTimeBetween("08:30", "11:00")>'
+    ritardoBreve: '<boolean(20)>'
+    note: '50%? <paragraph(1, true)>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween(<($data)>, "now")>'
+    alunno: '@alunno_seconda_<current()>'
+    docente: '@docente_*'
+    docenteGiustifica:
+    utenteGiustifica: <($alunno->getGenitori()[0])>
+
+  # ----- assenze validate -----
+  entrata_validata_{1..30}:
+    data (unique): '<dateTimeBetween("-3 month", "-1 day")>'
+    ora: '<dateTimeBetween("08:30", "11:00")>'
+    ritardoBreve: '<boolean(20)>'
+    note: '50%? <paragraph(1, true)>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween(<($data)>, "now")>'
+    alunno: '@alunno_terza_<current()>'
+    docente: '@docente_*'
+    docenteGiustifica: '@docente_*'
+    utenteGiustifica: <($alunno->getGenitori()[0])>

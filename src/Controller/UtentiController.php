@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -14,7 +10,7 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -28,17 +24,20 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\Genitore;
 use App\Entity\Alunno;
 use App\Entity\Docente;
+use App\Entity\App;
 use App\Util\LogHandler;
 use App\Util\OtpUtil;
 
 
 /**
  * UtentiController - gestione utenti generici
+ *
+ * @author Antonello Dessì
  */
 class UtentiController extends AbstractController {
 
@@ -64,7 +63,7 @@ class UtentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
@@ -76,7 +75,7 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function emailAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function emailAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                               TranslatorInterface $trans, ValidatorInterface $validator, LogHandler $dblogger) {
     $success = null;
     // form
@@ -94,7 +93,7 @@ class UtentiController extends AbstractController {
     if ($form->isSubmitted() && $form->isValid()) {
       $vecchia_email = $this->getUser()->getEmail();
       // legge configurazione: id_provider
-      $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+      $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
       // validazione
       $this->getUser()->setEmail($form->get('email')->getData());
       $errors = $validator->validate($this->getUser());
@@ -128,10 +127,10 @@ class UtentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -142,8 +141,8 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_UTENTE")
    */
-  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder,
-                                 TranslatorInterface $trans, ValidatorInterface $validator, SessionInterface $session,
+  public function passwordAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher,
+                                 TranslatorInterface $trans, ValidatorInterface $validator, RequestStack $reqstack,
                                  OtpUtil $otp, LogHandler $dblogger) {
     $success = null;
     $errore = null;
@@ -183,13 +182,13 @@ class UtentiController extends AbstractController {
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
         // legge configurazione: id_provider
-        $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+        $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
         if ($id_provider && ($this->getUser() instanceOf Docente || $this->getUser() instanceOf Alunno)) {
           // errore: docente/staff/preside/alunno
           $form->addError(new FormError($trans->trans('exception.invalid_user_type_recovery')));
         }
         // controllo password esistente
-        if (!$encoder->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
+        if (!$hasher->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
           // vecchia password errata
           $form->get('current_password')->addError(
             new FormError($trans->trans('password.wrong', [], 'validators')));
@@ -222,7 +221,7 @@ class UtentiController extends AbstractController {
         }
         if ($form->isValid()) {
           // codifica password
-          $password = $encoder->encodePassword($this->getUser(), $psw);
+          $password = $hasher->hashPassword($this->getUser(), $psw);
           $this->getUser()->setPassword($password);
           if ($this->getUser() instanceOf Docente) {
             // memorizza ultimo OTP
@@ -253,7 +252,7 @@ class UtentiController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param OtpUtil $otp Gestione del codice OTP
    * @param LogHandler $dblogger Gestore dei log su database
@@ -265,7 +264,7 @@ class UtentiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function otpAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function otpAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                              TranslatorInterface $trans, OtpUtil $otp, LogHandler $dblogger) {
     // inizializza
     $docente = $this->getUser();
@@ -273,7 +272,7 @@ class UtentiController extends AbstractController {
     $qrcode = null;
     $form = null;
     // legge configurazione: id_provider
-    $id_provider = $session->get('/CONFIG/SISTEMA/id_provider');
+    $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
     if ($id_provider) {
       // errore: docente/staff/preside/alunno
       $msg = array('tipo' => 'danger', 'messaggio' => 'exception.invalid_user_type_recovery');
@@ -284,11 +283,11 @@ class UtentiController extends AbstractController {
       // prima associazione con un dispositivo
       if ($request->getMethod() == 'POST') {
         // legge token esistente
-        $token = $session->get('/APP/ROUTE/utenti_otp/token');
+        $token = $reqstack->getSession()->get('/APP/ROUTE/utenti_otp/token');
       } else {
         // crea token
         $token = $otp->creaToken($docente->getUsername());
-        $session->set('/APP/ROUTE/utenti_otp/token', $token);
+        $reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', $token);
       }
       // crea qrcode
       $qrcode = $otp->qrcode($docente->getUsername(), 'Registro Elettronico', $token);
@@ -311,7 +310,7 @@ class UtentiController extends AbstractController {
           $docente->setOtp($token);
           $em->flush();
           // cancella sessione
-          $session->set('/APP/ROUTE/utenti_otp/token', '');
+          $reqstack->getSession()->set('/APP/ROUTE/utenti_otp/token', '');
           // messaggio di successo
           $msg = array('tipo' => 'success', 'messaggio' => 'message.otp_abilitato');
           // log azione
@@ -368,7 +367,7 @@ class UtentiController extends AbstractController {
       $notifica = array();
       if ($form->get('abilita')->getData() === true) {
         // abilita
-        $app = $em->getRepository('App:App')->findOneBy(['notifica' => 'E',
+        $app = $em->getRepository('App\Entity\App')->findOneBy(['notifica' => 'E',
           'abilitati' => 'DT', 'attiva' => 1]);
         if ($app) {
           // memorizza servizio invio email

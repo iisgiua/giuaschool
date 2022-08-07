@@ -1,0 +1,34 @@
+####################
+# OrarioFixtures - dati di test
+#
+# Dati del dirigente scolastico: gli stessi dello staff
+####################
+
+
+App\Entity\Preside:
+  preside:
+    sesso: 'M'
+    nome: 'Alan'
+    cognome: 'Turing'
+    username: 'dirigente'
+    email: 'dirigente@lovelace.edu.it'
+    password: '<passwordCodificata($username)>'
+    tokenCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
+    preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
+    prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
+    abilitato: true
+    spid: false
+    ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
+    otp: '50%? <md5()>: <strval("")>'
+    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
+    comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
+    codiceFiscale: 'TRNLNA12H23Z114P'
+    citta: '50%? <substr(<city()>, 0, 32)>: <strval("")>'
+    indirizzo: '50%? <streetAddress()>: <strval("")>'
+    numeriTelefono: '<telefono(1)>'
+    notifica: '<(array())>'
+    sede:
+    responsabileBes: false
+    responsabileBesSede:

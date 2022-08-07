@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -25,10 +21,18 @@ use App\Entity\ListaDestinatariUtente;
 use App\Entity\ListaDestinatariClasse;
 use App\Entity\File;
 use App\Entity\Sede;
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Genitore;
+use App\Entity\Materia;
 
 
 /**
  * DocumentiUtil - classe di utilità per la gestione dei documenti di classe
+ *
+ * @author Antonello Dessì
  */
 class DocumentiUtil {
 
@@ -89,7 +93,7 @@ class DocumentiUtil {
    */
   public function pianiDocente(Docente $docente) {
     $dati = [];
-    $cattedre = $this->em->getRepository('App:Documento')->piani($docente);
+    $cattedre = $this->em->getRepository('App\Entity\Documento')->piani($docente);
     foreach ($cattedre as $cattedra) {
       $id = $cattedra['cattedra_id'];
       $dati[$id] = $cattedra;
@@ -99,8 +103,8 @@ class DocumentiUtil {
         // genera documento fittizio
         $documento = (new Documento)
           ->setTipo('L')
-          ->setClasse($this->em->getRepository('App:Classe')->find($cattedra['classe_id']))
-          ->setMateria($this->em->getRepository('App:Materia')->find($cattedra['materia_id']));
+          ->setClasse($this->em->getRepository('App\Entity\Classe')->find($cattedra['classe_id']))
+          ->setMateria($this->em->getRepository('App\Entity\Materia')->find($cattedra['materia_id']));
         // controlla azioni
         if ($this->azioneDocumento('add', $docente, $documento)) {
           $dati[$id]['add'] = 1;
@@ -125,7 +129,7 @@ class DocumentiUtil {
    */
   public function programmiDocente(Docente $docente) {
     $dati = [];
-    $cattedre = $this->em->getRepository('App:Documento')->programmi($docente);
+    $cattedre = $this->em->getRepository('App\Entity\Documento')->programmi($docente);
     foreach ($cattedre as $cattedra) {
       $id = $cattedra['cattedra_id'];
       $dati[$id] = $cattedra;
@@ -135,8 +139,8 @@ class DocumentiUtil {
         // genera documento fittizio
         $documento = (new Documento)
           ->setTipo('P')
-          ->setClasse($this->em->getRepository('App:Classe')->find($cattedra['classe_id']))
-          ->setMateria($this->em->getRepository('App:Materia')->find($cattedra['materia_id']));
+          ->setClasse($this->em->getRepository('App\Entity\Classe')->find($cattedra['classe_id']))
+          ->setMateria($this->em->getRepository('App\Entity\Materia')->find($cattedra['materia_id']));
         // controlla azioni
         if ($this->azioneDocumento('add', $docente, $documento)) {
           $dati[$id]['add'] = 1;
@@ -170,7 +174,7 @@ class DocumentiUtil {
             case 'L':   // piano di lavoro
             case 'P':   // programma finale
             case 'R':   // relazione finale
-              $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
+              $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1,
                 'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
                 'alunno' => $documento->getAlunno()]);
               if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
@@ -221,7 +225,7 @@ class DocumentiUtil {
             case 'L':   // piano di lavoro
             case 'P':   // programma finale
             case 'R':   // relazione finale
-              $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
+              $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1,
                 'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
                 'alunno' => $documento->getAlunno()]);
               if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
@@ -377,7 +381,7 @@ class DocumentiUtil {
    */
   public function relazioniDocente(Docente $docente) {
     $dati = [];
-    $cattedre = $this->em->getRepository('App:Documento')->relazioni($docente);
+    $cattedre = $this->em->getRepository('App\Entity\Documento')->relazioni($docente);
     foreach ($cattedre as $cattedra) {
       $id = $cattedra['cattedra_id'];
       $dati[$id] = $cattedra;
@@ -387,10 +391,10 @@ class DocumentiUtil {
         // genera documento fittizio
         $documento = (new Documento)
           ->setTipo('R')
-          ->setClasse($this->em->getRepository('App:Classe')->find($cattedra['classe_id']))
-          ->setMateria($this->em->getRepository('App:Materia')->find($cattedra['materia_id']))
+          ->setClasse($this->em->getRepository('App\Entity\Classe')->find($cattedra['classe_id']))
+          ->setMateria($this->em->getRepository('App\Entity\Materia')->find($cattedra['materia_id']))
           ->setAlunno($cattedra['alunno_id'] ?
-            $this->em->getRepository('App:Alunno')->find($cattedra['alunno_id']) : null);
+            $this->em->getRepository('App\Entity\Alunno')->find($cattedra['alunno_id']) : null);
         // controlla azioni
         if ($this->azioneDocumento('add', $docente, $documento)) {
           $dati[$id]['add'] = 1;
@@ -415,7 +419,7 @@ class DocumentiUtil {
    */
   public function maggioDocente(Docente $docente) {
     $dati = [];
-    $classi = $this->em->getRepository('App:Documento')->maggio($docente);
+    $classi = $this->em->getRepository('App\Entity\Documento')->maggio($docente);
     foreach ($classi as $classe) {
       $id = $classe['classe_id'];
       $dati[$id] = $classe;
@@ -425,7 +429,7 @@ class DocumentiUtil {
         // genera documento fittizio
         $documento = (new Documento)
           ->setTipo('M')
-          ->setClasse($this->em->getRepository('App:Classe')->find($classe['classe_id']));
+          ->setClasse($this->em->getRepository('App\Entity\Classe')->find($classe['classe_id']));
         // controlla azioni
         if ($this->azioneDocumento('add', $docente, $documento)) {
           $dati[$id]['add'] = 1;
@@ -489,50 +493,50 @@ class DocumentiUtil {
     // dsga
     if ($destinatari->getDsga()) {
       // aggiunge DSGA
-      $utenti = $this->em->getRepository('App:Ata')->getIdDsga();
+      $utenti = $this->em->getRepository('App\Entity\Ata')->getIdDsga();
     }
     // ata
     if ($destinatari->getAta()) {
       // aggiunge ATA
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Ata')->getIdAta($sedi));
+      $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Ata')->getIdAta($sedi));
     }
     // docenti
     if ($destinatari->getDocenti() != 'N') {
       // aggiunge docenti
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Docente')
+      $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Docente')
         ->getIdDocente($sedi, $destinatari->getDocenti(), $destinatari->getFiltroDocenti()));
     }
     // coordinatori
     if ($destinatari->getCoordinatori() != 'N') {
       // aggiunge coordinatori
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Docente')
+      $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Docente')
         ->getIdCoordinatore($sedi, $destinatari->getCoordinatori() == 'C' ?
           $destinatari->getFiltroCoordinatori() : null));
     }
     // staff
     if ($destinatari->getStaff()) {
       // aggiunge staff
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Staff')->getIdStaff($sedi));
+      $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Staff')->getIdStaff($sedi));
     }
     // genitori
     if ($destinatari->getGenitori() != 'N') {
       // aggiunge genitori
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Genitore')
+      $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Genitore')
         ->getIdGenitore($sedi, $destinatari->getGenitori(), $destinatari->getFiltroGenitori()));
       if ($destinatari->getGenitori() != 'U') {
         // aggiunge classi
-        $classi = array_merge($classi, $this->em->getRepository('App:Classe')
+        $classi = array_merge($classi, $this->em->getRepository('App\Entity\Classe')
           ->getIdClasse($sedi, $destinatari->getGenitori() == 'C' ? $destinatari->getFiltroGenitori() : null));
       }
     }
     // alunni
     if ($destinatari->getAlunni() != 'N') {
       // aggiunge alunni
-      $utenti = array_merge($utenti, $this->em->getRepository('App:Alunno')
+      $utenti = array_merge($utenti, $this->em->getRepository('App\Entity\Alunno')
         ->getIdAlunno($sedi, $destinatari->getAlunni(), $destinatari->getFiltroAlunni()));
       if ($destinatari->getAlunni() != 'U') {
         // aggiunge classi
-        $classi = array_merge($classi, $this->em->getRepository('App:Classe')
+        $classi = array_merge($classi, $this->em->getRepository('App\Entity\Classe')
           ->getIdClasse($sedi, $destinatari->getAlunni() == 'C' ? $destinatari->getFiltroAlunni() : null));
       }
     }
@@ -543,14 +547,14 @@ class DocumentiUtil {
     foreach ($utenti as $utente) {
       $obj = (new ListaDestinatariUtente())
         ->setListaDestinatari($destinatari)
-        ->setUtente($this->em->getReference('App:Utente', $utente));
+        ->setUtente($this->em->getReference('App\Entity\Utente', $utente));
       $this->em->persist($obj);
     }
     // imposta classi destinatarie
     foreach ($classi as $classe) {
       $obj = (new ListaDestinatariClasse())
         ->setListaDestinatari($destinatari)
-        ->setClasse($this->em->getReference('App:Classe', $classe));
+        ->setClasse($this->em->getReference('App\Entity\Classe', $classe));
       $this->em->persist($obj);
     }
   }
@@ -562,14 +566,14 @@ class DocumentiUtil {
    */
   public function cancellaDestinatari(Documento $documento) {
     // cancella utenti in lista
-    $this->em->getRepository('App:ListaDestinatariUtente')->createQueryBuilder('ldu')
+    $this->em->getRepository('App\Entity\ListaDestinatariUtente')->createQueryBuilder('ldu')
       ->delete()
       ->where('ldu.listaDestinatari=:destinatari')
       ->setParameters(['destinatari' => $documento->getListaDestinatari()])
       ->getQuery()
       ->execute();
     // cancella classi in lista
-    $this->em->getRepository('App:ListaDestinatariClasse')->createQueryBuilder('ldc')
+    $this->em->getRepository('App\Entity\ListaDestinatariClasse')->createQueryBuilder('ldc')
       ->delete()
       ->where('ldc.listaDestinatari=:destinatari')
       ->setParameters(['destinatari' => $documento->getListaDestinatari()])
@@ -622,14 +626,14 @@ class DocumentiUtil {
       // utente è autore di documento o fa parte di staff: ok
       return true;
     }
-    if (!empty($this->em->getRepository('App:ListaDestinatariUtente')->findOneBy([
+    if (!empty($this->em->getRepository('App\Entity\ListaDestinatariUtente')->findOneBy([
         'listaDestinatari' => $documento->getListaDestinatari(), 'utente' => $utente]))) {
       // utente è tra i destinatari: ok
       return true;
     }
     if ($documento->getTipo() == 'R' && ($utente instanceOf Docente)) {
       // documento di tipo relazione e utente docente
-      $cattedra = $this->em->getRepository('App:Cattedra')->findOneBy(['attiva' => 1,
+      $cattedra = $this->em->getRepository('App\Entity\Cattedra')->findOneBy(['attiva' => 1,
         'docente' => $utente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria()]);
       if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E' &&
           $documento->getMateria()->getTipo() != 'S') {
@@ -659,7 +663,7 @@ class DocumentiUtil {
    */
   public function leggeUtente(Utente $utente, Documento $documento) {
     // dati lettura utente
-    $ldu = $this->em->getRepository('App:ListaDestinatariUtente')->findOneBy([
+    $ldu = $this->em->getRepository('App\Entity\ListaDestinatariUtente')->findOneBy([
       'listaDestinatari' => $documento->getListaDestinatari(), 'utente' => $utente]);
     if ($ldu && !$ldu->getLetto()) {
       // imposta lettura
@@ -678,7 +682,7 @@ class DocumentiUtil {
    */
   public function docenti($criteri, Sede $sede=null, $pagina) {
     // legge cattedre
-    $dati = $this->em->getRepository('App:Documento')->docenti($criteri, $sede, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Documento')->docenti($criteri, $sede, $pagina);
     if ($criteri['tipo'] == 'M') {
       // documento del 15 maggio: niente da aggiungere
       return $dati;
@@ -686,9 +690,9 @@ class DocumentiUtil {
     // aggiunge info
     foreach ($dati['lista'] as $i=>$cattedra) {
       // query base docenti
-      $docenti = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $docenti = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.cognome,d.nome')
-        ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.materia=:materia')
+        ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.classe=:classe AND c.materia=:materia')
         ->where('c.attiva=:attiva AND c.tipo!=:potenziamento')
         ->orderBy('d.cognome,d.nome', 'ASC')
         ->setParameters(['classe' => $cattedra['classe_id'], 'materia' => $cattedra['materia_id'],
@@ -698,7 +702,7 @@ class DocumentiUtil {
         $docenti
           ->andWhere('c.alunno=:alunno')
           ->setParameter('alunno', $cattedra['alunno_id']);
-        $dati['documenti'][$i] = $this->em->getRepository('App:Documento')->createQueryBuilder('d')
+        $dati['documenti'][$i] = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
           ->join('d.docente', 'doc')
           ->where('d.tipo=:documento AND d.classe=:classe AND d.materia=:materia AND d.alunno=:alunno')
           ->orderBy('doc.cognome,doc.nome', 'ASC')
@@ -730,10 +734,10 @@ class DocumentiUtil {
     $documentoAdd = (new Documento)
       ->setTipo('B');
     // estrae dati alunni
-    $dati = $this->em->getRepository('App:Documento')->bes($criteri, $docente->getResponsabileBesSede(), $pagina);
+    $dati = $this->em->getRepository('App\Entity\Documento')->bes($criteri, $docente->getResponsabileBesSede(), $pagina);
     foreach ($dati['lista'] as $i=>$alunno) {
       // dati documenti
-      $dati['documenti'][$i]['lista'] = $this->em->getRepository('App:Documento')->createQueryBuilder('d')
+      $dati['documenti'][$i]['lista'] = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
         ->join('d.alunno', 'a')
         ->where('d.tipo IN (:tipi) AND d.classe=a.classe AND d.alunno=:alunno')
         ->orderBy('d.tipo', 'ASC')
@@ -787,9 +791,9 @@ class DocumentiUtil {
    */
   public function alunni($criteri, Sede $sede=null, $pagina) {
     // legge dati
-    $dati = $this->em->getRepository('App:Documento')->alunni($criteri, $sede, $pagina);
+    $dati = $this->em->getRepository('App\Entity\Documento')->alunni($criteri, $sede, $pagina);
     // query base
-    $query = $this->em->getRepository('App:Documento')->createQueryBuilder('d')
+    $query = $this->em->getRepository('App\Entity\Documento')->createQueryBuilder('d')
       ->join('d.alunno', 'a')
       ->where('d.tipo IN (:tipi) AND d.classe=a.classe AND d.alunno=:alunno')
       ->orderBy('d.tipo', 'ASC');

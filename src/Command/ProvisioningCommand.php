@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,12 +13,15 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Provisioning;
 use App\Util\AccountProvisioning;
 use App\Util\ConfigLoader;
 
 
 /**
  * Comando per effettuare il provisioning su sistemi esterni
+ *
+ * @author Antonello Dessì
  */
 class ProvisioningCommand extends Command {
 
@@ -53,7 +52,7 @@ class ProvisioningCommand extends Command {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param ConfigLoader $config Gestore della configurazione su database
@@ -135,13 +134,13 @@ class ProvisioningCommand extends Command {
     // inizializza
     $num = 0;
     // comandi in attesa
-    $comandi = $this->em->getRepository('App:Provisioning')->comandiInAttesa();
+    $comandi = $this->em->getRepository('App\Entity\Provisioning')->comandiInAttesa();
     $this->logger->notice('provisioning-esegue: Comandi in attesa', ['num' => count($comandi)]);
     // inizializza
     $errore = $this->prov->inizializza();
     if ($errore) {
       // riporta comandi in attesa
-      $this->em->getRepository('App:Provisioning')->ripristinaComandi($comandi);
+      $this->em->getRepository('App\Entity\Provisioning')->ripristinaComandi($comandi);
       // esce con messaggio di errore
       $this->logger->error('provisioning-esegue: ERRORE - '.$errore);
       return 0;
@@ -149,7 +148,7 @@ class ProvisioningCommand extends Command {
     // esecuzione comandi
     foreach ($comandi as $id) {
       // esegue un comando alla volta
-      $dati = $this->em->getRepository('App:Provisioning')->comandoDaEseguire($id);
+      $dati = $this->em->getRepository('App\Entity\Provisioning')->comandoDaEseguire($id);
       switch ($dati['provisioning']->getFunzione()) {
         case 'creaUtente':
           $errore = $this->prov->creaUtente($dati['provisioning']->getUtente(),
@@ -199,17 +198,17 @@ class ProvisioningCommand extends Command {
       $log = $this->prov->log();
       $this->prov->svuotaLog();
       if ($errore) {
-        $this->em->getRepository('App:Provisioning')->provisioningErrato($id, $log, $errore);
+        $this->em->getRepository('App\Entity\Provisioning')->provisioningErrato($id, $log, $errore);
         // messaggio d'errore
         $this->logger->error('provisioning-esegue: ERRORE - '.$errore, ['id' => $id]);
       } else {
-        $this->em->getRepository('App:Provisioning')->provisioningEseguito($id, $log);
+        $this->em->getRepository('App\Entity\Provisioning')->provisioningEseguito($id, $log);
         // conta comandi eseguiti
         $num++;
       }
     }
     // cancella vecchi comandi eseguiti
-    $this->em->getRepository('App:Provisioning')->cancellaComandi();
+    $this->em->getRepository('App\Entity\Provisioning')->cancellaComandi();
     // restituisce numero comandi eseguiti
     return $num;
   }

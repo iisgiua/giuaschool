@@ -14,6 +14,7 @@ field.time: L'ora inserita non è valida.
 field.datetime: La data o l'ora inserita non è valida.
 field.positive: Il valore inserito deve essere un numero positivo.
 field.zeropositive: Il valore inserito deve essere un numero positivo o uguale a zero.
+field.type: Il valore inserito non è del tipo previsto ({{ type }}).
 
 image.type: Il file caricato non è un formato valido per le immagini.
 image.width: L'immagine caricata ha una larghezza superiore a {{ max_width }} pixel.

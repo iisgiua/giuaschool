@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -17,11 +13,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * CambioClasse - entità
+ * CambioClasse - dati per la gestione dei trasferimenti degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\CambioClasseRepository")
  * @ORM\Table(name="gs_cambio_classe")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @author Antonello Dessì
  */
 class CambioClasse {
 
@@ -29,74 +27,74 @@ class CambioClasse {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per il cambio classe
+   * @var int|null $id Identificativo univoco per il cambio classe
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var Alunno $alunno Alunno che ha effettuato il cambio classe
+   * @var Alunno|null $alunno Alunno che ha effettuato il cambio classe
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var \DateTime $inizio Data iniziale della permanenza nella classe indicata
+   * @var \DateTime|null $inizio Data iniziale della permanenza nella classe indicata
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $inizio;
+  private ?\DateTime $inizio = null;
 
   /**
-   * @var \DateTime $fine Data finale della permanenza nella classe indicata
+   * @var \DateTime|null $fine Data finale della permanenza nella classe indicata
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $fine;
+  private ?\DateTime $fine = null;
 
   /**
-   * @var Classe $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
+   * @var Classe|null $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
    *
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var string $note Note descrittive sul cambio classe
+   * @var string|null $note Note descrittive sul cambio classe
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
    * @Assert\Length(max=255,maxMessage="field.maxlength")
    */
-  private $note;
+  private ?string $note = '';
 
 
   //==================== EVENTI ORM ====================
@@ -106,7 +104,7 @@ class CambioClasse {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -117,7 +115,7 @@ class CambioClasse {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -128,36 +126,36 @@ class CambioClasse {
   /**
    * Restituisce l'identificativo univoco per il cambio classe
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce l'alunno che ha effettuato il cambio classe
    *
-   * @return Alunno Alunno che ha effettuato il cambio classe
+   * @return Alunno|null Alunno che ha effettuato il cambio classe
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -166,9 +164,9 @@ class CambioClasse {
    *
    * @param Alunno $alunno Alunno che ha effettuato il cambio classe
    *
-   * @return CambioClasse Oggetto CambioClasse
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -176,9 +174,9 @@ class CambioClasse {
   /**
    * Restituisce la data iniziale della permanenza nella classe indicata
    *
-   * @return \DateTime Data iniziale della permanenza nella classe indicata
+   * @return \DateTime|null Data iniziale della permanenza nella classe indicata
    */
-  public function getInizio() {
+  public function getInizio(): ?\DateTime {
     return $this->inizio;
   }
 
@@ -187,9 +185,9 @@ class CambioClasse {
    *
    * @param \DateTime $inizio Data iniziale della permanenza nella classe indicata
    *
-   * @return CambioClasse Oggetto CambioClasse
+   * @return self Oggetto modificato
    */
-  public function setInizio($inizio) {
+  public function setInizio(\DateTime $inizio): self {
     $this->inizio = $inizio;
     return $this;
   }
@@ -197,9 +195,9 @@ class CambioClasse {
   /**
    * Restituisce la data finale della permanenza nella classe indicata
    *
-   * @return \DateTime Data finale della permanenza nella classe indicata
+   * @return \DateTime|null Data finale della permanenza nella classe indicata
    */
-  public function getFine() {
+  public function getFine(): ?\DateTime {
     return $this->fine;
   }
 
@@ -208,9 +206,9 @@ class CambioClasse {
    *
    * @param \DateTime $fine Data finale della permanenza nella classe indicata
    *
-   * @return CambioClasse Oggetto CambioClasse
+   * @return self Oggetto modificato
    */
-  public function setFine($fine) {
+  public function setFine(\DateTime $fine): self {
     $this->fine = $fine;
     return $this;
   }
@@ -218,20 +216,20 @@ class CambioClasse {
   /**
    * Restituisce la classe dell'alunno nel periodo indicato (null=altra scuola)
    *
-   * @return Classe Classe dell'alunno nel periodo indicato
+   * @return Classe|null Classe dell'alunno nel periodo indicato
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
   /**
    * Modifica la classe dell'alunno nel periodo indicato (null=altra scuola)
    *
-   * @param Classe $classe Classe dell'alunno nel periodo indicato
+   * @param Classe|null $classe Classe dell'alunno nel periodo indicato
    *
-   * @return CambioClasse Oggetto CambioClasse
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe = null) {
+  public function setClasse(?Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -239,20 +237,20 @@ class CambioClasse {
   /**
    * Restituisce le note descrittive sul cambio classe
    *
-   * @return string Note descrittive sul cambio classe
+   * @return string|null Note descrittive sul cambio classe
    */
-  public function getNote() {
+  public function getNote(): ?string {
     return $this->note;
   }
 
   /**
    * Modifica le note descrittive sul cambio classe
    *
-   * @param string $note Note descrittive sul cambio classe
+   * @param string|null $note Note descrittive sul cambio classe
    *
-   * @return CambioClasse Oggetto CambioClasse
+   * @return self Oggetto modificato
    */
-  public function setNote($note) {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -265,7 +263,7 @@ class CambioClasse {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->alunno.' -> '.($this->classe == null ? 'ALTRA SCUOLA' : $this->classe);
   }
 

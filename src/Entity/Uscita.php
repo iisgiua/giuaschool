@@ -1,30 +1,28 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Uscita - entità
+ * Uscita - dati per la gestione delle uscite anticipate degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\UscitaRepository")
  * @ORM\Table(name="gs_uscita", uniqueConstraints={@ORM\UniqueConstraint(columns={"data","alunno_id"})})
  * @ORM\HasLifecycleCallbacks
  *
  * @UniqueEntity(fields={"data","alunno"}, message="field.unique")
+ *
+ * @author Antonello Dessì
  */
 class Uscita {
 
@@ -32,81 +30,81 @@ class Uscita {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var integer $id Identificativo univoco per l'uscita anticipata
+   * @var int|null $id Identificativo univoco per l'uscita anticipata
    *
    * @ORM\Column(type="integer")
    * @ORM\Id
    * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $id;
+  private ?int $id = null;
 
   /**
-   * @var \DateTime $creato Data e ora della creazione iniziale dell'istanza
+   * @var \DateTime|null $creato Data e ora della creazione iniziale dell'istanza
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $creato;
+  private ?\DateTime $creato = null;
 
   /**
-   * @var \DateTime $modificato Data e ora dell'ultima modifica dei dati
+   * @var \DateTime|null $modificato Data e ora dell'ultima modifica dei dati
    *
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $modificato;
+  private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime $data Data dell'uscita anticipata
+   * @var \DateTime|null $data Data dell'uscita anticipata
    *
    * @ORM\Column(type="date", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Date(message="field.date")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $data;
+  private ?\DateTime $data = null;
 
   /**
-   * @var \DateTime $ora Ora dell'uscita anticipata
+   * @var \DateTime|null $ora Ora dell'uscita anticipata
    *
    * @ORM\Column(type="time", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
-   * @Assert\Time(message="field.time")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private $ora;
+  private ?\DateTime $ora = null;
 
   /**
-   * @var string $note Note informative sull'uscita anticipata
+   * @var string|null $note Note informative sull'uscita anticipata
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $note;
+  private ?string $note = '';
 
   /**
-   * @var boolean $valido Indica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
+   * @var bool $valido Indica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
    *
    * @ORM\Column(name="valido", type="boolean", nullable=false)
    */
-  private $valido;
+  private bool $valido = false;
 
   /**
-   * @var Alunno $alunno Alunno al quale si riferisce l'uscita anticipata
+   * @var Alunno|null $alunno Alunno al quale si riferisce l'uscita anticipata
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $alunno;
+  private ?Alunno $alunno = null;
 
   /**
-   * @var Docente $docente Docente che autorizza l'uscita anticipata
+   * @var Docente|null $docente Docente che autorizza l'uscita anticipata
    *
    * @ORM\ManyToOne(targetEntity="Docente")
    * @ORM\JoinColumn(nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    */
-  private $docente;
+  private ?Docente $docente = null;
 
 
   //==================== EVENTI ORM ====================
@@ -116,7 +114,7 @@ class Uscita {
    *
    * @ORM\PrePersist
    */
-  public function onCreateTrigger() {
+  public function onCreateTrigger(): void {
     // inserisce data/ora di creazione
     $this->creato = new \DateTime();
     $this->modificato = $this->creato;
@@ -127,7 +125,7 @@ class Uscita {
    *
    * @ORM\PreUpdate
    */
-  public function onChangeTrigger() {
+  public function onChangeTrigger(): void {
     // aggiorna data/ora di modifica
     $this->modificato = new \DateTime();
   }
@@ -138,36 +136,36 @@ class Uscita {
   /**
    * Restituisce l'identificativo univoco per l'uscita anticipata
    *
-   * @return integer Identificativo univoco
+   * @return int|null Identificativo univoco
    */
-  public function getId() {
+  public function getId(): ?int {
     return $this->id;
   }
 
   /**
    * Restituisce la data e ora della creazione dell'istanza
    *
-   * @return \DateTime Data/ora della creazione
+   * @return \DateTime|null Data/ora della creazione
    */
-  public function getCreato() {
+  public function getCreato(): ?\DateTime {
     return $this->creato;
   }
 
   /**
    * Restituisce la data e ora dell'ultima modifica dei dati
    *
-   * @return \DateTime Data/ora dell'ultima modifica
+   * @return \DateTime|null Data/ora dell'ultima modifica
    */
-  public function getModificato() {
+  public function getModificato(): ?\DateTime {
     return $this->modificato;
   }
 
   /**
    * Restituisce la data dell'uscita anticipata
    *
-   * @return \DateTime Data dell'uscita anticipata
+   * @return \DateTime|null Data dell'uscita anticipata
    */
-  public function getData() {
+  public function getData(): ?\DateTime {
     return $this->data;
   }
 
@@ -176,9 +174,9 @@ class Uscita {
    *
    * @param \DateTime $data Data dell'uscita anticipata
    *
-   * @return Uscita Oggetto Uscita
+   * @return self Oggetto modificato
    */
-  public function setData($data) {
+  public function setData(\DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -186,9 +184,9 @@ class Uscita {
   /**
    * Restituisce l'ora dell'uscita anticipata
    *
-   * @return \DateTime Ora dell'uscita anticipata
+   * @return \DateTime|null Ora dell'uscita anticipata
    */
-  public function getOra() {
+  public function getOra(): ?\DateTime {
     return $this->ora;
   }
 
@@ -197,9 +195,9 @@ class Uscita {
    *
    * @param \DateTime $ora Ora dell'uscita anticipata
    *
-   * @return Uscita Oggetto Uscita
+   * @return self Oggetto modificato
    */
-  public function setOra($ora) {
+  public function setOra(\DateTime $ora): self {
     $this->ora = $ora;
     return $this;
   }
@@ -207,20 +205,20 @@ class Uscita {
   /**
    * Restituisce le note informative sull'uscita anticipata
    *
-   * @return string Note informative sull'uscita anticipata
+   * @return string|null Note informative sull'uscita anticipata
    */
-  public function getNote() {
+  public function getNote(): ?string {
     return $this->note;
   }
 
   /**
    * Modifica le note informative sull'uscita anticipata
    *
-   * @param string $note Note informative sull'uscita anticipata
+   * @param string|null $note Note informative sull'uscita anticipata
    *
-   * @return Uscita Oggetto Uscita
+   * @return self Oggetto modificato
    */
-  public function setNote($note) {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -228,20 +226,20 @@ class Uscita {
   /**
    * Restituisce se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
    *
-   * @return boolean Vero se è valida per il conteggio, falso altrimenti
+   * @return bool Vero se è valida per il conteggio, falso altrimenti
    */
-  public function getValido() {
+  public function getValido(): bool {
     return $this->valido;
   }
 
   /**
    * Modifica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
    *
-   * @param boolean $valido Vero se è valida per il conteggio, falso altrimenti
+   * @param bool|null $valido Vero se è valida per il conteggio, falso altrimenti
    *
-   * @return Uscita Oggetto Uscita
+   * @return self Oggetto modificato
    */
-  public function setValido($valido) {
+  public function setValido(?bool $valido): self {
     $this->valido = $valido;
     return $this;
   }
@@ -249,9 +247,9 @@ class Uscita {
   /**
    * Restituisce l'alunno al quale si riferisce l'uscita anticipata
    *
-   * @return Alunno Alunno al quale si riferisce l'uscita anticipata
+   * @return Alunno|null Alunno al quale si riferisce l'uscita anticipata
    */
-  public function getAlunno() {
+  public function getAlunno(): ?Alunno {
     return $this->alunno;
   }
 
@@ -260,9 +258,9 @@ class Uscita {
    *
    * @param Alunno $alunno Alunno al quale si riferisce l'uscita anticipata
    *
-   * @return Uscita Oggetto Uscita
+   * @return self Oggetto modificato
    */
-  public function setAlunno(Alunno $alunno) {
+  public function setAlunno(Alunno $alunno): self {
     $this->alunno = $alunno;
     return $this;
   }
@@ -270,9 +268,9 @@ class Uscita {
   /**
    * Restituisce il docente che autorizza l'uscita anticipata
    *
-   * @return Docente Docente che autorizza l'uscita anticipata
+   * @return Docente|null Docente che autorizza l'uscita anticipata
    */
-  public function getDocente() {
+  public function getDocente(): ?Docente {
     return $this->docente;
   }
 
@@ -281,9 +279,9 @@ class Uscita {
    *
    * @param Docente $docente Docente che autorizza l'uscita anticipata
    *
-   * @return Uscita Oggetto Uscita
+   * @return self Oggetto modificato
    */
-  public function setDocente(Docente $docente) {
+  public function setDocente(Docente $docente): self {
     $this->docente = $docente;
     return $this;
   }
@@ -296,7 +294,7 @@ class Uscita {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->data->format('d/m/Y').' '.$this->ora->format('H:i').' - '.$this->alunno;
   }
 

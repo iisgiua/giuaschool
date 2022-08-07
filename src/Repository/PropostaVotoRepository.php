@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -14,10 +10,13 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use App\Entity\Classe;
+use App\Entity\Scrutinio;
 
 
 /**
  * PropostaVoto - repository
+ *
+ * @author Antonello Dessì
  */
 class PropostaVotoRepository extends EntityRepository {
 
@@ -32,7 +31,7 @@ class PropostaVotoRepository extends EntityRepository {
    */
   public function proposteEdCivica(Classe $classe, $periodo, $alunni) {
     // dati valutazioni
-    $scrutinio = $this->_em->getRepository('App:Scrutinio')->createQueryBuilder('s')
+    $scrutinio = $this->_em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
       ->where('s.classe=:classe AND s.periodo=:periodo')
       ->setParameters(['classe' => $classe, 'periodo' => $periodo])
       ->setMaxResults(1)

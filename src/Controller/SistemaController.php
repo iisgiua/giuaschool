@@ -1,62 +1,62 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Controller;
 
+use App\Entity\Alunno;
+use App\Entity\Ata;
+use App\Entity\Classe;
+use App\Entity\Corso;
+use App\Entity\Docente;
+use App\Entity\Documento;
+use App\Entity\Genitore;
+use App\Entity\Istituto;
+use App\Entity\Materia;
+use App\Entity\Preside;
+use App\Entity\Provisioning;
+use App\Entity\Scrutinio;
+use App\Entity\Sede;
+use App\Entity\Staff;
+use App\Entity\StoricoEsito;
+use App\Entity\StoricoVoto;
+use App\Entity\Utente;
+use App\Form\ConfigurazioneType;
+use App\Form\ModuloType;
+use App\Form\UtenteType;
+use App\Kernel;
+use App\Util\ArchiviazioneUtil;
+use App\Util\LogHandler;
+use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Dotenv\Dotenv;
-use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
-use App\Kernel;
-use App\Form\ConfigurazioneType;
-use App\Form\UtenteType;
-use App\Form\ModuloType;
-use App\Util\LogHandler;
-use App\Util\ArchiviazioneUtil;
-use App\Entity\Istituto;
-use App\Entity\Sede;
-use App\Entity\Corso;
-use App\Entity\Materia;
-use App\Entity\Classe;
-use App\Entity\Preside;
-use App\Entity\Staff;
-use App\Entity\Docente;
-use App\Entity\Ata;
-use App\Entity\Alunno;
-use App\Entity\Genitore;
-use App\Entity\StoricoEsito;
-use App\Entity\StoricoVoto;
-use App\Entity\Documento;
-use App\Entity\Provisioning;
-use App\Entity\Scrutinio;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
  * SistemaController - gestione parametri di sistema e funzioni di utlità
+ *
+ * @author Antonello Dessì
  */
 class SistemaController extends BaseController {
 
@@ -78,17 +78,17 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $banner_login = $em->getRepository('App:Configurazione')->getParametro('banner_login', '');
-    $banner_home = $em->getRepository('App:Configurazione')->getParametro('banner_home', '');
+    $banner_login = $em->getRepository('App\Entity\Configurazione')->getParametro('banner_login', '');
+    $banner_home = $em->getRepository('App\Entity\Configurazione')->getParametro('banner_home', '');
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'banner',
       'dati' => [$banner_login, $banner_home]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // memorizza i parametri
-      $em->getRepository('App:Configurazione')->setParametro('banner_login',
+      $em->getRepository('App\Entity\Configurazione')->setParametro('banner_login',
         $form->get('banner_login')->getData() ? $form->get('banner_login')->getData() : '');
-      $em->getRepository('App:Configurazione')->setParametro('banner_home',
+      $em->getRepository('App\Entity\Configurazione')->setParametro('banner_home',
         $form->get('banner_home')->getData() ? $form->get('banner_home')->getData() : '');
     }
     // mostra la pagina di risposta
@@ -115,8 +115,8 @@ class SistemaController extends BaseController {
     // informazioni passate alla pagina
     $info['logLevel'] = $request->server->get('LOG_LEVEL');
     // legge parametri
-    $manutenzione_inizio = $em->getRepository('App:Configurazione')->getParametro('manutenzione_inizio', null);
-    $manutenzione_fine = $em->getRepository('App:Configurazione')->getParametro('manutenzione_fine', null);
+    $manutenzione_inizio = $em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_inizio', null);
+    $manutenzione_fine = $em->getRepository('App\Entity\Configurazione')->getParametro('manutenzione_fine', null);
     if (!$manutenzione_inizio) {
       // non è impostata una manutenzione
       $manutenzione = false;
@@ -138,10 +138,10 @@ class SistemaController extends BaseController {
       // form inviato
       if ($form->get('manutenzione')->getData()) {
         // imposta manutenzione
-        $param_inizio = $form->get('data_inizio')->getData()->format('Y-m-d').' '.
-          $form->get('ora_inizio')->getData()->format('H:i');
-        $param_fine = $form->get('data_fine')->getData()->format('Y-m-d').' '.
-          $form->get('ora_fine')->getData()->format('H:i');
+        $param_inizio = $form->get('data_inizio')->getData().' '.
+          $form->get('ora_inizio')->getData();
+        $param_fine = $form->get('data_fine')->getData().' '.
+          $form->get('ora_fine')->getData();
         if ($param_inizio > $param_fine) {
           // inverte l'ordine
           $temp = $param_inizio;
@@ -154,8 +154,8 @@ class SistemaController extends BaseController {
         $param_fine = '';
       }
       // memorizza i parametri
-      $em->getRepository('App:Configurazione')->setParametro('manutenzione_inizio', $param_inizio);
-      $em->getRepository('App:Configurazione')->setParametro('manutenzione_fine', $param_fine);
+      $em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_inizio', $param_inizio);
+      $em->getRepository('App\Entity\Configurazione')->setParametro('manutenzione_fine', $param_fine);
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'manutenzione', $dati, $info, [$form->createView(), 'message.manutenzione']);
@@ -179,7 +179,7 @@ class SistemaController extends BaseController {
     $dati = [];
     $info = [];
     // legge parametri
-    $parametri = $em->getRepository('App:Configurazione')->parametriConfigurazione();
+    $parametri = $em->getRepository('App\Entity\Configurazione')->parametriConfigurazione();
     // form
     $form = $this->createForm(ConfigurazioneType::class, null, ['formMode' => 'parametri',
       'dati' => $parametri]);
@@ -197,7 +197,7 @@ class SistemaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ValidatorInterface $validator Gestore della validazione dei dati
    * @param LogHandler $dblogger Gestore dei log su database
@@ -210,7 +210,7 @@ class SistemaController extends BaseController {
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
   public function passwordAction(Request $request, EntityManagerInterface $em,
-                                 UserPasswordEncoderInterface $encoder, TranslatorInterface $trans,
+                                 UserPasswordHasherInterface $hasher, TranslatorInterface $trans,
                                  ValidatorInterface $validator, LogHandler $dblogger): Response {
     // init
     $dati = [];
@@ -221,7 +221,7 @@ class SistemaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
       $username = $form->get('username')->getData();
-      $user = $em->getRepository('App:Utente')->findOneByUsername($username);
+      $user = $em->getRepository('App\Entity\Utente')->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
         $form->get('username')->addError(new FormError($trans->trans('exception.invalid_user')));
@@ -234,7 +234,7 @@ class SistemaController extends BaseController {
           $form->get('password')->get('first')->addError(new FormError($errors[0]->getMessage()));
         } else {
           // codifica password
-          $password = $encoder->encodePassword($user, $user->getPasswordNonCifrata());
+          $password = $hasher->hashPassword($user, $user->getPasswordNonCifrata());
           $user->setPassword($password);
           // provisioning
           if (($user instanceOf Docente) || ($user instanceOf Alunno)) {
@@ -264,7 +264,7 @@ class SistemaController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
    *
@@ -275,7 +275,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function aliasAction(Request $request, EntityManagerInterface $em, SessionInterface $session,
+  public function aliasAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
                               TranslatorInterface $trans, LogHandler $dblogger): Response {
     // init
     $dati = [];
@@ -286,20 +286,20 @@ class SistemaController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // form inviato
       $username = $form->get('username')->getData();
-      $user = $em->getRepository('App:Utente')->findOneByUsername($username);
+      $user = $em->getRepository('App\Entity\Utente')->findOneByUsername($username);
       if (!$user || !$user->getAbilitato()) {
         // errore, utente non esiste o non abilitato
         $form->get('username')->addError(new FormError($trans->trans('exception.invalid_user')));
       } else {
         // memorizza dati in sessione
-        $session->set('/APP/UTENTE/tipo_accesso_reale', $session->get('/APP/UTENTE/tipo_accesso'));
-        $session->set('/APP/UTENTE/ultimo_accesso_reale', $session->get('/APP/UTENTE/ultimo_accesso'));
-        $session->set('/APP/UTENTE/username_reale', $this->getUser()->getUsername());
-        $session->set('/APP/UTENTE/ruolo_reale', $this->getUser()->getRoles()[0]);
-        $session->set('/APP/UTENTE/id_reale', $this->getUser()->getId());
-        $session->set('/APP/UTENTE/ultimo_accesso',
+        $reqstack->getSession()->set('/APP/UTENTE/tipo_accesso_reale', $reqstack->getSession()->get('/APP/UTENTE/tipo_accesso'));
+        $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso_reale', $reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso'));
+        $reqstack->getSession()->set('/APP/UTENTE/username_reale', $this->getUser()->getUsername());
+        $reqstack->getSession()->set('/APP/UTENTE/ruolo_reale', $this->getUser()->getRoles()[0]);
+        $reqstack->getSession()->set('/APP/UTENTE/id_reale', $this->getUser()->getId());
+        $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso',
           ($user->getUltimoAccesso() ? $user->getUltimoAccesso()->format('d/m/Y H:i:s') : null));
-        $session->set('/APP/UTENTE/tipo_accesso', 'alias');
+        $reqstack->getSession()->set('/APP/UTENTE/tipo_accesso', 'alias');
         // log azione
         $dblogger->logAzione('ACCESSO', 'Alias', array(
           'Username' => $user->getUsername(),
@@ -317,7 +317,7 @@ class SistemaController extends BaseController {
    * Disconnette l'alias in uso e ritorna all'utente iniziale
    *
    * @param Request $request Pagina richiesta
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -325,23 +325,25 @@ class SistemaController extends BaseController {
    * @Route("/sistema/alias/exit", name="sistema_alias_exit",
    *    methods={"GET"})
    */
-  public function aliasExitAction(Request $request, SessionInterface $session, LogHandler $dblogger): Response  {
+  public function aliasExitAction(Request $request, RequestStack $reqstack, LogHandler $dblogger): Response  {
     // log azione
     $dblogger->logAzione('ACCESSO', 'Alias Exit', array(
       'Username' => $this->getUser()->getUsername(),
       'Ruolo' => $this->getUser()->getRoles()[0],
-      'Username reale' => $session->get('/APP/UTENTE/username_reale'),
-      'Ruolo reale' => $session->get('/APP/UTENTE/ruolo_reale'),
-      'ID reale' => $session->get('/APP/UTENTE/id_reale')
+      'Username reale' => $reqstack->getSession()->get('/APP/UTENTE/username_reale'),
+      'Ruolo reale' => $reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
+      'ID reale' => $reqstack->getSession()->get('/APP/UTENTE/id_reale')
       ));
     // ricarica dati in sessione
-    $session->set('/APP/UTENTE/ultimo_accesso', $session->get('/APP/UTENTE/ultimo_accesso_reale'));
-    $session->set('/APP/UTENTE/tipo_accesso', $session->get('/APP/UTENTE/tipo_accesso_reale'));
-    $session->remove('/APP/UTENTE/tipo_accesso_reale');
-    $session->remove('/APP/UTENTE/ultimo_accesso_reale');
-    $session->remove('/APP/UTENTE/username_reale');
-    $session->remove('/APP/UTENTE/ruolo_reale');
-    $session->remove('/APP/UTENTE/id_reale');
+    $reqstack->getSession()->set('/APP/UTENTE/ultimo_accesso', $reqstack->getSession()->get('/APP/UTENTE/ultimo_accesso_reale'));
+    $reqstack->getSession()->set('/APP/UTENTE/tipo_accesso', $reqstack->getSession()->get('/APP/UTENTE/tipo_accesso_reale'));
+    $reqstack->getSession()->remove('/APP/UTENTE/lista_profili');
+    $reqstack->getSession()->remove('/APP/UTENTE/profilo_usato');
+    $reqstack->getSession()->remove('/APP/UTENTE/tipo_accesso_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/ultimo_accesso_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/username_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/ruolo_reale');
+    $reqstack->getSession()->remove('/APP/UTENTE/id_reale');
     // disconnette l'alias in uso e redirect alla home
     return $this->redirectToRoute('login_home', array('reload' => 'yes', '_alias' => '_exit'));
   }
@@ -467,8 +469,8 @@ class SistemaController extends BaseController {
           $stmt = $conn->prepare($sql);
           $stmt->execute();
           foreach ($stmt->fetchAll() as $classe_old) {
-            $sede = $em->getRepository('App:Sede')->findOneByNome($classe_old['s_nome']);
-            $corso = $em->getRepository('App:Corso')->findOneByNome($classe_old['c_nome']);
+            $sede = $em->getRepository('App\Entity\Sede')->findOneByNome($classe_old['s_nome']);
+            $corso = $em->getRepository('App\Entity\Corso')->findOneByNome($classe_old['c_nome']);
             $classe = (new Classe())
               ->setSede($sede)
               ->setCorso($corso)
@@ -598,9 +600,6 @@ class SistemaController extends BaseController {
           $stmt->execute(['ruolo' => 'PRE', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
             $preside = (new Preside())
-              ->setChiave1($utente_old['chiave1'])
-              ->setChiave2($utente_old['chiave2'])
-              ->setChiave3($utente_old['chiave3'])
               ->setOtp($utente_old['otp'])
               ->setUsername($utente_old['username'])
               ->setPassword($utente_old['password'])
@@ -625,12 +624,9 @@ class SistemaController extends BaseController {
           $stmt = $conn->prepare($sql);
           $stmt->execute(['ruolo' => 'STA', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
-            $sede = $em->getRepository('App:Sede')->findOneByNome($utente_old['s_nome']);
+            $sede = $em->getRepository('App\Entity\Sede')->findOneByNome($utente_old['s_nome']);
             $staff = (new Staff())
               ->setSede($sede)
-              ->setChiave1($utente_old['chiave1'])
-              ->setChiave2($utente_old['chiave2'])
-              ->setChiave3($utente_old['chiave3'])
               ->setOtp($utente_old['otp'])
               ->setUsername($utente_old['username'])
               ->setPassword($utente_old['password'])
@@ -656,9 +652,6 @@ class SistemaController extends BaseController {
           $stmt->execute(['ruolo' => 'DOC', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
             $docente = (new Docente())
-              ->setChiave1($utente_old['chiave1'])
-              ->setChiave2($utente_old['chiave2'])
-              ->setChiave3($utente_old['chiave3'])
               ->setOtp($utente_old['otp'])
               ->setUsername($utente_old['username'])
               ->setPassword($utente_old['password'])
@@ -683,7 +676,7 @@ class SistemaController extends BaseController {
           $stmt = $conn->prepare($sql);
           $stmt->execute(['ruolo' => 'ATA', 'abilitato' => 1]);
           foreach ($stmt->fetchAll() as $utente_old) {
-            $sede = $em->getRepository('App:Sede')->findOneByNome($utente_old['s_nome']);
+            $sede = $em->getRepository('App\Entity\Sede')->findOneByNome($utente_old['s_nome']);
             $ata = (new Ata())
               ->setTipo($utente_old['tipo'])
               ->setSegreteria($utente_old['segreteria'])
@@ -710,7 +703,7 @@ class SistemaController extends BaseController {
         if (in_array('E', $form->get('dati')->getData())) {
           // alunni esistenti nel nuovo sistema
           $fs = new Filesystem();
-          $alunni = $em->getRepository('App:Alunno')->createQueryBuilder('a')
+          $alunni = $em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
             ->getQuery()
             ->getResult();
@@ -766,7 +759,7 @@ class SistemaController extends BaseController {
                 $primo = false;
               }
               // imposta voti
-              $materia = $em->getRepository('App:Materia')->findOneByNome($scrutinio['m_nome']);
+              $materia = $em->getRepository('App\Entity\Materia')->findOneByNome($scrutinio['m_nome']);
               $dati = unserialize($scrutinio['dati']);
               $votoDati = array();
               $carenze = null;
@@ -919,7 +912,7 @@ class SistemaController extends BaseController {
           $stmt->execute(['giudizio' => 'G', 'rinviato' => 'X']);
           $scrutini = $stmt->fetchAll();
           foreach ($scrutini as $scrutinio) {
-            $classe = $em->getRepository('App:Classe')->findOneBy(['anno' => $scrutinio['anno'],
+            $classe = $em->getRepository('App\Entity\Classe')->findOneBy(['anno' => $scrutinio['anno'],
               'sezione' => $scrutinio['sezione']]);
             $dati = [];
             // dati scrutinio svolto
@@ -939,7 +932,7 @@ class SistemaController extends BaseController {
             $materie = array_merge($materie, $stmt->fetchAll());
             $trasformaMateria = [];
             foreach ($materie as $materia) {
-              $mat = $em->getRepository('App:Materia')->findOneByNome($materia['nome']);
+              $mat = $em->getRepository('App\Entity\Materia')->findOneByNome($materia['nome']);
               $trasformaMateria[$materia['id']] = $mat->getId();
             }
             $dati['materie'] = array_values($trasformaMateria);
@@ -954,7 +947,7 @@ class SistemaController extends BaseController {
             $dati['alunni'] = [];
             $datiScrutinabili = unserialize($scrutinio['dati'])['scrutinabili'];
             foreach ($alunni as $alunno) {
-              $alu = $em->getRepository('App:Alunno')->findOneByCodiceFiscale($alunno['codice_fiscale']);
+              $alu = $em->getRepository('App\Entity\Alunno')->findOneByCodiceFiscale($alunno['codice_fiscale']);
               $dati['alunni'][] = $alu->getId();
               $dati['religione'][$alu->getId()] = $alunno['religione'];
               $dati['credito3'][$alu->getId()] = $alunno['credito3'];
@@ -1024,23 +1017,23 @@ class SistemaController extends BaseController {
     // init
     $dati = [];
     $info = [];
-    $lista_docenti = $em->getRepository('App:Docente')->createQueryBuilder('d')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id')
+    $lista_docenti = $em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo IN (:tipi)')
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->setParameters(['tipi' => ['N', 'R', 'E']])
       ->getQuery()
       ->getResult();
-    $lista_sostegno = $em->getRepository('App:Docente')->createQueryBuilder('d')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.docente=d.id')
+    $lista_sostegno = $em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id')
       ->join('c.materia', 'm')
       ->where('m.tipo=:tipo')
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->setParameters(['tipo' => 'S'])
       ->getQuery()
       ->getResult();
-    $lista_classi = $em->getRepository('App:Classe')->createQueryBuilder('c')
+    $lista_classi = $em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->orderBy('c.anno,c.sezione', 'ASC')
       ->getQuery()
       ->getResult();
@@ -1105,6 +1098,7 @@ class SistemaController extends BaseController {
    * Cancella la cache di sistema
    *
    * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
    *
    * @return Response Pagina di risposta
    *
@@ -1113,15 +1107,14 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneCacheAction(TranslatorInterface $trans): Response {
+  public function manutenzioneCacheAction(TranslatorInterface $trans, KernelInterface $kernel): Response {
     // comandi per la pulizia della cache del database
     $commands = [
-      new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => null, '-q' => null]),
-      new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => null, '-q' => null]),
-      //-- new ArrayInput(['command' => 'cache:clear', '-q' => null]),
+      new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]),
+      new ArrayInput(['command' => 'doctrine:cache:clear-query', '--flush' => true, '-n' => true, '-q' => true]),
+      new ArrayInput(['command' => 'doctrine:cache:clear-result', '--flush' => true, '-n' => true, '-q' => true]),
     ];
     // esegue comandi
-    $kernel = new Kernel('prod', false);
     $application = new Application($kernel);
     $application->setAutoExit(false);
     $output = new BufferedOutput();
@@ -1133,13 +1126,6 @@ class SistemaController extends BaseController {
         $this->addFlash('danger', $trans->trans('exception.svuota_cache', ['errore' => $content]));
         break;
       }
-    }
-    if ($status == 0) {
-      // cancella cache
-      $dir = $this->getParameter('kernel.cache_dir');
-      $this->fileDelete($dir);
-      // esecuzione senza errori
-      $this->addFlash('success', 'message.svuota_cache_ok');
     }
     // redirect
     return $this->redirectToRoute('sistema_manutenzione');
@@ -1201,8 +1187,8 @@ class SistemaController extends BaseController {
       // imposta data, ora inizio e ora fine
       $dt = $form->get('data')->getData()->format('Y-m-d');
       $tm = $form->get('ora')->getData()->format('H:i');
-      $inizio = '['.$dt.' '.$tm.':00]';
-      $fine = '['.$dt.' '.$form->get('ora')->getData()->modify('+1 hour')->format('H:i').':00]';
+      $inizio = '['.$dt.'T'.$tm.':00';
+      $fine = '['.$dt.'T'.$form->get('ora')->getData()->modify('+1 hour')->format('H:i').':00';
       // nome file
       $nomefile = $this->getParameter('kernel.project_dir').'/var/log/app_'.
         mb_strtolower($request->server->get('APP_ENV')).'-'.$dt.'.log';
@@ -1210,7 +1196,7 @@ class SistemaController extends BaseController {
         $fl = fopen($nomefile, "r");
         while (($riga = fgets($fl)) !== false) {
           // legge una riga
-          $tag = substr($riga, 0, 21);
+          $tag = substr($riga, 0, 20);
           if ($tag >= $inizio && $tag <= $fine) {
             // estrae messaggio;
             $msgs[] = $riga;
@@ -1238,6 +1224,10 @@ class SistemaController extends BaseController {
   /**
    * Imposta le informazioni di debug nel log di sistema
    *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
+   *
    * @return Response Pagina di risposta
    *
    * @Route("/sistema/manutenzione/debug/", name="sistema_manutenzione_debug",
@@ -1245,7 +1235,7 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function manutenzioneDebugAction(Request $request): Response {
+  public function manutenzioneDebugAction(Request $request, TranslatorInterface $trans, KernelInterface $kernel): Response {
     // imposta nuovo livello di log
     $logLevel = ($request->server->get('LOG_LEVEL') == 'warning') ? 'debug' : 'warning';
     // legge .env
@@ -1262,15 +1252,21 @@ class SistemaController extends BaseController {
     // scrive nuovo .env
     unlink($envPath);
     file_put_contents($envPath, $envData);
-    // cancella cache (solo file principali)
-    $dir = $this->getParameter('kernel.cache_dir');
-    $finder = new Finder();
-    $finder->files()->in($dir);
-    foreach ($finder as $file) {
-      unlink($file->getRealPath());
+    // cancella cache
+    $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
+    // esegue comando
+    $application = new Application($kernel);
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
+    $status = $application->run($command, $output);
+    if ($status != 0) {
+      // errore nell'esecuzione del comando
+      $content = $output->fetch();
+      $this->addFlash('danger', $trans->trans('exception.svuota_cache', ['errore' => $content]));
+    } else {
+      // messaggio ok
+      $this->addFlash('success', 'message.modifica_log_level_ok');
     }
-    // messaggio
-    $this->addFlash('success', 'message.modifica_log_level_ok');
     // redirect
     return $this->redirectToRoute('sistema_manutenzione');
   }

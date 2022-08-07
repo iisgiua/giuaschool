@@ -1,30 +1,29 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * Alunno - entità
+ * Alunno - dati degli alunni
  *
  * @ORM\Entity(repositoryClass="App\Repository\AlunnoRepository")
  *
  * @UniqueEntity(fields="codiceFiscale", message="field.unique", entityClass="App\Entity\Alunno")
+ *
+ * @author Antonello Dessì
  */
 class Alunno extends Utente {
 
@@ -32,7 +31,7 @@ class Alunno extends Utente {
   //==================== COSTANTI  ====================
 
   /**
-   * @var integer FOTO_MAXSIZE Dimensione massima della foto (in pixel)
+   * @var int FOTO_MAXSIZE Dimensione massima della foto (in pixel)
    */
   const FOTO_MAXSIZE = 100;
 
@@ -40,94 +39,92 @@ class Alunno extends Utente {
   //==================== ATTRIBUTI DELLA CLASSE  ====================
 
   /**
-   * @var string $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
+   * @var string|null $bes Bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"N","H","D","B"}, strict=true, message="field.choice")
    */
-  private $bes;
+  private ?string $bes = 'N';
 
   /**
-   * @var string $noteBes Note sull'alunno BES
+   * @var string|null $noteBes Note sull'alunno BES
    *
    * @ORM\Column(name="note_bes", type="text", nullable=true)
    */
-  private $noteBes;
+  private ?string $noteBes = '';
 
   /**
-   * @var string $autorizzaEntrata Autorizzazione all'entrata in ritardo
+   * @var string|null $autorizzaEntrata Autorizzazione all'entrata in ritardo
    *
    * @ORM\Column(name="autorizza_entrata", type="string", length=2048, nullable=true)
    *
    * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
-  private $autorizzaEntrata;
+  private ?string $autorizzaEntrata = '';
 
   /**
-   * @var string $autorizzaUscita Autorizzazione all'uscita in anticipo
+   * @var string|null $autorizzaUscita Autorizzazione all'uscita in anticipo
    *
    * @ORM\Column(name="autorizza_uscita", type="string", length=2048, nullable=true)
    *
    * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
-  private $autorizzaUscita;
+  private ?string $autorizzaUscita = '';
 
   /**
-   * @var string $note Note sulle autorizzazioni
+   * @var string|null $note Note sulle autorizzazioni
    *
    * @ORM\Column(type="text", nullable=true)
    */
-  private $note;
+  private ?string $note = '';
 
   /**
-   * @var boolean $frequenzaEstero Indica se l'alunno sta frequentando l'anno scolastico all'estero oppure no
+   * @var bool $frequenzaEstero Indica se l'alunno sta frequentando l'anno scolastico all'estero oppure no
    *
    * @ORM\Column(name="frequenza_estero", type="boolean", nullable=false)
    */
-  private $frequenzaEstero;
+  private bool $frequenzaEstero = false;
 
   /**
-   * @var string $religione Indica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
+   * @var string|null $religione Indica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\NotBlank(message="field.notblank")
    * @Assert\Choice(choices={"S","U","I","D","A"}, strict=true, message="field.choice")
    */
-  private $religione;
+  private ?string $religione = 'S';
 
   /**
-   * @var integer $credito3 Punteggio di credito per la classe terza (se presente)
+   * @var int $credito3 Punteggio di credito per la classe terza (se presente)
    *
    * @ORM\Column(type="smallint", nullable=true)
    */
-  private $credito3;
+  private ?int $credito3 = 0;
 
   /**
-   * @var integer $credito4 Punteggio di credito per la classe quarta (se presente)
+   * @var int $credito4 Punteggio di credito per la classe quarta (se presente)
    *
    * @ORM\Column(type="smallint", nullable=true)
    */
-  private $credito4;
+  private ?int $credito4 = 0;
 
   /**
-   * @var boolean $giustificaOnline Indica se l'alunno può effettuare la giustificazione online oppure no
+   * @var bool $giustificaOnline Indica se l'alunno può effettuare la giustificazione online oppure no
    *
    * @ORM\Column(name="giustifica_online", type="boolean", nullable=false)
    */
-  private $giustificaOnline;
+  private bool $giustificaOnline = true;
 
   /**
-   * @var boolean $richiestaCertificato Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
+   * @var bool $richiestaCertificato Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
    * @ORM\Column(name="richiesta_certificato", type="boolean", nullable=false)
    */
-  private $richiestaCertificato;
+  private bool $richiestaCertificato = false;
 
   /**
-   * @var string $foto Fotografia dell'alunno
+   * @var string|null $foto Fotografia dell'alunno
    *
    * @ORM\Column(type="string", length=255, nullable=true)
    *
@@ -137,7 +134,7 @@ class Alunno extends Utente {
    *               allowLandscapeMessage="image.notsquare", allowPortraitMessage="image.notsquare",
    *               corruptedMessage="image.corrupted")
    */
-  private $foto;
+  private ?string $foto = '';
 
   /**
    * @var Classe $classe Classe attuale dell'alunno (se esiste)
@@ -145,14 +142,14 @@ class Alunno extends Utente {
    * @ORM\ManyToOne(targetEntity="Classe")
    * @ORM\JoinColumn(nullable=true)
    */
-  private $classe;
+  private ?Classe $classe = null;
 
   /**
-   * @var ArrayCollection $genitori Genitori dell'alunno (a volte è necessario avere utenti distinti)
+   * @var Collection|null $genitori Genitori dell'alunno
    *
    * @ORM\OneToMany(targetEntity="Genitore", mappedBy="alunno")
    */
-  private $genitori;
+  private ?Collection $genitori = null;
 
 
   //==================== METODI SETTER/GETTER ====================
@@ -160,20 +157,20 @@ class Alunno extends Utente {
   /**
    * Restituisce i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
-   * @return string Bisogni educativi speciali dell'alunno
+   * @return string|null Bisogni educativi speciali dell'alunno
    */
-  public function getBes() {
+  public function getBes(): ?string {
     return $this->bes;
   }
 
   /**
    * Modifica i bisogni educativi speciali dell'alunno [N=No, H=disabile, D=DSA, B=BES]
    *
-   * @param string $bes Bisogni educativi speciali dell'alunno
+   * @param string|null $bes Bisogni educativi speciali dell'alunno
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setBes($bes) {
+  public function setBes(?string $bes): self {
     $this->bes = $bes;
     return $this;
   }
@@ -181,20 +178,20 @@ class Alunno extends Utente {
   /**
    * Restituisce le note sull'alunno BES
    *
-   * @return string Note sull'alunno BES
+   * @return string|null Note sull'alunno BES
    */
-  public function getNoteBes() {
+  public function getNoteBes(): ?string {
     return $this->noteBes;
   }
 
   /**
    * Modifica le note sull'alunno BES
    *
-   * @param string $noteBes Note sull'alunno BES
+   * @param string|null $noteBes Note sull'alunno BES
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setNoteBes($noteBes) {
+  public function setNoteBes(?string $noteBes): self {
     $this->noteBes = $noteBes;
     return $this;
   }
@@ -202,20 +199,20 @@ class Alunno extends Utente {
   /**
    * Restituisce l'autorizzazione all'entrata in ritardo
    *
-   * @return string Autorizzazione all'entrata in ritardo
+   * @return string|null Autorizzazione all'entrata in ritardo
    */
-  public function getAutorizzaEntrata() {
+  public function getAutorizzaEntrata(): ?string {
     return $this->autorizzaEntrata;
   }
 
   /**
    * Modifica l'autorizzazione all'entrata in ritardo
    *
-   * @param string $autorizzaEntrata Autorizzazione all'entrata in ritardo
+   * @param string|null $autorizzaEntrata Autorizzazione all'entrata in ritardo
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setAutorizzaEntrata($autorizzaEntrata) {
+  public function setAutorizzaEntrata(?string $autorizzaEntrata): self {
     $this->autorizzaEntrata = $autorizzaEntrata;
     return $this;
   }
@@ -223,20 +220,20 @@ class Alunno extends Utente {
   /**
    * Restituisce l'autorizzazione all'uscita in anticipo
    *
-   * @return string Autorizzazione all'uscita in anticipo
+   * @return string|null Autorizzazione all'uscita in anticipo
    */
-  public function getAutorizzaUscita() {
+  public function getAutorizzaUscita(): ?string {
     return $this->autorizzaUscita;
   }
 
   /**
    * Modifica l'autorizzazione all'uscita in anticipo
    *
-   * @param string $autorizzaUscita Autorizzazione all'uscita in anticipo
+   * @param string|null $autorizzaUscita Autorizzazione all'uscita in anticipo
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setAutorizzaUscita($autorizzaUscita) {
+  public function setAutorizzaUscita(?string $autorizzaUscita): self {
     $this->autorizzaUscita = $autorizzaUscita;
     return $this;
   }
@@ -244,20 +241,20 @@ class Alunno extends Utente {
   /**
    * Restituisce le note sull'alunno
    *
-   * @return string Note sull'alunno
+   * @return string|null Note sull'alunno
    */
-  public function getNote() {
+  public function getNote(): ?string {
     return $this->note;
   }
 
   /**
    * Modifica le note sull'alunno
    *
-   * @param string $note Note sull'alunno
+   * @param string|null $note Note sull'alunno
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setNote($note) {
+  public function setNote(?string $note): self {
     $this->note = $note;
     return $this;
   }
@@ -265,20 +262,20 @@ class Alunno extends Utente {
   /**
    * Indica se l'alunno sta frequentando l'anno scolastico all'estero oppure no
    *
-   * @return boolean Vero se l'alunno sta frequentando l'anno scolastico all'estero, falso altrimenti
+   * @return bool Vero se l'alunno sta frequentando l'anno scolastico all'estero, falso altrimenti
    */
-  public function getFrequenzaEstero() {
+  public function getFrequenzaEstero(): bool {
     return $this->frequenzaEstero;
   }
 
   /**
    * Modifica se l'alunno sta frequentando l'anno scolastico all'estero oppure no
    *
-   * @param boolean $frequenzaEstero Vero se l'alunno sta frequentando l'anno scolastico all'estero, falso altrimenti
+   * @param bool|null $frequenzaEstero Vero se l'alunno sta frequentando l'anno scolastico all'estero, falso altrimenti
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setFrequenzaEstero($frequenzaEstero) {
+  public function setFrequenzaEstero(?bool $frequenzaEstero): self {
     $this->frequenzaEstero = ($frequenzaEstero == true);
     return $this;
   }
@@ -286,20 +283,20 @@ class Alunno extends Utente {
   /**
    * Restituisce se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
-   * @return string Indica se l'alunno si avvale della religione
+   * @return string|null Indica se l'alunno si avvale della religione
    */
-  public function getReligione() {
+  public function getReligione(): ?string {
     return $this->religione;
   }
 
   /**
    * Modifica se l'alunno si avvale della religione [S=si, U=uscita, I=studio individuale, D=studio con docente, A=attività alternativa]
    *
-   * @param string $religione Indica se l'alunno si avvale della religione
+   * @param string|null $religione Indica se l'alunno si avvale della religione
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setReligione($religione) {
+  public function setReligione(?string $religione): self {
     $this->religione = $religione;
     return $this;
   }
@@ -307,20 +304,20 @@ class Alunno extends Utente {
   /**
    * Restituisce il punteggio di credito per la classe terza (se presente)
    *
-   * @return integer Punteggio di credito per la classe terza
+   * @return int|null Punteggio di credito per la classe terza
    */
-  public function getCredito3() {
+  public function getCredito3(): ?int {
     return $this->credito3;
   }
 
   /**
    * Modifica il punteggio di credito per la classe terza (se presente)
    *
-   * @param integer $credito3 Punteggio di credito per la classe terza
+   * @param int|null $credito3 Punteggio di credito per la classe terza
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setCredito3($credito3) {
+  public function setCredito3(?int $credito3): self {
     $this->credito3 = $credito3;
     return $this;
   }
@@ -328,20 +325,20 @@ class Alunno extends Utente {
   /**
    * Restituisce il punteggio di credito per la classe quarta (se presente)
    *
-   * @return integer Punteggio di credito per la classe quarta
+   * @return int|null Punteggio di credito per la classe quarta
    */
-  public function getCredito4() {
+  public function getCredito4(): ?int {
     return $this->credito4;
   }
 
   /**
    * Modifica il punteggio di credito per la classe quarta (se presente)
    *
-   * @param integer $credito4 Punteggio di credito per la classe quarta
+   * @param int|null $credito4 Punteggio di credito per la classe quarta
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setCredito4($credito4) {
+  public function setCredito4(?int $credito4): self {
     $this->credito4 = $credito4;
     return $this;
   }
@@ -349,20 +346,20 @@ class Alunno extends Utente {
   /**
    * Indica se l'alunno può effettuare la giustificazione online oppure no
    *
-   * @return boolean Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
+   * @return bool Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
    */
-  public function getGiustificaOnline() {
+  public function getGiustificaOnline(): bool {
     return $this->giustificaOnline;
   }
 
   /**
    * Modifica se l'alunno può effettuare la giustificazione online oppure no
    *
-   * @param boolean $giustificaOnline Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
+   * @param bool|null $giustificaOnline Vero se l'alunno può effettuare la giustificazione online, falso altrimenti
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setGiustificaOnline($giustificaOnline) {
+  public function setGiustificaOnline(?bool $giustificaOnline): self {
     $this->giustificaOnline = ($giustificaOnline == true);
     return $this;
   }
@@ -370,20 +367,20 @@ class Alunno extends Utente {
   /**
    * Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
-   * @return boolean Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
+   * @return bool Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
    */
-  public function getRichiestaCertificato() {
+  public function getRichiestaCertificato(): bool {
     return $this->richiestaCertificato;
   }
 
   /**
    * Imposta se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
-   * @param boolean $richiestaCertificato Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
+   * @param bool|null $richiestaCertificato Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setRichiestaCertificato($richiestaCertificato) {
+  public function setRichiestaCertificato(?bool $richiestaCertificato): self {
     $this->richiestaCertificato = ($richiestaCertificato == true);
     return $this;
   }
@@ -391,20 +388,20 @@ class Alunno extends Utente {
   /**
    * Restituisce la fotografia dell'alunno
    *
-   * @return string|File Fotografia dell'alunno
+   * @return string|null Fotografia dell'alunno
    */
-  public function getFoto() {
+  public function getFoto(): ?string {
     return $this->foto;
   }
 
   /**
    * Modifica la fotografia dell'alunno
    *
-   * @param File $foto Fotografia dell'alunno
+   * @param String $foto Fotografia dell'alunno
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setFoto(File $foto=null) {
+  public function setFoto(?string $foto): self {
     $this->foto = $foto;
     return $this;
   }
@@ -412,20 +409,20 @@ class Alunno extends Utente {
   /**
    * Restituisce la classe attuale dell'alunno (se esiste)
    *
-   * @return Classe Classe attuale dell'alunno
+   * @return Classe|null Classe attuale dell'alunno
    */
-  public function getClasse() {
+  public function getClasse(): ?Classe {
     return $this->classe;
   }
 
   /**
    * Modifica la classe attuale dell'alunno (se esiste)
    *
-   * @param string $classe Classe attuale dell'alunno (se esiste)
+   * @param Classe|null $classe Classe attuale dell'alunno (se esiste)
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setClasse(Classe $classe = null) {
+  public function setClasse(?Classe $classe): self {
     $this->classe = $classe;
     return $this;
   }
@@ -433,20 +430,20 @@ class Alunno extends Utente {
   /**
    * Restituisce i genitori dell'alunno (a volte è necessario avere utenti distinti)
    *
-   * @return ArrayCollection Lista dei genitori dell'alunno
+   * @return Collection|null Lista dei genitori dell'alunno
    */
-  public function getGenitori() {
+  public function getGenitori(): ?Collection {
     return $this->genitori;
   }
 
   /**
    * Modifica i genitori dell'alunno (a volte è necessario avere utenti distinti)
    *
-   * @param ArrayCollection $genitori Lista dei genitori dell'alunno
+   * @param Collection $genitori Lista dei genitori dell'alunno
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function setGenitori(ArrayCollection $genitori) {
+  public function setGenitori(Collection $genitori): self {
     $this->genitori = $genitori;
     return $this;
   }
@@ -456,9 +453,9 @@ class Alunno extends Utente {
    *
    * @param Genitore $genitore Genitore dell'alunno da aggiungere
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function addGenitore(Genitore $genitore) {
+  public function addGenitori(Genitore $genitore) {
     if (!$this->genitori->contains($genitore)) {
       $this->genitori->add($genitore);
     }
@@ -470,9 +467,9 @@ class Alunno extends Utente {
    *
    * @param Genitore $genitore Genitore dell'alunno da rimuovere
    *
-   * @return Alunno Oggetto Alunno
+   * @return self Oggetto modificato
    */
-  public function removeGenitore(Genitore $genitore) {
+  public function removeGenitori(Genitore $genitore) {
     if ($this->genitori->contains($genitore)) {
       $this->genitori->removeElement($genitore);
     }
@@ -487,12 +484,6 @@ class Alunno extends Utente {
    */
   public function __construct() {
     // valori predefiniti
-    parent::__construct();
-    $this->bes = 'N';
-    $this->frequenzaEstero = false;
-    $this->religione = 'S';
-    $this->giustificaOnline = true;
-    $this->richiestaCertificato = false;
     $this->genitori = new ArrayCollection();
   }
 
@@ -501,8 +492,28 @@ class Alunno extends Utente {
    *
    * @return array Lista di ruoli
    */
-  public function getRoles() {
+  public function getRoles(): array {
     return ['ROLE_ALUNNO', 'ROLE_UTENTE'];
+  }
+
+  /**
+   * Restituisce il codice corrispondente al ruolo dell'utente
+   * I codici utilizzati sono:
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
+   *
+   * @return string Codifica del ruolo dell'utente
+   */
+  public function getCodiceRuolo(): string {
+    return 'AU';
+  }
+
+  /**
+   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   *
+   * @return string Codifica della funzione
+   */
+  public function getCodiceFunzione(): string {
+    return 'N';
   }
 
   /**
@@ -510,7 +521,7 @@ class Alunno extends Utente {
    *
    * @return string Oggetto rappresentato come testo
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->getCognome().' '.$this->getNome().' ('.$this->getDataNascita()->format('d/m/Y').')';
   }
 

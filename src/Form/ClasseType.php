@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -27,6 +23,8 @@ use App\Entity\Classe;
 
 /**
  * ClasseType - form per la classe Classe
+ *
+ * @author Antonello Dessì
  */
 class ClasseType extends AbstractType {
 
@@ -48,7 +46,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('corso', EntityType::class, array('label' => 'label.corso',
-        'class' => 'App:Corso',
+        'class' => 'App\Entity\Corso',
         'choice_label' => function ($obj) {
             return $obj->getNomeBreve();
           },
@@ -59,7 +57,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
       ->add('sede', EntityType::class, array('label' => 'label.sede',
-        'class' => 'App:Sede',
+        'class' => 'App\Entity\Sede',
         'choice_label' => function ($obj) {
             return $obj->getNomeBreve();
           },
@@ -70,7 +68,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('coordinatore', EntityType::class, array('label' => 'label.coordinatore',
-        'class' => 'App:Docente',
+        'class' => 'App\Entity\Docente',
         'placeholder' => 'label.nessuno',
         'choice_label' => function ($obj) {
             return $obj->getNome().' '.$obj->getCognome();
@@ -82,7 +80,7 @@ class ClasseType extends AbstractType {
         'attr' => ['widget' => 'gs-row-start'],
         'required' => false))
       ->add('segretario', EntityType::class, array('label' => 'label.segretario',
-        'class' => 'App:Docente',
+        'class' => 'App\Entity\Docente',
         'placeholder' => 'label.nessuno',
         'choice_label' => function ($obj) {
             return $obj->getNome().' '.$obj->getCognome();

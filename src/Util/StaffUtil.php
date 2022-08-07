@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -15,17 +11,29 @@ namespace App\Util;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use App\Util\RegistroUtil;
 use App\Util\GenitoriUtil;
 use App\Entity\Classe;
 use App\Entity\Alunno;
 use App\Entity\Docente;
+use App\Entity\Assenza;
+use App\Entity\AssenzaLezione;
+use App\Entity\Cattedra;
+use App\Entity\Entrata;
+use App\Entity\Genitore;
+use App\Entity\Materia;
+use App\Entity\Nota;
+use App\Entity\ScansioneOraria;
+use App\Entity\Uscita;
+use App\Entity\Valutazione;
 
 
 /**
  * StaffUtil - classe di utilità per le funzioni disponibili allo staff
+ *
+ * @author Antonello Dessì
  */
 class StaffUtil {
 
@@ -48,9 +56,9 @@ class StaffUtil {
   private $trans;
 
   /**
-   * @var SessionInterface $session Gestore delle sessioni
+   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $session;
+  private $reqstack;
 
   /**
    * @var RegistroUtil $regUtil Funzioni di utilità per il registro
@@ -66,21 +74,21 @@ class StaffUtil {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Construttore
+   * Costruttore
    *
    * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param GenitoriUtil $genUtil Funzioni di utilità per i genitori
    */
   public function __construct(RouterInterface $router, EntityManagerInterface $em, TranslatorInterface $trans,
-                               SessionInterface $session, RegistroUtil $regUtil, GenitoriUtil $genUtil) {
+                               RequestStack $reqstack, RegistroUtil $regUtil, GenitoriUtil $genUtil) {
     $this->router = $router;
     $this->em = $em;
     $this->trans = $trans;
-    $this->session = $session;
+    $this->reqstack = $reqstack;
     $this->regUtil = $regUtil;
     $this->genUtil = $genUtil;
   }
@@ -100,7 +108,7 @@ class StaffUtil {
     foreach ($lista as $a) {
       $alunno['alunno'] = $a;
       // dati ritardi
-      $entrate = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
+      $entrate = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
         ->select('e.data,e.ora,e.note')
         ->where('e.valido=:valido AND e.alunno=:alunno AND e.data BETWEEN :inizio AND :fine')
         ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
@@ -110,7 +118,7 @@ class StaffUtil {
         ->getArrayResult();
       $alunno['entrate'] = $entrate;
       // dati uscite
-      $uscite = $this->em->getRepository('App:Uscita')->createQueryBuilder('u')
+      $uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
         ->select('u.data,u.ora,u.note')
         ->where('u.valido=:valido AND u.alunno=:alunno AND u.data BETWEEN :inizio AND :fine')
         ->setParameters(['valido' => 1, 'alunno' => $a, 'inizio' => $inizio->format('Y-m-d'),
@@ -138,7 +146,7 @@ class StaffUtil {
     $periodi = $this->regUtil->infoPeriodi();
     $dati = array();
     // legge note di classe
-    $note = $this->em->getRepository('App:Nota')->createQueryBuilder('n')
+    $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
@@ -161,7 +169,7 @@ class StaffUtil {
         'provvedimento_doc' => $n['docente_prov']);
     }
     // legge note individuali
-    $individuali = $this->em->getRepository('App:Nota')->createQueryBuilder('n')
+    $individuali = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->join('n.alunni', 'a')
       ->join('n.docente', 'd')
       ->leftJoin('n.docenteProvvedimento', 'dp')
@@ -211,9 +219,9 @@ class StaffUtil {
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     // dati GENITORI
-    $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
     // legge assenze
-    $assenze = $this->em->getRepository('App:Assenza')->createQueryBuilder('a')
+    $assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('a')
       ->select('(a.alunno) AS id,a.giustificato')
       ->where('a.alunno IN (:lista)')
       ->setParameters(['lista' => $lista_alunni])
@@ -231,7 +239,7 @@ class StaffUtil {
       }
     }
     // legge ritardi
-    $entrate = $this->em->getRepository('App:Entrata')->createQueryBuilder('e')
+    $entrate = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
       ->select('(e.alunno) AS id,e.data,e.ora,e.ritardoBreve,e.giustificato,e.valido')
       ->where('e.alunno IN (:lista)')
       ->setParameters(['lista' => $lista_alunni])
@@ -257,7 +265,7 @@ class StaffUtil {
       }
     }
     // legge uscite anticipate
-    $uscite = $this->em->getRepository('App:Uscita')->createQueryBuilder('u')
+    $uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
       ->select('(u.alunno) AS id,u.data,u.ora,u.valido')
       ->where('u.alunno IN (:lista)')
       ->setParameters(['lista' => $lista_alunni])
@@ -275,23 +283,23 @@ class StaffUtil {
       }
     }
     // ore di assenza (escluso sostegno/supplenza/religione)
-    $ore_N = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+    $ore_N = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
       ->select('(al.alunno) AS id,SUM(al.ore) AS ore')
       ->join('al.lezione', 'l')
       ->join('l.materia', 'm')
-      ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where('al.alunno IN (:lista) AND m.tipo IN (:tipo) AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
       ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'tipo' => ['N', 'E']])
       ->getQuery()
       ->getArrayResult();
     // ore di assenza di religione (per chi si avvale)
-    $ore_R = $this->em->getRepository('App:AssenzaLezione')->createQueryBuilder('al')
+    $ore_R = $this->em->getRepository('App\Entity\AssenzaLezione')->createQueryBuilder('al')
       ->select('(al.alunno) AS id,SUM(al.ore) AS ore')
       ->join('al.lezione', 'l')
       ->join('al.alunno', 'a')
       ->join('l.materia', 'm')
-      ->leftJoin('App:CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
+      ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=al.alunno AND l.data BETWEEN cc.inizio AND cc.fine')
       ->where('al.alunno IN (:lista) AND a.religione IN (:religione) AND m.tipo=:tipo AND (l.classe=:classe OR l.classe=cc.classe)')
       ->groupBy('al.alunno')
       ->setParameters(['lista' => $lista_alunni, 'classe' => $classe, 'religione' => ['S', 'A'], 'tipo' => 'R'])
@@ -318,7 +326,7 @@ class StaffUtil {
       $dati['statistiche'][$id]['livello'] = ($perc < 20 ? 'default' : ($perc < 25 ? 'warning' : 'danger'));
     }
     // dati alunni
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -347,9 +355,9 @@ class StaffUtil {
     $periodo = $this->regUtil->periodo(new \DateTime());
     $dati['periodo'] = $periodo['nome'];
     // lista materie
-    $materie = $this->em->getRepository('App:Materia')->createQueryBuilder('m')
+    $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.nomeBreve')
-      ->join('App:Cattedra', 'c', 'WITH', 'c.materia=m.id')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
       ->where('c.classe=:classe AND c.attiva=:attiva AND m.valutazione=:valutazione AND m.media=:media')
       ->orderBy('m.ordinamento', 'ASC')
       ->setParameters(['classe' => $classe, 'attiva' => 1, 'valutazione' => 'N', 'media' => 1])
@@ -362,9 +370,9 @@ class StaffUtil {
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
     // dati GENITORI
-    $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
     // legge medie
-    $voti = $this->em->getRepository('App:Valutazione')->createQueryBuilder('v')
+    $voti = $this->em->getRepository('App\Entity\Valutazione')->createQueryBuilder('v')
       ->select('(v.alunno) AS alunno,(v.materia) AS materia,v.tipo,AVG(v.voto) AS media')
       ->join('v.lezione', 'l')
       ->join('v.materia', 'm')
@@ -398,7 +406,7 @@ class StaffUtil {
       $dati['medie'][$alu][0] = number_format($somma[$alu] / $numero[$alu], 1, ',', null);
     }
     // dati alunni
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -421,7 +429,7 @@ class StaffUtil {
   public function orarioPerSede() {
     $dati = array();
     // legge orario
-    $ore = $this->em->getRepository('App:ScansioneOraria')->createQueryBuilder('so')
+    $ore = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
       ->select('s.citta,o.id,so.giorno,so.ora,so.inizio,so.fine,so.durata')
       ->join('so.orario', 'o')
       ->join('o.sede', 's')
@@ -445,7 +453,7 @@ class StaffUtil {
   public function docentiPerSede() {
     $dati = array();
     // legge docenti
-    $docenti = $this->em->getRepository('App:Cattedra')->createQueryBuilder('c')
+    $docenti = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
       ->select('DISTINCT s.citta,d.id,d.cognome,d.nome')
       ->join('c.docente', 'd')
       ->join('c.classe', 'cl')
@@ -473,7 +481,7 @@ class StaffUtil {
     $dati['alunni'] = [];
     // legge alunni
     $lista_alunni = $this->regUtil->alunniInData(new \DateTime(), $classe);
-    $alunni = $this->em->getRepository('App:Alunno')->createQueryBuilder('a')
+    $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -485,7 +493,7 @@ class StaffUtil {
       $dati['alunni'][$a['id']] = $a;
     }
     // dati GENITORI
-    $dati['genitori'] = $this->em->getRepository('App:Genitore')->datiGenitori($lista_alunni);
+    $dati['genitori'] = $this->em->getRepository('App\Entity\Genitore')->datiGenitori($lista_alunni);
     // restituisce dati come array associativo
     return $dati;
   }
@@ -551,12 +559,12 @@ class StaffUtil {
 
     if ($docente instanceOf Docente) {
       // statistiche di singolo docente
-      $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d AS docente,SUM(so.durata) AS ore')
-        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->andWhere('f.docente=:docente')
@@ -567,12 +575,12 @@ class StaffUtil {
         ->getQuery();
     } elseif ($docente == -1) {
       // statistiche di tutti i docenti
-      $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d AS docente,SUM(so.durata) AS ore')
-        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -582,7 +590,7 @@ class StaffUtil {
         ->getQuery();
     } else {
       // query vuota
-      $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->where('d.id=:valore')
         ->setParameters(['valore' => -999])
         ->getQuery();
@@ -607,7 +615,7 @@ class StaffUtil {
     $dati = [];
     $param = [];
     // lista classi
-    $classi = $this->em->getRepository('App:Classe')->createQueryBuilder('c')
+    $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
       ->join('c.corso', 'co')
       ->join('c.sede', 's');
     if ($search['sede']) {
@@ -630,7 +638,7 @@ class StaffUtil {
       $lista = $this->regUtil->alunniInData($data, $c);
       $totale = count($lista);
       // assenti e presenti
-      $assenti = $this->em->getRepository('App:Assenza')->createQueryBuilder('a')
+      $assenti = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('a')
         ->select('COUNT(a.id)')
         ->where('a.data=:data AND a.alunno IN (:lista)')
         ->setParameters(['data' => $data->format('Y-m-d'), 'lista' => $lista])
@@ -663,12 +671,12 @@ class StaffUtil {
 
     if ($docente instanceOf Docente) {
       // statistiche di singolo docente
-      $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.cognome,d.nome,SUM(so.durata) AS ore')
-        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->andWhere('f.docente=:docente')
@@ -679,12 +687,12 @@ class StaffUtil {
         ->getArrayResult();
     } elseif ($docente == -1) {
       // statistiche di tutti i docenti
-      $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->select('d.cognome,d.nome,SUM(so.durata) AS ore')
-        ->join('App:Firma', 'f', 'WITH', 'd.id=f.docente')
+        ->join('App\Entity\Firma', 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
-        ->join('App:ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
+        ->join('App\Entity\ScansioneOraria', 'so', 'WITH', 'l.ora=so.ora AND (WEEKDAY(l.data)+1)=so.giorno')
         ->join('so.orario', 'o')
         ->where('d.abilitato=:abilitato AND l.data BETWEEN :inizio AND :fine AND l.data BETWEEN o.inizio AND o.fine AND o.sede=cl.sede')
         ->orderBy('d.cognome,d.nome', 'ASC')
@@ -695,7 +703,7 @@ class StaffUtil {
         ->getArrayResult();
     } else {
       // query vuota
-      $stat = $this->em->getRepository('App:Docente')->createQueryBuilder('d')
+      $stat = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
         ->where('d.id=:valore')
         ->setParameters(['valore' => -999])
         ->getQuery();

@@ -1,12 +1,8 @@
 <?php
-/**
- * giua@school
+/*
+ * SPDX-FileCopyrightText: 2017 I.I.S. Michele Giua - Cagliari - Assemini
  *
- * Copyright (c) 2017-2022 Antonello Dessì
- *
- * @author    Antonello Dessì
- * @license   http://www.gnu.org/licenses/agpl.html AGPL
- * @copyright Antonello Dessì 2017-2022
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 
@@ -14,12 +10,12 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\File\File;
@@ -32,18 +28,22 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
+use App\Entity\App;
+use App\Entity\Utente;
 use App\Util\ConfigLoader;
 
 
 /**
  * AppController - gestione dell'app e implementazione API
+ *
+ * @author Antonello Dessì
  */
 class AppController extends AbstractController {
 
   /**
    * Login dell'utente tramite l'app
    *
-   * @param SessionInterface $session Gestore delle sessioni
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param AuthenticationUtils $auth Gestore delle procedure di autenticazione
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param string $codice Codifica delle credenziali in BASE64
@@ -58,16 +58,16 @@ class AppController extends AbstractController {
    *    defaults={"codice": "0", "lusr": 0, "lpsw": 0, "lapp": 0},
    *    methods={"GET"})
    */
-  public function loginAction(SessionInterface $session, AuthenticationUtils $auth, ConfigLoader $config,
+  public function loginAction(RequestStack $reqstack, AuthenticationUtils $auth, ConfigLoader $config,
                               $codice, $lusr, $lpsw, $lapp) {
     $errore = null;
     // carica configurazione di sistema
     $config->carica();
     // modalità manutenzione
     $ora = (new \DateTime())->format('Y-m-d H:i');
-    $manutenzione = (!empty($session->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
-      $ora >= $session->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
-      $ora <= $session->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
     if (!$manutenzione) {
       // conserva ultimo errore del login, se presente
       $errore = $auth->getLastAuthenticationError();
@@ -85,7 +85,7 @@ class AppController extends AbstractController {
    *
    * @param Request $request Pagina richiesta
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param UserPasswordEncoderInterface $encoder Gestore della codifica delle password
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param UriSafeTokenGenerator $tok Generatore di token per CSRF
    *
    * @return JsonResponse Informazioni di risposta
@@ -93,15 +93,15 @@ class AppController extends AbstractController {
    * @Route("/app/prelogin/", name="app_prelogin",
    *    methods={"POST"})
    */
-  public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordEncoderInterface $encoder) {
+  public function preloginAction(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher) {
     $risposta = array();
     $risposta['errore'] = 0;
     $risposta['token'] = null;
     // legge dati
     $codice = $request->request->get('codice');
-    $lusr = intval($request->request->get('lusr'));
-    $lpsw = intval($request->request->get('lpsw'));
-    $lapp = intval($request->request->get('lapp'));
+    $lusr = (int) $request->request->get('lusr');
+    $lpsw = (int) $request->request->get('lpsw');
+    $lapp = (int) $request->request->get('lapp');
     // decodifica credenziali
     $testo = base64_decode(str_replace(array('-', '_'), array('+', '/'), $codice));
     $profilo = substr($testo, 0, 1);
@@ -109,7 +109,7 @@ class AppController extends AbstractController {
     $password = substr($testo, $lusr, $lpsw);
     $appId = substr($testo, $lusr + $lpsw, $lapp);
     // controlla utente
-    $user = $em->getRepository('App:Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $user = $em->getRepository('App\Entity\Utente')->findOneBy(['username' => $username, 'abilitato' => 1]);
     if ($user) {
       // utente esistente
       if (($profilo == 'G' && $user instanceOf Genitore) || ($profilo == 'A' && $user instanceOf Alunno) ||
@@ -118,7 +118,7 @@ class AppController extends AbstractController {
         if (($profilo == 'A' || $profilo == 'D') && empty($password)) {
           // credenziali corrette: genera token fittizio
           $risposta['token'] = 'OK';
-        } elseif (($profilo == 'G' || $profilo == 'T') && $encoder->isPasswordValid($user, $password)) {
+        } elseif (($profilo == 'G' || $profilo == 'T') && $hasher->isPasswordValid($user, $password)) {
           // credenziali corrette: genera token
           $token = (new UriSafeTokenGenerator())->generateToken();
           $risposta['token'] = rtrim(strtr(base64_encode($profilo.$username.$password.$appId.$token), '+/', '-_'), '=');
@@ -158,7 +158,7 @@ class AppController extends AbstractController {
     // carica configurazione di sistema
     $config->carica();
     // legge app abilitate
-    $apps = $em->getRepository('App:App')->findBy(['attiva' => 1]);
+    $apps = $em->getRepository('App\Entity\App')->findBy(['attiva' => 1]);
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
@@ -186,7 +186,7 @@ class AppController extends AbstractController {
     // carica configurazione di sistema
     $config->carica();
     // controllo app
-    $app = $em->getRepository('App:App')->findOneBy(['id' => $id, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['id' => $id, 'attiva' => 1]);
     if (!$app || empty($app->getDownload())) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -223,7 +223,7 @@ class AppController extends AbstractController {
     // inizializza
     $dati = array();
     // controlla servizio
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if ($app) {
       $dati_app = $app->getDati();
       if ($dati_app['route'] == 'app_presenti' && $dati_app['ip'] == $request->getClientIp()) {
@@ -236,8 +236,8 @@ class AppController extends AbstractController {
           $dql = "SELECT CONCAT(c.anno,c.sezione) AS classe,a.nome,a.cognome,DATE_FORMAT(a.dataNascita,'%d/%m/%Y') AS dataNascita,DATE_FORMAT(e.ora,'%H:%i') AS entrata,DATE_FORMAT(u.ora,'%H:%i') AS uscita
                   FROM App\Entity\Alunno a
                   INNER JOIN a.classe c
-                  LEFT JOIN App:Entrata e WITH e.alunno=a.id AND e.data=:oggi
-                  LEFT JOIN App:Uscita u WITH u.alunno=a.id AND u.data=:oggi
+                  LEFT JOIN App\Entity\Entrata e WITH e.alunno=a.id AND e.data=:oggi
+                  LEFT JOIN App\Entity\Uscita u WITH u.alunno=a.id AND u.data=:oggi
                   WHERE a.abilitato=1
                   AND (NOT EXISTS (SELECT ass FROM App\Entity\Assenza ass WHERE ass.alunno=a.id AND ass.data=:oggi))
                   ORDER BY classe,a.cognome,a.nome,a.dataNascita ASC";
@@ -271,7 +271,7 @@ class AppController extends AbstractController {
     // legge dati
     $token = $request->request->get('token');
     // controllo app
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -300,7 +300,7 @@ class AppController extends AbstractController {
     $token = $request->headers->get('X-Giuaschool-Token');
     $username = $request->request->get('username');
     // controlla servizio
-    $app = $em->getRepository('App:App')->findOneBy(['token' => $token, 'attiva' => 1]);
+    $app = $em->getRepository('App\Entity\App')->findOneBy(['token' => $token, 'attiva' => 1]);
     if (!$app) {
       // errore: servizio non esiste o non è abilitato
       $dati['stato'] = 'ERRORE';
@@ -316,7 +316,7 @@ class AppController extends AbstractController {
       return new JsonResponse($dati);
     }
     // cerca utente
-    $alunno = $em->getRepository('App:Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['username' => $username, 'abilitato' => 1]);
     if (!$alunno) {
       // errore: utente on valido
       $dati['stato'] = 'ERRORE';
