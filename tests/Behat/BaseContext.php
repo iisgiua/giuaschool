@@ -54,6 +54,13 @@ abstract class BaseContext extends RawMinkContext implements Context {
   protected $faker;
 
   /**
+   * Generatore personalizzato di dati fittizi
+   *
+   * @var CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
+   */
+  protected ?CustomProvider $customProvider = null;
+
+  /**
    * Servizio per la gestione delle funzionalità http del kernel
    *
    * @var KernelInterface $kernel Gestore delle funzionalità http del kernel
@@ -182,7 +189,8 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $this->slugger = $slugger;
     $this->faker = $kernel->getContainer()->get('Faker\Generator');
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
-    $this->faker->addProvider(new CustomProvider($this->faker));
+    $this->customProvider = new CustomProvider($this->faker);
+    $this->faker->addProvider($this->customProvider);
     $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
     $this->session = new Session(new ChromeDriver('http://chrome_headless:9222', null, 'https://giuaschool_test',
       ['downloadBehavior' => 'allow', 'socketTimeout' => 60, 'domWaitTimeout' => 10000]));
@@ -544,7 +552,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
       // carica fixtures per l'ambiente di test
       $this->vars['obj'] = $this->alice->load([$fixturePath], [], [], PurgeMode::createTruncateMode());
       // esegue modifiche dopo l'inserimento nel db e le rende permanenti
-      CustomProvider::postPersistArrayId();
+      $this->customProvider->postPersistArrayId();
       $this->em->flush();
       // memorizza fixtures in un file SQL
       file_put_contents($sqlPath, "SET FOREIGN_KEY_CHECKS = 0;\n");

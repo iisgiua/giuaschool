@@ -57,8 +57,8 @@ App\Entity\Amministratore:
     abilitato: true
     spid: false
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: '50%? <md5()>: <strval("")>'
-    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    otp: ''
+    ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     codiceFiscale: 'BBBCRL91T26Z114G'
@@ -120,8 +120,8 @@ App\Entity\Ata:
     abilitato: true
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: '50%? <md5()>: <strval("")>'
-    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    otp: ''
+    ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     codiceFiscale (unique): '<taxId()>'
@@ -290,7 +290,7 @@ App\Entity\Docente:
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
-    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     codiceFiscale (unique): '<taxId()>'
@@ -560,8 +560,8 @@ App\Entity\Preside:
     abilitato: true
     spid: false
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: '50%? <md5()>: <strval("")>'
-    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    otp: ''
+    ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     codiceFiscale: 'TRNLNA12H23Z114P'
@@ -663,8 +663,8 @@ App\Entity\Staff:
     abilitato: true
     spid: true
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: '50%? <md5()>: <strval("")>'
-    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    otp: ''
+    ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     codiceFiscale (unique): '<taxId()>'
@@ -719,8 +719,8 @@ App\Entity\Utente:
     abilitato: '90%? 1: 0'
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
-    otp: '50%? <md5()>: <strval("")>'
-    ultimoOtp: '<($otp ? ($spid ? md5($otp) : "") : "")>'
+    otp: ''
+    ultimoOtp: ''
     dataNascita: '50%? <dateTimeBetween("-60 years", "-14 years")>'
     comuneNascita: '50%? <substr(<city()>, 0, 64)>: <strval("")>'
     codiceFiscale (unique): '<taxId()>'
