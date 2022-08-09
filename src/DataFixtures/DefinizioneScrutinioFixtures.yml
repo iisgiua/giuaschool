@@ -10,7 +10,7 @@
 
 
 App\Entity\DefinizioneScrutinio:
-  definizione_consiglio_{1..10}:
+  definizione_scrutinio_{1..10}:
     data: '<dateTimeBetween("-1 month", "now")>'
     argomenti: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'
     dati: '50%? <array_combine(<words(3)>, <sentences(3)>)>: <(array())>'

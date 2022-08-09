@@ -32,9 +32,12 @@ class AvvisoTest extends DatabaseTestCase {
     $this->noStoredFields = ['annotazioni', 'sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['AvvisoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
+    $this->canRead = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id'],
+      'gs_annotazione' => '*',
+      'gs_classe' => '*',
+      'gs_sede' => '*'];
     // SQL write
     $this->canWrite = ['gs_avviso' => ['id', 'creato', 'modificato', 'tipo', 'data', 'ora', 'ora_fine', 'cattedra_id', 'materia_id', 'oggetto', 'testo', 'allegati', 'destinatari_ata', 'destinatari', 'filtro_tipo', 'filtro', 'docente_id']];
     // SQL exec

@@ -32,9 +32,11 @@ class StoricoVotoTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['StoricoVotoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_storico_voto' => ['id', 'creato', 'modificato', 'voto', 'carenze', 'dati', 'storico_esito_id', 'materia_id']];
+    $this->canRead = ['gs_storico_voto' => ['id', 'creato', 'modificato', 'voto', 'carenze', 'dati', 'storico_esito_id', 'materia_id'],
+      'gs_materia' => '*',
+      'gs_storico_esito' => '*'];
     // SQL write
     $this->canWrite = ['gs_storico_voto' => ['id', 'creato', 'modificato', 'voto', 'carenze', 'dati', 'storico_esito_id', 'materia_id']];
     // SQL exec
@@ -71,7 +73,7 @@ class StoricoVotoTest extends DatabaseTestCase {
           ($field == 'carenze' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'storicoEsito' ? $this->getReference("storico_esito_".($i + 1)) :
-          ($field == 'materia' ? $this->getReference("materia_1") :
+          ($field == 'materia' ? $this->getReference("materia_2") :
           null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -125,18 +127,19 @@ class StoricoVotoTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // storicoEsito
+    $temp = $existent->getStoricoEsito();
     $property = $this->getPrivateProperty('App\Entity\StoricoVoto', 'storicoEsito');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::StoricoEsito - NOT BLANK');
-    $existent->setStoricoEsito($this->getReference("storico_esito_10"));
+    $existent->setStoricoEsito($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::StoricoEsito - VALID NOT BLANK');
     // materia
     $property = $this->getPrivateProperty('App\Entity\StoricoVoto', 'materia');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Materia - NOT BLANK');
-    $existent->setMateria($this->getReference("materia_10"));
+    $existent->setMateria($this->getReference("materia_5"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Materia - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

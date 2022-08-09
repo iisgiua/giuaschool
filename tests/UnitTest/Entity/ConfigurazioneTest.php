@@ -32,7 +32,7 @@ class ConfigurazioneTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ConfigurazioneFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_configurazione' => ['id', 'creato', 'modificato', 'categoria', 'parametro', 'descrizione', 'valore', 'gestito']];
     // SQL write

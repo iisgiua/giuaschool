@@ -32,7 +32,7 @@ class DefinizioneScrutinioTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['DefinizioneScrutinioFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_definizione_consiglio' => ['periodo', 'data_proposte', 'struttura', 'classi_visibili', 'id', 'creato', 'modificato', 'data', 'argomenti', 'dati', 'tipo']];
     // SQL write

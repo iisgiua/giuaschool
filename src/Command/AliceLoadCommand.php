@@ -62,7 +62,7 @@ class AliceLoadCommand extends Command {
    *
    * @var CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
    */
-  protected ?CustomProvider $customProvider;
+  protected ?CustomProvider $customProvider = null;
 
   /**
    * Generatore di fixtures con memmorizzazione su database

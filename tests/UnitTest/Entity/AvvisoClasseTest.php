@@ -32,9 +32,11 @@ class AvvisoClasseTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['AvvisoClasseFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_avviso_classe' => ['id', 'creato', 'modificato', 'avviso_id', 'classe_id', 'letto']];
+    $this->canRead = ['gs_avviso_classe' => ['id', 'creato', 'modificato', 'avviso_id', 'classe_id', 'letto'],
+      'gs_classe' => '*',
+      'gs_avviso' => '*'];
     // SQL write
     $this->canWrite = ['gs_avviso_classe' => ['id', 'creato', 'modificato', 'avviso_id', 'classe_id', 'letto']];
     // SQL exec
@@ -68,7 +70,7 @@ class AvvisoClasseTest extends DatabaseTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'avviso' ? $this->getReference("avviso_".($i + 1)) :
-          ($field == 'classe' ? $this->getReference("classe_".($i + 1)) :
+          ($field == 'classe' ? $this->getReference("classe_2") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -85,8 +87,8 @@ class AvvisoClasseTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['avviso'] = $this->getReference("avviso_6");
-      $o[$i]->setAvviso($data[$i]['avviso']);
+      $data[$i]['classe'] = $this->getReference("classe_3");
+      $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -121,18 +123,19 @@ class AvvisoClasseTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // avviso
+    $temp = $existent->getAvviso();
     $property = $this->getPrivateProperty('App\Entity\AvvisoClasse', 'avviso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Avviso - NOT BLANK');
-    $existent->setAvviso($this->getReference("avviso_10"));
+    $existent->setAvviso($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Avviso - VALID NOT BLANK');
     // classe
     $property = $this->getPrivateProperty('App\Entity\AvvisoClasse', 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_10"));
+    $existent->setClasse($this->getReference("classe_5"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // letto
     $existent->setLetto(null);

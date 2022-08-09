@@ -32,9 +32,11 @@ class AvvisoUtenteTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['AvvisoUtenteFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_avviso_utente' => ['id', 'creato', 'modificato', 'avviso_id', 'utente_id', 'letto']];
+    $this->canRead = ['gs_avviso_utente' => ['id', 'creato', 'modificato', 'avviso_id', 'utente_id', 'letto'],
+      'gs_avviso' => '*',
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_avviso_utente' => ['id', 'creato', 'modificato', 'avviso_id', 'utente_id', 'letto']];
     // SQL exec
@@ -67,8 +69,8 @@ class AvvisoUtenteTest extends DatabaseTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'avviso' ? $this->getReference("avviso_1") :
-          ($field == 'utente' ? $this->getReference("docente_".($i + 2)) :
+          ($field == 'avviso' ? $this->getReference("avviso_".($i + 1)) :
+          ($field == 'utente' ? $this->getReference("docente_2") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -85,8 +87,8 @@ class AvvisoUtenteTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['avviso'] = $this->getReference("avviso_10");
-      $o[$i]->setAvviso($data[$i]['avviso']);
+      $data[$i]['utente'] = $this->getReference("docente_3");
+      $o[$i]->setUtente($data[$i]['utente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -121,18 +123,19 @@ class AvvisoUtenteTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // avviso
+    $temp = $existent->getAvviso();
     $property = $this->getPrivateProperty('App\Entity\AvvisoUtente', 'avviso');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Avviso - NOT BLANK');
-    $existent->setAvviso($this->getReference("avviso_9"));
+    $existent->setAvviso($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Avviso - VALID NOT BLANK');
     // utente
     $property = $this->getPrivateProperty('App\Entity\AvvisoUtente', 'utente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Utente - NOT BLANK');
-    $existent->setUtente($this->getReference("docente_10"));
+    $existent->setUtente($this->getReference("docente_5"));
     $err = $this->val->validate($existent);
     $msgs = [];
     foreach ($err as $e) {

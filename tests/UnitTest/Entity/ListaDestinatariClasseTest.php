@@ -32,9 +32,11 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ListaDestinatariClasseFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id', 'letto', 'firmato']];
+    $this->canRead = ['gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id', 'letto', 'firmato'],
+      'gs_lista_destinatari' => '*',
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_lista_destinatari_classe' => ['id', 'creato', 'modificato', 'lista_destinatari_id', 'classe_id', 'letto', 'firmato']];
     // SQL exec
@@ -67,8 +69,8 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_1") :
-          ($field == 'classe' ? $this->getReference("classe_".($i + 1)) :
+          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_".($i + 1)) :
+          ($field == 'classe' ? $this->getReference("classe_2") :
           ($field == 'letto' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'firmato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null))));
@@ -86,8 +88,8 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['listaDestinatari'] = $this->getReference("lista_destinatari_10");
-      $o[$i]->setListaDestinatari($data[$i]['listaDestinatari']);
+      $data[$i]['classe'] = $this->getReference("classe_3");
+      $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -125,18 +127,20 @@ class ListaDestinatariClasseTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // listaDestinatari
+    $temp = $existent->getListaDestinatari();
     $property = $this->getPrivateProperty('App\Entity\ListaDestinatariClasse', 'listaDestinatari');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
-    $existent->setListaDestinatari($this->getReference("lista_destinatari_10"));
+    $existent->setListaDestinatari($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // classe
+    $temp = $existent->getClasse();
     $property = $this->getPrivateProperty('App\Entity\ListaDestinatariClasse', 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_10"));
+    $existent->setClasse($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // letto
     $existent->setLetto(null);

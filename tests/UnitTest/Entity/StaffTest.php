@@ -32,7 +32,7 @@ class StaffTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['StaffFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_utente' => ['sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
     // SQL write
@@ -131,7 +131,14 @@ class StaffTest extends DatabaseTestCase {
    */
   public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\Preside)) {
+        $existent = $obj;
+        break;
+      }
+    }
     // getRoles
     $this->assertSame(['ROLE_STAFF', 'ROLE_DOCENTE', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
@@ -150,7 +157,14 @@ class StaffTest extends DatabaseTestCase {
    */
   public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\Preside)) {
+        $existent = $obj;
+        break;
+      }
+    }
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // sede
     $existent->setSede(null);

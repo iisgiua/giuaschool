@@ -32,9 +32,11 @@ class LezioneTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['LezioneFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'materia_id', 'argomento', 'attivita']];
+    $this->canRead = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'materia_id', 'argomento', 'attivita'],
+      'gs_materia' => '*',
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_lezione' => ['id', 'creato', 'modificato', 'data', 'ora', 'classe_id', 'materia_id', 'argomento', 'attivita']];
     // SQL exec

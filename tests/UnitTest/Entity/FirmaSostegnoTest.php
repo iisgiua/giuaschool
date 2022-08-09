@@ -32,9 +32,10 @@ class FirmaSostegnoTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['FirmaSostegnoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo']];
+    $this->canRead = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo'],
+      'gs_lezione' => '*'];
     // SQL write
     $this->canWrite = ['gs_firma' => ['argomento', 'attivita', 'alunno_id', 'id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'tipo']];
     // SQL exec
@@ -69,9 +70,9 @@ class FirmaSostegnoTest extends DatabaseTestCase {
         $data[$i][$field] =
           ($field == 'argomento' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'attivita' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
+          ($field == 'alunno' ? $this->getReference("alunno_1") :
           ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
-          ($field == 'docente' ? $this->getReference("docente_".($i + 1)) :
+          ($field == 'docente' ? $this->getReference("docente_3") :
           null)))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }

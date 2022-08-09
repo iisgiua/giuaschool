@@ -32,7 +32,7 @@ class UtenteTest extends DatabaseTestCase {
     $this->noStoredFields = ['passwordNonCifrata', 'listaProfili', 'infoLogin'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['UtenteFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
     // SQL write
@@ -129,7 +129,16 @@ class UtenteTest extends DatabaseTestCase {
    */
   public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\Genitore) && !($obj instanceOf \App\Entity\Alunno) &&
+          !($obj instanceOf \App\Entity\Ata) && !($obj instanceOf \App\Entity\Amministratore) &&
+          !($obj instanceOf \App\Entity\Docente)) {
+        $existent = $obj;
+        break;
+      }
+    }
     // getUserIdentifier
     $this->assertSame($existent->getUsername(), $existent->getUserIdentifier(), $this->entity.'::getUserIdentifier');
     // getSalt
@@ -172,7 +181,16 @@ class UtenteTest extends DatabaseTestCase {
    */
   public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\Genitore) && !($obj instanceOf \App\Entity\Alunno) &&
+          !($obj instanceOf \App\Entity\Ata) && !($obj instanceOf \App\Entity\Amministratore) &&
+          !($obj instanceOf \App\Entity\Docente)) {
+        $existent = $obj;
+        break;
+      }
+    }
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // username
     $existent->setUsername(str_repeat('a', 2));

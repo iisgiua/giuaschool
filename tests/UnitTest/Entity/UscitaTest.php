@@ -32,9 +32,10 @@ class UscitaTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['UscitaFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_uscita' => ['id', 'creato', 'modificato', 'data', 'ora', 'note', 'valido', 'alunno_id', 'docente_id']];
+    $this->canRead = ['gs_uscita' => ['id', 'creato', 'modificato', 'data', 'ora', 'note', 'valido', 'alunno_id', 'docente_id'],
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_uscita' => ['id', 'creato', 'modificato', 'data', 'ora', 'note', 'valido', 'alunno_id', 'docente_id']];
     // SQL exec

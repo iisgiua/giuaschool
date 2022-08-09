@@ -8,11 +8,13 @@
 
 namespace App\Tests;
 
+use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Faker\Factory;
 use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
+use Fidry\AliceDataFixtures\Persistence\PurgeMode;
 use function Symfony\Component\String\u;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statements\DeleteStatement;
@@ -125,9 +127,9 @@ class DatabaseTestCase extends KernelTestCase {
   /**
    * Lista dei file di dati fissi (fixture) da caricare nell'ambiente di test
    *
-   * @var array $fixtures Lista delle fixtures da caricare
+   * @var string $fixtures Lista delle fixtures da caricare
    */
-  protected array $fixtures;
+  protected string $fixtures;
 
   /**
    * Lista dei file oggetti creati dalle fixtures
@@ -135,6 +137,13 @@ class DatabaseTestCase extends KernelTestCase {
    * @var array $objects Lista degli oggetti creati dalle fixtures
    */
   protected array $objects;
+
+  /**
+   * Generatore personalizzato di dati fittizi
+   *
+   * @var CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
+   */
+  protected ?CustomProvider $customProvider = null;
 
 
   //==================== ATTRIBUTI PRIVATI DELLA CLASSE  ====================
@@ -165,7 +174,8 @@ class DatabaseTestCase extends KernelTestCase {
     $this->val = $kernel->getContainer()->get('validator');
     $this->faker = $kernel->getContainer()->get('Faker\Generator');
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
-    $this->faker->addProvider(new CustomProvider($this->faker));
+    $this->customProvider = new CustomProvider($this->faker);
+    $this->faker->addProvider($this->customProvider);
     $this->alice = $kernel->getContainer()->get('fidry_alice_data_fixtures.loader.doctrine');
     // svuota database e carica dati fissi
     $this->addFixtures();
@@ -196,7 +206,7 @@ class DatabaseTestCase extends KernelTestCase {
     $this->sqlTrace = null;
     $this->entity = '';
     $this->fields = [];
-    $this->fixtures = [];
+    $this->fixtures = '';
   }
 
   /**
@@ -205,26 +215,56 @@ class DatabaseTestCase extends KernelTestCase {
    */
   protected function addFixtures(): void {
     // carica fixture alice
-    $path = dirname(__DIR__).'/src/DataFixtures/';
-    $this->objects = $this->alice->load(array_map(function($f) use ($path) {
-        return $path.$f.'.yml';
-      }, $this->fixtures));
-    // aggiunge alias per i riferimenti agli oggetti
-    $typesCount = [];
-    foreach ($this->objects as $name => $object) {
-      // determina classe e numero di istanza
-      $parts = explode('\\', get_class($object));
-      $type = ''.u($parts[count($parts) - 1])->snake();
-      if (!isset($typesCount[$type])) {
-        $typesCount[$type] = 1;
-      } else {
-        $typesCount[$type]++;
+    $sqlPath = __DIR__.'/temp/'.$this->fixtures.'.sql';
+    $mapPath = __DIR__.'/temp/'.$this->fixtures.'.map';
+    $connection = $this->em->getConnection();
+    $dbParams = $connection->getParams();
+    if (file_exists($sqlPath)) {
+      // svuota il database
+      $connection->exec('SET FOREIGN_KEY_CHECKS = 0');
+      $purger = new ORMPurger($this->em);
+      $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
+      $purger->purge();
+      $connection->exec('SET FOREIGN_KEY_CHECKS = 1');
+      // carica file SQL
+      $process = Process::fromShellCommandline('mysql -u'.$dbParams['user'].' -p'.$dbParams['password'].
+        ' '.$dbParams['dbname'].' < '.$sqlPath);
+      $process->setTimeout(0);
+      $process->run();
+      if (!$process->isSuccessful()) {
+        throw new ProcessFailedException($process);
       }
-      // crea alias
-      $alias = $type.'_'.$typesCount[$type];
-      if ($alias !== $name) {
-        $this->objects[$alias] = $object;
+      // carica riferimenti agli oggetti
+      $objectMap = unserialize(file_get_contents($mapPath));
+      $this->objects = [];
+      foreach ($objectMap as $name => $attrs) {
+        $this->objects[$name] = $this->em->getReference($attrs[0], $attrs[1]);
       }
+    } else {
+      // carica fixtures per l'ambiente di test
+      $fixturePath = dirname(__DIR__).'/src/DataFixtures/'.$this->fixtures.'.yml';
+      $this->objects = $this->alice->load([$fixturePath], [], [], PurgeMode::createTruncateMode());
+      // esegue modifiche dopo l'inserimento nel db e le rende permanenti
+      $this->customProvider->postPersistArrayId();
+      $this->em->flush();
+      // memorizza fixtures in un file SQL
+      file_put_contents($sqlPath, "SET FOREIGN_KEY_CHECKS = 0;\n");
+      $process = Process::fromShellCommandline('mysqldump -u'.$dbParams['user'].' -p'.$dbParams['password'].
+        ' '.$dbParams['dbname'].' -t -n --compact >> '.$sqlPath);
+      $process->setTimeout(0);
+      $process->run();
+      if (!$process->isSuccessful()) {
+        throw new ProcessFailedException($process);
+      }
+      file_put_contents($sqlPath, "SET FOREIGN_KEY_CHECKS = 1;\n", FILE_APPEND);
+      // crea mappa dei riferimenti agli oggetti
+      $objectMap = [];
+      foreach ($this->objects as $name => $object) {
+        // determina classe e numero di istanza
+        $objectMap[$name] = [get_class($object), $object->getId()];
+      }
+      // memorizza mappa dei riferimenti agli oggetti
+      file_put_contents($mapPath, serialize($objectMap));
     }
   }
 

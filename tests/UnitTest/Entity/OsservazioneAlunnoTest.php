@@ -32,9 +32,13 @@ class OsservazioneAlunnoTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['OsservazioneAlunnoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_osservazione' => ['alunno_id', 'id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'tipo']];
+    $this->canRead = ['gs_osservazione' => ['alunno_id', 'id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'tipo'],
+      'gs_cattedra' => '*',
+      'gs_classe' => '*',
+      'gs_utente' => '*',
+      'gs_materia' => '*'];
     // SQL write
     $this->canWrite = ['gs_osservazione' => ['alunno_id', 'id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'tipo']];
     // SQL exec
@@ -67,10 +71,10 @@ class OsservazioneAlunnoTest extends DatabaseTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'alunno' ? $this->getReference("alunno_1") :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
           ($field == 'data' ? $this->faker->dateTime() :
           ($field == 'testo' ? $this->faker->text() :
-          ($field == 'cattedra' ? $this->getReference("cattedra_1") :
+          ($field == 'cattedra' ? $this->getReference("cattedra_2") :
           null))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -86,8 +90,8 @@ class OsservazioneAlunnoTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['alunno'] = $this->getReference("alunno_2");
-      $o[$i]->setAlunno($data[$i]['alunno']);
+      $data[$i]['cattedra'] = $this->getReference("cattedra_3");
+      $o[$i]->setCattedra($data[$i]['cattedra']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -124,11 +128,12 @@ class OsservazioneAlunnoTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // alunno
+    $temp = $existent->getAlunno();
     $property = $this->getPrivateProperty('App\Entity\OsservazioneAlunno', 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_1"));
+    $existent->setAlunno($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
   }
 

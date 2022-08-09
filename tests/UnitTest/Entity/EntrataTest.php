@@ -32,9 +32,10 @@ class EntrataTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['EntrataFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_entrata' => ['id', 'creato', 'modificato', 'data', 'ora', 'ritardo_breve', 'note', 'valido', 'motivazione', 'giustificato', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id']];
+    $this->canRead = ['gs_entrata' => ['id', 'creato', 'modificato', 'data', 'ora', 'ritardo_breve', 'note', 'valido', 'motivazione', 'giustificato', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id'],
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_entrata' => ['id', 'creato', 'modificato', 'data', 'ora', 'ritardo_breve', 'note', 'valido', 'motivazione', 'giustificato', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id']];
     // SQL exec
@@ -74,7 +75,7 @@ class EntrataTest extends DatabaseTestCase {
           ($field == 'valido' ? $this->faker->boolean() :
           ($field == 'motivazione' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 1024)) :
           ($field == 'giustificato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
-          ($field == 'alunno' ? $this->getReference("alunno_1".($i + 1)) :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
           ($field == 'docente' ? $this->getReference("docente_1") :
           ($field == 'docenteGiustifica' ? $this->getReference("docente_1") :
           ($field == 'utenteGiustifica' ? $this->getReference("genitore_1") :

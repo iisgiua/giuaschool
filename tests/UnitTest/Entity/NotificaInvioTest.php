@@ -32,7 +32,7 @@ class NotificaInvioTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['NotificaInvioFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_notifica_invio' => ['id', 'creato', 'modificato', 'stato', 'messaggio', 'app_id', 'dati']];
     // SQL write

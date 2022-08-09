@@ -32,9 +32,11 @@ class PropostaVotoTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['PropostaVotoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_proposta_voto' => ['id', 'creato', 'modificato', 'periodo', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'alunno_id', 'classe_id', 'materia_id', 'docente_id']];
+    $this->canRead = ['gs_proposta_voto' => ['id', 'creato', 'modificato', 'periodo', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'alunno_id', 'classe_id', 'materia_id', 'docente_id'],
+      'gs_utente' => '*',
+      'gs_materia' => '*'];
     // SQL write
     $this->canWrite = ['gs_proposta_voto' => ['id', 'creato', 'modificato', 'periodo', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'alunno_id', 'classe_id', 'materia_id', 'docente_id']];
     // SQL exec

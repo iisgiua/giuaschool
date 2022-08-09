@@ -32,9 +32,10 @@ class AssenzaTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['AssenzaFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_assenza' => ['id', 'creato', 'modificato', 'data', 'giustificato', 'motivazione', 'dichiarazione', 'certificati', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id']];
+    $this->canRead = ['gs_assenza' => ['id', 'creato', 'modificato', 'data', 'giustificato', 'motivazione', 'dichiarazione', 'certificati', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id'],
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_assenza' => ['id', 'creato', 'modificato', 'data', 'giustificato', 'motivazione', 'dichiarazione', 'certificati', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id']];
     // SQL exec

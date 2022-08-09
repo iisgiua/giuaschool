@@ -32,7 +32,7 @@ class CorsoTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['CorsoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_corso' => ['id', 'creato', 'modificato', 'nome', 'nome_breve']];
     // SQL write

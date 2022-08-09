@@ -32,7 +32,7 @@ class ProvisioningTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ProvisioningFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_provisioning' => ['id', 'creato', 'modificato', 'utente_id', 'dati', 'funzione', 'stato']];
     // SQL write

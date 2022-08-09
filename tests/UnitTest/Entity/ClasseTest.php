@@ -32,9 +32,10 @@ class ClasseTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ClasseFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id']];
+    $this->canRead = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id'],
+      'gs_corso' => '*'];
     // SQL write
     $this->canWrite = ['gs_classe' => ['id', 'creato', 'modificato', 'anno', 'sezione', 'ore_settimanali', 'sede_id', 'corso_id', 'coordinatore_id', 'segretario_id']];
     // SQL exec
@@ -72,8 +73,8 @@ class ClasseTest extends DatabaseTestCase {
           ($field == 'oreSettimanali' ? $this->faker->randomNumber(4, false) :
           ($field == 'sede' ? $this->getReference("sede_1") :
           ($field == 'corso' ? $this->getReference("corso_1") :
-          ($field == 'coordinatore' ? $this->getReference("docente_curricolare_1") :
-          ($field == 'segretario' ? $this->getReference("docente_curricolare_1") :
+          ($field == 'coordinatore' ? $this->getReference("docente_1") :
+          ($field == 'segretario' ? $this->getReference("docente_2") :
           null)))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }

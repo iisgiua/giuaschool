@@ -32,9 +32,12 @@ class DocumentoTest extends DatabaseTestCase {
     $this->noStoredFields = ['allegati'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['DocumentoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma']];
+    $this->canRead = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma'],
+      'gs_sede' => '*',
+      'gs_file' => '*',
+      'gs_lista_destinatari' => '*'];
     // SQL write
     $this->canWrite = ['gs_documento' => ['id', 'creato', 'modificato', 'tipo', 'docente_id', 'lista_destinatari_id', 'materia_id', 'classe_id', 'alunno_id', 'cifrato', 'firma']];
     // SQL exec
@@ -69,7 +72,7 @@ class DocumentoTest extends DatabaseTestCase {
         $data[$i][$field] =
           ($field == 'tipo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'docente' ? $this->getReference("docente_1") :
-          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_".($i + 1)) :
+          ($field == 'listaDestinatari' ? $this->getReference("lista_destinatari_".($i + 6)) :
           ($field == 'materia' ? $this->getReference("materia_1") :
           ($field == 'classe' ? $this->getReference("classe_1") :
           ($field == 'alunno' ? $this->getReference("alunno_1") :
@@ -173,11 +176,12 @@ class DocumentoTest extends DatabaseTestCase {
     $existent->setDocente($this->getReference("docente_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // listaDestinatari
+    $temp = $existent->getListaDestinatari();
     $property = $this->getPrivateProperty('App\Entity\Documento', 'listaDestinatari');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::ListaDestinatari - NOT BLANK');
-    $existent->setListaDestinatari($this->getReference("lista_destinatari_1"));
+    $existent->setListaDestinatari($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::ListaDestinatari - VALID NOT BLANK');
     // allegati
     $property = $this->getPrivateProperty('App\Entity\Documento', 'allegati');

@@ -32,9 +32,12 @@ class FirmaTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['FirmaFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_firma' => ['id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'argomento', 'attivita', 'alunno_id', 'tipo']];
+    $this->canRead = ['gs_firma' => ['id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'argomento', 'attivita', 'alunno_id', 'tipo'],
+      'gs_classe' => '*',
+      'gs_materia' => '*',
+      'gs_lezione' => '*'];
     // SQL write
     $this->canWrite = ['gs_firma' => ['id', 'creato', 'modificato', 'lezione_id', 'docente_id', 'argomento', 'attivita', 'alunno_id', 'tipo']];
     // SQL exec
@@ -68,7 +71,7 @@ class FirmaTest extends DatabaseTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
-          ($field == 'docente' ? $this->getReference("docente_".($i + 11)) :
+          ($field == 'docente' ? $this->getReference("docente_3") :
           null));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -84,8 +87,8 @@ class FirmaTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['lezione'] = $this->getReference("lezione_10");
-      $o[$i]->setLezione($data[$i]['lezione']);
+      $data[$i]['docente'] = $this->getReference("docente_5");
+      $o[$i]->setDocente($data[$i]['docente']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -109,7 +112,14 @@ class FirmaTest extends DatabaseTestCase {
    */
   public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\FirmaSostegno)) {
+        $existent = $obj;
+        break;
+      }
+    }
     // toString
     $this->assertSame($existent->getLezione().' ('.$existent->getDocente().')', (string) $existent, $this->entity.'::toString');
   }
@@ -119,21 +129,30 @@ class FirmaTest extends DatabaseTestCase {
    */
   public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\FirmaSostegno)) {
+        $existent = $obj;
+        break;
+      }
+    }
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // lezione
+    $temp = $existent->getLezione();
     $property = $this->getPrivateProperty('App\Entity\Firma', 'lezione');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');
-    $existent->setLezione($this->getReference("lezione_1"));
+    $existent->setLezione($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Lezione - VALID NOT BLANK');
     // docente
+    $temp = $existent->getDocente();
     $property = $this->getPrivateProperty('App\Entity\Firma', 'docente');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
-    $existent->setDocente($this->getReference("docente_1"));
+    $existent->setDocente($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

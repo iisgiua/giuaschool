@@ -32,9 +32,10 @@ class ScrutinioTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ScrutinioFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_scrutinio' => ['id', 'creato', 'modificato', 'periodo', 'data', 'inizio', 'fine', 'stato', 'classe_id', 'dati', 'visibile', 'sincronizzazione']];
+    $this->canRead = ['gs_scrutinio' => ['id', 'creato', 'modificato', 'periodo', 'data', 'inizio', 'fine', 'stato', 'classe_id', 'dati', 'visibile', 'sincronizzazione'],
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_scrutinio' => ['id', 'creato', 'modificato', 'periodo', 'data', 'inizio', 'fine', 'stato', 'classe_id', 'dati', 'visibile', 'sincronizzazione']];
     // SQL exec
@@ -152,7 +153,6 @@ class ScrutinioTest extends DatabaseTestCase {
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Periodo - CHOICE');
     $existent->setPeriodo('P');
-    $existent->setClasse($this->getReference("classe_9"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Periodo - VALID CHOICE');
     // data
     $existent->setData(new \DateTime());
@@ -176,11 +176,12 @@ class ScrutinioTest extends DatabaseTestCase {
     $existent->setStato('N');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Stato - VALID CHOICE');
     // classe
+    $temp = $existent->getClasse();
     $property = $this->getPrivateProperty('App\Entity\Scrutinio', 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_10"));
+    $existent->setClasse($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // visibile
     $existent->setVisibile(new \DateTime());

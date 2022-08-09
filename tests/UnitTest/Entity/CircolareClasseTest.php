@@ -32,9 +32,11 @@ class CircolareClasseTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['CircolareClasseFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_circolare_classe' => ['id', 'creato', 'modificato', 'circolare_id', 'classe_id', 'letta']];
+    $this->canRead = ['gs_circolare_classe' => ['id', 'creato', 'modificato', 'circolare_id', 'classe_id', 'letta'],
+      'gs_circolare' => '*',
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_circolare_classe' => ['id', 'creato', 'modificato', 'circolare_id', 'classe_id', 'letta']];
     // SQL exec
@@ -68,7 +70,7 @@ class CircolareClasseTest extends DatabaseTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'circolare' ? $this->getReference("circolare_".($i + 1)) :
-          ($field == 'classe' ? $this->getReference("classe_".($i + 1)) :
+          ($field == 'classe' ? $this->getReference("classe_2") :
           ($field == 'letta' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -85,8 +87,8 @@ class CircolareClasseTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['circolare'] = $this->getReference("circolare_10");
-      $o[$i]->setCircolare($data[$i]['circolare']);
+      $data[$i]['classe'] = $this->getReference("classe_3");
+      $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -121,18 +123,19 @@ class CircolareClasseTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // circolare
+    $temp = $existent->getCircolare();
     $property = $this->getPrivateProperty('App\Entity\CircolareClasse', 'circolare');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Circolare - NOT BLANK');
-    $existent->setCircolare($this->getReference("circolare_1"));
+    $existent->setCircolare($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Circolare - VALID NOT BLANK');
     // classe
     $property = $this->getPrivateProperty('App\Entity\CircolareClasse', 'classe');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Classe - NOT BLANK');
-    $existent->setClasse($this->getReference("classe_1"));
+    $existent->setClasse($this->getReference("classe_5"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Classe - VALID NOT BLANK');
     // letta
     $existent->setLetta(null);

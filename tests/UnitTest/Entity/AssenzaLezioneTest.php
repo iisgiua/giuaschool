@@ -32,9 +32,13 @@ class AssenzaLezioneTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['AssenzaLezioneFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_assenza_lezione' => ['id', 'creato', 'modificato', 'alunno_id', 'lezione_id', 'ore']];
+    $this->canRead = ['gs_assenza_lezione' => ['id', 'creato', 'modificato', 'alunno_id', 'lezione_id', 'ore'],
+      'gs_lezione' => '*',
+      'gs_classe' => '*',
+      'gs_materia' => '*',
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_assenza_lezione' => ['id', 'creato', 'modificato', 'alunno_id', 'lezione_id', 'ore']];
     // SQL exec
@@ -68,7 +72,7 @@ class AssenzaLezioneTest extends DatabaseTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
-          ($field == 'lezione' ? $this->getReference("lezione_".($i + 1)) :
+          ($field == 'lezione' ? $this->getReference("lezione_2") :
           ($field == 'ore' ? $this->faker->randomFloat() :
           null)));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -85,8 +89,8 @@ class AssenzaLezioneTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['alunno'] = $this->getReference("alunno_6");
-      $o[$i]->setAlunno($data[$i]['alunno']);
+      $data[$i]['ore'] = $data[$i]['ore'] + 1;
+      $o[$i]->setOre($data[$i]['ore']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -123,35 +127,30 @@ class AssenzaLezioneTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // alunno
+    $temp = $existent->getAlunno();
     $property = $this->getPrivateProperty('App\Entity\AssenzaLezione', 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_6"));
+    $existent->setAlunno($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // lezione
     $property = $this->getPrivateProperty('App\Entity\AssenzaLezione', 'lezione');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Lezione - NOT BLANK');
-    $existent->setLezione($this->getReference("lezione_2"));
+    $existent->setLezione($this->getReference("lezione_3"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Lezione - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();
-    $objects = $this->em->getRepository($this->entity)->findBy([]);
-    // unique alunno-lezione
-    $alunnoSaved = $objects[1]->getAlunno();
-    $objects[1]->setAlunno($objects[0]->getAlunno());
-    $lezioneSaved = $objects[1]->getLezione();
-    $objects[1]->setLezione($objects[0]->getLezione());
-    $err = $this->val->validate($objects[1]);
+    $object = clone $existent;
+    $err = $this->val->validate($object);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.unique', $this->entity.'::alunno-lezione - UNIQUE');
-    $objects[1]->setAlunno($alunnoSaved);
-    $objects[1]->setLezione($lezioneSaved);
+    $object = null;
     // unique
     $newObject = new \App\Entity\AssenzaLezione();
     foreach ($this->fields as $field) {
-      $newObject->{'set'.ucfirst($field)}($objects[0]->{'get'.ucfirst($field)}());
+      $newObject->{'set'.ucfirst($field)}($existent->{'get'.ucfirst($field)}());
     }
     $err = $this->val->validate($newObject);
     $msgs = [];

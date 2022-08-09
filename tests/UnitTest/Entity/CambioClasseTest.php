@@ -32,9 +32,11 @@ class CambioClasseTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['CambioClasseFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_cambio_classe' => ['id', 'creato', 'modificato', 'alunno_id', 'inizio', 'fine', 'classe_id', 'note']];
+    $this->canRead = ['gs_cambio_classe' => ['id', 'creato', 'modificato', 'alunno_id', 'inizio', 'fine', 'classe_id', 'note'],
+      'gs_classe' => '*',
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_cambio_classe' => ['id', 'creato', 'modificato', 'alunno_id', 'inizio', 'fine', 'classe_id', 'note']];
     // SQL exec

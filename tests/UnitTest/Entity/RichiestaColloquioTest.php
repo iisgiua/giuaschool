@@ -32,9 +32,10 @@ class RichiestaColloquioTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['RichiestaColloquioFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'durata', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio']];
+    $this->canRead = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'durata', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio'],
+      'gs_colloquio' => '*'];
     // SQL write
     $this->canWrite = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'durata', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio']];
     // SQL exec

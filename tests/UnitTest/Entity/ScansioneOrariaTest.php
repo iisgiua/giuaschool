@@ -32,7 +32,7 @@ class ScansioneOrariaTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ScansioneOrariaFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_scansione_oraria' => ['id', 'creato', 'modificato', 'giorno', 'ora', 'inizio', 'fine', 'durata', 'orario_id']];
     // SQL write

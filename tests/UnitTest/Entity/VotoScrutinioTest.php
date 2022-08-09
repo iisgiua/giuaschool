@@ -32,9 +32,13 @@ class VotoScrutinioTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['VotoScrutinioFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_voto_scrutinio' => ['id', 'creato', 'modificato', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'scrutinio_id', 'alunno_id', 'materia_id']];
+    $this->canRead = ['gs_voto_scrutinio' => ['id', 'creato', 'modificato', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'scrutinio_id', 'alunno_id', 'materia_id'],
+      'gs_materia' => '*',
+      'gs_classe' => '*',
+      'gs_utente' => '*',
+      'gs_scrutinio' => '*'];
     // SQL write
     $this->canWrite = ['gs_voto_scrutinio' => ['id', 'creato', 'modificato', 'orale', 'scritto', 'pratico', 'unico', 'debito', 'recupero', 'assenze', 'dati', 'scrutinio_id', 'alunno_id', 'materia_id']];
     // SQL exec
@@ -77,7 +81,7 @@ class VotoScrutinioTest extends DatabaseTestCase {
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           ($field == 'scrutinio' ? $this->getReference("scrutinio_".($i + 1)) :
           ($field == 'alunno' ? $this->getReference("alunno_".($i + 1)) :
-          ($field == 'materia' ? $this->getReference("materia_1") :
+          ($field == 'materia' ? $this->getReference("materia_2") :
           null)))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
@@ -167,7 +171,7 @@ class VotoScrutinioTest extends DatabaseTestCase {
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_11"));
+    $existent->setAlunno($this->getReference("alunno_5"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // materia
     $property = $this->getPrivateProperty('App\Entity\VotoScrutinio', 'materia');

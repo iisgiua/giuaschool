@@ -32,9 +32,10 @@ class NotaTest extends DatabaseTestCase {
     $this->noStoredFields = ['alunni'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['NotaFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'classe_id', 'docente_id', 'docente_provvedimento_id']];
+    $this->canRead = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'classe_id', 'docente_id', 'docente_provvedimento_id'],
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_nota' => ['id', 'creato', 'modificato', 'tipo', 'data', 'testo', 'provvedimento', 'classe_id', 'docente_id', 'docente_provvedimento_id']];
     // SQL exec
@@ -117,9 +118,9 @@ class NotaTest extends DatabaseTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // addAlunni
     $existent->setAlunni(new \Doctrine\Common\Collections\ArrayCollection());
-    $item1 = $this->getReference('alunno_10');
+    $item1 = $this->getReference('alunno_1');
     $existent->addAlunni($item1);
-    $item2 = $this->getReference('alunno_11');
+    $item2 = $this->getReference('alunno_2');
     $existent->addAlunni($item2);
     $this->assertSame([$item1, $item2], array_values($existent->getAlunni()->toArray()), $this->entity.'::addAlunni');
     // removeAlunni

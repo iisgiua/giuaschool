@@ -32,9 +32,10 @@ class ValutazioneTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ValutazioneFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_valutazione' => ['id', 'creato', 'modificato', 'tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'docente_id', 'alunno_id', 'lezione_id', 'materia_id']];
+    $this->canRead = ['gs_valutazione' => ['id', 'creato', 'modificato', 'tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'docente_id', 'alunno_id', 'lezione_id', 'materia_id'],
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_valutazione' => ['id', 'creato', 'modificato', 'tipo', 'visibile', 'media', 'voto', 'giudizio', 'argomento', 'docente_id', 'alunno_id', 'lezione_id', 'materia_id']];
     // SQL exec

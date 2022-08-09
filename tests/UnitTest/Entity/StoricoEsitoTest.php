@@ -32,9 +32,10 @@ class StoricoEsitoTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['StoricoEsitoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_storico_esito' => ['id', 'creato', 'modificato', 'classe', 'esito', 'periodo', 'media', 'credito', 'credito_precedente', 'alunno_id', 'dati']];
+    $this->canRead = ['gs_storico_esito' => ['id', 'creato', 'modificato', 'classe', 'esito', 'periodo', 'media', 'credito', 'credito_precedente', 'alunno_id', 'dati'],
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_storico_esito' => ['id', 'creato', 'modificato', 'classe', 'esito', 'periodo', 'media', 'credito', 'credito_precedente', 'alunno_id', 'dati']];
     // SQL exec
@@ -73,7 +74,7 @@ class StoricoEsitoTest extends DatabaseTestCase {
           ($field == 'media' ? $this->faker->optional($weight = 50, $default = 0.0)->randomFloat() :
           ($field == 'credito' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
           ($field == 'creditoPrecedente' ? $this->faker->optional($weight = 50, $default = 0)->randomNumber(4, false) :
-          ($field == 'alunno' ? $this->getReference("alunno_".($i + 11)) :
+          ($field == 'alunno' ? $this->getReference("alunno_".($i + 6)) :
           ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
           null))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
@@ -147,11 +148,12 @@ class StoricoEsitoTest extends DatabaseTestCase {
     $existent->setPeriodo('F');
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Periodo - VALID CHOICE');
     // alunno
+    $temp = $existent->getAlunno();
     $property = $this->getPrivateProperty('App\Entity\StoricoEsito', 'alunno');
     $property->setValue($existent, null);
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
-    $existent->setAlunno($this->getReference("alunno_20"));
+    $existent->setAlunno($temp);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // legge dati esistenti
     $this->em->flush();

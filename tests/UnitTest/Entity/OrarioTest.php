@@ -32,7 +32,7 @@ class OrarioTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['OrarioFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_orario' => ['id', 'creato', 'modificato', 'nome', 'inizio', 'fine', 'sede_id']];
     // SQL write

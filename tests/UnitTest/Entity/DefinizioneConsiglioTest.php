@@ -32,7 +32,7 @@ class DefinizioneConsiglioTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['DefinizioneConsiglioFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_definizione_consiglio' => ['id', 'creato', 'modificato', 'data', 'argomenti', 'dati', 'periodo', 'data_proposte', 'struttura', 'classi_visibili', 'tipo']];
     // SQL write
@@ -110,7 +110,14 @@ class DefinizioneConsiglioTest extends DatabaseTestCase {
    */
   public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\DefinizioneScrutinio)) {
+        $existent = $obj;
+        break;
+      }
+    }
     // toString
     $this->assertSame('Consiglio di Classe per il '.$existent->getData()->format('d/m/Y'), (string) $existent, $this->entity.'::toString');
   }
@@ -120,7 +127,14 @@ class DefinizioneConsiglioTest extends DatabaseTestCase {
    */
   public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\DefinizioneScrutinio)) {
+        $existent = $obj;
+        break;
+      }
+    }
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // data
     $existent->setData(new \DateTime());

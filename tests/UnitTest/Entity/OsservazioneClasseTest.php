@@ -32,9 +32,12 @@ class OsservazioneClasseTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['OsservazioneClasseFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_osservazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'alunno_id', 'tipo']];
+    $this->canRead = ['gs_osservazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'alunno_id', 'tipo'],
+      'gs_materia' => '*',
+      'gs_classe' => '*',
+      'gs_cattedra' => '*'];
     // SQL write
     $this->canWrite = ['gs_osservazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'cattedra_id', 'alunno_id', 'tipo']];
     // SQL exec
@@ -110,7 +113,14 @@ class OsservazioneClasseTest extends DatabaseTestCase {
    */
   public function testMethods() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\OsservazioneAlunno)) {
+        $existent = $obj;
+        break;
+      }
+    }
     // toString
     $this->assertSame($existent->getData()->format('d/m/Y').' - '.$existent->getCattedra().': '.$existent->getTesto(), (string) $existent, $this->entity.'::toString');
   }
@@ -120,7 +130,14 @@ class OsservazioneClasseTest extends DatabaseTestCase {
    */
   public function testValidation() {
     // carica oggetto esistente
-    $existent = $this->em->getRepository($this->entity)->findOneBy([]);
+    $existent = null;
+    $objects = $this->em->getRepository($this->entity)->findBy([]);
+    foreach ($objects as $obj) {
+      if (!($obj instanceOf \App\Entity\OsservazioneAlunno)) {
+        $existent = $obj;
+        break;
+      }
+    }
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
     // data
     $property = $this->getPrivateProperty('App\Entity\OsservazioneClasse', 'data');

@@ -32,9 +32,10 @@ class DerogaAssenzaTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['DerogaAssenzaFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_deroga_assenza' => ['id', 'creato', 'modificato', 'data', 'alunno_id', 'motivazione']];
+    $this->canRead = ['gs_deroga_assenza' => ['id', 'creato', 'modificato', 'data', 'alunno_id', 'motivazione'],
+      'gs_utente' => '*'];
     // SQL write
     $this->canWrite = ['gs_deroga_assenza' => ['id', 'creato', 'modificato', 'data', 'alunno_id', 'motivazione']];
     // SQL exec

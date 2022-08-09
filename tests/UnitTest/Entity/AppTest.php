@@ -32,7 +32,7 @@ class AppTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['AppFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_app' => ['id', 'creato', 'modificato', 'nome', 'token', 'attiva', 'css', 'notifica', 'download', 'abilitati', 'dati']];
     // SQL write

@@ -32,9 +32,10 @@ class AnnotazioneTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['AnnotazioneFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_annotazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'visibile', 'avviso_id', 'classe_id', 'docente_id']];
+    $this->canRead = ['gs_annotazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'visibile', 'avviso_id', 'classe_id', 'docente_id'],
+      'gs_classe' => '*'];
     // SQL write
     $this->canWrite = ['gs_annotazione' => ['id', 'creato', 'modificato', 'data', 'testo', 'visibile', 'avviso_id', 'classe_id', 'docente_id']];
     // SQL exec

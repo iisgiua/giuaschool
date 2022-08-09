@@ -32,7 +32,7 @@ class NotificaTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['NotificaFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_notifica' => ['id', 'creato', 'modificato', 'oggetto_nome', 'oggetto_id', 'azione']];
     // SQL write

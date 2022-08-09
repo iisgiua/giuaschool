@@ -32,9 +32,10 @@ class ListaDestinatariTest extends DatabaseTestCase {
     $this->noStoredFields = ['sedi'];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['ListaDestinatariFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_lista_destinatari' => ['id', 'creato', 'modificato', 'dsga', 'ata', 'docenti', 'filtro_docenti', 'coordinatori', 'filtro_coordinatori', 'staff', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni']];
+    $this->canRead = ['gs_lista_destinatari' => ['id', 'creato', 'modificato', 'dsga', 'ata', 'docenti', 'filtro_docenti', 'coordinatori', 'filtro_coordinatori', 'staff', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni'],
+      'gs_sede' => '*'];
     // SQL write
     $this->canWrite = ['gs_lista_destinatari' => ['id', 'creato', 'modificato', 'dsga', 'ata', 'docenti', 'filtro_docenti', 'coordinatori', 'filtro_coordinatori', 'staff', 'genitori', 'filtro_genitori', 'alunni', 'filtro_alunni']];
     // SQL exec

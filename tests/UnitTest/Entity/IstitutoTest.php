@@ -32,7 +32,7 @@ class IstitutoTest extends DatabaseTestCase {
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
-    $this->fixtures = ['IstitutoFixtures'];
+    $this->fixtures = 'EntityTestFixtures';
     // SQL read
     $this->canRead = ['gs_istituto' => ['id', 'creato', 'modificato', 'tipo', 'tipo_sigla', 'nome', 'nome_breve', 'email', 'pec', 'url_sito', 'url_registro', 'firma_preside', 'email_amministratore', 'email_notifiche']];
     // SQL write
