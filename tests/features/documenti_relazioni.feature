@@ -16,7 +16,7 @@ Contesto: login docente senza cattedre
 
 ################################################################################
 # Bisogna leggere cattedre e relazioni di lavoro del docente e mostrarli
-
+@debug
 Scenario: visualizza solo lista cattedre utili per inserimento
   Data ricerca istanze di tipo "Materia":
     | id  | tipo | nome        |
