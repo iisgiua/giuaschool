@@ -58,10 +58,13 @@ Scenario: visualizza lista cattedre docente con documenti
     | id  | tipo | nome        |
     | $m1 | N    |             |
     | $m2 |      | Informatica |
+  E ricerca istanze di tipo "Classe":
+    | id   | anno |
+    | $cl1 | 4    |
   E istanze di tipo "Cattedra":
-    | id  | docente | attiva | materia | tipo |
-    | $c1 | #logged | si     | $m1     | N    |
-    | $c2 | #logged | si     | $m2     | N    |
+    | id  | docente | attiva | materia | classe | tipo |
+    | $c1 | #logged | si     | $m1     | $cl1   | N    |
+    | $c2 | #logged | si     | $m2     | $cl1   | N    |
   E istanze di tipo "Documento":
     | id  | classe     | materia     | tipo |
     | $d1 | $c2:classe | $c2:materia | R    |
