@@ -16,7 +16,7 @@ Contesto: login docente senza cattedre
 
 ################################################################################
 # Bisogna leggere cattedre e relazioni di lavoro del docente e mostrarli
-@debug
+
 Scenario: visualizza solo lista cattedre utili per inserimento
   Data ricerca istanze di tipo "Materia":
     | id  | tipo | nome        |
@@ -27,15 +27,17 @@ Scenario: visualizza solo lista cattedre utili per inserimento
   E ricerca istanze di tipo "Classe":
     | id   | anno |
     | $cl1 | 5    |
+    | $cl2 | 4    |
+    | $cl3 | 3    |
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | tipo | classe |
-    | $c1 | #logged | si     | $m1     | A    |        |
-    | $c2 | #logged | si     | $m4     | I    |        |
-    | $c3 | #logged | si     | $m4     | N    |        |
-    | $c4 | #logged | si     | $m2     | N    |        |
-    | $c5 | #logged | si     | $m4     | P    |        |
+    | $c1 | #logged | si     | $m1     | A    | $cl2   |
+    | $c2 | #logged | si     | $m4     | I    | $cl3   |
+    | $c3 | #logged | si     | $m4     | N    | $cl2   |
+    | $c4 | #logged | si     | $m2     | N    | $cl3   |
+    | $c5 | #logged | si     | $m4     | P    | $cl2   |
     | $c6 | #logged | si     | $m3     | N    | $cl1   |
-    | $c7 | #logged | no     | $m4     | N    |        |
+    | $c7 | #logged | no     | $m4     | N    | $cl3   |
     | $c8 | #logged | si     | $m4     | I    | $cl1   |
   Quando pagina attiva "documenti_relazioni"
   Allora vedi la tabella non ordinata:
