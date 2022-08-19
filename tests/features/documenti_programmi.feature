@@ -27,15 +27,17 @@ Scenario: visualizza solo lista cattedre utili per inserimento
   E ricerca istanze di tipo "Classe":
     | id   | anno |
     | $cl1 | 5    |
+    | $cl2 | 4    |
+    | $cl3 | 3    |
   E istanze di tipo "Cattedra":
     | id  | docente | attiva | materia | classe | tipo |
-    | $c1 | #logged | si     | $m1     |        | A    |
-    | $c2 | #logged | si     | $m4     |        | I    |
-    | $c3 | #logged | si     | $m4     |        | N    |
-    | $c4 | #logged | si     | $m2     |        | N    |
-    | $c5 | #logged | si     | $m4     |        | P    |
-    | $c6 | #logged | si     | $m3     |        | N    |
-    | $c7 | #logged | no     | $m4     |        | N    |
+    | $c1 | #logged | si     | $m1     | $cl2   | A    |
+    | $c2 | #logged | si     | $m4     | $cl3   | I    |
+    | $c3 | #logged | si     | $m4     | $cl2   | N    |
+    | $c4 | #logged | si     | $m2     | $cl3   | N    |
+    | $c5 | #logged | si     | $m4     | $cl2   | P    |
+    | $c6 | #logged | si     | $m3     | $cl3   | N    |
+    | $c7 | #logged | no     | $m4     | $cl2   | N    |
     | $c8 | #logged | si     | $m4     | $cl1   | I    |
   Quando pagina attiva "documenti_programmi"
   Allora vedi la tabella non ordinata:

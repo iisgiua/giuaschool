@@ -4,7 +4,6 @@ include:
   - ../../src/DataFixtures/ListaDestinatariFixtures.yml
 
 
-
 App\Entity\Documento:
   documento_1:
     tipo: 'L'
