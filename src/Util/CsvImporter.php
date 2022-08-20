@@ -295,7 +295,7 @@ class CsvImporter {
       }
       // formattazione campi
       $fields['usernameDocente'] = strtolower(trim($fields['usernameDocente']));
-      $fields['classe'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['classe']));
+      $fields['classe'] = trim($fields['classe']);
       $fields['materia'] = strtoupper(str_replace([' ',',','(',')',"'","`","\t","\r","\n"], '',
         iconv('UTF-8', 'ASCII//TRANSLIT', $fields['materia'])));
       $fields['usernameAlunno'] = strtolower(trim($fields['usernameAlunno']));
@@ -328,8 +328,8 @@ class CsvImporter {
       // controlla esistenza di classe
       $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
         'anno' => $fields['classe'][0],
-        'sezione' => $fields['classe'][1]));
-      if (count($lista) != 1 || strlen($fields['classe']) != 2) {
+        'sezione' => trim(substr($fields['classe'], 1))));
+      if (count($lista) != 1) {
         // errore: classe
         fclose($this->fh);
         $this->fh = null;
@@ -517,7 +517,7 @@ class CsvImporter {
       $fields['religione'] = strtoupper(trim($fields['religione']));
       $fields['credito3'] = trim($fields['credito3']);
       $fields['credito4'] = trim($fields['credito4']);
-      $fields['classe'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['classe']));
+      $fields['classe'] = trim($fields['classe']);
       $fields['username'] = strtolower(trim($fields['username']));
       $fields['password'] = trim($fields['password']);
       $fields['email'] = strtolower(trim($fields['email']));
@@ -643,7 +643,8 @@ class CsvImporter {
         } else {
           // classe esistente
           $classe = $this->em->getRepository('App\Entity\Classe')->findOneBy(array(
-            'anno' => $fields['classe'][0], 'sezione' => $fields['classe'][1]));
+            'anno' => $fields['classe'][0],
+            'sezione' => trim(substr($fields['classe'], 1))));
           if (!$classe) {
             // errore: classe
             fclose($this->fh);
@@ -904,7 +905,7 @@ class CsvImporter {
       }
       // formattazione campi
       $fields['username'] = strtolower(trim($fields['username']));
-      $fields['sede'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['sede']));
+      $fields['sede'] = trim($fields['sede']);
       $fields['giorno'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['giorno']));
       $fields['ora'] = trim($fields['ora']);
       $fields['frequenza'] = strtoupper(trim($fields['frequenza']));
@@ -935,7 +936,7 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di sede
-      $lista = $this->em->getRepository('App\Entity\Sede')->findByCitta($fields['sede']);
+      $lista = $this->em->getRepository('App\Entity\Sede')->findByNomeBreve($fields['sede']);
       if (count($lista) != 1) {
         // errore: sede
         fclose($this->fh);
@@ -1093,7 +1094,7 @@ class CsvImporter {
       $fields['email'] = strtolower(trim($fields['email']));
       $fields['tipo'] = strtoupper(trim($fields['tipo']));
       $fields['segreteria'] = strtoupper(trim($fields['segreteria']));
-      $fields['sede'] = strtoupper(trim($fields['sede']));
+      $fields['sede'] = trim($fields['sede']);
       // controlla campi obbligatori
       if (empty($fields['cognome']) || empty($fields['nome']) || empty($fields['sesso'])) {
         // errore
@@ -1246,10 +1247,10 @@ class CsvImporter {
       }
       // formattazione campi
       $fields['username'] = strtolower(trim($fields['username']));
-      $fields['sede'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['sede']));
+      $fields['sede'] = trim($fields['sede']);
       $fields['giorno'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['giorno']));
       $fields['ora'] = trim($fields['ora']);
-      $fields['classe'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['classe']));
+      $fields['classe'] = trim($fields['classe']);
       $fields['materia'] = strtoupper(str_replace([' ',',','(',')',"'","`","\t","\r","\n"], '',
         iconv('UTF-8', 'ASCII//TRANSLIT', $fields['materia'])));
       // controlla campi obbligatori
@@ -1278,7 +1279,7 @@ class CsvImporter {
       }
       $docente = $lista[0];
       // controlla esistenza di sede
-      $lista = $this->em->getRepository('App\Entity\Sede')->findByCitta($fields['sede']);
+      $lista = $this->em->getRepository('App\Entity\Sede')->findByNomeBreve($fields['sede']);
       if (count($lista) != 1) {
         // errore: sede
         fclose($this->fh);
@@ -1335,8 +1336,8 @@ class CsvImporter {
       if ($fields['classe'] != '---') {
         $lista = $this->em->getRepository('App\Entity\Classe')->findBy(array(
           'anno' => $fields['classe'][0],
-          'sezione' => $fields['classe'][1]));
-        if (count($lista) != 1 || strlen($fields['classe']) != 2) {
+          'sezione' => trim(substr($fields['classe'], 1))));
+        if (count($lista) != 1) {
           // errore: classe
           fclose($this->fh);
           $this->fh = null;
@@ -1957,7 +1958,7 @@ class CsvImporter {
    */
   private function nuovoAta($fields) {
     // legge sede
-    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByCitta($fields['sede']);
+    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByNomeBreve($fields['sede']);
     if ($fields['sede'] && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');
@@ -2035,7 +2036,7 @@ class CsvImporter {
       unset($fields['segreteria']);
     }
     // legge sede
-    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByCitta($fields['sede']);
+    $sede = $this->em->getRepository('App\Entity\Sede')->findOneByNomeBreve($fields['sede']);
     if (!isset($empty_fields['sede']) && !$sede) {
       // errore (restituisce solo il primo)
       $error = $this->trans->trans('exception.file_ata_sede');

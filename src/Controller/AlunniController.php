@@ -75,7 +75,7 @@ class AlunniController extends BaseController {
     $fs = new FileSystem();
     if (!$request->isMethod('POST')) {
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione);
+      $reqstack->getSession()->remove($var_sessione.'/file');
       // elimina file temporanei
       $finder = new Finder();
       $finder->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
@@ -96,7 +96,7 @@ class AlunniController extends BaseController {
       $dati = $importer->importaAlunni($file, $form);
       $dati = ($dati == null ? [] : $dati);
       // cancella dati sessione
-      $reqstack->getSession()->remove($var_sessione);
+      $reqstack->getSession()->remove($var_sessione.'/file');
     }
     // visualizza pagina
     return $this->renderHtml('alunni', 'importa', $dati, $info, [$form->createView(),  'message.importa_alunni']);

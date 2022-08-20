@@ -17,10 +17,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * Classe - dati delle classi
  *
  * @ORM\Entity(repositoryClass="App\Repository\ClasseRepository")
- * @ORM\Table(name="gs_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","sezione","corso_id"})})
+ * @ORM\Table(name="gs_classe", uniqueConstraints={@ORM\UniqueConstraint(columns={"anno","sezione"})})
  * @ORM\HasLifecycleCallbacks
  *
- * @UniqueEntity(fields={"anno","sezione","corso"}, message="field.unique")
+ * @UniqueEntity(fields={"anno","sezione"}, message="field.unique")
  *
  * @author Antonello Dessì
  */

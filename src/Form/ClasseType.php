@@ -41,8 +41,8 @@ class ClasseType extends AbstractType {
         'choices' => array('1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5),
         'attr' => ['widget' => 'gs-row-start'],
         'required' => true))
-      ->add('sezione', ChoiceType::class, array('label' => 'label.classe_sezione',
-        'choices' => array_combine(range('A', 'Z'), range('A', 'Z')),
+      ->add('sezione', TextType::class, array('label' => 'label.classe_sezione',
+        'trim' => true,
         'attr' => ['widget' => 'gs-row-end'],
         'required' => true))
       ->add('corso', EntityType::class, array('label' => 'label.corso',

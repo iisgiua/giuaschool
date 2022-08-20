@@ -1057,7 +1057,8 @@ message.importa_ata: "Il file CSV da importare deve avere la struttura seguente 
     <span class=\"ml-5\">* campi obbligatori</span><br>
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
     <span class=\"ml-5\">Tipo: D=DSGA, A=amministrativo, T=tecnico, U=autista, C=collaboratore scolastico</span><br>
-    <span class=\"ml-5\">Segreteria: S=si, N=no</span>
+    <span class=\"ml-5\">Segreteria: S=si, N=no</span><br>
+    <span class=\"ml-5\">Sede: nome breve della sede</span>
   </small>"
 message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
   <span class=\"ml-4\"><strong>Utenti</strong>: \"*Cognome, *Nome, *Sesso, CodiceFiscale, Username, Password, Email\"</span><br>
@@ -1069,6 +1070,7 @@ message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
     <span class=\"ml-5\">Tipo: N=normale, I=itp, P=potenziamento</span><br>
     <span class=\"ml-5\">Supplenza: S=si, N=no</span><br>
+    <span class=\"ml-5\">Sede: nome breve della sede</span><br>
     <span class=\"ml-5\">Giorno: LU=lunedì, MA=martedì, ME=mercoledì, GI=giovedì, VE=venerdì, SA=sabato</span><br>
     <span class=\"ml-5\">Frequenza: S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=quarta settimana</span><br>
     <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
