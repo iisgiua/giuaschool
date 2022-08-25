@@ -317,6 +317,8 @@ label.stato_colloquio_N: Colloquio rifiutato
 label.stato_colloquio: Stato della richiesta
 label.stato: Stato
 label.submit: Conferma
+label.start: Inizia
+label.next: Continua
 label.successiva: Successiva
 label.successivo: Successivo
 label.supplenza: Supplenza
@@ -535,8 +537,8 @@ page.docenti.importa: Importa Docenti
 title.docenti.importa: Importa i dati dei Docenti
 page.login.home: Pagina Principale
 title.login.home: Pagina Principale
-page.sistema.importa: Importa Anno
-title.sistema.importa: Importa i dati dell'anno precedente
+page.sistema.nuovo: Nuovo A.S.
+title.sistema.nuovo: Effettua il passaggio al nuovo A.S. {anno}
 page.sistema.banner: Gestione Banner
 title.sistema.banner: Gestione dei banner per le pagine principali
 page.sistema.manutenzione: Manutenzione Sistema
@@ -1106,8 +1108,27 @@ message.password: "Inserisci la username e la password (due volte).<br>
   I campi contrassegnati con l'asterisco (*) sono obbligatori."
 message.alias: "Inserisci la username dell'utente che vuoi impersonare.<br>
   I campi contrassegnati con l'asterisco (*) sono obbligatori."
-message.importa: "Inserisci il nome del database e il percorso dell'applicazione usati lo scorso anno scolastico nel registro, quindi indica quali dati importare.<br>
-  I campi contrassegnati con l'asterisco (*) sono obbligatori."
+message.nuovo_anno_0: "<strong>Prima di procedere, assicurati di avere effettuato le seguenti operazioni:<br>
+  1) archiviazione dei documenti;<br>
+  2) backup completo (file e database), per poter effettuare il ripristino in caso di problemi;<br>
+  3) posto il sito in modalità manutenzione e disconnesso tutti gli altri utenti collegati.</strong><br><br>
+  <em>Cliccando sul pulsante INIZIA saranno rimossi tutti i documenti non necessari.</em>"
+message.nuovo_anno_1: "<strong>Verrà ora effettuato lo svuotamento delle tabelle dai dati del precedente anno scolastico.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno rimossi i dati non necessari.</em>"
+message.nuovo_anno_2: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+  1) recupero delle circolari dello scorso anno scolastico;<br>
+  2) rimozione degli utenti disabilitati.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
+message.nuovo_anno_3: "<strong>Verranno ora effettuate le seguenti operazioni:<br>
+  1) recupero degli esiti scolastici dello scorso anno;<br>
+  2) passaggio di classe degli alunni promossi;<br>
+  3) rimozione degli alunni in uscita;<br>
+  4) impostazione nella configurazione del nuovo anno scolastico.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA saranno eseguite le operazioni indicate.</em>"
+message.nuovo_anno_4: "<strong>Verrà ora effettuato lo svuotamento della cache di sistema.</strong><br><br>
+  <em>Cliccando sul pulsante CONTINUA sarà svuotata la cache.</em>"
+message.nuovo_anno_5: "<strong>Le operazioni per il passaggio al nuovo anno sono state completate.</strong><br><br>
+  <em>Si può ora continuare con la configurazione dei parametri per il nuovo anno scolastico.</em>"
 message.archivia: "Seleziona i documenti da archiviare."
 message.modifica_alunno: "Inserisci i dati dell'alunno e del genitore. Se si modifica la classe, verrà inserito il nuovo valore senza gestire il cambio classe.<br>
   I campi contrassegnati con l'asterisco (*) sono obbligatori."
@@ -1147,6 +1168,7 @@ message.log_errori: "Inserisci la data e l'ora iniziale dell'evento per scaricar
 message.avviso_attiva_log_level: "Attenzione: l'operazione attiverà la modalità di debug per il log di sistema. Si consiglia di lasciarla attiva solo per il tempo necessario."
 message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la modalità di debug per il log di sistema."
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
+message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.

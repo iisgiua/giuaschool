@@ -28,12 +28,12 @@ class BaseController extends AbstractController {
   /**
    * @var EntityManagerInterface $em Gestore delle entità
    */
-  private $em;
+  protected $em;
 
   /**
    * @var RequestStack $reqstack Gestore dello stack delle variabili globali
    */
-  private $reqstack;
+  protected $reqstack;
 
 
   //==================== METODI DELLA CLASSE ====================

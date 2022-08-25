@@ -24,7 +24,6 @@ use App\Entity\Classe;
 use App\Entity\Materia;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
-use App\Entity\Ata;
 use App\Entity\Docente;
 use App\Form\DocumentoType;
 use App\Util\LogHandler;

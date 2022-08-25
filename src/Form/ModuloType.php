@@ -8,17 +8,18 @@
 
 namespace App\Form;
 
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 
 
 /**
@@ -35,22 +36,18 @@ class ModuloType extends AbstractType {
    * @param array $options Lista di opzioni per il form
    */
   public function buildForm(FormBuilderInterface $builder, array $options) {
-    if ($options['formMode'] == 'importa') {
-      // form importa
+    if ($options['formMode'] == 'nuovo') {
+      // form nuovo anno
       $builder
-        ->add('database', TextType::class, array('label' => 'label.database_precedente',
-          'required' => true))
-        ->add('directory', TextType::class, array('label' => 'label.directory_precedente',
-          'required' => true))
-        ->add('dati', ChoiceType::class, array('label' => 'label.importa_dati',
-          'data' => ['I','C','L','A','P','E','X'],
-          'choices' => ['label.importa_istituto' => 'I', 'label.importa_corsi' => 'C',
-            'label.importa_classi' => 'L', 'label.importa_alunni' => 'A',
-            'label.importa_personale' => 'P', 'label.importa_esiti' => 'E',
-            'label.importa_scrutini_rinviati' => 'X'],
-          'expanded' => true,
-          'multiple' => true,
-          'required' => false));
+        ->setAction($options['actionUrl']);
+      if ($options['step'] <= 4) {
+        $builder
+          ->add('submit', SubmitType::class, array('label' => $options['step'] == 0 ? 'label.start' : 'label.next'));
+      } else {
+        $builder
+          ->add('submit', SubmitType::class, array('label' => 'label.submit',
+            'attr' => ['style' => 'visibility:hidden']));
+      }
     } elseif ($options['formMode'] == 'archivia') {
       // form archivia
       $builder
@@ -181,7 +178,7 @@ class ModuloType extends AbstractType {
           'attr' => ['widget' => 'gs-button-start']))
         ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
           'attr' => ['widget' => 'gs-button-end', 'onclick' => "location.href='".$options['returnUrl']."'"]));
-    } else {
+    } elseif ($options['step'] === null) {
       $builder
         ->add('submit', SubmitType::class, array('label' => 'label.submit'));
     }
@@ -195,10 +192,14 @@ class ModuloType extends AbstractType {
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('formMode');
     $resolver->setDefined('returnUrl');
+    $resolver->setDefined('actionUrl');
+    $resolver->setDefined('step');
     $resolver->setDefined('dati');
     $resolver->setDefaults(array(
       'formMode' => 'importa',
       'returnUrl' => null,
+      'actionUrl' => null,
+      'step' => null,
       'dati' => null,
       'data_class' => null));
   }
