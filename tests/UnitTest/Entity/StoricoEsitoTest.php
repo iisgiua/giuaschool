@@ -68,7 +68,7 @@ class StoricoEsitoTest extends DatabaseTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'classe' ? $this->faker->passthrough(substr($this->faker->text(), 0, 16)) :
+          ($field == 'classe' ? $this->faker->passthrough(substr($this->faker->text(), 0, 66)) :
           ($field == 'esito' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'periodo' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'media' ? $this->faker->optional($weight = 50, $default = 0.0)->randomFloat() :
@@ -91,7 +91,7 @@ class StoricoEsitoTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['classe'] = substr($this->faker->text(), 0, 16);
+      $data[$i]['classe'] = substr($this->faker->text(), 0, 66);
       $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');

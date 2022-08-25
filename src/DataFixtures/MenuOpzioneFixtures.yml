@@ -314,9 +314,9 @@ App\Entity\MenuOpzione:
   menu_opzione_SISTEMA4:
     ruolo: 'M'
     funzione: 'N'
-    nome: 'Importazione&nbsp;iniziale'
-    descrizione: 'Importa i dati dall''A.S. precedente'
-    url: 'sistema_importa'
+    nome: 'Archiviazione'
+    descrizione: 'Archivia i registri e i documenti delle classi'
+    url: 'sistema_archivia'
     ordinamento: 4
     abilitato: true
     icona: ''
@@ -325,9 +325,9 @@ App\Entity\MenuOpzione:
   menu_opzione_SISTEMA5:
     ruolo: 'M'
     funzione: 'N'
-    nome: 'Archiviazione'
-    descrizione: 'Archivia i registri e i documenti delle classi'
-    url: 'sistema_archivia'
+    nome: 'Nuovo&nbsp;A.S.'
+    descrizione: 'Effettua il passaggio al nuovo Anno Scolastico'
+    url: 'sistema_nuovo'
     ordinamento: 5
     abilitato: true
     icona: ''
