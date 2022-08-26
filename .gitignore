@@ -17,6 +17,8 @@
 !/FILES/upload/avvisi/.gitkeep
 /FILES/upload/circolari/*
 !/FILES/upload/circolari/.gitkeep
+/FILES/upload/documenti/*
+!/FILES/upload/documenti/.gitkeep
 /FILES/upload/foto/*
 !/FILES/upload/foto/.gitkeep
 /public/app/*

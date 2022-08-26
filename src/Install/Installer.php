@@ -171,7 +171,7 @@ class Installer {
       "INSERT INTO `gs_configurazione` VALUES (NULL,NOW(),NOW(),'SCUOLA','voti_finali_N','Lista dei voti finali per le altre materie<br>[lista serializzata]','a:8:{s:3:\"min\";i:0;s:3:\"max\";i:10;s:4:\"suff\";i:6;s:3:\"med\";i:5;s:6:\"valori\";s:22:\"0,1,2,3,4,5,6,7,8,9,10\";s:9:\"etichette\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";s:4:\"voti\";s:39:\"\"Non Classificato\",1,2,3,4,5,6,7,8,9,10\";s:8:\"votiAbbr\";s:25:\"\"NC\",1,2,3,4,5,6,7,8,9,10\";}',1);",
     ],
     '1.4.5' => [],
-    'build' => [
+    '1.5.0' => [
       "DELETE FROM gs_configurazione WHERE parametro IN ('blocco_inizio', 'blocco_fine', 'ip_scuola');",
       "UPDATE gs_configurazione SET categoria='SCUOLA' WHERE parametro IN ('giorni_festivi_istituto', 'giorni_festivi_classi');",
       "UPDATE gs_configurazione SET categoria='ACCESSO' WHERE parametro IN ('id_provider', 'dominio_id_provider', 'spid');",
@@ -192,7 +192,8 @@ class Installer {
       "DELETE FROM gs_menu;",
       "INSERT INTO `gs_menu` VALUES (1,'2022-08-21 00:12:51','2022-08-21 00:12:51','help','Aiuto','Guida e supporto per l\'utente',0),(2,'2022-08-21 00:12:51','2022-08-21 00:12:51','user','Utente','Gestione del profilo dell\'utente',0),(3,'2022-08-21 00:12:51','2022-08-21 00:12:51','info','Informazioni','Informazioni sull\'applicazione',0),(4,'2022-08-21 00:12:51','2022-08-21 00:12:51','main','Menu Principale','Apri il menu principale',0),(5,'2022-08-21 00:12:51','2022-08-21 00:12:51','sistema','','',0),(6,'2022-08-21 00:12:51','2022-08-21 00:12:51','scuola','','',0),(7,'2022-08-21 00:12:51','2022-08-21 00:12:51','ata','','',0),(8,'2022-08-21 00:12:51','2022-08-21 00:12:51','docenti','','',0),(9,'2022-08-21 00:12:51','2022-08-21 00:12:51','alunni','','',0);",
       "INSERT INTO `gs_menu_opzione` VALUES (1,1,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','U','N','Manuale','Scarica il manuale d\'uso dell\'applicazione','',2,0,''),(2,2,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','U','N','Profilo','Gestione del profilo dell\'utente','utenti_profilo',1,1,''),(3,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','N','N','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,1,''),(4,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','N','N','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,1,''),(5,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','N','N','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,1,''),(6,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','N','N','Credits','Mostra i credits','info_credits',4,1,''),(7,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','U','N','Note&nbsp;legali','Mostra le note legali','info_noteLegali',1,1,''),(8,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','U','N','Privacy','Mostra l\'informativa sulla privacy','info_privacy',2,1,''),(9,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','U','N','Cookie','Mostra l\'informativa sui cookie','info_cookie',3,1,''),(10,3,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','U','N','Credits','Mostra i credits','info_credits',4,1,''),(11,4,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','N','N','Accesso','Accedi al registro','login_form',1,1,''),(12,4,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','N','N','Recupero&nbsp;Password','Recupera la password di accesso tramite la posta elettronica','login_recovery',2,1,''),(13,4,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','N','N','App&nbsp;e&nbsp;Servizi','Informazioni su app e servizi disponibili','app_info',3,1,''),(14,4,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','U','N','Home','Pagina principale','login_home',10,1,''),(15,4,5,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Sistema','Gestione generale del sistema','',20,1,'cog'),(16,4,6,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Scuola','Configurazione dei dati della scuola','',21,1,'school'),(17,4,7,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','ATA','Gestione del personale ATA','',22,1,'user-tie'),(18,4,8,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Docenti','Gestione dei docenti','',23,1,'user-graduate'),(19,4,9,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Alunni','Gestione degli alunni','',24,1,'child'),(20,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Parametri','Configura i parametri dell\'applicazione','sistema_parametri',1,1,''),(21,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Banner','Visualizza un banner sulle pagine principali','sistema_banner',2,1,''),(22,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Manutenzione','Imposta la modalit&agrave; di manutenzione','sistema_manutenzione',3,1,''),(23,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Archiviazione','Archivia i registri e i documenti delle classi','sistema_archivia',4,1,''),(24,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Nuovo&nbsp;A.S.','Effettua il passaggio al nuovo Anno Scolastico','sistema_nuovo',5,1,''),(25,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','__SEPARATORE__','__SEPARATORE__','',6,1,''),(26,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Alias','Assumi l\'identit&agrave; di un altro utente','sistema_alias',7,1,''),(27,5,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Password','Cambia la password di un utente','sistema_password',8,1,''),(28,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Amministratore','Configura i dati dell\'amministratore','scuola_amministratore',1,1,''),(29,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Dirigente&nbsp;scolastico','Configura i dati del dirigente scolastico','scuola_dirigente',2,1,''),(30,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Istituto','Configura i dati dell\'Istituto','scuola_istituto',3,1,''),(31,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Sedi','Configura i dati delle sedi scolastiche','scuola_sedi',4,1,''),(32,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Corsi','Configura i corsi di studio','scuola_corsi',5,1,''),(33,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Materie','Configura le materie scolastiche','scuola_materie',6,1,''),(34,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Classi','Configura le classi','scuola_classi',7,1,''),(35,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Festivit&agrave;','Configura il calendario delle festivit&agrave;','scuola_festivita',8,1,''),(36,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Orario','Configura la scansione oraria delle lezioni','scuola_orario',9,1,''),(37,6,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Scrutini','Configura gli scrutini','scuola_scrutini',10,1,''),(38,7,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Importa','Importa da file i dati del personale ATA','ata_importa',1,1,''),(39,7,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Modifica','Modifica i dati del personale ATA','ata_modifica',2,1,''),(40,8,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Importa','Importa da file i dati dei docenti','docenti_importa',1,1,''),(41,8,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Modifica','Modifica i dati dei docenti','docenti_modifica',2,1,''),(42,8,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Staff','Configura i componenti dello staff della dirigenza','docenti_staff',3,1,''),(43,8,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Coordinatori','Configura i coordinatori del Consiglio di Classe','docenti_coordinatori',4,1,''),(44,8,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Segretari','Configura i segretari del Consiglio di Classe','docenti_segretari',5,1,''),(45,8,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Cattedre','Configura le cattedre dei docenti','docenti_cattedre',6,1,''),(46,8,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Colloqui','Configura i colloqui dei docenti','docenti_colloqui',7,1,''),(47,9,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Importa','Importa da file i dati degli alunni','alunni_importa',1,1,''),(48,9,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Modifica','Modifica i dati degli alunni','alunni_modifica',2,1,''),(49,9,NULL,'2022-08-21 00:12:51','2022-08-21 00:12:51','M','N','Cambio&nbsp;classe','Configura il cambio di classe degli alunnii','alunni_classe',3,1,'');"
-    ]
+    ],
+    'build' => []
   ];
 
   /**
@@ -212,8 +213,24 @@ class Installer {
       "SELECT id FROM gs_configurazione WHERE parametro='voti_finali_C';",
       "SELECT id FROM gs_configurazione WHERE parametro='voti_finali_N';"
     ],
-    'build' => [
-    ]
+    'build' => []
+  ];
+
+  /**
+   * Conserva la lista dei file da rimuovere per l'aggiornamento di versione.
+   *
+   * @var array $fileDelete Lista di file da rimuovere
+   */
+  private $fileDelete = [
+    '1.5.0' => [
+      "src/Command/ModificaCommand.php",
+      "src/Command/AliceLoadCommand.php",
+      "src/Security/CardAuthenticator.php",
+      "src/Security/EnrollAuthenticator.php",
+      "src/Security/LogoutHandler.php",
+      "src/Security/TokenAuthenticator.php",
+    ],
+    'build' => []
   ];
 
 
@@ -881,6 +898,8 @@ class Installer {
       // connessione al db
       $this->connectDb();
     }
+    // esegue prima l'aggiornamento dei file
+    $this->updateFiles();
     // legge versione attuale
     $version = $this->getParameter('versione');
     foreach ($this->dataUpdate as $newVersion=>$data) {
@@ -1132,6 +1151,34 @@ class Installer {
     } catch (\Exception $err) {
       $debug = $err->getMessage();
       throw new \Exception('Errore nella spedizione della mail<br><pre>'.$debug.'</pre>', $this->step);
+    }
+  }
+
+  /**
+   * Aggiorna i file alla nuova versione, cancellando quelli indicati
+   *
+   */
+  private function updateFiles() {
+    $fs = new Filesystem();
+    // legge versione attuale
+    $version = $this->getParameter('versione');
+    // esegue aggiornamento per tutte versioni necessarie
+    foreach ($this->fileDelete as $newVersion=>$data) {
+      if ($newVersion != 'build' && version_compare($newVersion, $version, '<=')) {
+        // salta versione
+        continue;
+      }
+      // esegue i comandi
+      try {
+        if (count($data) > 0) {
+          $fs->remove($data);
+        }
+      } catch (\Exception $e) {
+        throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento dei file.<br>'.
+          $e->getMessage(), $this->step);
+      }
+      // passa alla versione successiva
+      $version = $newVersion;
     }
   }
 
