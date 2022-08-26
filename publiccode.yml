@@ -28,7 +28,7 @@ description:
       Istruzione Superiore “Michele Giua”**.
 
 
-      Ssebbene sia stato riscritto da zero, può essere considerato una _fork_ di
+      Sebbene sia stato riscritto da zero, può essere considerato una _fork_ di
       [Lampschool](http://www.lampschool.it/), perché riprende da questo diverse
       soluzioni algoritmiche e l’importante esperienza maturata con il suo uso.
 
@@ -72,7 +72,7 @@ maintenance:
 name: giua@school
 platforms:
   - web
-releaseDate: '2022-07-07'
+releaseDate: '2022-08-27'
 softwareType: standalone/web
-softwareVersion: 1.4.5
+softwareVersion: 1.5.0
 url: 'https://github.com/iisgiua/giuaschool'
