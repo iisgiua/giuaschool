@@ -223,6 +223,7 @@ class Installer {
    */
   private $fileDelete = [
     '1.5.0' => [
+      "config/bootstrap.php",
       "src/Command/ModificaCommand.php",
       "src/Command/AliceLoadCommand.php",
       "src/Security/CardAuthenticator.php",
@@ -1171,7 +1172,8 @@ class Installer {
       // esegue i comandi
       try {
         if (count($data) > 0) {
-          $fs->remove($data);
+          $files = array_map(function($f) { return $this->projectPath.'/'.$f; }, $data);
+          $fs->remove($files);
         }
       } catch (\Exception $e) {
         throw new \Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento dei file.<br>'.
