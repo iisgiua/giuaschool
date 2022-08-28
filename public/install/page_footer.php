@@ -21,7 +21,7 @@
                   <li>
                     <a class="list-item" href="https://github.com/iisgiua/giuaschool" target="_blank" title="Vai al progetto su GitHub">
                       <svg class="icon icon-sm icon-light mr-2" aria-hidden="true">
-                        <use xlink:href=vendor/fontawesome/sprites/brands.svg#github"></use>
+                        <use xlink:href=../vendor/fontawesome/sprites/brands.svg#github"></use>
                       </svg><span class="text-white">Codice sorgente su GitHub</span>
                     </a>
                   </li>
