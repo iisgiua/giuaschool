@@ -3161,6 +3161,7 @@ class ScrutinioUtil {
    */
   public function quadroCrediti(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
+    $dati['alunni'] = [];
     $conversione = [
       21 => 26,
       22 => 28,
@@ -3236,6 +3237,7 @@ class ScrutinioUtil {
    */
   public function quadroCompetenze(Docente $docente, Classe $classe, $periodo) {
     $dati = array();
+    $dati['alunni'] = [];
     // periodo dello scrutinio
     $dati['periodo'] = $periodo;
     // legge alunni

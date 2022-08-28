@@ -15,12 +15,13 @@
   <tr nobr="true">
     <td align="center" style="width:10mm"><strong>Pr.</strong></td>
     <td align="center" style="width:50mm"><strong>Alunno</strong></td>
-{% if dati.classe.anno >= 3 %}
+{% if dati.classe.anno == 3 %}
+    <td align="center" style="width:20mm"><strong>Credito</strong></td>
+{% endif %}
+{% if dati.classe.anno > 3 %}
     <td align="center" style="width:20mm"><strong>Credito<br>Prec.</strong></td>
-  {% if dati.classe.anno > 3 %}
     <td align="center" style="width:20mm"><strong>Credito</strong></td>
     <td align="center" style="width:20mm"><strong>Credito<br>Tot.</strong></td>
-  {% endif %}
 {% endif %}
 {% set esitoDim = 180 - (10 + 50 + (dati.classe.anno == 3 ? 20 : (dati.classe.anno == 4 ? 60 : 0))) %}
     <td align="center" style="width:{{ esitoDim }}mm"><strong>Esito</strong></td>

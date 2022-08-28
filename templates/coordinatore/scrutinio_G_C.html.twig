@@ -67,7 +67,11 @@
             Formato del documento: <em>PDF</em>
           </td>
           <td>
+      {% if dati.ammessi > 0 %}
             <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': dati.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+      {% else %}
+            <span class="label label-warning">NESSUN DOCUMENTO</span>
+      {% endif %}
           </td>
         </tr>
     {% endif %}
