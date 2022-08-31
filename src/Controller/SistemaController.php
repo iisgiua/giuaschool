@@ -615,7 +615,7 @@ class SistemaController extends BaseController {
               $this->em->persist($esito);
             }
             // alunni scrutinati
-            $scrutinabili = array_keys($scrutinio->getDato('scrutinabili'));
+            $scrutinabili = array_keys($scrutinio->getDato('scrutinabili') ?? []);
             foreach ($scrutinabili as $alu) {
               $esitoScrutinio = $this->em->getRepository('App\Entity\Esito')->findOneBy(['alunno' => $alu,
                 'scrutinio' => $scrutinio]);
