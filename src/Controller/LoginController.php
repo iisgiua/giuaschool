@@ -167,83 +167,44 @@ class LoginController extends BaseController {
         'required' => true,
         'trim' => true,
         'attr' => array('placeholder' => 'label.email')))
-      ->add('otp', TextType::class, array('label' => 'label.login_otp',
-        'required' => false,
-        'trim' => true,
-        'attr' => array('placeholder' => 'label.otp')))
       ->add('submit', SubmitType::class, array('label' => 'label.submit',
         'attr' => array('class' => 'btn-primary')))
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      $codice = $form->get('otp')->getData();
       $email = $form->get('email')->getData();
-      $utente = $em->getRepository('App\Entity\Utente')->findOneByEmail($email);
+      $utente = $em->getRepository('App\Entity\Utente')->findOneBy(['email' => $email, 'abilitato' => 1]);
       // legge configurazione: id_provider
-      $id_provider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider');
-      // se id_provider controlla tipo utente
-      if ($id_provider && ($utente instanceOf Docente || $utente instanceOf Alunno)) {
-        // errore: docente/staff/preside/alunno
+      $idProvider = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
+      $idProviderTipo = $reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
+      if (!$utente) {
+        // utente non esiste
+        $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', array(
+          'email' => $email,
+          'ip' => $request->getClientIp()));
+        $errore = 'exception.invalid_recovery_email';
+      } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
+        // errore: niente recupero password per utente su id provider
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', array(
           'email' => $email,
           'ip' => $request->getClientIp()));
         $errore = 'exception.invalid_user_type_recovery';
-      } elseif (!$utente) {
-        // utente non esiste
-        $logger->error('Email non valida nella richiesta di recupero password.', array(
-          'email' => $email,
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.invalid_recovery_email';
-      } elseif (!$utente->getAbilitato()) {
-        // utente disabilitato
-        $logger->error('Utente disabilitato nella richiesta di recupero password.', array(
-          'username' => $utente->getUsername(),
-          'email' => $email,
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.invalid_recovery_email';
-      } elseif ($utente instanceof Amministratore) {
-        // utente non abilitato al recupero password
-        $logger->error('Utente non abilitato alla richiesta di recupero password.', array(
-          'username' => $utente->getUsername(),
-          'email' => $email,
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.invalid_recovery_type';
-      } elseif (($utente instanceof Docente) && !$utente->getOtp()) {
-        // docente senza OTP
-        $logger->error('Docente non abilitato alla richiesta di recupero password.', array(
-          'username' => $utente->getUsername(),
-          'email' => $email,
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.invalid_recovery_type';
-      } elseif (($utente instanceof Docente) && ($codice == '' || !$otp->controllaOtp($utente->getOtp(), $codice))) {
-        // errato OTP
-        $logger->error('Docente con OTP errato.', array(
-          'username' => $utente->getUsername(),
-          'email' => $email,
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.otp_errato';
-      } elseif (($utente instanceof Docente) && $utente->getUltimoOtp() == $codice) {
-        // OTP replay attack
-        $logger->error('Docente con OTP ripetuto (OTP replay attack).', array(
-          'username' => $utente->getUsername(),
-          'email' => $email,
-          'ip' => $request->getClientIp(),
-          ));
-        $errore = 'exception.otp_errato';
       } else {
-        if ($utente instanceof Docente) {
+        // effettua il recupero password
+        if ($utente instanceof Amministratore) {
+          // amministratore
+          $num_pwdchars = 12;
+          $template_html = 'email/credenziali_recupero_ata.html.twig';
+          $template_txt = 'email/credenziali_recupero_ata.txt.twig';
+          $utente_mail = $utente;
+          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
+        } elseif ($utente instanceof Docente) {
           // docenti/staff/preside
           $num_pwdchars = 10;
           $template_html = 'email/credenziali_recupero_docenti.html.twig';
           $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
           $utente_mail = $utente;
           $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
-          $utente->setUltimoOtp($codice);
         } elseif ($utente instanceof Ata) {
           // ATA
           $num_pwdchars = 8;
@@ -319,8 +280,7 @@ class LoginController extends BaseController {
       'form' => $form->createView(),
       'errore' => $errore,
       'successo' => $successo,
-      'manutenzione' => $manutenzione,
-      ));
+      'manutenzione' => $manutenzione));
   }
 
   /**
