@@ -30,9 +30,10 @@ doctrine:
       numeric_functions:
         day: App\DQL\DayFunction
         month: App\DQL\MonthFunction
-        year: App\DQL\YearFunction
         weekday: App\DQL\WeekdayFunction
+        year: App\DQL\YearFunction
       string_functions:
         date_format: App\DQL\DateFormatFunction
-        replace: App\DQL\ReplaceFunction
+        find_in_set: App\DQL\FindInSetFunction
         instr: App\DQL\InstrFunction
+        replace: App\DQL\ReplaceFunction
