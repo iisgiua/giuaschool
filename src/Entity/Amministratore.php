@@ -41,16 +41,16 @@ class Amministratore extends Utente {
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'MU';
+    return 'M';
   }
 
   /**
-   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente [N=nessuna]
    *
-   * @return string Codifica della funzione
+   * @return array Lista della codifica delle funzioni
    */
-  public function getCodiceFunzione(): string {
-    return 'N';
+  public function getCodiceFunzioni(): array {
+    return ['N'];
   }
 
 }

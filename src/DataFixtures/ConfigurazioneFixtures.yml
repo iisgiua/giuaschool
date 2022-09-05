@@ -226,13 +226,13 @@ App\Entity\Configurazione:
   configurazione_ACCESSO3:
     categoria: 'ACCESSO'
     parametro: 'id_provider_tipo'
-    descrizione: 'Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (U=utente qualsiasi, A=alunno, G=genitore. D=docente/staff/preside, S=staff/preside, P=preside, T=ata, M=amministratore)\<br>[testo]'
+    descrizione: 'Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore)\<br>[testo]'
     valore: ''
     gestito: false
   configurazione_ACCESSO4:
     categoria: 'ACCESSO'
     parametro: 'otp_tipo'
-    descrizione: 'Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all''uso dell''OTP (U=utente qualsiasi, A=alunno, G=genitore. D=docente, S=staff/preside, T=ata, M=amministratore)\<br>[testo]'
+    descrizione: 'Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all''uso dell''OTP (A=alunno, G=genitore. D=docente, S=staff, T=ata, M=amministratore)\<br>[testo]'
     valore: 'DS'
     gestito: false
   configurazione_ACCESSO5:

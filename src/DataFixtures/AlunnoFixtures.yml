@@ -16,6 +16,7 @@
 #   foto: fotografia dell'alunno
 #   classe: classe attuale dell'alunno (se esiste)
 #   genitori: genitori dell'alunno
+#   rappresentante: indica se l'alunno è eletto come rappresentante [C=di classe, I=di istituto, P=consulta prov.]
 ####################
 
 
@@ -64,6 +65,7 @@ App\Entity\Alunno:
     credito4: 0
     classe: '@classe_1*'
     genitori: '<collection(@genitore1_prima_<current()>, @genitore2_prima_<current()>)>'
+    rappresentante: '30%? <randomElement(["C", "I", "P"])>: <strval("")>'
   alunno_seconda_{1..50}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -101,6 +103,7 @@ App\Entity\Alunno:
     credito4: 0
     classe: '@classe_2*'
     genitori: '<collection(@genitore1_seconda_<current()>, @genitore2_seconda_<current()>)>'
+    rappresentante: '30%? <randomElement(["C", "I", "P"])>: <strval("")>'
   alunno_terza_{1..50}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -138,6 +141,7 @@ App\Entity\Alunno:
     credito4: 0
     classe: '@classe_3*'
     genitori: '<collection(@genitore1_terza_<current()>, @genitore2_terza_<current()>)>'
+    rappresentante: '30%? <randomElement(["C", "I", "P"])>: <strval("")>'
   alunno_quarta_{1..50}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -175,6 +179,7 @@ App\Entity\Alunno:
     credito4: 0
     classe: '@classe_4*'
     genitori: '<collection(@genitore1_quarta_<current()>, @genitore2_quarta_<current()>)>'
+    rappresentante: '30%? <randomElement(["C", "I", "P"])>: <strval("")>'
   alunno_quinta_{1..50}:
     sesso: '<randomElement(["M", "F"])>'
     username (unique): '<generaUtente($sesso, ".s")>'
@@ -212,6 +217,7 @@ App\Entity\Alunno:
     credito4: '<numberBetween(8, 13)>'
     classe: '@classe_5*'
     genitori: '<collection(@genitore1_quinta_<current()>, @genitore2_quinta_<current()>)>'
+    rappresentante: '30%? <randomElement(["C", "I", "P"])>: <strval("")>'
 
   # ----- alunni con sostegno -----
   alunno_sostegno_{1..5}:
@@ -251,6 +257,7 @@ App\Entity\Alunno:
     credito3: '<($classe->getAnno() > 3 ? 8 : 0)>'
     credito4: '<($classe->getAnno() == 5 ? 12 : 0)>'
     genitori: '<collection(@genitore1_sostegno_<current()>, @genitore2_sostegno_<current()>)>'
+    rappresentante: ''
 
   # ----- alunni con materia alternativa -----
   alunno_alternativa_{1..5}:
@@ -290,3 +297,4 @@ App\Entity\Alunno:
     credito3: '<($classe->getAnno() > 3 ? 8 : 0)>'
     credito4: '<($classe->getAnno() == 5 ? 12 : 0)>'
     genitori: '<collection(@genitore1_alternativa_<current()>, @genitore2_alternativa_<current()>)>'
+    rappresentante: ''

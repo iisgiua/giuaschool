@@ -1,0 +1,32 @@
+####################
+# RichiestaFixtures - dati di test
+#
+# Dati per la gestione di una richiesta:
+#   inviata: data e ora dell'invio della richiesta
+#   gestita: data e ora della gestione della richiesta, o null se non ancora gestita
+#   valori: lista dei valori per i campi da compilare nel modulo: nome1 => valore1, nome2 => valore2...
+#   documento: percorso del file del documento generato dalla richiesta
+#   allegati: lista dei percorsi dei file allegati
+#   stato: indica lo stato della richiesta: I=inviata, G=gestita, A=annullata dal richiedente, C=cancellata dal gestore
+#   messaggio: eventuale messaggio da mostrare al richiedente
+#   utente: utente che invia la richiesta
+#   definizioneRichiesta: definizione del modulo a cui appartiene la richiesta
+####################
+
+
+include:
+  - UtenteFixtures.yml
+  - DefinizioneRichiestaFixtures.yml
+
+
+App\Entity\Richiesta:
+  richiesta_{1..10}:
+    inviata: '<dateTimeBetween("-1 month", "now")>'
+    gestita: '50%? <dateTimeBetween("-1 month", "now")>'
+    valori: '<array_combine(<words(3)>, <sentences(3)>)>'
+    documento: '<substr(<text()>, 0, 255)>'
+    allegati: '<array_combine(<words(3)>, <sentences(3)>)>'
+    stato: '<randomElement(["I", "G", "A", "C"])>'
+    messaggio: '<text()>'
+    utente: '@utente_*'
+    definizioneRichiesta: '@definizione_richiesta_*'

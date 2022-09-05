@@ -34,8 +34,8 @@ App\Entity\MenuOpzione:
     #-- menu: '@menu_HELP'
     #-- sottoMenu:
   menu_opzione_HELP2:
-    ruolo: 'U'
-    funzione: 'N'
+    ruolo: 'M'
+    funzione: ''
     nome: 'Manuale'
     descrizione: 'Scarica il manuale d''uso dell''applicazione'
     url: ''
@@ -69,8 +69,8 @@ App\Entity\MenuOpzione:
 
   # ----- opzioni menu UTENTE -----
   menu_opzione_UTENTE1:
-    ruolo: 'U'
-    funzione: 'N'
+    ruolo: 'UAGDSPTM'
+    funzione: ''
     nome: 'Profilo'
     descrizione: 'Gestione del profilo dell''utente'
     url: 'utenti_profilo'
@@ -80,10 +80,10 @@ App\Entity\MenuOpzione:
     menu: '@menu_UTENTE'
     sottoMenu:
 
-  # ----- opzioni menu INFO - PUBBLICO -----
+  # ----- opzioni menu INFO - PUBBLICO E UTENTE-----
   menu_opzione_INFO1:
-    ruolo: 'N'
-    funzione: 'N'
+    ruolo: 'NUAGDSPTM'
+    funzione: ''
     nome: 'Note&nbsp;legali'
     descrizione: 'Mostra le note legali'
     url: 'info_noteLegali'
@@ -93,8 +93,8 @@ App\Entity\MenuOpzione:
     menu: '@menu_INFO'
     sottoMenu:
   menu_opzione_INFO2:
-    ruolo: 'N'
-    funzione: 'N'
+    ruolo: 'NUAGDSPTM'
+    funzione: ''
     nome: 'Privacy'
     descrizione: 'Mostra l''informativa sulla privacy'
     url: 'info_privacy'
@@ -104,8 +104,8 @@ App\Entity\MenuOpzione:
     menu: '@menu_INFO'
     sottoMenu:
   menu_opzione_INFO3:
-    ruolo: 'N'
-    funzione: 'N'
+    ruolo: 'NUAGDSPTM'
+    funzione: ''
     nome: 'Cookie'
     descrizione: 'Mostra l''informativa sui cookie'
     url: 'info_cookie'
@@ -115,54 +115,8 @@ App\Entity\MenuOpzione:
     menu: '@menu_INFO'
     sottoMenu:
   menu_opzione_INFO4:
-    ruolo: 'N'
-    funzione: 'N'
-    nome: 'Credits'
-    descrizione: 'Mostra i credits'
-    url: 'info_credits'
-    ordinamento: 4
-    abilitato: true
-    icona: ''
-    menu: '@menu_INFO'
-    sottoMenu:
-
-  # ----- opzioni menu INFO - UTENTE -----
-  menu_opzione_INFO10:
-    ruolo: 'U'
-    funzione: 'N'
-    nome: 'Note&nbsp;legali'
-    descrizione: 'Mostra le note legali'
-    url: 'info_noteLegali'
-    ordinamento: 1
-    abilitato: true
-    icona: ''
-    menu: '@menu_INFO'
-    sottoMenu:
-  menu_opzione_INFO11:
-    ruolo: 'U'
-    funzione: 'N'
-    nome: 'Privacy'
-    descrizione: 'Mostra l''informativa sulla privacy'
-    url: 'info_privacy'
-    ordinamento: 2
-    abilitato: true
-    icona: ''
-    menu: '@menu_INFO'
-    sottoMenu:
-  menu_opzione_INFO12:
-    ruolo: 'U'
-    funzione: 'N'
-    nome: 'Cookie'
-    descrizione: 'Mostra l''informativa sui cookie'
-    url: 'info_cookie'
-    ordinamento: 3
-    abilitato: true
-    icona: ''
-    menu: '@menu_INFO'
-    sottoMenu:
-  menu_opzione_INFO13:
-    ruolo: 'U'
-    funzione: 'N'
+    ruolo: 'NUAGDSPTM'
+    funzione: ''
     nome: 'Credits'
     descrizione: 'Mostra i credits'
     url: 'info_credits'
@@ -175,7 +129,7 @@ App\Entity\MenuOpzione:
   # ----- opzioni menu PRINCIPALE - PUBBLICO -----
   menu_opzione_PRINCIPALE1:
     ruolo: 'N'
-    funzione: 'N'
+    funzione: ''
     nome: 'Accesso'
     descrizione: 'Accedi al registro'
     url: 'login_form'
@@ -186,7 +140,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_PRINCIPALE2:
     ruolo: 'N'
-    funzione: 'N'
+    funzione: ''
     nome: 'Recupero&nbsp;Password'
     descrizione: 'Recupera la password di accesso tramite la posta elettronica'
     url: 'login_recovery'
@@ -197,7 +151,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_PRINCIPALE3:
     ruolo: 'N'
-    funzione: 'N'
+    funzione: ''
     nome: 'App&nbsp;e&nbsp;Servizi'
     descrizione: 'Informazioni su app e servizi disponibili'
     url: 'app_info'
@@ -209,8 +163,8 @@ App\Entity\MenuOpzione:
 
   # ----- opzioni menu PRINCIPALE - UTENTI -----
   menu_opzione_PRINCIPALE10:
-    ruolo: 'U'
-    funzione: 'N'
+    ruolo: 'UAGDSPTM'
+    funzione: ''
     nome: 'Home'
     descrizione: 'Pagina principale'
     url: 'login_home'
@@ -223,7 +177,7 @@ App\Entity\MenuOpzione:
   # ----- opzioni menu PRINCIPALE - AMMINISTRATORE -----
   menu_opzione_PRINCIPALE20:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Sistema'
     descrizione: 'Gestione generale del sistema'
     url: ''
@@ -234,7 +188,7 @@ App\Entity\MenuOpzione:
     sottoMenu: '@menu_SISTEMA'
   menu_opzione_PRINCIPALE21:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Scuola'
     descrizione: 'Configurazione dei dati della scuola'
     url: ''
@@ -245,7 +199,7 @@ App\Entity\MenuOpzione:
     sottoMenu: '@menu_SCUOLA'
   menu_opzione_PRINCIPALE22:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'ATA'
     descrizione: 'Gestione del personale ATA'
     url: ''
@@ -256,7 +210,7 @@ App\Entity\MenuOpzione:
     sottoMenu: '@menu_ATA'
   menu_opzione_PRINCIPALE23:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Docenti'
     descrizione: 'Gestione dei docenti'
     url: ''
@@ -267,7 +221,7 @@ App\Entity\MenuOpzione:
     sottoMenu: '@menu_DOCENTI'
   menu_opzione_PRINCIPALE24:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Alunni'
     descrizione: 'Gestione degli alunni'
     url: ''
@@ -280,7 +234,7 @@ App\Entity\MenuOpzione:
   # ----- opzioni sottomenu SISTEMA - AMMINISTRATORE -----
   menu_opzione_SISTEMA1:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Parametri'
     descrizione: 'Configura i parametri dell''applicazione'
     url: 'sistema_parametri'
@@ -291,7 +245,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SISTEMA2:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Banner'
     descrizione: 'Visualizza un banner sulle pagine principali'
     url: 'sistema_banner'
@@ -302,7 +256,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SISTEMA3:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Manutenzione'
     descrizione: 'Imposta la modalit&agrave; di manutenzione'
     url: 'sistema_manutenzione'
@@ -313,7 +267,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SISTEMA4:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Archiviazione'
     descrizione: 'Archivia i registri e i documenti delle classi'
     url: 'sistema_archivia'
@@ -324,7 +278,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SISTEMA5:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Nuovo&nbsp;A.S.'
     descrizione: 'Effettua il passaggio al nuovo Anno Scolastico'
     url: 'sistema_nuovo'
@@ -335,7 +289,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SISTEMA6:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: '__SEPARATORE__'
     descrizione: '__SEPARATORE__'
     url: ''
@@ -346,7 +300,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SISTEMA7:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Alias'
     descrizione: 'Assumi l''identit&agrave; di un altro utente'
     url: 'sistema_alias'
@@ -357,7 +311,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SISTEMA8:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Password'
     descrizione: 'Cambia la password di un utente'
     url: 'sistema_password'
@@ -370,7 +324,7 @@ App\Entity\MenuOpzione:
   # ----- opzioni sottomenu SCUOLA - AMMINISTRATORE -----
   menu_opzione_SCUOLA1:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Amministratore'
     descrizione: 'Configura i dati dell''amministratore'
     url: 'scuola_amministratore'
@@ -381,7 +335,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA2:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Dirigente&nbsp;scolastico'
     descrizione: 'Configura i dati del dirigente scolastico'
     url: 'scuola_dirigente'
@@ -392,7 +346,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA3:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Istituto'
     descrizione: 'Configura i dati dell''Istituto'
     url: 'scuola_istituto'
@@ -403,7 +357,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA4:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Sedi'
     descrizione: 'Configura i dati delle sedi scolastiche'
     url: 'scuola_sedi'
@@ -414,7 +368,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA5:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Corsi'
     descrizione: 'Configura i corsi di studio'
     url: 'scuola_corsi'
@@ -425,7 +379,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA6:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Materie'
     descrizione: 'Configura le materie scolastiche'
     url: 'scuola_materie'
@@ -436,7 +390,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA7:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Classi'
     descrizione: 'Configura le classi'
     url: 'scuola_classi'
@@ -447,7 +401,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA8:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Festivit&agrave;'
     descrizione: 'Configura il calendario delle festivit&agrave;'
     url: 'scuola_festivita'
@@ -458,7 +412,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA9:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Orario'
     descrizione: 'Configura la scansione oraria delle lezioni'
     url: 'scuola_orario'
@@ -469,7 +423,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_SCUOLA10:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Scrutini'
     descrizione: 'Configura gli scrutini'
     url: 'scuola_scrutini'
@@ -478,11 +432,22 @@ App\Entity\MenuOpzione:
     icona: ''
     menu: '@menu_SCUOLA'
     sottoMenu:
+  menu_opzione_SCUOLA11:
+    ruolo: 'M'
+    funzione: ''
+    nome: 'Moduli&nbsp;di&nbsp;richiesta'
+    descrizione: 'Configura i dati dei moduli di richiesta'
+    url: 'scuola_moduli'
+    ordinamento: 11
+    abilitato: true
+    icona: ''
+    menu: '@menu_SCUOLA'
+    sottoMenu:
 
   # ----- opzioni sottomenu ATA - AMMINISTRATORE -----
   menu_opzione_ATA1:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Importa'
     descrizione: 'Importa da file i dati del personale ATA'
     url: 'ata_importa'
@@ -493,7 +458,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_ATA2:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Modifica'
     descrizione: 'Modifica i dati del personale ATA'
     url: 'ata_modifica'
@@ -506,7 +471,7 @@ App\Entity\MenuOpzione:
   # ----- opzioni sottomenu DOCENTI - AMMINISTRATORE -----
   menu_opzione_DOCENTI1:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Importa'
     descrizione: 'Importa da file i dati dei docenti'
     url: 'docenti_importa'
@@ -517,7 +482,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_DOCENTI2:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Modifica'
     descrizione: 'Modifica i dati dei docenti'
     url: 'docenti_modifica'
@@ -528,7 +493,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_DOCENTI3:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Staff'
     descrizione: 'Configura i componenti dello staff della dirigenza'
     url: 'docenti_staff'
@@ -539,7 +504,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_DOCENTI4:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Coordinatori'
     descrizione: 'Configura i coordinatori del Consiglio di Classe'
     url: 'docenti_coordinatori'
@@ -550,7 +515,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_DOCENTI5:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Segretari'
     descrizione: 'Configura i segretari del Consiglio di Classe'
     url: 'docenti_segretari'
@@ -561,7 +526,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_DOCENTI6:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Cattedre'
     descrizione: 'Configura le cattedre dei docenti'
     url: 'docenti_cattedre'
@@ -572,7 +537,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_DOCENTI7:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Colloqui'
     descrizione: 'Configura i colloqui dei docenti'
     url: 'docenti_colloqui'
@@ -585,7 +550,7 @@ App\Entity\MenuOpzione:
   # ----- opzioni sottomenu ALUNNI - AMMINISTRATORE -----
   menu_opzione_ALUNNI1:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Importa'
     descrizione: 'Importa da file i dati degli alunni'
     url: 'alunni_importa'
@@ -596,7 +561,7 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_ALUNNI2:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Modifica'
     descrizione: 'Modifica i dati degli alunni'
     url: 'alunni_modifica'
@@ -607,9 +572,9 @@ App\Entity\MenuOpzione:
     sottoMenu:
   menu_opzione_ALUNNI3:
     ruolo: 'M'
-    funzione: 'N'
+    funzione: ''
     nome: 'Cambio&nbsp;classe'
-    descrizione: 'Configura il cambio di classe degli alunnii'
+    descrizione: 'Configura il cambio di classe degli alunni'
     url: 'alunni_classe'
     ordinamento: 3
     abilitato: true

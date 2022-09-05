@@ -31,6 +31,13 @@ class Genitore extends Utente {
   private bool $giustificaOnline = true;
 
   /**
+   * @var string|null $rappresentante Indica se il genitore è eletto come rappresentante [C=di classe, I=di istituto]
+   *
+   * @ORM\Column(type="string", length=1, nullable=true)
+   */
+  private ?string $rappresentante = '';
+
+  /**
    * @var Alunno|null $alunno Alunno figlio o di cui si è tutori
    *
    * @ORM\ManyToOne(targetEntity="Alunno", inversedBy="genitori")
@@ -59,6 +66,27 @@ class Genitore extends Utente {
    */
   public function setGiustificaOnline(?bool $giustificaOnline): self {
     $this->giustificaOnline = ($giustificaOnline == true);
+    return $this;
+  }
+
+  /**
+   * Indica se il genitore è eletto come rappresentante [C=di classe, I=di istituto]
+   *
+   * @return string|null Indica se il genitore è eletto come rappresentante
+   */
+  public function getRappresentante(): ?string {
+    return $this->rappresentante;
+  }
+
+  /**
+   * Modifica il valore che indica se il genitore è eletto come rappresentante [C=di classe, I=di istituto]
+   *
+   * @param string $rappresentante Indica se il genitore è eletto come rappresentante
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRappresentante(string $rappresentante): self {
+    $this->rappresentante = $rappresentante;
     return $this;
   }
 
@@ -103,16 +131,17 @@ class Genitore extends Utente {
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'GU';
+    return 'G';
   }
 
   /**
-   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
+   * Le possibili funzioni sono: N=nessuna, C=rappr. classe, I=rappr. istituto
    *
-   * @return string Codifica della funzione
+   * @return array Lista della codifica delle funzioni
    */
-  public function getCodiceFunzione(): string {
-    return 'N';
+  public function getCodiceFunzioni(): array {
+    return $this->rappresentante ? [$this->rappresentante, 'N'] : ['N'];
   }
 
 }

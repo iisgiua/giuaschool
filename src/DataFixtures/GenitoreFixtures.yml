@@ -4,6 +4,7 @@
 # Dati degli alunni: gli stessi degli utenti più i seguenti
 #   giustificaOnline: indica se il genitore può effettuare la giustificazione online oppure no
 #   alunno: alunno figlio o di cui si è tutori
+#   rappresentante: indica se il genitore è eletto come rappresentante [C=di classe, I=di istituto]
 ####################
 
 
@@ -39,6 +40,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_prima_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore1_seconda_{1..50}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -64,6 +66,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_seconda_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore1_terza_{1..50}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -89,6 +92,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_terza_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore1_quarta_{1..50}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -114,6 +118,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_quarta_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore1_quinta_{1..50}:
     sesso: 'M'
     nome: '<nome($sesso)>'
@@ -139,6 +144,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_quinta_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
 
   # ----- secondo genitore degli alunni delle classi -----
   genitore2_prima_{1..50}:
@@ -166,6 +172,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_prima_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore2_seconda_{1..50}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -191,6 +198,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_seconda_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore2_terza_{1..50}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -216,6 +224,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_terza_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore2_quarta_{1..50}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -241,6 +250,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_quarta_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
   genitore2_quinta_{1..50}:
     sesso: 'F'
     nome: '<nome($sesso)>'
@@ -266,6 +276,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_quinta_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
 
   # ----- primo genitore degli alunni con sostegno: si usa genitore già presente -----
   genitore1_sostegno_{1..5}:
@@ -293,6 +304,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
 
   # ----- secondo genitore degli alunni con sostegno: si usa genitore già presente -----
   genitore2_sostegno_{1..5}:
@@ -320,6 +332,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_sostegno_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
 
   # ----- primo genitore degli alunni con materia alternativa: si usa genitore già presente -----
   genitore1_alternativa_{1..5}:
@@ -347,6 +360,7 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_alternativa_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'
 
   # ----- secondo genitore degli alunni con materia alternativa: si usa genitore già presente -----
   genitore2_alternativa_{1..5}:
@@ -374,3 +388,4 @@ App\Entity\Genitore:
     notifica: '<(array())>'
     giustificaOnline: true
     alunno: '@alunno_alternativa_<current()>'
+    rappresentante: '30%? <randomElement(["C", "I"])>: <strval("")>'

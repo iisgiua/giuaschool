@@ -34,9 +34,9 @@ class DocenteTest extends DatabaseTestCase {
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_utente' => ['responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canRead = ['gs_utente' => ['responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL write
-    $this->canWrite = ['gs_utente' => ['responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canWrite = ['gs_utente' => ['responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -142,13 +142,15 @@ class DocenteTest extends DatabaseTestCase {
     // getRoles
     $this->assertSame(['ROLE_DOCENTE', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
-    $this->assertSame('DU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    $this->assertSame('D', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
     // controllaRuolo
-    $this->assertFalse($existent->controllaRuolo('NAGSPTM'), $this->entity.'::controllaRuolo');
+    $this->assertFalse($existent->controllaRuolo('NUAGSPTM'), $this->entity.'::controllaRuolo');
     $this->assertTrue($existent->controllaRuolo('D'), $this->entity.'::controllaRuolo');
-    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
-    // getCodiceFunzione
-    $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
+    // getCodiceFunzioni
+    $existent->setResponsabileBes(false);
+    $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    $existent->setResponsabileBes(true);
+    $this->assertSame(['B', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     // toString
     $this->assertSame(($existent->getSesso() == 'M' ? 'Prof. ' : 'Prof.ssa ').$existent->getCognome().' '.$existent->getNome(), (string) $existent, $this->entity.'::toString');
   }

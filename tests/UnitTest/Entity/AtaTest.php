@@ -34,9 +34,9 @@ class AtaTest extends DatabaseTestCase {
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_utente' => ['tipo', 'segreteria', 'sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canRead = ['gs_utente' => ['tipo', 'segreteria', 'sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL write
-    $this->canWrite = ['gs_utente' => ['tipo', 'segreteria', 'sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canWrite = ['gs_utente' => ['tipo', 'segreteria', 'sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -136,16 +136,15 @@ class AtaTest extends DatabaseTestCase {
     // getRoles
     $this->assertSame(['ROLE_ATA', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
-    $this->assertSame('TU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    $this->assertSame('T', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
     // controllaRuolo
-    $this->assertFalse($existent->controllaRuolo('NAGDSPM'), $this->entity.'::controllaRuolo');
+    $this->assertFalse($existent->controllaRuolo('NUAGDSPM'), $this->entity.'::controllaRuolo');
     $this->assertTrue($existent->controllaRuolo('T'), $this->entity.'::controllaRuolo');
-    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
-    // getCodiceFunzione
+    // getCodiceFunzioni
     $existent->setSegreteria(false);
-    $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
+    $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
     $existent->setSegreteria(true);
-    $this->assertSame('E', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
+    $this->assertSame(['E', 'N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
   }
 
   /**

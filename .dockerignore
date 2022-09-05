@@ -32,6 +32,8 @@
 /src/Controller/TestController.php
 /templates/argo/
 /templates/info/.local/
+/templates/PERSONALI/*
+!/templates/PERSONALI/.gitkeep
 /templates/tema-new/info/.local/
 /tests/temp/*
 !/tests/temp/.gitkeep

@@ -34,9 +34,9 @@ class PresideTest extends DatabaseTestCase {
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_utente' => ['sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canRead = ['gs_utente' => ['sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL write
-    $this->canWrite = ['gs_utente' => ['sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canWrite = ['gs_utente' => ['sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -134,15 +134,12 @@ class PresideTest extends DatabaseTestCase {
     // getRoles
     $this->assertSame(['ROLE_PRESIDE', 'ROLE_STAFF', 'ROLE_DOCENTE', 'ROLE_UTENTE'], $existent->getRoles(), $this->entity.'::getRoles');
     // getCodiceRuolo
-    $this->assertSame('PSDU', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
+    $this->assertSame('P', $existent->getCodiceRuolo(), $this->entity.'::getCodiceRuolo');
     // controllaRuolo
-    $this->assertFalse($existent->controllaRuolo('NAGTM'), $this->entity.'::controllaRuolo');
+    $this->assertFalse($existent->controllaRuolo('NUAGDSTM'), $this->entity.'::controllaRuolo');
     $this->assertTrue($existent->controllaRuolo('P'), $this->entity.'::controllaRuolo');
-    $this->assertTrue($existent->controllaRuolo('S'), $this->entity.'::controllaRuolo');
-    $this->assertTrue($existent->controllaRuolo('D'), $this->entity.'::controllaRuolo');
-    $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
-    // getCodiceFunzione
-    $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
+    // getCodiceFunzioni
+    $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
   }
 
   /**

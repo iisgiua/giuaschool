@@ -34,9 +34,9 @@ class UtenteTest extends DatabaseTestCase {
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canRead = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL write
-    $this->canWrite = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo']];
+    $this->canWrite = ['gs_utente' => ['id', 'creato', 'modificato', 'username', 'password', 'email', 'token', 'token_creato', 'prelogin', 'prelogin_creato', 'abilitato', 'spid', 'ultimo_accesso', 'otp', 'ultimo_otp', 'nome', 'cognome', 'sesso', 'data_nascita', 'comune_nascita', 'codice_fiscale', 'citta', 'indirizzo', 'numeri_telefono', 'notifica', 'tipo', 'segreteria', 'sede_id', 'responsabile_bes', 'responsabile_bes_sede_id', 'bes', 'note_bes', 'autorizza_entrata', 'autorizza_uscita', 'note', 'frequenza_estero', 'religione', 'credito3', 'credito4', 'giustifica_online', 'richiesta_certificato', 'foto', 'classe_id', 'alunno_id', 'ruolo', 'rappresentante']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -161,8 +161,14 @@ class UtenteTest extends DatabaseTestCase {
     // controllaRuolo
     $this->assertFalse($existent->controllaRuolo('NAGDSPTM'), $this->entity.'::controllaRuolo');
     $this->assertTrue($existent->controllaRuolo('U'), $this->entity.'::controllaRuolo');
-    // getCodiceFunzione
-    $this->assertSame('N', $existent->getCodiceFunzione(), $this->entity.'::getCodiceFunzione');
+    $this->assertFalse($existent->controllaRuolo(''), $this->entity.'::controllaRuolo');
+    // getCodiceFunzioni
+    $this->assertSame(['N'], $existent->getCodiceFunzioni(), $this->entity.'::getCodiceFunzioni');
+    // controllaRuoloFunzione
+    $this->assertTrue($existent->controllaRuoloFunzione('TE,UN'), $this->entity.'::controllaRuoloFunzione');
+    $this->assertFalse($existent->controllaRuoloFunzione('TE,UX,UZ'), $this->entity.'::controllaRuoloFunzione');
+    $this->assertFalse($existent->controllaRuoloFunzione(''), $this->entity.'::controllaRuoloFunzione');
+    $this->assertTrue($existent->controllaRuoloFunzione('UN'), $this->entity.'::controllaRuoloFunzione');
     // toString
     $this->assertSame($existent->getCognome().' '.$existent->getNome().' ('.$existent->getUsername().')', (string) $existent, $this->entity.'::toString');
     // creaToken

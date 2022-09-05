@@ -75,17 +75,17 @@ class Staff extends Docente {
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'SDU';
+    return 'S';
   }
 
   /**
-   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
    * Utilizza le stesse funzioni dei docenti
    *
-   * @return string Codifica della funzione
+   * @return array Lista della codifica delle funzioni
    */
-  public function getCodiceFunzione(): string {
-    return parent::getCodiceFunzione();
+  public function getCodiceFunzioni(): array {
+    return parent::getCodiceFunzioni();
   }
 
 }

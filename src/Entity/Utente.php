@@ -934,7 +934,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
   /**
    * Controlla e restituisce il valore vero se l'utente ha un ruolo tra quelli specificati
    * I codici utilizzati sono:
-   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente/staff/preside, S=staff/preside, P=preside, T=ata, M=amministratore
+   *    N=nessuno (utente anonimo), U=utente loggato, A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore
    *
    * @param string lista Lista codificata dei ruoli ammessi
    *
@@ -942,27 +942,52 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, \Seri
    */
   public function controllaRuolo(string $lista): bool {
     if (empty($lista)) {
-      // nessun ruolo specificato
+      // lista vuota
       return false;
     }
-    // controlla tutti i ruoli specificati
-    for ($i = 0; $i < strlen($lista); $i++) {
-      if (strpos($this->getCodiceRuolo(), $lista[$i]) !== false) {
-        // ruolo ammesso trovato
-        return true;
-      }
+    // controlla i ruoli specificati
+    if (strpos($lista, $this->getCodiceRuolo()) !== false) {
+      // ruolo ammesso trovato
+      return true;
     }
     // nessun ruolo ammesso
     return false;
   }
 
   /**
-   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente [N=nessuna]
    *
-   * @return string Codifica della funzione
+   * @return array Lista della codifica delle funzioni
    */
-  public function getCodiceFunzione(): string {
-    return 'N';
+  public function getCodiceFunzioni(): array {
+    return ['N'];
+  }
+
+  /**
+   * Controlla e restituisce il valore vero se l'utente ha un ruolo e funzione tra quelli specificati
+   * La lista è formata da coppie di 2 codici separati da virgole:
+   * il primo carattere è il ruolo, il secondo la funzione.
+   *
+   * @param string lista Lista codificata dei ruoli e funzioni ammesse
+   *
+   * @return bool Vero se il ruolo e la funzione dell'utente è tra quelle ammesse
+   */
+  public function controllaRuoloFunzione(string $lista): bool {
+    if (empty($lista)) {
+      // lista vuota
+      return false;
+    }
+    $codici = explode(',', $lista);
+    foreach ($codici as $codice) {
+      // controlla i ruoli specificati
+      if ($codice[0] == $this->getCodiceRuolo() &&
+          in_array($codice[1], $this->getCodiceFunzioni(), true)) {
+        // ruolo e funzione ammesso trovato
+        return true;
+      }
+    }
+    // nessun ruolo/funzione ammesso
+    return false;
   }
 
   /**

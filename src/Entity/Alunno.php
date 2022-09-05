@@ -117,6 +117,13 @@ class Alunno extends Utente {
   private bool $giustificaOnline = true;
 
   /**
+   * @var string|null $rappresentante Indica se l'alunno è eletto come rappresentante [C=di classe, I=di istituto, P=consulta prov.]
+   *
+   * @ORM\Column(type="string", length=1, nullable=true)
+   */
+  private ?string $rappresentante = '';
+
+  /**
    * @var bool $richiestaCertificato Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
    * @ORM\Column(name="richiesta_certificato", type="boolean", nullable=false)
@@ -365,6 +372,27 @@ class Alunno extends Utente {
   }
 
   /**
+   * Indica se l'alunno è eletto come rappresentante [C=di classe, I=di istituto, P=consulta prov.]
+   *
+   * @return string|null Indica se l'alunno è eletto come rappresentante
+   */
+  public function getRappresentante(): ?string {
+    return $this->rappresentante;
+  }
+
+  /**
+   * Modifica il valore che indica se l'alunno è eletto come rappresentante [C=di classe, I=di istituto, P=consulta prov.]
+   *
+   * @param string $rappresentante Indica se l'alunno è eletto come rappresentante
+   *
+   * @return self Oggetto modificato
+   */
+  public function setRappresentante(string $rappresentante): self {
+    $this->rappresentante = $rappresentante;
+    return $this;
+  }
+
+  /**
    * Indica se all'alunno è stata richiesta la consegna del certificato medico oppure no
    *
    * @return bool Vero se all'alunno è stata richiesta la consegna del certificato medico, falso altrimenti
@@ -504,16 +532,28 @@ class Alunno extends Utente {
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'AU';
+    return 'A';
   }
 
   /**
-   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente [N=nessuna]
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
+   * Le possibili funzioni sono: N=nessuna, C=rappr. classe, I=rappr. istituto, P=rappr. consulta prov., M=maggiorenne
    *
-   * @return string Codifica della funzione
+   * @return array Lista della codifica delle funzioni
    */
-  public function getCodiceFunzione(): string {
-    return 'N';
+  public function getCodiceFunzioni(): array {
+    if ($this->rappresentante) {
+      $lista = [$this->rappresentante];
+    } else {
+      $lista = [];
+    }
+    // determina se è maggiorenne
+    $oggi = new \DateTime('today');
+    if ($oggi->diff($this->getDataNascita())->format('%y') >= 18) {
+      $lista[] = 'M';
+    }
+    $lista[] = 'N';
+    return $lista;
   }
 
   /**

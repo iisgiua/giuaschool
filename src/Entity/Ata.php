@@ -137,17 +137,17 @@ class Ata extends Utente {
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'TU';
+    return 'T';
   }
 
   /**
-   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
    * Le possibili funzioni sono: N=nessuna, E=segreteria
    *
-   * @return string Codifica della funzione
+   * @return array Lista della codifica delle funzioni
    */
-  public function getCodiceFunzione(): string {
-    return $this->segreteria ? 'E' : 'N';
+  public function getCodiceFunzioni(): array {
+    return $this->segreteria ? ['E', 'N'] : ['N'];
   }
 
 }

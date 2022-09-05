@@ -38,7 +38,7 @@ App\Entity\Menu:
     nome: 'Informazioni'
     descrizione: 'Informazioni sull''applicazione'
     mega: false
-    opzioni: '<collection(@menu_opzione_INFO1, @menu_opzione_INFO2, @menu_opzione_INFO3, @menu_opzione_INFO4, @menu_opzione_INFO10, @menu_opzione_INFO11, @menu_opzione_INFO12, @menu_opzione_INFO13)>'
+    opzioni: '<collection(@menu_opzione_INFO1, @menu_opzione_INFO2, @menu_opzione_INFO3, @menu_opzione_INFO4)>'
 
   # ----- menu PRINCIPALE -----
   menu_PRINCIPALE:
@@ -62,7 +62,7 @@ App\Entity\Menu:
     nome: ''
     descrizione: ''
     mega: false
-    opzioni: '<collection(@menu_opzione_SCUOLA1, @menu_opzione_SCUOLA2, @menu_opzione_SCUOLA3, @menu_opzione_SCUOLA4, @menu_opzione_SCUOLA5, @menu_opzione_SCUOLA6, @menu_opzione_SCUOLA7, @menu_opzione_SCUOLA8, @menu_opzione_SCUOLA9, @menu_opzione_SCUOLA10)>'
+    opzioni: '<collection(@menu_opzione_SCUOLA1, @menu_opzione_SCUOLA2, @menu_opzione_SCUOLA3, @menu_opzione_SCUOLA4, @menu_opzione_SCUOLA5, @menu_opzione_SCUOLA6, @menu_opzione_SCUOLA7, @menu_opzione_SCUOLA8, @menu_opzione_SCUOLA9, @menu_opzione_SCUOLA10, @menu_opzione_SCUOLA11)>'
 
   # ----- sottomenu ATA -----
   menu_ATA:

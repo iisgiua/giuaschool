@@ -106,17 +106,17 @@ class Docente extends Utente {
    * @return string Codifica del ruolo dell'utente
    */
   public function getCodiceRuolo(): string {
-    return 'DU';
+    return 'D';
   }
 
   /**
-   * Restituisce il codice corrispondente alla funzione svolta nel ruolo dell'utente
-   * Le possibili funzioni sono:  N=nessuna, B=responsabile BES, C=coordinatore
+   * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
+   * Le possibili funzioni sono: N=nessuna, B=responsabile bes
    *
-   * @return string Codifica della funzione
+   * @return array Lista della codifica delle funzioni
    */
-  public function getCodiceFunzione(): string {
-    return $this->responsabileBes ? 'B' : 'N';
+  public function getCodiceFunzioni(): array {
+    return $this->responsabileBes ? ['B', 'N'] : ['N'];
   }
 
   /**
