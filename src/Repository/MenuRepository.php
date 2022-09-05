@@ -22,6 +22,7 @@ class MenuRepository extends EntityRepository {
 
   /**
    * Restituisce la lista delle opzioni del menu specificato
+   * NB: la funzione non è considerata
    *
    * @param string $selettore Nome identificativo del menu da restituire
    * @param Utente $utente Utente per il quale restituire il menu
@@ -33,13 +34,13 @@ class MenuRepository extends EntityRepository {
     $dati = array();
     // imposta ruolo e funzione
     $ruolo = $utente ? $utente->getCodiceRuolo() : 'N';
-    $funzione = $utente ? $utente->getCodiceFunzione() : 'N';
+    $funzione = 'N';
     // legge dati
     $menu = $this->createQueryBuilder('m')
       ->select('m.nome AS nome_menu,m.descrizione AS descrizione_menu,m.mega AS megamenu,o.nome,o.descrizione,o.url,o.abilitato,o.icona,(o.sottoMenu) AS sottomenu')
       ->join('App\Entity\MenuOpzione', 'o', 'WITH', 'o.menu=m.id')
-      ->where('m.selettore=:selettore AND INSTR(:ruolo, o.ruolo) > 0 AND INSTR(:funzione, o.funzione) > 0')
-      ->setParameters(['selettore' => $selettore, 'ruolo' => $ruolo, 'funzione' => $funzione])
+      ->where('m.selettore=:selettore AND INSTR(o.ruolo, :ruolo) > 0')
+      ->setParameters(['selettore' => $selettore, 'ruolo' => $ruolo])
       ->orderBy('o.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -131,6 +132,7 @@ class MenuRepository extends EntityRepository {
 
   /**
    * Restituisce la lista delle opzioni del sottomenu specificato
+   * NB: la funzione non è considerata
    *
    * @param int $id Identificativo del sottomenu
    * @param string $ruolo Ruolo dell'utente che visualizza il sottomenu
@@ -143,8 +145,8 @@ class MenuRepository extends EntityRepository {
     $dati = $this->createQueryBuilder('m')
       ->select('m.mega AS megamenu,o.nome,o.descrizione,o.url,o.abilitato,o.icona,(o.sottoMenu) AS sottomenu')
       ->join('App\Entity\MenuOpzione', 'o', 'WITH', 'o.menu=m.id')
-      ->where('m.id=:id AND INSTR(:ruolo, o.ruolo) > 0 AND INSTR(:funzione, o.funzione) > 0')
-      ->setParameters(['id' => $id, 'ruolo' => $ruolo, 'funzione' => $funzione])
+      ->where('m.id=:id AND INSTR(o.ruolo, :ruolo) > 0')
+      ->setParameters(['id' => $id, 'ruolo' => $ruolo])
       ->orderBy('o.ordinamento', 'ASC')
       ->getQuery()
       ->getArrayResult();
