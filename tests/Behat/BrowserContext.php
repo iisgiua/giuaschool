@@ -156,8 +156,8 @@ class BrowserContext extends BaseContext {
     $this->assertNotEmpty($users);
     do {
       $user = $this->faker->randomElement($users);
-    } while (get_class($user) != 'App\\Entity\\'.$class_name  &&
-             get_class($user) != 'Proxies\\__CG__\\App\\Entity\\'.$class_name);
+    } while (get_class($user) != 'App\Entity\\'.$class_name  &&
+             get_class($user) != 'Proxies\__CG__\App\Entity\\'.$class_name);
     $this->loginUtente($user->getUsername());
   }
 
