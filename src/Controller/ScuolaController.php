@@ -8,38 +8,42 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Form\FormError;
-use App\Entity\DefinizioneScrutinio;
-use App\Entity\Preside;
-use App\Entity\Istituto;
-use App\Entity\Sede;
-use App\Entity\Corso;
-use App\Entity\Materia;
-use App\Entity\Classe;
-use App\Entity\Festivita;
-use App\Entity\Orario;
-use App\Entity\ScansioneOraria;
 use App\Entity\Amministratore;
+use App\Entity\Classe;
 use App\Entity\Configurazione;
+use App\Entity\Corso;
+use App\Entity\DefinizioneRichiesta;
+use App\Entity\DefinizioneScrutinio;
+use App\Entity\Festivita;
+use App\Entity\Istituto;
+use App\Entity\Materia;
+use App\Entity\Orario;
+use App\Entity\Preside;
+use App\Entity\ScansioneOraria;
 use App\Entity\Scrutinio;
-use App\Form\DefinizioneScrutinioType;
+use App\Entity\Sede;
 use App\Form\AmministratoreType;
-use App\Form\PresideType;
-use App\Form\IstitutoType;
-use App\Form\SedeType;
-use App\Form\CorsoType;
-use App\Form\MateriaType;
 use App\Form\ClasseType;
+use App\Form\CorsoType;
+use App\Form\DefinizioneRichiestaType;
+use App\Form\DefinizioneScrutinioType;
 use App\Form\FestivitaType;
+use App\Form\IstitutoType;
+use App\Form\MateriaType;
 use App\Form\OrarioType;
+use App\Form\PresideType;
 use App\Form\ScansioneOrariaSettimanaleType;
+use App\Form\SedeType;
+use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -1050,6 +1054,176 @@ class ScuolaController extends BaseController {
     }
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'orario_scansione', $dati, $info, [$form->createView(), 'message.scansione_oraria']);
+  }
+
+  /**
+   * Visualizza i moduli di richiesta definiti
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/scuola/moduli", name="scuola_moduli",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function moduliAction(Request $request): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // recupera dati
+    $dati = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->findBY([], ['nome' => 'ASC']);
+    // mostra la pagina di risposta
+    return $this->renderHtml('scuola', 'moduli', $dati, $info);
+  }
+
+  /**
+   * Modifica i dati di un modulo di richiesta
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/scuola/moduli/edit/{id}", name="scuola_moduli_edit",
+   *    requirements={"id": "\d+"},
+   *    defaults={"id": "0"},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function moduliEditAction(Request $request, TranslatorInterface $trans, $id): Response {
+    // init
+    $fs = new Filesystem();
+    $finder = new Finder();
+    $path = $this->getParameter('kernel.project_dir').'/templates/PERSONALI/moduli';
+    $dati = [];
+    $info = [];
+    // controlla azione
+    $campi = [];
+    if ($id > 0) {
+      // azione edit
+      $modulo = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->find($id);
+      if (!$modulo) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      foreach ($modulo->getCampi() as $key=>$val) {
+        $campi[] = ['nome_campo' => $key, 'tipo_campo' => $val[0], 'campo_obbligatorio' => $val[1]];
+      }
+    } else {
+      // azione add
+      $modulo = new DefinizioneRichiesta();
+      $this->em->persist($modulo);
+    }
+    // determina lista moduli
+    $lista = [];
+    if ($fs->exists($path)) {
+      $finder->files()->in($path)->name('*.html.twig')->sortByName();
+      foreach ($finder as $file) {
+        $lista[substr($file->getFilename(), 0, -10)] = $file->getFilename();
+      }
+    }
+    // form
+    $form = $this->createForm(DefinizioneRichiestaType::class, $modulo, [
+      'returnUrl' => $this->generateUrl('scuola_moduli'), 'dati' => [$campi, $lista]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      $listaCampi = [];
+      foreach ($form->get('campi')->getData() as $campo) {
+        $listaCampi[$campo['nome_campo']] = [$campo['tipo_campo'], $campo['campo_obbligatorio']];
+        if (empty($campo['nome_campo'])) {
+          // errore: nome campo duplicato
+          $form->addError(new FormError($trans->trans('exception.modulo_campo_senza_nome')));
+        }
+        if (empty($campo['tipo_campo'])) {
+          // errore: nome campo duplicato
+          $form->addError(new FormError($trans->trans('exception.modulo_campo_senza_tipo')));
+        }
+      }
+      if (count($listaCampi) != count($form->get('campi')->getData())) {
+        // errore: nome campo duplicato
+        $form->addError(new FormError($trans->trans('exception.modulo_campo_duplicato')));
+      }
+      if ($form->isValid()) {
+        // memorizza modifiche
+        $modulo->setCampi($listaCampi);
+        $this->em->flush();
+        // messaggio
+        $this->addFlash('success', 'message.update_ok');
+        // redirect
+        return $this->redirectToRoute('scuola_moduli');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('scuola', 'moduli_edit', $dati, $info, [$form->createView(), 'message.required_fields']);
+  }
+
+  /**
+   * Cancella un modulo definito
+   *
+   * @param Request $request Pagina richiesta
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/scuola/moduli/delete/{id}", name="scuola_moduli_delete",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function moduliDeleteAction(Request $request, $id): Response {
+    // controlla modulo
+    $modulo = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->find($id);
+    if (!$modulo) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    try {
+      // cancella modulo
+      $this->em->remove($modulo);
+      // memorizza modifiche
+      $this->em->flush();
+      // messaggio
+      $this->addFlash('success', 'message.delete_ok');
+    } catch (\Exception $e) {
+      // errore: violazione vincolo di integrità referenziale
+      $this->addFlash('danger', 'exception.delete_errors');
+    }
+    // redirect
+    return $this->redirectToRoute('scuola_moduli');
+  }
+
+  /**
+   * Abilitazione o disabilitazione di un modulo di richiesta
+   *
+   * @param int $id ID del modulo di richiesta
+   * @param boolean $abilita Vero per abilitare, falso per disabilitare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/scuola/moduli/abilita/{id}/{abilita}", name="scuola_moduli_abilita",
+   *    requirements={"id": "\d+", "abilita": "0|1"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function moduliAbilitaAction($id, $abilita): Response {
+    // controlla modulo
+    $modulo = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->find($id);
+    if (!$modulo) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // abilita o disabilita
+    $modulo->setAbilitata($abilita == 1);
+    // memorizza modifiche
+    $this->em->flush();
+    // messaggio
+    $this->addFlash('success', 'message.update_ok');
+    // redirezione
+    return $this->redirectToRoute('scuola_moduli');
   }
 
 }
