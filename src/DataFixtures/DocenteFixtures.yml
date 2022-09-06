@@ -25,7 +25,7 @@ App\Entity\Docente:
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: '90%? 1: 0'
+    abilitato: true
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
@@ -52,7 +52,7 @@ App\Entity\Docente:
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: '90%? 1: 0'
+    abilitato: true
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
@@ -79,7 +79,7 @@ App\Entity\Docente:
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: '90%? 1: 0'
+    abilitato: true
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
@@ -106,7 +106,7 @@ App\Entity\Docente:
     token: '<($tokenCreato ? md5($tokenCreato->format("c")) : "")>'
     preloginCreato: '50%? <dateTimeBetween("-1 month", "now")>'
     prelogin: '<($preloginCreato ? md5($preloginCreato->format("c")) : "")>'
-    abilitato: '90%? 1: 0'
+    abilitato: true
     spid: '70%? 1: 0'
     ultimoAccesso: '70%? <dateTimeBetween("-1 month", "now")>'
     otp: ''
