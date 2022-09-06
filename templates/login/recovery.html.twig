@@ -47,15 +47,6 @@
               {{ form_widget(form.email) }}
             </div>
           </div>
-    {% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty %}
-          <div class="form-group">
-            <label for="otp" class="col-sm-6 text-primary text-right">{{ 'label.login_otp'|trans|raw }}</label>
-            <div class="col-sm-6 input-group gs-pr-4 gs-pl-4 gs-mb-4">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-flash"></span></div>
-              {{ form_widget(form.otp) }}
-            </div>
-          </div>
-    {% endif %}
           <div class="form-group text-center">
             {{ form_widget(form.submit) }}
           </div>

@@ -139,7 +139,7 @@ class BrowserContext extends BaseContext {
    */
   public function loginUtenteConRuolo($ruolo): void {
     $class_name = ucfirst($ruolo);
-    $user = $this->faker->randomElement($this->em->getRepository("App\\Entity\\".$class_name)->findBy(['abilitato' => 1]));
+    $user = $this->faker->randomElement($this->em->getRepository('App\Entity\\'.$class_name)->findBy(['abilitato' => 1]));
     $this->assertNotEmpty($user);
     $this->loginUtente($user->getUsername());
   }
