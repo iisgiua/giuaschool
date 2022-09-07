@@ -61,13 +61,11 @@ class ScansioneOrariaType extends AbstractType {
         'attr' => ['widget' => 'gs-row-inline'],
         'row_attr' => ['class' => 'col-2'],
         'required' => true))
-      ->add('delete', ButtonType::class, array('label' => '-',
+      ->add('delete', ButtonType::class, array('label' => 'label.minus',
         'attr' => ['widget' => 'gs-row-end',
           'class' => 'btn-danger btn-xs gs-remove-item',
-          'title' => 'label.cancella_elemento',
-          'label_html' => true],
-        'row_attr' => ['class' => 'col-1'],
-        'translation_domain' => false
+          'title' => 'label.cancella_elemento'],
+        'row_attr' => ['class' => 'col-1']
       ));
   }
 

@@ -886,6 +886,7 @@ class GenitoriUtil {
     $dati = array();
     $dati['orari'] = null;
     $dati['colloqui'] = null;
+    $dati['cattedre'] = [];
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge cattedre
