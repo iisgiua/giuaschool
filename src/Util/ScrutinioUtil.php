@@ -674,27 +674,27 @@ class ScrutinioUtil {
     $valutazioni['E'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
     $valutazioni['C'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_C'));
     $valutazioni['N'] = unserialize($this->em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
-    // retrocompatibilità per A.S 21/22
-    if ($periodo == 'P' || $periodo == 'S') {
-      $valutazioni['R'] = [
-        'min' => 20,
-        'max' => 26,
-        'suff' => 22,
-        'med' => 22,
-        'valori' => '20,21,22,23,24,25,26',
-        'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
-        'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
-        'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
-      $valutazioni['E'] = [
-        'min' => 3,
-        'max' => 10,
-        'suff' => 6,
-        'med' => 5,
-        'valori' => '3,4,5,6,7,8,9,10',
-        'etichette' => '"NC",4,5,6,7,8,9,10',
-        'voti' => '"Non Classificato",4,5,6,7,8,9,10',
-        'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
-    }
+    //-- // retrocompatibilità per A.S 21/22
+    //-- if ($periodo == 'P' || $periodo == 'S') {
+      //-- $valutazioni['R'] = [
+        //-- 'min' => 20,
+        //-- 'max' => 26,
+        //-- 'suff' => 22,
+        //-- 'med' => 22,
+        //-- 'valori' => '20,21,22,23,24,25,26',
+        //-- 'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
+        //-- 'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
+        //-- 'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
+      //-- $valutazioni['E'] = [
+        //-- 'min' => 3,
+        //-- 'max' => 10,
+        //-- 'suff' => 6,
+        //-- 'med' => 5,
+        //-- 'valori' => '3,4,5,6,7,8,9,10',
+        //-- 'etichette' => '"NC",4,5,6,7,8,9,10',
+        //-- 'voti' => '"Non Classificato",4,5,6,7,8,9,10',
+        //-- 'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
+    //-- }
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -853,6 +853,7 @@ class ScrutinioUtil {
     // memorizza alunni
     $dati_scrutinio = $scrutinio->getDati();
     $dati_scrutinio['alunni'] = array_keys($dati['alunni']);
+    $dati_scrutinio['valutazioni'] = $dati['valutazioni'];
     $scrutinio->setDati($dati_scrutinio);
     // aggiorna stato
     $scrutinio->setStato('1');
@@ -1567,13 +1568,13 @@ class ScrutinioUtil {
           if (!isset($dati['voti'][$a][$m]['unico'])) {
             // mancano valutazioni
             $errori[$m] = 1;
-          } elseif ((!isset($errori[$m]) || $errori[$m] == 3) &&
-                     $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['recupero']) {
-            // mancano recuperi
-            $errori[$m] = 2;
-          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['debito']) {
+          //-- } elseif ((!isset($errori[$m]) || $errori[$m] == 3) &&
+                     //-- $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['recupero']) {
+            //-- // mancano recuperi
+            //-- $errori[$m] = 2;
+          //-- } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['debito']) {
             // mancano debiti
-            $errori[$m] = 3;
+            //-- $errori[$m] = 3;
           }
         } else {
           // condotta
@@ -2035,8 +2036,8 @@ class ScrutinioUtil {
       ->getSingleScalarResult();
     // controlla se attivare pulsante riapertura o no
     $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
-      ->where('s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato AND s.sincronizzazione IS NULL')
-      ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
+      ->where('s.classe=:classe AND s.periodo=:periodo AND s.stato=:stato AND (s.sincronizzazione IS NULL OR s.sincronizzazione=:vuota)')
+      ->setParameters(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C', 'vuota' => ''])
       ->getQuery()
       ->getOneOrNullResult();
     $dati['precedente'] = ($docente instanceOf Staff) && $scrutinio;
@@ -4998,6 +4999,7 @@ class ScrutinioUtil {
     // memorizza alunni
     $dati_scrutinio = $scrutinio->getDati();
     $dati_scrutinio['alunni'] = array_keys($dati['alunni']);
+    $dati_scrutinio['valutazioni'] = $dati['valutazioni'];
     $scrutinio->setDati($dati_scrutinio);
     // aggiorna stato
     $scrutinio->setStato('1');

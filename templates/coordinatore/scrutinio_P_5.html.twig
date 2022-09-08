@@ -50,7 +50,8 @@
       <button class="btn btn-primary" title="Termina la procedura dello scrutinio" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Chiudi lo scrutinio</strong></button>
     </div>
   </div>
-    {{ form_end(form) }}
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
     {% include 'include/modal-waiting.html.twig' %}
     {% include 'include/modal-remote.html.twig' %}
   {% endif %}

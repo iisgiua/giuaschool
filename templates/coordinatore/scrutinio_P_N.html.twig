@@ -50,22 +50,12 @@
           </td>
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-        {% if m.tipo == 'R' %}
-          {% if a.religione != 'S' and a.religione != 'A' %}
+        {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
-          {% elseif dati.proposte[alunno][materia].unico is not defined %}
+        {% elseif dati.proposte[alunno][materia].unico is not defined %}
             <span>--</span>
-          {% else %}
-            <span class="label label-{{ dati.proposte[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ info.giudizi['P']['R'][dati.proposte[alunno][materia].unico] }}</span>
-          {% endif %}
         {% else %}
-          {% if dati.proposte[alunno][materia].unico is not defined %}
-            <span>--</span>
-          {% elseif dati.proposte[alunno][materia].unico == 0 %}
-            <span class="gs-big"><span class="label label-danger">NC</span></span>
-          {% else %}
-            <span class="gs-big"><span class="label label-{{ dati.proposte[alunno][materia].unico < 5 ? 'danger' : (dati.proposte[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.proposte[alunno][materia].unico }}</span></span>
-          {% endif %}
+            <span class="label {{ dati.proposte[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'label-danger' : (dati.proposte[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'label-warning' : 'label-success') }}">{{ dati.valutazioni[m.tipo].lista[dati.proposte[alunno][materia].unico] }}</span>
         {% endif %}
           </td>
       {% endfor %}
@@ -81,7 +71,7 @@
                   <div class="row bg-info gs-pl-3 gs-pr-3 gs-pt-2 gs-pb-2">
         {% for v in dati.civica[alunno] %}
                     <div style="border-bottom: solid #000 1px;" class="col-sm-4 col-sm-offset-1 gs-pt-1 gs-pb-0 gs-pl-0">{{ v.docente }}</div>
-                    <div style="border-bottom: solid #000 1px;" class="col-sm-1 text-right gs-pt-1 gs-pb-0 gs-pr-0"><span class="label label-{{ v.unico < 5 ? 'danger' : (v.unico < 6 ? 'warning' : 'success') }}">{{ v.unico == 3 ? 'NC' : v.unico }}</span></div>
+                    <div style="border-bottom: solid #000 1px;" class="col-sm-1 text-right gs-pt-1 gs-pb-0 gs-pr-0"><span class="label label-{{ v.unico < dati.valutazioni['E'].med ? 'danger' : (v.unico < dati.valutazioni['E'].suff ? 'warning' : 'success') }}">{{ dati.valutazioni['E'].lista[v.unico] }}</span></div>
         {% endfor %}
                   </div>
                 </div>
@@ -157,7 +147,7 @@ $(document).ready(function() {
   });
   $('#gs-modal-info').on('shown.bs.modal', function (e) {
     $('body').addClass('modal-open');
-  });  
+  });
   // init
   $('#gs-fixed-header table').floatThead({top: 60});
   {% if posizione > 0 %}

@@ -42,30 +42,18 @@
           </td>
       {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-        {% if m.tipo == 'R' %}
-          {% if a.religione != 'S' and a.religione != 'A' %}
-            <span>NA</span>
-          {% elseif dati.voti[alunno][materia].unico is not defined %}
-            <span>--</span>
-          {% else %}
-            <span class="label label-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ info.giudizi['P']['R'][dati.voti[alunno][materia].unico] }}</span>
-          {% endif %}
-        {% elseif m.tipo == 'C' %}
+        {% if m.tipo == 'C' %}
           {% if dati.voti[alunno][materia].unico is not defined %}
             <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'P', 'alunno': alunno}) }}"><span class="glyphicon glyphicon-edit"></span></button>
-          {% elseif dati.voti[alunno][materia].unico == 4 %}
-            <button type="button" class="btn btn-xs btn-danger gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'P', 'alunno': alunno}) }}"><strong>NC</strong></button>
           {% else %}
-            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }} gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'P', 'alunno': alunno}) }}"><strong>{{ dati.voti[alunno][materia].unico }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {'classe': classe.id, 'periodo': 'P', 'alunno': alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
           {% endif %}
-        {% else %}
-          {% if dati.voti[alunno][materia].unico is not defined %}
+        {% elseif m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
+            <span>NA</span>
+        {% elseif dati.voti[alunno][materia].unico is not defined %}
             <span>--</span>
-          {% elseif dati.voti[alunno][materia].unico == 0 or (m.tipo == 'E' and dati.voti[alunno][materia].unico == 3)%}
-            <span class="gs-big"><span class="label label-danger">NC</span></span>
-          {% else %}
-            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][materia].unico }}</span></span>
-          {% endif %}
+        {% else %}
+            <span class="label {{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'label-danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'label-warning' : 'label-success') }}">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>
         {% endif %}
           </td>
       {% endfor %}

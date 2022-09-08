@@ -102,27 +102,27 @@ class ScrutinioController extends AbstractController {
     $valutazioni['R'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
     $valutazioni['E'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
-    // retrocompatibilità per A.S 21/22
-    if ($periodo == 'P' || $periodo == 'S') {
-      $valutazioni['R'] = [
-        'min' => 20,
-        'max' => 26,
-        'suff' => 22,
-        'med' => 22,
-        'valori' => '20,21,22,23,24,25,26',
-        'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
-        'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
-        'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
-      $valutazioni['E'] = [
-        'min' => 3,
-        'max' => 10,
-        'suff' => 6,
-        'med' => 5,
-        'valori' => '3,4,5,6,7,8,9,10',
-        'etichette' => '"NC",4,5,6,7,8,9,10',
-        'voti' => '"Non Classificato",4,5,6,7,8,9,10',
-        'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
-    }
+    //-- // retrocompatibilità per A.S 21/22
+    //-- if ($periodo == 'P' || $periodo == 'S') {
+      //-- $valutazioni['R'] = [
+        //-- 'min' => 20,
+        //-- 'max' => 26,
+        //-- 'suff' => 22,
+        //-- 'med' => 22,
+        //-- 'valori' => '20,21,22,23,24,25,26',
+        //-- 'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
+        //-- 'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
+        //-- 'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
+      //-- $valutazioni['E'] = [
+        //-- 'min' => 3,
+        //-- 'max' => 10,
+        //-- 'suff' => 6,
+        //-- 'med' => 5,
+        //-- 'valori' => '3,4,5,6,7,8,9,10',
+        //-- 'etichette' => '"NC",4,5,6,7,8,9,10',
+        //-- 'voti' => '"Non Classificato",4,5,6,7,8,9,10',
+        //-- 'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
+    //-- }
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -473,27 +473,27 @@ class ScrutinioController extends AbstractController {
     $valutazioni['R'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
     $valutazioni['E'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
-    // retrocompatibilità per A.S 21/22
-    if ($periodo == 'P' || $periodo == 'S') {
-      $valutazioni['R'] = [
-        'min' => 20,
-        'max' => 26,
-        'suff' => 22,
-        'med' => 22,
-        'valori' => '20,21,22,23,24,25,26',
-        'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
-        'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
-        'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
-      $valutazioni['E'] = [
-        'min' => 3,
-        'max' => 10,
-        'suff' => 6,
-        'med' => 5,
-        'valori' => '3,4,5,6,7,8,9,10',
-        'etichette' => '"NC",4,5,6,7,8,9,10',
-        'voti' => '"Non Classificato",4,5,6,7,8,9,10',
-        'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
-    }
+    //-- // retrocompatibilità per A.S 21/22
+    //-- if ($periodo == 'P' || $periodo == 'S') {
+      //-- $valutazioni['R'] = [
+        //-- 'min' => 20,
+        //-- 'max' => 26,
+        //-- 'suff' => 22,
+        //-- 'med' => 22,
+        //-- 'valori' => '20,21,22,23,24,25,26',
+        //-- 'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
+        //-- 'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
+        //-- 'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
+      //-- $valutazioni['E'] = [
+        //-- 'min' => 3,
+        //-- 'max' => 10,
+        //-- 'suff' => 6,
+        //-- 'med' => 5,
+        //-- 'valori' => '3,4,5,6,7,8,9,10',
+        //-- 'etichette' => '"NC",4,5,6,7,8,9,10',
+        //-- 'voti' => '"Non Classificato",4,5,6,7,8,9,10',
+        //-- 'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
+    //-- }
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -744,6 +744,7 @@ class ScrutinioController extends AbstractController {
     }
     // visualizza pagina
     return $this->render('coordinatore/condotta_'.$periodo.'.html.twig', array(
+      'periodo' => $periodo,
       'classe' => $classe,
       'dati' => $dati,
       'form' => $form->createView(),
@@ -954,62 +955,62 @@ class ScrutinioController extends AbstractController {
     }
     if ($cattedra) {
       // imposta valutazioni
-      if ($periodo == 'P' || $periodo == 'S') {
-        // retrocompatibilità per A.S. 21/22
-        $scrut = $em->getRepository('App\Entity\Scrutinio')
-          ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C']);
-        $valutazioni = $scrut->getDato('valutazioni');
-        if (!$valutazioni) {
-          $valutazioni['R'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
-          $valutazioni['E'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
-          $valutazioni['N'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
-          $valutazioni['C'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_C'));
-          $valutazioni['R'] = [
-            'min' => 20,
-            'max' => 26,
-            'suff' => 22,
-            'med' => 22,
-            'valori' => '20,21,22,23,24,25,26',
-            'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
-            'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
-            'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
-          $valutazioni['E'] = [
-            'min' => 3,
-            'max' => 10,
-            'suff' => 6,
-            'med' => 5,
-            'valori' => '3,4,5,6,7,8,9,10',
-            'etichette' => '"NC",4,5,6,7,8,9,10',
-            'voti' => '"Non Classificato",4,5,6,7,8,9,10',
-            'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
-          // crea lista voti
-          $listaValori = explode(',', $valutazioni['R']['valori']);
-          $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
-          foreach ($listaValori as $key=>$val) {
-            $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
-          }
-          $listaValori = explode(',', $valutazioni['E']['valori']);
-          $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
-          foreach ($listaValori as $key=>$val) {
-            $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
-          }
-          $listaValori = explode(',', $valutazioni['N']['valori']);
-          $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
-          foreach ($listaValori as $key=>$val) {
-            $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
-          }
-          $listaValori = explode(',', $valutazioni['C']['valori']);
-          $listaVoti = explode(',', $valutazioni['C']['votiAbbr']);
-          foreach ($listaValori as $key=>$val) {
-            $valutazioni['C']['lista'][$val] = trim($listaVoti[$key], '"');
-          }
-          // memorizza su scrutinio
-          $datiScrutinio = $scrut->getDati();
-          $datiScrutinio['valutazioni'] = $valutazioni;
-          $scrut->setdati($datiScrutinio);
-          $em->flush();
-        }
-      }
+      //-- if ($periodo == 'P' || $periodo == 'S') {
+        //-- // retrocompatibilità per A.S. 21/22
+        //-- $scrut = $em->getRepository('App\Entity\Scrutinio')
+          //-- ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C']);
+        //-- $valutazioni = $scrut->getDato('valutazioni');
+        //-- if (!$valutazioni) {
+          //-- $valutazioni['R'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
+          //-- $valutazioni['E'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
+          //-- $valutazioni['N'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
+          //-- $valutazioni['C'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_C'));
+          //-- $valutazioni['R'] = [
+            //-- 'min' => 20,
+            //-- 'max' => 26,
+            //-- 'suff' => 22,
+            //-- 'med' => 22,
+            //-- 'valori' => '20,21,22,23,24,25,26',
+            //-- 'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
+            //-- 'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
+            //-- 'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
+          //-- $valutazioni['E'] = [
+            //-- 'min' => 3,
+            //-- 'max' => 10,
+            //-- 'suff' => 6,
+            //-- 'med' => 5,
+            //-- 'valori' => '3,4,5,6,7,8,9,10',
+            //-- 'etichette' => '"NC",4,5,6,7,8,9,10',
+            //-- 'voti' => '"Non Classificato",4,5,6,7,8,9,10',
+            //-- 'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
+          //-- // crea lista voti
+          //-- $listaValori = explode(',', $valutazioni['R']['valori']);
+          //-- $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+          //-- foreach ($listaValori as $key=>$val) {
+            //-- $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
+          //-- }
+          //-- $listaValori = explode(',', $valutazioni['E']['valori']);
+          //-- $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+          //-- foreach ($listaValori as $key=>$val) {
+            //-- $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
+          //-- }
+          //-- $listaValori = explode(',', $valutazioni['N']['valori']);
+          //-- $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+          //-- foreach ($listaValori as $key=>$val) {
+            //-- $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
+          //-- }
+          //-- $listaValori = explode(',', $valutazioni['C']['valori']);
+          //-- $listaVoti = explode(',', $valutazioni['C']['votiAbbr']);
+          //-- foreach ($listaValori as $key=>$val) {
+            //-- $valutazioni['C']['lista'][$val] = trim($listaVoti[$key], '"');
+          //-- }
+          //-- // memorizza su scrutinio
+          //-- $datiScrutinio = $scrut->getDati();
+          //-- $datiScrutinio['valutazioni'] = $valutazioni;
+          //-- $scrut->setdati($datiScrutinio);
+          //-- $em->flush();
+        //-- }
+      //-- }
       // legge lista periodi
       $lista_periodi = $scr->periodi($classe);
       // aggiunde periodo per A.S. precedente
