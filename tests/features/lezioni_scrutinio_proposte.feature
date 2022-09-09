@@ -63,8 +63,8 @@ Schema dello scenario: Inserisce e memorizza i voti senza recupero per la catted
     | P       | N            | 3         | 9             |
     | P       | N            | 4         | 10            |
     | P       | R            | -3        | NC            |
-    | P       | R            | -2        | Insufficiente            |
-    | P       | R            | -1        | Mediocre |
+    | P       | R            | -2        | Insufficiente |
+    | P       | R            | -1        | Mediocre      |
     | P       | R            | 0         | Sufficiente   |
     | P       | R            | 1         | Discreto      |
     | P       | R            | 2         | Buono         |
