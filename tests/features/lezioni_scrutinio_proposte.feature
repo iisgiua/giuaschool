@@ -62,8 +62,9 @@ Schema dello scenario: Inserisce e memorizza i voti senza recupero per la catted
     | P       | N            | 2         | 8             |
     | P       | N            | 3         | 9             |
     | P       | N            | 4         | 10            |
-    | P       | R            | -2        | NC            |
-    | P       | R            | -1        | Insufficiente |
+    | P       | R            | -3        | NC            |
+    | P       | R            | -2        | Insufficiente            |
+    | P       | R            | -1        | Mediocre |
     | P       | R            | 0         | Sufficiente   |
     | P       | R            | 1         | Discreto      |
     | P       | R            | 2         | Buono         |
@@ -136,7 +137,8 @@ Schema dello scenario: Inserisce e memorizza i voti con recupero per la cattedra
     | P       | N            | -3        | 3    | Studio individuale  | A            | Questo e quello.    |
     | P       | N            | -2        | 4    | Corso di recupero   | C            | Solo questo         |
     | P       | N            | -1        | 5    | Sportello didattico | S            | Qualcosina.         |
-    | P       | E            | -3        | NC   | Corso di recupero   | C            | Da recuperare tutto |
+    | P       | E            | -4        | NC   | Corso di recupero   | C            | Da recuperare tutto |
+    | P       | E            | -3        | 3    | Corso di recupero   | C            | Da recuperare tutto |
     | P       | E            | -2        | 4    | Sportello didattico | S            | Tutto               |
     | P       | E            | -1        | 5    | Pausa didattica     | P            | Da recuperare       |
     | F       | N            | -6        | NC   | Corso di recupero   | C            | Da recuperare tutto |
@@ -190,9 +192,9 @@ Schema dello scenario: Modifica voti esistenti per la cattedra del docente
     | P       | N            | 1         | 8    | 9           |
     | P       | N            | -1        | 8    | 7           |
     | P       | R            | -1        | 21   | NC          |
-    | P       | R            | 1         | 21   | Sufficiente |
-    | P       | R            | -1        | 23   | Sufficiente |
-    | P       | R            | 1         | 23   | Buono       |
+    | P       | R            | 1         | 21   | Mediocre    |
+    | P       | R            | -1        | 24   | Sufficiente |
+    | P       | R            | 1         | 24   | Buono       |
     | P       | E            | 2         | 5    | 7           |
     | P       | E            | -1        | 5    | 4           |
     | P       | E            | 1         | 8    | 9           |

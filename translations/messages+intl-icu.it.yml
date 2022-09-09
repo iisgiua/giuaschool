@@ -515,6 +515,32 @@ label.cancella_elemento: Cancella l'elemento indicato
 label.aggiunge_elemento: Aggiunge un elemento
 label.scrutinio_svolto_in_presenza: Scrutinio in presenza
 label.scrutinio_svolto_a_distanza: Scrutinio a distanza
+label.nome_modulo: Nome del modulo
+label.richiedenti_modulo: Utenti che possono presentare il modulo
+label.destinatari_modulo: Utenti che possono gestire la richiesta
+label.allegati_modulo: Numero di allegati da inserire nella richiesta
+label.richiesta_unica_modulo: Ammessa una sola richiesta per utente
+label.campi_modulo: Lista dei campi da compilare
+label.template_modulo: Nome del file del modello
+label.ruolo_funzione_GN: Genitori
+label.ruolo_funzione_AM: Alunni maggiorenni
+label.ruolo_funzione_AN: Alunni
+label.ruolo_funzione_PN: Dirigente
+label.ruolo_funzione_SN: Staff
+label.ruolo_funzione_DN: Docenti
+label.nome_campo: Nome del campo
+label.tipo_campo: Tipo del campo
+label.campo_obbligatorio: Campo obbligatorio
+label.tipo_string: Testo su una riga
+label.tipo_text: Testo su più righe
+label.tipo_int: Numero intero
+label.tipo_float: Numero decimale
+label.tipo_bool: SI/NO
+label.tipo_date: Data
+label.tipo_time: Ora
+label.minus: -
+label.invia_richiesta: Invia una nuova richiesta
+label.cancella_richiesta: Cancella la richiesta
 
 
 ##### PAGINE #####
@@ -618,6 +644,14 @@ page.scuola.orario: Configura Orario
 title.scuola.orario: Dati degli orari scolastici
 title.scuola.orario_edit: Modifica i dati dell'orario scolastico
 title.scuola.orario_scansione: Modifica i dati della scansione oraria
+page.scuola.moduli: Configura Moduli
+title.scuola.moduli: Moduli di richiesta
+title.scuola.moduli_edit: Modifica i dati di un modulo di richiesta
+page.richieste.lista: Lista Richieste
+title.richieste.lista: Lista delle richieste
+page.richieste.add: Modifica Richiesta
+title.richieste.add: Invia un modulo di richiesta
+
 
 page.agenda_compito: Agenda Compiti
 page.agenda_eventi: Agenda Docenti
@@ -1169,6 +1203,11 @@ message.avviso_attiva_log_level: "Attenzione: l'operazione attiverà la modalit�
 message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la modalità di debug per il log di sistema."
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
 message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
+message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
+message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
+message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
+message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
+
 
 ##### ERRORI #####
 exception.annotazione_con_file: Non puoi creare l'annotazione sul Registro con un documento allegato.
@@ -1404,3 +1443,8 @@ exception.orari_sovrapposti: L'orario si sovrappone al precedente
 exception.log_errori_vuoto: Non sono presenti messaggi di errore per la data e ora indicate.
 exception.scrutinio_svolgimento: Non è stata inserito il tipo di scrutinio svolto
 exception.voto_sospeso_inferiore_a_finale: Il voto dell'alunn{sex} {alunno} per la materia {materia} è inferiore a quello deliberato nello scrutinio finale.
+exception.modulo_campo_duplicato: I nomi dei campi del modulo devono essere univoci.
+exception.modulo_campo_senza_nome: Non possono esistere campi del modulo senza nome.
+exception.modulo_campo_senza_tipo: Non possono esistere campi del modulo senza tipo.
+exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un campo obbligatorio.
+exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.

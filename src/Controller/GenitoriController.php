@@ -536,10 +536,37 @@ class GenitoriController extends AbstractController {
           $dati = $gen->pagelle($classe, $alunno, $periodo);
         }
         // retrocompatibilità a.s. 21/22
-        $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
-        $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
-        if (!in_array($periodo, ['P', 'S', 'A'])) {
-          // legge dati valutazioni
+        //-- $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
+        //-- $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
+        if ($periodo == 'A') {
+          // legge valutazioni da configurazione
+          $valutazioni['R'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
+          $valutazioni['E'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
+          $valutazioni['N'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
+          $valutazioni['C'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_C'));
+          $listaValori = explode(',', $valutazioni['R']['valori']);
+          $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
+          foreach ($listaValori as $key=>$val) {
+            $valutazioni['R']['lista'][$val] = trim($listaVoti[$key], '"');
+          }
+          $listaValori = explode(',', $valutazioni['E']['valori']);
+          $listaVoti = explode(',', $valutazioni['E']['votiAbbr']);
+          foreach ($listaValori as $key=>$val) {
+            $valutazioni['E']['lista'][$val] = trim($listaVoti[$key], '"');
+          }
+          $listaValori = explode(',', $valutazioni['N']['valori']);
+          $listaVoti = explode(',', $valutazioni['N']['votiAbbr']);
+          foreach ($listaValori as $key=>$val) {
+            $valutazioni['N']['lista'][$val] = trim($listaVoti[$key], '"');
+          }
+          $listaValori = explode(',', $valutazioni['C']['valori']);
+          $listaVoti = explode(',', $valutazioni['C']['votiAbbr']);
+          foreach ($listaValori as $key=>$val) {
+            $valutazioni['C']['lista'][$val] = trim($listaVoti[$key], '"');
+          }
+          $dati['valutazioni'] = $valutazioni;
+        } else {
+          // legge valutazioni da scrutinio
           $dati['valutazioni'] = $em->getRepository('App\Entity\Scrutinio')
             ->findOneBy(['classe' => $classe, 'periodo' => $periodo, 'stato' => 'C'])
             ->getDato('valutazioni');
