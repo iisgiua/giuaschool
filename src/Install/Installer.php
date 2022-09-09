@@ -202,6 +202,8 @@ class Installer {
       "ALTER TABLE gs_definizione_richiesta ADD abilitata TINYINT(1) NOT NULL;",
       "UPDATE gs_configurazione SET descrizione='Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore)\<br>[testo]' WHERE parametro='id_provider_tipo';",
       "UPDATE gs_configurazione SET descrizione='Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all''uso dell''OTP (A=alunno, G=genitore. D=docente, S=staff, T=ata, M=amministratore)<br>[testo]' WHERE parametro='otp_tipo';",
+      "ALTER TABLE gs_definizione_richiesta ADD azione_gestione VARCHAR(64) NOT NULL, ADD azione_rimozione VARCHAR(64) NOT NULL;",
+      "ALTER TABLE gs_richiesta ADD data DATE DEFAULT NULL;",
       "DELETE FROM gs_menu_opzione;",
       "DELETE FROM gs_menu;",
       "INSERT INTO gs_menu VALUES (1,'2022-09-07 17:39:50','2022-09-07 17:39:50','help','Aiuto','Guida e supporto per l\'utente',0),(2,'2022-09-07 17:39:50','2022-09-07 17:39:50','user','Utente','Gestione del profilo dell\'utente',0),(3,'2022-09-07 17:39:50','2022-09-07 17:39:50','info','Informazioni','Informazioni sull\'applicazione',0),(4,'2022-09-07 17:39:50','2022-09-07 17:39:50','main','Menu Principale','Apri il menu principale',0),(5,'2022-09-07 17:39:50','2022-09-07 17:39:50','sistema','','',0),(6,'2022-09-07 17:39:50','2022-09-07 17:39:50','scuola','','',0),(7,'2022-09-07 17:39:50','2022-09-07 17:39:50','ata','','',0),(8,'2022-09-07 17:39:50','2022-09-07 17:39:50','docenti','','',0),(9,'2022-09-07 17:39:50','2022-09-07 17:39:50','alunni','','',0);",

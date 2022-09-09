@@ -9,10 +9,12 @@
 namespace App\Controller;
 
 use App\Entity\Alunno;
+use App\Entity\DefinizioneScrutinio;
 use App\Entity\Docente;
 use App\Entity\Provisioning;
 use App\Entity\StoricoEsito;
 use App\Entity\StoricoVoto;
+use App\Entity\Scrutinio;
 use App\Form\ConfigurazioneType;
 use App\Form\ModuloType;
 use App\Form\UtenteType;
@@ -339,6 +341,7 @@ class SistemaController extends BaseController {
    * Effettua il passaggio al nuovo A.S.
    *
    * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
    * @param int $step Passo della procedura
    *
@@ -351,7 +354,8 @@ class SistemaController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-  public function nuovoAction(Request $request, KernelInterface $kernel, $step): Response {
+  public function nuovoAction(Request $request, TranslatorInterface $trans, KernelInterface $kernel,
+                              $step): Response {
     // init
     $dati = [];
     $info = [];
@@ -370,12 +374,15 @@ class SistemaController extends BaseController {
       switch($step) {
         case 1: // pulizia file
           // directory da svuotare
-          $finder->files()->in($path.'/tmp')->in($path.'/upload/avvisi')->in($path.'/upload/documenti')->depth('== 0');
+          $finder->files()->in($path.'/tmp')->in($path.'/upload/documenti')->depth('== 0')->notName('.gitkeep');;
           $fs->remove($finder);
+          $finder = new Finder();
+          $finder->files()->in($path.'/upload/avvisi')->depth('== 0')->notName('.gitkeep')
+            ->date('< '.$info['nuovoAnno'].'-09-01');
           // sposta circolari in directory dell'anno
           $fs->mkdir($path.'/upload/circolari/'.$info['vecchioAnno'], 0770);
           $finder = new Finder();
-          $finder->files()->in($path.'/upload/circolari')->depth('== 0');
+          $finder->files()->in($path.'/upload/circolari')->depth('== 0')->notName('.gitkeep');
           foreach ($finder as $file) {
             $fs->rename($file, $path.'/upload/circolari/'.$info['vecchioAnno'].'/'.$file->getFilename());
           }
@@ -408,7 +415,9 @@ class SistemaController extends BaseController {
           }
           // elimina directory di archiviazione
           $fs->remove([$path.'/archivio/circolari', $path.'/archivio/classi', $path.'/archivio/registri']);
-          $fs->mkdir($path.'/archivio/classi', 0770);
+          $fs->appendToFile($path.'/archivio/circolari/.gitkeep', '');
+          $fs->appendToFile($path.'/archivio/classi/.gitkeep', '');
+          $fs->appendToFile($path.'/archivio/registri/.gitkeep', '');
           $finder = new Finder();
           $finder->directories()->in($path.'/archivio/scrutini')->depth('== 0')->exclude('storico');
           foreach ($finder as $dir) {
@@ -417,21 +426,18 @@ class SistemaController extends BaseController {
           $this->addFlash('success', 'message.tutte_operazioni_ok');
           break;
         case 2: // pulizia tabelle
+          // cancella tabelle
           $connection = $this->em->getConnection();
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
             "TRUNCATE gs_annotazione;",
             "TRUNCATE gs_assenza;",
             "TRUNCATE gs_assenza_lezione;",
-            "TRUNCATE gs_avviso;",
             "TRUNCATE gs_avviso_classe;",
             "TRUNCATE gs_avviso_sede;",
-            "TRUNCATE gs_avviso_utente;",
             "TRUNCATE gs_cambio_classe;",
-            "TRUNCATE gs_cattedra;",
             "TRUNCATE gs_circolare_classe;",
             "TRUNCATE gs_circolare_sede;",
-            "TRUNCATE gs_circolare_utente;",
             "TRUNCATE gs_colloquio;",
             "TRUNCATE gs_definizione_consiglio;",
             "TRUNCATE gs_deroga_assenza;",
@@ -462,6 +468,54 @@ class SistemaController extends BaseController {
           foreach ($sqlCommands as $sql) {
             $connection->prepare($sql)->execute();
           }
+          // elimina destinatari per vecchie circolari
+          $sql = $this->em->getRepository('App\Entity\Circolare')->createQueryBuilder('c')
+            ->select('c.id')
+            ->where('c.anno=:anno')
+            ->getDql();
+          $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+            ->delete()
+            ->where('cu.circolare NOT IN ('.$sql.')')
+            ->setParameters(['anno' => $info['nuovoAnno']])
+            ->getQuery()
+            ->getResult();
+          $sql = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
+            ->select('u.id')
+            ->where('u.abilitato=:no')
+            ->getDql();
+          $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+            ->delete()
+            ->where('cu.utente IN ('.$sql.')')
+            ->setParameters(['no' => 0])
+            ->getQuery()
+            ->getResult();
+          // conserva avvisi dal 01/09
+          $sql = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+            ->select('a.id')
+            ->where('a.data>=:data')
+            ->getDql();
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.avviso NOT IN ('.$sql.')')
+            ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
+            ->getQuery()
+            ->getResult();
+          $sql = $this->em->getRepository('App\Entity\Utente')->createQueryBuilder('u')
+            ->select('u.id')
+            ->where('u.abilitato=:no')
+            ->getDql();
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.utente IN ('.$sql.')')
+            ->setParameters(['no' => 0])
+            ->getQuery()
+            ->getResult();
+          $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
+            ->delete()
+            ->where('a.data<:data')
+            ->setParameters(['data' => $info['nuovoAnno'].'-09-01'])
+            ->getQuery()
+            ->getResult();
           // pulisce classi da coordinatori e segretari
           $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
             ->update()
@@ -537,6 +591,22 @@ class SistemaController extends BaseController {
             $connection->prepare($sql)->execute();
           }
           // rimozione utenti disabilitati
+          $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+            ->update()
+            ->set('c.alunno', ':nullo')
+            ->setParameters(['nullo' => NULL])
+            ->getQuery()
+            ->getResult();
+          $subquery = $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
+              ->select('d.id')
+              ->where('d.abilitato=:no')
+              ->getDql();
+          $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+            ->delete()
+            ->where('c.docente IN ('.$subquery.')')
+            ->setParameters(['no' => 0])
+            ->getQuery()
+            ->getResult();
           $this->em->getRepository('App\Entity\Docente')->createQueryBuilder('d')
             ->delete()
             ->where('d.abilitato=:no')
@@ -723,7 +793,7 @@ class SistemaController extends BaseController {
           }
           $this->em->flush();
           $this->em->clear();
-          // scrutini rinviati
+          // esiti scrutini rinviati
           $esitiScrutini = $this->em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
             ->join('e.scrutinio', 's')
             ->where('e.alunno IN (:alunni) AND s.periodo=:periodo')
@@ -756,6 +826,72 @@ class SistemaController extends BaseController {
           }
           $this->em->flush();
           $this->em->clear();
+          // scrutini rinviati al successivo A.S.
+          $datiScrutinio = [] ;
+          $scrutini = $this->em->getRepository('App\Entity\Scrutinio')->createQueryBuilder('s')
+            ->join('App\Entity\Esito', 'e', 'WITH', 'e.scrutinio=s.id')
+            ->where('s.periodo=:periodo AND e.esito=:esito')
+            ->setParameters(['periodo' => 'G', 'esito' => 'X'])
+            ->getQuery()
+            ->getResult();
+          foreach ($scrutini as $scrutinio) {
+            $dati = [];
+            // dati materie
+            $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
+              ->select('DISTINCT m.id')
+              ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.materia=m.id')
+              ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo=:tipo')
+              ->orderBy('m.ordinamento', 'ASC')
+              ->setParameters(['classe' => $scrutinio->getClasse(), 'attiva' => 1, 'tipo' => 'N'])
+              ->getQuery()
+              ->getArrayResult();
+            $dati['materie'] = array_map(fn($m) => $m['id'], $materie);
+            $condotta = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('C');
+            $dati['materie'][] = $condotta->getId();
+            // dati alunni
+            $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+              ->join('App\Entity\Esito', 'e', 'WITH', 'e.alunno=a.id')
+              ->where('e.scrutinio=:scrutinio AND e.esito=:esito')
+              ->setParameters(['scrutinio' => $scrutinio, 'esito' => 'X'])
+              ->getQuery()
+              ->getResult();
+            foreach ($alunni as $alunno) {
+              $dati['alunni'][] = $alunno->getId();
+              $dati['religione'][$alunno->getId()] = $alunno->getReligione();
+              $dati['bes'][$alunno->getId()] = $alunno->getBes();
+              $dati['credito3'][$alunno->getId()] = $alunno->getCredito3();
+              $dati['scrutinabili'][$alunno->getId()] = $scrutinio->getDato('scrutinabili')[$alunno->getId()];
+              // voti e assenze alunno
+              $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
+                ->where('vs.scrutinio=:scrutinio AND vs.alunno=:alunno')
+                ->setParameters(['scrutinio' => $scrutinio, 'alunno' => $alunno])
+                ->getQuery()
+                ->getResult();
+              foreach ($voti as $voto) {
+                $dati['voti'][$alunno->getId()][$voto->getMateria()->getId()]['unico'] = $voto->getUnico();
+                $dati['voti'][$alunno->getId()][$voto->getMateria()->getId()]['assenze'] = $voto->getAssenze();
+              }
+            }
+            // dati docenti
+            $docenti = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
+              ->select('d.id,d.cognome,d.nome,d.sesso,c.tipo,m.id AS m_id')
+              ->join('c.docente', 'd')
+              ->join('c.materia', 'm')
+              ->where('c.classe=:classe AND c.attiva=:attiva AND c.tipo!=:tipo')
+              ->orderBy('d.cognome,d.nome,m.ordinamento', 'ASC')
+              ->setParameters(['classe' => $scrutinio->getClasse(), 'attiva' => 1, 'tipo' => 'P'])
+              ->getQuery()
+              ->getArrayResult();
+            foreach ($docenti as $docente) {
+              $dati['docenti'][$docente['id']]['cognome'] = $docente['cognome'];
+              $dati['docenti'][$docente['id']]['nome'] = $docente['nome'];
+              $dati['docenti'][$docente['id']]['sesso'] = $docente['sesso'];
+              $dati['docenti'][$docente['id']]['cattedre'][] = ['tipo' => $docente['tipo'],
+                'materia' =>$docente['m_id']];
+            }
+            // memorizza dati scrutinio
+            $datiScrutinio[] = ['classe' => $scrutinio->getClasse()->getId(), 'dati' => $dati];
+          }
           // gestione alunni promossi
           $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
             ->join('a.classe', 'c')
@@ -793,6 +929,7 @@ class SistemaController extends BaseController {
           $connection = $this->em->getConnection();
           $sqlCommands = [
             "SET FOREIGN_KEY_CHECKS = 0;",
+            "TRUNCATE gs_cattedra;",
             "TRUNCATE gs_esito;",
             "TRUNCATE gs_scrutinio;",
             "TRUNCATE gs_voto_scrutinio;",
@@ -801,6 +938,18 @@ class SistemaController extends BaseController {
             $connection->prepare($sql)->execute();
           }
           // elimina utenti
+          $this->em->getRepository('App\Entity\CircolareUtente')->createQueryBuilder('cu')
+            ->delete()
+            ->where('cu.utente IN (:lista)')
+            ->setParameters(['lista' => array_merge($genitoriEliminati, $alunniEliminati)])
+            ->getQuery()
+            ->getResult();
+          $this->em->getRepository('App\Entity\AvvisoUtente')->createQueryBuilder('au')
+            ->delete()
+            ->where('au.utente IN (:lista)')
+            ->setParameters(['lista' => array_merge($genitoriEliminati, $alunniEliminati)])
+            ->getQuery()
+            ->getResult();
           $this->em->getRepository('App\Entity\Genitore')->createQueryBuilder('g')
             ->delete()
             ->where('g.id IN (:lista)')
@@ -811,6 +960,44 @@ class SistemaController extends BaseController {
             ->delete()
             ->where('a.id IN (:lista)')
             ->setParameters(['lista' => $alunniEliminati])
+            ->getQuery()
+            ->getResult();
+          // aggiunge scrutini rinviati
+          foreach ($datiScrutinio as $dati) {
+            $classe = $this->em->getRepository('App\Entity\Classe')->find($dati['classe']);
+            $scrutinioRinviato = (new Scrutinio())
+              ->setClasse($classe)
+              ->setPeriodo('X')
+              ->setStato('N')
+              ->setDati($dati['dati']);
+            $this->em->persist($scrutinioRinviato);
+          }
+          if (count($datiScrutinio) > 0) {
+            // crea definizione scrutinio rinviato
+            $argomenti[1] = $trans->trans('label.verbale_scrutinio_X');
+            $argomenti[2] = $trans->trans('label.verbale_situazioni_particolari');
+            $struttura[1] = ['ScrutinioInizio', false, []];
+            $struttura[2] = ['ScrutinioSvolgimento', false, ['sezione' => 'Punto primo', 'argomento' => 1]];
+            $struttura[3] = ['Argomento', true, ['sezione' => 'Punto secondo', 'argomento' => 2,
+              'obbligatorio' => false, 'inizio' => '', 'seVuoto' => '', 'default' => '', 'fine' => '']];
+            $struttura[4] = ['ScrutinioFine', false, []];
+            $defScrutinio = (new DefinizioneScrutinio())
+              ->setData(new \DateTime('today'))
+              ->setDataProposte(new \DateTime('today'))
+              ->setPeriodo('X')
+              ->setArgomenti($argomenti)
+              ->setStruttura($struttura);
+            $this->em->persist($defScrutinio);
+          }
+          // memorizza dati
+          $this->em->flush();
+          $this->em->clear();
+          // cancella deroghe alunni anno precedente
+          $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
+            ->update()
+            ->set('a.autorizzaEntrata', ':no')
+            ->set('a.autorizzaUscita', ':no')
+            ->setParameters(['no' => null])
             ->getQuery()
             ->getResult();
           // parametro nuovo anno
