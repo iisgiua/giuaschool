@@ -24,13 +24,11 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
-use App\Entity\Configurazione;
 use App\Entity\App;
 use App\Entity\Avviso;
 use App\Entity\Valutazione;
 use App\Entity\Circolare;
 use App\Util\BachecaUtil;
-use App\Util\ConfigLoader;
 
 
 /**
@@ -54,11 +52,6 @@ class NotificaPreparaCommand extends Command {
   private $trans;
 
   /**
-   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
-   */
-  private $reqstack;
-
-  /**
    * @var \Twig\Environment $tpl Gestione template
    */
   private $tpl;
@@ -67,11 +60,6 @@ class NotificaPreparaCommand extends Command {
    * @var BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
    */
   private $bac;
-
-  /**
-   * @var ConfigLoader $config Gestore della configurazione su database
-   */
-  private $config;
 
   /**
    * @var LoggerInterface $logger Gestore dei log su file
@@ -86,21 +74,17 @@ class NotificaPreparaCommand extends Command {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param \Twig\Environment $tpl Gestione template
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
-   * @param ConfigLoader $config Gestore della configurazione su database
    * @param LoggerInterface $logger Gestore dei log su file
    */
-  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,  RequestStack $reqstack,
-                              \Twig\Environment $tpl, BachecaUtil $bac, ConfigLoader $config, LoggerInterface $logger) {
+  public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
+                              \Twig\Environment $tpl, BachecaUtil $bac, LoggerInterface $logger) {
     parent::__construct();
     $this->em = $em;
     $this->trans = $trans;
-    $this->reqstack = $reqstack;
     $this->tpl = $tpl;
     $this->bac = $bac;
-    $this->config = $config;
     $this->logger = $logger;
   }
 
@@ -146,8 +130,6 @@ class NotificaPreparaCommand extends Command {
    * @return null|int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
-    // carica configurazione
-    $this->config->carica();
     // inizio
     $this->logger->notice('notifica-prepara: Inizio procedura di preparazione delle notifiche');
     // recupero notifiche
@@ -277,14 +259,15 @@ class NotificaPreparaCommand extends Command {
             // crea messaggio
             if ($app->getNotifica() == 'E') {
               // notifica via email
+              $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
               $testo = $this->tpl->render('email/notifica_circolari.html.twig', array(
                 'circolari' => $circ,
-                'intestazione_istituto_breve' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve'),
-                'url_registro' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/url_registro'),
-                'email_amministratore' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_amministratore')));
+                'intestazione_istituto_breve' => $istituto->getIntestazioneBreve(),
+                'url_registro' => $istituto->getUrlRegistro(),
+                'email_amministratore' => $istituto->getEmailAmministratore()));
               // aggiunge dati
               $dati_notifica['oggetto'] = $this->trans->trans('message.notifica_circolare_oggetto', [
-                'intestazione_istituto_breve' => $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')]);
+                'intestazione_istituto_breve' => $istituto->getIntestazioneBreve()]);
               $dati_notifica['email'] = $utente->getEmail();
               // imposta la precedenza su altri messaggi
               $stato = 'P';

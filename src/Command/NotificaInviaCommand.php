@@ -28,7 +28,6 @@ use App\Entity\Genitore;
 use App\Entity\Docente;
 use App\Entity\Ata;
 use App\Util\BachecaUtil;
-use App\Util\ConfigLoader;
 
 
 /**
@@ -52,11 +51,6 @@ class NotificaInviaCommand extends Command {
   private $trans;
 
   /**
-   * @var RequestStack $reqstack Gestore dello stack delle variabili globali
-   */
-  private $reqstack;
-
-  /**
    * @var MailerInterface $mailer Gestore della spedizione delle email
    */
   private $mailer;
@@ -65,11 +59,6 @@ class NotificaInviaCommand extends Command {
    * @var BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
    */
   private $bac;
-
-  /**
-   * @var ConfigLoader $config Gestore della configurazione su database
-   */
-  private $config;
 
   /**
   * @var LoggerInterface $logger Gestore dei log su file
@@ -84,22 +73,17 @@ class NotificaInviaCommand extends Command {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param MailerInterface $mailer Gestore della spedizione delle email
    * @param BachecaUtil $bac Classe di utilità per le funzioni di gestione della bacheca
-   * @param ConfigLoader $config Gestore della configurazione su database
    * @param LoggerInterface $logger Gestore dei log su file
    */
-   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans, RequestStack $reqstack,
-                               MailerInterface  $mailer, BachecaUtil $bac, ConfigLoader $config,
-                               LoggerInterface $logger) {
+   public function __construct(EntityManagerInterface $em, TranslatorInterface $trans,
+                               MailerInterface  $mailer, BachecaUtil $bac, LoggerInterface $logger) {
     parent::__construct();
     $this->em = $em;
     $this->trans = $trans;
-    $this->reqstack = $reqstack;
     $this->mailer = $mailer;
     $this->bac = $bac;
-    $this->config = $config;
     $this->logger = $logger;
   }
 
@@ -145,8 +129,6 @@ class NotificaInviaCommand extends Command {
    * @return null|int Restituisce un valore nullo o 0 se tutto ok, altrimenti un codice di errore come numero intero
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
-    // carica configurazione
-    $this->config->carica();
     // inizio
     $this->logger->notice('notifica-invia: Inizio procedura di notifica');
     // invia messaggi
@@ -168,6 +150,7 @@ class NotificaInviaCommand extends Command {
   private function inviaMessaggi() {
     // inizializza
     $num = 0;
+    $istituto = $this->em->getRepository('App\Entity\Istituto')->findOneBy([]);
     // messaggi con priorità
     $notifiche1 = $this->em->getRepository('App\Entity\NotificaInvio')->createQueryBuilder('n')
       ->where('n.stato=:priorita')
@@ -188,7 +171,7 @@ class NotificaInviaCommand extends Command {
       // invia un messaggio alla volta
       if ($not->getApp()->getNotifica() == 'E') {
         // notifica via email
-        $num += $this->inviaEmail($not);
+        $num += $this->inviaEmail($not, $istituto);
       }
       // rende permanenti modifiche
       $this->em->flush();
@@ -201,16 +184,17 @@ class NotificaInviaCommand extends Command {
    * Utilizza l'email per inviare la notifica
    *
    * @param NotificaInvio $notifica Notifica da inviare
+   * @param Istituto $istituto Dati dell'istituto scolastico
    *
    * @return int Numero di messaggi inviati
    */
-  private function inviaEmail(NotificaInvio $notifica) {
+  private function inviaEmail(NotificaInvio $notifica, $istituto) {
     $errore = false;
     $num = 0;
     $dati = $notifica->getDati();
     // crea il messaggio
     $message = (new Email())
-      ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
+      ->from(new Address($istituto->getEmailNotifiche(), $istituto->getIntestazioneBreve()))
       ->to($dati['email'])
       ->subject($dati['oggetto'])
       ->html($notifica->getMessaggio());
