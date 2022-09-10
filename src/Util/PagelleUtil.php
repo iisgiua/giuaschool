@@ -1060,14 +1060,22 @@ class PagelleUtil {
       $edcivica = $this->em->getRepository('App\Entity\Materia')->findOneByTipo('E');
       // legge docenti del CdC
       $docenti = $dati['scrutinio']->getDato('docenti');
+  //-- dd($dati['scrutinio']->getDato('docenti'));
+
       $docenti_presenti = $dati['scrutinio']->getDato('presenze');
       // dati per materia
       foreach ($materie as $mat) {
         foreach ($docenti as $iddoc=>$doc) {
           foreach ($doc['cattedre'] as $cat) {
             if ($cat['materia'] == $mat['id']) {
-              $dati['materie'][$mat['id']]['nome'] = $mat['nome'].
-                (isset($cat[$edcivica->getId()]) ? (', '.$edcivica->getNome()) : '');
+              $dati['materie'][$mat['id']]['nome'] = $mat['nome'];
+              foreach ($doc['cattedre'] as $cat2) {
+                if ($cat2['materia'] == $edcivica->getId()) {
+                  // aggiunge ed.civica
+                  $dati['materie'][$mat['id']]['nome'] .= ', '.$edcivica->getNome();
+                  break;
+                }
+              }
               if ($docenti_presenti[$iddoc]->getPresenza()) {
                 // dati docente
                 $dati['materie'][$mat['id']]['docenti'][$iddoc] = $doc['cognome'].' '.$doc['nome'];
@@ -1652,6 +1660,7 @@ class PagelleUtil {
       $dati['alunni_noreligione'] = array();
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
+        $dati['alunni'][$alu['id']]['bes'] = $dati['scrutinio']->getDato('bes')[$alu['id']];
         $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']->getDato('religione')[$alu['id']];
         $dati['alunni'][$alu['id']]['credito3'] = $dati['scrutinio']->getDato('credito3')[$alu['id']];
         $dati['alunni'][$alu['id']]['credito4'] = null;
@@ -1667,6 +1676,7 @@ class PagelleUtil {
         ->getResult();
       $dati['ammessi'] = 0;
       $dati['non_ammessi'] = 0;
+      $dati['rinviati'] = 0;
       foreach ($esiti as $e) {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
         if ($e->getEsito() == 'A') {
@@ -2759,6 +2769,7 @@ class PagelleUtil {
       // esame rinviato
       $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');

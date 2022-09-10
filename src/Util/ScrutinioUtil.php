@@ -927,9 +927,6 @@ class ScrutinioUtil {
     // legge docenti del CdC (esclusi potenziamento)
     if ($periodo == 'X') {
       // scrutinio rinviato da prec. A.S. (legge dati da scrutinio)
-      foreach ($scrutinio->getDato('docenti') as $id=>$docente) {
-        $docenti[] = array_merge(['id' => $id], $docente);
-      }
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.id IN (:lista)')
@@ -939,6 +936,17 @@ class ScrutinioUtil {
         ->getArrayResult();
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
+      }
+      foreach ($scrutinio->getDato('docenti') as $id=>$docente) {
+        foreach ($docente['cattedre'] as $cattedra) {
+          $docenti[] = [
+            'id' => $id,
+            'cognome' => $docente['cognome'],
+            'nome' => $docente['nome'],
+            'sesso' => $docente['sesso'],
+            'tipo' => $cattedra['tipo'],
+            'nomeBreve' => $dati['materie'][$cattedra['materia']]['nomeBreve']];
+        }
       }
     } else {
       // altri periodi
@@ -1196,6 +1204,7 @@ class ScrutinioUtil {
       if ($periodo == 'X') {
         // scrutinio rinviato da prec. A.S. (legge dati da scrutinio)
         $dati['alunni'][$alu['id']]['religione'] = $scrutinio->getDato('religione')[$alu['id']];
+        $dati['alunni'][$alu['id']]['bes'] = $scrutinio->getDato('bes')[$alu['id']];
       }
     }
     // legge materie
@@ -3207,6 +3216,7 @@ class ScrutinioUtil {
         $dati['alunni'][$alu['id']]['credito3'] = $dati['scrutinio']['credito3'][$alu['id']];
         $dati['alunni'][$alu['id']]['credito4'] = null;
         $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']['religione'][$alu['id']];
+        $dati['alunni'][$alu['id']]['bes'] = $dati['scrutinio']['bes'][$alu['id']];
       }
       // legge esito
       $dati['esiti'][$alu['id']] = $this->em->getRepository('App\Entity\Esito')->find($alu['esito']);
@@ -3770,6 +3780,8 @@ class ScrutinioUtil {
       foreach ($rinviati as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
         $dati['alunni'][$alu['id']]['religione'] = $scrutinio->getDato('religione')[$alu['id']];
+        $dati['alunni'][$alu['id']]['bes'] = $scrutinio->getDato('bes') ?
+          $scrutinio->getDato('bes')[$alu['id']] : 'N';
       }
       // legge materie (da dati in scrutinio)
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
@@ -3787,7 +3799,7 @@ class ScrutinioUtil {
         foreach ($voti as $mat=>$voto) {
           $dati['voti'][$alu][$mat]['unico'] = $voto['unico'];
           $dati['voti'][$alu][$mat]['assenze'] = $voto['assenze'];
-          $dati['voti'][$alu][$mat]['recupero'] = 'recupero';
+          $dati['voti'][$alu][$mat]['recupero'] = 'C';
           $dati['voti'][$alu][$mat]['debito'] = 'debito';
           $dati['voti'][$alu][$mat]['dati'] = [];
         }
@@ -3939,8 +3951,14 @@ class ScrutinioUtil {
     }
     $this->em->flush();
     // legge dati da scrutinio finale
-    $scrutinio_F = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => 'F']);
-    $scrutinabili = $scrutinio_F->getDato('scrutinabili');
+    if ($scrutinio->getPeriodo() == 'X') {
+      // scrutinio rimandata nell'A.S. precedente
+      $scrutinabili = $scrutinio->getDato('scrutinabili');
+    } else {
+      // scrutinio sospeso o rimandato in stesso A.S.
+      $scrutinio_F = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe, 'periodo' => 'F']);
+      $scrutinabili = $scrutinio_F->getDato('scrutinabili');
+    }
     // memorizza dati alunni
     $dati_scrutinio = $scrutinio->getDati();
     $dati_scrutinio['sospesi'] = array_keys($dati['alunni']);
@@ -4332,10 +4350,10 @@ class ScrutinioUtil {
           // voto insufficiente
           $insuff_cont++;
         }
-        // legge voto dello scrutinio finale
+        // legge voto dello scrutinio finale (escluso scrutinio rimandato da prec. A.S.)
         $votoFinale = $this->em->getRepository('App\Entity\VotoScrutinio')->findOneBy([
           'scrutinio' => $scrutinioFinale, 'alunno' => $id, 'materia' => $voto->getMateria()]);
-        if ($voto->getUnico() < $votoFinale->getUnico()) {
+        if ($votoFinale && $voto->getUnico() < $votoFinale->getUnico()) {
           // voto inferiore a quello assegnato nello scrutinio finale
           $errore[] = $this->trans->trans('exception.voto_sospeso_inferiore_a_finale', ['sex' => $sesso,
             'alunno' => $nome, 'materia' => $voto->getMateria()->getNomeBreve()]);

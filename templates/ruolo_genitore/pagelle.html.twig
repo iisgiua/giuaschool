@@ -65,11 +65,9 @@
           {% for v in dati.voti %}
       <tr>
         <td><strong>{{ v.materia.nome }}</strong></td>
-            {% if v.materia.tipo == 'R' %}
-        <td><span class="label label-{{ v.voto < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.voto] }}</span></td>
-            {% else %}
-        <td><span class="label label-{{ v.voto < 6 ? 'danger' : 'success' }} gs-big">{{ ((v.materia.tipo == 'C' and v.voto == 4) or (v.materia.tipo == 'E' and v.voto == 3) or (v.voto == 0)) ? 'NC' : v.voto }}</span></td>
-            {% endif %}
+        <td>
+          <span class="gs-big label {{ v.voto < dati.valutazioni[v.materia.tipo].med ? 'label-danger' : (v.voto < dati.valutazioni[v.materia.tipo].suff ? 'label-warning' : 'label-success') }}">{{ dati.valutazioni[v.materia.tipo].lista[v.voto] }}</span>
+        </td>
       </tr>
           {% endfor %}
     </tbody>
@@ -87,11 +85,9 @@
           {% for v in dati.votiRinviato %}
       <tr>
         <td><strong>{{ v.materia.nome }}</strong></td>
-            {% if v.materia.tipo == 'R' %}
-        <td><span class="label label-{{ v.unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['F']['R'][v.unico] }}</span></td>
-            {% else %}
-        <td><span class="label label-{{ v.unico < 6 ? 'danger' : 'success' }} gs-big">{{ ((v.materia.tipo == 'C' and v.unico == 4) or (v.materia.tipo == 'E' and v.unico == 3) or (v.unico == 0)) ? 'NC' : v.unico }}</span></td>
-            {% endif %}
+        <td>
+          <span class="gs-big label {{ v.unico < dati.valutazioni[v.materia.tipo].med ? 'label-danger' : (v.unico < dati.valutazioni[v.materia.tipo].suff ? 'label-warning' : 'label-success') }}">{{ dati.valutazioni[v.materia.tipo].lista[v.unico] }}</span>
+        </td>
       </tr>
           {% endfor %}
     </tbody>
