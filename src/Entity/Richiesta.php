@@ -67,6 +67,13 @@ class Richiesta {
   private ?\DateTime $gestita = null;
 
   /**
+   * @var \DateTime|null $data Data della richiesta (solo per le richieste multiple)
+   *
+   * @ORM\Column(type="date", nullable=true)
+   */
+  private ?\DateTime $data = null;
+
+  /**
    * @var array $valori Lista dei valori per i campi da compilare nel modulo: nome1 => valore1, nome2 => valore2...
    *
    * @ORM\Column(type="array", nullable=false)
@@ -216,6 +223,27 @@ class Richiesta {
    */
   public function setGestita(?\DateTime $gestita): self {
     $this->gestita = $gestita;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data della richiesta (solo per le richieste multiple)
+   *
+   * @return \DateTime|null Data della richiesta
+   */
+  public function getData(): ?\DateTime {
+    return $this->data;
+  }
+
+  /**
+   * Modifica la data della richiesta (solo per le richieste multiple)
+   *
+   * @param \DateTime|null $data Data della richiesta
+   *
+   * @return self Oggetto modificato
+   */
+  public function setData(?\DateTime $data): self {
+    $this->data = $data;
     return $this;
   }
 
@@ -387,6 +415,7 @@ class Richiesta {
     $dati = [
       'inviata' => $this->inviata->format('d/m/y H:i'),
       'gestita' => $this->gestita ? $this->gestita->format('d/m/y H:i') : '',
+      'data' => $this->data ? $this->data->format('d/m/y H:i') : '',
       'valori' => $this->valori,
       'documento' => $this->documento,
       'allegati' => $this->allegati,

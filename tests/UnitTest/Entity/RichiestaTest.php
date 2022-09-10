@@ -31,15 +31,15 @@ class RichiestaTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Richiesta';
     // campi da testare
-    $this->fields = ['inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente', 'definizioneRichiesta'];
+    $this->fields = ['inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente', 'definizioneRichiesta', 'data'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'definizione_richiesta_id']];
+    $this->canRead = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'definizione_richiesta_id', 'data']];
     // SQL write
-    $this->canWrite = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'definizione_richiesta_id']];
+    $this->canWrite = ['gs_richiesta' => ['id', 'creato', 'modificato', 'inviata', 'gestita', 'valori', 'documento', 'allegati', 'stato', 'messaggio', 'utente_id', 'definizione_richiesta_id', 'data']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -79,7 +79,8 @@ class RichiestaTest extends DatabaseTestCase {
           ($field == 'messaggio' ? $this->faker->text() :
           ($field == 'utente' ? $this->getReference("utente_1") :
           ($field == 'definizioneRichiesta' ? $this->getReference("definizione_richiesta_1") :
-          null)))))))));
+          ($field == 'data' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
+          null))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -126,6 +127,7 @@ class RichiestaTest extends DatabaseTestCase {
     $dt = [
       'inviata' => $existent->getInviata()->format('d/m/y H:i'),
       'gestita' => $existent->getGestita() ? $existent->getGestita()->format('d/m/y H:i') : '',
+      'data' => $existent->getData() ? $existent->getData()->format('d/m/y H:i') : '',
       'valori' =>  $existent->getValori(),
       'documento' =>  $existent->getDocumento(),
       'allegati' =>  $existent->getAllegati(),

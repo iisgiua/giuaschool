@@ -111,6 +111,24 @@ class DefinizioneRichiesta {
   private int $allegati = 0;
 
   /**
+   * @var string $azioneGestione Pagina dell'azione di gestione della richiesta (pagina predefinita se vuoto)
+   *
+   * @ORM\Column(name="azione_gestione", type="string", length=64, nullable=false)
+   *
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
+   */
+  private string $azioneGestione = '';
+
+  /**
+   * @var string $azioneRimozione Pagina dell'azione di rimozione della richiesta (pagina predefinita se vuoto)
+   *
+   * @ORM\Column(name="azione_rimozione", type="string", length=64, nullable=false)
+   *
+   * @Assert\Length(max=64,maxMessage="field.maxlength")
+   */
+  private string $azioneRimozione = '';
+
+  /**
    * @var bool $unica Indica se è ammessa una sola richiesta per l'utente
    *
    * @ORM\Column(type="boolean", nullable=false)
@@ -305,6 +323,48 @@ class DefinizioneRichiesta {
   }
 
   /**
+   * Restituisce la pagina dell'azione di gestione della richiesta (pagina predefinita se vuoto)
+   *
+   * @return string Pagina dell'azione di gestione della richiesta
+   */
+  public function getAzioneGestione(): string {
+    return $this->azioneGestione;
+  }
+
+  /**
+   * Modifica la pagina dell'azione di gestione della richiesta (pagina predefinita se vuoto)
+   *
+   * @param string $azioneGestione Pagina dell'azione di gestione della richiesta
+   *
+   * @return self Oggetto modificato
+   */
+  public function setAzioneGestione(string $azioneGestione): self {
+    $this->azioneGestione = $azioneGestione;
+    return $this;
+  }
+
+  /**
+   * Restituisce la pagina dell'azione di rimozione della richiesta (pagina predefinita se vuoto)
+   *
+   * @return string Pagina dell'azione di rimozione della richiesta
+   */
+  public function getAzioneRimozione(): string {
+    return $this->azioneRimozione;
+  }
+
+  /**
+   * Modifica la pagina dell'azione di rimozione della richiesta (pagina predefinita se vuoto)
+   *
+   * @param string $azioneRimozione Pagina dell'azione di rimozione della richiesta
+   *
+   * @return self Oggetto modificato
+   */
+  public function setAzioneRimozione(string $azioneRimozione): self {
+    $this->azioneRimozione = $azioneRimozione;
+    return $this;
+  }
+
+  /**
    * Restituisce vero se è ammessa una sola richiesta per l'utente
    *
    * @return bool Indica se è ammessa una sola richiesta per l'utente
@@ -371,6 +431,8 @@ class DefinizioneRichiesta {
       'modulo' => $this->modulo,
       'campi' => $this->campi,
       'allegati' => $this->allegati,
+      'azioneGestione' => $this->azioneGestione,
+      'azioneRimozione' => $this->azioneRimozione,
       'unica' => $this->unica,
       'abilitata' => $this->abilitata];
     return $dati;

@@ -31,15 +31,15 @@ class DefinizioneRichiestaTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\DefinizioneRichiesta';
     // campi da testare
-    $this->fields = ['nome', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata'];
+    $this->fields = ['nome', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata', 'azioneGestione', 'azioneRimozione'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata']];
+    $this->canRead = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata', 'azione_gestione', 'azione_rimozione']];
     // SQL write
-    $this->canWrite = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata']];
+    $this->canWrite = ['gs_definizione_richiesta' => ['id', 'creato', 'modificato', 'nome', 'richiedenti', 'destinatari', 'modulo', 'campi', 'allegati', 'unica', 'abilitata', 'azione_gestione', 'azione_rimozione']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -78,7 +78,9 @@ class DefinizioneRichiestaTest extends DatabaseTestCase {
           ($field == 'allegati' ? $this->faker->randomNumber(4, false) :
           ($field == 'unica' ? $this->faker->boolean() :
           ($field == 'abilitata' ? $this->faker->boolean() :
-          null))))))));
+          ($field == 'azioneGestione' ? substr($this->faker->text(), 0, 64) :
+          ($field == 'azioneRimozione' ? substr($this->faker->text(), 0, 64) :
+          null))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -129,6 +131,8 @@ class DefinizioneRichiestaTest extends DatabaseTestCase {
       'modulo' => $existent->getModulo(),
       'campi' => $existent->getCampi(),
       'allegati' => $existent->getAllegati(),
+      'azioneGestione' => $existent->getAzioneGestione(),
+      'azioneRimozione' => $existent->getAzioneRimozione(),
       'unica' => $existent->getUnica(),
       'abilitata' => $existent->getAbilitata()];
     $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
@@ -197,6 +201,18 @@ class DefinizioneRichiestaTest extends DatabaseTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Allegati - VALID POSITIVE OR ZERO');
     $existent->setAllegati(1);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Allegati - VALID POSITIVE OR ZERO');
+    // azioneGestione
+    $existent->setAzioneGestione(str_repeat('*', 65));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::AzioneGestione - MAX LENGTH');
+    $existent->setAzioneGestione(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::AzioneGestione - VALID MAX LENGTH');
+    // AzioneRimozione
+    $existent->setAzioneRimozione(str_repeat('*', 65));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::AzioneRimozione - MAX LENGTH');
+    $existent->setAzioneRimozione(str_repeat('*', 64));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::AzioneRimozione - VALID MAX LENGTH');
     // legge dati esistenti
     $this->em->flush();
     $objects = $this->em->getRepository($this->entity)->findBy([]);
