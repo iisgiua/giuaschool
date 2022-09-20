@@ -795,7 +795,7 @@ class CsvImporter {
             return $imported;
           }
           // dati per la visualizzazione
-          $fields['dataNascita'] = $fields['dataNascita']->format('d/m/Y');
+          $fields['dataNascita'] = $fields['dataNascita'] ? $fields['dataNascita']->format('d/m/Y') : '';
           $fields['classe'] = ($fields['classe'] ? $fields['classe'] : '');
           $fields['genitore1Telefono'] = implode(', ', $fields['genitore1Telefono']);
           $fields['genitore2Telefono'] = implode(', ', $fields['genitore2Telefono']);
@@ -1492,7 +1492,8 @@ class CsvImporter {
       ->setNome($fields['nome'])
       ->setCognome($fields['cognome'])
       ->setSesso($fields['sesso'])
-      ->setCodiceFiscale($fields['codiceFiscale']);
+      ->setCodiceFiscale($fields['codiceFiscale'])
+      ->setSpid(true);
     $password = $this->hasher->hashPassword($docente, $docente->getPasswordNonCifrata());
     $docente->setPassword($password);
     // valida dati
@@ -1642,7 +1643,8 @@ class CsvImporter {
       ->setReligione($fields['religione'])
       ->setCredito3($fields['credito3'])
       ->setCredito4($fields['credito4'])
-      ->setClasse($fields['classe']);
+      ->setClasse($fields['classe'])
+      ->setSpid(true);
     $password = $this->hasher->hashPassword($alunno, $alunno->getPasswordNonCifrata());
     $alunno->setPassword($password);
     // valida dati alunno
@@ -1664,7 +1666,8 @@ class CsvImporter {
       ->setSesso('M')
       ->setCodiceFiscale($fields['genitore1CodiceFiscale'])
       ->setNumeriTelefono($fields['genitore1Telefono'])
-      ->setAlunno($alunno);
+      ->setAlunno($alunno)
+      ->setSpid(true);
     $password = $this->hasher->hashPassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
     // valida dati genitore
@@ -1686,7 +1689,8 @@ class CsvImporter {
       ->setSesso('F')
       ->setCodiceFiscale($fields['genitore2CodiceFiscale'])
       ->setNumeriTelefono($fields['genitore2Telefono'])
-      ->setAlunno($alunno);
+      ->setAlunno($alunno)
+      ->setSpid(true);
     $password = $this->hasher->hashPassword($genitore, $genitore->getPasswordNonCifrata());
     $genitore->setPassword($password);
     // valida dati genitore
@@ -1976,7 +1980,8 @@ class CsvImporter {
       ->setCodiceFiscale($fields['codiceFiscale'])
       ->setSede($sede)
       ->setTipo($fields['tipo'])
-      ->setSegreteria($fields['segreteria']);
+      ->setSegreteria($fields['segreteria'])
+      ->setSpid(true);
     $password = $this->hasher->hashPassword($ata, $ata->getPasswordNonCifrata());
     $ata->setPassword($password);
     // valida dati

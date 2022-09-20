@@ -845,7 +845,7 @@ class AccountProvisioning {
       $errore = $this->aggiungeUtenteGruppoGsuite($email, $gruppo);
       if (!$errore && $tipo == 'D') {
         // aggiunge docente a corso COLLEGIO DEI DOCENTI
-        $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DEI-DOCENTI');
+        $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DOCENTI');
       }
     } catch (\Exception $e) {
       // errore
@@ -943,14 +943,14 @@ class AccountProvisioning {
         $errore = $this->rimuoveUtenteGruppoGsuite($email, $gruppo);
         if (!$errore && $tipo == 'D') {
           // toglie docente da corso COLLEGIO DEI DOCENTI
-          $errore = $this->rimuoveAlunnoCorsoGsuite($email, 'COLLEGIO-DEI-DOCENTI');
+          $errore = $this->rimuoveAlunnoCorsoGsuite($email, 'COLLEGIO-DOCENTI');
         }
       } else {
         // aggiunge a gruppo
         $errore = $this->aggiungeUtenteGruppoGsuite($email, $gruppo);
         if (!$errore && $tipo == 'D') {
           // aggiunge docente a corso COLLEGIO DEI DOCENTI
-          $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DEI-DOCENTI');
+          $errore = $this->aggiungeAlunnoCorsoGsuite($email, 'COLLEGIO-DOCENTI');
         }
       }
     } catch (\Exception $e) {
