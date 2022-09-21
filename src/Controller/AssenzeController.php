@@ -175,16 +175,6 @@ class AssenzeController extends AbstractController {
       $errore = $reg->controlloData($data_obj, $classe->getSede());
       if (!$errore) {
         // non festivo
-        $oggi = new \DateTime();
-        $adesso = $oggi->format('H:i');
-        if ($oggi->format('w') != 0 &&
-            $adesso >= $em->getRepository('App\Entity\ScansioneOraria')->inizioLezioni($oggi, $classe->getSede()) &&
-            $adesso <= $em->getRepository('App\Entity\ScansioneOraria')->fineLezioni($oggi, $classe->getSede())) {
-          // avvisi alla classe
-          $num_avvisi = $bac->bachecaNumeroAvvisiAlunni($classe);
-          $lista_circolari = $em->getRepository('App\Entity\Circolare')->listaCircolariClasse($classe);
-        }
-        // recupera dati
         $dati = $reg->quadroAssenzeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
       }
     }

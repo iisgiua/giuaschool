@@ -23,7 +23,6 @@
   </div>
     {% else %}
       {% if avvisi+(circolari|length) > 0 %}
-        {% include 'include/modal-popup.html.twig' with {'modal_popup_msg': 'message.presenti_comunicazioni'|trans } %}
   <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
     <strong>{{ 'message.presenti_comunicazioni'|trans }}</strong><br>
         {% if avvisi > 0 %}
@@ -345,18 +344,6 @@ $(document).ready(function() {
   $('#gs-modal-info').on('shown.bs.modal', function (e) {
     $('body').addClass('modal-open');
   });
-  {% if avvisi+(circolari|length) > 0 %}
-  $("#gs-modal-popup-do").click(function(e) {
-    $('#gs-modal-popup').modal('hide');
-    {% if avvisi > 0 %}
-    $('#gs-leggi-avvisi').click();
-    {% else %}
-    $('#gs-leggi-circolari').click();
-    {% endif %}
-  });
-  // init
-  $('#gs-modal-popup').modal('show');
-  {% endif %}
 });
 </script>
 {% endblock %}
