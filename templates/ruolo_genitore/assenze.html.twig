@@ -61,24 +61,20 @@
     <caption class="text-info text-center gs-big"><strong>Situazione globale</strong></caption>
     <tbody>
       <tr>
-        <th class="gs-big">Numero di giorni di assenza</th>
-        <td><span class="label label-default gs-big">{{ dati.stat.assenze }}</span></td>
-      </tr>
-      <tr>
-        <th>Numero di ritardi brevi (entro {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
-        <td><span class="label label-default gs-big">{{ dati.stat.brevi }}</span></td>
+        <th class="gs-big">Totale ore di assenza</th>
+        <td><span class="label label-{{ dati.stat.livello }} gs-big">{{ dati.stat.ore|number_format(1, ',') }}</span></td>
       </tr>
       <tr>
         <th class="gs-big">Numero di ritardi (oltre {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
         <td><span class="label label-default gs-big">{{ dati.stat.ritardi }}</span> <strong>di cui <span class="label label-{{ dati.stat.ritardi_validi > 0 ? 'warning' : 'default' }}">{{ dati.stat.ritardi_validi }}</span> considerati per il conteggio del numero massimo ammesso</strong></td>
       </tr>
       <tr>
-        <th class="gs-big">Numero di uscite anticipate</th>
-        <td><span class="label label-default gs-big">{{ dati.stat.uscite }}</span> <strong>di cui <span class="label label-{{ dati.stat.uscite_valide > 0 ? 'warning' : 'default' }}">{{ dati.stat.uscite_valide }}</span> considerate per il conteggio del numero massimo ammesso</strong></td>
+        <th>Numero di ritardi brevi (entro {{ app.session.get('/CONFIG/SCUOLA/ritardo_breve') }} minuti)</th>
+        <td><span class="label label-default gs-big">{{ dati.stat.brevi }}</span></td>
       </tr>
       <tr>
-        <th class="gs-big">Totale ore di assenza</th>
-        <td><span class="label label-{{ dati.stat.livello }} gs-big">{{ dati.stat.ore|number_format(1, ',') }}</span></td>
+        <th class="gs-big">Numero di uscite anticipate</th>
+        <td><span class="label label-default gs-big">{{ dati.stat.uscite }}</span> <strong>di cui <span class="label label-{{ dati.stat.uscite_valide > 0 ? 'warning' : 'default' }}">{{ dati.stat.uscite_valide }}</span> considerate per il conteggio del numero massimo ammesso</strong></td>
       </tr>
     </tbody>
   </table>

@@ -41,6 +41,7 @@ use App\Entity\ScansioneOraria;
 use App\Entity\Uscita;
 use App\Form\Appello;
 use App\Form\AppelloType;
+use App\Form\EntrataType;
 use App\Form\MessageType;
 
 
@@ -391,18 +392,18 @@ class AssenzeController extends AbstractController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    // controlla alunno
+    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
+    if (!$alunno) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // controlla data
     $data_obj = \DateTime::createFromFormat('Y-m-d', $data);
     $errore = $reg->controlloData($data_obj, $classe->getSede());
     if ($errore) {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
-    }
-    // controlla alunno
-    $alunno = $em->getRepository('App\Entity\Alunno')->findOneBy(['id' => $alunno, 'classe' => $classe]);
-    if (!$alunno) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
@@ -427,7 +428,7 @@ class AssenzeController extends AbstractController {
       $entrata = (new Entrata())
         ->setData($data_obj)
         ->setAlunno($alunno)
-        ->setValido(false)
+        ->setValido(true)
         ->setDocente($this->getUser());
       // imposta ora
       $ora = new \DateTime();
@@ -452,30 +453,10 @@ class AssenzeController extends AbstractController {
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('entrata_edit', FormType::class, $entrata)
-      ->add('ora', TimeType::class, array('label' => 'label.ora_entrata',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'required' => true))
-      ->add('note', MessageType::class, array('label' => 'label.note',
-        'trim' => true,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']));
-    if (isset($entrata_old)) {
-      $form = $form
-        ->add('delete', SubmitType::class, array('label' => 'label.delete',
-          'attr' => ['widget' => 'gs-button-inline', 'class' => 'btn-danger']));
-    }
-    $form = $form
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('lezioni_assenze_quadro')."'"]))
-      ->getForm();
+    $form = $this->createForm(EntrataType::class, $entrata, array('formMode' => 'staff'));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      if (!isset($entrata_old) && isset($request->request->get('entrata_edit')['delete'])) {
+      if (!isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
         // ritardo non esiste, niente da fare
         return $this->redirectToRoute('lezioni_assenze_quadro');
       } elseif ($form->get('ora')->getData()->format('H:i:00') <= $orario[0]['inizio'] ||
@@ -483,7 +464,7 @@ class AssenzeController extends AbstractController {
         // ora fuori dai limiti
         $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
       } elseif ($form->isValid()) {
-        if (isset($entrata_old) && $form->get('delete')->isClicked()) {
+        if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
           // cancella ritardo esistente
           $id_entrata = $entrata->getId();
           $em->remove($entrata);
@@ -512,7 +493,7 @@ class AssenzeController extends AbstractController {
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
-        if (isset($entrata_old) && $form->get('delete')->isClicked()) {
+        if (isset($entrata_old) && isset($request->request->get('entrata')['delete'])) {
           // log cancella
           $dblogger->logAzione('ASSENZE', 'Cancella entrata', array(
             'Entrata' => $id_entrata,
@@ -563,6 +544,7 @@ class AssenzeController extends AbstractController {
       'form' => $form->createView(),
       'form_title' => (isset($entrata_old) ? 'title.modifica_entrata' : 'title.nuova_entrata'),
       'label' => $label,
+      'btn_delete' => isset($entrata_old),
     ));
   }
 
@@ -1112,69 +1094,69 @@ class AssenzeController extends AbstractController {
               $em->remove($uscita);
             }
             break;
-          case 'R':   // ritardo
-            // validazione orario
-            if ($appello->getOra()->format('H:i:00') <= $orario[0]['inizio'] ||
-                $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
-              // errore su orario
-              $form->get('lista')[$key]->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
-              continue 2;
-            }
-            // controlla esistenza ritardo
-            $entrata = $em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
-            if ($entrata) {
-              if ($entrata->getOra()->format('H:i') != $appello->getOra()->format('H:i')) {
-                // modifica
-                $log['entrata_edit'][] = array($entrata->getId(), $entrata->getAlunno()->getId(),
-                  $entrata->getOra()->format('H:i'), $entrata->getNote(), $entrata->getGiustificato(),
-                  $entrata->getDocente()->getId(), $entrata->getDocenteGiustifica());
-                $entrata
-                  ->setOra($appello->getOra())
-                  ->setDocente($this->getUser())
-                  ->setRitardoBreve(false)
-                  ->setGiustificato(null)
-                  ->setDocenteGiustifica(null);
-                // controlla ritardo breve
-                $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
-                $inizio->modify('+' . $reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
-                if ($appello->getOra() <= $inizio) {
-                  // ritardo breve: giustificazione automatica (non imposta docente)
-                  $entrata
-                    ->setRitardoBreve(true)
-                    ->setGiustificato($data_obj)
-                    ->setDocenteGiustifica(null)
-                    ->setValido(false);
-                }
-              }
-            } else {
-              // inserisce ritardo
-              $entrata = (new Entrata())
-                ->setData($data_obj)
-                ->setAlunno($alunno)
-                ->setDocente($this->getUser())
-                ->setOra($appello->getOra())
-                ->setValido(false);
-              // controlla ritardo breve
-              $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
-              $inizio->modify('+' . $reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
-              if ($appello->getOra() <= $inizio) {
-                // ritardo breve: giustificazione automatica (non imposta docente)
-                $entrata
-                  ->setRitardoBreve(true)
-                  ->setGiustificato($data_obj)
-                  ->setDocenteGiustifica(null);
-              }
-              $em->persist($entrata);
-              $log['entrata_create'][] = $entrata;
-            }
-            // controlla esistenza assenza
-            $assenza = $em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
-            if ($assenza) {
-              // rimuove assenza
-              $log['assenza_delete'][] = array($assenza->getId(), $assenza);
-              $em->remove($assenza);
-            }
-            break;
+          //-- case 'R':   // ritardo
+            //-- // validazione orario
+            //-- if ($appello->getOra()->format('H:i:00') <= $orario[0]['inizio'] ||
+                //-- $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
+              //-- // errore su orario
+              //-- $form->get('lista')[$key]->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
+              //-- continue 2;
+            //-- }
+            //-- // controlla esistenza ritardo
+            //-- $entrata = $em->getRepository('App\Entity\Entrata')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            //-- if ($entrata) {
+              //-- if ($entrata->getOra()->format('H:i') != $appello->getOra()->format('H:i')) {
+                //-- // modifica
+                //-- $log['entrata_edit'][] = array($entrata->getId(), $entrata->getAlunno()->getId(),
+                  //-- $entrata->getOra()->format('H:i'), $entrata->getNote(), $entrata->getGiustificato(),
+                  //-- $entrata->getDocente()->getId(), $entrata->getDocenteGiustifica());
+                //-- $entrata
+                  //-- ->setOra($appello->getOra())
+                  //-- ->setDocente($this->getUser())
+                  //-- ->setRitardoBreve(false)
+                  //-- ->setGiustificato(null)
+                  //-- ->setDocenteGiustifica(null);
+                //-- // controlla ritardo breve
+                //-- $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
+                //-- $inizio->modify('+' . $reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
+                //-- if ($appello->getOra() <= $inizio) {
+                  //-- // ritardo breve: giustificazione automatica (non imposta docente)
+                  //-- $entrata
+                    //-- ->setRitardoBreve(true)
+                    //-- ->setGiustificato($data_obj)
+                    //-- ->setDocenteGiustifica(null)
+                    //-- ->setValido(false);
+                //-- }
+              //-- }
+            //-- } else {
+              //-- // inserisce ritardo
+              //-- $entrata = (new Entrata())
+                //-- ->setData($data_obj)
+                //-- ->setAlunno($alunno)
+                //-- ->setDocente($this->getUser())
+                //-- ->setOra($appello->getOra())
+                //-- ->setValido(false);
+              //-- // controlla ritardo breve
+              //-- $inizio = \DateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 '.$orario[0]['inizio']);
+              //-- $inizio->modify('+' . $reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . 'minutes');
+              //-- if ($appello->getOra() <= $inizio) {
+                //-- // ritardo breve: giustificazione automatica (non imposta docente)
+                //-- $entrata
+                  //-- ->setRitardoBreve(true)
+                  //-- ->setGiustificato($data_obj)
+                  //-- ->setDocenteGiustifica(null);
+              //-- }
+              //-- $em->persist($entrata);
+              //-- $log['entrata_create'][] = $entrata;
+            //-- }
+            //-- // controlla esistenza assenza
+            //-- $assenza = $em->getRepository('App\Entity\Assenza')->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
+            //-- if ($assenza) {
+              //-- // rimuove assenza
+              //-- $log['assenza_delete'][] = array($assenza->getId(), $assenza);
+              //-- $em->remove($assenza);
+            //-- }
+            //-- break;
         }
       }
       if ($form->isValid()) {

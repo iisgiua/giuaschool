@@ -120,6 +120,9 @@
                 {% if v.note_uscita %} <span class="glyphicon glyphicon-info-sign"></span>{% endif %}
           </span>
               {% endif %}
+              {% if v.ritardi > 0 %}
+          <span class="label label-info pull-right">Ritardi: {{ v.ritardi }}</span>
+              {% endif %}
         </td>
         <td>
               {% if v.convalide > 0 %}

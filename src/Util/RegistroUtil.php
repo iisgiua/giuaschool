@@ -754,6 +754,8 @@ class RegistroUtil {
       // vista giornaliera
       $data_str = $data_inizio->format('Y-m-d');
       $dati[$data_str]['data'] = clone $data_inizio;
+      // dati periodo
+      $periodo = $this->periodo($data_inizio);
       // legge alunni di classe
       $lista = $this->alunniInData($data_inizio, $classe);
       // dati GENITORI
@@ -801,6 +803,15 @@ class RegistroUtil {
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['convalide'] = $convalide_assenze + $convalide_ritardi;
+        // conteggio ritardi
+        $ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
+          ->select('COUNT(e.id)')
+          ->where('e.valido=:valido AND e.alunno=:alunno AND e.data BETWEEN :inizio AND :fine')
+          ->setParameters(['valido' => 1, 'alunno' => $alu['id_alunno'],
+            'inizio' => $periodo['inizio']->format('Y-m-d'), 'fine' => $data_str])
+          ->getQuery()
+          ->getSingleScalarResult();
+        $alunni[$k]['ritardi'] = $ritardi;
         // gestione pulsanti
         $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu['id_alunno']);
         $pulsanti = $this->azioneAssenze($data_inizio, $docente, $alunno, $classe, ($cattedra ? $cattedra->getMateria() : null));

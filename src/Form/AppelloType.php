@@ -35,16 +35,18 @@ class AppelloType extends AbstractType {
       ->add('id', HiddenType::class)
       ->add('alunno', HiddenType::class)
       ->add('presenza', ChoiceType::class, array('label' => false,
-        'choices' => [ 'label.appello_P' => 'P', 'label.appello_A' => 'A', 'label.appello_R' => 'R'],
+        'choices' => [ 'label.appello_P' => 'P', 'label.appello_A' => 'A'],
+        //-- 'choices' => [ 'label.appello_P' => 'P', 'label.appello_A' => 'A', 'label.appello_R' => 'R'],
         'label_attr' => ['class' => 'gs-radio-inline col-sm-2'],
         'expanded' => true,
         'multiple' => false,
         'required' => true))
-      ->add('ora', TimeType::class, array('label' => false,
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'required' => true));
+      //-- ->add('ora', TimeType::class, array('label' => false,
+        //-- 'widget' => 'single_text',
+        //-- 'html5' => false,
+        //-- 'attr' => ['widget' => 'gs-picker'],
+        //-- 'required' => true))
+        ;
   }
 
   /**
@@ -57,4 +59,3 @@ class AppelloType extends AbstractType {
   }
 
 }
-

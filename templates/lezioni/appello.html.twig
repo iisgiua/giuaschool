@@ -66,7 +66,7 @@ $(document).ready(function() {
         if (this.checked) {
           $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
           $(this).parent().removeClass('text-muted').addClass('text-success');
-          $(this).parent().parent().find('div.time').css('visibility', 'hidden');
+          {#-- $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
         } else {
           $(this).parent().removeClass('text-success').addClass('text-muted');
         }
@@ -75,21 +75,21 @@ $(document).ready(function() {
         if (this.checked) {
           $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
           $(this).parent().removeClass('text-muted').addClass('text-danger');
-          $(this).parent().parent().find('div.time').css('visibility', 'hidden');
+          {#-- $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
         } else {
           $(this).parent().removeClass('text-danger ').addClass('text-muted');
         }
         break;
-      case 'R':
-        if (this.checked) {
-          $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
-          $(this).parent().removeClass('text-muted').addClass('text-warning');
-          $(this).parent().parent().find('div.time').css('visibility', 'visible');
-        } else {
-          $(this).parent().removeClass('text-warning').addClass('text-muted');
-          $(this).parent().parent().find('div.time').css('visibility', 'hidden');
-        }
-        break;
+      {#-- case 'R': #}
+        {#-- if (this.checked) { #}
+          {#-- $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted'); #}
+          {#-- $(this).parent().removeClass('text-muted').addClass('text-warning'); #}
+          {#-- $(this).parent().parent().find('div.time').css('visibility', 'visible'); #}
+        {#-- } else { #}
+          {#-- $(this).parent().removeClass('text-warning').addClass('text-muted'); #}
+          {#-- $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
+        {#-- } #}
+        {#-- break; #}
     }
   }).change();
 });
@@ -97,8 +97,10 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block _assenze_appello_lista_entry_widget %}
-  {{ form_widget(form.presenza) }}
-  {{ form_widget(form.ora) }}
-  {{ form_errors(form.ora) }}
-  {{ form_widget(form.id) }}
+  <div class="row">
+    {{ form_widget(form.presenza) }}
+    {#-- {{ form_widget(form.ora) }} #}
+    {#-- {{ form_errors(form.ora) }} #}
+    {{ form_widget(form.id) }}
+  </div>
 {% endblock %}
