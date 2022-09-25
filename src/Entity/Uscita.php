@@ -87,6 +87,24 @@ class Uscita {
   private bool $valido = false;
 
   /**
+   * @var string|null $motivazione Motivazione dell'assenza
+   *
+   * @ORM\Column(type="string", length=1024, nullable=true)
+   *
+   * @Assert\Length(max=1024, maxMessage="field.maxlength")
+   */
+  private ?string $motivazione = '';
+
+  /**
+   * @var \DateTime|null $giustificato Data della giustificazione
+   *
+   * @ORM\Column(type="date", nullable=true)
+   *
+   * @Assert\Type(type="\DateTime", message="field.type")
+   */
+  private ?\DateTime $giustificato = null;
+
+  /**
    * @var Alunno|null $alunno Alunno al quale si riferisce l'uscita anticipata
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
@@ -105,6 +123,22 @@ class Uscita {
    * @Assert\NotBlank(message="field.notblank")
    */
   private ?Docente $docente = null;
+
+  /**
+   * @var Docente|null $docenteGiustifica Docente che giustifica/autorizza l'uscita anticipata
+   *
+   * @ORM\ManyToOne(targetEntity="Docente")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private ?Docente $docenteGiustifica = null;
+
+  /**
+   * @var Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'uscita anticipata
+   *
+   * @ORM\ManyToOne(targetEntity="Utente")
+   * @ORM\JoinColumn(nullable=true)
+   */
+  private ?Utente $utenteGiustifica = null;
 
 
   //==================== EVENTI ORM ====================
@@ -245,6 +279,48 @@ class Uscita {
   }
 
   /**
+   * Restituisce la motivazione dell'assenza
+   *
+   * @return string|null Motivazione dell'assenza
+   */
+  public function getMotivazione(): ?string {
+    return $this->motivazione;
+  }
+
+  /**
+   * Modifica la motivazione dell'assenza
+   *
+   * @param string|null $motivazione Motivazione dell'assenza
+   *
+   * @return self Oggetto modificato
+   */
+  public function setMotivazione(?string $motivazione): self {
+    $this->motivazione = $motivazione;
+    return $this;
+  }
+
+  /**
+   * Restituisce la data della giustificazione
+   *
+   * @return \DateTime|null Data della giustificazione
+   */
+  public function getGiustificato(): ?\DateTime {
+    return $this->giustificato;
+  }
+
+  /**
+   * Modifica la data della giustificazione
+   *
+   * @param \DateTime|null $giustificato Data della giustificazione
+   *
+   * @return self Oggetto modificato
+   */
+  public function setGiustificato(?\DateTime $giustificato): self {
+    $this->giustificato = $giustificato;
+    return $this;
+  }
+
+  /**
    * Restituisce l'alunno al quale si riferisce l'uscita anticipata
    *
    * @return Alunno|null Alunno al quale si riferisce l'uscita anticipata
@@ -283,6 +359,48 @@ class Uscita {
    */
   public function setDocente(Docente $docente): self {
     $this->docente = $docente;
+    return $this;
+  }
+
+  /**
+   * Restituisce il docente che giustifica/autorizza l'uscita anticipata
+   *
+   * @return Docente|null Docente che giustifica/autorizza l'uscita anticipata
+   */
+  public function getDocenteGiustifica(): ?Docente {
+    return $this->docenteGiustifica;
+  }
+
+  /**
+   * Modifica il docente che giustifica/autorizza l'uscita anticipata
+   *
+   * @param Docente|null $docenteGiustifica Docente che giustifica/autorizza l'uscita anticipata
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDocenteGiustifica(?Docente $docenteGiustifica): self {
+    $this->docenteGiustifica = $docenteGiustifica;
+    return $this;
+  }
+
+  /**
+   * Restituisce l'utente (Genitore/Alunno) che giustifica l'uscita anticipata
+   *
+   * @return Utente|null Utente (Genitore/Alunno) che giustifica l'uscita anticipata
+   */
+  public function getUtenteGiustifica(): ?Utente {
+    return $this->utenteGiustifica;
+  }
+
+  /**
+   * Modifica l'utente (Genitore/Alunno) che giustifica l'uscita anticipata
+   *
+   * @param Utente|null $utenteGiustifica Utente (Genitore/Alunno) che giustifica l'uscita anticipata
+   *
+   * @return self Oggetto modificato
+   */
+  public function setUtenteGiustifica(?Utente $utenteGiustifica): self {
+    $this->utenteGiustifica = $utenteGiustifica;
     return $this;
   }
 

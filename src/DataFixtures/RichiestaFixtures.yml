@@ -4,6 +4,7 @@
 # Dati per la gestione di una richiesta:
 #   inviata: data e ora dell'invio della richiesta
 #   gestita: data e ora della gestione della richiesta, o null se non ancora gestita
+#   data: data della richiesta (solo per le richieste multiple)
 #   valori: lista dei valori per i campi da compilare nel modulo: nome1 => valore1, nome2 => valore2...
 #   documento: percorso del file del documento generato dalla richiesta
 #   allegati: lista dei percorsi dei file allegati
@@ -23,6 +24,7 @@ App\Entity\Richiesta:
   richiesta_{1..10}:
     inviata: '<dateTimeBetween("-1 month", "now")>'
     gestita: '50%? <dateTimeBetween("-1 month", "now")>'
+    data: '50%? <dateTimeBetween("-1 month", "now")>'
     valori: '<array_combine(<words(3)>, <sentences(3)>)>'
     documento: '<substr(<text()>, 0, 255)>'
     allegati: '<array_combine(<words(3)>, <sentences(3)>)>'

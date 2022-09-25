@@ -6,8 +6,12 @@
 #   ora: ora dell'uscita anticipata
 #   note: note informative sull'uscita anticipata
 #   valido: indica se l'uscita è valida per il conteggio del numero massimo di uscite a disposizione
+#   motivazione: Motivazione dell'assenza
+#   giustificato: Data della giustificazione
 #   alunno: alunno al quale si riferisce l'uscita anticipata
 #   docente: docente che autorizza l'uscita anticipata
+#   docenteGiustifica: Docente che giustifica/autorizza l'uscita anticipata
+#   utenteGiustifica: Utente (Genitore/Alunno) che giustifica l'uscita anticipata
 ####################
 
 
@@ -22,5 +26,9 @@ App\Entity\Uscita:
     ora: '<dateTimeBetween("10:00", "12:00")>'
     note: '50%? <text()>: <strval("")>'
     valido: '<boolean()>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween(<($data)>, "now")>'
     alunno: '@alunno_*'
     docente: '@docente_*'
+    docenteGiustifica: '@docente_*'
+    utenteGiustifica: <($alunno->getGenitori()[0])>

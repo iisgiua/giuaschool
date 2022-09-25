@@ -99,19 +99,19 @@ App\Entity\Configurazione:
     categoria: 'SCUOLA'
     parametro: 'anno_scolastico'
     descrizione: 'Anno scolastico corrente\<br>[formato: AAAA/AAAA]'
-    valore: '2021/2022'
+    valore: '2022/2023'
     gestito: false
   configurazione_SCUOLA2:
     categoria: 'SCUOLA'
     parametro: 'anno_inizio'
     descrizione: 'Data dell''inizio dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
-    valore: '2021-09-22'
+    valore: '2022-09-14'
     gestito: false
   configurazione_SCUOLA3:
     categoria: 'SCUOLA'
     parametro: 'anno_fine'
     descrizione: 'Data della fine dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
-    valore: '2022-06-12'
+    valore: '2023-06-10'
     gestito: false
   configurazione_SCUOLA4:
     categoria: 'SCUOLA'
@@ -123,7 +123,7 @@ App\Entity\Configurazione:
     categoria: 'SCUOLA'
     parametro: 'periodo1_fine'
     descrizione: 'Data della fine del primo periodo, da \<em>anno_inizio</em> sino al giorno indicato incluso<br>[formato: AAAA-MM-GG]'
-    valore: '2022-01-31'
+    valore: '2023-01-31'
     gestito: false
   configurazione_SCUOLA6:
     categoria: 'SCUOLA'
@@ -135,7 +135,7 @@ App\Entity\Configurazione:
     categoria: 'SCUOLA'
     parametro: 'periodo2_fine'
     descrizione: 'Data della fine del secondo periodo, da \<em>periodo1_fine</em>+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a <em>anno_fine</em><br>[formato AAAA-MM-GG]'
-    valore: '2022-06-12'
+    valore: '2023-06-10'
     gestito: false
   configurazione_SCUOLA8:
     categoria: 'SCUOLA'
@@ -208,6 +208,18 @@ App\Entity\Configurazione:
     parametro: 'giorni_festivi_classi'
     descrizione: 'Indica i giorni festivi settimanali per singole classi (per gestire settimana corta anche per solo alcune classi)\<br>[lista separata da virgole nel formato GIORNO:CLASSE; giorno: 0=domenica, 1=luned&igrave;, ... 6=sabato; classe: 1A, 2A, ...]'
     valore: ''
+    gestito: false
+  configurazione_SCUOLA20:
+    categoria: 'SCUOLA'
+    parametro: 'scadenza_invio_richiesta'
+    descrizione: 'Indica l''ora entro cui devono essere inviate le richieste per il giorno successivo\<br>[formato: HH:MM]'
+    valore: '16:00'
+    gestito: false
+  configurazione_SCUOLA21:
+    categoria: 'SCUOLA'
+    parametro: 'gestione_uscite'
+    descrizione: 'Indica il tipo di gestione delle uscite anticipate degli alunni: tramite autorizzazione preventiva o con giustificazione (come per i ritardi)\<br>[formato: A=autorizzazione, G=giustificazione]'
+    valore: 'A'
     gestito: false
 
   # ----- categoria ACCESSO -----

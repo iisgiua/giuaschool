@@ -111,22 +111,22 @@ class DefinizioneRichiesta {
   private int $allegati = 0;
 
   /**
-   * @var string $azioneGestione Pagina dell'azione di gestione della richiesta (pagina predefinita se vuoto)
+   * @var string|null $azioneGestione Pagina dell'azione di gestione della richiesta
    *
-   * @ORM\Column(name="azione_gestione", type="string", length=64, nullable=false)
+   * @ORM\Column(name="azione_gestione", type="string", length=64, nullable=true)
    *
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $azioneGestione = '';
+  private ?string $azioneGestione = '';
 
   /**
-   * @var string $azioneRimozione Pagina dell'azione di rimozione della richiesta (pagina predefinita se vuoto)
+   * @var string|null $azioneRimozione Pagina dell'azione di rimozione della richiesta
    *
-   * @ORM\Column(name="azione_rimozione", type="string", length=64, nullable=false)
+   * @ORM\Column(name="azione_rimozione", type="string", length=64, nullable=true)
    *
    * @Assert\Length(max=64,maxMessage="field.maxlength")
    */
-  private string $azioneRimozione = '';
+  private ?string $azioneRimozione = '';
 
   /**
    * @var bool $unica Indica se è ammessa una sola richiesta per l'utente
@@ -323,43 +323,43 @@ class DefinizioneRichiesta {
   }
 
   /**
-   * Restituisce la pagina dell'azione di gestione della richiesta (pagina predefinita se vuoto)
+   * Restituisce la pagina dell'azione di gestione della richiesta 
    *
-   * @return string Pagina dell'azione di gestione della richiesta
+   * @return string|null Pagina dell'azione di gestione della richiesta
    */
-  public function getAzioneGestione(): string {
+  public function getAzioneGestione(): ?string {
     return $this->azioneGestione;
   }
 
   /**
-   * Modifica la pagina dell'azione di gestione della richiesta (pagina predefinita se vuoto)
+   * Modifica la pagina dell'azione di gestione della richiesta
    *
-   * @param string $azioneGestione Pagina dell'azione di gestione della richiesta
+   * @param string|null $azioneGestione Pagina dell'azione di gestione della richiesta
    *
    * @return self Oggetto modificato
    */
-  public function setAzioneGestione(string $azioneGestione): self {
+  public function setAzioneGestione(?string $azioneGestione): self {
     $this->azioneGestione = $azioneGestione;
     return $this;
   }
 
   /**
-   * Restituisce la pagina dell'azione di rimozione della richiesta (pagina predefinita se vuoto)
+   * Restituisce la pagina dell'azione di rimozione della richiesta
    *
-   * @return string Pagina dell'azione di rimozione della richiesta
+   * @return string|null Pagina dell'azione di rimozione della richiesta
    */
-  public function getAzioneRimozione(): string {
+  public function getAzioneRimozione(): ?string {
     return $this->azioneRimozione;
   }
 
   /**
-   * Modifica la pagina dell'azione di rimozione della richiesta (pagina predefinita se vuoto)
+   * Modifica la pagina dell'azione di rimozione della richiesta
    *
-   * @param string $azioneRimozione Pagina dell'azione di rimozione della richiesta
+   * @param string|null $azioneRimozione Pagina dell'azione di rimozione della richiesta
    *
    * @return self Oggetto modificato
    */
-  public function setAzioneRimozione(string $azioneRimozione): self {
+  public function setAzioneRimozione(?string $azioneRimozione): self {
     $this->azioneRimozione = $azioneRimozione;
     return $this;
   }

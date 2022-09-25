@@ -28,16 +28,16 @@ class UscitaTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Uscita';
     // campi da testare
-    $this->fields = ['data', 'ora', 'note', 'valido', 'alunno', 'docente'];
+    $this->fields = ['data', 'ora', 'note', 'valido', 'motivazione', 'giustificato', 'alunno', 'docente', 'docenteGiustifica', 'utenteGiustifica'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_uscita' => ['id', 'creato', 'modificato', 'data', 'ora', 'note', 'valido', 'alunno_id', 'docente_id'],
+    $this->canRead = ['gs_uscita' => ['id', 'creato', 'modificato', 'data', 'ora', 'note', 'valido', 'motivazione', 'giustificato', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id'],
       'gs_utente' => '*'];
     // SQL write
-    $this->canWrite = ['gs_uscita' => ['id', 'creato', 'modificato', 'data', 'ora', 'note', 'valido', 'alunno_id', 'docente_id']];
+    $this->canWrite = ['gs_uscita' => ['id', 'creato', 'modificato', 'data', 'ora', 'note', 'valido', 'motivazione', 'giustificato', 'alunno_id', 'docente_id', 'docente_giustifica_id', 'utente_giustifica_id']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -72,9 +72,13 @@ class UscitaTest extends DatabaseTestCase {
           ($field == 'ora' ? $this->faker->dateTime() :
           ($field == 'note' ? $this->faker->optional($weight = 50, $default = '')->text() :
           ($field == 'valido' ? $this->faker->boolean() :
+          ($field == 'motivazione' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 1024)) :
+          ($field == 'giustificato' ? $this->faker->optional($weight = 50, $default = null)->dateTime() :
           ($field == 'alunno' ? $this->getReference("alunno_1") :
           ($field == 'docente' ? $this->getReference("docente_1") :
-          null))))));
+          ($field == 'docenteGiustifica' ? $this->getReference("docente_1") :
+          ($field == 'utenteGiustifica' ? $this->getReference("genitore_1") :
+          null))))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -144,6 +148,17 @@ class UscitaTest extends DatabaseTestCase {
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ora - VALID NOT BLANK');
     $existent->setOra(new \DateTime());
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Ora - VALID TYPE');
+    // motivazione
+    $existent->setMotivazione(str_repeat('*', 1025));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Motivazione - MAX LENGTH');
+    $existent->setMotivazione(str_repeat('*', 1024));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Motivazione - VALID MAX LENGTH');
+    // giustificato
+    $existent->setGiustificato(new \DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giustificato - VALID TYPE');
+    $existent->setGiustificato(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giustificato - VALID NULL');
     // alunno
     $property = $this->getPrivateProperty('App\Entity\Uscita', 'alunno');
     $property->setValue($existent, null);
@@ -158,6 +173,12 @@ class UscitaTest extends DatabaseTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
     $existent->setDocente($this->getReference("docente_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
+    // docenteGiustifica
+    $existent->setDocenteGiustifica(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::DocenteGiustifica - VALID NULL');
+    // utenteGiustifica
+    $existent->setUtenteGiustifica(null);
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::UtenteGiustifica - VALID NULL');
     // legge dati esistenti
     $this->em->flush();
     $objects = $this->em->getRepository($this->entity)->findBy([]);

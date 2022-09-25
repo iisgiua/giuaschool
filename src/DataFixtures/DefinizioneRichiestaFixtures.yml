@@ -8,6 +8,8 @@
 #   modulo: nome del file del modulo di richiesta da compilare da parte del richiedente
 #   campi: lista dei campi da compilare nel modulo: nome1 => tipo1, nome2 => tipo2... I tipi ammessi sono: string/int/float/bool/date/time
 #   allegati: numero di allegati da inserire nella richiesta
+#   azioneGestione: pagina dell'azione di gestione della richiesta
+#   azioneRimozione: pagina dell'azione di rimozione della richiesta
 #   unica: indica se è ammessa una sola richiesta per l'utente
 #   abilitata: indica se la definizione della richiesta è abilitata
 ####################
@@ -21,5 +23,7 @@ App\Entity\DefinizioneRichiesta:
     modulo: '<substr(<text()>, 0, 128)>'
     campi: '<array_combine(<words(3)>, <sentences(3)>)>'
     allegati: '<numberBetween(0, 3)>'
+    azioneGestione: '<substr(<word()>, 0, 64)>'
+    azioneRimozione: '<substr(<word()>, 0, 64)>'
     unica: '<boolean()>'
     abilitata: '<boolean()>'
