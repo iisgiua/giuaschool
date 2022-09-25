@@ -120,8 +120,11 @@
                 {% if v.note_uscita %} <span class="glyphicon glyphicon-info-sign"></span>{% endif %}
           </span>
               {% endif %}
+              {% if v.uscite > 0 %}
+          <span class="label label-info pull-right gs-ml-1 gs-mt-1">Uscite: {{ v.uscite }}</span>
+              {% endif %}
               {% if v.ritardi > 0 %}
-          <span class="label label-info pull-right">Ritardi: {{ v.ritardi }}</span>
+          <span class="label label-info pull-right gs-mt-1">Ritardi: {{ v.ritardi }}</span>
               {% endif %}
         </td>
         <td>
@@ -137,19 +140,19 @@
         </td>
         <td>
               {% if v.pulsante_presenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-          <a class="btn btn-success btn-xs" href="{{ v.pulsante_presenza }}" role="button" title="Segna la presenza dell'alunno">P</a>
+          <a class="btn btn-success btn-xs gs-mb-1" href="{{ v.pulsante_presenza }}" role="button" title="Segna la presenza dell'alunno">P</a>
               {% endif %}
               {% if v.pulsante_assenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-          <a class="btn btn-danger btn-xs" href="{{ v.pulsante_assenza }}" role="button" title="Segna l'assenza dell'alunno">A</a>
+          <a class="btn btn-danger btn-xs gs-mb-1" href="{{ v.pulsante_assenza }}" role="button" title="Segna l'assenza dell'alunno">A</a>
               {% endif %}
               {% if v.pulsante_entrata is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-          <a class="btn btn-warning btn-xs" href="{{ v.pulsante_entrata }}" role="button" title="Segna il ritardo dell'alunno">R</a>
+          <a class="btn btn-warning btn-xs gs-mb-1" href="{{ v.pulsante_entrata }}" role="button" title="Segna il ritardo dell'alunno">R</a>
               {% endif %}
               {% if v.pulsante_uscita is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}
-          <a class="btn btn-warning btn-xs" href="{{ v.pulsante_uscita }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
+          <a class="btn btn-warning btn-xs gs-mb-1" href="{{ v.pulsante_uscita }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
               {% endif %}
               {% if v.pulsante_giustifica is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ v.pulsante_giustifica }}" role="button" title="Giustifica le assenze e i ritardi">G</a>
+          <a class="btn btn-primary btn-xs gs-mb-1" href="{{ v.pulsante_giustifica }}" role="button" title="Giustifica le assenze e i ritardi">G</a>
               {% endif %}
         </td>
       </tr>

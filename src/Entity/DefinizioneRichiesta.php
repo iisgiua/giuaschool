@@ -111,22 +111,14 @@ class DefinizioneRichiesta {
   private int $allegati = 0;
 
   /**
-   * @var string|null $azioneGestione Pagina dell'azione di gestione della richiesta
+   * @var string $tipo Codifica del tipo di richiesta
    *
-   * @ORM\Column(name="azione_gestione", type="string", length=64, nullable=true)
+   * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Length(max=1,maxMessage="field.maxlength")
    */
-  private ?string $azioneGestione = '';
-
-  /**
-   * @var string|null $azioneRimozione Pagina dell'azione di rimozione della richiesta
-   *
-   * @ORM\Column(name="azione_rimozione", type="string", length=64, nullable=true)
-   *
-   * @Assert\Length(max=64,maxMessage="field.maxlength")
-   */
-  private ?string $azioneRimozione = '';
+  private string $tipo = '*';
 
   /**
    * @var bool $unica Indica se è ammessa una sola richiesta per l'utente
@@ -323,44 +315,23 @@ class DefinizioneRichiesta {
   }
 
   /**
-   * Restituisce la pagina dell'azione di gestione della richiesta 
+   * Restituisce la codifica del tipo di richiesta
    *
-   * @return string|null Pagina dell'azione di gestione della richiesta
+   * @return string Codifica del tipo di richiesta
    */
-  public function getAzioneGestione(): ?string {
-    return $this->azioneGestione;
+  public function getTipo(): string {
+    return $this->tipo;
   }
 
   /**
-   * Modifica la pagina dell'azione di gestione della richiesta
+   * Modifica la codifica del tipo di richiesta
    *
-   * @param string|null $azioneGestione Pagina dell'azione di gestione della richiesta
+   * @param string $tipo Codifica del tipo di richiesta
    *
    * @return self Oggetto modificato
    */
-  public function setAzioneGestione(?string $azioneGestione): self {
-    $this->azioneGestione = $azioneGestione;
-    return $this;
-  }
-
-  /**
-   * Restituisce la pagina dell'azione di rimozione della richiesta
-   *
-   * @return string|null Pagina dell'azione di rimozione della richiesta
-   */
-  public function getAzioneRimozione(): ?string {
-    return $this->azioneRimozione;
-  }
-
-  /**
-   * Modifica la pagina dell'azione di rimozione della richiesta
-   *
-   * @param string|null $azioneRimozione Pagina dell'azione di rimozione della richiesta
-   *
-   * @return self Oggetto modificato
-   */
-  public function setAzioneRimozione(?string $azioneRimozione): self {
-    $this->azioneRimozione = $azioneRimozione;
+  public function setTipo(string $tipo): self {
+    $this->tipo = $tipo;
     return $this;
   }
 
@@ -431,8 +402,7 @@ class DefinizioneRichiesta {
       'modulo' => $this->modulo,
       'campi' => $this->campi,
       'allegati' => $this->allegati,
-      'azioneGestione' => $this->azioneGestione,
-      'azioneRimozione' => $this->azioneRimozione,
+      'tipo' => $this->tipo,
       'unica' => $this->unica,
       'abilitata' => $this->abilitata];
     return $dati;

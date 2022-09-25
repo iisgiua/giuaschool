@@ -539,8 +539,10 @@ label.tipo_bool: SI/NO
 label.tipo_date: Data
 label.tipo_time: Ora
 label.minus: -
-label.invia_richiesta: Invia una nuova richiesta
-label.cancella_richiesta: Cancella la richiesta
+label.invia_richiesta: Nuova richiesta
+label.cancella_richiesta: Cancella richiesta
+label.richieste_scadute: Richieste scadute
+label.tipo_richiesta: Codifica del tipo di richiesta
 
 
 ##### PAGINE #####
@@ -1448,3 +1450,7 @@ exception.modulo_campo_senza_nome: Non possono esistere campi del modulo senza n
 exception.modulo_campo_senza_tipo: Non possono esistere campi del modulo senza tipo.
 exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un campo obbligatorio.
 exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.
+exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "data".
+exception.campo_data_vuoto: Non hai inserito un valore per la data.
+exception.richiesta_esistente: Esiste già una richiesta per questa data.
+exception.richiesta_ora_invio: La richiesta deve essere inviata entro le ore {ora} del giorno precedente a quello a cui si riferisce.

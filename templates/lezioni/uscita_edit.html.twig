@@ -21,6 +21,16 @@
       </div>
       {{ form_start(form) }}
       {{ form_widget(form) }}
+      <div class="form-group">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+          <button type="submit" id="{{ form.vars.full_name }}_submit" name="{{ form.vars.full_name }}[submit]" class="btn-default gs-mr-3 btn">{{ 'label.submit'|trans }}</button>
+  {% if btn_delete %}
+          <button type="submit" id="{{ form.vars.full_name }}_delete" name="{{ form.vars.full_name }}[delete]" class="btn-danger gs-mr-3 btn">{{ 'label.delete'|trans }}</button>
+  {% endif %}
+          <button type="button" id="{{ form.vars.full_name }}_cancel" name="{{ form.vars.full_name }}[cancel]" onclick="location.href='{{ path('lezioni_assenze_quadro') }}'" class="btn-default btn">{{ 'label.cancel'|trans }}</button>
+        </div>
+      </div>
       {{ form_end(form) }}
     </div>
   </div>
@@ -56,4 +66,3 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
-

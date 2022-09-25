@@ -211,6 +211,7 @@ class Installer {
       "CREATE INDEX IDX_D3A7B4FDA41A8D6A ON gs_uscita (docente_giustifica_id);",
       "CREATE INDEX IDX_D3A7B4FD75B404A4 ON gs_uscita (utente_giustifica_id);",
       "UPDATE gs_uscita SET giustificato=data,docente_giustifica_id=docente_id;",
+      "ALTER TABLE gs_definizione_richiesta ADD tipo VARCHAR(1) NOT NULL, DROP azione_gestione, DROP azione_rimozione;",
       "INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NULL, NOW(), NOW(), 'SCUOLA', 'scadenza_invio_richiesta', 'Indica l\'ora entro cui devono essere inviate le richieste per il giorno successivo<br>[formato: HH:MM]', '16:00', 0);",
       "INSERT INTO gs_configurazione (id, creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NULL, NOW(), NOW(), 'SCUOLA', 'gestione_uscite', 'Indica il tipo di gestione delle uscite anticipate degli alunni: tramite autorizzazione preventiva o con giustificazione (come per i ritardi)<br>[formato: A=autorizzazione, G=giustificazione]', 'A', 0);",
       "DELETE FROM gs_menu_opzione;",

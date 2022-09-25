@@ -1,0 +1,74 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('tema-new/include/flash.html.twig') }}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="_margin-top:-2.5rem">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.nome_modulo'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for m in dati %}
+        <tr{% if not m.abilitata %} class="table-danger"{% endif %}>
+          <td>
+    {% if m.abilitata %}
+            <span title="{{ 'label.utente_attivo'|trans }}">
+              <svg class="icon icon-xs icon-success" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
+              </svg>
+            </span>
+    {% else %}
+            <span title="{{ 'label.utente_disabilitato'|trans }}">
+              <svg class="icon icon-sm icon-danger" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#ban"></use>
+              </svg>
+            </span>
+    {% endif %}
+          </td>
+          <td>{{ m.nome }}</td>
+          <td>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_moduli_edit', {'id': m.id}) }}" role="button" title="Modifica i dati del modulo">{{ 'label.edit'|trans }}</a>
+            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella il modulo" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ m.nome }}" data-contenuto="{{ 'message.cancella_modulo'|trans }}" data-href="{{ path('scuola_moduli_delete', {'id': m.id}) }}">{{ 'label.delete'|trans }}</button>
+    {% if m.abilitata %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': m.id, 'abilita': 0}) }}" role="button" title="Disabilita il modulo di richesta">{{ 'label.disable'|trans }}</a>
+    {% else %}
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': m.id, 'abilita': 1}) }}" role="button" title="Abilita il modulo di richiesta">{{ 'label.enable'|trans }}</a>
+    {% endif %}
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">
+            <a class="btn btn-primary btn-sm" href="{{ path('scuola_moduli_edit') }}" role="button" title="Nuovo modulo">{{ 'label.add'|trans }}</a>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {{ include('tema-new/include/modal-confirm.html.twig') }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('tema-new/include/thfloat.html.twig') }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (e) {
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $(e.relatedTarget).data('contenuto');
+    var href = $(e.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-titolo').html(titolo);
+    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+  });
+});
+</script>
+{% endblock %}

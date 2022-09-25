@@ -42,6 +42,7 @@ use App\Entity\Uscita;
 use App\Form\Appello;
 use App\Form\AppelloType;
 use App\Form\EntrataType;
+use App\Form\UscitaType;
 use App\Form\MessageType;
 
 
@@ -613,14 +614,20 @@ class AssenzeController extends AbstractController {
       $uscita_old['ora'] = $uscita->getOra();
       $uscita_old['note'] = $uscita->getNote();
       $uscita_old['valido'] = $uscita->getValido();
+      $uscita_old['giustificato'] = $uscita->getGiustificato();
       $uscita_old['docente'] = $uscita->getDocente();
-      $uscita->setDocente($this->getUser());
+      $uscita_old['docenteGiustifica'] = $uscita->getDocenteGiustifica();
+      // elimina giustificazione
+      $uscita
+        ->setDocente($this->getUser())
+        ->setGiustificato(null)
+        ->setDocenteGiustifica(null);
     } else {
       // nuovo
       $uscita = (new Uscita())
         ->setData($data_obj)
         ->setAlunno($alunno)
-        ->setValido(false)
+        ->setValido(true)
         ->setDocente($this->getUser());
       // imposta ora
       $ora = new \DateTime();
@@ -645,38 +652,18 @@ class AssenzeController extends AbstractController {
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('uscita_edit', FormType::class, $uscita)
-      ->add('ora', TimeType::class, array('label' => 'label.ora_uscita',
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'required' => true))
-      ->add('note', MessageType::class, array('label' => 'label.note',
-        'trim' => true,
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']));
-    if (isset($uscita_old)) {
-      $form = $form
-        ->add('delete', SubmitType::class, array('label' => 'label.delete',
-          'attr' => ['widget' => 'gs-button-inline', 'class' => 'btn-danger']));
-    }
-    $form = $form
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('lezioni_assenze_quadro')."'"]))
-      ->getForm();
+    $form = $this->createForm(UscitaType::class, $uscita, array('formMode' => 'staff'));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
-      if (!isset($uscita_old) && isset($request->request->get('uscita_edit')['delete'])) {
-        // ritardo non esiste, niente da fare
+      if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
+        // uscita non esiste, niente da fare
         return $this->redirectToRoute('lezioni_assenze_quadro');
       } elseif ($form->get('ora')->getData()->format('H:i:00') < $orario[0]['inizio'] ||
                 $form->get('ora')->getData()->format('H:i:00') >= $orario[count($orario) - 1]['fine']) {
         // ora fuori dai limiti
         $form->get('ora')->addError(new FormError($trans->trans('field.time', [], 'validators')));
       } elseif ($form->isValid()) {
-        if (isset($uscita_old) && $form->get('delete')->isClicked()) {
+        if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
           // cancella ritardo esistente
           $id_uscita = $uscita->getId();
           $em->remove($uscita);
@@ -694,7 +681,7 @@ class AssenzeController extends AbstractController {
         // ricalcola ore assenze
         $reg->ricalcolaOreAlunno($data_obj, $alunno);
         // log azione
-        if (isset($uscita_old) && $form->get('delete')->isClicked()) {
+        if (isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
           // cancella
           $dblogger->logAzione('ASSENZE', 'Cancella uscita', array(
             'Uscita' => $id_uscita,
@@ -703,7 +690,9 @@ class AssenzeController extends AbstractController {
             'Ora' => $uscita->getOra()->format('H:i'),
             'Note' => $uscita->getNote(),
             'Valido' => $uscita->getValido(),
-            'Docente' => $uscita->getDocente()->getId()
+            'Giustificato' => ($uscita->getGiustificato() ? $uscita->getGiustificato()->format('Y-m-d') : null),
+            'Docente' => $uscita->getDocente()->getId(),
+            'DocenteGiustifica' => ($uscita->getDocenteGiustifica() ? $uscita->getDocenteGiustifica()->getId() : null)
             ));
         } elseif (isset($uscita_old)) {
           // modifica
@@ -712,7 +701,9 @@ class AssenzeController extends AbstractController {
             'Ora' => $uscita_old['ora']->format('H:i'),
             'Note' => $uscita_old['note'],
             'Valido' => $uscita_old['valido'],
-            'Docente' => $uscita_old['docente']->getId()
+            'Giustificato' => ($uscita_old['giustificato'] ? $uscita_old['giustificato']->format('Y-m-d') : null),
+            'Docente' => $uscita_old['docente']->getId(),
+            'DocenteGiustifica' => ($uscita_old['docenteGiustifica'] ? $uscita_old['docenteGiustifica'] ->getId() : null)
             ));
         } else {
           // nuovo
@@ -741,6 +732,7 @@ class AssenzeController extends AbstractController {
       'form' => $form->createView(),
       'form_title' => (isset($uscita_old) ? 'title.modifica_uscita' : 'title.nuova_uscita'),
       'label' => $label,
+      'btn_delete' => isset($uscita_old),
     ));
   }
 

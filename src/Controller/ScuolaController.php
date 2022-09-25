@@ -1130,12 +1130,16 @@ class ScuolaController extends BaseController {
       'returnUrl' => $this->generateUrl('scuola_moduli'), 'dati' => [$campi, $lista]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // controlla campi
       $listaCampi = [];
       foreach ($form->get('campi')->getData() as $campo) {
         $listaCampi[$campo['nome_campo']] = [$campo['tipo_campo'], $campo['campo_obbligatorio']];
         if (empty($campo['nome_campo'])) {
           // errore: nome campo duplicato
           $form->addError(new FormError($trans->trans('exception.modulo_campo_senza_nome')));
+        } elseif ($campo['nome_campo'] == 'data') {
+          // errore: nome campo riservato
+          $form->addError(new FormError($trans->trans('exception.modulo_campo_nome_riservato')));
         }
         if (empty($campo['tipo_campo'])) {
           // errore: nome campo duplicato

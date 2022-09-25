@@ -1,0 +1,32 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {% include 'tema-new/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  $('.gs-lista-campi').on('click', 'button.gs-remove-item', function() {
+    $(this).closest('fieldset.form-group').remove();
+  });
+  $('.gs-lista-campi').on('click', 'button.gs-add-item', function() {
+    var html = $('#definizione_richiesta_campi').data('prototype');
+    html = html.replace(/>\s*-\s*<\/button>/, '><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg></button>');
+    var idNum = $('#definizione_richiesta_campi fieldset').last().find('div').attr('id');
+    var reNum = /\d+$/;
+    var resNum = reNum.exec(idNum);
+    var num = (resNum == null ? 0 : 1 + parseInt(resNum, 10));
+    html = html.replace(/__name__/g, num);
+    $('#definizione_richiesta_campi').append(html);
+  });
+  // init
+  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
+  $('#definizione_richiesta_campi fieldset button.gs-remove-item').html('<svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg>')
+  $('.gs-lista-campi').append(button);
+});
+</script>
+{% endblock %}

@@ -770,8 +770,7 @@ App\Entity\DefinizioneRichiesta:
     modulo: '<substr(<text()>, 0, 128)>'
     campi: '<array_combine(<words(3)>, <sentences(3)>)>'
     allegati: '<numberBetween(0, 3)>'
-    azioneGestione: '<substr(<word()>, 0, 64)>'
-    azioneRimozione: '<substr(<word()>, 0, 64)>'
+    azioneGestione: '<substr(<word()>, 0, 1)>'
     unica: '<boolean()>'
     abilitata: '<boolean()>'
 
