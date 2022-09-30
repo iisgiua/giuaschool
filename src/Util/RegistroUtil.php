@@ -789,6 +789,14 @@ class RegistroUtil {
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['giustifica_ritardi'] = $giustifica_ritardi;
+        // conteggio uscite da giustificare
+        $giustifica_uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+          ->select('COUNT(u.id)')
+          ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
+          ->getQuery()
+          ->getSingleScalarResult();
+        $alunni[$k]['giustifica_uscite'] = $giustifica_uscite;
         // conteggio convalide giustificazioni online
         $convalide_assenze = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
           ->select('COUNT(ass.id)')
@@ -802,7 +810,13 @@ class RegistroUtil {
           ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str, 'breve' => 1])
           ->getQuery()
           ->getSingleScalarResult();
-        $alunni[$k]['convalide'] = $convalide_assenze + $convalide_ritardi;
+        $convalide_uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+          ->select('COUNT(u.id)')
+          ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
+          ->setParameters(['alunno' => $alu['id_alunno'], 'data' => $data_str])
+          ->getQuery()
+          ->getSingleScalarResult();
+        $alunni[$k]['convalide'] = $convalide_assenze + $convalide_ritardi  + $convalide_uscite;
         // conteggio ritardi
         $ritardi = $this->em->getRepository('App\Entity\Entrata')->createQueryBuilder('e')
           ->select('COUNT(e.id)')
@@ -812,6 +826,15 @@ class RegistroUtil {
           ->getQuery()
           ->getSingleScalarResult();
         $alunni[$k]['ritardi'] = $ritardi;
+        // conteggio uscite
+        $uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+          ->select('COUNT(u.id)')
+          ->where('u.valido=:valido AND u.alunno=:alunno AND u.data BETWEEN :inizio AND :fine')
+          ->setParameters(['valido' => 1, 'alunno' => $alu['id_alunno'],
+            'inizio' => $periodo['inizio']->format('Y-m-d'), 'fine' => $data_str])
+          ->getQuery()
+          ->getSingleScalarResult();
+        $alunni[$k]['uscite'] = $uscite;
         // gestione pulsanti
         $alunno = $this->em->getRepository('App\Entity\Alunno')->find($alu['id_alunno']);
         $pulsanti = $this->azioneAssenze($data_inizio, $docente, $alunno, $classe, ($cattedra ? $cattedra->getMateria() : null));
@@ -832,11 +855,19 @@ class RegistroUtil {
           $alunni[$k]['pulsante_entrata'] = $this->router->generate('lezioni_assenze_entrata', array(
               'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
               'alunno' => $alu['id_alunno']));
-          // pulsante uscita
-          $alunni[$k]['pulsante_uscita'] = $this->router->generate('lezioni_assenze_uscita', array(
-              'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
-              'alunno' => $alu['id_alunno']));
-          if (($alunni[$k]['giustifica_assenze'] + $alunni[$k]['giustifica_ritardi'] + $alunni[$k]['convalide'])  > 0) {
+          if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
+            // pulsante uscita se richiesta presente
+            $richiesta = $this->em->getRepository('App\Entity\Richiesta')
+              ->richiestaAlunno('U', $alu['id_alunno'], $data_inizio);
+            $alunni[$k]['pulsante_uscita'] = $this->router->generate('richieste_uscita', ['data' =>$data_str,
+              'alunno' => $alu['id_alunno'], 'richiesta' => $richiesta ? $richiesta->getId() : 0]);
+          } else {
+            // pulsante uscita standard
+            $alunni[$k]['pulsante_uscita'] = $this->router->generate('lezioni_assenze_uscita', array(
+                'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
+                'alunno' => $alu['id_alunno']));
+          }
+          if (($alunni[$k]['giustifica_assenze'] + $alunni[$k]['giustifica_ritardi'] + $alunni[$k]['giustifica_uscite'] + $alunni[$k]['convalide'])  > 0) {
             // pulsante giustifica
             $alunni[$k]['pulsante_giustifica'] = $this->router->generate('lezioni_assenze_giustifica', array(
               'cattedra' => ($cattedra ? $cattedra->getId() : 0), 'classe' => $classe->getId(), 'data' =>$data_str,
@@ -1140,9 +1171,26 @@ class RegistroUtil {
       ->getQuery()
       ->getResult();
     $dati['convalida_ritardi'] = $convalida_ritardi;
+    // uscite da giustificare
+    $uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
+      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->orderBy('u.data', 'DESC')
+      ->getQuery()
+      ->getResult();
+    $dati['uscite'] = $uscite;
+    // uscite da convalidare
+    $convalida_uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
+      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->orderBy('u.data', 'DESC')
+      ->getQuery()
+      ->getResult();
+    $dati['convalida_uscite'] = $convalida_uscite;
     // numero totale di giustificazioni
-    $dati['tot_giustificazioni'] = count($assenze) + count($ritardi);
-    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']);
+    $dati['tot_giustificazioni'] = count($assenze) + count($ritardi) + count($uscite);
+    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
+      count($dati['convalida_uscite']);
     // restituisce dati
     return $dati;
   }
@@ -2746,9 +2794,45 @@ class RegistroUtil {
       ->getQuery()
       ->getResult();
     $dati['convalida_ritardi'] = $convalida_ritardi;
+    // uscite da giustificare
+    $uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
+      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->orderBy('u.data', 'DESC')
+      ->getQuery()
+      ->getResult();
+    $dati['uscite'] = $uscite;
+    // uscite da convalidare
+    $convalida_uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
+      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->orderBy('u.data', 'DESC')
+      ->getQuery()
+      ->getResult();
+    $dati['convalida_uscite'] = $convalida_uscite;
     // numero totale di giustificazioni
-    $dati['tot_giustificazioni'] = count($dati['assenze']) + count($dati['ritardi']);
-    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']);
+    $dati['tot_giustificazioni'] = count($assenze) + count($ritardi) + count($uscite);
+    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
+      count($dati['convalida_uscite']);    // uscite da giustificare
+    $uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
+      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->orderBy('u.data', 'DESC')
+      ->getQuery()
+      ->getResult();
+    $dati['uscite'] = $uscite;
+    // uscite da convalidare
+    $convalida_uscite = $this->em->getRepository('App\Entity\Uscita')->createQueryBuilder('u')
+      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
+      ->setParameters(['alunno' => $alunno->getId(), 'data' => $data->format('Y-m-d')])
+      ->orderBy('u.data', 'DESC')
+      ->getQuery()
+      ->getResult();
+    $dati['convalida_uscite'] = $convalida_uscite;
+    // numero totale di giustificazioni
+    $dati['tot_giustificazioni'] = count($dati['assenze']) + count($dati['ritardi']) + count($dati['uscite']);
+    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
+      count($dati['convalida_uscite']);
     // restituisce dati
     return $dati;
   }

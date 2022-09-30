@@ -1,0 +1,37 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.richieste.gestione'|trans }}</h1>
+  {#-- {% include 'include/form-inline.html.twig' with {form: form[0], form_success: '', form_help: ''} %} #}
+
+
+
+{#-- <pre> #}
+{#-- filtro: modulo/stato/sede/classe #}
+  {#-- esporta csv #}
+  {#-- lista tabella: riga dati,azioni #}
+
+{#-- paginazione #}
+
+{#-- </pre> #}
+
+
+
+  {#-- {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_richiesta'} %} #}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  {#-- $('#gs-modal-confirm').on('show.bs.modal', function (event) { #}
+    {#-- var href = $(event.relatedTarget).data('href'); #}
+    {#-- $(this).find('#gs-modal-confirm-yes').attr('href', href); #}
+    {#-- var text = $(event.relatedTarget).data('text'); #}
+    {#-- $(this).find('#gs-modal-confirm-msg').text(text); #}
+  {#-- }); #}
+});
+</script>
+{% endblock %}

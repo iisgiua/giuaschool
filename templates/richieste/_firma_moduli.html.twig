@@ -1,0 +1,13 @@
+
+<p>&nbsp;</p>
+<table border="0" cellpadding="0" nobr="true">
+  <tr nobr="true">
+    <td width="55%" align="left">DATA E ORA: {{ invio|date('d/m/Y H:i') }}</td>
+    <td width="45%" align="center">FIRMA:
+      <br><i>{{ app.user.nome }} {{ app.user.cognome }}</i>
+      <br><span style="font-size:9pt;">(sottoscritto digitalmente tramite il Registro Elettronico)</span>
+    </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<p style="font-size:9pt;text-align:right;">[{{ id }}]</p>

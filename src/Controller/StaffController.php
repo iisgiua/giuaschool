@@ -1885,8 +1885,8 @@ class StaffController extends AbstractController {
    * @IsGranted("ROLE_STAFF")
    */
   public function studentiAutorizzaUscitaAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                                 RegistroUtil $reg, TranslatorInterface $trans, LogHandler $dblogger,
-                                                 $data, $classe, $alunno) {
+                                                RegistroUtil $reg, TranslatorInterface $trans, LogHandler $dblogger,
+                                                $data, $classe, $alunno) {
     // inizializza
     $label = array();
     // controlla classe
@@ -1915,7 +1915,11 @@ class StaffController extends AbstractController {
     if ($uscita) {
       // edit
       $uscita_old = clone $uscita;
-      $uscita->setDocente($this->getUser());
+      $uscita
+        ->setDocente($this->getUser())
+        ->setGiustificato(null)
+        ->setDocenteGiustifica(null);
+      $chiediGiustificazione = !$uscita_old->getDocenteGiustifica();
     } else {
       // nuovo
       $ora = new \DateTime();
@@ -1924,8 +1928,9 @@ class StaffController extends AbstractController {
         // data non odierna o ora attuale fuori da orario
         $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['inizio']);
       }
-      $nota = $trans->trans('message.autorizza_uscita', [
-        'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
+      $msg = $alunno->controllaRuoloFunzione('AM') ? 'message.autorizza_uscita_maggiorenne' :
+        'message.autorizza_uscita';
+      $nota = $trans->trans($msg, ['sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
         'alunno' => $alunno->getCognome().' '.$alunno->getNome()]);
       $uscita = (new Uscita())
         ->setData($data_obj)
@@ -1935,6 +1940,7 @@ class StaffController extends AbstractController {
         ->setValido(true)
         ->setDocente($this->getUser());
       $em->persist($uscita);
+      $chiediGiustificazione = false;
     }
     // controlla permessi
     if (!$reg->azioneAssenze($data_obj, $this->getUser(), $alunno, $classe, null)) {
@@ -1949,7 +1955,9 @@ class StaffController extends AbstractController {
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
     // form di inserimento
-    $form = $this->createForm(UscitaType::class, $uscita, array('formMode' => 'staff'));
+    $form = $this->createForm(UscitaType::class, $uscita, array(
+      'formMode' => $reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A' ? 'staff' : 'docenti',
+      'dati' => [$chiediGiustificazione]));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       if (!isset($uscita_old) && isset($request->request->get('uscita')['delete'])) {
@@ -1972,6 +1980,13 @@ class StaffController extends AbstractController {
             $id_assenza = $assenza->getId();
             $em->remove($assenza);
           }
+        }
+        if ($reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A' &&
+            $form->get('giustificazione')->getData() === false) {
+          // gestione autorizzazione
+          $uscita
+            ->setGiustificato(new \DateTime('today'))
+            ->setDocenteGiustifica($this->getUser());
         }
         // ok: memorizza dati
         $em->flush();

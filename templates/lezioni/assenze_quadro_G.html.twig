@@ -137,6 +137,9 @@
               {% if v.giustifica_ritardi > 0 %}
           <span class="badge gs-mr-3">{{ v.giustifica_ritardi }} ritard{{ v.giustifica_ritardi > 1 ? 'i' : 'o' }}</span>
               {% endif %}
+              {% if v.giustifica_uscite > 0 %}
+          <span class="badge gs-mr-3">{{ v.giustifica_uscite }} uscit{{ v.giustifica_uscite > 1 ? 'e' : 'a' }}</span>
+              {% endif %}
         </td>
         <td>
               {% if v.pulsante_presenza is defined and not app.session.get('/CONFIG/SCUOLA/assenze_ore') %}

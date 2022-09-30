@@ -1,0 +1,40 @@
+{{ form_start(form) }}
+  <div class="modal-header">
+    <h3 class="modal-title gs-h3">{{ info.alunno }} - Classe: {{ info.classe }}</h3>
+    <h4 class="modal-title text-info gs-h4"><em>Giustificazione dell'uscita anticipata del giorno: {{ info.data }} ore {{ info.ora }}</em></h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group gs-pl-4 gs-pr-4">
+      <label class="control-label required" for="giustifica_uscita_motivazione">{{ 'label.motivazione_uscita'|trans }}</label>
+      {{ form_widget(form.tipo) }}
+    </div>
+    <div class="form-group gs-pl-4 gs-pr-4">
+      {{ form_widget(form.motivazione) }}
+    </div>
+  </div>
+  <div class="modal-footer">
+    {{ form_widget(form.submit) }}
+  {% if info.uscita.giustificato %}
+    {{ form_widget(form.delete) }}
+  {% endif %}
+    <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+  </div>
+{{ form_end(form, {'render_rest': false}) }}
+
+<script>
+$(document).ready(function() {
+  $('#giustifica_uscita_tipo').change(function () {
+    if ($(this).val() == 0) {
+      $('#giustifica_uscita_motivazione').val('');
+    } else if ($(this).val() == 9) {
+      $('#giustifica_uscita_motivazione').val('').focus();
+    } else {
+      $('#giustifica_uscita_motivazione').val($("#giustifica_uscita_tipo option:selected").text());
+    }
+  });
+  $('#giustifica_uscita_delete').click(function () {
+    $('#giustifica_uscita_motivazione').attr('required', false);
+    return true;
+  });
+});
+</script>

@@ -30,6 +30,7 @@ use App\Entity\Alunno;
 use App\Entity\Genitore;
 use App\Entity\Assenza;
 use App\Entity\Entrata;
+use App\Entity\Uscita;
 use App\Entity\Scrutinio;
 use App\Entity\Avviso;
 use App\Entity\Colloquio;
@@ -1415,6 +1416,135 @@ class GenitoriController extends AbstractController {
     }
     // visualizza pagina
     return $this->render('ruolo_genitore/giustifica_ritardo.html.twig', array(
+      'info' => $info,
+      'form' => $form->createView(),
+    ));
+  }
+
+  /**
+   * Giustificazione online di un'uscita anticipata
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param GenitoriUtil $gen Funzioni di utilità per i genitori
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param Uscita $uscita Uscita anticipata da giustificare
+   * @param int $posizione Posizione per lo scrolling verticale della finestra
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/genitori/giustifica/uscita/{uscita}/{posizione}", name="genitori_giustifica_uscita",
+   *    requirements={"posizione": "\d+"},
+   *    defaults={"posizione": 0},
+   *    methods={"GET","POST"})
+   *
+   * @Security("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')")
+   */
+  public function giustificaUscitaAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
+                                         GenitoriUtil $gen, LogHandler $dblogger, Uscita $uscita,
+                                         $posizione) {
+    // inizializza
+    $info = array();
+    $lista_motivazioni = array('label.giustifica_salute' => 1, 'label.giustifica_famiglia' => 2, 'label.giustifica_trasporto' => 3, 'label.giustifica_sport' => 4, 'label.giustifica_altro' => 9);
+    // legge l'alunno
+    if ($this->getUser() instanceOf Alunno) {
+      // utente è alunno
+      $alunno = $this->getUser();
+    } else {
+      // utente è genitore
+      $alunno = $gen->alunno($this->getUser());
+      if (!$alunno) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+    // controlla assenza e possibilità di giustificare
+    if ($uscita->getAlunno() !== $alunno || !$alunno->getAbilitato() || !$alunno->getClasse() ||
+        !$gen->giusticazioneOnline($this->getUser()) || $uscita->getDocenteGiustifica()) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla permessi
+    if (!$gen->azioneGiustifica($uscita->getData(), $alunno)) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // dati in formato stringa
+    $formatter = new \IntlDateFormatter('it_IT', \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT);
+    $formatter->setPattern('EEEE d MMMM yyyy');
+    $info['data'] =  $formatter->format($uscita->getData());
+    $info['ora'] =  $uscita->getOra()->format('H:i');
+    $info['classe'] = $alunno->getClasse()->getAnno().'ª '.$alunno->getClasse()->getSezione();
+    $info['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
+    $info['uscita'] = $uscita;
+    // form
+    $uscita_old = clone $uscita;
+    $form = $this->container->get('form.factory')->createNamedBuilder('giustifica_uscita', FormType::class, $uscita)
+      ->setAction($this->generateUrl('genitori_giustifica_uscita', ['uscita' => $uscita->getId(), 'posizione' => $posizione]))
+      ->add('tipo', ChoiceType::class, array('label' => 'label.motivazione_ritardo',
+        'choices' => $lista_motivazioni,
+        'placeholder' => 'label.scelta_giustifica',
+        'expanded' => false,
+        'multiple' => false,
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'mapped' => false,
+        'required' => false))
+      ->add('motivazione', MessageType::class, array('label' => null,
+        'trim' => true,
+        'attr' => array('rows' => '3'),
+        'required' => true))
+      ->add('submit', SubmitType::class, array('label' => 'label.submit',
+        'attr' => ['class' => 'btn-primary']))
+      ->add('delete', SubmitType::class, array('label' => 'label.delete',
+        'attr' => ['class' => 'btn-danger']))
+      ->getForm();
+    $form->handleRequest($request);
+    if ($form->isSubmitted()) {
+      if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
+        // errore: motivazione assente
+        $this->addFlash('error', $trans->trans('exception.no_motivazione'));
+      } else {
+        // dati validi
+        if ($form->get('delete')->isClicked()) {
+          // cancella
+          $uscita
+            ->setMotivazione(null)
+            ->setGiustificato(null);
+        } else {
+          // aggiorna dati
+          $uscita
+            ->setMotivazione(substr($form->get('motivazione')->getData(), 0, 255))
+            ->setGiustificato(new \DateTime())
+            ->setUtenteGiustifica($this->getUser());
+        }
+        // ok: memorizza dati
+        $em->flush();
+        // log azione
+        if ($form->get('delete')->isClicked()) {
+          // cancella
+          $dblogger->logAzione('ASSENZE', 'Elimina giustificazione online', array(
+            'Uscita' => $uscita->getId(),
+            'Motivazione' => $uscita_old->getMotivazione(),
+            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null,
+            ));
+        } else {
+          // inserisce o modifica
+          $dblogger->logAzione('ASSENZE', 'Giustificazione online', array(
+            'Uscita' => $uscita->getId(),
+            'Motivazione' => $uscita_old->getMotivazione(),
+            'Giustificato' => $uscita_old->getGiustificato() ? $uscita_old->getGiustificato()->format('Y-m-d') : null,
+          ));
+        }
+      }
+      // redirezione
+      return $this->redirectToRoute('genitori_assenze', ['posizione' => $posizione]);
+    }
+    // visualizza pagina
+    return $this->render('ruolo_genitore/giustifica_uscita.html.twig', array(
       'info' => $info,
       'form' => $form->createView(),
     ));

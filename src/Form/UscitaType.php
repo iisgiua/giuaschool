@@ -39,10 +39,17 @@ class UscitaType extends AbstractType {
         'widget' => 'single_text',
         'html5' => false,
         'attr' => ['widget' => 'gs-picker'],
+        'required' => true))
+      ->add('valido', ChoiceType::class, array('label' => 'label.conteggio_uscite',
+        'choices' => ['label.si' => true, 'label.no' => false],
+        'expanded' => true,
+        'multiple' => false,
+        'label_attr' => ['class' => 'radio-inline'],
         'required' => true));
     if ($options['formMode'] == 'staff') {
       $builder
-        ->add('valido', ChoiceType::class, array('label' => 'label.conteggio_uscite',
+        ->add('giustificazione', ChoiceType::class, array('label' => 'label.richiedi_giustificazione',
+          'data' => $options['dati'][0],
           'choices' => ['label.si' => true, 'label.no' => false],
           'expanded' => true,
           'multiple' => false,
@@ -62,8 +69,10 @@ class UscitaType extends AbstractType {
    */
   public function configureOptions(OptionsResolver $resolver) {
     $resolver->setDefined('formMode');
+    $resolver->setDefined('dati');
     $resolver->setDefaults(array(
-      'formMode' => 'docenti',
+      'formMode' => 'richiesta',
+      'dati' => [],
       'allow_extra_fields' => true,
       'data_class' => Uscita::class));
   }

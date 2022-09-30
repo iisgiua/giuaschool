@@ -81,6 +81,7 @@ label.conteggio_uscite: Valido per il conteggio delle uscite?
 label.continua: Continua
 label.convalida_assenze: Convalida giustificazioni assenze
 label.convalida_ritardi: Convalida giustificazioni ritardi
+label.convalida_uscite: Convalida giustificazioni uscite anticipate
 label.coordinatore: Coordinatore
 label.coordinatori: Coordinatori
 label.crea_annotazione: Annotazione sul registro
@@ -195,6 +196,7 @@ label.motivazione_assenza: Motivazione dell'assenza
 label.motivazione_facoltativa: Motivazione facoltativa
 label.motivazione_obbligatoria: Motivazione obbligatoria
 label.motivazione_ritardo: Motivazione del ritardo
+label.motivazione_uscita: Motivazione dell'uscita anticipata
 label.nessuna_classe: Nessuna classe
 label.nessuna_sede: Nessuna sede
 label.nessuno: Nessuno
@@ -340,6 +342,7 @@ label.ultimo_accesso: Ultimo accesso
 label.upload_cancella: Annulla
 label.upload_rimuove_file: Cancella
 label.uscite: Uscite
+label.uscite_anticipate: Uscite anticipate
 label.username: Nome utente
 label.utenti: Utenti
 label.utente_attivo: Utente attivo
@@ -543,6 +546,7 @@ label.invia_richiesta: Nuova richiesta
 label.cancella_richiesta: Cancella richiesta
 label.richieste_scadute: Richieste scadute
 label.tipo_richiesta: Codifica del tipo di richiesta
+label.richiedi_giustificazione: Chiedere la giustificazione?
 
 
 ##### PAGINE #####
@@ -653,6 +657,10 @@ page.richieste.lista: Lista Richieste
 title.richieste.lista: Lista delle richieste
 page.richieste.add: Modifica Richiesta
 title.richieste.add: Invia un modulo di richiesta
+page.richieste.uscita: Gestione Uscite
+title.richieste.uscita: Gestione delle richieste di uscita anticipata
+page.richieste.gestione: Gestione Richieste
+title.richieste.gestione: Gestione delle richieste
 
 
 page.agenda_compito: Agenda Compiti
@@ -1068,6 +1076,8 @@ message.cancella_piano: Verrà cancellato il documento del piano di lavoro. Vuoi
 message.inserimento_piani: "Inserire il piano di lavoro creando un documento distinto per ogni materia e classe; il documento dovrà comprendere anche gli argomenti di Educazione Civica.<br>I docenti di laboratorio dovranno inserire il proprio piano di lavoro assieme a quello del docente di teoria, in un unico documento."
 message.autorizza_ritardo: "L'alunn{sex} {alunno} è autorizzat{sex} ad entrare alla seconda ora"
 message.autorizza_uscita: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, accompagnat{sex} da un genitore"
+message.autorizza_uscita_maggiorenne: "Si autorizza l'uscita anticipata dell'alunn{sex} maggiorenne {alunno}"
+message.autorizza_uscita_richiesta: "Si autorizza l'uscita anticipata dell'alunn{sex} {alunno}, come da richiesta preventivamente formalizzata."
 message.conferma_supplenza: "Confermando la scelta entrerai come SUPPLENTE in una tua classe. Vuoi continuare?"
 message.presenti_compiti_oggi: "{num, plural, one {È presente un compito assegnato per oggi} other {Sono presenti # compiti assegnati per oggi}}"
 message.presenti_compiti_domani: "{num, plural, one {È presente un compito assegnato per domani} other {Sono presenti # compiti assegnati per domani}}"

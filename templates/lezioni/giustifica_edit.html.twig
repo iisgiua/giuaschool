@@ -23,30 +23,42 @@
       </div>
       {{ form_start(form) }}
       <div {{ convalide == 0 ? 'style="display:none" '}}class="row alert alert-info gs-mb-4 gs-ml-2 gs-mr-2 gs-pl-2 gs-pr-2 gs-pt-2 gs-pb-2">
-        <div class="col-sm-6">
+        <div class="col-sm-6"{{ form.convalida_assenze.children|length == 0 ? ' style="display:none"'}}>
           <label class="control-label">{{ 'label.convalida_assenze'|trans }}</label>
           <ul class="list-group">
             {{ form_widget(form.convalida_assenze) }}
           </ul>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-6"{{ form.convalida_ritardi.children|length == 0 ? ' style="display:none"'}}>
           <label class="control-label">{{ 'label.convalida_ritardi'|trans }}</label>
           <ul class="list-group">
             {{ form_widget(form.convalida_ritardi) }}
           </ul>
         </div>
+        <div class="col-sm-6"{{ form.convalida_uscite.children|length == 0 ? ' style="display:none"'}}>
+          <label class="control-label">{{ 'label.convalida_uscite'|trans }}</label>
+          <ul class="list-group">
+            {{ form_widget(form.convalida_uscite) }}
+          </ul>
+        </div>
       </div>
       <div {{ giustificazioni == 0 ? 'style="display:none" '}}class="row gs-mb-4">
-        <div class="col-sm-6">
+        <div class="col-sm-6"{{ form.assenze.children|length == 0 ? ' style="display:none"'}}>
           <label class="control-label">{{ 'label.assenze'|trans }}</label>
           <ul class="list-group">
             {{ form_widget(form.assenze) }}
           </ul>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-6"{{ form.ritardi.children|length == 0 ? ' style="display:none"'}}>
           <label class="control-label">{{ 'label.ritardi'|trans }}</label>
           <ul class="list-group">
             {{ form_widget(form.ritardi) }}
+          </ul>
+        </div>
+        <div class="col-sm-6"{{ form.uscite.children|length == 0 ? ' style="display:none"'}}>
+          <label class="control-label">{{ 'label.uscite_anticipate'|trans }}</label>
+          <ul class="list-group">
+            {{ form_widget(form.uscite) }}
           </ul>
         </div>
       </div>

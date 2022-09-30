@@ -472,6 +472,7 @@ class GenitoriUtil {
     }
     $dati['evidenza'] = $dati_assenze['evidenza'];
     $dati['evidenza']['ritardo'] = [];
+    $dati['evidenza']['uscita'] = [];
     $dati_periodo = $dati_assenze['gruppi'];
     // legge ritardi
     $ritardi = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
@@ -516,7 +517,7 @@ class GenitoriUtil {
     }
     // legge uscite anticipate
     $uscite = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
-      ->select('u.data,u.ora,u.note,u.valido')
+      ->select('u.data,u.ora,u.note,u.giustificato,u.valido,u.motivazione,(u.docenteGiustifica) AS docenteGiustifica,u.id')
       ->join('App\Entity\Uscita', 'u', 'WITH', 'a.id=u.alunno')
       ->where('a.id=:alunno AND a.classe=:classe')
       ->orderBy('u.data', 'DESC')
@@ -533,6 +534,16 @@ class GenitoriUtil {
       $dati_periodo[$numperiodo][$data]['uscita']['ora'] = $u['ora'];
       $dati_periodo[$numperiodo][$data]['uscita']['note'] = $u['note'];
       $dati_periodo[$numperiodo][$data]['uscita']['valido'] = $u['valido'];
+      $dati_periodo[$numperiodo][$data]['uscita']['giustificato'] =
+        ($u['giustificato'] ? ($u['docenteGiustifica'] ? 'D' : 'G') : null);
+      $dati_periodo[$numperiodo][$data]['uscita']['motivazione'] = $u['motivazione'];
+      $dati_periodo[$numperiodo][$data]['uscita']['id'] = $u['id'];
+      $dati_periodo[$numperiodo][$data]['uscita']['permesso'] = $this->azioneGiustifica($u['data'], $alunno);
+      if (!$u['giustificato'] && count($dati['evidenza']['uscita']) < 5 &&
+          $dati_periodo[$numperiodo][$data]['uscita']['permesso']) {
+        // uscita da giustificare in evidenza (primi 5)
+        $dati['evidenza']['uscita'][] = $dati_periodo[$numperiodo][$data]['uscita'];
+      }
       if ($u['valido']) {
         $num_uscite_valide[$numperiodo]++;
       }

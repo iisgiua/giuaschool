@@ -11,7 +11,8 @@
     {% include 'include/modal-error.html.twig' %}
     {% if dati.giustifica and
       ((dati.evidenza.assenza is defined and dati.evidenza.assenza|length > 0) or
-      (dati.evidenza.ritardo is defined and dati.evidenza.ritardo|length > 0)) %}
+      (dati.evidenza.ritardo is defined and dati.evidenza.ritardo|length > 0) or
+      (dati.evidenza.uscita is defined and dati.evidenza.uscita|length > 0)) %}
   <table class="table table-bordered table-hover table-striped table-condensed gs-mb-5">
     <caption class="text-danger text-center gs-big"><strong>Da giustificare</strong></caption>
     <thead class="bg-warning">
@@ -49,6 +50,12 @@
         <td><strong>Ritardo</strong> ({{ v.ora|date('H:i') }})</td>
         <td>
           <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': v.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+        </td>
+          {% elseif tipo == 'uscita' %}
+        <td class="text-danger"><strong>{{ v.data }}</strong></td>
+        <td><strong>Uscita anticipata</strong> ({{ v.ora|date('H:i') }})</td>
+        <td>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': v.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
         </td>
           {% endif %}
       </tr>
@@ -145,8 +152,17 @@
         <td>
           <small>{{ e.note }}
             {% if e.valido %}{{ e.note is not empty ? '<br>' }}<em>(Rientra nel conteggio del numero massimo di uscite)</em>{% endif %}
-          </small></td>
-        <td></td>
+          </small>
+        </td>
+        <td>
+            {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
+          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+            {% elseif not e.giustificato and e.permesso and dati.giustifica %}
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': e.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+            {% elseif not e.giustificato %}
+          <span class="label label-danger">Da giustificare</span>
+            {% endif %}
+        </td>
           {% endif %}
       </tr>
         {% endfor %}
