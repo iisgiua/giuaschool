@@ -16,8 +16,10 @@
       <div class="row bg-success{{ not dati.richiesta ? ' gs-mb-3'}}">
         <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.alunno }}</span></div>
+  {% if app.session('/CONFIG/SCUOLA/gestione_uscite') == 'A' %}
         <div class="col-sm-2 text-right"><strong class="gs-big">Richiesta:</strong></div>
         <div class="col-sm-4"><span class="label label-{{ dati.richiesta ? 'success' : 'danger' }} gs-big">{{ dati.richiesta ? 'PRESENTE' : 'NESSUNA' }}</span></div>
+  {% endif %}
       </div>
   {% if dati.richiesta %}
       <div class="row bg-info gs-mb-3">

@@ -1908,6 +1908,21 @@ class StaffController extends AbstractController {
       // errore: festivo
       throw $this->createNotFoundException('exception.invalid_params');
     }
+    // controlla richiesta
+    if ($reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A') {
+      // gestione uscita con autorizzazione
+      $richiesta = $em->getRepository('App\Entity\Richiesta')
+        ->richiestaAlunno('U', $alunno->getId(), $data_obj);
+      if ($richiesta && (!in_array($richiesta->getStato(), ['I', 'G'], true) ||
+          $richiesta->getDefinizioneRichiesta()->getUnica() ||
+          !$richiesta->getDefinizioneRichiesta()->getAbilitata())) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+    } else {
+      // gestione uscita con giustificazione
+      $richiesta = null;
+    }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
     // controlla uscita
@@ -1922,14 +1937,18 @@ class StaffController extends AbstractController {
       $chiediGiustificazione = !$uscita_old->getDocenteGiustifica();
     } else {
       // nuovo
-      $ora = new \DateTime();
-      if ($data != $ora->format('Y-m-d') || $ora->format('H:i:00') < $orario[0]['inizio'] ||
-          $ora->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
-        // data non odierna o ora attuale fuori da orario
-        $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['inizio']);
+      if ($richiesta) {
+        $ora = $richiesta->getValori()['ora'];
+      } else {
+        $ora = new \DateTime();
+        if ($data != $ora->format('Y-m-d') || $ora->format('H:i:00') < $orario[0]['inizio'] ||
+            $ora->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
+          // data non odierna o ora attuale fuori da orario
+          $ora = \DateTime::createFromFormat('H:i:s', $orario[count($orario) - 1]['inizio']);
+        }
       }
-      $msg = $alunno->controllaRuoloFunzione('AM') ? 'message.autorizza_uscita_maggiorenne' :
-        'message.autorizza_uscita';
+      $msg = $richiesta ? 'message.autorizza_uscita_richiesta' :
+        ($alunno->controllaRuoloFunzione('AM') ? 'message.autorizza_uscita_maggiorenne' : 'message.autorizza_uscita');
       $nota = $trans->trans($msg, ['sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
         'alunno' => $alunno->getCognome().' '.$alunno->getNome()]);
       $uscita = (new Uscita())
@@ -1954,9 +1973,10 @@ class StaffController extends AbstractController {
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = $classe->getAnno()."ª ".$classe->getSezione();
     $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome();
+    $label['richiesta'] = $richiesta;
     // form di inserimento
     $form = $this->createForm(UscitaType::class, $uscita, array(
-      'formMode' => $reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A' ? 'staff' : 'docenti',
+      'formMode' => $richiesta ? 'richiesta' : 'staff',
       'dati' => [$chiediGiustificazione]));
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -1981,8 +2001,11 @@ class StaffController extends AbstractController {
             $em->remove($assenza);
           }
         }
-        if ($reqstack->getSession()->get('/CONFIG/SCUOLA/gestione_uscite') == 'A' &&
-            $form->get('giustificazione')->getData() === false) {
+        if ($richiesta) {
+          // gestione richiesta
+          $richiesta->setStato(isset($id_uscita) ? 'I' : 'G');
+        }
+        if ($richiesta || $form->get('giustificazione')->getData() === false) {
           // gestione autorizzazione
           $uscita
             ->setGiustificato(new \DateTime('today'))

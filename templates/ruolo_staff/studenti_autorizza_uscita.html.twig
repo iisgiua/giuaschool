@@ -8,17 +8,36 @@
     </div>
     <div class="panel-body gs-pt-0">
       <div class="row bg-success">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Data:</strong></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Data uscita:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.data }}</span></div>
         <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.classe }}</span></div>
       </div>
       <div class="row bg-success gs-mb-3">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Docente:</strong></div>
-        <div class="col-sm-4"><span class="gs-big">{{ label.docente }}</span></div>
         <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.alunno }}</span></div>
+  {% if app.session('/CONFIG/SCUOLA/gestione_uscite') == 'A' %}
+        <div class="col-sm-2 text-right"><strong class="gs-big">Richiesta:</strong></div>
+        <div class="col-sm-4"><span class="label label-{{ label.richiesta ? 'success' : 'danger' }} gs-big">{{ label.richiesta ? 'PRESENTE' : 'NESSUNA' }}</span></div>
+  {% endif %}
       </div>
+  {% if label.richiesta %}
+      <div class="row bg-info gs-mb-3">
+        <div class="col-sm-3 text-right"><strong>Motivazione richiesta:</strong></div>
+        <div class="col-sm-9"><em>{{ label.richiesta.valori.motivazione }}</em></div>
+        <div class="col-sm-3 text-right"><strong>Documenti richiesta:</strong></div>
+        <div class="col-sm-9">
+          <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: label.richiesta.id}) }}" title="Scarica il modulo di richiesta compilato">
+            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
+          </a>
+          {% for a in label.richiesta.allegati %}
+          <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id:  label.richiesta.id, documento: loop.index}) }}" title="Scarica l'allegato alla richiesta">
+            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+  {% endif %}
       {{ form_start(form) }}
       {{ form_widget(form) }}
       <div class="form-group">
@@ -66,4 +85,3 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
-
