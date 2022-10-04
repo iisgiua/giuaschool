@@ -1,0 +1,40 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {{ form_start(form[0]) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
+    </div>
+    <div class="panel-body gs-pt-0">
+      <div class="row bg-success">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Modulo:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.definizioneRichiesta.nome }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Stato:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.stato == 'A' ? 'ANNULLATA' : (info.richiesta.stato == 'I' ? 'IN ATTESA' : (info.richiesta.stato == 'G' ? 'GESTITA' : (info.richiesta.stato == 'R' ? 'RIMOSSA' : ''))) }}</span></div>
+      </div>
+      <div class="row bg-success">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.cognome }} {{ info.richiesta.utente.nome }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.classe.anno }}ª {{ info.richiesta.utente.classe.sezione }}</span></div>
+      </div>
+      <div class="row bg-success gs-mb-4">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Città:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.citta }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Indirizzo:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.indirizzo }}</span></div>
+      </div>
+      {{ form(form[0]) }}
+    </div>
+    <div class="panel-footer text-center">
+      <button type="submit" id="richiesta_submit" name="richiesta[submit]" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+      <button type="button" id="richiesta_cancel" name="richiesta[cancel]" class="btn btn-default" onClick="location.href='{{ path('richieste_gestione') }}'"><strong>{{ 'label.cancel'|trans }}</strong></button>
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
+</div>
+{% endblock %}

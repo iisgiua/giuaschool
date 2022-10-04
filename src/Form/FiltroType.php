@@ -9,10 +9,10 @@
 namespace App\Form;
 
 use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -34,23 +34,44 @@ class FiltroType extends AbstractType {
     if ($options['formMode'] == 'richieste') {
       // form gestione richieste
       $builder
-        ->add('tipo', ChoiceType::class, array('label' => false,
+        ->add('tipo', ChoiceType::class, array('label' => 'label.richiesta_tipo',
+          'data' => $options['values'][0],
+          'choices' => ['label.richiesta_tipo_E' => 'E', 'label.richiesta_tipo_D' => 'D',
+            'label.richiesta_tipo_altre' => '*', 'label.richiesta_tipo_tutte' => ''],
+          'attr' => ['title' => 'label.richiesta_tipo'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => true))
+        ->add('stato', ChoiceType::class, array('label' => 'label.richiesta_stato',
           'data' => $options['values'][1],
-          'choices' => ['modulo' => 'U'],
-          'placeholder' => 'label.qualsiasi_tipo_richiesta',
-          'required' => false))
-        ->add('stato', ChoiceType::class, array('label' => false,
+          'choices' => ['label.richiesta_stato_IA' => 'IA', 'label.richiesta_stato_G' => 'G',
+            'label.richiesta_stato_R' => 'R', 'label.richiesta_stato_tutte' => ''],
+          'attr' => ['title' => 'label.richiesta_stato'],
+          'label_attr' => ['class' => 'sr-only'],
+        'required' => true))
+        ->add('sede', ChoiceType::class, array('label' => 'label.richiesta_sede',
           'data' => $options['values'][2],
-          'choices' => ['label.richieste_I' => 'I', 'label.richieste_G' => 'G'],
-          'placeholder' => 'label.qualsiasi_stato_richiesta',
+          'choices' => $options['values'][3],
+          'choice_translation_domain' => false,
+          'attr' => ['title' => 'label.richiesta_sede'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => true))
+        ->add('classe', ChoiceType::class, array('label' => 'label.classe',
+          'data' => $options['values'][4],
+          'choices' => $options['values'][5],
+          'placeholder' => 'label.qualsiasi_classe',
+          'choice_translation_domain' => false,
+          'attr' => ['title' => 'label.classe'],
+          'label_attr' => ['class' => 'sr-only'],
           'required' => false))
-        ->add('sede', EntityType::class, array('label' => false,
-          'data' => $options['values'][3],
-          'class' => 'App\Entity\Sede',
-          'choice_label' => 'citta',
-          'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('s')->orderBy('s.ordinamento', 'ASC'); },
-          'placeholder' => 'label.qualsiasi_sede',
+        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'data' => $options['values'][6],
+          'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('nome', TextType::class, array('label' => 'label.nome',
+          'data' => $options['values'][7],
+          'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome'],
+          'label_attr' => ['class' => 'sr-only'],
           'required' => false));
     }
     // pulsante filtro

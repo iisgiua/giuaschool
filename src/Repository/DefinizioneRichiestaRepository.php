@@ -9,7 +9,6 @@
 namespace App\Repository;
 
 use App\Entity\Genitore;
-use App\Entity\Sede;
 use App\Entity\Utente;
 
 
@@ -75,72 +74,6 @@ class DefinizioneRichiestaRepository extends BaseRepository {
       }
     }
     // restituisce dati
-    return $dati;
-  }
-
-
-
-
-
-
-
-
-  /**
-   //-- * Restituisce la lista dei moduli di richiesta per la gestione dell'utente destinatario
-   //-- *
-   //-- * @param Utente $utente Utente che può gestire i moduli di richiesta
-   *
-   //-- * @return array Lista associativa con i risultatiA
-   */
-  public function listaGestione(Utente $utente, array $criteri, ?Sede $sede, int $pagina): array {
-    $ruolo = $utente->getCodiceRuolo();
-    $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.destinatari) > 0",
-      $utente->getCodiceFunzioni());
-    $sql = implode(' OR ', $funzioni);
-    // legge richieste
-    $richieste = $this->createQueryBuilder('dr')
-      ->select('dr.id,dr.nome,dr.unica,dr.azioneGestione,dr.azioneRimozione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio')
-      ->leftJoin('App\Entity\Richiesta', 'r', 'WITH', 'r.definizioneRichiesta=dr.id AND r.stato IN (:stati)')
-      ->where('dr.abilitata=:si')
-      ->andWhere($sql)
-      ->setParameters(['si' => 1, 'stati' => ['I', 'G', 'A']])
-      ->orderBy('dr.nome', 'ASC')
-      ->addOrderBy('r.data', 'DESC')
-      ->addOrderBy('r.inviata', 'DESC')
-      ->getQuery()
-      ->getArrayResult();
-
-    //-- // formatta dati
-    //-- $dati['uniche'] = [];
-    //-- $dati['multiple'] = [];
-    //-- $dati['richieste'] = [];
-    //-- $moduloPrec = null;
-    //-- foreach ($richieste as $richiesta) {
-      //-- $modulo = $richiesta['id'];
-      //-- if (!$moduloPrec || $moduloPrec != $modulo) {
-        //-- // aggiunge a lista moduli
-        //-- $dati[$richiesta['unica'] ? 'uniche' : 'multiple'][$modulo] = [
-          //-- 'nome' => $richiesta['nome'],
-          //-- 'azioneGestione' => $richiesta['azioneGestione'],
-          //-- 'azioneRimozione' => $richiesta['azioneRimozione']];
-        //-- $moduloPrec = $modulo;
-      //-- }
-      //-- if ($richiesta['richiesta_id']) {
-        //-- // aggiunge a lista richieste
-        //-- $tipo = ($richiesta['unica'] || $richiesta['data'] >= $oggi) ? 'nuove' : 'vecchie';
-        //-- $dati['richieste'][$modulo][$tipo][] = [
-          //-- 'id' => $richiesta['richiesta_id'],
-          //-- 'inviata' => $richiesta['inviata'],
-          //-- 'gestita' => $richiesta['gestita'],
-          //-- 'data' => $richiesta['data'],
-          //-- 'documento' => $richiesta['documento'],
-          //-- 'allegati' => $richiesta['allegati'],
-          //-- 'stato' => $richiesta['stato'],
-          //-- 'messaggio' => $richiesta['messaggio']];
-      //-- }
-    //-- }
-    // restituisce dati
-$dati=[];
     return $dati;
   }
 

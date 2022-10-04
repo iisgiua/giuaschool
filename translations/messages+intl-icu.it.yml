@@ -547,6 +547,20 @@ label.cancella_richiesta: Cancella richiesta
 label.richieste_scadute: Richieste scadute
 label.tipo_richiesta: Codifica del tipo di richiesta
 label.richiedi_giustificazione: Chiedere la giustificazione?
+label.richiesta_tipo: Modulo di richiesta
+label.richiesta_tipo_E: Deroga orario ingresso
+label.richiesta_tipo_D: Deroga orario uscita
+label.richiesta_tipo_altre: Altri moduli
+label.richiesta_tipo_tutte: Tutti i moduli
+label.richiesta_stato: Stato della richiesta
+label.richiesta_stato_IA: Nuove
+label.richiesta_stato_G: Gestite
+label.richiesta_stato_R: Rimosse
+label.richiesta_stato_tutte: Tutte
+label.richiesta_sede: Sede di destinazione
+label.richiesta_messaggio: Messaggio in risposta
+label.richiesta_deroga_entrata: Autorizza ingresso
+label.richiesta_deroga_uscita: Autorizza uscita
 
 
 ##### PAGINE #####
@@ -661,6 +675,10 @@ page.richieste.uscita: Gestione Uscite
 title.richieste.uscita: Gestione delle richieste di uscita anticipata
 page.richieste.gestione: Gestione Richieste
 title.richieste.gestione: Gestione delle richieste
+page.richieste.remove: Rimuove Richiesta
+title.richieste.remove: Rimozione di una richiesta
+page.richieste.manage: Gestisce Richiesta
+title.richieste.manage: Gestione di una richiesta
 
 
 page.agenda_compito: Agenda Compiti
@@ -1219,6 +1237,8 @@ message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
+message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
+message.richieste_manage: La richiesta sarà segnata come gestita. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
 
 
 ##### ERRORI #####

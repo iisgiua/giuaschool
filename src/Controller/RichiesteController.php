@@ -115,7 +115,7 @@ class RichiesteController extends BaseController {
     $info['modulo'] = 'PERSONALI/moduli/'.$definizioneRichiesta->getModulo();
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     // form di inserimento
-    $form = $this->createForm(RichiestaType::class, null, ['returnUrl' => $this->generateUrl('richieste_lista'),
+    $form = $this->createForm(RichiestaType::class, null, ['formMode' => 'add',
       'dati' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
@@ -191,7 +191,7 @@ class RichiesteController extends BaseController {
   }
 
   /**
-   * Annulla una richiesta inviata
+   * Annulla una richiesta inviata. Azione eseguita dal richiedente.
    *
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Richiesta da annullare
@@ -502,13 +502,20 @@ class RichiesteController extends BaseController {
   public function gestioneAction(Request $request, RequestStack $reqstack, int $pagina): Response {
     // inizializza
     $info = [];
+    $info['sedi'] = [];
     $dati = [];
     // criteri di ricerca
     $criteri = array();
-    $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/tipo');
-    $criteri['stato'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/stato', 'I');
-    $criteri['sede'] = $this->em->getRepository('App\Entity\Sede')->find(
+    $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/tipo', '');
+    $criteri['stato'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/stato', 'IA');
+    $sede = $this->em->getRepository('App\Entity\Sede')->find(
       (int) $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/sede', 0));
+    $criteri['sede'] = $sede ? $sede->getId() : 0;
+    $classe = $this->em->getRepository('App\Entity\Classe')->find(
+      (int) $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/classe', 0));
+    $criteri['classe'] = $classe ? $classe->getId() : 0;
+    $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/cognome', '');
+    $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/nome', '');
     if ($pagina == 0) {
       // pagina non definita: la cerca in sessione
       $pagina = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/pagina', 1);
@@ -516,34 +523,214 @@ class RichiesteController extends BaseController {
       // pagina specificata: la conserva in sessione
       $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }
+    // lista sedi
+    if ($this->getUser()->getSede()) {
+      // sede definita
+      $sede = $this->em->getRepository('App\Entity\Sede')->find($this->getUser()->getSede());
+      $listaSedi = [$sede->getNomeBreve() => $sede->getId()];
+      $criteri['sede'] = $sede->getId();
+    } else {
+      // crea lista
+      $sedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' => 'ASC']);
+      $listaSedi = [];
+      foreach ($sedi as $sede) {
+        $listaSedi[$sede->getNomeBreve()] = $sede->getId();
+      }
+      if (!$criteri['sede']) {
+        // definisce sempre una sede
+        $criteri['sede'] = $sedi[0]->getId();
+      }
+      // cambio sede
+      $classi = $this->em->getRepository('App\Entity\Classe')->createQueryBuilder('c')
+        ->select('s.id AS sede_id,c.anno,c.sezione,c.id')
+        ->join('c.sede', 's')
+        ->orderBy('s.ordinamento,c.anno,c.sezione', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($classi as $classe) {
+        $info['sedi'][$classe['sede_id']][] = [$classe['id'], $classe['anno'].'ª '.$classe['sezione']];
+      }
+    }
+    // lista classi
+    $classi = $this->em->getRepository('App\Entity\Classe')->findBy(['sede' => $criteri['sede']],
+      ['anno' => 'ASC', 'sezione' => 'ASC']);
+    $listaClassi = [];
+    foreach ($classi as $classe) {
+      $listaClassi[$classe->getAnno().'ª '.$classe->getSezione()] = $classe->getId();
+    }
     // form filtro
     $form = $this->createForm(FiltroType::class, null, ['formMode' => 'richieste',
-      'values' => [$this->getUser()->getSede(), $criteri['tipo'], $criteri['stato'], $criteri['sede']]]);
+      'values' => [$criteri['tipo'], $criteri['stato'], $criteri['sede'], $listaSedi, $criteri['classe'],
+      $listaClassi, $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      //-- // imposta criteri di ricerca
-      //-- $criteri['filtro'] = $form->get('filtro')->getData();
-      //-- $criteri['tipo'] = $form->get('tipo')->getData();
-      //-- $criteri['classe'] = $form->get('classe')->getData();
-      //-- $pagina = 1;
-      //-- // memorizza in sessione
-      //-- $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/filtro', $criteri['filtro']);
-      //-- $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/tipo', $criteri['tipo']);
-      //-- $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/classe',
-        //-- is_object($criteri['classe']) ? $criteri['classe']->getId() : null);
-      //-- $reqstack->getSession()->set('/APP/ROUTE/documenti_docenti/pagina', $pagina);
+      // imposta criteri di ricerca
+      $criteri['tipo'] = $form->get('tipo')->getData();
+      $criteri['stato'] = $form->get('stato')->getData();
+      $criteri['sede'] = $form->get('sede')->getData();
+      $criteri['classe'] = $form->get('classe')->getData();
+      $criteri['cognome'] = $form->get('cognome')->getData();
+      $criteri['nome'] = $form->get('nome')->getData();
+      $pagina = 1;
+      // memorizza in sessione
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/tipo', $criteri['tipo']);
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/stato', $criteri['stato']);
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/sede', $criteri['sede']);
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/classe', $criteri['classe']);
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/cognome', $criteri['cognome']);
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/nome', $criteri['nome']);
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }
     // recupera dati
-    //-- $dati = $this->em->getRepository('App\Entity\DefinizioneRichiesta')->listaGestione($this->getUser(),
-      //-- $criteri, $sede, $pagina);
-
-    //-- $dati = $doc->docenti($criteri, $this->getUser()->getSede(), $pagina);
+    $dati = $this->em->getRepository('App\Entity\Richiesta')->lista($this->getUser(), $criteri, $pagina);
     // informazioni di visualizzazione
-    //-- $info['pagina'] = $pagina;
-    //-- $info['tipo'] = $criteri['tipo'];
-
+    $info['pagina'] = $pagina;
     // pagina di risposta
     return $this->renderHtml('richieste', 'gestione', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Rimuove una richiesta. Azione eseguita dal destinatario.
+   *
+   * @param Request $request Pagina richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Richiesta da rimuovere
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/richieste/remove/{id}", name="richieste_remove",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function removeAction(Request $request, LogHandler $dblogger, int $id): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla richiesta
+    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->find($id);
+    if (!$richiesta || $richiesta->getStato() == 'R') {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso a modulo richiesta
+    if (!$this->getUser()->controllaRuoloFunzione($richiesta->getDefinizioneRichiesta()->getDestinatari())) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controlla sede
+    if ($this->getUser()->getSede() &&
+        $richiesta->getUtente()->getClasse()->getSede() != $this->getUser()->getSede()) {
+      // errore: richiesta di sede non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // informazioni
+    $info['richiesta'] = $richiesta;
+    // form di gestione
+    $form = $this->createForm(RichiestaType::class, null, ['formMode' => 'remove',
+      'dati' => [$richiesta->getMessaggio()]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+        // cambia stato
+        $richiestaVecchia = clone $richiesta;
+        $richiesta
+          ->setGestita(new \DateTime())
+          ->setStato('R')
+          ->setMessaggio($form->get('messaggio')->getData());
+      // memorizzazione e log
+      $dblogger->logModifica('RICHIESTE', 'Rimuove richiesta', $richiestaVecchia, $richiesta);
+      // redirezione
+      return $this->redirectToRoute('richieste_gestione');
+    }
+    // pagina di risposta
+    return $this->renderHtml('richieste', 'remove', $dati, $info, [$form->createView(),  'message.richieste_remove']);
+  }
+
+  /**
+   * Gestione di una richiesta. Azione eseguita dal destinatario.
+   *
+   * @param Request $request Pagina richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Richiesta da rimuovere
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/richieste/manage/{id}", name="richieste_manage",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function manageAction(Request $request, LogHandler $dblogger, int $id): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla richiesta
+    $richiesta = $this->em->getRepository('App\Entity\Richiesta')->find($id);
+    if (!$richiesta) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso a modulo richiesta
+    if (!$this->getUser()->controllaRuoloFunzione($richiesta->getDefinizioneRichiesta()->getDestinatari())) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // controlla sede
+    if ($this->getUser()->getSede() &&
+        $richiesta->getUtente()->getClasse()->getSede() != $this->getUser()->getSede()) {
+      // errore: richiesta di sede non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    // legge deroga
+    $tipo = $richiesta->getDefinizioneRichiesta()->getTipo();
+    $deroga = ($tipo == 'E' ? $richiesta->getUtente()->getAutorizzaEntrata() :
+      ($tipo == 'D' ? $richiesta->getUtente()->getAutorizzaUscita() : ''));
+    // informazioni
+    $info['richiesta'] = $richiesta;
+    // form di gestione
+    $form = $this->createForm(RichiestaType::class, null, [
+      'formMode' => $tipo == 'E' ? 'manageEntrata' : ($tipo == 'D' ? 'manageUscita' : 'manage'),
+      'dati' => [$richiesta->getMessaggio(), $deroga]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // gestione deroghe
+      if ($tipo == 'E') {
+        $derogaVecchia = $richiesta->getUtente()->getAutorizzaEntrata();
+        $richiesta->getUtente()->setAutorizzaEntrata($form->get('deroga')->getData());
+      } elseif ($tipo == 'D') {
+        $derogaVecchia = $richiesta->getUtente()->getAutorizzaUscita();
+        $richiesta->getUtente()->setAutorizzaUscita($form->get('deroga')->getData());
+      }
+      // cambia stato
+      $richiestaVecchia = clone $richiesta;
+      $richiesta
+        ->setGestita(new \DateTime())
+        ->setStato('G')
+        ->setMessaggio($form->get('messaggio')->getData());
+      // memorizzazione e log
+      $dblogger->logModifica('RICHIESTE', 'Gestisce richiesta', $richiestaVecchia, $richiesta);
+      $dblogger->logAzione('ALUNNO', 'Modifica deroghe', array(
+        'Username' => $richiesta->getUtente()->getUsername(),
+        ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia));
+      // controlla unicità
+      if ($richiesta->getDefinizioneRichiesta()->getUnica() && $richiestaVecchia->getStato() == 'R') {
+        // richiesta gestita deve essere una sola
+        $this->em->getRepository('App\Entity\Richiesta')->createQueryBuilder('r')
+          ->update()
+          ->set('r.stato', ':rimossa')
+          ->where('r.definizioneRichiesta=:modulo AND r.utente=:alunno AND r.stato=:gestita AND r.id!=:richiesta')
+          ->setParameters(['rimossa' => 'R', 'modulo' => $richiesta->getDefinizioneRichiesta(),
+            'alunno' => $richiesta->getUtente(), 'gestita' => 'G', 'richiesta' => $richiesta->getId()])
+          ->getQuery()
+          ->getResult();
+      }
+      // redirezione
+      return $this->redirectToRoute('richieste_gestione');
+    }
+    // pagina di risposta
+    return $this->renderHtml('richieste', 'manage', $dati, $info, [$form->createView(),  'message.richieste_manage']);
   }
 
 }
