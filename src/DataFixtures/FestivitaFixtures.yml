@@ -15,117 +15,117 @@ include:
 
 App\Entity\Festivita:
   festivita_1:
-    data: '<date_create("2021-11-01")>'
+    data: '<date_create("2022-11-01")>'
     descrizione: 'Tutti i Santi'
     tipo: 'F'
     sede: null
   festivita_2:
-    data: '<date_create("2021-11-02")>'
+    data: '<date_create("2022-11-02")>'
     descrizione: 'Commemorazione dei defunti'
     tipo: 'F'
     sede: null
   festivita_3:
-    data: '<date_create("2021-12-08")>'
+    data: '<date_create("2022-12-08")>'
     descrizione: 'Immacolata Concezione'
     tipo: 'F'
     sede: null
   festivita_4:
-    data: '<date_create("2022-04-25")>'
+    data: '<date_create("2023-04-25")>'
     descrizione: 'Anniversario della Liberazione'
     tipo: 'F'
     sede: null
   festivita_5:
-    data: '<date_create("2022-05-01")>'
+    data: '<date_create("2023-05-01")>'
     descrizione: 'Festa del Lavoro'
     tipo: 'F'
     sede: null
   festivita_6:
-    data: '<date_create("2022-06-02")>'
+    data: '<date_create("2023-06-02")>'
     descrizione: 'Festa della Repubblica'
     tipo: 'F'
     sede: null
   festivita_7:
-    data: '<date_create("2021-10-30")>'
+    data: '<date_create("2022-10-30")>'
     descrizione: 'Festa del Santo Patrono'
     tipo: 'F'
     sede: '@sede_1'
   festivita_8:
-    data: '<date_create("2022-05-10")>'
+    data: '<date_create("2023-05-10")>'
     descrizione: 'Festa del Santo Patrono'
     tipo: 'F'
     sede: '@sede_2'
   festivita_10:
-    data: '<date_create("2021-12-23")>'
+    data: '<date_create("2022-12-23")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_11:
-    data: '<date_create("2021-12-24")>'
+    data: '<date_create("2022-12-24")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_12:
-    data: '<date_create("2021-12-25")>'
+    data: '<date_create("2022-12-25")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_13:
-    data: '<date_create("2021-12-26")>'
+    data: '<date_create("2022-12-26")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_14:
-    data: '<date_create("2021-12-27")>'
+    data: '<date_create("2022-12-27")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_15:
-    data: '<date_create("2021-12-28")>'
+    data: '<date_create("2022-12-28")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_16:
-    data: '<date_create("2021-12-29")>'
+    data: '<date_create("2022-12-29")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_17:
-    data: '<date_create("2021-12-30")>'
+    data: '<date_create("2022-12-30")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_18:
-    data: '<date_create("2021-12-31")>'
+    data: '<date_create("2022-12-31")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_19:
-    data: '<date_create("2022-01-01")>'
+    data: '<date_create("2023-01-01")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_20:
-    data: '<date_create("2022-01-02")>'
+    data: '<date_create("2023-01-02")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_21:
-    data: '<date_create("2022-01-03")>'
+    data: '<date_create("2023-01-03")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_22:
-    data: '<date_create("2022-01-04")>'
+    data: '<date_create("2023-01-04")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_23:
-    data: '<date_create("2022-01-05")>'
+    data: '<date_create("2023-01-05")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
   festivita_24:
-    data: '<date_create("2022-01-06")>'
+    data: '<date_create("2023-01-06")>'
     descrizione: 'Vacanze di Natale'
     tipo: 'F'
     sede: null
