@@ -70,6 +70,25 @@
   {% endfor %}
     </tbody>
   </table>
+  {% if dati.maxPagine > 1 %}
+  <nav aria-label="Navigazione tra le pagine" class="text-center">
+    <ul class="pagination pagination-sm gs-mt-2">
+    {% if info.pagina > 1 %}
+      <li><a href="{{ path('richieste_gestione', {'pagina': info.pagina - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+    {% else %}
+      <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
+    {% endif %}
+    {% for i in 1 .. dati.maxPagine %}
+      <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('richieste_gestione', {'pagina': i}) }}">{{ i }}</a></li>
+    {% endfor %}
+    {% if info.pagina < dati.maxPagine %}
+      <li><a href="{{ path('richieste_gestione', {'pagina': info.pagina + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+    {% else %}
+      <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
+    {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
   <div class="modal fade" id="gs-info-richiesta" tabindex="-1" role="dialog" aria-labelledby="gs-info-richiesta-titolo">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">

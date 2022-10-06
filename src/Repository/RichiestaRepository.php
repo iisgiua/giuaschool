@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use App\Entity\Richiesta;
+use App\Entity\Staff;
 use App\Entity\Utente;
 
 
@@ -120,6 +121,46 @@ class RichiestaRepository extends BaseRepository {
     $dati['lista']->setUseOutputWalkers(false);
     // restituisce dati
     return $dati;
+  }
+
+  /**
+   * Restituisce il numero di nuove richieste per sede
+   *
+   * @param Staff $staff Docnete dello staff che gestisce i moduli di richiesta
+   *
+   * @return array Lista associativa con i risultati
+   */
+  public function contaNuove(Staff $staff): array {
+    // controllo destinatario
+    $ruolo = $staff->getCodiceRuolo();
+    $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.destinatari) > 0",
+      $staff->getCodiceFunzioni());
+    $sql = implode(' OR ', $funzioni);
+    // query base
+    $richieste = $this->createQueryBuilder('r')
+      ->select('COUNT(r.id) AS totale, s.nomeBreve')
+      ->join('r.definizioneRichiesta', 'dr')
+      ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
+      ->join('a.classe', 'c')
+      ->join('c.sede', 's')
+      ->where('dr.abilitata=:abilitata AND dr.tipo!=:tipo AND r.stato IN (:stati)')
+      ->andWhere($sql)
+      ->groupBy('s.nomeBreve')
+      ->orderBy('s.ordinamento', 'ASC')
+      ->setParameters(['abilitata' => 1, 'tipo' => 'U', 'stati' => ['I', 'A']]);
+    // controlla sede
+    if ($staff->getSede()) {
+      // imposta sede
+      $richieste
+        ->andWhere('c.sede=:sede')
+        ->setParameter('sede', $staff->getSede());
+    }
+    // esegue query
+    $richieste = $richieste
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce dati
+    return $richieste;
   }
 
 }

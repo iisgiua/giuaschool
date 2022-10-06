@@ -17,6 +17,7 @@ use App\Entity\Genitore;
 use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Docente;
+use App\Entity\Staff;
 use App\Entity\Ata;
 use App\Entity\Assenza;
 use App\Entity\Avviso;
@@ -139,6 +140,10 @@ class NotificheUtil {
       $dati['verifiche'] = $this->numeroVerifiche($utente);
       // legge compiti
       $dati['compiti'] = $this->numeroCompiti($utente);
+      // legge moduli di richiesta per lo staff
+      if ($utente instanceof Staff) {
+        $dati['moduli'] = $this->em->getRepository('App\Entity\Richiesta')->contaNuove($utente);
+      }
     } elseif ($utente instanceof Ata) {
       // notifiche per gli ata
       $dati['avvisi'] = $this->numeroAvvisi($utente);

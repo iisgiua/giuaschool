@@ -50,6 +50,9 @@
     {% if dati.compiti.domani > 0 %}
       <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({'num': dati.compiti.domani}) }}: <a href="{{ path('agenda_eventi') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
     {% endif %}
+    {% if dati.moduli is defined and dati.moduli|length > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">Sono presenti nuove richieste da gestire ({% for m in dati.moduli %}{{ m.totale }} per {{ m.nomeBreve }}{{ not loop.last ? ', ' }}{% endfor %}): <a href="{{ path('richieste_gestione') }}">vai alla gestione richieste</a></strong></div>
+    {% endif %}
   {% elseif is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') %}
     {% if dati.colloqui is defined and dati.colloqui %}
       {% for c in dati.colloqui %}
