@@ -44,6 +44,7 @@
           data-classe="{{ r.utente.classe.anno }}ª {{ r.utente.classe.sezione }}"
           data-citta="{{ r.utente.citta }}"
           data-indirizzo="{{ r.utente.indirizzo }}"
+          data-religione="{{ r.utente.religione }}"
     {% if not r.definizioneRichiesta.unica %}
           data-valore-data="{{ r.data|date('d/m/Y') }}"
     {% endif %}
@@ -113,6 +114,8 @@
             <dd class="col-sm-4" id="gs-info-richiesta-citta"></dd>
             <dt class="col-sm-2 text-right">Indirizzo</dt>
             <dd class="col-sm-4" id="gs-info-richiesta-indirizzo"></dd>
+            <dt class="col-sm-2 text-right">Religione</dt>
+            <dd class="col-sm-4" id="gs-info-richiesta-religione"></dd>
           </dl>
           <ul class="list-group" id="gs-info-richiesta-valori"></ul>
           <dl class="row">
@@ -158,6 +161,13 @@ $(document).ready(function() {
     $(this).find('#gs-info-richiesta-classe').text($(e.relatedTarget).data('classe'));
     $(this).find('#gs-info-richiesta-citta').text($(e.relatedTarget).data('citta'));
     $(this).find('#gs-info-richiesta-indirizzo').text($(e.relatedTarget).data('indirizzo'));
+    var religione = $(e.relatedTarget).data('religione');
+    religione = (religione == 'S' ? "{{ 'label.religione_S'|trans }}" :
+      (religione == 'I' ? "{{ 'label.religione_I'|trans }}" :
+      (religione == 'D' ? "{{ 'label.religione_D'|trans }}" :
+      (religione == 'U' ? "{{ 'label.religione_U'|trans }}" :
+      (religione == 'A' ? "{{ 'label.religione_A'|trans }}" : '')))));
+    $(this).find('#gs-info-richiesta-religione').text(religione);
     var valori = '';
     if ($(e.relatedTarget).data('valore-data')) {
       valori += '<li class="list-group-item"><strong class="text-capitalize">Data</strong>: <span>'+
