@@ -397,7 +397,7 @@ label.qualsiasi_materia: Qualsiasi materia
 label.qualsiasi_docente: Qualsiasi docente
 label.cattedra_attiva: Cattedra attiva
 label.cattedra_disabilitata: Cattedra disabilitata
-label.giorno: Giorno della settimana
+label.giorno: Giorno
 label.frequenza: Frequenza
 label.prima_settimana: Prima settimana del mese
 label.seconda_settimana: Seconda settimana del mese
@@ -561,6 +561,15 @@ label.richiesta_sede: Sede di destinazione
 label.richiesta_messaggio: Messaggio in risposta
 label.richiesta_deroga_entrata: Autorizza ingresso
 label.richiesta_deroga_uscita: Autorizza uscita
+label.tipo_colloquio_P: In presenza
+label.tipo_colloquio_D: A distanza
+label.durata_colloquio_5: 5 minuti
+label.durata_colloquio_10: 10 minuti
+label.durata_colloquio_15: 15 minuti
+label.colloquio_ricevimento: Ricevimento
+label.colloquio_luogo: Luogo/Link
+label.colloquio_durata: Durata colloquio
+label.residenza: Residenza
 
 
 ##### PAGINE #####
@@ -679,6 +688,12 @@ page.richieste.remove: Rimuove Richiesta
 title.richieste.remove: Rimozione di una richiesta
 page.richieste.manage: Gestisce Richiesta
 title.richieste.manage: Gestione di una richiesta
+page.colloqui.gestione: Gestione Colloqui
+title.colloqui.gestione: Gestione dei colloqui individuali
+page.colloqui.edit: Modifica Ricevimento
+title.colloqui.edit: Modifica le impostazioni di un ricevimento
+page.colloqui.create: Crea Ricevimenti
+title.colloqui.create: Crea ricevimenti periodici
 
 
 page.agenda_compito: Agenda Compiti
@@ -792,7 +807,6 @@ page.utenti_notifiche: Gestione Notifiche
 page.utenti_otp: Abilita OTP
 page.utenti_password: Cambia Password
 page.utenti_profilo: Profilo Utente
-page.gestione_colloqui: Gestione Colloqui
 
 title.agenda_eventi: Agenda degli eventi per il docente
 title.alias_exit: Esci dall'alias
@@ -1239,6 +1253,9 @@ message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'inv
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
 message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
 message.richieste_manage: La richiesta sarà segnata come gestita. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
+message.edit_ricevimento_singolo: Inserisci le impostazioni per il ricevimento dei genitori.
+message.create_ricevimento_periodico: Inserisci le impostazioni per generare i ricevimenti periodici dei genitori.
+message.colloquio_modifica_con_richieste: "Le prenotazioni esistenti per il ricevimento non saranno modificate. Dovrai eventualmente inserire un messaggio per segnalare le variazioni."
 
 
 ##### ERRORI #####
@@ -1433,7 +1450,7 @@ exception.database_error: Impossibile connettersi al database.
 exception.directory_error: Il percorso indicato non esiste.
 exception.orario_sede_invalido: Non esiste un orario per la sede indicata.
 exception.scansione_ora_invalida: Il giorno e ora indicati non corrispondono ad un orario esistente.
-exception.colloquio_duplicato: Esiste già un colloquio per la sede e il docente indicati.
+exception.colloquio_duplicato: Esiste già una data di ricevimento che si sovrappone a quella indicata.
 exception.dati_presenti: Impossibile cancellare quanto richiesto perché sono presenti dei dati collegati.
 exception.classe_inizio_invalido: La data di iniziale è precedente all'inizio dell'anno scolastico.
 exception.classe_fine_invalido: La data finale è successiva alla fine dell'anno scolastico.
@@ -1456,6 +1473,7 @@ exception.no_firma_dichiarazione: "Errore: devi sottoscrivere la dichiarazione."
 exception.dichiarazione_incompleta: "Errore: devi compilare la dichiarazione e sottoscriverla."
 exception.data_invalida: "Errore: data non valida. Devi inserire una data nel formato gg/mm/aaaa."
 exception.colloquio_ora_invalida: Non hai inserito l'orario dell'appuntamento.
+exception.colloquio_data_invalida: La data inserita non è valida.
 exception.numero_file_allegati: Hai caricato un numero eccessivo di documenti.
 exception.documento_tipo_mancante: Non hai indicato il tipo di documento.
 exception.documento_alunno_mancante: Non hai indicato l'alunno a cui è riferito il documento.
@@ -1484,3 +1502,4 @@ exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "d
 exception.campo_data_vuoto: Non hai inserito un valore per la data.
 exception.richiesta_esistente: Esiste già una richiesta per questa data.
 exception.richiesta_ora_invio: La richiesta deve essere inviata entro le ore {ora} del giorno precedente a quello a cui si riferisce.
+exception.colloquio_link_invalido: Il link inserito non è valido.

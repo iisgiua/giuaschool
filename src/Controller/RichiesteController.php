@@ -514,6 +514,7 @@ class RichiesteController extends BaseController {
     $classe = $this->em->getRepository('App\Entity\Classe')->find(
       (int) $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/classe', 0));
     $criteri['classe'] = $classe ? $classe->getId() : 0;
+    $criteri['residenza'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/residenza', '');
     $criteri['cognome'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/cognome', '');
     $criteri['nome'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/nome', '');
     if ($pagina == 0) {
@@ -561,7 +562,7 @@ class RichiesteController extends BaseController {
     // form filtro
     $form = $this->createForm(FiltroType::class, null, ['formMode' => 'richieste',
       'values' => [$criteri['tipo'], $criteri['stato'], $criteri['sede'], $listaSedi, $criteri['classe'],
-      $listaClassi, $criteri['cognome'], $criteri['nome']]]);
+      $listaClassi, $criteri['residenza'], $criteri['cognome'], $criteri['nome']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // imposta criteri di ricerca
@@ -569,6 +570,7 @@ class RichiesteController extends BaseController {
       $criteri['stato'] = $form->get('stato')->getData();
       $criteri['sede'] = $form->get('sede')->getData();
       $criteri['classe'] = $form->get('classe')->getData();
+      $criteri['residenza'] = $form->get('residenza')->getData();
       $criteri['cognome'] = $form->get('cognome')->getData();
       $criteri['nome'] = $form->get('nome')->getData();
       $pagina = 1;
@@ -578,6 +580,7 @@ class RichiesteController extends BaseController {
       $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/sede', $criteri['sede']);
       $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/classe', $criteri['classe']);
       $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/cognome', $criteri['cognome']);
+      $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/residenza', $criteri['residenza']);
       $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/nome', $criteri['nome']);
       $reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }

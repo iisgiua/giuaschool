@@ -63,14 +63,22 @@ class FiltroType extends AbstractType {
           'attr' => ['title' => 'label.classe'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false))
-        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+        ->add('residenza', TextType::class, array('label' => 'label.residenza',
           'data' => $options['values'][6],
-          'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome'],
+          'attr' => ['placeholder' => 'label.residenza', 'title' => 'label.residenza',
+            'style' => 'width:10em'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => false))
+        ->add('cognome', TextType::class, array('label' => 'label.cognome',
+          'data' => $options['values'][7],
+          'attr' => ['placeholder' => 'label.cognome', 'title' => 'label.cognome',
+            'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false))
         ->add('nome', TextType::class, array('label' => 'label.nome',
-          'data' => $options['values'][7],
-          'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome'],
+          'data' => $options['values'][8],
+          'attr' => ['placeholder' => 'label.nome', 'title' => 'label.nome',
+            'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false));
     }

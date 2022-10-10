@@ -101,16 +101,23 @@ class RichiestaRepository extends BaseRepository {
         ->andWhere('c.id=:classe')
         ->setParameter('classe', $criteri['classe']);
     }
+    // controllo residenza
+    if ($criteri['residenza']) {
+      // residenza definita
+      $richieste
+        ->andWhere('a.citta LIKE :citta')
+        ->setParameter('citta', $criteri['residenza'].'%');
+    }
     // controllo cognome
     if ($criteri['cognome']) {
-      // classe definita
+      // cognome definito
       $richieste
         ->andWhere('a.cognome LIKE :cognome')
         ->setParameter('cognome', $criteri['cognome'].'%');
     }
     // controllo nome
     if ($criteri['nome']) {
-      // classe definita
+      // nome definito
       $richieste
         ->andWhere('a.nome LIKE :nome')
         ->setParameter('nome', $criteri['nome'].'%');
