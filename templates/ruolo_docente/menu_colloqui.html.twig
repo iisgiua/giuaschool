@@ -1,6 +1,6 @@
 <nav class="gs-navbar-submenu">
   <ul class="nav nav-tabs">
-    <li role="presentation"{{ app.request.attributes.get('_route')[:16] == 'colloqui' ? ' class="active"' }}><a href="{{ path('colloqui') }}" title="Visualizza le richieste di colloquio">Richieste</a></li>
-    <li role="presentation"{{ app.request.attributes.get('_route')[:18] == 'colloqui_gestione' ? ' class="active"' }}><a href="{{ path('colloqui_gestione') }}" title="Inserisci i giorni per i colloqui">Gestione</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route') in ['colloqui_richieste', 'colloqui_conferma', 'colloqui_rifiuta', 'colloqui_modifica'] ? ' class="active"' }}><a href="{{ path('colloqui_richieste') }}" title="Visualizza le richieste di colloquio">Richieste</a></li>
+    <li role="presentation"{{ app.request.attributes.get('_route') in ['colloqui_gestione', 'colloqui_edit', 'colloqui_create'] ? ' class="active"' }}><a href="{{ path('colloqui_gestione') }}" title="Inserisci i giorni per i colloqui">Gestione</a></li>
   </ul>
 </nav>

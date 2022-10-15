@@ -50,21 +50,14 @@ class RichiestaColloquio {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var \DateTime|null $appuntamento Data e ora del colloquio
+   * @var \DateTime|null $appuntamento Ora di inizio del colloquio
    *
-   * @ORM\Column(type="datetime", nullable=false)
+   * @ORM\Column(type="time", nullable=false)
    *
    * @Assert\NotBlank(message="field.notblank")
    * @Assert\Type(type="\DateTime", message="field.type")
    */
   private ?\DateTime $appuntamento = null;
-
-  /**
-   * @var int $durata Durata del colloquio (in minuti)
-   *
-   * @ORM\Column(type="integer", nullable=false)
-   */
-  private int $durata = 0;
 
   /**
    * @var Colloquio|null $colloquio Colloquio richiesto
@@ -80,7 +73,9 @@ class RichiestaColloquio {
    * @var Alunno|null $alunno Alunno al quale si riferisce il colloquio
    *
    * @ORM\ManyToOne(targetEntity="Alunno")
-   * @ORM\JoinColumn(nullable=true)
+   * @ORM\JoinColumn(nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
    */
   private ?Alunno $alunno = null;
 
@@ -88,7 +83,9 @@ class RichiestaColloquio {
    * @var Genitore|null $genitore Genitore che effettua la richiesta del colloquio
    *
    * @ORM\ManyToOne(targetEntity="Genitore")
-   * @ORM\JoinColumn(nullable=true)
+   * @ORM\JoinColumn(nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
    */
   private ?Genitore $genitore = null;
 
@@ -101,11 +98,11 @@ class RichiestaColloquio {
   private ?Genitore $genitoreAnnulla = null;
 
   /**
-   * @var string|null $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente, X=data al completo]
+   * @var string|null $stato Stato della richiesta del colloquio [R=richiesto dal genitore, A=annullato dal genitore, C=confermato dal docente, N=negato dal docente]
    *
    * @ORM\Column(type="string", length=1, nullable=false)
    *
-   * @Assert\Choice(choices={"R","A","C","N","X"}, strict=true, message="field.choice")
+   * @Assert\Choice(choices={"R","A","C","N"}, strict=true, message="field.choice")
    */
   private ?string $stato = 'R';
 
@@ -171,44 +168,23 @@ class RichiestaColloquio {
   }
 
   /**
-   * Restituisce la data e l'ora del colloquio
+   * Restituisce l'ora di inizio del colloquio
    *
-   * @return \DateTime|null Data e ora del colloquio
+   * @return \DateTime|null Ora di inizio del colloquio
    */
   public function getAppuntamento(): ?\DateTime {
     return $this->appuntamento;
   }
 
   /**
-   * Modifica la data e l'ora del colloquio
+   * Modifica l'ora di inizio del colloquio
    *
-   * @param \DateTime $appuntamento Data e ora del colloquio
+   * @param \DateTime $appuntamento Ora di inizio del colloquio
    *
    * @return self Oggetto modificato
    */
   public function setAppuntamento(\DateTime $appuntamento): self {
     $this->appuntamento = $appuntamento;
-    return $this;
-  }
-
-  /**
-   * Restituisce la durata del colloquio (in minuti)
-   *
-   * @return int Durata del colloquio (in minuti)
-   */
-  public function getDurata(): int {
-    return $this->durata;
-  }
-
-  /**
-   * Modifica la data e l'ora del colloquio (in minuti)
-   *
-   * @param int $durata Durata del colloquio (in minuti)
-   *
-   * @return self Oggetto modificato
-   */
-  public function setDurata(int $durata): self {
-    $this->durata = $durata;
     return $this;
   }
 
@@ -347,7 +323,24 @@ class RichiestaColloquio {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->appuntamento->format('d/m/Y H:i').', '.$this->colloquio;
+    return $this->colloquio.', '.$this->appuntamento->format('H:i');
+  }
+
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'appuntamento' => $this->appuntamento->format('H:i'),
+      'colloquio' => $this->colloquio->getId(),
+      'alunno' => $this->alunno->getId(),
+      'genitore' => $this->genitore->getId(),
+      'genitoreAnnulla' => $this->genitoreAnnulla ? $this->genitoreAnnulla->getId() : '',
+      'stato' => $this->stato,
+      'messaggio' => $this->messaggio];
+    return $dati;
   }
 
 }

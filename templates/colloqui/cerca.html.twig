@@ -1,0 +1,41 @@
+{% extends 'ruolo_staff/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
+  {% include 'include/form-inline.html.twig' with {form: form[0], form_success: '', form_help: ''} %}
+  {% if dati|length == 0 %}
+  <div class="alert alert-info text-center gs-big">
+    <strong>Non sono presenti dati</strong>
+  </div>
+  {% else %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title text-center">
+        <strong>{{ dati[0].docente.cognome }} {{ dati[0].docente.nome }}</strong>
+      </h3>
+    </div>
+    <table class="table table-bordered table-hover">
+      <thead class="bg-info">
+        <tr>
+          <th class="col-sm-2">Ricevimento</th>
+          <th class="col-sm-2">Modalità</th>
+        </tr>
+      </thead>
+      <tbody>
+    {% for r in dati %}
+        <tr>
+          <td class="gs-big">
+            {{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}
+          </td>
+          <td class="gs-big">
+            {{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }}
+          </td>
+        </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

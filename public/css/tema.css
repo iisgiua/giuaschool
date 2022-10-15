@@ -466,6 +466,15 @@
   font-weight: bold !important;
 }
 
+.gs-em {
+  font-style: italic;
+}
+
+.gs-normal {
+  font-style: normal;
+  font-weight: normal;
+}
+
 
 /***** MODIFICHE A CLASSI ESISTENTI *****/
 

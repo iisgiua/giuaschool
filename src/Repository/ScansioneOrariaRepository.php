@@ -170,4 +170,27 @@ class ScansioneOrariaRepository extends EntityRepository {
     return $dati;
   }
 
+  /**
+   * Restituisce i dati della scansione oraria completa per una data sede.
+   *
+   * @param int $id Identificativo della sede
+   *
+   * @return array Dati formattati come array associativo
+   */
+  public function orarioSede(int $id): array {
+    $dati = [];
+    // legge le ore
+    $ore = $this->createQueryBuilder('so')
+      ->join('App\Entity\Orario', 'o', 'WITH', 'so.orario=o.id')
+      ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
+      ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $id])
+      ->getQuery()
+      ->getResult();
+    foreach ($ore as $so) {
+      $dati[$so->getGiorno()][$so->getOra()] = $so;
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }

@@ -1,0 +1,104 @@
+{% extends 'ruolo_genitore/index.html.twig' %}
+
+{% form_theme form[0] _self %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {{ form_start(form[0]) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading gs-mb-0">
+      <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
+    </div>
+    <div class="panel-body gs-pt-0">
+      <div class="row bg-success gs-mb-3 gs-pt-2 gs-pb-2">
+        <div class="col-sm-2 control-label gs-pt-0"><strong class="gs-big">Docente:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.docente }}</span></div>
+        <div class="col-sm-2 control-label gs-pt-0"><strong class="gs-big">Materia:</strong></div>
+        <div class="col-sm-4">
+          <span class="gs-big">
+  {% for m in info.materie %}
+          {{ loop.index > 1 ? '<br>'}}{{ m }}
+  {% endfor %}
+          </span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label required">Date disponibili</label>
+        <div class="col-sm-10">
+   {% if dati.validi|length > 0 %}
+          {{ form_widget(form[0].data, {dati: dati.validi}) }}
+   {% else %}
+          {{ form_widget(form[0].data, {attr: {class: 'hide'}}) }}
+          <div class="alert alert-warning text-center gs-big">
+            <strong>Non sono presenti date disponibili</strong>
+          </div>
+   {% endif %}
+        </div>
+      </div>
+  {% if dati.esauriti|length > 0 %}
+      <div class="row">
+        <div class="col-sm-2 control-label gs-pt-0"><strong>Date al completo</strong></div>
+        <div class="col-sm-10">
+          <ul class="list-unstyled">
+    {% for r in dati.esauriti %}
+            <li><em>{{ r.ricevimento.data|format_date('full')|title }} dalle {{ r.ricevimento.inizio|date('G:i')}} alle {{ r.ricevimento.fine|date('G:i')}}</em></li>
+    {% endfor %}
+          </ul>
+        </div>
+      </div>
+  {% endif %}
+  {% if dati.prossimi|length > 0 %}
+      <div class="row">
+        <div class="col-sm-2 control-label gs-pt-0"><strong>Prossime date</strong></div>
+        <div class="col-sm-10">
+          <ul class="list-unstyled">
+    {% for r in dati.prossimi %}
+            <li><em>{{ r.ricevimento.data|format_date('full')|title }} dalle {{ r.ricevimento.inizio|date('G:i')}} alle {{ r.ricevimento.fine|date('G:i')}}</em></li>
+    {% endfor %}
+          </ul>
+        </div>
+      </div>
+  {% endif %}
+    </div>
+    <div class="panel-footer text-center">
+  {% if dati.validi|length > 0 %}
+      <button type="submit" id="prenotazione_submit" name="prenotazione[submit]" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+  {% endif %}
+      <button type="button" id="prenotazione_cancel" name="prenotazione[cancel]" class="btn btn-default" onClick="location.href='{{ path('colloqui_genitori') }}'"><strong>{{ 'label.cancel'|trans }}</strong></button>
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('.radio label').removeClass('required');
+  $('label input[name="prenotazione[data]"]').change(function() {
+    $('label input[name="prenotazione[data]"]:not(:checked)').parent().attr('style', 'font-weight:normal');
+    $('label input[name="prenotazione[data]"]:checked').parent().attr('style', 'font-weight:bold');
+  }).change();
+});
+</script>
+{% endblock %}
+
+{% block _prenotazione_data_widget %}
+<div id="prenotazione_data">
+  {% for item in choices %}
+  <div class="radio">
+    <label for="prenotazione_data_{{ loop.index0 }}" class="" style="font-weight:normal">
+      <input type="radio" id="prenotazione_data_{{ loop.index0 }}" name="prenotazione[data]" required="required" value="{{ item.value }}"> {{ item.label }}
+    {% if dati[item.value].ricevimento.tipo == 'P' %}
+        <br>Modalità: IN PRESENZA - {{ dati[item.value].ricevimento.luogo }}
+    {% else %}
+        <br>Modalità: A DISTANZA - {{ dati[item.value].ricevimento.luogo }}
+    {% endif %}
+    </label>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

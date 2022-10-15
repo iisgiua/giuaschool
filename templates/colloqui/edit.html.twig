@@ -1,0 +1,127 @@
+{% extends 'colloqui/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {{ form_start(form[0]) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading gs-mb-3">
+      <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-sm-6">
+          {{ form_row(form[0].tipo) }}
+        </div>
+        <div class="col-sm-6">
+          {{ form_row(form[0].data) }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          {{ form_row(form[0].inizio) }}
+        </div>
+        <div class="col-sm-6">
+          {{ form_row(form[0].fine) }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          {{ form_row(form[0].durata) }}
+        </div>
+        <div id="gs-sede" class="col-sm-6">
+          {{ form_row(form[0].sede) }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label id="gs-luogo" class="col-sm-1 control-label required" for="colloquio_luogo">Luogo</label>
+            <div class="col-sm-11">
+              {{ form_widget(form[0].luogo) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer text-center">
+      <button type="submit" id="colloquio_submit" name="colloquio[submit]" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+      <button type="button" id="colloquio_cancel" name="colloquio[cancel]" class="btn btn-default" onClick="location.href='{{ path('colloqui_gestione') }}'"><strong>{{ 'label.cancel'|trans }}</strong></button>
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
+</div>
+{% endblock %}
+
+{% block pagina_css %}
+{{ parent() }}
+<link href="{{ asset('vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.date').datepicker({
+    format: "dd/mm/yyyy",
+    weekStart: 1,
+    maxViewMode: 1,
+    daysOfWeekDisabled: "0",
+    startDate: "{{ info.inizio }}",
+    endDate: "{{ info.fine }}",
+    datesDisabled: {{ info.festivi|raw }},
+    todayBtn: "linked",
+    todayHighlight: true,
+    autoclose: true,
+    language: "it",
+    zIndexOffset: 1200
+  });
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12 ,13, 14, 15, 16, 17, 18, 19, 20],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+  });
+  $('#colloquio_tipo').change(function() {
+    if ($(this).val() == 'P') {
+      $('#gs-sede').show();
+      $('#gs-luogo').text('Luogo');
+      $('#colloquio_luogo').val('');
+      $('#colloquio_sede').change();
+    } else {
+      $('#gs-sede').hide();
+      $('#gs-luogo').text('Link');
+      $('#colloquio_luogo').val('https://meet.google.com/');
+    }
+  });
+  $('#colloquio_sede').change(function() {
+    var s = $('#colloquio_sede :selected').text();
+    if (s != '') {
+      $('#colloquio_luogo').val('Sede di '+s);
+    }
+  });
+  // init
+  if ($('#colloquio_tipo').val() == 'D') {
+    $('#gs-sede').hide();
+    $('#gs-luogo').text('Link');
+  } else if ($('#colloquio_luogo').val() == '') {
+    $('#colloquio_sede').change();
+  }
+});
+</script>
+{% endblock %}

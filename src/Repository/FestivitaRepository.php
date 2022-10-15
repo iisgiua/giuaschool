@@ -26,35 +26,37 @@ class FestivitaRepository extends BaseRepository {
 
   /**
    * Indica se il giorno indicato è festivo (per tutta la scuola).
-   * Include anche il periodo precedente all'inizio o successivo alla fine dell'anno scolastico.
-   * Non sono indicati come festivi i riposi settimanali (domenica ed eventuali altri) indicati dai
-   * parametro di sistema.
+   * Include come festivo anche il periodo precedente all'inizio o successivo alla fine dell'anno scolastico.
+   * Sono indicati come festivi i riposi settimanali (domenica ed eventuali altri) configurati nei parametri.
    *
    * @param DateTime $data Giorno da controllare
-   * @param boolean $festivo Vero per controllare solo i festivi (no assemblee), falso altrimenti
    *
    * @return bool Vero il giorno è festivo, falso altrimenti
    */
-  public function giornoFestivo(\DateTime $data, $festivo = false) {
+  public function giornoFestivo(\DateTime $data) {
     // controlla festività su tutta la scuola
+    $festivo = $this->createQueryBuilder('f')
+      ->select('COUNT(f.id)')
+      ->where('f.data=:data AND f.tipo=:festivo AND f.sede IS NULL')
+      ->setParameters(['data' => $data, 'festivo' => 'F'])
+      ->getQuery()
+      ->getSingleScalarResult();
     if ($festivo) {
-      // controlla solo i giorni festivi
-      $cond = array('data' => $data, 'sede' => null, 'tipo' => 'F');
-    } else {
-      // controlla tutti i giorni presenti
-      $cond = array('data' => $data, 'sede' => null);
+      // giorno festivo
+      return true;
     }
-    if (count($this->findBy($cond))) {
+    // controlla giorni festivi settimanali
+    $giorni = explode(',',
+      $this->_em->getRepository('App\Entity\Configurazione')->getParametro('giorni_festivi_istituto', '0'));
+    if (in_array($data->format('w'), $giorni, true)) {
       // giorno festivo
       return true;
     }
     // controlla se la data è al di fuori dell'anno scolastico
-    $inizio_conf = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_inizio');
-    $inizio = ($inizio_conf === null ? '0000-00-00' : $inizio_conf->getValore());
-    $fine_conf = $this->_em->getRepository('App\Entity\Configurazione')->findOneByParametro('anno_fine');
-    $fine = ($fine_conf === null ? '0000-00-00' : $fine_conf->getValore());
-    $data_str = $data->format('Y-m-d');
-    if ($data_str < $inizio || $data_str > $fine) {
+    $inizio = $this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_inizio', '0000-00-00');
+    $fine = $this->_em->getRepository('App\Entity\Configurazione')->getParametro('anno_fine', '9999-99-99');
+    $dataStr = $data->format('Y-m-d');
+    if ($dataStr < $inizio || $dataStr > $fine) {
       // giorno festivo
       return true;
     }

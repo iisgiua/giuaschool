@@ -8,28 +8,21 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use Symfony\Component\Form\FormError;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Colloquio;
 use App\Entity\RichiestaColloquio;
-use App\Entity\ScansioneOraria;
-use App\Util\RegistroUtil;
-use App\Util\LogHandler;
 use App\Form\ColloquioType;
+use App\Form\FiltroType;
+use App\Form\PrenotazioneType;
+use App\Form\RichiestaColloquioType;
+use App\Util\ColloquiUtil;
+use App\Util\LogHandler;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -37,167 +30,221 @@ use App\Form\ColloquioType;
  *
  * @author Antonello Dessì
  */
-class ColloquiController extends AbstractController {
+class ColloquiController extends BaseController {
 
   /**
    * Visualizza le richieste di colloquio
    *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui", name="colloqui",
+   * @Route("/colloqui/richieste", name="colloqui_richieste",
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function colloquiAction(EntityManagerInterface $em, RequestStack $reqstack) {
-    // inizializza variabili
-    $errore = null;
-    $dati = null;
-    $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+  public function richiesteAction(): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
     // controllo fine colloqui
-    $fine = \DateTime::createFromFormat('Y-m-d H:i:s', $reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
-    $fine->modify('-30 days');    // controllo fine
     $oggi = new \DateTime('today');
+    $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
+    $fine->modify('-30 days');
     if ($oggi > $fine) {
       // visualizza errore
-      $errore = 'exception.colloqui_sospesi';
+      $info['errore'] = 'exception.colloqui_sospesi';
     } else {
-      // legge richieste
-      $dati['richieste'] = $em->getRepository('App\Entity\RichiestaColloquio')->colloquiDocente($this->getUser());
-      $dati['ore'] = $em->getRepository('App\Entity\Colloquio')->oreNoSede($this->getUser());
-      $dati['appuntamenti'] = $em->getRepository('App\Entity\RichiestaColloquio')->infoAppuntamenti($this->getUser());
+      // richieste valide
+      $dati = $this->em->getRepository('App\Entity\Colloquio')->richiesteValide($this->getUser());
     }
-    // visualizza pagina
-    return $this->render('colloqui/colloqui.html.twig', array(
-      'pagina_titolo' => 'page.docenti_colloqui',
-      'errore' => $errore,
-      'dati' => $dati,
-      'settimana' => $settimana,
-      'mesi' => $mesi,
-    ));
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'richieste', $dati, $info);
   }
 
   /**
-   * Risponde ad una richiesta di colloquio
-   *
-   * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param LogHandler $dblogger Gestore dei log su database
-   * @param RichiestaColloquio $richiesta Richiesta di colloquio da modificare
-   * @param string $azione Tipo di modifica da effettuare
+   * Visualizza le vecchie richieste di colloquio ricevute dal docente
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/edit/{richiesta}/{azione}", name="colloqui_edit",
-   *    requirements={"richiesta": "\d+", "azione": "C|N|X"},
+   * @Route("/colloqui/storico", name="colloqui_storico",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function storicoAction(): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // storico richieste
+    $dati['storico'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->storico($this->getUser());
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'storico', $dati, $info);
+  }
+
+  /**
+   * Conferma una prenotazione per il colloquio
+   *
+   * @param Request $request Pagina richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Identificativo della richiesta di colloquio
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/conferma/{id}", name="colloqui_conferma",
+   *    requirements={"id": "\d+"},
    *    methods={"GET","POST"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function colloquiEditAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                     LogHandler $dblogger, RichiestaColloquio $richiesta, $azione) {
-    // inizializza variabili
-    $label = array();
+  public function confermaAction(Request $request, LogHandler $dblogger, int $id): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
     // controlla richiesta
-    $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->find($richiesta);
-    if (empty($richiesta)) {
+    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
+        !$richiesta->getColloquio()->getAbilitato() || $richiesta->getStato() != 'R') {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    $richiesta_old = array($richiesta->getStato(), $richiesta->getMessaggio());
-    $colloquio = $richiesta->getColloquio();
-    if ($colloquio->getDocente() != $this->getUser()) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // info
-    $label['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome();
-    $label['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
-    $label['data'] = $richiesta->getAppuntamento()->format('d/m/Y');
-    $label['ora_inizio'] = $richiesta->getAppuntamento()->format('G:i');
-    $ora = clone $richiesta->getAppuntamento();
-    $label['ora_fine'] = $ora->modify('+'.$richiesta->getDurata().' minutes')->format('G:i');
-    // azione
-    if ($azione == 'C') {
-      // conferma colloquio
-      $msg_required = true;
-      $stato_disabled = true;
-      $msg = 'L\'appuntamento è alle ore XX:XX; il colloquio avrà la durata di circa 10 minuti, in modo da consentire l\'incontro con diversi genitori.';
-      $stato = 'C';
-    } elseif ($azione == 'N') {
-      // rifiuta colloquio
-      $msg_required = true;
-      $stato_disabled = true;
-      $msg = '';
-      $stato = 'N';
-    } else {
-      // modifica risposta
-      $msg_required = true;
-      $stato_disabled = false;
-      $msg = $richiesta->getMessaggio();
-      $stato = $richiesta->getStato();
-    }
+    // salva vecchia richiesta
+    $vecchiaRichiesta = clone $richiesta;
+    // informazioni per la visualizzazione
+    $info['data'] = $richiesta->getColloquio()->getData();
+    $info['tipo'] = $richiesta->getColloquio()->getTipo();
+    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
+    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
+      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
     // form di inserimento
-    $form = $this->container->get('form.factory')->createNamedBuilder('colloqui_edit', FormType::class)
-      ->add('stato', ChoiceType::class, array('label' => 'label.stato_colloquio',
-        'data' => $stato,
-        'choices'  => ['label.stato_colloquio_C' => 'C', 'label.stato_colloquio_N' => 'N'],
-        'required' => true,
-        'disabled' => $stato_disabled))
-      ->add('messaggio', TextType::class, array(
-        'data' => $msg,
-        'label' => 'label.messaggio_colloquio',
-        'trim' => true,
-        'required' => $msg_required))
-      ->add('submit', SubmitType::class, array('label' => 'label.submit',
-        'attr' => ['widget' => 'gs-button-start']))
-      ->add('cancel', ButtonType::class, array('label' => 'label.cancel',
-        'attr' => ['widget' => 'gs-button-end',
-        'onclick' => "location.href='".$this->generateUrl('colloqui')."'"]))
-      ->getForm();
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'conferma']);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      if (strstr($form->get('messaggio')->getData(), 'XX:XX') !== FALSE) {
-        // errore nel messaggio
-        $form->addError(new FormError($trans->trans('exception.colloquio_ora_invalida')));
+      // modifica stato
+      $richiesta->setStato('C');
+      // ok: memorizzazione e log
+      $dblogger->logModifica('COLLOQUI', 'Conferma richiesta', $vecchiaRichiesta, $richiesta);
+      // redirezione
+      return $this->redirectToRoute('colloqui_richieste');
+    }
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'conferma', $dati, $info, [$form->createView(), 'message.conferma_colloquio']);
+  }
+
+  /**
+   * Rifiuta una richiesta di prenotazione per il colloquio
+   *
+   * @param Request $request Pagina richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id Identificativo della richiesta di colloquio
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/rifiuta/{id}", name="colloqui_rifiuta",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function rifiutaAction(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
+                                int $id): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla richiesta
+    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
+        !$richiesta->getColloquio()->getAbilitato() || $richiesta->getStato() != 'R') {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // salva vecchia richiesta
+    $vecchiaRichiesta = clone $richiesta;
+    // informazioni per la visualizzazione
+    $info['data'] = $richiesta->getColloquio()->getData();
+    $info['tipo'] = $richiesta->getColloquio()->getTipo();
+    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
+    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
+      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    // form di inserimento
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'rifiuta']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      if (empty($richiesta->getMessaggio())) {
+        // errore: messaggio vuoto
+        $form->addError(new FormError($trans->trans('exception.colloquio_no_messaggio')));
       } else {
-        // tutto ok
-        $richiesta
-          ->setStato($form->get('stato')->getData())
-          ->setMessaggio($form->get('messaggio')->getData());
-        // memorizza dati
-        $em->flush();
-        // log azione
-        $dblogger->logAzione('COLLOQUI', 'Risposta a richiesta', array(
-          'RichiestaColloquio' => $richiesta->getId(),
-          'Stato' => $richiesta_old[0],
-          'Messaggio' => $richiesta_old[1]));
+        // modifica stato
+        $richiesta->setStato('N');
+        // ok: memorizzazione e log
+        $dblogger->logModifica('COLLOQUI', 'Rifiuta richiesta', $vecchiaRichiesta, $richiesta);
         // redirezione
-        return $this->redirectToRoute('colloqui');
+        return $this->redirectToRoute('colloqui_richieste');
       }
     }
-    // mostra la pagina di risposta
-    return $this->render('colloqui/colloqui_edit.html.twig', array(
-      'pagina_titolo' => 'page.colloqui_edit',
-      'form' => $form->createView(),
-      'form_title' => 'title.risposta_colloqui',
-      'label' => $label,
-    ));
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'rifiuta', $dati, $info, [$form->createView(), 'message.rifiuta_colloquio']);
+  }
+
+  /**
+   * Modifica la risposta ad una richiesta di prenotazione per il colloquio
+   *
+   * @param Request $request Pagina richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $id Identificativo della richiesta di colloquio
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/modifica/{id}", name="colloqui_modifica",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function modificaAction(Request $request, LogHandler $dblogger, TranslatorInterface $trans,
+                                 int $id): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla richiesta
+    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->find($id);
+    if (!$richiesta || $richiesta->getColloquio()->getDocente()->getId() != $this->getUser()->getId() ||
+        !$richiesta->getColloquio()->getAbilitato() || !in_array($richiesta->getStato(), ['C', 'N'], true)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // salva vecchia richiesta
+    $vecchiaRichiesta = clone $richiesta;
+    // informazioni per la visualizzazione
+    $info['data'] = $richiesta->getColloquio()->getData();
+    $info['tipo'] = $richiesta->getColloquio()->getTipo();
+    $info['classe'] = $richiesta->getAlunno()->getClasse()->getAnno().'ª '.$richiesta->getAlunno()->getClasse()->getSezione();
+    $info['alunno'] = $richiesta->getAlunno()->getCognome().' '.$richiesta->getAlunno()->getNome().' ('.
+      $richiesta->getAlunno()->getDataNascita()->format('d/m/Y').')';
+    // form di inserimento
+    $form = $this->createForm(RichiestaColloquioType::class, $richiesta, ['formMode' => 'modifica']);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      if (empty($richiesta->getMessaggio())) {
+        // errore: messaggio vuoto
+        $form->addError(new FormError($trans->trans('exception.colloquio_no_messaggio')));
+      } else {
+        // ok: memorizzazione e log
+        $dblogger->logModifica('COLLOQUI', 'Modifica richiesta', $vecchiaRichiesta, $richiesta);
+        // redirezione
+        return $this->redirectToRoute('colloqui_richieste');
+      }
+    }
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'modifica', $dati, $info, [$form->createView(), 'message.modifica_colloquio']);
   }
 
   /**
    * Gestione dell'inserimento dei giorni di colloquio
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RegistroUtil $reg Funzioni di utilità per il registro
-   * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
    *
@@ -206,167 +253,455 @@ class ColloquiController extends AbstractController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function gestioneAction(Request $request, EntityManagerInterface $em, TranslatorInterface $trans,
-                                 RegistroUtil $reg, LogHandler $dblogger) {
-    $docente = $this->getUser();
-    // determina operazione da eseguire
-    $colloquio = $em->getRepository('App\Entity\Colloquio')->findOneByDocente($docente);
-    if ($colloquio) {
-      // modalità modifica
-      $edit = true;
-      $codice = $colloquio->getDato('codice');
-      $old_colloquio = clone $colloquio;
-    } else {
-      // modalità inserimento
-      $edit = false;
-      $codice = 'aula-'.str_replace([' ', '\'', 'à', 'è', 'é', 'ì', 'ò', 'ù'], ['', '', 'a', 'e', 'e', 'i', 'o', 'u'],
-        mb_strtolower($docente->getCognome())).'-'.mb_strtolower(substr($docente->getNome(), 0, 1));
-      $colloquio = (new Colloquio())
-        ->addDato('codice', $codice)
-        ->setFrequenza('4')
-        ->setGiorno(1)
-        ->setOra(1)
-        ->setDocente($docente);
-      $em->persist($colloquio);
-    }
-    // determina lista orari
-    $ore = $em->getRepository('App\Entity\ScansioneOraria')->orarioGiorno($colloquio->getGiorno(), $colloquio->getOrario());
-    $lista_ore = array();
-    foreach ($ore as $o) {
-      $opzione = $o['ora'].': '.$o['inizio']->format('H:i').' - '.$o['fine']->format('H:i');
-      $lista_ore[$opzione] = $o['ora'];
-    }
-    // determina lista ore aggiuntive
-    $lista_aggiuntiva = array();
-    $oggi = new \DateTime('today');
-    foreach ($colloquio->getExtra() as $k=>$o) {
-      if (substr($k, 0, 4) == 'date') {
-        $dt = \DateTime::createFromFormat('d/m/Y H:i', $o.' 00:00');
-        if ($dt >= $oggi) {
-          $kt = 'time'.substr($k, 4);
-          $lista_aggiuntiva[$k] = $o;
-          $lista_aggiuntiva[$kt] = $colloquio->getExtra()[$kt];
-        }
-      }
-    }
-    // form di inserimento
-    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'noSede',
-      'returnUrl' => $this->generateUrl('colloqui'), 'dati' => [$codice, $lista_ore, $lista_aggiuntiva]]);
-    $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // controlla date aggiuntive
-      $lista_date = array();
-      $dt = '';
-      foreach ($form->get('extra')->getData() as $k=>$v) {
-        if (substr($k, 0, 4) == 'date') {
-          $dt = $v;
-        } else {
-          $dt_obj = \DateTime::createFromFormat('d/m/Y H:i', $dt.' '.$v);
-          if ($dt_obj) {
-            // data corretta
-            $lista_date[$dt_obj->format('YmdHi')] = array($dt, $v, $dt_obj);
-          }
-          $dt = '';
-        }
-      }
-      // ordina date
-      ksort($lista_date);
-      // controlla festivi
-      $date_aggiuntive = array();
-      $n = 0;
-      foreach ($lista_date as $v) {
-        $errore = $reg->controlloData($v[2], null);
-        if ($errore) {
-          // errore: festivo
-          $form->addError(new FormError($trans->trans('exception.data_festiva')));
-          break;
-        }
-        $date_aggiuntive['date'.$n] = $v[0];
-        $date_aggiuntive['time'.$n] = $v[1];
-        $n++;
-      }
-      if ($form->isValid()) {
-        // ok: memorizza dati
-        $colloquio->setExtra($date_aggiuntive);
-        $colloquio->addDato('codice', $form->get('codice')->getData());
-        $em->flush();
-        // log azione
-        if ($edit) {
-          // azione modifica
-          $dblogger->logAzione('COLLOQUI', 'Modifica colloquio', array(
-            'Colloquio' => $colloquio->getId(),
-            'Frequenza' => $old_colloquio->getFrequenza(),
-            'Giorno' => $old_colloquio->getGiorno(),
-            'Ora' => $old_colloquio->getOra(),
-            'Extra' => $colloquio->getExtra(),
-            'Dati' => $colloquio->getDati(),
-            'Note' => $old_colloquio->getNote()));
-        } else {
-          // azione inserimento
-          $dblogger->logAzione('COLLOQUI', 'Inserimento colloquio', array(
-            'Colloquio' => $colloquio->getId()));
-        }
-        // redirezione
-        return $this->redirectToRoute('colloqui');
-      }
-    }
-    // mostra la pagina di risposta
-    return $this->render('colloqui/gestione.html.twig', array(
-      'pagina_titolo' => 'page.gestione_colloqui',
-      'form' => $form->createView(),
-      'form_title' => 'title.gestione_colloqui',
-    ));
+  public function gestioneAction(): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
+    // legge dati
+    $dati = $this->em->getRepository('App\Entity\Colloquio')->ricevimenti($this->getUser(), $inizio);
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'gestione', $dati, $info);
   }
 
   /**
-   * Blocca/sblocca le richieste di colloauo segnalando che non ci sono/ci sono posti disponibili
+   * Crea o modifica i dati per un ricevimento del docente
    *
    * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
+   * @param ColloquiUtil $col Funzioni di utilità per i colloqui
+   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param LogHandler $dblogger Gestore dei log su database
-   * @param string $appuntamento Data e ora dell'appuntamento da bloccare/sbloccare
-   * @param boolean $blocca Vero per bloccare le richieste di colloquio, falso altrimenti
+   * @param int $id Identificativo del ricevimento esistente
    *
    * @return Response Pagina di risposta
    *
-   * @Route("/colloqui/blocca/{colloquio}/{appuntamento}/{blocca}", name="colloqui_blocca",
-   *    requirements={"appuntamento": "\d+-\d+-\d+-\d+-\d+", "blocca": "0|1"},
+   * @Route("/colloqui/edit/{id}", name="colloqui_edit",
+   *    requirements={"id": "\d+"},
+   *    defaults={"id": "0"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function editAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
+                             LogHandler $dblogger, int $id): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla azione
+    if ($id > 0) {
+      // azione edit
+      $oggi = new \DateTime('today');
+      $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['id' => $id,
+        'docente' => $this->getUser()]);
+      if (!$colloquio || $colloquio->getData() < $oggi) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $vecchioColloquio = clone $colloquio;
+    } else {
+      // azione add
+      $colloquio = (new Colloquio())
+        ->setDocente($this->getUser())
+        ->setData(new \DateTime('today'))
+        ->setInizio(new \DateTime('08:30'))
+        ->setFine(new \DateTime('09:30'));
+      $this->em->persist($colloquio);
+    }
+    // informazioni per la visualizzazione
+    $inizio = \DateTime::createFromFormat('Y-m-d',
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
+    $oggi = new \DateTime('today');
+    $info['inizio'] = $inizio > $oggi ? $inizio->format('d/m/Y') : $oggi->format('d/m/Y');
+    $fine = \DateTime::createFromFormat('Y-m-d H:i:s',
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00:00');
+    $info['fine'] = $fine->modify('-30 days')->format('d/m/Y');
+    $info['festivi'] = $this->em->getRepository('App\Entity\Festivita')->listaFestivi();
+    // lista sedi
+    $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
+    // form di inserimento
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'singolo',
+      'values' => [$listaSedi]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // controlla data
+      $data = $form->get('data')->getData();
+      if ($this->em->getRepository('App\Entity\Festivita')->giornoFestivo($data) || $data < $oggi ||
+          $data > $fine) {
+        // errore: data non valida
+        $form->addError(new FormError($trans->trans('exception.colloquio_data_invalida')));
+      }
+      // controlla se esite già
+      if ($this->em->getRepository('App\Entity\Colloquio')->sovrapposizione($this->getUser(), $data,
+          $form->get('inizio')->getData(), $form->get('fine')->getData(), $id)) {
+        // errore: sovrapposizione
+        $form->addError(new FormError($trans->trans('exception.colloquio_duplicato')));
+      }
+      // controlla link
+      if ($colloquio->getTipo() == 'D') {
+        $link = $colloquio->getLuogo();
+        if (substr($link, 0, 8) != 'https://' || $link == 'https://meet.google.com/' ||
+            $link == 'https://meet.google.com') {
+          // errore: link non valido
+          $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
+        }
+      }
+      if ($form->isValid()) {
+        // clcola numero colloqui
+        $colloquio->setNumero($col->numeroColloqui($colloquio));
+        // ok: memorizzazione e log
+        if ($id) {
+          $dblogger->logModifica('COLLOQUI', 'Modifica ricevimento', $vecchioColloquio, $colloquio);
+        } else {
+          $dblogger->logCreazione('COLLOQUI', 'Aggiunge ricevimento', $colloquio);
+        }
+        // redirezione
+        return $this->redirectToRoute('colloqui_gestione');
+      }
+    }
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'edit', $dati, $info, [$form->createView(),
+      'message.edit_ricevimento_singolo']);
+  }
+
+  /**
+   * Cancella i dati per un ricevimento del docente.
+   *
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Ricevimento da cancellare
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/enable/{id}/{stato}", name="colloqui_enable",
+   *    requirements={"id": "\d+", "stato": "0|1"},
    *    methods={"GET"})
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function bloccaAction(Request $request, EntityManagerInterface $em, LogHandler $dblogger,
-                               Colloquio $colloquio, $appuntamento, $blocca) {
+  public function enableAction(LogHandler $dblogger, int $id, int $stato): Response {
+    // controlla colloquio
+    $oggi = new \DateTime('today');
+    $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['id' => $id,
+      'docente' => $this->getUser()]);
+    if (!$colloquio || $colloquio->getData() < $oggi) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla se presenti richieste
+    if ($this->em->getRepository('App\Entity\Colloquio')->numeroRichieste($colloquio) > 0) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // copia per log
+    $vecchioColloquio = clone $colloquio;
+    // abilita/disabilita colloquio
+    $colloquio->setAbilitato($stato);
+    // memorizzazione e log
+    $dblogger->logModifica('COLLOQUI', 'Abilita/Disabilita ricevimento', $vecchioColloquio, $colloquio);
+    // redirezione
+    return $this->redirectToRoute('colloqui_gestione');
+  }
+
+  /**
+   * Crea più ricevimenti periodici del docente
+   *
+   * @param Request $request Pagina richiesta
+   * @param ColloquiUtil $col Funzioni di utilità per i colloqui
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/create", name="colloqui_create",
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function createAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
+                               LogHandler $dblogger): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // imposta colloquio fittizio
+    $colloquio = (new Colloquio())
+      ->setDocente($this->getUser())
+      ->setData(new \DateTime('today'))
+      ->setInizio(new \DateTime('08:30'))
+      ->setFine(new \DateTime('09:30'))
+      ->setDurata(10);
+    // lista sedi
+    $listaSedi = $this->em->getRepository('App\Entity\Docente')->sedi($this->getUser());
+    if (isset($listaSedi[''])) {
+      // elimina opzione vuota
+      unset($listaSedi['']);
+    }
+    // informazioni per la visualizzazione
+    $sedePredefinita = null;
+    foreach ($listaSedi as $idSede) {
+      $info['orario'][$idSede] = $this->em->getRepository('App\Entity\ScansioneOraria')->orarioSede($idSede);
+    }
+    $listaOre = [];
+    for ($i = 1; $i <= 10; $i++) {
+      $listaOre[$i] = $i;
+    }
+    // form di inserimento
+    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'periodico',
+      'values' => [$listaSedi, $listaOre]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // legge dati
+      $tipo = $form->get('tipo')->getData();
+      $frequenza = $form->get('frequenza')->getData();
+      $durata = $form->get('durata')->getData();
+      $sede = $form->get('sede')->getData();
+      $giorno = $form->get('giorno')->getData();
+      $ora = $form->get('ora')->getData();
+      $luogo = $form->get('luogo')->getData();
+      $inizio = $info['orario'][$sede][$giorno][$ora]->getInizio();
+      $fine = $info['orario'][$sede][$giorno][$ora]->getFine();
+      // controlla link
+      if ($form->get('tipo')->getData() == 'D') {
+        if (substr($luogo, 0, 8) != 'https://' || $luogo == 'https://meet.google.com/' ||
+            $luogo == 'https://meet.google.com') {
+          // errore: link non valido
+          $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
+        }
+      }
+      if ($form->isValid()) {
+        // genera date
+        $errore = $col->generaDate($this->getUser(), $tipo, $frequenza, $durata, $giorno, $inizio, $fine, $luogo);
+        if (!empty($errore)) {
+          // errore: colloqui sospesi
+          $form->addError(new FormError($trans->trans($errore)));
+        } else {
+          // redirezione
+          return $this->redirectToRoute('colloqui_gestione');
+        }
+      }
+    }
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'create', $dati, $info, [$form->createView(),
+      'message.create_ricevimento_periodico']);
+  }
+
+  /**
+   * Mostra le date di ricevimento dei docenti ai genitori.
+   *
+   * @param ColloquiUtil $col Funzioni di utilità per i colloqui
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/genitori", name="colloqui_genitori",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_GENITORE")
+   */
+  public function genitoriAction(ColloquiUtil $col, TranslatorInterface $trans): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla alunno
+    $alunno = $this->getUser()->getAlunno();
+    if (!$alunno || !$alunno->getAbilitato()) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla classe
+    $classe = $alunno->getClasse();
+    if ($classe) {
+      // recupera dati
+      $dati = $col->colloquiGenitori($classe, $alunno);
+    } else {
+      // nessuna classe
+      $info['errore'] = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);
+    }
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'genitori', $dati, $info);
+  }
+
+  /**
+   * Invia la disdetta del genitore alla richiesta di colloquio.
+   *
+   * @param Request $request Pagina richiesta
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/disdetta/{id}", name="colloqui_disdetta")
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_GENITORE")
+   */
+  public function disdettaAction(Request $request, LogHandler $dblogger, int $id): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla alunno
+    $alunno = $this->getUser()->getAlunno();
+    if (!$alunno || !$alunno->getAbilitato()) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla classe
+    $classe = $alunno->getClasse();
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controlla richiesta
-    $data = \DateTime::createFromFormat('Y-m-d-G-i', $appuntamento);
-    $richiesta = $em->getRepository('App\Entity\RichiestaColloquio')->findOneBy(['colloquio' => $colloquio,
-      'appuntamento' => $data, 'stato' => ($blocca ? 'C' : 'X')]);
+    $richiesta = $this->em->getRepository('App\Entity\RichiestaColloquio')->findOneBy(['id' => $id,
+      'alunno' => $alunno, 'stato' => ['R', 'C']]);
     if (!$richiesta) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    if ($blocca) {
-      // aggiunge blocco
-      $richiesta = (new RichiestaColloquio())
-        ->setColloquio($colloquio)
-        ->setAppuntamento($richiesta->getAppuntamento())
-        ->setDurata($richiesta->getDurata())
-        ->setStato('X');
-      $em->persist($richiesta);
-    } else {
-      // rimuove blocco
-      $em->remove($richiesta);
-    }
-    // memorizza modifica
-    $em->flush();
-    // log azione
-    $dblogger->logAzione('COLLOQUI', 'Blocca richieste', array(
-      'Colloquio' => $richiesta->getColloquio()->getId(),
-      'Appuntamento' => $richiesta->getAppuntamento()->format('d/m/Y G:i'),
-      'Durata' => $richiesta->getDurata(),
-      'Blocca' => $blocca));
+    // annulla richiesta
+    $vecchiaRichiesta = clone $richiesta;
+    $richiesta
+      ->setStato('A')
+      ->setMessaggio('')
+      ->setGenitoreAnnulla($this->getUser());
+    // ok: memorizzazione e log
+    $dblogger->logModifica('COLLOQUI', 'Disdetta prenotazione', $vecchiaRichiesta, $richiesta);
     // redirezione
-    return $this->redirectToRoute('colloqui');
+    return $this->redirectToRoute('colloqui_genitori');
+  }
+
+  /**
+   * Invia la prenotazione per il colloquio con un docente.
+   *
+   * @param Request $request Pagina richiesta
+   * @param ColloquiUtil $col Funzioni di utilità per i colloqui
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param LogHandler $dblogger Gestore dei log su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/prenota/{docente}", name="colloqui_prenota")
+   *    requirements={"docente": "\d+"},
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_GENITORE")
+   */
+  public function prenotaAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
+                                LogHandler $dblogger, int $docente): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // controlla docente
+    $docente = $this->em->getRepository('App\Entity\Docente')->findOneBy(['id' => $docente, 'abilitato' => 1]);
+    if (!$docente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla alunno
+    $alunno = $this->getUser()->getAlunno();
+    if (!$alunno || !$alunno->getAbilitato()) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controlla classe
+    $classe = $alunno->getClasse();
+    if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // lista date
+    $dati = $col->dateRicevimento($docente);
+    // informazioni per la visualizzazione
+    $info['docente'] = "".$docente;
+    $cattedre = $this->em->getRepository('App\Entity\Cattedra')->cattedreDocente($docente, 'Q');
+    $info['materie'] = [];
+    foreach ($cattedre as $cattedra) {
+      if ($cattedra->getClasse() == $classe) {
+        $info['materie'][] = $cattedra->getMateria()->getNome();
+      }
+    }
+    // form di inserimento
+    $form = $this->createForm(PrenotazioneType::class, null, ['formMode' => 'prenotazione',
+      'values' => [$dati['lista']]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      $colloquioId = $form->get('data')->getData();
+      // controlla duplicati
+      $prenotazione = $this->em->getRepository('App\Entity\RichiestaColloquio')->findOneBy([
+        'colloquio' => $colloquioId, 'alunno' => $alunno, 'stato' => ['R', 'C']]);
+      if (!empty($prenotazione)) {
+        // esiste già richiesta
+        $form->addError(new FormError($trans->trans('exception.colloqui_esiste')));
+      } else {
+        // nuova richiesta
+        $appuntamento = $this->em->getRepository('App\Entity\Colloquio')->
+          nuovoAppuntamento($dati['validi'][$colloquioId]['ricevimento']);
+        $richiesta = (new RichiestaColloquio)
+          ->setColloquio($dati['validi'][$colloquioId]['ricevimento'])
+          ->setAppuntamento($appuntamento)
+          ->setAlunno($alunno)
+          ->setStato('R')
+          ->setGenitore($this->getUser());
+        $this->em->persist($richiesta);
+        // ok: memorizzazione e log
+        $dblogger->logCreazione('COLLOQUI', 'Nuova prenotazione', $richiesta);
+        // redirezione
+        return $this->redirectToRoute('colloqui_genitori');
+      }
+    }
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'prenota', $dati, $info, [$form->createView(),
+      'message.colloqui_prenota']);
+  }
+
+  /**
+   * Visualizza le ore dei colloqui individuali dei docenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $pagina Numero di pagina per la lista dei alunni
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/cerca/{pagina}", name="colloqui_cerca",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_STAFF")
+   */
+  public function cercaAction(Request $request, int $pagina): Response {
+    // inizializza
+    $info = [];
+    $dati = [];
+    // criteri di ricerca
+    $criteri = array();
+    $docente = $this->em->getRepository('App\Entity\Docente')->find(
+      (int) $this->reqstack->getSession()->get('/APP/ROUTE/colloqui_cerca/docente', 0));
+    $criteri['docente'] = $docente ? $docente->getId() : 0;
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/colloqui_cerca/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
+    }
+    // form di ricerca
+    $form = $this->createForm(FiltroType::class, null, ['formMode' => 'colloqui',
+      'values' => [$docente]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : 0);
+      $pagina = 1;
+      // memorizza in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/docente', $criteri['docente']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/colloqui_cerca/pagina', $pagina);
+    }
+    // recupera dati
+    $dati = $this->em->getRepository('App\Entity\Colloquio')->cerca($criteri, $pagina);
+    // informazioni di visualizzazione
+    $info['pagina'] = $pagina;
+    // pagina di risposta
+    return $this->renderHtml('colloqui', 'cerca', $dati, $info, [$form->createView()]);
   }
 
 }

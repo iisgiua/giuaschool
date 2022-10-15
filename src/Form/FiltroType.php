@@ -9,6 +9,7 @@
 namespace App\Form;
 
 use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -81,6 +82,27 @@ class FiltroType extends AbstractType {
             'style' => 'width:10em'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false));
+    } elseif ($options['formMode'] == 'colloqui') {
+      // form cerca colloqui
+      $builder
+      ->add('docente', EntityType::class, array('label' => 'label.docente',
+        'data' => $options['values'][0],
+        'class' => 'App\Entity\Docente',
+        'choice_label' => function ($obj) {
+            return $obj->getCognome().' '.$obj->getNome();
+          },
+        'placeholder' => 'label.scegli_docente',
+        'query_builder' => function (EntityRepository $er) {
+            return $er->createQueryBuilder('d')
+              ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=1')
+              ->orderBy('d.cognome,d.nome', 'ASC');
+          },
+        'label_attr' => ['class' => 'sr-only'],
+        'choice_attr' => function($val, $key, $index) {
+            return ['class' => 'gs-no-placeholder'];
+          },
+        'attr' => ['class' => 'gs-placeholder'],
+        'required' => false));
     }
     // pulsante filtro
     $builder

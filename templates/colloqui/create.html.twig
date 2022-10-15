@@ -1,0 +1,97 @@
+{% extends 'colloqui/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {{ form_start(form[0]) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading gs-mb-3">
+      <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-sm-6">
+          {{ form_row(form[0].tipo) }}
+        </div>
+        <div class="col-sm-6">
+          {{ form_row(form[0].frequenza) }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          {{ form_row(form[0].durata) }}
+        </div>
+        <div id="gs-sede" class="col-sm-6">
+          {{ form_row(form[0].sede) }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          {{ form_row(form[0].giorno) }}
+        </div>
+        <div class="col-sm-6">
+          {{ form_row(form[0].ora) }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label id="gs-luogo" class="col-sm-1 control-label required" for="colloquio_luogo">Luogo</label>
+            <div class="col-sm-11">
+              {{ form_widget(form[0].luogo) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer text-center">
+      <button type="submit" id="colloquio_submit" name="colloquio[submit]" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+      <button type="button" id="colloquio_cancel" name="colloquio[cancel]" class="btn btn-default" onClick="location.href='{{ path('colloqui_gestione') }}'"><strong>{{ 'label.cancel'|trans }}</strong></button>
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  var orario = new Array();
+  $('#colloquio_tipo').change(function() {
+    if ($(this).val() == 'P') {
+      $('#gs-luogo').text('Luogo');
+    } else {
+      $('#gs-luogo').text('Link');
+      $('#colloquio_luogo').val('https://meet.google.com/');
+    }
+    $('#colloquio_sede').change();
+  });
+  $('#colloquio_sede').change(function() {
+    if ($('#colloquio_tipo').val() == 'P') {
+      $('#colloquio_luogo').val('Sede di '+$('#colloquio_sede :selected').text());
+    }
+    $('#colloquio_giorno').change();
+  });
+  $('#colloquio_giorno').change(function() {
+    var s = $('#colloquio_sede').val();
+    var g = $(this).val();
+    var html = '';
+    orario[s][g].forEach((o, i) => { html += '<option value="'+i+'">'+o+'</option>'; });
+    $('#colloquio_ora').html(html);
+  });
+  // init
+  {% for s,or in info.orario %}
+  orario[{{ s }}] = new Array();
+    {% for g,gv in or %}
+  orario[{{ s }}][{{ g }}] = new Array();
+      {% for o,ov in gv %}
+  orario[{{ s }}][{{ g }}][{{ o }}] = '{{ o }}ª: {{ ov.inizio|date('G:i') }} - {{ ov.fine|date('G:i') }}';
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+  $('#colloquio_tipo').change();
+});
+</script>
+{% endblock %}

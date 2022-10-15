@@ -70,7 +70,7 @@ label.avvisi_tutti: Tutti
 label.citta: Città
 label.classe: Classe
 label.classi: Classi
-label.close: Chiude
+label.close: Chiudi
 label.codice_fiscale: Codice fiscale
 label.cognome: Cognome
 label.colloquio: Colloquio
@@ -108,7 +108,7 @@ label.criterio_credito_P: Progetti
 label.criterio_credito_S: Credito formativo (Attività sociali e sportive)
 label.csv_file: File CSV
 label.current_password: Password attuale
-label.data_colloquio: Data del colloquio
+label.date_disponibili: Date disponibili
 label.data_compito: Data
 label.data_evento: Data dell'evento
 label.data_fine: Data fine
@@ -570,6 +570,7 @@ label.colloquio_ricevimento: Ricevimento
 label.colloquio_luogo: Luogo/Link
 label.colloquio_durata: Durata colloquio
 label.residenza: Residenza
+label.form_data_ricevimento: "{data} dalle {inizio} alle {fine}"
 
 
 ##### PAGINE #####
@@ -694,6 +695,20 @@ page.colloqui.edit: Modifica Ricevimento
 title.colloqui.edit: Modifica le impostazioni di un ricevimento
 page.colloqui.create: Crea Ricevimenti
 title.colloqui.create: Crea ricevimenti periodici
+page.colloqui.richieste: Richieste Colloqui
+title.colloqui.richieste: Richieste di colloquio individuale
+page.colloqui.conferma: Conferma Colloquio
+title.colloqui.conferma: Conferma la prenotazione per il colloquio individuale
+page.colloqui.rifiuta: Rifiuta Colloquio
+title.colloqui.rifiuta: Rifiuta la richiesta di colloquio individuale
+page.colloqui.modifica: Modifica Colloquio
+title.colloqui.modifica: Modifica la risposta ad una richiesta di colloquio individuale
+page.colloqui.genitori: Colloqui Genitori
+title.colloqui.genitori: Prenotazione dei colloqui individuali
+page.colloqui.prenota: Prenota Colloquio
+title.colloqui.prenota: Prenota un colloquio
+page.colloqui.cerca: Cerca Colloquio
+title.colloqui.cerca: Mostra le ore di colloquio individuale dei docenti
 
 
 page.agenda_compito: Agenda Compiti
@@ -837,7 +852,7 @@ title.coordinatore_voti: Medie dei voti della classe
 title.coordinatore: Aggiungi o modifica un coordinatore del Consiglio di Classe
 title.deroghe: Inserimento deroghe e annotazioni sugli alunni
 title.docenti_colloqui_importa: Importa le ore di colloquio individuale dei docenti da file
-title.docenti_colloqui: Colloqui individuali
+title.docenti_colloqui: Richieste di colloquio individuale
 title.documenti_classi: Visualizza i documenti dei Consigli di Classe
 title.documenti_maggio: Inserimento dei documenti del 15 Maggio
 title.documenti_piani: Inserimento dei piani di lavoro
@@ -1144,7 +1159,6 @@ message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima
   <span class=\"ml-4\"><strong>Utenti</strong>: \"*Cognome, *Nome, *Sesso, CodiceFiscale, Username, Password, Email\"</span><br>
   <span class=\"ml-4\"><strong>Cattedre</strong>: \"*UsernameDocente, *Classe, *Materia, UsernameAlunno, Tipo, Supplenza\"</span><br>
   <span class=\"ml-4\"><strong>Orario</strong>: \"*Username, *Sede, *Giorno, *Ora, *Classe, *Materia\"</span><br>
-  <span class=\"ml-4\"><strong>Colloqui</strong>: \"*Username, *Sede, *Giorno, *Ora, *Frequenza, Note\"</span><br>
   <small>
     <span class=\"ml-5\">* campi obbligatori</span><br>
     <span class=\"ml-5\">Sesso: M=maschio, F=femmina</span><br>
@@ -1152,7 +1166,6 @@ message.importa_docenti: "Il file CSV deve avere la struttura seguente (la prima
     <span class=\"ml-5\">Supplenza: S=si, N=no</span><br>
     <span class=\"ml-5\">Sede: nome breve della sede</span><br>
     <span class=\"ml-5\">Giorno: LU=lunedì, MA=martedì, ME=mercoledì, GI=giovedì, VE=venerdì, SA=sabato</span><br>
-    <span class=\"ml-5\">Frequenza: S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=quarta settimana</span><br>
     <span class=\"ml-5\">--- è usato nel campo UsernameAlunno delle Cattedre per cancellare l'alunno, nei campi Classe e Materia dell'Orario per cancellare il dato</span><br>
   </small>"
 message.importa_alunni: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):<br>
@@ -1255,7 +1268,12 @@ message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire
 message.richieste_manage: La richiesta sarà segnata come gestita. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
 message.edit_ricevimento_singolo: Inserisci le impostazioni per il ricevimento dei genitori.
 message.create_ricevimento_periodico: Inserisci le impostazioni per generare i ricevimenti periodici dei genitori.
-message.colloquio_modifica_con_richieste: "Le prenotazioni esistenti per il ricevimento non saranno modificate. Dovrai eventualmente inserire un messaggio per segnalare le variazioni."
+message.colloquio_modifica_con_richieste: "Le prenotazioni esistenti per il ricevimento non saranno modificate. Dovrai inserire un messaggio nelle richieste per segnalare le variazioni."
+message.colloquio_richieste_in_attesa: Sono presenti richieste di colloquio in attesa di conferma
+message.conferma_colloquio: Conferma l'appuntamento per il colloquio individuale. Puoi modificare l'ora prevista e inserire un messaggio per i genitori.
+message.rifiuta_colloquio: Rifiuta l'appuntamento per il colloquio individuale. Devi inserire un messaggio di risposta per il genitore che ha fatto la richiesta.
+message.colloqui_prenota: Scegli la data desiderata e clicca sul pulsante CONFERMA, oppure premi ANNULLA per tornare indietro.
+message.modifica_colloquio: Modifica la risposta alla richiesta di colloquio. Puoi modificare lo stato della richiesta, l'ora prevista e il messaggio per i genitori.
 
 
 ##### ERRORI #####
@@ -1503,3 +1521,4 @@ exception.campo_data_vuoto: Non hai inserito un valore per la data.
 exception.richiesta_esistente: Esiste già una richiesta per questa data.
 exception.richiesta_ora_invio: La richiesta deve essere inviata entro le ore {ora} del giorno precedente a quello a cui si riferisce.
 exception.colloquio_link_invalido: Il link inserito non è valido.
+exception.colloquio_no_messaggio: Non hai inserito un messaggio per i genitori.

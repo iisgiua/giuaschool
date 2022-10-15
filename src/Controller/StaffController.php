@@ -41,7 +41,6 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mailer\MailerInterface;
 use App\Entity\Annotazione;
-use App\Entity\Colloquio;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Entity\AvvisoClasse;
@@ -2341,80 +2340,6 @@ class StaffController extends AbstractController {
       'dati' => $dati,
       'page' => $pagina,
       'maxPages' => ceil($lista['lista']->count() / $limite),
-    ));
-  }
-
-  /**
-   * Visualizza le ore dei colloqui individuali dei docenti
-   *
-   * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param int $pagina Numero di pagina per la lista dei alunni
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/staff/docenti/colloqui/{pagina}", name="staff_docenti_colloqui",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_STAFF")
-   */
-  public function docentiColloquiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                         $pagina) {
-    $giorni_settimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
-    // recupera criteri dalla sessione
-    $search = array();
-    $search['docente'] = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_colloqui/docente');
-    $docente = ($search['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($search['docente']) : null);
-    if ($pagina == 0) {
-      // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/staff_docenti_colloqui/pagina', 1);
-    } else {
-      // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_colloqui/pagina', $pagina);
-    }
-    // form di ricerca
-    $limite = 20;
-    $form = $this->container->get('form.factory')->createNamedBuilder('staff_docenti_colloqui', FormType::class)
-      ->setAction($this->generateUrl('staff_docenti_colloqui'))
-      ->add('docente', EntityType::class, array('label' => 'label.docente',
-        'data' => $docente,
-        'class' => 'App\Entity\Docente',
-        'choice_label' => function ($obj) {
-            return $obj->getCognome().' '.$obj->getNome();
-          },
-        'placeholder' => 'label.docente',
-        'query_builder' => function (EntityRepository $er) {
-            return $er->createQueryBuilder('d')
-              ->where('d NOT INSTANCE OF App\Entity\Preside AND d.abilitato=1')
-              ->orderBy('d.cognome,d.nome', 'ASC');
-          },
-        'label_attr' => ['class' => 'sr-only'],
-        'required' => false))
-      ->add('submit', SubmitType::class, array('label' => 'label.search'))
-      ->getForm();
-    $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // imposta criteri di ricerca
-      $search['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : 0);
-      $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_colloqui/docente', $search['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/staff_docenti_colloqui/pagina', $pagina);
-    }
-    // lista colloqui
-    $lista = $em->getRepository('App\Entity\Colloquio')->findAllNoSede($search, $pagina);
-    // mostra la pagina di risposta
-    return $this->render('ruolo_staff/docenti_colloqui.html.twig', array(
-      'pagina_titolo' => 'page.staff_colloqui',
-      'form' => $form->createView(),
-      'form_help' => null,
-      'form_success' => null,
-      'lista' => $lista,
-      'page' => $pagina,
-      'maxPages' => ceil($lista->count() / $limite),
-      'giorni_settimana' => $giorni_settimana,
     ));
   }
 

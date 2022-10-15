@@ -85,14 +85,15 @@ class AgendaUtil {
     $dati = null;
     // colloqui confermati con il docente
     $colloqui = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
+      ->select('c.data')
       ->join('rc.colloquio', 'c')
-      ->where('rc.stato=:stato AND MONTH(rc.appuntamento)=:mese AND c.docente=:docente')
+      ->where('rc.stato=:stato AND MONTH(c.data)=:mese AND c.docente=:docente AND c.abilitato=:abilitato')
       ->orderBy('rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'C', 'docente' => $docente, 'mese' => $mese->format('n')])
+      ->setParameters(['stato' => 'C', 'mese' => $mese->format('n'), 'docente' => $docente, 'abilitato' => 1])
       ->getQuery()
       ->getResult();
     foreach ($colloqui as $c) {
-      $dati[intval($c->getAppuntamento()->format('j'))]['colloqui'] = 1;
+      $dati[(int) $c['data']->format('j')]['colloqui'] = 1;
     }
     // attivita che coinvolgono il docente o la classe
     $attivita = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
@@ -205,13 +206,13 @@ class AgendaUtil {
     if ($tipo == 'C') {
       // colloqui
       $dati['colloqui'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
-        ->select('rc.id,rc.messaggio,rc.appuntamento,rc.durata,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione')
+        ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,a.cognome,a.nome,a.sesso,a.dataNascita,cl.anno,cl.sezione')
         ->join('rc.alunno', 'a')
         ->join('a.classe', 'cl')
         ->join('rc.colloquio', 'c')
-        ->where("DATE_FORMAT(rc.appuntamento,'%Y-%m-%d')=:data AND rc.stato=:stato AND c.docente=:docente")
+        ->where("rc.stato=:stato AND c.data=:data AND c.docente=:docente AND c.abilitato=:abilitato")
         ->orderBy('rc.appuntamento,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'stato' => 'C', 'docente' => $docente])
+        ->setParameters(['stato' => 'C', 'data' => $data->format('Y-m-d'), 'docente' => $docente, 'abilitato' => 1])
         ->getQuery()
         ->getArrayResult();
     } elseif ($tipo == 'A') {
@@ -488,13 +489,15 @@ class AgendaUtil {
     $dati = null;
     // colloqui
     $colloqui = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
-      ->where('rc.stato=:stato AND rc.alunno=:alunno AND MONTH(rc.appuntamento)=:mese')
+      ->select('c.data')
+      ->join('rc.colloquio', 'c')
+      ->where('rc.stato=:stato AND rc.alunno=:alunno AND MONTH(c.data)=:mese AND c.abilitato=:abilitato')
       ->orderBy('rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'mese' => $mese->format('n')])
+      ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'mese' => $mese->format('n'), 'abilitato' => 1])
       ->getQuery()
       ->getResult();
     foreach ($colloqui as $c) {
-      $dati[intval($c->getAppuntamento()->format('j'))]['colloqui'] = 1;
+      $dati[(int) $c['data']->format('j')]['colloqui'] = 1;
     }
     // attivita
     $attivita = $this->em->getRepository('App\Entity\Avviso')->createQueryBuilder('a')
@@ -555,12 +558,12 @@ class AgendaUtil {
     if ($tipo == 'C') {
       // colloqui
       $dati['colloqui'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
-        ->select('rc.messaggio,rc.appuntamento,rc.durata,d.cognome,d.nome,d.sesso')
+        ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,d.cognome,d.nome,d.sesso')
         ->join('rc.colloquio', 'c')
         ->join('c.docente', 'd')
-        ->where("DATE_FORMAT(rc.appuntamento,'%Y-%m-%d')=:data AND rc.stato=:stato AND rc.alunno=:alunno")
-        ->orderBy('c.ora', 'ASC')
-        ->setParameters(['data' => $data->format('Y-m-d'), 'stato' => 'C', 'alunno' => $alunno])
+        ->where("rc.stato=:stato AND rc.alunno=:alunno AND c.data=:data AND c.abilitato=:abilitato")
+        ->orderBy('rc.appuntamento', 'ASC')
+        ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'data' => $data->format('Y-m-d'), 'abilitato' => 1])
         ->getQuery()
         ->getArrayResult();
     } elseif ($tipo == 'A') {

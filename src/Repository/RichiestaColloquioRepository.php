@@ -8,9 +8,9 @@
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use App\Entity\Alunno;
 use App\Entity\Docente;
-use App\Entity\Colloquio;
+use App\Entity\Genitore;
 
 
 /**
@@ -18,94 +18,149 @@ use App\Entity\Colloquio;
  *
  * @author Antonello Dessì
  */
-class RichiestaColloquioRepository extends EntityRepository {
+class RichiestaColloquioRepository extends BaseRepository {
 
   /**
-   * Restituisce gli appuntamenti richiesti al docente
+   * Restituisce le richieste di ricevimenti passati o disabilitati.
    *
    * @param Docente $docente Docente a cui sono inviate le richieste di colloquio
-   * @param array $stato LIsta degli stati della richiesta del colloquio
-   * @param \DateTime $data Data del colloquio da cui iniziare la ricerca
    *
-   * @return array Dati restituiti
+   * @return array Dati delle richieste
    */
-  public function colloquiDocente(Docente $docente, $stato=null, \DateTime $data=null) {
-    if (!$data) {
-      $data = new \DateTime('today');
-    }
-    $colloqui = $this->createQueryBuilder('rc')
-      ->select("rc.id,rc.appuntamento,rc.durata,rc.stato,rc.messaggio,CONCAT(g.nome,' ',g.cognome) AS genitore,c.dati,a.cognome,a.nome,a.sesso,cl.anno,cl.sezione")
-      ->join('rc.alunno', 'a')
-      ->join('rc.genitore', 'g')
-      ->join('a.classe', 'cl')
+  public function storico(Docente $docente): array {
+    $dati = [];
+    $oggi = new \DateTime('today');
+    // legge dati richieste
+    $richieste = $this->createQueryBuilder('rc')
+      ->select('c.id,c.abilitato,c.tipo,c.data,c.inizio,c.fine,c.luogo,rc.appuntamento,rc.stato,a.nome,a.cognome,a.dataNascita,cl.anno,cl.sezione')
       ->join('rc.colloquio', 'c')
-      ->where('c.docente=:docente AND rc.appuntamento>=:data')
-      ->orderBy('rc.appuntamento,cl.anno,cl.sezione,a.cognome,a.nome', 'ASC')
-      ->setParameters(['docente' => $docente, 'data' => $data]);
-    if (!empty($stato)) {
-      $colloqui->andWhere('rc.stato IN (:stato)')->setParameter('stato', $stato);
-    }
-    $colloqui = $colloqui
+      ->join('rc.alunno', 'a')
+      ->leftJoin('a.classe', 'cl')
+      ->where('c.docente=:docente AND (c.abilitato=:disabilitato OR c.data<:oggi)')
+      ->orderBy('c.data,rc.appuntamento', 'ASC')
+      ->setParameters(['docente' => $docente, 'disabilitato' => 0, 'oggi' => $oggi->format('Y-m-d')])
       ->getQuery()
       ->getArrayResult();
+    // imposta dati da restituire
+    $id = 0;
+    foreach ($richieste as $richiesta) {
+      if ($id != $richiesta['id']) {
+        $id = $richiesta['id'];
+        $dati[$id] = [
+          'abilitato' => $richiesta['abilitato'],
+          'tipo' => $richiesta['tipo'],
+          'data' => $richiesta['data'],
+          'inizio' => $richiesta['inizio'],
+          'fine' => $richiesta['fine'],
+          'luogo' => $richiesta['luogo'],
+          'prenotazioni' => []];
+      }
+      $dati[$id]['prenotazioni'][] = [
+        'appuntamento' => $richiesta['appuntamento'],
+        'stato' => $richiesta['stato'],
+        'alunno' => $richiesta['cognome'].' '.$richiesta['nome'].' ('.
+          $richiesta['dataNascita']->format('Y-m-d').')',
+        'classe' => empty($richiesta['anno']) ? '' : $richiesta['anno'].'ª '.$richiesta['sezione']];
+    }
+    // restituisce i dati
+    return $dati;
+  }
+
+  /**
+   * Restituisce le richieste di ricevimento relative all'alunno indicato.
+   *
+   * @param Alunno $alunno Alunno a cui sono riferite le richieste di colloquio
+   *
+   * @return array Dati delle richieste
+   */
+  public function richiesteAlunno(Alunno $alunno): array {
+    $oggi = new \DateTime('today');
+    // legge dati richieste
+    $richieste = $this->createQueryBuilder('rc')
+      ->select('rc.id,rc.appuntamento,rc.stato,rc.messaggio,c.id AS colloquio_id,c.tipo,c.data,c.luogo,(c.docente) AS docente_id')
+      ->join('rc.alunno', 'a')
+      ->join('rc.colloquio', 'c')
+      ->where('rc.alunno=:alunno AND c.abilitato=:abilitato AND c.data>=:oggi')
+      ->orderBy('c.data,rc.appuntamento', 'ASC')
+      ->setParameters(['alunno' => $alunno, 'abilitato' => 1, 'oggi' => $oggi->format('Y-m-d')])
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce i dati
+    return $richieste;
+  }
+
+  /**
+   * Restituisce gli appuntamenti confermati per i colloqui dell'alunno nel periodo indicato
+   *
+   * @param \DateTime $inizio Data dell'inizio del periodo da controllare
+   * @param \DateTime $fine Data della fine del periodo da controllare
+   * @param Alunno $alunno Alunno a cui sono riferite le richieste di colloquio
+   * @param Genitore $genitore Genitore che ha richiesto il colloquio
+   *
+   * @return array Dati delle richieste
+   */
+  public function colloquiGenitore(\DateTime $inizio, \DateTime $fine, Alunno $alunno, Genitore $genitore): array {
+    // legge dati colloqui
+    $colloqui = $this->createQueryBuilder('rc')
+      ->select('rc.appuntamento,rc.messaggio,c.tipo,c.data,c.luogo,d.nome,d.cognome,d.sesso')
+      ->join('rc.alunno', 'a')
+      ->join('rc.colloquio', 'c')
+      ->join('c.docente', 'd')
+      ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND rc.stato=:stato AND c.abilitato=:abilitato AND c.data BETWEEN :inizio AND :fine')
+      ->orderBy('c.data,rc.appuntamento', 'ASC')
+      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'stato' => 'C', 'abilitato' => 1,
+          'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
+      ->getQuery()
+      ->getArrayResult();
+    // restituisce i dati
     return $colloqui;
   }
 
   /**
-   * Restituisce gli appuntamenti confermati dal docente e altre informazioni
+   * Restituisce gli appuntamenti confermati per i colloqui con il docente indicato e nel periodo specificato
    *
-   * @param Docente $docente Docente a cui sono inviate le richieste di colloquio
+   * @param \DateTime $inizio Data dell'inizio del periodo da controllare
+   * @param \DateTime $fine Data della fine del periodo da controllare
+   * @param Docente $docente Docente che deve fare i colloqui
    *
-   * @return array Dati restituiti
+   * @return array Dati restituiti come array associativo
    */
-  public function infoAppuntamenti(Docente $docente) {
-    $data = new \DateTime('today');
+  public function colloquiDocente(\DateTime $inizio, \DateTime $fine, Docente $docente): array {
+    // legge dati colloqui
     $colloqui = $this->createQueryBuilder('rc')
-      ->select('COUNT(rc.id) AS tot,c.id,rc.appuntamento,rc.durata,rc.stato')
+      ->select('rc.appuntamento,rc.messaggio,c.tipo,c.data,c.luogo,a.nome,a.cognome,a.sesso,a.dataNascita,cl.anno,cl.sezione')
+      ->join('rc.alunno', 'a')
+      ->join('a.classe', 'cl')
       ->join('rc.colloquio', 'c')
-      ->where('c.docente=:docente AND rc.appuntamento>=:data AND rc.stato IN (:stati)')
-      ->groupBy('c.id,rc.appuntamento,rc.durata,rc.stato')
-      ->orderBy('rc.appuntamento,rc.stato', 'ASC')
-      ->setParameters(['docente' => $docente, 'data' => $data, 'stati' => ['C', 'X']])
+      ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato AND c.data BETWEEN :inizio AND :fine')
+      ->orderBy('c.data,rc.appuntamento', 'ASC')
+      ->setParameters(['stato' => 'C', 'docente' => $docente, 'abilitato' => 1,
+          'inizio' => $inizio->format('Y-m-d'), 'fine' => $fine->format('Y-m-d')])
       ->getQuery()
       ->getArrayResult();
-    // imposta appuntamenti
-    $appuntamenti = array();
-    foreach ($colloqui as $c) {
-      $dt = $c['appuntamento']->format('YmdHi');
-      if ($c['stato'] == 'X') {
-        // appuntamento al completo
-        $appuntamenti[$dt]['completo'] = 1;
-      } else {
-        // numero appuntamenti
-        $appuntamenti[$dt]['numero'] = $c['tot'];
-        $appuntamenti[$dt]['colloquio'] = $c['id'];
-        $appuntamenti[$dt]['inizio'] = $c['appuntamento'];
-        $appuntamenti[$dt]['fine'] = (clone $c['appuntamento'])->modify('+'.$c['durata'].' minutes');
-      }
-    }
-    // restituisce gli appuntamenti
-    return $appuntamenti;
+    // restituisce dati
+    return $colloqui;
   }
 
   /**
-   * Restituisce le date al completo per i colloqui del docente indicato
+   * Restituisce il numero di richieste in attesa di conferma per i colloqui con il docente indicato
    *
-   * @param Colloquio $colloquio Colloquio di cui ricavare le date al completo
+   * @param Docente $docente Docente che deve fare i colloqui
    *
-   * @return array Dati restituiti
+   * @return int Numero richieste
    */
-  public function postiEsauriti(Colloquio $colloquio) {
-    $data = new \DateTime('today');
-    $esauriti = $this->createQueryBuilder('rc')
-      ->select('rc.appuntamento,rc.durata')
-      ->where('rc.colloquio=:colloquio AND rc.appuntamento>=:data AND rc.stato=:completo')
-      ->orderBy('rc.appuntamento', 'ASC')
-      ->setParameters(['colloquio' => $colloquio, 'data' => $data, 'completo' => 'X'])
+  public function inAttesa(Docente $docente): int {
+    // legge dati colloqui
+    $numero = $this->createQueryBuilder('rc')
+      ->select('COUNT(rc.id)')
+      ->join('rc.colloquio', 'c')
+      ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato')
+      ->orderBy('c.data,rc.appuntamento', 'ASC')
+      ->setParameters(['stato' => 'R', 'docente' => $docente, 'abilitato' => 1])
       ->getQuery()
-      ->getArrayResult();
-    // restituisce gli appuntamenti al completo
-    return $esauriti;
+      ->getSingleScalarResult();
+    // restituisce dati
+    return $numero;
   }
 
 }

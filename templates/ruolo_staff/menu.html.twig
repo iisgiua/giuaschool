@@ -31,7 +31,7 @@
     <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:13] == 'staff_docenti' ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Informazioni sui docenti">Docenti<span class="caret gs-ml-3"></span></a>
       <ul class="dropdown-menu">
-        <li{{ app.request.attributes.get('_route')[:22] == 'staff_docenti_colloqui' ? ' class="active"' }}><a href="{{ path('staff_docenti_colloqui') }}" title="Mostra le ore dei colloqui mensili per i docenti">Colloqui mensili</a></li>
+        <li{{ app.request.attributes.get('_route') == 'colloqui_cerca' ? ' class="active"' }}><a href="{{ path('colloqui_cerca') }}" title="Mostra le ore dei colloqui mensili dei docenti">Colloqui mensili</a></li>
         <li{{ app.request.attributes.get('_route')[:25] == 'staff_docenti_statistiche' ? ' class="active"' }}><a href="{{ path('staff_docenti_statistiche') }}" title="Mostra le statistiche sulle ore di lezione svolte dai docenti">Statistiche lezioni</a></li>
         <li{{ app.request.attributes.get('_route') == 'documenti_docenti' ? ' class="active"' }}><a href="{{ path('documenti_docenti') }}" title="Mostra i documenti dei docenti">Visualizza documenti</a></li>
       </ul>

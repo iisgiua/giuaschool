@@ -50,24 +50,6 @@ class Colloquio {
   private ?\DateTime $modificato = null;
 
   /**
-   * @var string|null $frequenza Frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
-   *
-   * @ORM\Column(type="string", length=1, nullable=false)
-   *
-   * @Assert\Choice(choices={"S","1","2","3","4"}, strict=true, message="field.choice")
-   */
-  private ?string $frequenza = 'S';
-
-  /**
-   * @var string|null $note Note informative sul colloquio
-   *
-   * @ORM\Column(type="string", length=2048, nullable=true)
-   *
-   * @Assert\Length(max=2048,maxMessage="field.maxlength")
-   */
-  private ?string $note = '';
-
-  /**
    * @var Docente|null $docente Docente che deve fare il colloquio
    *
    * @ORM\ManyToOne(targetEntity="Docente")
@@ -78,42 +60,73 @@ class Colloquio {
   private ?Docente $docente = null;
 
   /**
-   * @var Orario|null $orario Orario a cui appartiene il colloquio
+   * @var \DateTime|null $data Data del colloquio
    *
-   * @ORM\ManyToOne(targetEntity="Orario")
-   * @ORM\JoinColumn(nullable=true)
+   * @ORM\Column(type="date", nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private ?Orario $orario = null;
+  private ?\DateTime $data = null;
 
   /**
-   * @var int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+   * @var \DateTime|null $inizio Ora iniziale del colloquio
    *
-   * @ORM\Column(type="smallint", nullable=false)
+   * @ORM\Column(type="time", nullable=false)
    *
-   * @Assert\Choice(choices={0,1,2,3,4,5,6}, strict=true, message="field.choice")
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private int $giorno = 1;
+  private ?\DateTime $inizio = null;
 
   /**
-   * @var int $ora Numero dell'ora di lezione [1,2,...]
+   * @var \DateTime|null $fine Ora finale del colloquio
    *
-   * @ORM\Column(type="smallint", nullable=false)
+   * @ORM\Column(type="time", nullable=false)
+   *
+   * @Assert\NotBlank(message="field.notblank")
+   * @Assert\Type(type="\DateTime", message="field.type")
    */
-  private int $ora = 1;
+  private ?\DateTime $fine = null;
 
   /**
-   * @var array|null $extra Liste di ora extra per i colloqui
+   * @var string $tipo Tipo di colloquio [D=a distanza, P=in presenza]
    *
-   * @ORM\Column(type="array", nullable=true)
+   * @ORM\Column(type="string", length=1, nullable=false)
+   *
+   * @Assert\Choice(choices={"D","P"}, strict=true, message="field.choice")
    */
-  private ?array $extra = array();
+  private string $tipo = 'P';
 
   /**
-   * @var array|null $dati Lista di dati aggiuntivi
+   * @var string|null $luogo Indicazione del luogo di svolgimento del colloquio (aula o link)
    *
-   * @ORM\Column(type="array", nullable=true)
+   * @ORM\Column(type="string", length=2048, nullable=true)
+   *
+   * @Assert\Length(max=2048,maxMessage="field.maxlength")
    */
-  private ?array $dati = array();
+  private ?string $luogo = '';
+
+  /**
+   * @var int $durata Durata di ogni colloquio del ricevimento (in minuti)
+   *
+   * @ORM\Column(type="integer", nullable=false)
+   */
+  private int $durata = 10;
+
+  /**
+   * @var int $numero Numero di colloqui per ricevimento
+   *
+   * @ORM\Column(type="integer", nullable=false)
+   */
+  private int $numero = 6;
+
+  /**
+   * @var bool $abilitato Indica se il ricevimento è abilitato
+   *
+   * @ORM\Column(type="boolean", nullable=false)
+   */
+  private bool $abilitato = true;
 
 
   //==================== EVENTI ORM ====================
@@ -170,48 +183,6 @@ class Colloquio {
   }
 
   /**
-   * Restituisce la frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
-   *
-   * @return string|null Frequenza del colloquio
-   */
-  public function getFrequenza(): ?string {
-    return $this->frequenza;
-  }
-
-  /**
-   * Modifica la frequenza del colloquio [S=settimanale, 1=prima settimana del mese, 2=seconda settimana del mese, 3=terza settimana del mese, 4=quarta settimana del mese]
-   *
-   * @param string|null $frequenza Frequenza del colloquio
-   *
-   * @return self Oggetto modificato
-   */
-  public function setFrequenza(?string $frequenza): self {
-    $this->frequenza = $frequenza;
-    return $this;
-  }
-
-  /**
-   * Restituisce le note informative sul colloquio
-   *
-   * @return string|null Note informative sul colloquio
-   */
-  public function getNote(): ?string {
-    return $this->note;
-  }
-
-  /**
-   * Modifica le note informative sul colloquio
-   *
-   * @param string|null $note Note informative sul colloquio
-   *
-   * @return self Oggetto modificato
-   */
-  public function setNote(?string $note): self {
-    $this->note = $note;
-    return $this;
-  }
-
-  /**
    * Restituisce il docente che deve fare il colloquio
    *
    * @return Docente|null Docente che deve fare il colloquio
@@ -233,115 +204,170 @@ class Colloquio {
   }
 
   /**
-   * Restituisce l'orario a cui appartiene il colloquio
+   * Restituisce la data del colloquio
    *
-   * @return Orario|null Orario a cui appartiene il colloquio
+   * @return \DateTime|null Data del colloquio
    */
-  public function getOrario(): ?Orario {
-    return $this->orario;
+  public function getData(): ?\DateTime {
+    return $this->data;
   }
 
   /**
-   * Modifica l'orario a cui appartiene il colloquio
+   * Modifica la data del colloquio
    *
-   * @param Orario|null $orario Orario a cui appartiene il colloquio
+   * @param \DateTime $data Data del colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setOrario(?Orario $orario): self {
-    $this->orario = $orario;
+  public function setData(\DateTime $data): self {
+    $this->data = $data;
     return $this;
   }
 
   /**
-   * Restituisce il giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+   * Restituisce l'ora iniziale del colloquio
    *
-   * @return int Giorno della settimana
+   * @return \DateTime|null Ora iniziale del colloquio
    */
-  public function getGiorno(): int {
-    return $this->giorno;
+  public function getInizio(): ?\DateTime {
+    return $this->inizio;
   }
 
   /**
-   * Modifica il giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
+   * Modifica l'ora iniziale del colloquio
    *
-   * @param int $giorno Giorno della settimana
+   * @param \DateTime $inizio Ora iniziale del colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setGiorno(int $giorno): self {
-    $this->giorno = $giorno;
+  public function setInizio(\DateTime $inizio): self {
+    $this->inizio = $inizio;
     return $this;
   }
 
   /**
-   * Restituisce il numero dell'ora di lezione [1,2,...]
+   * Restituisce l'ora finale del colloquio
    *
-   * @return int Numero dell'ora di lezione
+   * @return \DateTime|null Ora finale del colloquio
    */
-  public function getOra(): int {
-    return $this->ora;
+  public function getFine(): ?\DateTime {
+    return $this->fine;
   }
 
   /**
-   * Modifica il numero dell'ora di lezione [1,2,...]
+   * Modifica l'ora finale del colloquio
    *
-   * @param int $ora Numero dell'ora di lezione
+   * @param \DateTime $fine Ora finale del colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setOra(int $ora): self {
-    $this->ora = $ora;
+  public function setFine(\DateTime $fine): self {
+    $this->fine = $fine;
     return $this;
   }
 
   /**
-   * Restituisce la lista di ora extra per i colloqui
+   * Restituisce il tipo di colloquio [D=a distanza, P=in presenza]
    *
-   * @return array||null Lista di ora extra per i colloqui
+   * @return string Tipo di colloquio
    */
-  public function getExtra(): ?array {
-    return $this->extra;
+  public function getTipo(): string {
+    return $this->tipo;
   }
 
   /**
-   * Modifica la lista di ora extra per i colloqui
+   * Modifica il tipo di colloquio [D=a distanza, P=in presenza]
    *
-   * @param array $extra Lista di ora extra per i colloqui
+   * @param string $tipo Tipo di colloquio
    *
    * @return self Oggetto modificato
    */
-  public function setExtra(array $extra): self {
-    if ($extra === $this->extra) {
-      // clona array per forzare update su doctrine
-      $extra = unserialize(serialize($extra));
-    }
-    $this->extra = $extra;
+  public function setTipo(string $tipo): self {
+    $this->tipo = $tipo;
     return $this;
   }
 
   /**
-   * Restituisce la lista di dati aggiuntivi
+   * Restituisce l'indicazione del luogo di svolgimento del colloquio (aula o link)
    *
-   * @return array|null Lista di dati aggiuntivi
+   * @return string|null Indicazione del luogo di svolgimento del colloquio (aula o link)
    */
-  public function getDati(): ?array {
-    return $this->dati;
+  public function getLuogo(): ?string {
+    return $this->luogo;
   }
 
   /**
-   * Modifica la lista di dati aggiuntivi
+   * Modifica l'indicazione del luogo di svolgimento del colloquio (aula o link)
    *
-   * @param array $dati Lista di dati aggiuntivi
+   * @param string|null $luogo Indicazione del luogo di svolgimento del colloquio (aula o link)
    *
    * @return self Oggetto modificato
    */
-  public function setDati(array $dati): self {
-    if ($dati === $this->dati) {
-      // clona array per forzare update su doctrine
-      $dati = unserialize(serialize($dati));
-    }
-    $this->dati = $dati;
+  public function setLuogo(?string $luogo): self {
+    $this->luogo = $luogo;
+    return $this;
+  }
+
+  /**
+   * Restituisce la durata di ogni colloquio del ricevimento (in minuti)
+   *
+   * @return int Durata di ogni colloquio del ricevimento (in minuti)
+   */
+  public function getDurata(): int {
+    return $this->durata;
+  }
+
+  /**
+   * Modifica la durata di ogni colloquio del ricevimento (in minuti)
+   *
+   * @param int $durata Durata di ogni colloquio del ricevimento (in minuti)
+   *
+   * @return self Oggetto modificato
+   */
+  public function setDurata(int $durata): self {
+    $this->durata = $durata;
+    return $this;
+  }
+
+  /**
+   * Restituisce il numero di colloqui per ricevimento
+   *
+   * @return int Numero di colloqui per ricevimento
+   */
+  public function getNumero(): int {
+    return $this->numero;
+  }
+
+  /**
+   * Modifica il numero di colloqui per ricevimento
+   *
+   * @param int $numero Numero di colloqui per ricevimento
+   *
+   * @return self Oggetto modificato
+   */
+  public function setNumero(int $numero): self {
+    $this->numero = $numero;
+    return $this;
+  }
+
+  /**
+   * Restituisce vero se il ricevimento è abilitato
+   *
+   * @return bool Indica se il ricevimento è abilitato
+   */
+  public function getAbilitato(): bool {
+    return $this->abilitato;
+  }
+
+  /**
+   * Modifica il valore per indicare se il ricevimento è abilitato
+   *
+   * @param bool $abilitato Indica se il ricevimento è abilitato
+   *
+   * @return self Oggetto modificato
+   */
+  public function setAbilitato(bool $abilitato): self {
+    $this->abilitato = $abilitato;
     return $this;
   }
 
@@ -349,55 +375,32 @@ class Colloquio {
   //==================== METODI DELLA CLASSE ====================
 
   /**
-   * Restituisce il valore del dato indicato all'interno della lista dei dati aggiuntivi
-   *
-   * @param string $nome Nome identificativo del dato
-   *
-   * @return mixed|null Valore del dato o null se non esiste
-   */
-  public function getDato(string $nome) {
-    if (isset($this->dati[$nome])) {
-      return $this->dati[$nome];
-    }
-    return null;
-  }
-
-  /**
-   * Aggiunge/modifica un dato alla lista dei dati aggiuntivi
-   *
-   * @param string $nome Nome identificativo del dato
-   * @param mixed $valore Valore del dato
-   *
-   * @return self Oggetto modificato
-   */
-  public function addDato(string $nome, $valore): self {
-    if (isset($this->dati[$nome]) && $valore === $this->dati[$nome]) {
-      // clona array per forzare update su doctrine
-      $valore = unserialize(serialize($valore));
-    }
-    $this->dati[$nome] = $valore;
-    return $this;
-  }
-
-  /**
-   * Elimina un dato dalla lista dei dati aggiuntivi
-   *
-   * @param string $nome Nome identificativo del dato
-   *
-   * @return self Oggetto modificato
-   */
-  public function removeDato(string $nome): self {
-    unset($this->dati[$nome]);
-    return $this;
-  }
-
-  /**
    * Restituisce l'oggetto rappresentato come testo
    *
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return $this->docente.' > '.$this->giorno.':'.$this->ora;
+    return $this->docente.': '.$this->data->format('d/m/Y').', '.$this->inizio->format('H:i').
+      ' - '.$this->fine->format('H:i');
+  }
+
+  /**
+   * Restituisce i dati dell'istanza corrente come un array associativo
+   *
+   * @return array Lista dei valori dell'istanza
+   */
+  public function datiVersione(): array {
+    $dati = [
+      'docente' => $this->docente->getId(),
+      'data' => $this->data->format('d/m/Y'),
+      'inizio' => $this->inizio->format('H:i'),
+      'fine' => $this->fine->format('H:i'),
+      'tipo' => $this->tipo,
+      'luogo' => $this->luogo,
+      'durata' => $this->durata,
+      'numero' => $this->numero,
+      'abilitato' => $this->abilitato];
+    return $dati;
   }
 
 }

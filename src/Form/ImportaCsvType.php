@@ -34,8 +34,7 @@ class ImportaCsvType extends AbstractType {
     if ($options['formMode'] == 'docenti') {
       $builder
         ->add('tipo', ChoiceType::class, array('label' => 'label.importazione_docenti_tipo',
-          'choices' => array('label.utenti' => 'U', 'label.cattedre' => 'C', 'label.orario' => 'O',
-            'label.colloqui' => 'L'),
+          'choices' => array('label.utenti' => 'U', 'label.cattedre' => 'C', 'label.orario' => 'O'),
           'data' => 'U',
           'expanded' => true,
           'multiple' => false,

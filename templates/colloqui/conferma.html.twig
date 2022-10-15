@@ -1,0 +1,61 @@
+{% extends 'colloqui/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {{ form_start(form[0]) }}
+  {{ form_errors(form[0]) }}
+  <div class="panel panel-primary">
+    <div class="panel-heading gs-mb-0">
+      <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
+    </div>
+    <div class="panel-body gs-pt-0">
+      <div class="row bg-success">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Data:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.data|date('d/m/Y') }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Tipo:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.tipo == 'D' ? 'A DISTANZA' : 'IN PRESENZA' }}</span></div>
+      </div>
+      <div class="row bg-success gs-mb-3">
+        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.classe }}</span></div>
+        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-4"><span class="gs-big">{{ info.alunno }}</span></div>
+      </div>
+      {{ form_row(form[0].appuntamento) }}
+      {{ form_row(form[0].messaggio) }}
+    </div>
+    <div class="panel-footer text-center">
+      <button type="submit" id="richiesta_colloquio_submit" name="richiesta_colloquio[submit]" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
+      <button type="button" id="richiesta_colloquio_cancel" name="richiesta_colloquio[cancel]" class="btn btn-default" onClick="location.href='{{ path('colloqui_richieste') }}'"><strong>{{ 'label.cancel'|trans }}</strong></button>
+    </div>
+  </div>
+  {{ form_end(form[0]) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script src="{{ asset('vendor/moment/js/moment.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/locales/it.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+  $('.input-group.time').datetimepicker({
+    format: "HH:mm",
+    enabledHours: [8, 9, 10, 11, 12 ,13, 14, 15, 16, 17, 18, 19, 20],
+    useCurrent: false,
+    tooltips: {
+      incrementHour: 'Incrementa l\'ora',
+      pickHour: 'Imposta l\'ora',
+      decrementHour:'Decrementa l\'ora',
+      incrementMinute: 'Incrementa i minuti',
+      pickMinute: 'Imposta i minuti',
+      decrementMinute:'Decrementa i minuti'
+      },
+    widgetPositioning: { horizontal: 'left' },
+    allowInputToggle: true
+  });
+});
+</script>
+{% endblock %}

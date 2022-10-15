@@ -535,17 +535,6 @@ App\Entity\MenuOpzione:
     icona: ''
     menu: '@menu_DOCENTI'
     sottoMenu:
-  menu_opzione_DOCENTI7:
-    ruolo: 'M'
-    funzione: ''
-    nome: 'Colloqui'
-    descrizione: 'Configura i colloqui dei docenti'
-    url: 'docenti_colloqui'
-    ordinamento: 7
-    abilitato: true
-    icona: ''
-    menu: '@menu_DOCENTI'
-    sottoMenu:
 
   # ----- opzioni sottomenu ALUNNI - AMMINISTRATORE -----
   menu_opzione_ALUNNI1:

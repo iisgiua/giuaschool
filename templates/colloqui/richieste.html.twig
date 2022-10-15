@@ -1,0 +1,117 @@
+{% extends 'colloqui/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {% if info.errore is defined %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ info.errore|trans }}</strong>
+  </div>
+  {% else %}
+    {% if dati.ricevimenti is not empty %}
+      {% if dati.inAttesa > 0 %}
+      <div class="alert alert-warning text-center" role="alert">
+        <strong class="gs-big">{{ 'message.colloquio_richieste_in_attesa'|trans }}</strong>
+      </div>
+      {% endif %}
+      {% for r in dati.ricevimenti %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title text-center">
+        <span class="pull-left"><strong>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}</strong></span>
+        <span class="pull-right">{{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }}</span>
+        <span>- {{ r.valide }}/{{ r.numero }} -</span>
+      </h3>
+    </div>
+    <table class="table table-bordered table-hover">
+      <thead class="bg-info">
+        <tr>
+          <th class="col-sm-2">Appuntamento</th>
+          <th class="col-sm-2">Classe</th>
+          <th class="col-sm-4">Alunno</th>
+          <th class="col-sm-4">Stato della richiesta</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in r.prenotazioni %}
+        <tr class="{% if p.stato == 'A' %}gs-em text-muted{% elseif p.stato == 'N' %}gs-em{% endif %}">
+          <td>
+          {% if p.stato == 'R' %}
+          <span class="glyphicon glyphicon-hourglass text-warning gs-mr-2" aria-hidden="true"></span>
+          {% elseif p.stato == 'C' %}
+            <span class="glyphicon glyphicon-ok text-success gs-mr-2" aria-hidden="true"></span>
+          {% elseif p.stato == 'A' %}
+            <span class="glyphicon glyphicon-ban-circle text-danger gs-mr-2" aria-hidden="true"></span>
+          {% elseif p.stato == 'N' %}
+            <span class="glyphicon glyphicon-remove text-danger gs-mr-2" aria-hidden="true"></span>
+          {% endif %}
+            {{ p.appuntamento|date('H:i') }}
+          </td>
+          <td>{{ p.classe }}</td>
+          <td>{{ p.alunno }}</td>
+          <td>
+          {% if p.stato == 'R' %}
+            <strong>In attesa di conferma</strong>
+              <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button gs-ml-3 gs-mb-1" title="Rifiuta la prenotazione per il colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_rifiuta', {id: p.id}) }}" data-text="{{ 'message.rifiuto_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Rifiuta</strong></button>
+              <a class="btn btn-success btn-xs pull-right gs-mb-1" href="{{ path('colloqui_conferma', {id: p.id}) }}" role="button" title="Conferma la prenotazione per il colloquio"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma</strong></a>
+          {% elseif p.stato == 'C' %}
+            Confermato
+            {% if p.messaggio %}
+            <span class="gs-normal"><br>Messaggio per il genitore:</span>
+            <div class="panel panel-default gs-mb-1"><small>{{ p.messaggio }}</small></div>
+            {% endif %}
+            <a class="btn btn-primary btn-xs pull-right" href="{{ path('colloqui_modifica', {id: p.id}) }}" role="button" title="Modifica la scelta effettuata per la richiesta di colloquio"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
+          {% elseif p.stato == 'A' %}
+            Annullato dal genitore
+          {% elseif p.stato == 'N' %}
+            Rifiutato dal docente
+            {% if p.messaggio %}
+            <span class="gs-normal"><br>Messaggio per il genitore:</span>
+            <div class="panel panel-default gs-mb-1"><small>{{ p.messaggio }}</small></div>
+            {% endif %}
+            <a class="btn btn-primary btn-xs pull-right gs-normal" href="{{ path('colloqui_modifica', {id: p.id}) }}" role="button" title="Modifica la scelta effettuata per la richiesta di colloquio"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
+          {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center"><em>Nessuna richiesta</em></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+      {% endfor %}
+    {% else %}
+  <div class="alert alert-info" role="alert">
+    <strong class="gs-big">Non sono presenti richieste di colloquio.</strong>
+  </div>
+    {% endif %}
+  {% endif %}
+  <div class="text-right gs-mt-5">
+    <button class="btn btn-default gs-button-remote" type="button" title="Visualizza le richieste dei ricevimenti passati o disabilitati" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('colloqui_storico') }}"><strong>Vecchie richieste</strong></button>
+  </div>
+  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.rifiuto_colloquio'} %}
+  {% include 'include/modal-remote.html.twig' %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+  $('#gs-modal-remote').on('show.bs.modal', function (event) {
+    var url = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-remote-content').load(url);
+  });
+  $(".gs-button-remote").click(function(e) {
+    e.preventDefault();
+    $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
+  });
+});
+</script>
+{% endblock %}

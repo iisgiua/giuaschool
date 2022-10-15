@@ -1,0 +1,80 @@
+{% extends 'ruolo_genitore/index.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
+  {% if info.errore is defined %}
+  <div class="alert alert-warning" role="alert">
+    <strong class="gs-big">{{ info.errore }}</strong>
+  </div>
+  {% else %}
+    {% if dati.richieste is not empty %}
+  <div class="panel panel-success">
+    <div class="panel-heading"><h3 class="panel-title gs-h3">{{ 'title.richieste_colloqui'|trans }}</h3></div>
+    <ul class="list-group">
+      {% for r in dati.richieste %}
+      <li class="list-group-item container-fluid{{ r.stato == 'A' or r.stato == 'N' ? ' list-group-item-warning'}}">
+        <div class="col-sm-4">
+          <strong>
+            {{ r.data|format_date('full')|title }} alle {{ r.appuntamento|date('G:i')}}<br>
+            Modalità: {{ ('label.tipo_colloquio_'~r.tipo)|trans }}<br>
+            {% if r.tipo == 'D' %}<a href="{{ r.luogo }}" target="_blank">{{ r.luogo }}</a>{% else %}{{ r.luogo }}{% endif %}
+          </strong>
+        </div>
+        <div class="col-sm-4 gs-big">
+          <strong>{{ dati.docenti[r.docente_id].info }}</strong>
+        </div>
+        <div class="col-sm-4">
+        {% if r.stato == 'R' %}
+            <strong class="text-danger"><em>In attesa di conferma</em></strong>
+            <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_disdetta', {id: r.id}) }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+        {% elseif r.stato == 'C' %}
+            <strong class="text-success"><em>Appuntamento confermato</em></strong>
+          {% if r.messaggio %}
+            <br>Messaggio del docente:<small><br><strong><em>{{ r.messaggio }}</em></strong></small>
+          {% endif %}
+            <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_disdetta', {id: r.id}) }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+        {% elseif r.stato == 'A' %}
+            <strong class="text-danger"><em>Appuntamento annullato dal genitore</em></strong>
+        {% elseif r.stato == 'N' %}
+            <strong class="text-danger"><em>Appuntamento cancellato per indisponibilità del docente</em></strong>
+          {% if r.messaggio %}
+          <br>Messaggio del docente:<small><br><strong><em>{{ r.messaggio }}</em></strong></small>
+          {% endif %}
+        {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+    {% endif %}
+  <div class="panel panel-info">
+    <div class="panel-heading"><h3 class="panel-title gs-h3">{{ 'title.ore_colloqui'|trans }}</h3></div>
+    <ul class="list-group">
+    {% for docente,d in dati.docenti %}
+      <li class="list-group-item container-fluid">
+        <div class="col-sm-4 gs-big"><strong>{{ d.info }}</strong></div>
+        <div class="col-sm-6 gs-big"><em>{% for m in d.materie %}{{ m }}{{ not loop.last ? '<br>' }}{% endfor %}</em></div>
+        <div class="col-sm-2"><a class="btn btn-primary btn-xs" href="{{ path('colloqui_prenota', {docente: docente}) }}" role="button" title="Prenota il colloquio con il docente"><span class="glyphicon glyphicon-time gs-mr-2"></span><strong>Prenota</strong></a></div>
+      </li>
+    {% endfor %}
+    </ul>
+  </div>
+    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.disdetta_colloquio'} %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
+});
+</script>
+{% endblock %}

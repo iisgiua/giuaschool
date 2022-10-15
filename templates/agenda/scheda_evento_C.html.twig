@@ -9,8 +9,9 @@
 <div class="modal-body">
 {% for c in dati.colloqui %}
   <div class="alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2" role="alert">
-    <strong class="gs-text-normal gs-big">Classe {{ c.anno }}ª {{ c.sezione }}</strong><br>
-    <span class="gs-text-normal">Genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }}, dalle {{ c.appuntamento|date('G:i') }} alle {{ c.appuntamento|date_modify('+'~c.durata~' minutes')|date('G:i') }}</span>
+    <strong class="gs-text-normal gs-big">Classe {{ c.anno }}ª {{ c.sezione }} - Alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }}) </strong><br>
+    <strong class="gs-text-normal">Appuntamento alle ore {{ c.appuntamento|date('G:i') }}</strong><br>
+    <strong class="gs-text-normal">{{ ('label.tipo_colloquio_'~c.tipo)|trans }}: {{ c.luogo }}</strong>
   {% if c.messaggio is not empty %}
     <br><span class="gs-text-normal">Messaggio ai genitori: <em>{{ c.messaggio }}</em></span>
   {% endif %}

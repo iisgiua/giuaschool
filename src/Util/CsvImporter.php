@@ -25,7 +25,6 @@ use App\Entity\Classe;
 use App\Entity\Materia;
 use App\Entity\Alunno;
 use App\Entity\Genitore;
-use App\Entity\Colloquio;
 use App\Entity\Orario;
 use App\Entity\OrarioDocente;
 use App\Entity\Provisioning;
@@ -853,187 +852,6 @@ class CsvImporter {
       }
     }
     // ok: chiude file
-    fclose($this->fh);
-    $this->fh = null;
-    return $imported;
-  }
-
-  /**
-   * Importa i colloqui dei docenti da file CSV
-   *
-   * @param File $file File da importare
-   * @param Form $form Form su cui visualizzare gli errori
-   *
-   * @return array Lista dei colloqui importati
-   */
-  public function importaColloqui(File $file=null, Form $form) {
-    $header = array('username', 'sede', 'giorno', 'ora', 'frequenza', 'note');
-    $filtro = $form->get('filtro')->getData();
-    // controllo file
-    $error = $this->checkFile($file, $header);
-    if ($error) {
-      // errore
-      if ($this->fh) {
-        fclose($this->fh);
-        $this->fh = null;
-      }
-      $form->addError(new FormError($this->trans->trans($error)));
-      return null;
-    }
-    // lettura dati
-    $imported = array();
-    $count = 0;
-    while (($data = fgetcsv($this->fh)) !== false) {
-      $count++;
-      if (count($data) == 0 || (count($data) == 1 && $data[0] == '')) {
-        // riga vuota, salta
-        continue;
-      }
-      // controllo numero campi
-      if (count($data) != count($header)) {
-        // errore
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_data', ['num' => $count])));
-        return $imported;
-      }
-      // lettura campi
-      $fields = array();
-      $empty_fields = array();
-      foreach ($data as $key=>$val) {
-        $fields[$this->header[$key]] = $val;
-      }
-      // formattazione campi
-      $fields['username'] = strtolower(trim($fields['username']));
-      $fields['sede'] = trim($fields['sede']);
-      $fields['giorno'] = strtoupper(str_replace([' ',"\t","\r","\n"], '',$fields['giorno']));
-      $fields['ora'] = trim($fields['ora']);
-      $fields['frequenza'] = strtoupper(trim($fields['frequenza']));
-      $fields['note'] = trim($fields['note']);
-      // controlla campi obbligatori
-      if (empty($fields['username']) || empty($fields['sede']) || empty($fields['giorno']) || empty($fields['ora']) ||
-           empty($fields['frequenza'])) {
-        // errore
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_required', ['num' => $count])));
-        return $imported;
-      }
-      // controlla esistenza di docente
-      $lista = $this->em->getRepository('App\Entity\Docente')->findByUsername($fields['username']);
-      if (count($lista) == 0) {
-        // errore: docente non esiste
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_docente_mancante', ['num' => $count])));
-        return $imported;
-      } elseif (count($lista) > 1) {
-        // errore: docente duplicato
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_docente_duplicato', ['num' => $count])));
-        return $imported;
-      }
-      $docente = $lista[0];
-      // controlla esistenza di sede
-      $lista = $this->em->getRepository('App\Entity\Sede')->findByNomeBreve($fields['sede']);
-      if (count($lista) != 1) {
-        // errore: sede
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_sede', ['num' => $count])));
-        return $imported;
-      }
-      $sede = $lista[0];
-      // legge orario
-      $scansione_oraria = $this->em->getRepository('App\Entity\ScansioneOraria')->createQueryBuilder('so')
-        ->join('so.orario', 'o')
-        ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
-        ->setParameters(['data' => (new \DateTime())->format('Y-m-d'), 'sede' => $sede])
-        ->getQuery()
-        ->getResult();
-      if (!$scansione_oraria) {
-        // errore: orario
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_orario', ['num' => $count])));
-        return $imported;
-      }
-      $ore = array();
-      foreach ($scansione_oraria as $so) {
-        $ore[$so->getGiorno()][$so->getOra()] = [$so->getInizio()->format('H:i'),
-          $so->getFine()->format('H:i'), $so->getDurata()];
-      }
-      // controlla giorno
-      $lista_giorni = ['DO', 'LU', 'MA', 'ME', 'GI', 'VE', 'SA'];
-      $giorno = array_search($fields['giorno'], $lista_giorni);
-      if ($giorno === false || !isset($ore[$giorno])) {
-        // errore: giorno
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_giorno', ['num' => $count])));
-        return $imported;
-      }
-      // controlla ora
-      $ora = intval($fields['ora']);
-      if (!isset($ore[$giorno][$ora])) {
-        // errore: ora
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_ora', ['num' => $count])));
-        return $imported;
-      }
-      // controlla frequenza
-      $lista_frequenza = ['S', '1', '2', '3', '4'];
-      $frequenza = $fields['frequenza'];
-      if (!in_array($frequenza, $lista_frequenza)) {
-        // errore: frequenza
-        fclose($this->fh);
-        $this->fh = null;
-        $form->addError(new FormError($this->trans->trans('exception.file_frequenza', ['num' => $count])));
-        return $imported;
-      }
-      // controlla esistenza di colloquio
-      $colloquio = $this->em->getRepository('App\Entity\Colloquio')->findOneBy(['docente' => $docente,
-        'orario' => $scansione_oraria[0]->getOrario()]);
-      if ($colloquio) {
-        // colloquio esiste
-        if ($filtro == 'T' || $filtro == 'E') {
-          // modifica colloquio
-          $error = $this->modificaColloquio($colloquio, $giorno, $ora, $frequenza, $fields['note']);
-          if ($error) {
-            // errore
-            fclose($this->fh);
-            $this->fh = null;
-            $form->addError(new FormError('# '.$count.': '.$error));
-            return $imported;
-          }
-          $imported['EDIT'][$count] = $fields;
-        } else {
-          // nessuna modifica
-          $imported['NONE'][$count] = $fields;
-        }
-      } else {
-        // crea nuovo colloquio
-        if ($filtro == 'T' || $filtro == 'N') {
-          // inserisce
-          $error = $this->nuovoColloquio($docente, $scansione_oraria[0]->getOrario(), $giorno, $ora,
-            $frequenza, $fields['note']);
-          if ($error) {
-            // errore
-            fclose($this->fh);
-            $this->fh = null;
-            $form->addError(new FormError('# '.$count.': '.$error));
-            return $imported;
-          }
-          $imported['NEW'][$count] = $fields;
-        } else {
-          // nessuna modifica
-          $imported['NONEW'][$count] = $fields;
-        }
-      }
-    }
-    // ok
     fclose($this->fh);
     $this->fh = null;
     return $imported;
@@ -1890,70 +1708,6 @@ class CsvImporter {
   }
 
   /**
-   * Crea un nuovo colloquio
-   *
-   * @param Docente $docente Docente che deve fare il colloquio
-   * @param Orario $orario Orario per la sede
-   * @param int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
-   * @param int $ora Numero dell'ora di lezione [1,2,...]
-   * @param string $frequenza Frequenza del colloquio [S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=quarta settimana]
-   * @param string $note Note informative sul colloquio
-   *
-   * @return string|null Messaggio di errore o NULL se tutto ok
-   */
-  private function nuovoColloquio(Docente $docente, Orario $orario, $giorno, $ora, $frequenza, $note) {
-    // crea oggetto colloquio
-    $colloquio = (new Colloquio())
-      ->setDocente($docente)
-      ->setOrario($orario)
-      ->setGiorno($giorno)
-      ->setOra($ora)
-      ->setFrequenza($frequenza)
-      ->setNote($note);
-    // valida dati
-    $errors = $this->validator->validate($colloquio);
-    if (count($errors) > 0) {
-      // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
-    } else {
-      // ok, memorizza su db
-      $this->em->persist($colloquio);
-      $this->em->flush();
-      return null;
-    }
-  }
-
-  /**
-   * Modifica un colloquio esistente
-   *
-   * @param Colloquio $colloquio Colloquio da modificare
-   * @param int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]
-   * @param int $ora Numero dell'ora di lezione [1,2,...]
-   * @param string $frequenza Frequenza del colloquio [S=settimanale, 1=prima settimana, 2=seconda settimana, 3=terza settimana, 4=quarta settimana]
-   * @param string $note Note informative sul colloquio
-   *
-   * @return string|null Messaggio di errore o NULL se tutto ok
-   */
-  private function modificaColloquio(Colloquio $colloquio, $giorno, $ora, $frequenza, $note) {
-    // crea oggetto colloquio
-    $colloquio
-      ->setGiorno($giorno)
-      ->setOra($ora)
-      ->setFrequenza($frequenza)
-      ->setNote($note);
-    // valida dati
-    $errors = $this->validator->validate($colloquio);
-    if (count($errors) > 0) {
-      // errore (restituisce solo il primo)
-      return $errors[0]->getPropertyPath().': '.$errors[0]->getMessage();
-    } else {
-      // ok, memorizza su db
-      $this->em->flush();
-      return null;
-    }
-  }
-
-  /**
    * Crea un nuovo ATA
    *
    * @param array $fields Lista dei dati dell'utente
@@ -2105,7 +1859,7 @@ class CsvImporter {
   }
 
   /**
-   * Crea un nuovo colloquio
+   * Crea un nuovo orario
    *
    * @param Orario $orario Orario per la sede
    * @param int $giorno Giorno della settimana [0=domenica, 1=lunedì, ... 6=sabato]

@@ -30,7 +30,6 @@ use App\Form\DocenteType;
 use App\Form\ModuloType;
 use App\Form\ImportaCsvType;
 use App\Form\CattedraType;
-use App\Form\ColloquioType;
 use App\Util\CsvImporter;
 use App\Util\LogHandler;
 use App\Util\PdfManager;
@@ -38,11 +37,9 @@ use App\Util\StaffUtil;
 use App\Entity\Provisioning;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Colloquio;
 use App\Entity\Docente;
 use App\Entity\Materia;
 use App\Entity\Orario;
-use App\Entity\RichiestaColloquio;
 use App\Entity\ScansioneOraria;
 use App\Entity\Sede;
 use App\Entity\Staff;
@@ -107,10 +104,6 @@ class DocentiController extends BaseController {
         case 'O':
           // importa orario
           $dati = $importer->importaOrario($file, $form);
-          break;
-        case 'L':
-          // importa colloqui
-          $dati = $importer->importaColloqui($file, $form);
           break;
       }
       $dati = ($dati == null ? [] : $dati);
@@ -1088,182 +1081,6 @@ class DocentiController extends BaseController {
     $this->addFlash('success', 'message.update_ok');
     // redirezione
     return $this->redirectToRoute('docenti_cattedre');
-  }
-
-  /**
-   * Gestisce la modifica dei dati dei docenti
-   *
-   * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param int $pagina Numero di pagina per la lista visualizzata
-   *
-   * @Route("/docenti/colloqui/{pagina}", name="docenti_colloqui",
-   *    requirements={"pagina": "\d+"},
-   *    defaults={"pagina": 0},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
-   */
-  public function colloquiAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
-                                 TranslatorInterface $trans, $pagina): Response {
-    // init
-    $dati = [];
-    $info = [];
-    // recupera criteri dalla sessione
-    $criteri = array();
-    $criteri['sede'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/sede');
-    $criteri['classe'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/classe');
-    $criteri['docente'] = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/docente');
-    $sede = ($criteri['sede'] > 0 ? $em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
-    $classe = ($criteri['classe'] > 0 ? $em->getRepository('App\Entity\Classe')->find($criteri['classe']) : null);
-    $docente = ($criteri['docente'] > 0 ? $em->getRepository('App\Entity\Docente')->find($criteri['docente']) : null);
-    if ($pagina == 0) {
-      // pagina non definita: la cerca in sessione
-      $pagina = $reqstack->getSession()->get('/APP/ROUTE/docenti_colloqui/pagina', 1);
-    } else {
-      // pagina specificata: la conserva in sessione
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/pagina', $pagina);
-    }
-    // form di ricerca
-    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'docenti-sedi',
-      'dati' => [$sede, $classe, $docente]]);
-    $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // imposta criteri di ricerca
-      $criteri['sede'] = ($form->get('sede')->getData() ? $form->get('sede')->getData()->getId() : 0);
-      $criteri['classe'] = ($form->get('classe')->getData() ? $form->get('classe')->getData()->getId() : 0);
-      $criteri['docente'] = ($form->get('docente')->getData() ? $form->get('docente')->getData()->getId() : 0);
-      $pagina = 1;
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/sede', $criteri['sede']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/classe', $criteri['classe']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/docente', $criteri['docente']);
-      $reqstack->getSession()->set('/APP/ROUTE/docenti_colloqui/pagina', $pagina);
-    }
-    // lista colloqui
-    $dati = $em->getRepository('App\Entity\Colloquio')->cerca($criteri, $pagina);
-    $info['pagina'] = $pagina;
-    // mostra la pagina di risposta
-    return $this->renderHtml('docenti', 'colloqui', $dati, $info, [$form->createView()]);
-  }
-
-  /**
-   * Modifica dei dati di configurazione di un colloquio
-   *
-   * @param Request $request Pagina richiesta
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param int $id ID del colloquio
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/docenti/colloqui/edit/{id}", name="docenti_colloqui_edit",
-   *    requirements={"id": "\d+"},
-   *    defaults={"id": "0"},
-   *    methods={"GET", "POST"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
-   */
-  public function colloquiEditAction(Request $request, EntityManagerInterface $em,
-                                     TranslatorInterface $trans,$id): Response {
-    // controlla azione
-    if ($id > 0) {
-      // azione edit
-      $colloquio = $em->getRepository('App\Entity\Colloquio')->find($id);
-      if (!$colloquio) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      $sede = $colloquio->getOrario()->getSede();
-      $docente = $colloquio->getDocente();
-    } else {
-      // azione add
-      $colloquio = new Colloquio();
-      $orario = $em->getRepository('App\Entity\Orario')->orarioSede();
-      $colloquio->setOrario($orario);
-      $em->persist($colloquio);
-      $sede = null;
-      $docente = null;
-    }
-    // form
-    $form = $this->createForm(ColloquioType::class, $colloquio, ['formMode' => 'sede',
-      'returnUrl' => $this->generateUrl('docenti_colloqui'), 'dati' => [$sede, $docente]]);
-    $form->handleRequest($request);
-    if ($form->isSubmitted() && $form->isValid()) {
-      // imposta orario di sede
-      $orario = $em->getRepository('App\Entity\Orario')->orarioSede($form->get('sede')->getData());
-      if (!$orario) {
-        // errore: orario di sede non esiste
-        $form->addError(new FormError($trans->trans('exception.orario_sede_invalido')));
-      } else {
-        // imposta orario
-        $colloquio->setOrario($orario);
-      }
-      // controlla se esiste orario indicato
-      $ora = $em->getRepository('App\Entity\ScansioneOraria')->findOneBy(['orario' => $orario,
-        'giorno' => $colloquio->getGiorno(), 'ora' => $colloquio->getOra()]);
-      if (!$ora) {
-        // errore: ora non esiste
-        $form->addError(new FormError($trans->trans('exception.scansione_ora_invalida')));
-      }
-      if ($id == 0 && $orario) {
-        // controlla se esiste già il colloquio
-        $col = $em->getRepository('App\Entity\Colloquio')->findOneBy(['orario' => $orario,
-          'docente' => $colloquio->getDocente()]);
-        if ($col) {
-          // errore: ora non esiste
-          $form->addError(new FormError($trans->trans('exception.colloquio_duplicato')));
-        }
-      }
-      if ($form->isValid()) {
-        // ok, memorizza
-        $em->flush();
-        // messaggio
-        $this->addFlash('success', 'message.update_ok');
-        // redirect
-        return $this->redirectToRoute('docenti_colloqui');
-      }
-    }
-    // mostra la pagina di risposta
-    return $this->renderHtml('docenti', 'colloqui_edit', [], [], [$form->createView(), 'message.required_fields']);
-  }
-
-  /**
-   * Gestione della cancellazione del colloquio
-   *
-   * @param EntityManagerInterface $em Gestore delle entità
-   * @param int $id ID della classe
-   *
-   * @return Response Pagina di risposta
-   *
-   * @Route("/docenti/colloqui/delete/{id}", name="docenti_colloqui_delete",
-   *    requirements={"id": "\d+"},
-   *    methods={"GET"})
-   *
-   * @IsGranted("ROLE_AMMINISTRATORE")
-   */
-  public function colloquiDeleteAction(EntityManagerInterface $em, $id) {
-    // controlla colloquio
-    $colloquio = $em->getRepository('App\Entity\Colloquio')->find($id);
-    if (!$colloquio) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla presenza di richieste
-    $ric = $em->getRepository('App\Entity\RichiestaColloquio')->findOneByColloquio($colloquio);
-    if ($ric) {
-      // errore
-      $this->addFlash('danger', 'exception.dati_presenti');
-    } else {
-      // elimina colloquio
-      $em->remove($colloquio);
-      $em->flush();
-      // messaggio
-      $this->addFlash('success', 'message.update_ok');
-    }
-    // redirezione
-    return $this->redirectToRoute('docenti_colloqui');
   }
 
 }

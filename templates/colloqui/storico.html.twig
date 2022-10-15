@@ -1,0 +1,49 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">
+    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    <span class="sr-only">{{ 'label.close'|trans }}</span>
+  </button>
+  <h3 class="modal-title gs-h3">Richieste di colloquio per i ricevimenti passati o disabilitati</h3>
+</div>
+<div class="modal-body">
+{% for r in dati.storico %}
+  <h4 class="gs-h4 gs-mb-1">
+    <span>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}</span>
+    <span class="gs-normal">({{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }})</span>
+    {% if not r.abilitato %}- DISABILITATO{% endif %}
+  </h4>
+  <div class="panel panel-default">
+    <ul class="list-group">
+  {% for p in r.prenotazioni %}
+      <li class="list-group-item gs-pb-1 gs-pt-1">
+        <div class="row">
+          <div class="col-sm-2">{{ p.appuntamento|date('H:i') }}</div>
+          <div class="col-sm-2">{{ p.classe }}</div>
+          <div class="col-sm-4">{{ p.alunno }}</div>
+          <div class="col-sm-4">
+            {% if p.stato == 'R' %}
+                In attesa di conferma
+            {% elseif p.stato == 'C' %}
+                Confermato
+            {% elseif p.stato == 'A' %}
+                Annullato dal genitore
+            {% elseif p.stato == 'N' %}
+                Rifiutato dal docente
+            {% endif %}
+          </div>
+        </div>
+      </li>
+  {% endfor %}
+    </ul>
+  </div>
+{% else %}
+  <div class="alert alert-info" role="alert">
+    <strong class="gs-big">Non sono presenti richieste di colloquio.</strong>
+  </div>
+{% endfor %}
+</div>
+<div class="modal-footer gs-pb-3 gs-pt-3">
+  <div class="text-center">
+    <button type="button" class="btn btn-default" data-dismiss="modal"><strong>{{ 'label.close'|trans }}</strong></button>
+  </div>
+</div>

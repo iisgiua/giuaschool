@@ -17,17 +17,16 @@
     <div class="panel-body">
   {% if is_granted('ROLE_DOCENTE') %}
     {% if dati.richieste > 0 %}
-      <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1 richiesta' : 'Sono presenti '~dati.richieste~' richieste' }} di colloquio a cui rispondere: <a href="{{ path('colloqui') }}">vai alla gestione dei colloqui</a></strong></div>
+      <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1 richiesta' : 'Sono presenti '~dati.richieste~' richieste' }} di colloquio a cui rispondere: <a href="{{ path('colloqui_richieste') }}">vai alla gestione dei colloqui</a></strong></div>
     {% endif %}
     {% if dati.colloqui %}
       {% for c in dati.colloqui %}
       <div class="alert alert-success gs-mb-2" role="alert">
-        <strong class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} (classe {{ c.anno }}ª {{ c.sezione }}): {{ c.data_str }} {{ c.ora_str }}</strong>
+        <span class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }}) - {{ c.anno }}ª {{ c.sezione }}</span><br>
+        <strong>{{ c.data|format_date('full')|title }} alle {{ c.appuntamento|date('G:i') }}
+        - {{ ('label.tipo_colloquio_'~c.tipo)|trans }}: {% if c.tipo == 'D' %}<a href="{{ c.luogo }}">{{ c.luogo }}</a>{% else %}{{ c.luogo }}{% endif %}</strong>
         {% if c.messaggio is not empty %}
-        <br>Messaggio al genitore: <em>{{ c.messaggio }}</em>
-        {% endif %}
-        {% if c.dati.codice is not empty %}
-        <br>Codice riunione: <strong>{{ c.dati.codice }}</strong>
+        <br>Messaggio del docente: <em>{{ c.messaggio }}</em>
         {% endif %}
       </div>
       {% endfor %}
@@ -57,12 +56,11 @@
     {% if dati.colloqui is defined and dati.colloqui %}
       {% for c in dati.colloqui %}
       <div class="alert alert-success gs-mb-2 gs-big" role="alert">
-        Colloquio con {{ c.sesso == 'M' ? 'il prof.' : 'la prof.ssa' }} {{ c.cognome }} {{ c.nome }}: <strong>{{ c.data_str }} {{ c.ora_str }}</strong>
+        Colloquio con {{ c.sesso == 'M' ? 'il prof.' : 'la prof.ssa' }} {{ c.cognome }} {{ c.nome }}:
+        <strong>{{ c.data|format_date('full')|title }} alle {{ c.appuntamento|date('G:i') }}
+        - {{ ('label.tipo_colloquio_'~c.tipo)|trans }}: {% if c.tipo == 'D' %}<a href="{{ c.luogo }}">{{ c.luogo }}</a>{% else %}{{ c.luogo }}{% endif %}</strong>
         {% if c.messaggio is not empty %}
         <br>Messaggio del docente: <em>{{ c.messaggio }}</em>
-        {% endif %}
-        {% if c.dati.codice is not empty %}
-        <br>Codice riunione: <strong>{{ c.dati.codice }}</strong>
         {% endif %}
       </div>
       {% endfor %}

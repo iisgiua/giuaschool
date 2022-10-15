@@ -17,4 +17,3 @@ namespace App\Repository;
 class SedeRepository extends \Doctrine\ORM\EntityRepository {
 
 }
-

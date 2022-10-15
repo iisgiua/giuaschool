@@ -8,7 +8,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Cattedra;
+use App\Entity\Docente;
 
 
 /**
@@ -251,6 +251,46 @@ class DocenteRepository extends BaseRepository {
     }
     // crea lista con pagine
     return $this->paginazione($query->getQuery(), $pagina);
+  }
+
+  /**
+   * Restituisce la lista delle sedi di lavoro del docente indicato
+   *
+   * @param Docente $docente Docente di cui cercare le sedi
+   *
+   * @return array Lista delle sedi
+   */
+  public function sedi(Docente $docente): array {
+    // legge sedi
+    $sedi = $this->createQueryBuilder('d')
+      ->select('DISTINCT s.id,s.nomeBreve')
+      ->join('App\Entity\Cattedra', 'c', 'WITH', 'c.docente=d.id AND c.attiva=:attiva')
+      ->join('c.classe', 'cl')
+      ->join('cl.sede', 's')
+      ->where('d.id=:docente')
+      ->setParameters(['attiva' => 1, 'docente' => $docente])
+      ->orderBy('s.ordinamento', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    if (count($sedi) == 0) {
+      // nessuna cattedra: imposta tutte le sedi
+      $sedi = $this->_em->getRepository('App\Entity\Sede')->createQueryBuilder('s')
+        ->select('s.id,s.nomeBreve')
+        ->orderBy('s.ordinamento', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+    }
+    // crea lista
+    $listaSedi = [];
+    foreach ($sedi as $sede) {
+      $listaSedi[$sede['nomeBreve']] = $sede['id'];
+    }
+    if (count($sedi) > 1) {
+      // aggiunge opzione vuota
+      $listaSedi[''] = '';
+    }
+    // restituisce lista
+    return $listaSedi;
   }
 
 }
