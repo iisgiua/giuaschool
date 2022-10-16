@@ -714,9 +714,11 @@ class RichiesteController extends BaseController {
         ->setMessaggio($form->get('messaggio')->getData());
       // memorizzazione e log
       $dblogger->logModifica('RICHIESTE', 'Gestisce richiesta', $richiestaVecchia, $richiesta);
-      $dblogger->logAzione('ALUNNO', 'Modifica deroghe', array(
-        'Username' => $richiesta->getUtente()->getUsername(),
-        ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia));
+      if (isset($derogaVecchia)) {
+        $dblogger->logAzione('ALUNNO', 'Modifica deroghe', array(
+          'Username' => $richiesta->getUtente()->getUsername(),
+          ($tipo == 'E' ? 'Autorizza entrata' : 'Autorizza uscita') => $derogaVecchia));
+      }
       // controlla unicità
       if ($richiesta->getDefinizioneRichiesta()->getUnica() && $richiestaVecchia->getStato() == 'R') {
         // richiesta gestita deve essere una sola
