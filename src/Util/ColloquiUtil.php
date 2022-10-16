@@ -12,6 +12,7 @@ use App\Entity\Alunno;
 use App\Entity\Classe;
 use App\Entity\Colloquio;
 use App\Entity\Docente;
+use App\Entity\Genitore;
 use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -192,10 +193,11 @@ class ColloquiUtil {
    *
    * @param Classe $classe Classe dell'alunno
    * @param Alunno $alunno Alunno su cui fare i colloqui
+   * @param Genitore $genitore Genitore che ha richiesto il colloquio
    *
    * @return array Dati restituiti come array associativo
    */
-  public function colloquiGenitori(Classe $classe, Alunno $alunno): array {
+  public function colloquiGenitori(Classe $classe, Alunno $alunno, Genitore $genitore): array {
     $dati = [];
     // legge cattedre
     $cattedre = $this->em->getRepository('App\Entity\Cattedra')->createQueryBuilder('c')
@@ -233,7 +235,8 @@ class ColloquiUtil {
       }
     }
     // legge richieste
-    $dati['richieste'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->richiesteAlunno($alunno);
+    $dati['richieste'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->richiesteAlunno($alunno,
+      $genitore);
     // restituisce dati
     return $dati;
   }

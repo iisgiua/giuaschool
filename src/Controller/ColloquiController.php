@@ -511,7 +511,7 @@ class ColloquiController extends BaseController {
     $classe = $alunno->getClasse();
     if ($classe) {
       // recupera dati
-      $dati = $col->colloquiGenitori($classe, $alunno);
+      $dati = $col->colloquiGenitori($classe, $alunno, $this->getUser());
     } else {
       // nessuna classe
       $info['errore'] = $trans->trans('exception.genitori_classe_nulla', ['sex' => $alunno->getSesso() == 'M' ? 'o' : 'a']);

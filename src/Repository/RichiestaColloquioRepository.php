@@ -70,19 +70,21 @@ class RichiestaColloquioRepository extends BaseRepository {
    * Restituisce le richieste di ricevimento relative all'alunno indicato.
    *
    * @param Alunno $alunno Alunno a cui sono riferite le richieste di colloquio
+   * @param Genitore $genitore Genitore che ha richiesto il colloquio
    *
    * @return array Dati delle richieste
    */
-  public function richiesteAlunno(Alunno $alunno): array {
+  public function richiesteAlunno(Alunno $alunno, Genitore $genitore): array {
     $oggi = new \DateTime('today');
     // legge dati richieste
     $richieste = $this->createQueryBuilder('rc')
       ->select('rc.id,rc.appuntamento,rc.stato,rc.messaggio,c.id AS colloquio_id,c.tipo,c.data,c.luogo,(c.docente) AS docente_id')
       ->join('rc.alunno', 'a')
       ->join('rc.colloquio', 'c')
-      ->where('rc.alunno=:alunno AND c.abilitato=:abilitato AND c.data>=:oggi')
+      ->where('rc.alunno=:alunno AND rc.genitore=:genitore AND c.abilitato=:abilitato AND c.data>=:oggi')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['alunno' => $alunno, 'abilitato' => 1, 'oggi' => $oggi->format('Y-m-d')])
+      ->setParameters(['alunno' => $alunno, 'genitore' => $genitore, 'abilitato' => 1,
+        'oggi' => $oggi->format('Y-m-d')])
       ->getQuery()
       ->getArrayResult();
     // restituisce i dati

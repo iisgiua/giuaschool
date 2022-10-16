@@ -23,7 +23,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | Genitore | genitori_osservazioni      |
     | Genitore | genitori_deroghe           |
     | Genitore | genitori_pagelle           |
-    | Genitore | genitori_colloqui          |
+    | Genitore | colloqui_genitori          |
     | Genitore | circolari_genitori         |
     | Genitore | genitori_avvisi            |
     | Genitore | documenti_bacheca          |
@@ -63,8 +63,11 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | Docente  | documenti_programmi        |
     | Docente  | documenti_relazioni        |
     | Docente  | documenti_maggio           |
-    | Docente  | colloqui                   |
+    | Docente  | colloqui_richieste         |
     | Docente  | colloqui_gestione          |
+    | Docente  | colloqui_storico           |
+    | Docente  | colloqui_edit              |
+    | Docente  | colloqui_create            |
     | Docente  | circolari_docenti          |
     | Docente  | bacheca_avvisi             |
     | Docente  | documenti_bacheca          |
@@ -83,8 +86,6 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | Staff    | documenti_programmi        |
     | Staff    | documenti_relazioni        |
     | Staff    | documenti_maggio           |
-    | Staff    | colloqui                   |
-    | Staff    | colloqui_gestione          |
     | Staff    | circolari_docenti          |
     | Staff    | bacheca_avvisi             |
     | Staff    | documenti_bacheca          |
@@ -98,7 +99,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | Staff    | staff_studenti_situazione  |
     | Staff    | staff_studenti_statistiche |
     | Staff    | documenti_alunni           |
-    | Staff    | staff_docenti_colloqui     |
+    | Staff    | colloqui_cerca             |
     | Staff    | staff_docenti_statistiche  |
     | Staff    | documenti_docenti          |
     | Staff    | staff_password             |
@@ -117,8 +118,6 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | Preside  | documenti_programmi        |
     | Preside  | documenti_relazioni        |
     | Preside  | documenti_maggio           |
-    | Preside  | colloqui                   |
-    | Preside  | colloqui_gestione          |
     | Preside  | circolari_docenti          |
     | Preside  | bacheca_avvisi             |
     | Preside  | documenti_bacheca          |
@@ -132,7 +131,7 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per gli utenti 
     | Preside  | staff_studenti_situazione  |
     | Preside  | staff_studenti_statistiche |
     | Preside  | documenti_alunni           |
-    | Preside  | staff_docenti_colloqui     |
+    | Preside  | colloqui_cerca             |
     | Preside  | staff_docenti_statistiche  |
     | Preside  | documenti_docenti          |
     | Preside  | staff_password             |

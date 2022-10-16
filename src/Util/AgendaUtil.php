@@ -21,7 +21,6 @@ use App\Entity\AvvisoClasse;
 use App\Entity\Avviso;
 use App\Entity\AvvisoUtente;
 use App\Entity\Festivita;
-use App\Entity\RichiestaColloquio;
 
 
 /**
@@ -491,9 +490,10 @@ class AgendaUtil {
     $colloqui = $this->em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
       ->select('c.data')
       ->join('rc.colloquio', 'c')
-      ->where('rc.stato=:stato AND rc.alunno=:alunno AND MONTH(c.data)=:mese AND c.abilitato=:abilitato')
+      ->where('rc.stato=:stato AND rc.alunno=:alunno AND rc.genitore=:genitore AND MONTH(c.data)=:mese AND c.abilitato=:abilitato')
       ->orderBy('rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'mese' => $mese->format('n'), 'abilitato' => 1])
+      ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'genitore' => $genitore,
+        'mese' => $mese->format('n'), 'abilitato' => 1])
       ->getQuery()
       ->getResult();
     foreach ($colloqui as $c) {
@@ -561,9 +561,10 @@ class AgendaUtil {
         ->select('rc.id,rc.messaggio,rc.appuntamento,c.tipo,c.luogo,d.cognome,d.nome,d.sesso')
         ->join('rc.colloquio', 'c')
         ->join('c.docente', 'd')
-        ->where("rc.stato=:stato AND rc.alunno=:alunno AND c.data=:data AND c.abilitato=:abilitato")
+        ->where("rc.stato=:stato AND rc.alunno=:alunno AND rc.genitore=:genitore AND c.data=:data AND c.abilitato=:abilitato")
         ->orderBy('rc.appuntamento', 'ASC')
-        ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'data' => $data->format('Y-m-d'), 'abilitato' => 1])
+        ->setParameters(['stato' => 'C', 'alunno' => $alunno, 'genitore' => $genitore,
+          'data' => $data->format('Y-m-d'), 'abilitato' => 1])
         ->getQuery()
         ->getArrayResult();
     } elseif ($tipo == 'A') {
