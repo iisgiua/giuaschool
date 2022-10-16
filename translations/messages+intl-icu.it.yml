@@ -553,7 +553,8 @@ label.richiesta_tipo_D: Deroga orario uscita
 label.richiesta_tipo_altre: Altri moduli
 label.richiesta_tipo_tutte: Tutti i moduli
 label.richiesta_stato: Stato della richiesta
-label.richiesta_stato_IA: Nuove
+label.richiesta_stato_I: Nuove
+label.richiesta_stato_A: Annullate
 label.richiesta_stato_G: Gestite
 label.richiesta_stato_R: Rimosse
 label.richiesta_stato_tutte: Tutte

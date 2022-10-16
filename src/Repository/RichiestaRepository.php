@@ -83,13 +83,8 @@ class RichiestaRepository extends BaseRepository {
         ->setParameter('tipo', 'U');
     }
     // controllo stato
-    if ($criteri['stato'] == 'IA') {
-      // nuove (inviate o annullate)
-      $richieste
-        ->andWhere('r.stato IN (:stati)')
-        ->setParameter('stati', ['I', 'A']);
-    } elseif ($criteri['stato']) {
-      // stato definito (gestite o rimosse)
+    if ($criteri['stato']) {
+      // stato definito
       $richieste
         ->andWhere('r.stato=:stato')
         ->setParameter('stato', $criteri['stato']);
@@ -150,11 +145,11 @@ class RichiestaRepository extends BaseRepository {
       ->join('App\Entity\Alunno', 'a', 'WITH', 'a.id=r.utente')
       ->join('a.classe', 'c')
       ->join('c.sede', 's')
-      ->where('dr.abilitata=:abilitata AND dr.tipo!=:tipo AND r.stato IN (:stati)')
+      ->where('dr.abilitata=:abilitata AND dr.tipo!=:tipo AND r.stato=:stato')
       ->andWhere($sql)
       ->groupBy('s.nomeBreve')
       ->orderBy('s.ordinamento', 'ASC')
-      ->setParameters(['abilitata' => 1, 'tipo' => 'U', 'stati' => ['I', 'A']]);
+      ->setParameters(['abilitata' => 1, 'tipo' => 'U', 'stato' => 'I']);
     // controlla sede
     if ($staff->getSede()) {
       // imposta sede

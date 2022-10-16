@@ -507,7 +507,7 @@ class RichiesteController extends BaseController {
     // criteri di ricerca
     $criteri = array();
     $criteri['tipo'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/tipo', '');
-    $criteri['stato'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/stato', 'IA');
+    $criteri['stato'] = $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/stato', 'I');
     $sede = $this->em->getRepository('App\Entity\Sede')->find(
       (int) $reqstack->getSession()->get('/APP/ROUTE/richieste_gestione/sede', 0));
     $criteri['sede'] = $sede ? $sede->getId() : 0;

@@ -44,8 +44,9 @@ class FiltroType extends AbstractType {
           'required' => true))
         ->add('stato', ChoiceType::class, array('label' => 'label.richiesta_stato',
           'data' => $options['values'][1],
-          'choices' => ['label.richiesta_stato_IA' => 'IA', 'label.richiesta_stato_G' => 'G',
-            'label.richiesta_stato_R' => 'R', 'label.richiesta_stato_tutte' => ''],
+          'choices' => ['label.richiesta_stato_I' => 'I', 'label.richiesta_stato_G' => 'G',
+            'label.richiesta_stato_R' => 'R', 'label.richiesta_stato_A' => 'A', 
+            'label.richiesta_stato_tutte' => ''],
           'attr' => ['title' => 'label.richiesta_stato'],
           'label_attr' => ['class' => 'sr-only'],
         'required' => true))
