@@ -28,15 +28,15 @@ class ColloquioTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\Colloquio';
     // campi da testare
-    $this->fields = ['frequenza', 'note', 'docente', 'orario', 'giorno', 'ora', 'extra', 'dati'];
+    $this->fields = ['docente', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_colloquio' => ['id', 'creato', 'modificato', 'frequenza', 'note', 'docente_id', 'orario_id', 'giorno', 'ora', 'extra', 'dati']];
+    $this->canRead = ['gs_colloquio' => ['id', 'creato', 'modificato', 'docente_id', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato']];
     // SQL write
-    $this->canWrite = ['gs_colloquio' => ['id', 'creato', 'modificato', 'frequenza', 'note', 'docente_id', 'orario_id', 'giorno', 'ora', 'extra', 'dati']];
+    $this->canWrite = ['gs_colloquio' => ['id', 'creato', 'modificato', 'docente_id', 'data', 'inizio', 'fine', 'tipo', 'luogo', 'durata', 'numero', 'abilitato']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -67,15 +67,16 @@ class ColloquioTest extends DatabaseTestCase {
       $o[$i] = new $this->entity();
       foreach ($this->fields as $field) {
         $data[$i][$field] =
-          ($field == 'frequenza' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
-          ($field == 'note' ? $this->faker->optional($weight = 50, $default = '')->passthrough(substr($this->faker->text(), 0, 2048)) :
           ($field == 'docente' ? $this->getReference("docente_1") :
-          ($field == 'orario' ? $this->getReference("orario_1") :
-          ($field == 'giorno' ? $this->faker->randomNumber(4, false) :
-          ($field == 'ora' ? $this->faker->randomNumber(4, false) :
-          ($field == 'extra' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          ($field == 'dati' ? $this->faker->optional($weight = 50, $default = array())->passthrough(array_combine($this->faker->words($i), $this->faker->sentences($i))) :
-          null))))))));
+          ($field == 'data' ? $this->faker->dateTime() :
+          ($field == 'inizio' ? $this->faker->dateTime() :
+          ($field == 'fine' ? $this->faker->dateTime() :
+          ($field == 'tipo' ? $this->faker->randomElement(["D", "P"]) :
+          ($field == 'luogo' ? substr($this->faker->text(), 0, 2048) :
+          ($field == 'durata' ? $this->faker->numberBetween(5, 30) :
+          ($field == 'numero' ? $this->faker->numberBetween(1, 5) :
+          ($field == 'abilitato' ? $this->faker->boolean() :
+          null)))))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -90,8 +91,8 @@ class ColloquioTest extends DatabaseTestCase {
       }
       // controlla dati dopo l'aggiornamento
       sleep(1);
-      $data[$i]['frequenza'] = $this->faker->passthrough(substr($this->faker->text(), 0, 1));
-      $o[$i]->setFrequenza($data[$i]['frequenza']);
+      $data[$i]['data'] = $this->faker->dateTime();
+      $o[$i]->setData($data[$i]['data']);
       $this->em->flush();
       $this->assertNotSame($data[$i]['modificato'], $o[$i]->getModificato(), $this->entity.'::getModificato - Post-update');
     }
@@ -116,27 +117,22 @@ class ColloquioTest extends DatabaseTestCase {
   public function testMethods() {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
-    // getDato
-    $existent->setDati([]);
-    $existent->addDato('txt', 'stringa di testo');
-    $existent->addDato('int', 1234);
-    $this->assertSame('stringa di testo', $existent->getDato('txt'), $this->entity.'::getDato');
-    $this->assertSame(1234, $existent->getDato('int'), $this->entity.'::getDato');
-    $this->assertSame(null, $existent->getDato('non_esiste'), $this->entity.'::getDato');
-    // addDato
-    $existent->setDati([]);
-    $existent->addDato('txt', 'stringa di testo');
-    $existent->addDato('int', 1234);
-    $this->assertSame(['txt' => 'stringa di testo', 'int' => 1234], $existent->getDati(), $this->entity.'::addDato');
-    $existent->addDato('txt', 'altro');
-    $existent->addDato('int', 1234);
-    $this->assertSame(['txt' => 'altro', 'int' => 1234], $existent->getDati(), $this->entity.'::addDato');
-    // removeDato
-    $existent->removeDato('txt');
-    $existent->removeDato('txt');
-    $this->assertSame(['int' => 1234], $existent->getDati(), $this->entity.'::removeDato');
     // toString
-    $this->assertSame($existent->getDocente().' > '.$existent->getGiorno().':'.$existent->getOra(), (string) $existent, $this->entity.'::toString');
+    $this->assertSame($existent->getDocente().': '.$existent->getData()->format('d/m/Y').', '.
+      $existent->getInizio()->format('H:i').' - '.$existent->getFine()->format('H:i'),
+      (string) $existent, $this->entity.'::toString');
+    // datiVersione
+    $dt = [
+      'docente' => $existent->getDocente()->getId(),
+      'data' => $existent->getData()->format('d/m/Y'),
+      'inizio' => $existent->getInizio()->format('H:i'),
+      'fine' => $existent->getFine()->format('H:i'),
+      'tipo' => $existent->getTipo(),
+      'luogo' => $existent->getLuogo(),
+      'durata' => $existent->getDurata(),
+      'numero' => $existent->getNumero(),
+      'abilitato' => $existent->getAbilitato()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**
@@ -146,18 +142,6 @@ class ColloquioTest extends DatabaseTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.' - VALID OBJECT');
-    // frequenza
-    $existent->setFrequenza('*');
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Frequenza - CHOICE');
-    $existent->setFrequenza('S');
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Frequenza - VALID CHOICE');
-    // note
-    $existent->setNote(str_repeat('*', 2049));
-    $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Note - MAX LENGTH');
-    $existent->setNote(str_repeat('*', 2048));
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Note - VALID MAX LENGTH');
     // docente
     $property = $this->getPrivateProperty('App\Entity\Colloquio', 'docente');
     $property->setValue($existent, null);
@@ -165,15 +149,45 @@ class ColloquioTest extends DatabaseTestCase {
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Docente - NOT BLANK');
     $existent->setDocente($this->getReference("docente_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Docente - VALID NOT BLANK');
-    // orario
-    $existent->setOrario(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Orario - VALID NULL');
-    // giorno
-    $existent->setGiorno(22);
+    // data
+    $property = $this->getPrivateProperty('App\Entity\Colloquio', 'data');
+    $property->setValue($existent, null);
     $err = $this->val->validate($existent);
-    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Giorno - CHOICE');
-    $existent->setGiorno(1);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Giorno - VALID CHOICE');
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Data - NOT BLANK');
+    $existent->setData(new \DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID NOT BLANK');
+    $existent->setData(new \DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Data - VALID TYPE');
+    // inizio
+    $property = $this->getPrivateProperty('App\Entity\Colloquio', 'inizio');
+    $property->setValue($existent, null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Inizio - NOT BLANK');
+    $existent->setInizio(new \DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID NOT BLANK');
+    $existent->setInizio(new \DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Inizio - VALID TYPE');
+    // fine
+    $property = $this->getPrivateProperty('App\Entity\Colloquio', 'fine');
+    $property->setValue($existent, null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Fine - NOT BLANK');
+    $existent->setFine(new \DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID NOT BLANK');
+    $existent->setFine(new \DateTime());
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Fine - VALID TYPE');
+    // tipo
+    $existent->setTipo('*');
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.choice', $this->entity.'::Tipo - CHOICE');
+    $existent->setTipo('D');
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Tipo - VALID CHOICE');
+    // luogo
+    $existent->setLuogo(str_repeat('*', 2049));
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Luogo - MAX LENGTH');
+    $existent->setLuogo(str_repeat('*', 2048));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Luogo - VALID MAX LENGTH');
   }
 
 }

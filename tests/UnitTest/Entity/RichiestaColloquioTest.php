@@ -28,16 +28,16 @@ class RichiestaColloquioTest extends DatabaseTestCase {
     // nome dell'entità
     $this->entity = '\App\Entity\RichiestaColloquio';
     // campi da testare
-    $this->fields = ['appuntamento', 'durata', 'colloquio', 'alunno', 'genitore', 'genitoreAnnulla', 'stato', 'messaggio'];
+    $this->fields = ['appuntamento', 'colloquio', 'alunno', 'genitore', 'genitoreAnnulla', 'stato', 'messaggio'];
     $this->noStoredFields = [];
     $this->generatedFields = ['id', 'creato', 'modificato'];
     // fixture da caricare
     $this->fixtures = 'EntityTestFixtures';
     // SQL read
-    $this->canRead = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'durata', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio'],
+    $this->canRead = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio'],
       'gs_colloquio' => '*'];
     // SQL write
-    $this->canWrite = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'durata', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio']];
+    $this->canWrite = ['gs_richiesta_colloquio' => ['id', 'creato', 'modificato', 'appuntamento', 'colloquio_id', 'alunno_id', 'genitore_id', 'genitore_annulla_id', 'stato', 'messaggio']];
     // SQL exec
     $this->canExecute = ['START TRANSACTION', 'COMMIT'];
   }
@@ -69,14 +69,13 @@ class RichiestaColloquioTest extends DatabaseTestCase {
       foreach ($this->fields as $field) {
         $data[$i][$field] =
           ($field == 'appuntamento' ? $this->faker->dateTime() :
-          ($field == 'durata' ? $this->faker->randomNumber(4, false) :
           ($field == 'colloquio' ? $this->getReference("colloquio_1") :
           ($field == 'alunno' ? $this->getReference("alunno_1") :
           ($field == 'genitore' ? $this->getReference("genitore_1") :
           ($field == 'genitoreAnnulla' ? $this->getReference("genitore_1") :
           ($field == 'stato' ? $this->faker->passthrough(substr($this->faker->text(), 0, 1)) :
           ($field == 'messaggio' ? $this->faker->optional($weight = 50, $default = '')->text() :
-          null))))))));
+          null)))))));
         $o[$i]->{'set'.ucfirst($field)}($data[$i][$field]);
       }
       foreach ($this->generatedFields as $field) {
@@ -118,7 +117,17 @@ class RichiestaColloquioTest extends DatabaseTestCase {
     // carica oggetto esistente
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
-    $this->assertSame($existent->getAppuntamento()->format('d/m/Y H:i').', '.$existent->getColloquio(), (string) $existent, $this->entity.'::toString');
+    $this->assertSame($existent->getColloquio().', '.$existent->getAppuntamento()->format('H:i'), (string) $existent, $this->entity.'::toString');
+    // datiVersione
+    $dt = [
+      'appuntamento' => $existent->getAppuntamento()->format('H:i'),
+      'colloquio' => $existent->getColloquio()->getId(),
+      'alunno' => $existent->getAlunno()->getId(),
+      'genitore' => $existent->getGenitore()->getId(),
+      'genitoreAnnulla' => $existent->getGenitoreAnnulla() ? $existent->getGenitoreAnnulla()->getId() : '',
+      'stato' => $existent->getStato(),
+      'messaggio' => $existent->getMessaggio()];
+    $this->assertSame($dt, $existent->datiVersione(), $this->entity.'::datiVersione');
   }
 
   /**
@@ -145,11 +154,19 @@ class RichiestaColloquioTest extends DatabaseTestCase {
     $existent->setColloquio($this->getReference("colloquio_1"));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Colloquio - VALID NOT BLANK');
     // alunno
-    $existent->setAlunno(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NULL');
+    $property = $this->getPrivateProperty('App\Entity\RichiestaColloquio', 'alunno');
+    $property->setValue($existent, null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Alunno - NOT BLANK');
+    $existent->setAlunno($this->getReference("alunno_1"));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Alunno - VALID NOT BLANK');
     // genitore
-    $existent->setGenitore(null);
-    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Genitore - VALID NULL');
+    $property = $this->getPrivateProperty('App\Entity\RichiestaColloquio', 'genitore');
+    $property->setValue($existent, null);
+    $err = $this->val->validate($existent);
+    $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.notblank', $this->entity.'::Genitore - NOT BLANK');
+    $existent->setGenitore($this->getReference("genitore_1"));
+    $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Genitore - VALID NOT BLANK');
     // genitoreAnnulla
     $existent->setGenitoreAnnulla(null);
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::GenitoreAnnulla - VALID NULL');
