@@ -14,9 +14,6 @@
 
 - [Scarica l'ultimo aggiornamento](https://iisgiua.github.io/giuaschool-docs/latest-build.html)
 
-- [Vai alla DEMO](https://giuademo.x10.mx/)
-  - [Richiedi le credenziali della DEMO](https://giuademo.x10.mx/richiesta-demo/)
-
 - [Visualizza gli annunci](https://github.com/iisgiua/giuaschool/discussions/categories/annunci)
 
 - [Segnala un errore](https://github.com/iisgiua/giuaschool/issues/new?assignees=&labels=Errore&template=bug-report.md&title=)
