@@ -160,11 +160,12 @@ class StaffUtil {
       $data = $n['data']->format('Y-m-d');
       $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
       $data_str = intval(substr($data, 8)).' '.$mesi[intval(substr($data, 5, 2))];
-      $d = array();
+      $alunni = $this->em->getRepository('App\Entity\Assenza')->assentiInData($classe, $n['data']);
       $dati_periodo[$numperiodo][$data]['classe'][] = array(
         'data' => $data_str,
         'nota' => $n['testo'],
         'nota_doc' => $n['docente'],
+        'esclusi' => $alunni,
         'provvedimento' => $n['provvedimento'],
         'provvedimento_doc' => $n['docente_prov']);
     }

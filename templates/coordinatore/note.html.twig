@@ -31,8 +31,13 @@
       <tr>
         <td><strong>{{ e.data }}</strong></td>
           {% if tipo == 'classe' %}
-        <td><em>Tutta la classe</em></td>
-          {% else %}
+        <td>
+          <em>Tutta la classe</em>
+            {% if e.esclusi|length > 0 %}
+          <br>Esclusi: {% for a in e.esclusi %}{{ a }}{{ not loop.last ? ', ' }}{% endfor %}
+            {% endif %}
+        </td>
+        {% else %}
         <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
           {% endif %}
         <td><small>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></small></td>

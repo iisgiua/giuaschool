@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use App\Entity\Alunno;
+use App\Entity\Classe;
 
 
 /**
@@ -39,8 +40,10 @@ class AssenzaRepository extends BaseRepository {
    * Restituisce il numero di assenze ingiustificate
    *
    * @param Alunno $alunno Alunno di cui si vogliono eliminare le assenze
+   *
+   * @return int Numero assenze ingiustificate
    */
-  public function assenzeIngiustificate(Alunno $alunno) {
+  public function assenzeIngiustificate(Alunno $alunno): int {
     // crea query base
     $assenze = $this->createQueryBuilder('ass')
       ->select('COUNT(ass.id)')
@@ -49,6 +52,31 @@ class AssenzaRepository extends BaseRepository {
       ->getQuery()
       ->getSingleScalarResult();
     return $assenze;
+  }
+
+  /**
+   * Restituisce gli alunni della classe assenti nella data indicata
+   *
+   * @param Classe $classe Classe di cui controllare le assenze
+   * @param \DateTime $data Data del giorno in cui controllare le assenze
+   *
+   * @return array Lista degli alunni assenti
+   */
+  public function assentiInData(Classe $classe, \DateTime $data): array {
+    // crea query base
+    $assenti = $this->createQueryBuilder('ass')
+      ->select('a.cognome,a.nome')
+      ->join('ass.alunno', 'a')
+      ->where('ass.data=:data AND a.abilitato=:abilitato AND a.classe=:classe')
+      ->setParameters(['data' => $data->format('Y-m-d'), 'abilitato' => 1, 'classe' => $classe])
+      ->getQuery()
+      ->getResult();
+    $dati = [];
+    foreach ($assenti as $assente) {
+      $dati[] = $assente['cognome'].' '.$assente['nome'];
+    }
+    // restituisce dati
+    return $dati;
   }
 
 }

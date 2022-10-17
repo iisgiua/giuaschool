@@ -30,7 +30,12 @@
           <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza il registro del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
         </td>
           {% if tipo == 'classe' %}
-        <td><em>Tutta la classe</em></td>
+        <td>
+          <em>Tutta la classe</em>
+            {% if e.esclusi|length > 0 %}
+          <br>Esclusi: {% for a in e.esclusi %}{{ a }}{{ not loop.last ? ', ' }}{% endfor %}
+            {% endif %}
+        </td>
           {% else %}
         <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
           {% endif %}

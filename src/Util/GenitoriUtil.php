@@ -609,6 +609,11 @@ class GenitoriUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     $periodi = $this->regUtil->infoPeriodi();
     $dati = array();
+    // subquery per le assenze
+    $subquery = $this->em->getRepository('App\Entity\Assenza')->createQueryBuilder('ass')
+      ->select('ass.id')
+      ->where('ass.data=n.data AND ass.alunno=:alunno')
+      ->getDQL();
     // legge note di classe
     $note = $this->em->getRepository('App\Entity\Nota')->createQueryBuilder('n')
       ->select("n.data,n.testo,CONCAT(d.nome,' ',d.cognome) AS docente,n.provvedimento,CONCAT(dp.nome,' ',dp.cognome) AS docente_prov")
@@ -616,6 +621,7 @@ class GenitoriUtil {
       ->leftJoin('n.docenteProvvedimento', 'dp')
       ->leftJoin('App\Entity\CambioClasse', 'cc', 'WITH', 'cc.alunno=:alunno AND n.data BETWEEN cc.inizio AND cc.fine')
       ->where('n.tipo=:tipo AND (n.classe=:classe OR n.classe=cc.classe)')
+      ->andWhere('NOT EXISTS ('.$subquery.')')
       ->setParameters(['tipo' => 'C', 'classe' => $classe, 'alunno' => $alunno])
       ->getQuery()
       ->getArrayResult();
