@@ -6,6 +6,11 @@
   {% if dati|length == 0 %}
   <div class="alert alert-warning text-center gs-big"><strong>Non hai inserito i ricevimenti dei genitori</strong></div>
   {% else %}
+    {% for messaggio in app.flashes('avviso') %}
+  <div class="alert alert-warning gs-big gs-mb-3" role="alert">
+    <strong>{{ messaggio|trans }}</strong>
+  </div>
+    {% endfor %}
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <thead class="bg-success">
       <tr>
@@ -54,8 +59,10 @@
   </table>
   {% endif %}
   <div class="text-right gs-mt-4">
-    <a class="btn btn-primary gs-mr-3" href="{{ path('colloqui_edit') }}" role="button" title="Aggiungi un singolo ricevimento indicando data e ora"><strong>Aggiungi ricevimento singolo</strong></a>
-    <a class="btn btn-primary gs-mr-3" href="{{ path('colloqui_create') }}" role="button" title="Aggiungi più ricevimenti indicando la periodicità"><strong>Aggiungi ricevimenti periodici</strong></a>
+    <a class="btn btn-primary gs-mr-3 gs-mb-1" href="{{ path('colloqui_edit') }}" role="button" title="Aggiungi un singolo ricevimento indicando data e ora"><strong>Aggiungi ricevimento singolo</strong></a>
+    <a class="btn btn-primary gs-mr-3 gs-mb-1" href="{{ path('colloqui_create') }}" role="button" title="Aggiungi più ricevimenti indicando la periodicità"><strong>Aggiungi ricevimenti periodici</strong></a>
+    <button class="btn btn-danger gs-modal-confirm-button gs-mr-3 gs-mb-1" title="Cancella i ricevimenti disabilitati" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_delete', {tipo: 'D'}) }}" data-text="{{ 'message.colloquio_cancella_disabilitati'|trans }}"><strong>Cancella disabilitati</strong></button>
+    <button class="btn btn-danger gs-modal-confirm-button gs-mr-3 gs-mb-1" title="Cancella tutti i ricevimenti senza richieste" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_delete', {tipo: 'T'}) }}" data-text="{{ 'message.colloquio_cancella_tutti'|trans }}"><strong>Cancella tutti</strong></button>
   </div>
   {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.colloquio_modifica_con_richieste'} %}
 </div>

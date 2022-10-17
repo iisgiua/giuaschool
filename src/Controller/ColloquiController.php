@@ -365,7 +365,7 @@ class ColloquiController extends BaseController {
   }
 
   /**
-   * Cancella i dati per un ricevimento del docente.
+   * Abilita/dsabilita un ricevimento del docente.
    *
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Ricevimento da cancellare
@@ -417,8 +417,7 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function createAction(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
-                               LogHandler $dblogger): Response {
+  public function createAction(Request $request, ColloquiUtil $col, LogHandler $dblogger): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -469,14 +468,13 @@ class ColloquiController extends BaseController {
       }
       if ($form->isValid()) {
         // genera date
-        $errore = $col->generaDate($this->getUser(), $tipo, $frequenza, $durata, $giorno, $inizio, $fine, $luogo);
-        if (!empty($errore)) {
-          // errore: colloqui sospesi
-          $form->addError(new FormError($trans->trans($errore)));
-        } else {
-          // redirezione
-          return $this->redirectToRoute('colloqui_gestione');
+        $avviso = $col->generaDate($this->getUser(), $tipo, $frequenza, $durata, $giorno, $inizio, $fine, $luogo);
+        if (!empty($avviso)) {
+          // mostra avviso
+          $this->addFlash('avviso', $avviso);
         }
+        // redirezione
+        return $this->redirectToRoute('colloqui_gestione');
       }
     }
     // pagina di risposta
@@ -702,6 +700,39 @@ class ColloquiController extends BaseController {
     $info['pagina'] = $pagina;
     // pagina di risposta
     return $this->renderHtml('colloqui', 'cerca', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Cancella i ricevimenti del docente
+   *
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param string $tipo Tipo di cancellazione [D=disabilitati, T=tutti]
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/colloqui/delete/{tipo}", name="colloqui_delete",
+   *    requirements={"tipo": "D|T"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_DOCENTE")
+   */
+  public function deleteAction(LogHandler $dblogger, string $tipo): Response {
+    // legge ricevimenti
+    $inizio = \DateTime::createFromFormat('Y-m-d H:i:s',
+      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
+    $ricevimenti = $this->em->getRepository('App\Entity\Colloquio')->cancellabili($this->getUser(),
+      ($tipo == 'D' ? false : null));
+    // controlla richieste e li elimina
+    foreach ($ricevimenti as $ricevimento) {
+      // copia per log
+      $vecchioColloquio = clone $ricevimento;
+      // cancella colloquio
+      $this->em->remove($ricevimento);
+      // memorizzazione e log
+      $dblogger->logRimozione('COLLOQUI', 'Cancella ricevimento', $vecchioColloquio, $ricevimento);
+    }
+    // redirezione
+    return $this->redirectToRoute('colloqui_gestione');
   }
 
 }

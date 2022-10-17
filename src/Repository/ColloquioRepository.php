@@ -226,4 +226,37 @@ class ColloquioRepository extends BaseRepository {
     return $ora;
   }
 
+  /**
+   * Restituisce i ricevimenti senza richieste di un docente.
+   *
+   * @param Docente $docente Docente di cui cercare i ricevimenti
+   * @param bool $abilitato Se vero cerca ricevimenti abilitati, se falso quelli disabilitati, se nullo tutti
+   *
+   * @return array Lista dati restituiti
+   */
+  public function cancellabili(Docente $docente, bool $abilitato=null): array {
+    // subquery richieste
+    $subquery = $this->_em->getRepository('App\Entity\RichiestaColloquio')->createQueryBuilder('rc')
+      ->select('rc.id')
+      ->where('rc.colloquio=c.id')
+      ->getDQL();
+    // query base
+    $colloqui = $this->createQueryBuilder('c')
+      ->where('c.docente=:docente AND NOT EXISTS ('.$subquery.')')
+      ->orderBy('c.data,c.inizio', 'ASC')
+      ->setParameters(['docente' => $docente]);
+    // cerca abilitati/disabilitati
+    if ($abilitato !== null) {
+      $colloqui
+        ->andWhere('c.abilitato=:abilitato')
+        ->setParameter('abilitato', $abilitato);
+    }
+    // legge dati
+    $colloqui = $colloqui
+      ->getQuery()
+      ->getResult();
+    // restituisce dati
+    return $colloqui;
+  }
+
 }

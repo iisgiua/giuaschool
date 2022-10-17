@@ -80,12 +80,13 @@ class ColloquiUtil {
    *  @param \DateTime $fine Ora fine ricevimento
    *  @param string $luogo Luogo/link del colloquio
    *
-   *  @return string|null Errore o null se tutto ok
+   *  @return string|null Avviso su colloqui duplicati o null se tutto ok
    */
   public function generaDate(Docente $docente, string $tipo, string $frequenza, int $durata, int $giorno,
                              \DateTime $inizio, \DateTime $fine, string $luogo): ?string {
     // inizializza
     $week = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    $avviso = null;
     // inizio e fine colloqui
     $dataInizio = new \DateTime('tomorrow');
     $dataFine = (\DateTime::createFromFormat('Y-m-d H:i:s',
@@ -160,15 +161,17 @@ class ColloquiUtil {
         // controlla se esite già
         if ($this->em->getRepository('App\Entity\Colloquio')->sovrapposizione($docente, $data,
             $inizio, $fine)) {
-          // errore: sovrapposizione
-          return 'exception.colloquio_duplicato';
+          // avviso: sovrapposizione
+          $this->em->remove($colloquio);
+          $avviso = 'message.salta_colloqui_duplicati';
+        } else {
+          // memorizzazione e log
+          $this->dblogger->logCreazione('COLLOQUI', 'Aggiunge ricevimento', $colloquio);
         }
-        // memorizzazione e log
-        $this->dblogger->logCreazione('COLLOQUI', 'Aggiunge ricevimento', $colloquio);
       }
     }
-    // ok: restituisce null
-    return null;
+    // restituisce eventuale avviso
+    return $avviso;
   }
 
   /**

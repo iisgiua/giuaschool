@@ -1261,7 +1261,7 @@ message.avviso_attiva_log_level: "Attenzione: l'operazione attiverà la modalit�
 message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la modalità di debug per il log di sistema."
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
 message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
-message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
+message.cancella_modulo: Veorrà cancellato il modulo indicato. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.richieste_add: Inserisci i dati nel modulo di richiesta e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
@@ -1275,6 +1275,9 @@ message.conferma_colloquio: Conferma l'appuntamento per il colloquio individuale
 message.rifiuta_colloquio: Rifiuta l'appuntamento per il colloquio individuale. Devi inserire un messaggio di risposta per il genitore che ha fatto la richiesta.
 message.colloqui_prenota: Scegli la data desiderata e clicca sul pulsante CONFERMA, oppure premi ANNULLA per tornare indietro.
 message.modifica_colloquio: Modifica la risposta alla richiesta di colloquio. Puoi modificare lo stato della richiesta, l'ora prevista e il messaggio per i genitori.
+message.colloquio_cancella_disabilitati: Verranno cancellati i ricevimenti disabilitati che non hanno ricevuto richieste. Vuoi continuare?
+message.colloquio_cancella_tutti: Verranno cancellati tutti i ricevimenti che non hanno ricevuto richieste. Vuoi continuare?
+message.salta_colloqui_duplicati: Attenzione! Non sono state inserite le date di ricevimento che si sovrappongono a quelle già esistenti.
 
 
 ##### ERRORI #####
