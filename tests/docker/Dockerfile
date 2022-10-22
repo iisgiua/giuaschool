@@ -90,6 +90,8 @@ RUN \
   cd spid-php && \
   composer -q install --no-dev --no-progress --no-scripts && \
   composer -q clear-cache && \
+  rm -r vendor/italia/spid-smart-button/.git && \
+  rm -r vendor/italia/spid-sp-access-button/.git && \
   cd vendor/simplesamlphp/simplesamlphp/modules && \
   tar -zxf /var/www/giuaschool/tests/docker/spid-theme.tgz && \
   cd .. && \

@@ -13,4 +13,4 @@ wget -q -P ../ https://github.com/iisgiua/giuaschool/releases/download/$1/giuasc
 unzip -q ../giuaschool-release-$1.md5.zip -d ../
 find ./ -type f -exec md5sum {} + | sort -k 2 > ../giuaschool-update.md5
 diff -n ../giuaschool-release.md5 ../giuaschool-update.md5 | sed -E '/^.{,32}$/d' | sed -E 's/^.*\s+//' > ../lista.txt
-cat ../lista.txt | zip -q -y -9 -@ ../giuaschool-update.zip
+cat ../lista.txt | zip -q -9 -@ ../giuaschool-update.zip
