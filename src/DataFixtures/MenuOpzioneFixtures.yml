@@ -290,9 +290,9 @@ App\Entity\MenuOpzione:
   menu_opzione_SISTEMA6:
     ruolo: 'M'
     funzione: ''
-    nome: '__SEPARATORE__'
-    descrizione: '__SEPARATORE__'
-    url: ''
+    nome: 'Aggiornamento'
+    descrizione: 'Cerca nuovi aggiornamenti e installa la nuova versione'
+    url: 'sistema_aggiorna'
     ordinamento: 6
     abilitato: true
     icona: ''
@@ -301,9 +301,9 @@ App\Entity\MenuOpzione:
   menu_opzione_SISTEMA7:
     ruolo: 'M'
     funzione: ''
-    nome: 'Alias'
-    descrizione: 'Assumi l''identit&agrave; di un altro utente'
-    url: 'sistema_alias'
+    nome: '__SEPARATORE__'
+    descrizione: '__SEPARATORE__'
+    url: ''
     ordinamento: 7
     abilitato: true
     icona: ''
@@ -312,10 +312,21 @@ App\Entity\MenuOpzione:
   menu_opzione_SISTEMA8:
     ruolo: 'M'
     funzione: ''
+    nome: 'Alias'
+    descrizione: 'Assumi l''identit&agrave; di un altro utente'
+    url: 'sistema_alias'
+    ordinamento: 8
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA9:
+    ruolo: 'M'
+    funzione: ''
     nome: 'Password'
     descrizione: 'Cambia la password di un utente'
     url: 'sistema_password'
-    ordinamento: 8
+    ordinamento: 9
     abilitato: true
     icona: ''
     menu: '@menu_SISTEMA'

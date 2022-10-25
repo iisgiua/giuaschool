@@ -1303,4 +1303,109 @@ class SistemaController extends BaseController {
     return $this->redirectToRoute('sistema_manutenzione');
   }
 
+  /**
+   * Esegue l'aggiornamento a una nuova versione
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $step Passo della procedura
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/sistema/aggiorna/{step}", name="sistema_aggiorna",
+   *    requirements={"step": "\d+"},
+   *    defaults={"step": "0"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function aggiornaAction(Request $request, int $step): Response {
+    // inizializza
+    $dati = [];
+    $info = [];
+    // assicura che lo script non sia interrotto
+    ini_set('max_execution_time', 0);
+    $info['step'] = 0;
+    $info['prossimo'] = 0;
+    // esegue passi
+    switch($step) {
+      case 0:   // controlli iniziali
+        $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/version.yml';
+        $pagina = file_get_contents($url);
+        preg_match('/^tag:\s*([0-9\.]+)$/m', $pagina, $trovati);
+        if (count($trovati) != 2) {
+          // errore recupero versione
+          $info['tipo'] = 'danger';
+          $info['messaggio'] = 'exception.aggiornamento_no_versione';
+          break;
+        }
+        // controlla versione
+        $nuovaVersione = $trovati[1];
+        $versione = $this->em->getRepository('App\Entity\Configurazione')->getParametro('versione');
+        if (version_compare($nuovaVersione, $versione, '<=')) {
+          // sistema già aggiornato
+          $info['tipo'] = 'info';
+          $info['messaggio'] = 'message.sistema_aggiornato';
+          break;
+        }
+        // nuova versione presente
+        $dati['versione'] = $nuovaVersione;
+        if (!extension_loaded('zip')) {
+          // zip non supportato
+          $info['tipo'] = 'danger';
+          $info['messaggio'] = 'exception.aggiornamento_zip_non_presente';
+          break;
+        }
+        // controlla esistenza file
+        $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.ok';
+        if (file_exists($file)) {
+          // file già scaricato: salta il passo successivo
+          $info['tipo'] = 'success';
+          $info['messaggio'] = 'message.aggiornamento_scaricato';
+          $info['prossimo'] = 2;
+        } else {
+          // file da scaricare
+          $info['tipo'] = 'success';
+          $info['messaggio'] = 'message.aggiornamento_possibile';
+          $info['prossimo'] = 1;
+        }
+        $this->reqstack->getSession()->set('/APP/ROUTE/sistema_aggiorna/versione', $nuovaVersione);
+        break;
+      case 1:   // scarica file
+        $nuovaVersione = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/versione');
+        $dati['versione'] = $nuovaVersione;
+        $url = 'https://github.com/iisgiua/giuaschool/releases/download/v'.$nuovaVersione.
+          '/giuaschool-release-v'.$nuovaVersione.'.zip';
+        $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.zip';
+        // scarica file
+        $bytes = file_put_contents($file, file_get_contents($url));
+        if ($bytes == 0) {
+          $info['tipo'] = 'danger';
+          $info['messaggio'] = 'exception.aggiornamento_errore_file';
+          break;
+        }
+        // conferma scaricamento
+        $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.ok';
+        file_put_contents($file, '');
+        $info['tipo'] = 'success';
+        $info['messaggio'] = 'message.aggiornamento_scaricato';
+        $info['prossimo'] = 2;
+        break;
+      case 2:   // installazione
+        // salva dati per l'installazione
+        $nuovaVersione = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/versione');
+        $token = bin2hex(random_bytes(16));
+        $contenuto = 'token="'.$token.'"'."\n".
+          'version="'.$nuovaVersione.'"'."\n";
+        file_put_contents(dirname(dirname(__DIR__)).'/.gs-updating', $contenuto);
+        // reindirizza a pagina di installazione
+        $urlPath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
+          '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+        $urlPath = substr($urlPath, 0, - strlen('/sistema/aggiorna/2'));
+        return $this->redirect($urlPath."/install/update.php?token=$token&step=1");
+        break;
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
+  }
+
 }

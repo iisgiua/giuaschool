@@ -710,6 +710,9 @@ page.colloqui.prenota: Prenota Colloquio
 title.colloqui.prenota: Prenota un colloquio
 page.colloqui.cerca: Cerca Colloquio
 title.colloqui.cerca: Mostra le ore di colloquio individuale dei docenti
+page.sistema.aggiorna: Aggiorna Sistema
+title.sistema.aggiorna: Aggiornamento dell'applicazione
+
 
 
 page.agenda_compito: Agenda Compiti
@@ -1278,6 +1281,9 @@ message.modifica_colloquio: Modifica la risposta alla richiesta di colloquio. Pu
 message.colloquio_cancella_disabilitati: Verranno cancellati i ricevimenti disabilitati che non hanno ricevuto richieste. Vuoi continuare?
 message.colloquio_cancella_tutti: Verranno cancellati tutti i ricevimenti che non hanno ricevuto richieste. Vuoi continuare?
 message.salta_colloqui_duplicati: Attenzione! Non sono state inserite le date di ricevimento che si sovrappongono a quelle già esistenti.
+message.aggiornamento_possibile: E' presente la nuova versione {versione}.<br>Puoi proseguire con lo scaricamento dell'aggiornamento.
+message.sistema_aggiornato: L'applicazione risulta aggiornata all'ultima versione disponibile.
+message.aggiornamento_scaricato: La nuova versione {versione} è stata scaricata correttamente.<br> Prima di proseguire con l'installazione, assicurati di aver eseguito il backup del sistema e di aver attivato la modalità <em>manutenzione</em>.
 
 
 ##### ERRORI #####
@@ -1526,3 +1532,6 @@ exception.richiesta_esistente: Esiste già una richiesta per questa data.
 exception.richiesta_ora_invio: La richiesta deve essere inviata entro le ore {ora} del giorno precedente a quello a cui si riferisce.
 exception.colloquio_link_invalido: Il link inserito non è valido.
 exception.colloquio_no_messaggio: Non hai inserito un messaggio per i genitori.
+exception.aggiornamento_no_versione: Impossibile recuperare le informazioni sull'esistenza di aggiornamenti.
+exception.aggiornamento_zip_non_presente: E' presente la nuova versione {versione}, ma il server non permette l'aggiornamento automatico.
+exception.aggiornamento_errore_file: Impossibile scaricare l'aggiornamento.
