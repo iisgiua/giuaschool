@@ -546,6 +546,17 @@ App\Entity\MenuOpzione:
     icona: ''
     menu: '@menu_DOCENTI'
     sottoMenu:
+  menu_opzione_DOCENTI7:
+    ruolo: 'M'
+    funzione: ''
+    nome: 'Responsabili&nbsp;BES'
+    descrizione: 'Configura i responsabili BES'
+    url: 'docenti_responsabiliBes'
+    ordinamento: 7
+    abilitato: true
+    icona: ''
+    menu: '@menu_DOCENTI'
+    sottoMenu:
 
   # ----- opzioni sottomenu ALUNNI - AMMINISTRATORE -----
   menu_opzione_ALUNNI1:

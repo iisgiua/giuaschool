@@ -293,4 +293,31 @@ class DocenteRepository extends BaseRepository {
     return $listaSedi;
   }
 
+  /**
+   * Restituisce la lista dei responsabili BES secondo i criteri di ricerca indicati
+   *
+   * @param array $criteri Lista dei criteri di ricerca
+   * @param int $pagina Pagina corrente
+   *
+   * @return array Array associativo con i risultati della ricerca
+   */
+  public function responsabiliBes($criteri, $pagina=1) {
+    // crea query
+    $query = $this->createQueryBuilder('d')
+      ->where('d.responsabileBes=:responsabile AND d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside)')
+      ->orderBy('d.cognome,d.nome,d.username', 'ASC')
+      ->setParameters(['responsabile' => 1, 'nome' => $criteri['nome'].'%',
+        'cognome' => $criteri['cognome'].'%']);
+    if ($criteri['sede'] > 0) {
+      $query
+        ->join('d.responsabileBesSede', 's')
+        ->andwhere('s.id=:sede')->setParameter('sede', $criteri['sede']);
+    } elseif ($criteri['sede'] == -1) {
+      $query
+        ->andwhere('d.responsabileBesSede IS NULL');
+    }
+    // crea lista con pagine
+    return $this->paginazione($query->getQuery(), $pagina);
+  }
+
 }

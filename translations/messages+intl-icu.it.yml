@@ -334,6 +334,7 @@ label.tipo_S: Sostegno
 label.tipo_A: Attività alternativa
 label.tipo: Tipo
 label.tutte_classi: Tutte le classi
+label.tutte_sedi: Tutte le sedi
 label.tutti_destinatari: Tutti i destinatari
 label.tutti_docenti: Tutti i docenti
 label.tutti_documenti: Tutti i documenti
@@ -712,7 +713,8 @@ page.colloqui.cerca: Cerca Colloquio
 title.colloqui.cerca: Mostra le ore di colloquio individuale dei docenti
 page.sistema.aggiorna: Aggiorna Sistema
 title.sistema.aggiorna: Aggiornamento dell'applicazione
-
+page.docenti.responsabiliBes: Responsabili BES
+title.docenti.responsabiliBes: Configura i responsabili BES
 
 
 page.agenda_compito: Agenda Compiti

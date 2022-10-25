@@ -537,7 +537,7 @@ class DocentiController extends BaseController {
    *
    * @IsGranted("ROLE_AMMINISTRATORE")
    */
-   public function staffDeleteAction(EntityManagerInterface $em, $id): Response {
+  public function staffDeleteAction(EntityManagerInterface $em, $id): Response {
     // controlla utente staff
     $staff = $em->getRepository('App\Entity\Staff')->find($id);
     if (!$staff) {
@@ -1082,5 +1082,152 @@ class DocentiController extends BaseController {
     // redirezione
     return $this->redirectToRoute('docenti_cattedre');
   }
+
+  /**
+   * Configurazione dei responsabili BES
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param int $pagina Numero di pagina per la lista visualizzata
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/responsabiliBes/{pagina}", name="docenti_responsabiliBes",
+   *    requirements={"pagina": "\d+"},
+   *    defaults={"pagina": 0},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function responsabiliBesAction(Request $request, TranslatorInterface $trans, int $pagina): Response {
+    // init
+    $dati = [];
+    $info = [];
+    // recupera criteri dalla sessione
+    $criteri = array();
+    $criteri['nome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_responsabiliBes/nome', '');
+    $criteri['cognome'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_responsabiliBes/cognome', '');
+    $criteri['sede'] = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_responsabiliBes/sede');
+    $sede = ($criteri['sede'] > 0 ? $this->em->getRepository('App\Entity\Sede')->find($criteri['sede']) : null);
+    if ($pagina == 0) {
+      // pagina non definita: la cerca in sessione
+      $pagina = $this->reqstack->getSession()->get('/APP/ROUTE/docenti_responsabiliBes/pagina', 1);
+    } else {
+      // pagina specificata: la conserva in sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/pagina', $pagina);
+    }
+    // form di ricerca
+    $listaSedi = $this->em->getRepository('App\Entity\Sede')->findBy([], ['ordinamento' =>'ASC']);
+    $listaSedi[] = -1;
+    $labelSede = $trans->trans('label.tutte_sedi');
+    $form = $this->createForm(RicercaType::class, null, ['formMode' => 'ata',
+      'dati' => [$criteri['cognome'], $criteri['nome'], $sede, $listaSedi, $labelSede]]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // imposta criteri di ricerca
+      $criteri['nome'] = trim($form->get('nome')->getData());
+      $criteri['cognome'] = trim($form->get('cognome')->getData());
+      $criteri['sede'] = (is_object($form->get('sede')->getData()) ? $form->get('sede')->getData()->getId() :
+        intval($form->get('sede')->getData()));
+      $pagina = 1;
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/nome', $criteri['nome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/cognome', $criteri['cognome']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/sede', $criteri['sede']);
+      $this->reqstack->getSession()->set('/APP/ROUTE/docenti_responsabiliBes/pagina', $pagina);
+    }
+    // lista responsabili
+    $dati = $this->em->getRepository('App\Entity\Docente')->responsabiliBes($criteri, $pagina);
+    $info['pagina'] = $pagina;
+    // mostra la pagina di risposta
+    return $this->renderHtml('docenti', 'responsabiliBes', $dati, $info, [$form->createView()]);
+  }
+
+  /**
+   * Modifica i dati di configurazione dei responsabili BES
+   *
+   * @param Request $request Pagina richiesta
+   * @param int $id ID dell'utente
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/responsabiliBes/edit/{id}", name="docenti_responsabiliBes_edit",
+   *    requirements={"id": "\d+"},
+   *    defaults={"id": "0"},
+   *    methods={"GET", "POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function responsabiliBesEditAction(Request $request, $id): Response {
+    // controlla azione
+    if ($id > 0) {
+      // azione edit
+      $docente = $this->em->getRepository('App\Entity\Docente')->find($id);
+      if (!$docente) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $sede = $docente->getResponsabileBesSede();
+    } else {
+      // azione add
+      $docente = null;
+      $sede = null;
+    }
+    // form
+    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'staff',
+      'returnUrl' => $this->generateUrl('docenti_responsabiliBes'), 'dati' => [$docente, $sede] ]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      if ($docente) {
+        // modifica
+        $docente->setResponsabileBesSede($form->get('sede')->getData());
+      } else {
+        // nuovo
+        $docente = $form->get('docente')->getData();
+        $docente->setResponsabileBes(true);
+        $docente->setResponsabileBesSede($form->get('sede')->getData());
+      }
+      // memorizza dati
+      $this->em->flush();
+      // messaggio
+      $this->addFlash('success', 'message.update_ok');
+      // redirect
+      return $this->redirectToRoute('docenti_responsabiliBes');
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('docenti', 'responsabiliBes_edit', [], [], [$form->createView(),
+      'message.required_fields']);
+  }
+
+  /**
+   * Cancellazione del responsabile BES
+   *
+   * @param int $id ID dell'utente
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/docenti/responsabiliBes/delete/{id}", name="docenti_responsabiliBes_delete",
+   *    requirements={"id": "\d+"},
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function responsabiliBesDeleteAction(EntityManagerInterface $em, $id): Response {
+    // controlla utente
+    $docente = $em->getRepository('App\Entity\Docente')->find($id);
+    if (!$docente) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // toglie il ruolo di responsabile BES
+    $docente->setResponsabileBes(false);
+    $docente->setResponsabileBesSede(null);
+    // memorizza dati
+    $this->em->flush();
+    // messaggio
+    $this->addFlash('success', 'message.update_ok');
+    // redirezione
+    return $this->redirectToRoute('docenti_responsabiliBes');
+  }
+
 
 }
