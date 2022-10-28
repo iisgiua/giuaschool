@@ -394,7 +394,7 @@ class Updater {
     for($i = 0; $i < $zip->numFiles; $i++) {
       $success = true;
       if (substr($zip->getNameIndex($i), -1) != '/' ||
-          !file_exists($this->projectPath.'/'.$zip->getNameIndex($i))) {
+          !is_dir($this->projectPath.'/'.$zip->getNameIndex($i))) {
         // estrae file
         $success = $zip->extractTo('../..', [$zip->getNameIndex($i)]);
         if (!$success) {
@@ -569,12 +569,14 @@ class Updater {
     // toglie la modalità manutenzione (se presente)
     $this->setParameter('manutenzione_inizio', '');
     $this->setParameter('manutenzione_fine', '');
+    // elimina il file di sistema
+    unlink($this->projectPath.'/.gs-updating');
     // visualizza pagina
     $page['version'] = $this->sys['version'];
     $page['step'] = $step.' - Fine';
     $page['title'] = 'Procedura di installazione terminata';
     $page['success'] = 'La procedura di installazione è terminata con successo.';
-    $page['text'] = 'Ora puoi andare alla <a href="'.$urlPath.'/">pagina principale</a>.';
+    $page['text'] = 'Ora puoi andare alla <a href="'.$this->urlPath.'/">pagina principale</a>.';
     include($this->publicPath.'/install/update_page.php');
   }
 
