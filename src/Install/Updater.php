@@ -395,6 +395,11 @@ class Updater {
       $success = true;
       if (substr($zip->getNameIndex($i), -1) != '/' ||
           !is_dir($this->projectPath.'/'.$zip->getNameIndex($i))) {
+        // controlla link
+        if (is_link($this->projectPath.'/'.$zip->getNameIndex($i))) {
+          // elimina link
+          unlink($this->projectPath.'/'.$zip->getNameIndex($i));
+        }
         // estrae file
         $success = $zip->extractTo('../..', [$zip->getNameIndex($i)]);
         if (!$success) {
