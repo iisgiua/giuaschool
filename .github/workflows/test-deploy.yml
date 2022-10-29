@@ -37,7 +37,7 @@ jobs:
           docker save --output ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar gs:test
 
   test-phpunit:
-    name: Build release
+    name: PhpUnit tests
     needs: build
     runs-on: ubuntu-latest
     strategy:
