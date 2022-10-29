@@ -6,10 +6,13 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+env:
+  IMAGE_CACHE_DIR: /tmp/cache/docker-image
+
 jobs:
 
-  test-phpunit:
-    name: PhpUnit tests
+  build:
+    name: Build release
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -18,12 +21,44 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Create cache registry
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.IMAGE_CACHE_DIR }}
+          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+
       - name: Set up docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build docker image and run phpunit
+      - name: Build docker image and cache it
         run: |
           docker build -t "gs:test" -f tests/docker/Dockerfile .
+          mkdir -p ${{ env.IMAGE_CACHE_DIR }}
+          docker save --output ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar gs:test
+
+  test-phpunit:
+    name: Build release
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Create cache registry
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.IMAGE_CACHE_DIR }}
+          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+
+      - name: Docker load
+        run: |
+          docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
+
+      - name: Run phpunit tests
+        run: |
           docker run --name "gs_test" --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-phpunit.sh
           docker cp gs_test:/var/www/giuaschool/clover.xml clover.xml
 
@@ -52,7 +87,7 @@ jobs:
 
   test-behat:
     name: Behat tests
-    needs: feature-matrix
+    needs: [build, feature-matrix]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -62,6 +97,12 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Create cache registry
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.IMAGE_CACHE_DIR }}
+          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+
       - name: Set up docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -70,9 +111,12 @@ jobs:
         with:
           swap-size-gb: 5
 
-      - name: Build docker image and run behat
+      - name: Docker load
         run: |
-          docker build -t "gs:test" -f tests/docker/Dockerfile .
+          docker load --input ${{ env.IMAGE_CACHE_DIR }}/gs-image.tar
+
+      - name: Run behat tests
+        run: |
           docker run --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test tests/docker/test-behat.sh ${{ matrix.feature }}
 
   deploy:
