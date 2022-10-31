@@ -93,3 +93,10 @@ services:
         event: 'Symfony\Component\Security\Http\Event\LogoutEvent'
         dispatcher: security.event_dispatcher.main
         method: onLogoutEvent
+
+  # usato per la mail tramite PHP mail()
+  mailer.transport_factory.php:
+    class: App\Util\PhpTransportFactory
+    parent: mailer.transport_factory.abstract
+    tags:
+      - { name: 'mailer.transport_factory' }

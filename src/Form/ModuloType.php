@@ -14,7 +14,9 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
@@ -169,6 +171,34 @@ class ModuloType extends AbstractType {
           'widget' => 'single_text',
           'html5' => false,
           'attr' => ['widget' => 'gs-row-end'],
+          'required' => true));
+    } elseif ($options['formMode'] == 'email') {
+      // form configurazione email
+      $builder
+        ->add('server', ChoiceType::class, array('label' => 'label.mailserver_tipo',
+          'data' => $options['dati']['server'],
+          'choices' => ['label.mailserver_smtp' => 'smtp', 'label.mailserver_sendmail' => 'sendmail',
+            'label.mailserver_gmail' => 'gmail+smtp', 'label.mailserver_php' => 'php'],
+          'help' => 'message.mailserver_help_smtp',
+          'required' => true))
+        ->add('user', TextType::class, array('label' => 'label.mailserver_user',
+          'data' => $options['dati']['user'],
+          'attr' => ['widget' => 'gs-row-start'],
+          'required' => false))
+        ->add('password', PasswordType::class, array('label' => 'label.mailserver_password',
+          'data' => $options['dati']['password'],
+          'always_empty' => false,
+          'attr' => ['widget' => 'gs-row-end'],
+          'required' => false))
+        ->add('host', TextType::class, array('label' => 'label.mailserver_host',
+          'data' => $options['dati']['host'],
+          'attr' => ['widget' => 'gs-row-start'],
+          'required' => false))
+        ->add('port', IntegerType::class, array('label' => 'label.mailserver_port',
+          'data' => $options['dati']['port'],
+          'attr' => ['widget' => 'gs-row-end'],
+          'required' => false))
+        ->add('email', EmailType::class, array('label' => 'label.mailserver_email',
           'required' => true));
     }
     // aggiunge pulsanti al form

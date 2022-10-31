@@ -12,9 +12,9 @@ use App\Entity\Alunno;
 use App\Entity\DefinizioneScrutinio;
 use App\Entity\Docente;
 use App\Entity\Provisioning;
+use App\Entity\Scrutinio;
 use App\Entity\StoricoEsito;
 use App\Entity\StoricoVoto;
-use App\Entity\Scrutinio;
 use App\Form\ConfigurazioneType;
 use App\Form\ModuloType;
 use App\Form\UtenteType;
@@ -36,11 +36,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-
 
 /**
  * SistemaController - gestione parametri di sistema e funzioni di utlità
@@ -1406,6 +1407,147 @@ class SistemaController extends BaseController {
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
+  }
+
+  /**
+   * Configura il server per l'invio delle email
+   *
+   * @param Request $request Pagina richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param MailerInterface $mailer Gestore per l'invio delle email
+   * @param KernelInterface $kernel Gestore delle funzionalità http del kernel
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/sistema/email", name="sistema_email",
+   *    methods={"GET","POST"})
+   *
+   * @IsGranted("ROLE_AMMINISTRATORE")
+   */
+  public function emailAction(Request $request, TranslatorInterface $trans, MailerInterface $mailer,
+                              KernelInterface $kernel): Response {
+    // inizializza
+    $dati = [];
+    $info = [];
+    if ($request->isMethod('GET')) {
+      // inizializza sessione
+      $this->reqstack->getSession()->set('/APP/ROUTE/sistema_email/invio', '');
+    }
+    // legge .env
+    $envPath = $this->getParameter('kernel.project_dir').'/.env';
+    $envData = parse_ini_file($envPath);
+    // estrae configurazione
+    $dsn = parse_url($envData['MAILER_DSN'] ?? '');
+    $info['server'] = (in_array($dsn['scheme'] ?? '', ['smtp', 'sendmail', 'gmail+smtp', 'php'], true) ?
+      $dsn['scheme'] : '');
+    $info['user'] = (substr($info['server'], -4) == 'smtp') ? ($dsn['user'] ?? '') : '';
+    $info['password'] = (substr($info['server'], -4) == 'smtp') ? ($dsn['pass'] ?? '') : '';
+    $info['host'] = $info['server'] == 'smtp' ? ($dsn['host'] ?? '') : '';
+    $info['port'] = $info['server'] == 'smtp' ? ($dsn['port'] ?? null) : null;
+    $info['email'] = '';
+    // form
+    $form = $this->createForm(ModuloType::class, null, ['formMode' => 'email', 'dati' => $info]);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      // legge dati form
+      $server = $form->get('server')->getData();
+      $user = $form->get('user')->getData();
+      $password = $form->get('password')->getData();
+      $host = $form->get('host')->getData();
+      $port = $form->get('port')->getData();
+      $email = $form->get('email')->getData();
+      if (empty($this->reqstack->getSession()->get('/APP/ROUTE/sistema_email/invio'))) {
+        // controlla errori
+        if (!$server || !in_array($server, ['smtp', 'sendmail', 'gmail+smtp', 'php'], true)) {
+          $form->addError(new FormError($trans->trans('exception.mailserver_no_server')));
+        }
+        if (substr($server, -4) == 'smtp' && !$user) {
+          $form->addError(new FormError($trans->trans('exception.mailserver_no_user')));
+        }
+        if (substr($server, -4) == 'smtp' && !$password) {
+          $form->addError(new FormError($trans->trans('exception.mailserver_no_password')));
+        }
+        if ($server == 'smtp' && !$host) {
+          $form->addError(new FormError($trans->trans('exception.mailserver_no_host')));
+        }
+        if ($server == 'smtp' && !$port) {
+          $form->addError(new FormError($trans->trans('exception.mailserver_no_port')));
+        }
+        if (!$email) {
+          $form->addError(new FormError($trans->trans('exception.mailserver_no_email')));
+        }
+        if ($form->isValid()) {
+          // imposta il DSN
+          if ($server == 'sendmail' || $server == 'php') {
+            $dsn = $server.'://default';
+          } else {
+            $dsn = $server.'://'.$user.':'.$password.'@'.
+              ($server == 'smtp' ? $host.':'.$port : 'default');
+          }
+          // legge .env
+          $envData = file($envPath);
+          // modifica impostazione
+          foreach ($envData as $row => $text) {
+            if (preg_match('/^\s*MAILER_DSN\s*=/', $text)) {
+              // modifica valore
+              $envData[$row] = "MAILER_DSN='".$dsn."'\n";
+              break;
+            }
+          }
+          // scrive nuovo .env
+          unlink($envPath);
+          file_put_contents($envPath, $envData);
+          // cancella cache e ricarica .env
+          $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
+          // esegue comando
+          $application = new Application($kernel);
+          $application->setAutoExit(false);
+          $output = new BufferedOutput();
+          $status = $application->run($command, $output);
+          if ($status != 0) {
+            // errore nell'esecuzione del comando
+            $form->addError(new FormError($trans->trans('exception.mailserver_svuota_cache',
+              ['errore' => $output->fetch()])));
+          } else {
+            // ok: imposta sessione
+            $info['email'] = $email;
+            $this->reqstack->getSession()->set('/APP/ROUTE/sistema_email/invio', $email);
+          }
+        }
+      } else {
+        // spedisce mail di test
+        $text = "Questa è il testo dell'email.\n".
+          "La mail è stata spedita dall'applicazione giua@school per verificare il corretto recapito della posta elettronica.\n\n".
+          "Allegato:\n - il file di testo della licenza AGPL.\n";
+        $html = "<p><strong>Questa è il testo dell'email.</strong></p>".
+          "<p><em>La mail è stata spedita dall'applicazione <strong>giua@school</strong> per verificare il corretto recapito della posta elettronica.</em></p>".
+          "<p>Allegato:</p><ul><li>il file di testo della licenza AGPL.</li></ul>";
+        // invia per email
+        $message = (new Email())
+          ->from($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'))
+          ->to($email)
+          ->subject('[TEST] giua@school - Invio email di prova')
+          ->text($text)
+          ->html($html)
+          ->attachFromPath($this->getParameter('kernel.project_dir').'/LICENSE',
+            'LICENSE.txt', 'text/plain');
+        try {
+          // invia email
+          $mailer->send($message);
+          // invio riuscito
+          $this->addFlash('success', 'message.mailserver_email_test_ok');
+        } catch (\Exception $e) {
+          // errore sull'invio dell'email
+          $form->addError(new FormError($trans->trans('exception.mailserver_email_test',
+            ['errore' => $e->getMessage()])));
+        }
+        // resetta sessione
+        $this->reqstack->getSession()->set('/APP/ROUTE/sistema_email/invio', '');
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->renderHtml('sistema', 'email', $dati, $info, [$form->createView(),
+      'message.sistema_email']);
   }
 
 }

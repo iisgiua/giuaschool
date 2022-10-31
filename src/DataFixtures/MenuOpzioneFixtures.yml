@@ -301,32 +301,43 @@ App\Entity\MenuOpzione:
   menu_opzione_SISTEMA7:
     ruolo: 'M'
     funzione: ''
-    nome: '__SEPARATORE__'
-    descrizione: '__SEPARATORE__'
-    url: ''
+    nome: 'Configura&nbsp;email'
+    descrizione: 'Configura il server per l''invio della posta elettronica'
+    url: 'sistema_email'
     ordinamento: 7
     abilitato: true
     icona: ''
     menu: '@menu_SISTEMA'
     sottoMenu:
-  menu_opzione_SISTEMA8:
+  menu_opzione_SISTEMA10:
+    ruolo: 'M'
+    funzione: ''
+    nome: '__SEPARATORE__'
+    descrizione: '__SEPARATORE__'
+    url: ''
+    ordinamento: 10
+    abilitato: true
+    icona: ''
+    menu: '@menu_SISTEMA'
+    sottoMenu:
+  menu_opzione_SISTEMA11:
     ruolo: 'M'
     funzione: ''
     nome: 'Alias'
     descrizione: 'Assumi l''identit&agrave; di un altro utente'
     url: 'sistema_alias'
-    ordinamento: 8
+    ordinamento: 11
     abilitato: true
     icona: ''
     menu: '@menu_SISTEMA'
     sottoMenu:
-  menu_opzione_SISTEMA9:
+  menu_opzione_SISTEMA12:
     ruolo: 'M'
     funzione: ''
     nome: 'Password'
     descrizione: 'Cambia la password di un utente'
     url: 'sistema_password'
-    ordinamento: 9
+    ordinamento: 12
     abilitato: true
     icona: ''
     menu: '@menu_SISTEMA'

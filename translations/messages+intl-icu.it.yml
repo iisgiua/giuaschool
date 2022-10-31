@@ -573,6 +573,16 @@ label.colloquio_luogo: Luogo/Link
 label.colloquio_durata: Durata colloquio
 label.residenza: Residenza
 label.form_data_ricevimento: "{data} dalle {inizio} alle {fine}"
+label.mailserver_tipo: Scegli il tipo di server per le email
+label.mailserver_gmail: Usa server esterno GMAIL
+label.mailserver_smtp: Usa server esterno SMTP
+label.mailserver_sendmail: Usa server locale tramite SENDMAIL
+label.mailserver_php: Usa server locale tramite PHP
+label.mailserver_user: Nome utente per l'accesso al server
+label.mailserver_password: Password per l'accesso al server
+label.mailserver_host: Nome del server di posta
+label.mailserver_port: Porta del server di posta
+label.mailserver_email: Indirizzo a cui spedire la mail di prova
 
 
 ##### PAGINE #####
@@ -716,6 +726,8 @@ title.sistema.aggiorna: Aggiornamento dell'applicazione
 page.docenti.responsabiliBes: Responsabili BES
 title.docenti.responsabiliBes: Configura i responsabili BES
 title.docenti.responsabiliBes_edit: Modifica i dati del responsabile BES
+page.sistema.email: Configura Email
+title.sistema.email: Configura il server per l'invio delle email
 
 
 page.agenda_compito: Agenda Compiti
@@ -1287,6 +1299,12 @@ message.salta_colloqui_duplicati: Attenzione! Non sono state inserite le date di
 message.aggiornamento_possibile: E' presente la nuova versione {versione}.<br>Puoi proseguire con lo scaricamento dell'aggiornamento.
 message.sistema_aggiornato: L'applicazione risulta aggiornata all'ultima versione disponibile.
 message.aggiornamento_scaricato: La nuova versione {versione} è stata scaricata correttamente.<br> Prima di proseguire con l'installazione, assicurati di aver eseguito il backup del sistema e di aver attivato la modalità <em>manutenzione</em>.
+message.sistema_email: Modifica la configurazione per la posta elettronica ed invia una mail di prova all'indirizzo indicato.
+message.mailserver_help_gmail: "Utilizza un server esterno GMAIL; è necessario inserire il nome e la password di un utente esistente. Può essere necessario modificare le impostazioni di sicurezza dell'utente GMAIL per concedere il permesso di utilizzo dall'applicazione."
+message.mailserver_help_smtp: "Utilizza un server esterno tramite protocollo SMTP; è necessario inserire i parametri del server di posta forniti dal servizio di hosting."
+message.mailserver_help_sendmail: "Utilizza il servizio di spedizione SENDMAIL, presente sul server dell'applicazione; questa modalità non richiede l'inserimento di altri parametri."
+message.mailserver_help_php: "Utilizza il servizio di spedizione del linguaggio PHP, presente sul server dell'applicazione; questa modalità non richiede l'inserimento di altri parametri."
+message.mailserver_email_test_ok: La mail è stata inviata senza errori. Controlla la casella di posta fra qualche minuto.
 
 
 ##### ERRORI #####
@@ -1538,3 +1556,11 @@ exception.colloquio_no_messaggio: Non hai inserito un messaggio per i genitori.
 exception.aggiornamento_no_versione: Impossibile recuperare le informazioni sull'esistenza di aggiornamenti.
 exception.aggiornamento_zip_non_presente: E' presente la nuova versione {versione}, ma il server non permette l'aggiornamento automatico.
 exception.aggiornamento_errore_file: Impossibile scaricare l'aggiornamento.
+exception.mailserver_no_server: Non hai indicato un tipo di server tra quelli previsti.
+exception.mailserver_no_user: Non hai indicato il nome utente per accedere al server.
+exception.mailserver_no_password: Non hai indicato la password per accedere al server.
+exception.mailserver_no_host: Non hai indicato il nome del server.
+exception.mailserver_no_port: Non hai indicato il numero di porta del server.
+exception.mailserver_no_email: Non hai indicato l'indirizzo a cui mandare l'email di prova.
+exception.mailserver_svuota_cache: "Impossibile eseguire i comandi per svuotare la cache. [{errore}]"
+exception.mailserver_email_test: "Errore nella spedizione della mail. [{errore}]"

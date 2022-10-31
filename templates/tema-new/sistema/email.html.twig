@@ -1,0 +1,64 @@
+{% extends 'tema-new/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('tema-new/include/form.html.twig', {form: form[0], form_help: form[1]}) }}
+  {{ include('tema-new/include/modal-confirm.html.twig') }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+<script>
+$(document).ready(function() {
+  $('#modulo_server').change(function () {
+    if ($(this).val() == 'smtp') {
+      $('#modulo_user').prop('disabled', false);
+      $('#modulo_password').prop('disabled', false);
+      $('#modulo_host').prop('disabled', false);
+      $('#modulo_port').prop('disabled', false);
+      $('#modulo_server_help').html("{{ 'message.mailserver_help_smtp'|trans }}");
+    } else if ($(this).val() == 'sendmail') {
+      $('#modulo_user').val('').prop('disabled', true);
+      $('#modulo_password').val('').prop('disabled', true);
+      $('#modulo_host').val('').prop('disabled', true);
+      $('#modulo_port').val('').prop('disabled', true);
+      $('#modulo_server_help').html("{{ 'message.mailserver_help_sendmail'|trans }}");
+    } else if ($(this).val() == 'gmail+smtp') {
+      $('#modulo_user').prop('disabled', false);
+      $('#modulo_password').prop('disabled', false);
+      $('#modulo_host').val('').prop('disabled', true);
+      $('#modulo_port').val('').prop('disabled', true);
+      $('#modulo_server_help').html("{{ 'message.mailserver_help_gmail'|trans }}");
+    } else if ($(this).val() == 'php') {
+      $('#modulo_user').val('').prop('disabled', true);
+      $('#modulo_password').val('').prop('disabled', true);
+      $('#modulo_host').val('').prop('disabled', true);
+      $('#modulo_port').val('').prop('disabled', true);
+      $('#modulo_server_help').html("{{ 'message.mailserver_help_php'|trans }}");
+    }
+  }).change();
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var title = 'Invio della mail di prova';
+    $(this).find('#gs-modal-confirm-titolo').text(title);
+    var html = 'Clicca sul pulsante CONTINUA per inviare la mail di prova all\'indirizzo <strong>{{ info.email }}<strong>';
+    $(this).find('#gs-modal-confirm-contenuto').html(html);
+  });
+  $('#gs-modal-confirm-yes').click(function() {
+    $('form[name="modulo"]').submit();
+  });
+  $('#gs-modal-confirm').on('hide.bs.modal', function (event) {
+    window.location = '{{ path('sistema_email') }}';
+  });
+  // init
+  $('#modulo_server_help').attr('class', 'font-italic');
+  {% if not form[0].vars.submitted and info.password %}
+  $('label[for="modulo_password"]').addClass('active');
+  $('#modulo_password').val('{{ info.password }}');
+  {% endif %}
+  {% if app.session.get('/APP/ROUTE/sistema_email/invio') is not empty %}
+  $('#gs-modal-confirm').modal({backdrop: 'static'});
+  {% endif %}
+});
+</script>
+{% endblock %}
