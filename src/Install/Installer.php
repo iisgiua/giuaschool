@@ -998,6 +998,8 @@ class Installer {
         'user-class' => '\App\Entity\Amministratore',
         '-n' => null])
     ];
+    // ricarica ambiente modificato
+    (new Dotenv(false))->loadEnv($this->projectPath.'/.env');
     // esegue comandi
     $kernel = new Kernel('prod', false);
     $application = new Application($kernel);
