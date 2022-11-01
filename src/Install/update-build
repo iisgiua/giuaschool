@@ -2,6 +2,8 @@
 
 return [
   'fileDelete' => [
+    'public/install/page_email.php',
+    'public/install/page_email_test.php'
   ],
   'sqlCommand' => [
     "DELETE FROM gs_menu_opzione;",

@@ -12,9 +12,6 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Dotenv\Dotenv;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Kernel;
 
@@ -107,14 +104,12 @@ class Installer {
       '5' => 'pageDatabase',
       '6' => 'pageSchema',
       '7' => 'pageAdmin',
-      '8' => 'pageEmail',
-      '9' => 'pageEmailTest',
-      '10' => 'pageSpid',
-      '11' => 'pageSpidRequirements',
-      '12' => 'pageSpidData',
-      '13' => 'pageSpidConfig',
-      '14' => 'pageClean',
-      '15' => 'pageEnd',
+      '8' => 'pageSpid',
+      '9' => 'pageSpidRequirements',
+      '10' => 'pageSpidData',
+      '11' => 'pageSpidConfig',
+      '12' => 'pageClean',
+      '13' => 'pageEnd',
     ],
     'Update' => [
       '1' => 'pageInstall',
@@ -122,14 +117,12 @@ class Installer {
       '3' => 'pageMandatory',
       '4' => 'pageOptional',
       '5' => 'pageUpdate',
-      '6' => 'pageEmail',
-      '7' => 'pageEmailTest',
-      '8' => 'pageSpid',
-      '9' => 'pageSpidRequirements',
-      '10' => 'pageSpidData',
-      '11' => 'pageSpidConfig',
-      '12' => 'pageClean',
-      '13' => 'pageEnd',
+      '6' => 'pageSpid',
+      '7' => 'pageSpidRequirements',
+      '8' => 'pageSpidData',
+      '9' => 'pageSpidConfig',
+      '10' => 'pageClean',
+      '11' => 'pageEnd',
     ]
   ];
 
@@ -1170,38 +1163,6 @@ class Installer {
   }
 
   /**
-   * Invia una email di test
-   *
-   * @param string $from Indirizzo email del mittente
-   * @param string $dest Indirizzo email del destinatario
-   */
-  private function testEmail($from, $dest) {
-    $text = "Questa è il testo dell'email.\n".
-      "La mail è stata spedita dall'applicazione giua@school per verificare il corretto recapito della posta elettronica.\n\n".
-      "Allegato:\n - il file di testo della licenza AGPL.\n";
-    $html = "<p><strong>Questa è il testo dell'email.</strong></p>".
-      "<p><em>La mail è stata spedita dall'applicazione <strong>giua@school</strong> per verificare il corretto recapito della posta elettronica.</em></p>".
-      "<p>Allegato:</p><ul><li>il file di testo della licenza AGPL.</li></ul>";
-    // invia per email
-    $message = (new Email())
-      ->from($from)
-      ->to($dest)
-      ->subject('[TEST] giua@school - Invio email di prova')
-      ->text($text)
-      ->html($html)
-      ->attachFromPath($this->projectPath.'/LICENSE', 'LICENSE.txt', 'text/plain');
-    try {
-      // invia email
-      $transport = Transport::fromDsn($this->env['MAILER_DSN']);
-      $mailer = new Mailer($transport);
-      $sent = $mailer->send($message);
-    } catch (\Exception $err) {
-      $debug = $err->getMessage();
-      throw new \Exception('Errore nella spedizione della mail<br><pre>'.$debug.'</pre>', $this->step);
-    }
-  }
-
-  /**
    * Aggiorna i file alla nuova versione, cancellando quelli indicati
    *
    */
@@ -1478,123 +1439,6 @@ class Installer {
       $page['_token'] = $this->token;
       // visualizza pagina
       include('page_admin.php');
-    }
-  }
-
-  /**
-   * Pagina per la configurazione dell'email
-   *
-   */
-  private function pageEmail() {
-    if (isset($_POST['install']['next'])) {
-      // salta configurazione e test email
-      $page = [];
-      $this->step += 2;
-      $_SESSION['GS_INSTALL_STEP'] = $this->step;
-      $this->{$this->procedure[$this->mode][$this->step]}();
-    } elseif (isset($_POST['install']['step']) && $_POST['install']['step'] == $this->step) {
-      // controllo dati
-      $mail_server = (int) $_POST['install']['mail_server'];
-      if ($mail_server < 0 || $mail_server > 2) {
-        // mail server sconosciuto
-        throw new \Exception('La modalità scelta per l\'invio delle mail è sconosciuta', $this->step);
-      }
-      $mail_user = trim($_POST['install']['mail_user']);
-      if ($mail_server < 2 && empty($mail_user)) {
-        // utente non presente
-        throw new \Exception('Non è stato indicato l\'utente', $this->step);
-      }
-      if ($mail_server == 0 && strpos($mail_user, '@') !== false) {
-        // indirizzo al posto dell'utente
-        throw new \Exception('Devi indicare solo il nome utente, non l\'intero indirizzo email', $this->step);
-      }
-      $mail_password = trim($_POST['install']['mail_password']);
-      if ($mail_server < 2 && empty($mail_password)) {
-        // password non presente
-        throw new \Exception('Non è stata indicata la password dell\'utente', $this->step);
-      }
-      $mail_host = trim($_POST['install']['mail_host']);
-      if ($mail_server == 1 && empty($mail_host)) {
-        // host SMTP
-        throw new \Exception('Non è stato indicato il server SMTP', $this->step);
-      }
-      $mail_port = trim($_POST['install']['mail_port']);
-      if ($mail_server == 1 && empty($mail_port)) {
-        // porta SMTP
-        throw new \Exception('Non è stata indicata la porta del server SMTP', $this->step);
-      }
-      $mail_test = trim($_POST['install']['mail_test']);
-      if (empty($mail_test) || strpos($mail_test, '@') == false) {
-        // indirizzo di test errato
-        throw new \Exception('L\'indirizzo a cui spedire la mail di prova non è valido', $this->step);
-      }
-      // salva configurazione
-      if ($mail_server == 0) {
-        // GMAIL
-        $this->env['MAILER_DSN'] = 'gmail://'.$_POST['install']['mail_user'].':'.
-          $_POST['install']['mail_password'].'@default';
-      } elseif ($mail_server == 1) {
-        // SMTP
-        $this->env['MAILER_DSN'] = 'smtp://'.$_POST['install']['mail_user'].':'.
-          $_POST['install']['mail_password'].'@'.$_POST['install']['mail_host'].':'.
-          $_POST['install']['mail_port'];
-      } else {
-        // SENDMAIL
-        $this->env['MAILER_DSN'] = 'sendmail://default';
-      }
-      $_SESSION['GS_INSTALL_ENV'] = $this->env;
-      $this->writeEnv();
-      // ricarica ambiente modificato
-      (new Dotenv(false))->loadEnv($this->projectPath.'/.env');
-      // invia email di test
-      $this->testEmail('test@noreply.no', $mail_test);
-      // va al passo successivo
-      $page = [];
-      $this->step++;
-      $_SESSION['GS_INSTALL_STEP'] = $this->step;
-      $this->{$this->procedure[$this->mode][$this->step]}();
-    } else {
-      // imposta dati della pagina
-      $page['step'] = $this->step.' - Configurazione email';
-      $page['title'] = 'Configurazione per l\'invio delle email';
-      $page['_token'] = $this->token;
-      $page['info'] = 'Se non usi l\'invio delle email, puoi saltare questa configurazione cliccando sull\'apposito pulsante a fine pagina.';
-      $mail = parse_url($this->env['MAILER_DSN']);
-      $page['mail_server'] = ($mail['scheme'] == 'gmail' ? 0 : ($mail['scheme'] == 'smtp' ? 1 : 2));
-      $page['mail_user'] = isset($mail['user']) ? $mail['user'] : '';
-      $page['mail_password'] = isset($mail['pass']) ? $mail['pass'] : '';
-      $page['mail_host'] = isset($mail['host']) ? $mail['host'] : '';
-      $page['mail_port'] = isset($mail['port']) ? $mail['port'] : '';
-      // visualizza pagina
-      include('page_email.php');
-    }
-  }
-
-  /**
-   * Pagina per la configurazione dell'email
-   *
-   */
-  private function pageEmailTest() {
-    if (isset($_POST['install']['next'])) {
-      // va al passo successivo
-      $page = [];
-      $this->step++;
-      $_SESSION['GS_INSTALL_STEP'] = $this->step;
-      $this->{$this->procedure[$this->mode][$this->step]}();
-    } elseif (isset($_POST['install']['previous'])) {
-      // torna al passo precedente
-      $page = [];
-      $this->step--;
-      $_SESSION['GS_INSTALL_STEP'] = $this->step;
-      $this->{$this->procedure[$this->mode][$this->step]}();
-    } else {
-      // imposta dati della pagina
-      $page['step'] = $this->step.' - Test email';
-      $page['title'] = 'Test di invio di una email';
-      $page['_token'] = $this->token;
-      $page['success'] = 'La mail è stata inviata correttamente.<br>Controlla di averla ricevuta.';
-      // visualizza pagina
-      include('page_email_test.php');
     }
   }
 
