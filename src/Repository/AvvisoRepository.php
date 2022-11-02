@@ -25,14 +25,14 @@ class AvvisoRepository extends BaseRepository {
    *
    * @return array Dati formattati come array associativo
    */
-  public function statistiche(Avviso $avviso) {
+  public function statistiche(Avviso $avviso): array {
     $dati = array();
-    $dati['ata'] = array(0, 0);
-    $dati['dsga'] = array(0, 0);
-    $dati['coordinatori'] = array(0, 0);
-    $dati['docenti'] = array(0, 0);
-    $dati['genitori'] = array(0, 0);
-    $dati['alunni'] = array(0, 0);
+    $dati['ata'] = array(0, 0, []);
+    $dati['dsga'] = array(0, 0, []);
+    $dati['coordinatori'] = array(0, 0, []);
+    $dati['docenti'] = array(0, 0, []);
+    $dati['genitori'] = array(0, 0, []);
+    $dati['alunni'] = array(0, 0, []);
     $dati['classi'] = array(0, 0, []);
     // lettura utenti
     if (count($avviso->getDestinatariAta()) > 0) {
@@ -46,17 +46,34 @@ class AvvisoRepository extends BaseRepository {
         ->groupBy('ata.tipo')
         ->getQuery()
         ->getArrayResult();
-      $ata = array(0, 0);
+      $ata = array(0, 0, []);
       foreach ($utenti as $u) {
         if ($u['tipo'] == 'D') {
-          $dati['dsga'] = array($u['tot'], $u['letti']);
+          // dsga
+          $dati['dsga'] = array($u['tot'], $u['letti'], []);
         } else {
+          // altri ata
           $ata[0] += $u['tot'];
           $ata[1] += $u['letti'];
         }
       }
       if ($ata[0] > 0) {
         $dati['ata'] = $ata;
+      }
+      // dati di lettura
+      $utenti = $this->createQueryBuilder('a')
+        ->select('ata.cognome,ata.nome,ata.tipo,au.letto')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Ata', 'ata', 'WITH', 'ata.id=au.utente')
+        ->where('a.id=:avviso AND au.letto IS NOT NULL')
+        ->setParameters(['avviso' => $avviso])
+        ->orderBy('ata.cognome,ata.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($utenti as $utente) {
+        $dati[$utente['tipo'] == 'D' ? 'dsga' : 'ata'][2][] = [
+          $utente['letto'],
+          $utente['cognome'].' '.$utente['nome']];
       }
     }
     if (in_array('C', $avviso->getDestinatari())) {
@@ -70,7 +87,24 @@ class AvvisoRepository extends BaseRepository {
         ->setParameters(['avviso' => $avviso])
         ->getQuery()
         ->getArrayResult();
-      $dati['coordinatori'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      $dati['coordinatori'] = array($utenti[0]['tot'], $utenti[0]['letti'], []);
+      // dati di lettura
+      $utenti = $this->createQueryBuilder('a')
+        ->select('d.cognome,d.nome,c.anno,c.sezione,au.letto')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
+        ->join('App\Entity\Classe', 'c', 'WITH', 'c.coordinatore=d.id')
+        ->where('a.id=:avviso AND au.letto IS NOT NULL')
+        ->setParameters(['avviso' => $avviso])
+        ->orderBy('c.anno,c.sezione', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($utenti as $utente) {
+        $dati['coordinatori'][2][] = [
+          $utente['letto'],
+          $utente['anno'].'ª '.$utente['sezione'].' - '.
+          $utente['cognome'].' '.$utente['nome']];
+      }
     }
     if (in_array('D', $avviso->getDestinatari())) {
       // docenti
@@ -83,6 +117,21 @@ class AvvisoRepository extends BaseRepository {
         ->getQuery()
         ->getArrayResult();
       $dati['docenti'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      // dati di lettura
+      $utenti = $this->createQueryBuilder('a')
+        ->select('d.cognome,d.nome,au.letto')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Docente', 'd', 'WITH', 'd.id=au.utente')
+        ->where('a.id=:avviso AND au.letto IS NOT NULL')
+        ->setParameters(['avviso' => $avviso])
+        ->orderBy('d.cognome,d.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($utenti as $utente) {
+        $dati['docenti'][2][] = [
+          $utente['letto'],
+          $utente['cognome'].' '.$utente['nome']];
+      }
     }
     if (in_array('G', $avviso->getDestinatari())) {
       // genitori
@@ -95,6 +144,25 @@ class AvvisoRepository extends BaseRepository {
         ->getQuery()
         ->getArrayResult();
       $dati['genitori'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      // dati di lettura
+      $utenti = $this->createQueryBuilder('a')
+        ->select('al.cognome,al.nome,c.anno,c.sezione,g.cognome AS cognome_gen,g.nome AS nome_gen,au.letto')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Genitore', 'g', 'WITH', 'g.id=au.utente')
+        ->join('g.alunno', 'al')
+        ->join('al.classe', 'c')
+        ->where('a.id=:avviso AND au.letto IS NOT NULL')
+        ->setParameters(['avviso' => $avviso])
+        ->orderBy('c.anno,c.sezione,al.cognome,al.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($utenti as $utente) {
+        $dati['genitori'][2][] = [
+          $utente['letto'],
+          $utente['anno'].'ª '.$utente['sezione'].' - '.
+          $utente['cognome'].' '.$utente['nome'].
+          ' ('.$utente['cognome_gen'].' '.$utente['nome_gen'].')'];
+      }
     }
     if (in_array('A', $avviso->getDestinatari())) {
       // alunni
@@ -107,6 +175,23 @@ class AvvisoRepository extends BaseRepository {
         ->getQuery()
         ->getArrayResult();
       $dati['alunni'] = array($utenti[0]['tot'], $utenti[0]['letti']);
+      // dati di lettura
+      $utenti = $this->createQueryBuilder('a')
+        ->select('al.cognome,al.nome,c.anno,c.sezione,au.letto')
+        ->join('App\Entity\AvvisoUtente', 'au', 'WITH', 'au.avviso=a.id')
+        ->join('App\Entity\Alunno', 'al', 'WITH', 'al.id=au.utente')
+        ->join('al.classe', 'c')
+        ->where('a.id=:avviso AND au.letto IS NOT NULL')
+        ->setParameters(['avviso' => $avviso])
+        ->orderBy('c.anno,c.sezione,al.cognome,al.nome', 'ASC')
+        ->getQuery()
+        ->getArrayResult();
+      foreach ($utenti as $utente) {
+        $dati['alunni'][2][] = [
+          $utente['letto'],
+          $utente['anno'].'ª '.$utente['sezione'].' - '.
+          $utente['cognome'].' '.$utente['nome']];
+      }
       // classi
       $classi = $this->createQueryBuilder('a')
         ->select('COUNT(ac.id) AS tot,COUNT(ac.letto) AS letti')
