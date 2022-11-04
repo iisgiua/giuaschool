@@ -395,6 +395,10 @@ class Updater {
       $success = true;
       if (substr($zip->getNameIndex($i), -1) != '/' ||
           !is_dir($this->projectPath.'/'.$zip->getNameIndex($i))) {
+        if ($zip->getNameIndex($i) == '.htaccess') {
+          // non sovrascrive le impostazioni del server
+          continue;
+        }
         // controlla link
         if (is_link($this->projectPath.'/'.$zip->getNameIndex($i))) {
           // elimina link
