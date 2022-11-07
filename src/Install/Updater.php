@@ -475,6 +475,7 @@ class Updater {
       throw new \Exception('Errore nelle informazioni di aggiornamento per il database', $step);
     }
     // aggiorna database
+    $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0;');
     foreach ($updates['sqlCommand'] as $key => $sql) {
       // controlla modifica già eseguita
       $toDo = true;
@@ -500,6 +501,7 @@ class Updater {
         }
       }
     }
+    $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1;');    
     // visualizza pagina
     $page['version'] = $this->sys['version'];
     $page['step'] = $step.' - Aggiornamento database';

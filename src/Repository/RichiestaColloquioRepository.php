@@ -156,9 +156,10 @@ class RichiestaColloquioRepository extends BaseRepository {
     $numero = $this->createQueryBuilder('rc')
       ->select('COUNT(rc.id)')
       ->join('rc.colloquio', 'c')
-      ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato')
+      ->where('rc.stato=:stato AND c.docente=:docente AND c.abilitato=:abilitato AND c.data>=:oggi')
       ->orderBy('c.data,rc.appuntamento', 'ASC')
-      ->setParameters(['stato' => 'R', 'docente' => $docente, 'abilitato' => 1])
+      ->setParameters(['stato' => 'R', 'docente' => $docente, 'abilitato' => 1,
+        'oggi' => (new \DateTime())->format('Y-m-d')])
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati
