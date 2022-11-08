@@ -340,10 +340,12 @@ class ColloquiController extends BaseController {
       // controlla link
       if ($colloquio->getTipo() == 'D') {
         $link = $colloquio->getLuogo();
-        if (substr($link, 0, 8) != 'https://' || $link == 'https://meet.google.com/' ||
-            $link == 'https://meet.google.com') {
+        if (substr($link, -16) == 'meet.google.com/' || substr($link, -15) == 'meet.google.com') {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
+        }
+        if (substr($link, 0, 8) != 'https://' && substr($link, 0, 7) != 'http://') {
+          $colloquio->setLuogo('https://'.$link);
         }
       }
       if ($form->isValid()) {
@@ -417,7 +419,8 @@ class ColloquiController extends BaseController {
    *
    * @IsGranted("ROLE_DOCENTE")
    */
-  public function createAction(Request $request, ColloquiUtil $col, LogHandler $dblogger): Response {
+  public function createAction(Request $request, ColloquiUtil $col, LogHandler $dblogger,
+                               TranslatorInterface $trans): Response {
     // inizializza
     $info = [];
     $dati = [];
@@ -460,12 +463,14 @@ class ColloquiController extends BaseController {
       $fine = $info['orario'][$sede][$giorno][$ora]->getFine();
       // controlla link
       if ($form->get('tipo')->getData() == 'D') {
-        if (substr($luogo, 0, 8) != 'https://' || $luogo == 'https://meet.google.com/' ||
-            $luogo == 'https://meet.google.com') {
+        if (substr($luogo, -16) == 'meet.google.com/' || substr($luogo, -15) == 'meet.google.com') {
           // errore: link non valido
           $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
         }
-      }
+        if (substr($luogo, 0, 8) != 'https://' && substr($luogo, 0, 7) != 'http://') {
+          $luogo = 'https://'.$luogo;
+        }
+    }
       if ($form->isValid()) {
         // genera date
         $avviso = $col->generaDate($this->getUser(), $tipo, $frequenza, $durata, $giorno, $inizio, $fine, $luogo);
