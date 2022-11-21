@@ -57,7 +57,7 @@
           <td>
     {% for k1,v1 in v %}
       {% if v1.id in cattedre|keys %}
-            <button type="button" class="btn btn-default btn-sm gs-mr-3" title="{{ v1.anno }}ª {{ v1.sezione }} - {{ v1.corso.nome }}" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Non puoi fare una supplenza in una classe della tua cattedra"><strong>{{ v1.anno }}ª {{ v1.sezione }}</strong></button>
+            <button type="button" class="btn btn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{ v1.anno }}ª {{ v1.sezione }} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come supplente in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}"><strong>{{ v1.anno }}ª {{ v1.sezione }}</strong></button>
       {% else %}
             <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" role="button" title="{{ v1.anno }}{{ v1.sezione }} - {{ v1.corso.nome }}"><strong>{{ v1.anno }}ª {{ v1.sezione }}</strong></a>
       {% endif %}
@@ -68,6 +68,7 @@
       </tbody>
     </table>
   </div>
+  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': ''} %}
 </div>
 {% endblock %}
 
@@ -76,6 +77,13 @@
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
+  $('#gs-modal-confirm').on('show.bs.modal', function (event) {
+    var href = $(event.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+
+    var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-msg').text(text);
+  });
 });
 </script>
 {% endblock %}

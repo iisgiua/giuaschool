@@ -212,30 +212,13 @@ class ColloquiUtil {
       ->getQuery()
       ->getResult();
     // imposta i dati
-    $sostegno = [];
-    $tipoMateria = [];
     foreach ($cattedre as $cattedra) {
-      // include sostegno solo per l'alunno seguito
       $id = $cattedra->getDocente()->getId();
-      if ($cattedra->getMateria()->getTipo() != 'S' || ($alunno->getBes() == 'H' && $cattedra->getAlunno() &&
-          $cattedra->getAlunno()->getId() == $alunno->getId())) {
-        // materie curricolari o sostegno di alunno
-        if (!isset($dati['docenti'][$id])) {
-          $dati['docenti'][$id]['info'] = ''.$cattedra->getDocente();
-        }
-        $dati['docenti'][$id]['materie'][] = ($cattedra->getTipo() == 'I' ? 'Lab. ' : '').
-          $cattedra->getMateria()->getNome();
-        $tipoMateria[$id][] = $cattedra->getMateria()->getTipo();
-      } else {
-        // docente sostegno escluso
-        $sostegno[] = $id;
+      if (!isset($dati['docenti'][$id])) {
+        $dati['docenti'][$id]['info'] = ''.$cattedra->getDocente();
       }
-    }
-    foreach ($sostegno as $idSostegno) {
-      if (count($dati['docenti'][$idSostegno]['materie']) == 1 && $tipoMateria[$idSostegno][0] == 'E') {
-        // elimina docente di sostegno che non ha altre materie curricolari
-        unset($dati['docenti'][$idSostegno]);
-      }
+      $dati['docenti'][$id]['materie'][] = ($cattedra->getTipo() == 'I' ? 'Lab. ' : '').
+        $cattedra->getMateria()->getNome();
     }
     // legge richieste
     $dati['richieste'] = $this->em->getRepository('App\Entity\RichiestaColloquio')->richiesteAlunno($alunno,
