@@ -22,7 +22,7 @@ security:
         invalidate_session: false
       custom_authenticators:
         - 'App\Security\GSuiteAuthenticator'
-        - 'App\Security\FormAuthenticator'
         - 'App\Security\SpidAuthenticator'
+        - 'App\Security\FormAuthenticator'
         - 'App\Security\AppAuthenticator'
       entry_point: 'App\Security\GSuiteAuthenticator'

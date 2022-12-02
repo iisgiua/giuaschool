@@ -8,29 +8,32 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\HttpFoundation\HeaderUtils;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Entity\Alunno;
-use App\Entity\Genitore;
-use App\Entity\Docente;
-use App\Entity\Ata;
 use App\Entity\App;
+use App\Entity\Ata;
+use App\Entity\Docente;
+use App\Entity\Genitore;
+use App\Entity\Log;
 use App\Entity\Utente;
 use App\Util\ConfigLoader;
+use App\Util\LogHandler;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Csrf\TokenGenerator\UriSafeTokenGenerator;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -331,6 +334,138 @@ class AppController extends AbstractController {
     $dati['stato'] = 'OK';
     // restituisce la risposta
     return new JsonResponse($dati);
+  }
+
+  /**
+   * Passo iniziale per la connessione all'app: restituisce il token di sicurezza
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   *
+   * @return JsonResponse Informazioni di risposta
+   *
+   * @Route("/app/connect/init", name="app_connectInit",
+   *    methods={"GET"})
+   *
+   * @IsGranted("ROLE_UTENTE")
+   */
+  public function connectInitAction(Request $request, EntityManagerInterface $em,
+                                    RequestStack $reqstack): JsonResponse {
+    $res = array();
+    // legge dati
+    $userId = $this->getUser()->getId();
+    $ip = $request->getClientIp();
+    $sessionId = session_id();
+    $token = bin2hex(openssl_random_pseudo_bytes(32));
+    // crea token
+    $res['token'] = $token.'-'.$userId;
+    // memorizza token
+    $this->getUser()->setPrelogin($token.'-'.sha1($ip).'-'.$sessionId);
+    $this->getUser()->setPreloginCreato(new \DateTime());
+    $em->flush();
+    // restituisce risposta
+    return new JsonResponse($res);
+  }
+
+  /**
+   * Connette utente da app, tramite token di sicurezza
+   *
+   * @param Request $request Pagina richiesta
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param LoggerInterface $logger Gestore dei log su file
+   * @param ConfigLoader $config Gestore della configurazione su database
+   *
+   * @return Response Pagina di risposta
+   *
+   * @Route("/app/connect/{token}", name="app_connect",
+   *    methods={"GET"})
+   */
+  public function connectAction(Request $request, EntityManagerInterface $em, RequestStack $reqstack,
+                                LogHandler $dblogger, LoggerInterface $logger, ConfigLoader $config,
+                                $token): Response {
+    $errore = null;
+    // carica configurazione di sistema
+    $config->carica();
+    // modalità manutenzione
+    $ora = (new \DateTime())->format('Y-m-d H:i');
+    $manutenzione = (!empty($reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio')) &&
+      $ora >= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_inizio') &&
+      $ora <= $reqstack->getSession()->get('/CONFIG/SISTEMA/manutenzione_fine'));
+    if (!$manutenzione) {
+      try {
+        // legge dati
+        $ip = $request->getClientIp();
+        list($tokenId, $userId) = explode('-', $token);
+        $user = $em->getRepository('App\Entity\Utente')->findOneBy(['id' => $userId, 'abilitato' => 1]);
+        if (!$user) {
+          // errore utente
+          $logger->error('Utente non valido o disabilitato nella richiesta di connessione da app.', array(
+            'id' => $userId,
+            'token' => $token));
+          throw new \Exception('exception.invalid_user');
+        }
+        if (substr_count($user->getPrelogin(), '-') != 2) {
+          // errore formato prelogin
+          $logger->error('Formato prelogin errato nella richiesta di connessione da app.', array(
+            'id' => $userId,
+            'token' => $token));
+          throw new \Exception('exception.invalid_user');
+        }
+        list($tokenCheck, $hashCheck, $sessionId) = explode('-', $user->getPrelogin());
+        if ($tokenCheck != $tokenId || $hashCheck != sha1($ip)) {
+          // errore token o hash
+          $logger->error('Token o hash errato nella richiesta di connessione da app.', array(
+            'id' => $userId,
+            'token' => $token));
+          throw new \Exception('exception.invalid_user');
+        }
+        $now = new \DateTime();
+        $timeout = (clone $user->getPreloginCreato())->modify('+2 minutes');
+        if ($now > $timeout) {
+          // errore token scaduto
+          $logger->error('Token scaduto nella richiesta di connessione da app.', array(
+            'id' => $userId,
+            'token' => $token));
+          throw new \Exception('exception.token_scaduto');
+        }
+        // ok, resetta token e log azione
+        $user->setPrelogin(null);
+        $user->setPreloginCreato(null);
+        $log = (new Log())
+          ->setUtente($user)
+          ->setUsername($user->getUsername())
+          ->setRuolo($user->getRoles()[0])
+          ->setAlias(null)
+          ->setIp($ip)
+          ->setOrigine($request->attributes->get('_controller'))
+          ->setTipo('A')
+          ->setCategoria('ACCESSO')
+          ->setAzione('Connessione da app')
+          ->setDati(['Token' => $token]);
+        $em->persist($log);
+        $em->flush();
+        // connette a sessione esistente
+        if (session_status() == PHP_SESSION_ACTIVE) {
+          session_destroy();
+        }
+        session_id($sessionId);
+        session_start();
+        // redirezione a pagina iniziale
+        return $this->redirectToRoute('login_home');
+      } catch (\Exception $e) {
+        // errore
+        $errore = $e;
+      }
+    }
+    // mostra la pagina di risposta
+    return $this->render('app/login.html.twig', array(
+      'pagina_titolo' => 'page.app_login',
+      'errore' => $errore,
+      'manutenzione' => $manutenzione,
+      ));
   }
 
 }

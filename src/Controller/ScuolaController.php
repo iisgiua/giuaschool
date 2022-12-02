@@ -79,6 +79,7 @@ class ScuolaController extends BaseController {
     $info['listaPeriodi'] = $em->getRepository('App\Entity\Configurazione')->infoScrutini();
     $info['listaPeriodi']['G'] = $trans->trans('label.scrutini_periodo_G');
     $info['listaPeriodi']['R'] = $trans->trans('label.scrutini_periodo_R');
+    $info['listaPeriodi']['X'] = $trans->trans('label.scrutini_periodo_X');
     // periodo predefinito
     if (empty($periodo)) {
       // ultimo periodo configurato

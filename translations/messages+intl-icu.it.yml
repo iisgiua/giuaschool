@@ -236,6 +236,7 @@ label.periodo_S: Secondo Quadrimestre
 label.periodo_X: Scrutinio Rinviato
 label.scrutini_periodo_G: Esami giudizio sospeso
 label.scrutini_periodo_R: Sessione supplettiva
+label.scrutini_periodo_X: Scrutini rinviati
 label.piani: Piani di lavoro
 label.precedente: Precedente
 label.presenti: Alunni presenti
@@ -1564,3 +1565,4 @@ exception.mailserver_no_port: Non hai indicato il numero di porta del server.
 exception.mailserver_no_email: Non hai indicato l'indirizzo a cui mandare l'email di prova.
 exception.mailserver_svuota_cache: "Impossibile eseguire i comandi per svuotare la cache. [{errore}]"
 exception.mailserver_email_test: "Errore nella spedizione della mail. [{errore}]"
+exception.token_scaduto: E' scaduto il tempo massimo per effettuare l'autenticazione. Riprova.
