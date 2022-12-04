@@ -534,9 +534,6 @@ class GenitoriController extends AbstractController {
           // altri periodi
           $dati = $gen->pagelle($classe, $alunno, $periodo);
         }
-        // retrocompatibilità a.s. 21/22
-        //-- $info['giudizi']['P']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
-        //-- $info['giudizi']['S']['R'] = [20 => 'NC', 21 => 'Insufficiente', 22 => 'Sufficiente', 23 => 'Discreto', 24 => 'Buono', 25 => 'Distinto', 26 => 'Ottimo'];
         if ($periodo == 'A') {
           // legge valutazioni da configurazione
           $valutazioni['R'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));

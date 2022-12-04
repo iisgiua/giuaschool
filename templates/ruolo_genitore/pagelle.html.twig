@@ -129,20 +129,12 @@
         {% for materia,m in dati.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
-          {% if m.tipo == 'R' %}
-            {% if alunno.religione != 'S' and alunno.religione != 'A' %}
+          {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
         <td><strong>--</strong></td>
         <td></td>
-            {% else %}
-        <td><span class="label label-{{ dati.voti[materia].unico < 22 ? 'danger' : 'success' }} gs-big">{{ info.giudizi['P']['R'][dati.voti[materia].unico] }}</span></td>
-        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
-            {% endif %}
-          {% elseif m.tipo == 'C' %}
-        <td><span class="label label-{{ dati.voti[materia].unico < 6 ? 'danger' : 'success' }} gs-big">{{ dati.voti[materia].unico == 4 ? 'NC' : dati.voti[materia].unico }}</span></td>
-        <td></td>
           {% else %}
-        <td><span class="label label-{{ dati.voti[materia].unico < 5 ? 'danger' : (dati.voti[materia].unico < 6 ? 'warning' : 'success') }} gs-big">{{ (dati.voti[materia].unico == 0 or (m.tipo == 'E' and dati.voti[materia].unico == 3)) ? 'NC' : dati.voti[materia].unico }}</span></td>
-        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+        <td><span class="label label-{{ dati.voti[materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ dati.valutazioni[m.tipo].lista[dati.voti[materia].unico] }}</span></td>
+        <td><span class="label label-default gs-big">{{ m.tipo == 'C' ? '' : dati.voti[materia].assenze }}</span></td>
           {% endif %}
       </tr>
         {% endfor %}
@@ -228,7 +220,7 @@
         <td></td>
             {% else %}
         <td><span class="label label-{{ dati.voti[materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ dati.valutazioni[m.tipo].lista[dati.voti[materia].unico] }}</span></td>
-        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+        <td><span class="label label-default gs-big">{{ m.tipo == 'C' ? '' : dati.voti[materia].assenze }}</span></td>
             {% endif %}
       </tr>
           {% endfor %}
@@ -310,7 +302,7 @@
         <td></td>
             {% else %}
         <td><span class="label label-{{ dati.voti[materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ dati.valutazioni[m.tipo].lista[dati.voti[materia].unico] }}</span></td>
-        <td><span class="label label-default gs-big">{{ dati.voti[materia].assenze }}</span></td>
+        <td><span class="label label-default gs-big">{{ m.tipo == 'C' ? '' : dati.voti[materia].assenze }}</span></td>
             {% endif %}
       </tr>
           {% endfor %}

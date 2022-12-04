@@ -59,30 +59,10 @@
           </td>
         {% for materia,m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-          {% if m.tipo == 'R' %}
-            {% if a.religione != 'S' and a.religione != 'A' %}
+          {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
-            {% elseif dati.voti[alunno][materia].unico is not defined %}
-            <span>--</span>
-            {% else %}
-            <span class="label label-{{ dati.voti[alunno][materia].unico < 22 ? 'danger' : 'success' }}">{{ dati.valutazioni['R'].lista[dati.voti[alunno][materia].unico] }}</span>
-            {% endif %}
-          {% elseif m.tipo == 'C' %}
-            {% if dati.voti[alunno][materia].unico is not defined %}
-            <span>--</span>
-            {% elseif dati.voti[alunno][materia].unico == 4 %}
-            <span class="gs-big"><span class="label label-danger">NC</span></span>
-            {% else %}
-            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 6 ? 'danger' : 'success' }}">{{ dati.voti[alunno][materia].unico }}</span></span>
-            {% endif %}
           {% else %}
-            {% if dati.voti[alunno][materia].unico is not defined %}
-            <span>--</span>
-            {% elseif dati.voti[alunno][materia].unico == dati.valutazioni[m.tipo].min %}
-            <span class="gs-big"><span class="label label-danger">NC</span></span>
-            {% else %}
-            <span class="gs-big"><span class="label label-{{ dati.voti[alunno][materia].unico < 5 ? 'danger' : (dati.voti[alunno][materia].unico < 6 ? 'warning' : 'success')}}">{{ dati.voti[alunno][materia].unico }}</span></span>
-            {% endif %}
+            <span class="label label-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }}">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>
           {% endif %}
           </td>
         {% endfor %}
