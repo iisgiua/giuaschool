@@ -110,9 +110,11 @@ class PagelleUtil {
   public function riepilogoVotiDati(Classe $classe, $periodo) {
     $dati = array();
     if ($periodo == 'P' || $periodo == 'S') {
+      $dati['classe'] = $classe;
       // legge scrutinio
       $scrutinio = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
+      $dati['scrutinio'] = $scrutinio;
       // legge alunni
       $alunni = $this->em->getRepository('App\Entity\Alunno')->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
@@ -144,10 +146,13 @@ class PagelleUtil {
         'tipo' => $condotta->getTipo());
       // legge i voti
       $voti = $this->em->getRepository('App\Entity\VotoScrutinio')->createQueryBuilder('vs')
-        ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista) AND vs.unico IS NOT NULL')
+        ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista)')
         ->setParameters(['scrutinio' => $scrutinio, 'lista' => $scrutinio->getDato('alunni')])
         ->getQuery()
         ->getResult();
+      $somma = array();
+      $numero = array();
+      $valutazioni = $scrutinio->getDato('valutazioni');
       foreach ($voti as $v) {
         // inserisce voti/assenze
         $dati['voti'][$v->getAlunno()->getId()][$v->getMateria()->getId()] = array(
@@ -157,24 +162,20 @@ class PagelleUtil {
           'recupero' => $v->getRecupero(),
           'debito' => $v->getDebito());
         if ($v->getMateria()->getMedia()) {
-          // esclude religione dalla media
+          // calcolo medie
           if (!isset($somma[$v->getAlunno()->getId()])) {
-            $somma[$v->getAlunno()->getId()] =
-              ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4 || $v->getMateria()->getTipo() == 'E' && $v->getUnico() == 3) ? 0 : $v->getUnico();
-            $numero[$v->getAlunno()->getId()] = 1;
-          } else {
-            $somma[$v->getAlunno()->getId()] +=
-              ($v->getMateria()->getTipo() == 'C' && $v->getUnico() == 4 || $v->getMateria()->getTipo() == 'E' && $v->getUnico() == 3) ? 0 : $v->getUnico();
-            $numero[$v->getAlunno()->getId()]++;
+            $somma[$v->getAlunno()->getId()] = 0;
+            $numero[$v->getAlunno()->getId()] = 0;
           }
+          $somma[$v->getAlunno()->getId()] +=
+            ($v->getUnico() == $valutazioni[$v->getMateria()->getTipo()]['min']) ? 0 : $v->getUnico();
+          $numero[$v->getAlunno()->getId()]++;
         }
       }
       // calcola medie
       foreach ($somma as $alu=>$s) {
         $dati['medie'][$alu] = number_format($somma[$alu] / $numero[$alu], 2, ',', null);
       }
-      // data scrutinio
-      $dati['scrutinio']['data'] = $scrutinio->getData()->format('d/m/Y');
       // docenti
       $docenti = $scrutinio->getDato('docenti');
       $docenti_presenti = $scrutinio->getDato('presenze');
@@ -554,6 +555,7 @@ class PagelleUtil {
           $params = [30, 0, str_replace('/ ', "/\n", strtoupper($mat['nomeBreve'])), 0, 'L', false, 0];
           $dati['tcpdf_params'][$id] = $this->pdf->getHandler()->serializeTCPDFtagParameters($params);
         }
+        $dati['tcpdf_params']['rotate'] = $this->pdf->getHandler()->serializeTCPDFtagParameters([90]);
         // crea documento
         $html = $this->tpl->render('coordinatore/documenti/scrutinio_riepilogo_'.$periodo.'.html.twig',
           array('dati' => $dati));
@@ -667,234 +669,6 @@ class PagelleUtil {
     }
     // errore
     return null;
-  }
-
-  /**
-   * Crea il riepilogo dei voti come documento PDF
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   */
-  public function creaRiepilogoVoti_P($pdf, $classe, $classe_completa, $dati) {
-    // set margins
-    $pdf->SetMargins(10, 15, 10, true);
-    // set auto page breaks
-    $pdf->SetAutoPageBreak(false, 15);
-    // set font
-    $pdf->SetFont('helvetica', '', 10);
-    // inizio pagina
-    $pdf->SetHeaderMargin(12);
-    $pdf->SetFooterMargin(12);
-    $pdf->setHeaderFont(Array('helvetica', 'B', 6));
-    $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
-    $pdf->setFooterData(array(0,0,0), array(255,255,255));
-    $pdf->setPrintHeader(true);
-    $pdf->setPrintFooter(true);
-    $pdf->AddPage('P');
-    // intestazione pagina
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 15, 5, 0, 2, 'Classe:', 0, 'C', 'B');
-    $pdf->SetFont('helvetica', '', 10);
-    $this->cella($pdf, 85, 5, 0, 0, $classe_completa, 0, 'L', 'B');
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
-    $pdf->SetFont('helvetica', '', 10);
-    $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
-    $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 0, 5, 0, 0, 'PRIMO QUADRIMESTRE', 0, 'R', 'B');
-    $this->acapo($pdf, 5);
-    // intestazione tabella
-    $pdf->SetFont('helvetica', 'B', 8);
-    $this->cella($pdf, 10, 30, 0, 0, 'Pr.', 1, 'C', 'B');
-    $this->cella($pdf, 50, 30, 0, 0, 'Alunno', 1, 'C', 'B');
-    $pdf->SetX($pdf->GetX() - 6); // aggiusta prima posizione
-    $pdf->StartTransform();
-    $pdf->Rotate(90);
-    $numrot = 1;
-    $etichetterot = array();
-    $last_width = 6;
-    foreach ($dati['materie'] as $materia=>$mat) {
-      $text = strtoupper($mat['nomeBreve']);
-      if ($mat['tipo'] != 'R') {
-        $etichetterot[] = array('nome' => $text, 'dim' => 6);
-        $this->cella($pdf, 30, 6, -30, $last_width, $text, 1, 'L', 'M');
-        $last_width = 6;
-      } else {
-        $text = str_replace('/ ', "/\n", $text);
-        $etichetterot[] = array('nome' => $text, 'dim' => 12);
-        $this->cella($pdf, 30, 12, -30, $last_width, $text, 1, 'L', 'M');
-        $last_width = 12;
-      }
-      $numrot++;
-    }
-    $pdf->StopTransform();
-    $this->cella($pdf, 20, 30, $numrot*6+6, -$numrot*6, 'Media', 1, 'C', 'B');
-    $this->acapo($pdf, 30);
-    // dati alunni
-    $pdf->SetFont('helvetica', '', 8);
-    $numalunni = 0;
-    $next_height = 26;
-    foreach ($dati['alunni'] as $idalunno=>$alu) {
-      // nuovo alunno
-      $numalunni++;
-      $this->cella($pdf, 10, 11, 0, 0, $numalunni, 1, 'C', 'T');
-      $nomealunno = strtoupper($alu['cognome'].' '.$alu['nome']);
-      $sessoalunno = $alu['sesso'];
-      $dataalunno = $alu['dataNascita']->format('d/m/Y');
-      $this->cella($pdf, 50, 11, 0, 0, $nomealunno, 1, 'L', 'T');
-      $this->cella($pdf, 50, 11, -50, 0, $dataalunno, 1, 'L', 'B');
-      $this->cella($pdf, 50, 11, -50, 0, 'Assenze ->', 1, 'R', 'B');
-      $pdf->SetXY($pdf->GetX(), $pdf->GetY() + 5.50);
-      // voti e assenze
-      foreach ($dati['materie'] as $idmateria=>$mat) {
-        $pdf->SetTextColor(0,0,0);
-        $voto = '';
-        $assenze = '';
-        if ($mat['tipo'] == 'R') {
-          // religione
-          if ($alu['religione'] != 'S' && $alu['religione'] != 'A') {
-            $voto = '///';
-            $assenze = '';
-          } else {
-            $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-            $assenze = $dati['voti'][$idalunno][$idmateria]['assenze'];
-            switch ($voto) {
-              case 20:
-                $pdf->SetTextColor(255,0,0);
-                $voto = 'NC';
-                break;
-              case 21:
-                $pdf->SetTextColor(255,0,0);
-                $voto = 'Insuff.';
-                break;
-              case 22:
-                $voto = 'Suff.';
-                break;
-              case 23:
-                $voto = 'Discreto';
-                break;
-              case 24:
-                $voto = 'Buono';
-                break;
-              case 25:
-                $voto = 'Distinto';
-                break;
-              case 26:
-                $voto = 'Ottimo';
-                break;
-            }
-          }
-          // voto religione
-          $this->cella($pdf, 12, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 12, 5.50, -12, 5.50, $assenze, 1, 'C', 'M');
-        } elseif ($mat['tipo'] == 'C') {
-          // condotta
-          $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-          $assenze = '';
-          switch ($voto) {
-            case 4:
-              $voto = 'NC';
-              $pdf->SetTextColor(255,0,0);
-              break;
-            case 5:
-              $pdf->SetTextColor(255,0,0);
-              break;
-          }
-          // voto numerico
-          $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 6, 5.50, -6, 5.50, '', 1, 'C', 'M');
-        } elseif ($mat['tipo'] == 'E') {
-          // Ed.Civica
-          $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-          $assenze = $dati['voti'][$idalunno][$idmateria]['assenze'];
-          switch ($voto) {
-            case 3:
-              $voto = 'NC';
-              $pdf->SetTextColor(255,0,0);
-              break;
-            case 4:
-            case 5:
-              $pdf->SetTextColor(255,0,0);
-              break;
-          }
-          // voto numerico
-          $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 6, 5.50, -6, 5.50, $assenze, 1, 'C', 'M');
-        } else {
-          // altre materie
-          $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-          $assenze = $dati['voti'][$idalunno][$idmateria]['assenze'];
-          switch ($voto) {
-            case 0:
-              $voto = 'NC';
-              $pdf->SetTextColor(255,0,0);
-              break;
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-              $pdf->SetTextColor(255,0,0);
-              break;
-          }
-          // voto numerico
-          $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 6, 5.50, -6, 5.50, $assenze, 1, 'C', 'M');
-        }
-      }
-      // media
-      $this->cella($pdf, 20, 5.50, 0, -5.50, $dati['medie'][$idalunno], 1, 'C', 'M');
-      $this->cella($pdf, 20, 5.50, -20, 5.50, '', 1, 'C', 'M');
-      // nuova riga
-      if ($numalunni < count($dati['alunni'])) {
-        $this->acapo($pdf, 5.50, $next_height, $etichetterot, [10, 50, 20, false]);
-      } else {
-        $this->acapo($pdf, 5.50, $next_height);
-      }
-    }
-    // firme docenti
-    $this->acapo($pdf, 5);
-    $next_height = 24;
-    $cont = 0;
-    foreach ($dati['docenti'] as $iddoc=>$doc) {
-      if ($cont % 3 == 0) {
-        $html = '<table border="0" cellpadding="0" style="font-family:helvetica;font-size:9pt"><tr>';
-      }
-      $html .= '<td width="33%" align="center">(<em>'.$doc.'</em>)<br><br>______________________________<br></td>';
-      $cont++;
-      if ($cont % 3 == 0) {
-        $html .= '</tr></table>';
-        $this->acapo($pdf, 0, $next_height);
-        $pdf->writeHTML($html, true, false, false, false, 'C');
-      }
-    }
-    if ($cont % 3 > 0) {
-      while ($cont % 3 > 0) {
-        $html .= '<td width="33%"></td>';
-        $cont++;
-      }
-      $html .= '</tr></table>';
-      $this->acapo($pdf, 0, $next_height);
-      $pdf->writeHTML($html, true, false, false, false, 'C');
-    }
-    // data e firma presidente
-    $this->acapo($pdf, 10, 30);
-    $datascrutinio = $dati['scrutinio']['data'];
-    $html = '<table border="0" cellpadding="0" style="font-family:helvetica;font-size:11pt">'.
-      '<tr nobr="true">'.
-        '<td width="20%">Data &nbsp;&nbsp;<u>&nbsp;&nbsp;'.$datascrutinio.'&nbsp;&nbsp;</u></td>'.
-        '<td width="30%">&nbsp;</td>'.
-        '<td width="50%" align="center">Il Presidente<br><em>('.$dati['presidente_nome'].')</em><br><br>______________________________<br></td>'.
-      '</tr></table>';
-    $pdf->writeHTML($html, true, false, false, false, 'C');
   }
 
   /**
@@ -1980,17 +1754,16 @@ class PagelleUtil {
    */
   public function debitiDati(Classe $classe, Alunno $alunno, $periodo) {
     $dati = array();
-    $dati['valutazioni'] = ['NC', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-      null, null, null, null, null, null, null, null, null,
-      'Non classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'];
     if ($periodo == 'P' || $periodo == 'S') {
       // dati classe
       $dati['classe'] = $classe;
       // dati alunno
       $dati['alunno'] = $alunno;
+      $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
       // dati scrutinio
       $dati['scrutinio'] = $this->em->getRepository('App\Entity\Scrutinio')->findOneBy(['classe' => $classe,
         'periodo' => $periodo, 'stato' => 'C']);
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
       // legge materie
       $materie = $this->em->getRepository('App\Entity\Materia')->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.tipo')
@@ -3196,234 +2969,6 @@ class PagelleUtil {
     }
     // errore
     return null;
-  }
-
-  /**
-   * Crea il riepilogo dei voti come documento PDF
-   *
-   * @param TCPDF $pdf Gestore del documento PDF
-   * @param string $classe Nome della classe
-   * @param string $classe_completa Nome della classe con corso e sede
-   * @param array $dati Dati dello scrutinio
-   */
-  public function creaRiepilogoVoti_S($pdf, $classe, $classe_completa, $dati) {
-    // set margins
-    $pdf->SetMargins(10, 15, 10, true);
-    // set auto page breaks
-    $pdf->SetAutoPageBreak(false, 15);
-    // set font
-    $pdf->SetFont('helvetica', '', 10);
-    // inizio pagina
-    $pdf->SetHeaderMargin(12);
-    $pdf->SetFooterMargin(12);
-    $pdf->setHeaderFont(Array('helvetica', 'B', 6));
-    $pdf->setFooterFont(Array('helvetica', '', 8));
-    $pdf->setHeaderData('', 0, $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione')."      ***      RIEPILOGO VOTI CLASSE ".$classe, '', array(0,0,0), array(255,255,255));
-    $pdf->setFooterData(array(0,0,0), array(255,255,255));
-    $pdf->setPrintHeader(true);
-    $pdf->setPrintFooter(true);
-    $pdf->AddPage('P');
-    // intestazione pagina
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 15, 5, 0, 2, 'Classe:', 0, 'C', 'B');
-    $pdf->SetFont('helvetica', '', 10);
-    $this->cella($pdf, 85, 5, 0, 0, $classe_completa, 0, 'L', 'B');
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 31, 5, 0, 0, 'Anno Scolastico:', 0, 'C', 'B');
-    $pdf->SetFont('helvetica', '', 10);
-    $as = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
-    $this->cella($pdf, 20, 5, 0, 0, $as, 0, 'L', 'B');
-    $pdf->SetFont('helvetica', 'B', 10);
-    $this->cella($pdf, 0, 5, 0, 0, $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome'), 0, 'R', 'B');
-    $this->acapo($pdf, 5);
-    // intestazione tabella
-    $pdf->SetFont('helvetica', 'B', 8);
-    $this->cella($pdf, 10, 30, 0, 0, 'Pr.', 1, 'C', 'B');
-    $this->cella($pdf, 50, 30, 0, 0, 'Alunno', 1, 'C', 'B');
-    $pdf->SetX($pdf->GetX() - 6); // aggiusta prima posizione
-    $pdf->StartTransform();
-    $pdf->Rotate(90);
-    $numrot = 1;
-    $etichetterot = array();
-    $last_width = 6;
-    foreach ($dati['materie'] as $materia=>$mat) {
-      $text = strtoupper($mat['nomeBreve']);
-      if ($mat['tipo'] != 'R') {
-        $etichetterot[] = array('nome' => $text, 'dim' => 6);
-        $this->cella($pdf, 30, 6, -30, $last_width, $text, 1, 'L', 'M');
-        $last_width = 6;
-      } else {
-        $text = str_replace('/ ', "/\n", $text);
-        $etichetterot[] = array('nome' => $text, 'dim' => 12);
-        $this->cella($pdf, 30, 12, -30, $last_width, $text, 1, 'L', 'M');
-        $last_width = 12;
-      }
-      $numrot++;
-    }
-    $pdf->StopTransform();
-    $this->cella($pdf, 20, 30, $numrot*6+6, -$numrot*6, 'Media', 1, 'C', 'B');
-    $this->acapo($pdf, 30);
-    // dati alunni
-    $pdf->SetFont('helvetica', '', 8);
-    $numalunni = 0;
-    $next_height = 26;
-    foreach ($dati['alunni'] as $idalunno=>$alu) {
-      // nuovo alunno
-      $numalunni++;
-      $this->cella($pdf, 10, 11, 0, 0, $numalunni, 1, 'C', 'T');
-      $nomealunno = strtoupper($alu['cognome'].' '.$alu['nome']);
-      $sessoalunno = $alu['sesso'];
-      $dataalunno = $alu['dataNascita']->format('d/m/Y');
-      $this->cella($pdf, 50, 11, 0, 0, $nomealunno, 1, 'L', 'T');
-      $this->cella($pdf, 50, 11, -50, 0, $dataalunno, 1, 'L', 'B');
-      $this->cella($pdf, 50, 11, -50, 0, 'Assenze ->', 1, 'R', 'B');
-      $pdf->SetXY($pdf->GetX(), $pdf->GetY() + 5.50);
-      // voti e assenze
-      foreach ($dati['materie'] as $idmateria=>$mat) {
-        $pdf->SetTextColor(0,0,0);
-        $voto = '';
-        $assenze = '';
-        if ($mat['tipo'] == 'R') {
-          // religione
-          if ($alu['religione'] != 'S' && $alu['religione'] != 'A') {
-            $voto = '///';
-            $assenze = '';
-          } else {
-            $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-            $assenze = $dati['voti'][$idalunno][$idmateria]['assenze'];
-            switch ($voto) {
-              case 20:
-                $pdf->SetTextColor(255,0,0);
-                $voto = 'NC';
-                break;
-              case 21:
-                $pdf->SetTextColor(255,0,0);
-                $voto = 'Insuff.';
-                break;
-              case 22:
-                $voto = 'Suff.';
-                break;
-              case 23:
-                $voto = 'Discreto';
-                break;
-              case 24:
-                $voto = 'Buono';
-                break;
-              case 25:
-                $voto = 'Distinto';
-                break;
-              case 26:
-                $voto = 'Ottimo';
-                break;
-            }
-          }
-          // voto religione
-          $this->cella($pdf, 12, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 12, 5.50, -12, 5.50, $assenze, 1, 'C', 'M');
-        } elseif ($mat['tipo'] == 'C') {
-          // condotta
-          $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-          $assenze = '';
-          switch ($voto) {
-            case 4:
-              $voto = 'NC';
-              $pdf->SetTextColor(255,0,0);
-              break;
-            case 5:
-              $pdf->SetTextColor(255,0,0);
-              break;
-          }
-          // voto numerico
-          $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 6, 5.50, -6, 5.50, '', 1, 'C', 'M');
-        } elseif ($mat['tipo'] == 'E') {
-          // Ed.Civica
-          $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-          $assenze = $dati['voti'][$idalunno][$idmateria]['assenze'];
-          switch ($voto) {
-            case 3:
-              $voto = 'NC';
-              $pdf->SetTextColor(255,0,0);
-              break;
-            case 4:
-            case 5:
-              $pdf->SetTextColor(255,0,0);
-              break;
-          }
-          // voto numerico
-          $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 6, 5.50, -6, 5.50, $assenze, 1, 'C', 'M');
-        } else {
-          // altre materie
-          $voto = $dati['voti'][$idalunno][$idmateria]['unico'];
-          $assenze = $dati['voti'][$idalunno][$idmateria]['assenze'];
-          switch ($voto) {
-            case 0:
-              $voto = 'NC';
-              $pdf->SetTextColor(255,0,0);
-              break;
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-              $pdf->SetTextColor(255,0,0);
-              break;
-          }
-          // voto numerico
-          $this->cella($pdf, 6, 5.50, 0, -5.50, $voto, 1, 'C', 'M');
-          $pdf->SetTextColor(0,0,0);
-          $this->cella($pdf, 6, 5.50, -6, 5.50, $assenze, 1, 'C', 'M');
-        }
-      }
-      // media
-      $this->cella($pdf, 20, 5.50, 0, -5.50, $dati['medie'][$idalunno], 1, 'C', 'M');
-      $this->cella($pdf, 20, 5.50, -20, 5.50, '', 1, 'C', 'M');
-      // nuova riga
-      if ($numalunni < count($dati['alunni'])) {
-        $this->acapo($pdf, 5.50, $next_height, $etichetterot, [10, 50, 20, false]);
-      } else {
-        $this->acapo($pdf, 5.50, $next_height);
-      }
-    }
-    // firme docenti
-    $this->acapo($pdf, 5);
-    $next_height = 24;
-    $cont = 0;
-    foreach ($dati['docenti'] as $iddoc=>$doc) {
-      if ($cont % 3 == 0) {
-        $html = '<table border="0" cellpadding="0" style="font-family:helvetica;font-size:9pt"><tr>';
-      }
-      $html .= '<td width="33%" align="center">(<em>'.$doc.'</em>)<br><br>______________________________<br></td>';
-      $cont++;
-      if ($cont % 3 == 0) {
-        $html .= '</tr></table>';
-        $this->acapo($pdf, 0, $next_height);
-        $pdf->writeHTML($html, true, false, false, false, 'C');
-      }
-    }
-    if ($cont % 3 > 0) {
-      while ($cont % 3 > 0) {
-        $html .= '<td width="33%"></td>';
-        $cont++;
-      }
-      $html .= '</tr></table>';
-      $this->acapo($pdf, 0, $next_height);
-      $pdf->writeHTML($html, true, false, false, false, 'C');
-    }
-    // data e firma presidente
-    $this->acapo($pdf, 10, 30);
-    $datascrutinio = $dati['scrutinio']['data'];
-    $html = '<table border="0" cellpadding="0" style="font-family:helvetica;font-size:11pt">'.
-      '<tr nobr="true">'.
-        '<td width="20%">Data &nbsp;&nbsp;<u>&nbsp;&nbsp;'.$datascrutinio.'&nbsp;&nbsp;</u></td>'.
-        '<td width="30%">&nbsp;</td>'.
-        '<td width="50%" align="center">Il Presidente<br><em>('.$dati['presidente_nome'].')</em><br><br>______________________________<br></td>'.
-      '</tr></table>';
-    $pdf->writeHTML($html, true, false, false, false, 'C');
   }
 
 }

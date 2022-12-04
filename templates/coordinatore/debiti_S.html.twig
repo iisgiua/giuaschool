@@ -1,0 +1,41 @@
+{{ form_start(form) }}
+  <div class="modal-header">
+    <h3 class="modal-title gs-h3">Scrutinio di <span class="text-info">{{ alunno.cognome }} {{ alunno.nome }}</span> - Classe {{ alunno.classe.anno~'ª '~alunno.classe.sezione }}</h3>
+  </div>
+  <div class="modal-body">
+    <div class="text-center text-info"><strong class="gs-big">Debiti formativi</strong></div>
+    <ul id="gs-form-collection" class="list-group">
+  {% for voto in form.lista %}
+      <li class="list-group-item gs-pt-2 gs-pb-2">
+        <div class="form-group gs-mb-0">
+          <div class="row gs-mb-2">
+            <div class="col-sm-9 gs-pl-5"><strong class="gs-big">{{ voto.vars.value.materia.nome }}</strong></div>
+            <div class="col-sm-3 gs-pl-0">
+              <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.vars.value.unico < dati.valutazioni[voto.vars.value.materia.tipo].med ? 'danger' : 'warning' }} gs-big">{{ dati.valutazioni[voto.vars.value.materia.tipo].lista[voto.vars.value.unico] }}</span>
+            </div>
+          </div>
+          <div>
+            <label class="control-label col-sm-2" for="{{ voto.recupero.vars.id }}">Recupero</label>
+            <div class="col-sm-10">
+              {{ form_widget(voto.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [voto.recupero.vars.choices[0],voto.recupero.vars.choices[1],voto.recupero.vars.choices[2],voto.recupero.vars.choices[3]] }) }}
+            </div>
+          </div>
+          <div>
+            <label class="control-label col-sm-2" for="{{ voto.debito.vars.id }}">Argomenti</label>
+            <div class="col-sm-10">
+              {{ form_widget(voto.debito, {'attr': {'rows': 5}}) }}
+            </div>
+          </div>
+        </div>
+        {{ form_widget(voto.alunno) }}
+        {{ form_widget(voto.unico) }}
+      </li>
+  {% endfor %}
+    </ul>
+  </div>
+  <div class="modal-footer">
+    {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
+    <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+  </div>
+  {{ form_widget(form._token) }}
+{{ form_end(form, {'render_rest': false}) }}

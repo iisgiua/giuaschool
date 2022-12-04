@@ -102,27 +102,6 @@ class ScrutinioController extends AbstractController {
     $valutazioni['R'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_R'));
     $valutazioni['E'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_E'));
     $valutazioni['N'] = unserialize($em->getRepository('App\Entity\Configurazione')->getParametro('voti_finali_N'));
-    //-- // retrocompatibilità per A.S 21/22
-    //-- if ($periodo == 'P' || $periodo == 'S') {
-      //-- $valutazioni['R'] = [
-        //-- 'min' => 20,
-        //-- 'max' => 26,
-        //-- 'suff' => 22,
-        //-- 'med' => 22,
-        //-- 'valori' => '20,21,22,23,24,25,26',
-        //-- 'etichette' => '"NC","","Suff.","","Buono","","Ottimo"',
-        //-- 'voti' => '"Non Classificato","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"',
-        //-- 'votiAbbr' => '"NC","Insufficiente","Sufficiente","Discreto","Buono","Distinto","Ottimo"'];
-      //-- $valutazioni['E'] = [
-        //-- 'min' => 3,
-        //-- 'max' => 10,
-        //-- 'suff' => 6,
-        //-- 'med' => 5,
-        //-- 'valori' => '3,4,5,6,7,8,9,10',
-        //-- 'etichette' => '"NC",4,5,6,7,8,9,10',
-        //-- 'voti' => '"Non Classificato",4,5,6,7,8,9,10',
-        //-- 'votiAbbr' => '"NC",4,5,6,7,8,9,10'];
-    //-- }
     // crea lista voti
     $listaValori = explode(',', $valutazioni['R']['valori']);
     $listaVoti = explode(',', $valutazioni['R']['votiAbbr']);
@@ -1749,24 +1728,26 @@ class ScrutinioController extends AbstractController {
           'sex' => ($alunno->getSesso() == 'M' ? 'o' : 'a'),
           'alunno' => $alunno->getCognome().' '.$alunno->getNome()]));
       }
-      // recupera esito
-      $esito = $em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
-        ->join('e.scrutinio', 's')
-        ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
-        ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
-        ->getQuery()
-        ->setMaxResults(1)
-        ->getOneOrNullResult();
-      // modifica conferma
-      $valori = $esito->getDati();
-      if (count($errore) > 0) {
-        // errore presente: non confermato
-        $valori['debiti'] = false;
-      } else {
-        // nessun errore: confermato
-        $valori['debiti'] = true;
+      if ($periodo != 'P' && $periodo != 'S') {
+        // recupera esito
+        $esito = $em->getRepository('App\Entity\Esito')->createQueryBuilder('e')
+          ->join('e.scrutinio', 's')
+          ->where('e.alunno=:alunno AND s.classe=:classe AND s.periodo=:periodo')
+          ->setParameters(['alunno' => $alunno, 'classe' => $alunno->getClasse(), 'periodo' => $periodo])
+          ->getQuery()
+          ->setMaxResults(1)
+          ->getOneOrNullResult();
+        // modifica conferma
+        $valori = $esito->getDati();
+        if (count($errore) > 0) {
+          // errore presente: non confermato
+          $valori['debiti'] = false;
+        } else {
+          // nessun errore: confermato
+          $valori['debiti'] = true;
+        }
+        $esito->setDati($valori);
       }
-      $esito->setDati($valori);
       // memorizza dati
       $em->flush();
       // redirect

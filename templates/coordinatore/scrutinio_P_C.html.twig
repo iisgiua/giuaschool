@@ -11,7 +11,7 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Scrutinio chiuso</h2>
     {% include 'include/modal-error.html.twig' %}
   <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Primo Quadrimestre</strong></caption>
+    <caption class="text-center text-info"><strong class="gs-big">{{ app.session.get('/CONFIG/SCUOLA/periodo1_nome') }}</strong></caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-2">Documento</th>
@@ -88,7 +88,7 @@
   </table>
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
-    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '5'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
+    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '6'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
   </div>
     {% endif %}
     {% include 'include/modal-waiting.html.twig' %}

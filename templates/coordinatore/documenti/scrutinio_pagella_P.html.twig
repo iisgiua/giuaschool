@@ -3,7 +3,7 @@
   <tr nobr="true">
     <td width="55%">&nbsp;</td>
     <td width="45%" align="left">
-      <em>Ai genitori dell'alunn{{ dati.alunno.sesso == 'M' ? 'o' : 'a' }}</em><br>
+      <em>Ai genitori dell'alunn{{ dati.sex }}</em><br>
       {{ dati.alunno.cognome|upper }} {{ dati.alunno.nome|upper }}<br>
       Classe {{ dati.classe.anno }}ª {{ dati.classe.sezione }}
     </td>
@@ -14,13 +14,12 @@
   <p><strong>OGGETTO: Scrutinio del primo quadrimestre A.S.
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }} - Comunicazione dei voti</strong></p>
   <br>
-  <p>Il Consiglio di Classe, nella seduta dello scrutinio del primo quadrimestre dell’Anno Scolastico
+  <p>Il Consiglio di Classe, nella seduta dello scrutinio del {{ app.session.get('/CONFIG/SCUOLA/periodo1_nome') }} dell’Anno Scolastico
     {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}, tenutasi il giorno
-    {{ dati.scrutinio.data|date('d/m/Y') }}, ha attribuito all'alunn{{ dati.alunno.sesso == 'M' ? 'o' : 'a' }}
-    le valutazioni che vengono di seguito riportate:</p>
-{% set valutazioni = ['Non classificato', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-  null, null, null, null, null, null, null, null, null,
-  'Non classificato', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Distinto', 'Ottimo'] %}
+    {{ dati.scrutinio.data|date('d/m/Y') }},
+    ha attribuito all'alunn{{ dati.sex }} {{ dati.alunno.cognome }} {{ dati.alunno.nome }}
+    le valutazioni che vengono di seguito riportate:
+  </p>
   <table border="1" cellpadding="3" style="font-family:helvetica;font-size:10pt">
     <tr nobr="true">
       <td width="60%" align="center"><strong>MATERIA</strong></td>
@@ -33,20 +32,16 @@
       <td align="center">
   {% if mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A' %}
         <strong>///</strong>
-  {% elseif (mat.tipo == 'C' and dati.voti[idmat].unico < 5) or (mat.tipo == 'E' and dati.voti[idmat].unico < 4) %}
-        <strong>Non classificato</strong>
   {% else %}
-        <strong>{{ valutazioni[dati.voti[idmat].unico] }}</strong>
+        <strong>{{ dati.valutazioni[mat.tipo].lista[dati.voti[idmat].unico] }}</strong>
   {% endif %}
       </td>
       <td align="center">
-  {% if mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A' %}
+    {% if (mat.tipo == 'R' and dati.alunno.religione != 'S' and dati.alunno.religione != 'A') or mat.tipo == 'C' %}
         &nbsp;
-  {% elseif mat.tipo == 'C' %}
-        &nbsp;
-  {% else %}
+    {% else %}
         {{ dati.voti[idmat].assenze }}
-  {% endif %}
+    {% endif %}
       </td>
     </tr>
 {% endfor %}

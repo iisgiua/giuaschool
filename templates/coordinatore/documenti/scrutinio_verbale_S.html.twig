@@ -8,16 +8,23 @@
 {#============================== ARGOMENTO ==============================#}
   {% if str[0] == 'Argomento' %}
   <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}.</strong></p>
-    {% if dati.scrutinio.dati.argomento[str[2]['argomento']] is not empty %}
-  <p>{{ str[2]['inizio']|nl2br }}
-    <br><em>{{ dati.scrutinio.dati.argomento[str[2]['argomento']][0:1]|lower }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][-1:] != '.' ? '.' }}</em>
+    {#-- {% if dati.scrutinio.dati.argomento[str[2]['argomento']] is not empty %} #}
+  {#-- <p>{{ str[2]['inizio']|nl2br }} #}
+    {#-- <br><em>{{ dati.scrutinio.dati.argomento[str[2]['argomento']][0:1]|lower }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][-1:] != '.' ? '.' }}</em> #}
+  {#-- </p> #}
+    {#-- {% else %} #}
+  {#-- <p>{{ str[2]['seVuoto']|nl2br }}</p> #}
+    {#-- {% endif %} #}
+    {#-- {% if str[2]['fine'] is not empty %} #}
+  {#-- <p>{{ str[2]['fine']|nl2br }}</p> #}
+    {#-- {% endif %} #}
+    {% if dati.scrutinio.dati.argomento is defined and dati.scrutinio.dati.argomento[2] %}
+  <p>Tra le situazioni particolari si segnala quanto segue:
+    <br><em>{{ dati.scrutinio.dati.argomento[2]|nl2br }}</em>
   </p>
     {% else %}
-  <p>{{ str[2]['seVuoto']|nl2br }}</p>
-    {% endif %}
-    {% if str[2]['fine'] is not empty %}
-  <p>{{ str[2]['fine']|nl2br }}</p>
-    {% endif %}
+  <p>Non risulta nessuna situazione particolare da segnalare.</p>
+    {% endif %}    
   <p>&nbsp;</p>
 {#============================== SCRUTINIO INIZIO ==============================#}
   {% elseif str[0] == 'ScrutinioInizio' %}

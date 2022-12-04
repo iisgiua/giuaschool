@@ -1,6 +1,6 @@
 {{ include('coordinatore/documenti/intestazione.html.twig') }}
 <p style="text-align:center;font-family:times;font-size:12pt">
-  <strong>VERBALE DELLO SCRUTINIO DEL PRIMO QUADRIMESTRE</strong> <br>
+  <strong>VERBALE DELLO SCRUTINIO DEL {{ app.session.get('/CONFIG/SCUOLA/periodo1_nome')|upper }}</strong> <br>
   <strong>CLASSE {{ dati.classe.anno }}ª {{ dati.classe.sezione }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
@@ -8,22 +8,31 @@
 {#============================== ARGOMENTO ==============================#}
   {% if str[0] == 'Argomento' %}
   <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}.</strong></p>
-    {% if dati.scrutinio.dati.argomento[str[2]['argomento']] is not empty %}
-  <p>{{ str[2]['inizio']|nl2br }}
-    <br><em>{{ dati.scrutinio.dati.argomento[str[2]['argomento']][0:1]|lower }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][-1:] != '.' ? '.' }}</em>
+    {#-- {% if dati.scrutinio.dati.argomento[str[2]['argomento']] is not empty %} #}
+  {#-- <p>{{ str[2]['inizio']|nl2br }} #}
+    {#-- <br><em>{{ dati.scrutinio.dati.argomento[str[2]['argomento']][0:1]|lower }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][1:]|nl2br }}{{ dati.scrutinio.dati.argomento[str[2]['argomento']][-1:] != '.' ? '.' }}</em> #}
+  {#-- </p> #}
+    {#-- {% else %} #}
+  {#-- <p>{{ str[2]['seVuoto']|nl2br }}</p> #}
+    {#-- {% endif %} #}
+    {#-- {% if str[2]['fine'] is not empty %} #}
+  {#-- <p>{{ str[2]['fine']|nl2br }}</p> #}
+    {#-- {% endif %} #}
+    {% if dati.scrutinio.dati.argomento is defined and dati.scrutinio.dati.argomento[2] %}
+  <p>Tra le situazioni particolari si segnala quanto segue:
+    <br><em>{{ dati.scrutinio.dati.argomento[2]|nl2br }}</em>
   </p>
     {% else %}
-  <p>{{ str[2]['seVuoto']|nl2br }}</p>
-    {% endif %}
-    {% if str[2]['fine'] is not empty %}
-  <p>{{ str[2]['fine']|nl2br }}</p>
+  <p>Non risulta nessuna situazione particolare da segnalare.</p>
     {% endif %}
   <p>&nbsp;</p>
 {#============================== SCRUTINIO INIZIO ==============================#}
   {% elseif str[0] == 'ScrutinioInizio' %}
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
     del mese di {{ dati.nomi_mesi[dati.scrutinio.data|date('n')] }} dell'anno {{ dati.scrutinio.data|date('Y') }}
-    alle ore {{ dati.scrutinio.inizio|date('G:i') }}, in seduta telematica, si riunisce,
+    alle ore {{ dati.scrutinio.inizio|date('G:i') }},
+    nei locali dell'<em>Istituto di Istruzione Superiore "Michele Giua"</em>
+    di Cagliari, si riunisce
     a seguito di regolare convocazione (circ. n. 255 del 11/01/2022, n. 270 del 28/01/2022 e n. 271 del 30/01/2022),
     il Consiglio della Classe della {{ dati.classe.anno }}ª {{ dati.classe.sezione }} per discutere il seguente Ordine del Giorno:
   </p>
@@ -77,19 +86,10 @@
     {% else %}
   <p>Nessun docente risulta assente.</p>
     {% endif %}
-  <p>Preliminarmente si fa presente che:</p>
-  <ul>
-    <li>la piattaforma individuata è Google Classroom-Meet;</li>
-    <li>a tutti i docenti del Consiglio è stata comunicata la modalità di accesso a tale piattaforma.</li>
-  </ul>
-  <p>Successivamente, constatate:</p>
-  <ul>
-    <li>la presenza di tutti i componenti del Consiglio di Classe, presenza attestata dalla loro visibilità sulla piattaforma, a cui sono collegati in modalità audio e video;</li>
-    <li>la disponibilità di strumenti telematici idonei allo svolgimento della seduta;</li>
-  </ul>
-  <div>il Presidente richiama le norme in vigore sullo scrutinio (D.P.R. 122/09 e L. 169/08) e in particolare i
-    criteri di valutazione deliberati dal Collegio dei Docenti, dichiarando aperta la seduta.
-  </div>
+  <p>Accertata la legalità della seduta, il Presidente richiama le norme in vigore sullo scrutinio
+    (D.P.R. 122/09 e L. 169/08) e in particolare i criteri di valutazione deliberati dal Collegio dei Docenti,
+    dichiarando aperta la seduta.
+  </p>
   <p>&nbsp;</p>
 {#============================== SCRUTINIO SVOLGIMENTO ==============================#}
   {% elseif str[0] == 'ScrutinioSvolgimento' %}
