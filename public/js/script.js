@@ -6,3 +6,7 @@ $(document).ready(function() {
     $(this).find('.dropdown.active').addClass('open');
   })
 });
+
+setTimeout(() => {
+  document.location.reload();
+}, 3600000);
