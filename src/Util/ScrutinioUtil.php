@@ -2708,7 +2708,7 @@ class ScrutinioUtil {
         $dati_scrutini['monteore'] = $dati['monteore'];
         $dati_scrutini['maxassenze'] = $dati['maxassenze'];
         // dati alunni
-        $dati_scrutini['estero'] = array_keys($dati['estero']);
+        $dati_scrutini['estero'] = empty($dati['estero']) ? [] : array_keys($dati['estero']);
         $dati_scrutini['scrutinabili'] = null;
         foreach ($dati['alunni'] as $alu=>$val) {
           $dati_scrutini['scrutinabili'][$alu]['ore'] = $val['ore'];
