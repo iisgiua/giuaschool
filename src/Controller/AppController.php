@@ -22,6 +22,7 @@ use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -165,10 +166,20 @@ class AppController extends AbstractController {
     foreach ($apps as $app) {
       $applist[$app->getNome()] = $app;
     }
+    // gestione app giuaReg
+    $giuaReg = null;
+    $finder = new Finder();
+    $finder->files()->in($this->getParameter('kernel.project_dir').'/public/app')
+      ->name('giuaReg-*.apk')->sortByModifiedTime()->reverseSorting();
+    foreach ($finder as $file) {
+      $giuaReg = substr($file->getBasename(), 8, -4);
+      break;
+    }
     // mostra la pagina di risposta
     return $this->render('app/info.html.twig', array(
       'pagina_titolo' => 'page.app_info',
       'applist' => $applist,
+      'giuaReg' => $giuaReg,
       ));
   }
 

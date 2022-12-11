@@ -6,22 +6,25 @@
   <p class="gs-big">In questa pagina sono elencate le applicazioni e i servizi per smartphone disponibili per il Registro Elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}.</p>
   <p class="gs-big"><em>Attenzione: applicazioni scaricate da altre fonti sono da considerarsi non ufficiali e il oro uso espone al rischio di una violazione della privacy e di una potenziale diffusione non autorizzata dei dati degli utenti.</em></p>
 
-  {% if applist['GiuaReg'] is defined %}
+  {% if giuaReg is not null %}
   <div class="alert alert-success gs-mt-5" role="alert">
-    <div class="row text-center"><strong class="gs-big">GiuaReg v2.0</strong></div>
+    <div class="row text-center"><strong class="gs-big">giuaReg {{ giuaReg }}</strong></div>
     <hr class="gs-mt-2 gs-mb-2">
     <div class="row text-center">
     </div>
     <div class="row gs-text-normal">
-      <div class="col-sm-6">
-        <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso.</p>
+      <div class="col-sm-8">
+        <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso. Funziona anche con lo SPID.</p>
         <p><strong>Come si installa?</strong></p>
-        <p>Prima di scaricare l'app, attiva sul tuo smartphone l'opzione per l'<em>installazione da fonti sconosciute</em>.<br>
-          Succesivamente, cliccando sul pulsante che trovi di seguito verrà scaricata e installata sul tuo smartphone l'app <em>GiuaReg</em>.<br>
-          Al termine dell'installazione ricordati di disabilitare nuovamente sul tuo smartphone l'opzione per l'<em>installazione da fonti sconosciute</em>.
+        <p>Scarica l'app sul tuo smartphone e procedi all'installazione, attivando l'opzione per l'<em>installazione da fonti sconosciute</em>
+          e ignorando eventuali avvisi di sicurezza.<br>
         </p>
-      </div>
-      <div class="col-sm-6">
+        <p><strong>Come si usa?</strong></p>
+        <p>Al termine dell'installazione, avvia l'app e configura la tua modalità di accesso.<br>
+          Per maggiori dettagli, leggi la pagina delle informazioni sull'utilizzo, presente nell'app.
+        </p>
+  </div>
+      <div class="col-sm-4">
         <table class="table gs-big ">
           <tbody>
             <tr>
@@ -33,7 +36,7 @@
           </tbody>
         </table>
         <div class="row text-center">
-          <a class="btn btn-primary btn-sm" href="{{ path('app_download', {'id': applist['GiuaReg'].id}) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
+          <a class="btn btn-primary btn-sm" href="{{ asset('app/giuaReg-'~giuaReg~'.apk') }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
         </div>
       </div>
     </div>
@@ -47,7 +50,7 @@
     <div class="row text-center">
     </div>
     <div class="row gs-text-normal">
-      <div class="col-sm-6">
+      <div class="col-sm-8">
         <p>L'idea di creare l’applicazione nasce dal concetto di semplicità e portabilità: ti basterà entrare nell'app per visualizzare il Registro Elettronico. Inoltre, potrai ruotare lo schermo in modo tale da avere una visione migliore. Le credenziali vengono salvate automaticamente.</p>
         <p><strong>Come si installa?</strong></p>
         <p>Cliccando sul pulsante che trovi di seguito verrà scaricato sul tuo smartphone un profilo di configurazione.<br>
@@ -68,12 +71,12 @@
           <a class="gs-img-zoom" href="#"><img style="width:15%" class="img-rounded gs-mr-2 gs-ml-2" id="gs-reg-passo9" src="{{ asset('app/Registro-IOS-9.png') }}"></a>
         </div>
       </div>
-      <div class="col-sm-6">
+      <div class="col-sm-4">
         <table class="table gs-big ">
           <tbody>
             <tr>
               <td style="width:50%" class="text-right gs-noborder"><strong>Autore:</strong></td>
-              <td style="width:50%" class="gs-noborder"><em>Claudio Pani (classe 4ª O)</em></td>
+              <td style="width:50%" class="gs-noborder"><em>Claudio Pani</em></td>
             </tr>
             <tr>
               <td style="width:50%;vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
