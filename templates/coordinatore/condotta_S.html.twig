@@ -12,7 +12,9 @@
             <strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong>
           </div>
           <div class="col-sm-6 text-right">
+    {% if periodo != 'P' and  periodo != 'S' %}
             <strong>Percentuale di assenze: <span class="label label-info gs-big">{{ dati.assenze[voto.alunno.vars.value].percentuale|number_format(2,   ',') }}%</span></strong>
+    {% endif %}
           </div>
         </div>
         <div class="form-group gs-mb-2">

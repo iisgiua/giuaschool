@@ -5469,13 +5469,13 @@ class ScrutinioUtil {
           if (!isset($dati['voti'][$a][$m]['unico'])) {
             // mancano valutazioni
             $errori[$m] = 1;
-          } elseif ((!isset($errori[$m]) || $errori[$m] == 3) &&
-                     $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['recupero']) {
-            // mancano recuperi
-            $errori[$m] = 2;
-          } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['debito']) {
-            // mancano debiti
-            $errori[$m] = 3;
+          //-- } elseif ((!isset($errori[$m]) || $errori[$m] == 3) &&
+                     //-- $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['recupero']) {
+            //-- // mancano recuperi
+            //-- $errori[$m] = 2;
+          //-- } elseif (!isset($errori[$m]) && $dati['voti'][$a][$m]['unico'] < 6 && !$dati['voti'][$a][$m]['debito']) {
+            //-- // mancano debiti
+            //-- $errori[$m] = 3;
           }
         } else {
           // condotta

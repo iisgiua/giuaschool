@@ -3,7 +3,7 @@
 <tcpdf method="startPageGroup" />
 <tcpdf method="AddPage" />
 <div style="text-align:center;font-family:times;font-size:11pt">
-  <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
+  <img src="@{{ file64('public/img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
   <br><br><strong>Anno Scolastico {{ dati.annoScolastico }}</strong>
 </div>
 <div style="font-family:times;font-size:11pt">

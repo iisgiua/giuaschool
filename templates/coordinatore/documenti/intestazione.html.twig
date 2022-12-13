@@ -1,5 +1,5 @@
 <div style="text-align:center;font-family:times;font-size:11pt">
-  <img src="{{ asset('img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
+  <img src="@{{ file64('public/img/'~LOCAL_PATH~'intestazione-documenti.jpg') }}" width="400">
   <br><br><strong>Anno Scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</strong>
   <br><br>
 </div>
